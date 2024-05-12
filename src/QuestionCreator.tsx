@@ -5,8 +5,6 @@ export default function createQuestion(coasters: Array<Rollercoaster>): Question
     const coasterAnswer = getRandomCoaster(coasters);
     const incorrectOptions = getOptions(3, allParks, coasterAnswer.park.name)
 
-    console.log(incorrectOptions, coasterAnswer.park.name);
-
     const text = `Which park is the coaster "${coasterAnswer.name}" made by "${coasterAnswer.make}" from?`;
     const correctIndex = Math.floor(Math.random() * 4);
     const options = incorrectOptions.slice(0, correctIndex).concat(coasterAnswer.park.name).concat(incorrectOptions.slice(correctIndex));

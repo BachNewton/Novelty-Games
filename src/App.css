@@ -20,3 +20,11 @@ button {
   height: 3em;
   margin-bottom: 2em;
 }
+
+.button-correct {
+  background-color: lime;
+}
+
+.button-incorrect {
+  background-color: red;
+}
