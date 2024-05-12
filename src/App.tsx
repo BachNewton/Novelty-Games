@@ -10,6 +10,8 @@ enum GameState {
 
 export default function App({ prop }: any) {
   const [gameState, setGameState] = useState(GameState.SHOW_QUESTION);
+  const [lives, setLives] = useState(3);
+  const [score, setScore] = useState(0);
   const [question, setQuestion] = useState({
     text: "Loading...",
     options: [] as Array<string>,
@@ -26,8 +28,10 @@ export default function App({ prop }: any) {
     const onClick = () => {
       if (index === question.correctIndex) {
         setGameState(GameState.SHOW_ANSWER_CORRECT);
+        setScore(score + 1);
       } else {
         setGameState(GameState.SHOW_ANSWER_INCORRECT);
+        setLives(lives - 1);
       }
     };
 
@@ -44,9 +48,13 @@ export default function App({ prop }: any) {
     }
   });
 
+  const livesUi = new Array(lives).fill(0).map((_, index) => <span key={index}>❤️</span>);
+
   return (
     <div className="App">
       <header className="App-header">
+        <p>{livesUi}</p>
+        <p>Score: {score}</p>
         <p>
           {question.text}
         </p>
