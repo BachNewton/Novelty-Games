@@ -24,7 +24,7 @@ export default function App({ prop }: any) {
 
   const ui = questions.length === 0
     ? LoadingUi()
-    : QuestionUi(questions, activeQuestion, gameState, setGameState, lives, setLives, score, setScore);
+    : QuestionUi(questions, activeQuestion, setActiveQuestion, gameState, setGameState, lives, setLives, score, setScore);
 
   return (
     <div className="App">
@@ -42,6 +42,7 @@ function LoadingUi() {
 function QuestionUi(
   questions: Question[],
   activeQuestion: number,
+  setActiveQuestion: React.Dispatch<React.SetStateAction<number>>,
   gameState: GameState,
   setGameState: React.Dispatch<React.SetStateAction<GameState>>,
   lives: number,
@@ -60,6 +61,11 @@ function QuestionUi(
         setGameState(GameState.SHOW_ANSWER_INCORRECT);
         setLives(lives - 1);
       }
+
+      setTimeout(() => {
+        setGameState(GameState.SHOW_QUESTION);
+        setActiveQuestion(activeQuestion + 1);
+      }, 3000)
     };
 
     if (gameState === GameState.SHOW_QUESTION) {
