@@ -1,8 +1,8 @@
 import { Question, Rollercoaster } from './Data';
 
-export default function createQuestion(coasters: Array<Rollercoaster>): Question {
+export default function createQuestion(coasters: Array<Rollercoaster>, coasterAnswer: Rollercoaster): Question {
     const allParks = new Set([...coasters.map(coaster => coaster.park.name)]);
-    const coasterAnswer = getRandomCoaster(coasters);
+
     const incorrectOptions = getOptions(3, allParks, coasterAnswer.park.name)
 
     const text = `Which park is the coaster "${coasterAnswer.name}" made by "${coasterAnswer.make}" from?`;
@@ -28,9 +28,4 @@ function getOptions(numberOfOptions: number, allOptions: Set<string>, isNot: str
     }
 
     return options;
-}
-
-function getRandomCoaster(coasters: Array<Rollercoaster>): Rollercoaster {
-    const randomIndex = Math.floor(Math.random() * coasters.length);
-    return coasters[randomIndex];
 }

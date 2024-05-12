@@ -9,20 +9,47 @@ enum GameState {
 }
 
 export default function App({ prop }: any) {
+  const [activeQuestion, setActiveQuestion] = useState(0);
+  const [questions, setQuestions] = useState([] as Array<Question>);
   const [gameState, setGameState] = useState(GameState.SHOW_QUESTION);
   const [lives, setLives] = useState(3);
   const [score, setScore] = useState(0);
-  const [question, setQuestion] = useState({
-    text: "Loading...",
-    options: [] as Array<string>,
-  } as Question);
 
-  const pendingQuestion = prop as Promise<Question>;
+  const pendingQuestions = prop as Promise<Array<Question>>;
 
-  pendingQuestion.then(readyQuestion => {
-    if (readyQuestion === question) return;
-    setQuestion(readyQuestion);
+  pendingQuestions.then(readyQuestions => {
+    if (readyQuestions === questions) return;
+    setQuestions(readyQuestions);
   });
+
+  const ui = questions.length === 0
+    ? LoadingUi()
+    : QuestionUi(questions, activeQuestion, gameState, setGameState, lives, setLives, score, setScore);
+
+  return (
+    <div className="App">
+      <header className="App-header">
+        {ui}
+      </header>
+    </div>
+  );
+}
+
+function LoadingUi() {
+  return <p>Loading...</p>
+}
+
+function QuestionUi(
+  questions: Question[],
+  activeQuestion: number,
+  gameState: GameState,
+  setGameState: React.Dispatch<React.SetStateAction<GameState>>,
+  lives: number,
+  setLives: React.Dispatch<React.SetStateAction<number>>,
+  score: number,
+  setScore: React.Dispatch<React.SetStateAction<number>>) {
+
+  const question = questions[activeQuestion];
 
   const optionsUi = question.options.map((option, index) => {
     const onClick = () => {
@@ -50,16 +77,12 @@ export default function App({ prop }: any) {
 
   const livesUi = new Array(lives).fill(0).map((_, index) => <span key={index}>❤️</span>);
 
-  return (
-    <div className="App">
-      <header className="App-header">
-        <p>{livesUi}</p>
-        <p>Score: {score}</p>
-        <p>
-          {question.text}
-        </p>
-        {optionsUi}
-      </header>
-    </div>
-  );
+  return <div>
+    <p>{livesUi}</p>
+    <p>Score: {score}</p>
+    <p>
+      {question.text}
+    </p>
+    {optionsUi}
+  </div>;
 }
