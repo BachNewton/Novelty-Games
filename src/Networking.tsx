@@ -20,7 +20,6 @@ function filterCoasters(coasters: Array<Rollercoaster>): Array<Rollercoaster> {
         if (coaster.status.state !== 'Operating') return false;
         if (coaster.country !== 'United States') return false;
         if (['Junior Coaster', 'Kiddie Coaster', 'Family Coaster'].includes(coaster.model)) return false;
-        if (coaster.park.name == undefined) console.log(coaster);
 
         return true;
     })

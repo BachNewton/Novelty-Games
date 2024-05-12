@@ -16,14 +16,15 @@ export default function createQuestion(coasters: Array<Rollercoaster>): Question
 
 function getOptions(numberOfOptions: number, allOptions: Set<string>, isNot: string): Array<string> {
     const remainingOptions = [] as Array<string>;
+    allOptions.delete(isNot);
     allOptions.forEach(value => {
-        if (value !== isNot) remainingOptions.push(value);
+        remainingOptions.push(value);
     });
 
     const options = [] as Array<string>;
     while (options.length < numberOfOptions) {
         const randomIndex = Math.floor(Math.random() * remainingOptions.length);
-        options.push(remainingOptions.splice(randomIndex)[0]);
+        options.push(remainingOptions.splice(randomIndex, 1)[0]);
     }
 
     return options;
