@@ -2,29 +2,41 @@ import './App.css';
 import { useState } from 'react';
 import { Question } from './Data';
 
-enum GameState {
+interface GameState {
+  questions: Array<Question>,
+  activeQuestion: number,
+  uiState: UiState,
+  lives: number,
+  score: number
+}
+
+enum UiState {
+  LOADING,
   SHOW_QUESTION,
   SHOW_ANSWER_CORRECT,
   SHOW_ANSWER_INCORRECT
 }
 
 export default function App({ prop }: any) {
-  const [activeQuestion, setActiveQuestion] = useState(0);
-  const [questions, setQuestions] = useState([] as Array<Question>);
-  const [gameState, setGameState] = useState(GameState.SHOW_QUESTION);
-  const [lives, setLives] = useState(3);
-  const [score, setScore] = useState(0);
+  const [gameState, setGameState] = useState({ uiState: UiState.LOADING } as GameState)
 
   const pendingQuestions = prop as Promise<Array<Question>>;
 
   pendingQuestions.then(readyQuestions => {
-    if (readyQuestions === questions) return;
-    setQuestions(readyQuestions);
+    if (readyQuestions === gameState.questions) return;
+
+    setGameState({
+      questions: readyQuestions,
+      activeQuestion: 0,
+      uiState: UiState.SHOW_QUESTION,
+      lives: 3,
+      score: 0
+    } as GameState);
   });
 
-  const ui = questions.length === 0
+  const ui = gameState.uiState === UiState.LOADING
     ? LoadingUi()
-    : QuestionUi(questions, activeQuestion, setActiveQuestion, gameState, setGameState, lives, setLives, score, setScore);
+    : QuestionUi(gameState, setGameState)
 
   return (
     <div className="App">
@@ -39,41 +51,34 @@ function LoadingUi() {
   return <p>Loading...</p>
 }
 
-function QuestionUi(
-  questions: Question[],
-  activeQuestion: number,
-  setActiveQuestion: React.Dispatch<React.SetStateAction<number>>,
-  gameState: GameState,
-  setGameState: React.Dispatch<React.SetStateAction<GameState>>,
-  lives: number,
-  setLives: React.Dispatch<React.SetStateAction<number>>,
-  score: number,
-  setScore: React.Dispatch<React.SetStateAction<number>>) {
-
-  const question = questions[activeQuestion];
+function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>) {
+  const question = gameState.questions[gameState.activeQuestion];
 
   const optionsUi = question.options.map((option, index) => {
     const onClick = () => {
       if (index === question.correctIndex) {
-        setGameState(GameState.SHOW_ANSWER_CORRECT);
-        setScore(score + 1);
+        gameState.uiState = UiState.SHOW_ANSWER_CORRECT;
+        gameState.score++;
+        setGameState({ ...gameState });
       } else {
-        setGameState(GameState.SHOW_ANSWER_INCORRECT);
-        setLives(lives - 1);
+        gameState.uiState = UiState.SHOW_ANSWER_INCORRECT;
+        gameState.lives--;
+        setGameState({ ...gameState });
       }
 
       setTimeout(() => {
-        setGameState(GameState.SHOW_QUESTION);
-        setActiveQuestion(activeQuestion + 1);
+        gameState.uiState = UiState.SHOW_QUESTION;
+        gameState.activeQuestion++;
+        setGameState({ ...gameState });
       }, 3000)
     };
 
-    if (gameState === GameState.SHOW_QUESTION) {
+    if (gameState.uiState === UiState.SHOW_QUESTION) {
       return <button key={index} onClick={onClick}>{option}</button>;
     } else {
       if (index === question.correctIndex) {
         return <button key={index} className='button-correct'>{option}</button>;
-      } else if (gameState === GameState.SHOW_ANSWER_INCORRECT) {
+      } else if (gameState.uiState === UiState.SHOW_ANSWER_INCORRECT) {
         return <button key={index} className='button-incorrect'>{option}</button>;
       } else {
         return <button key={index}>{option}</button>;
@@ -81,11 +86,11 @@ function QuestionUi(
     }
   });
 
-  const livesUi = new Array(lives).fill(0).map((_, index) => <span key={index}>❤️</span>);
+  const livesUi = new Array(gameState.lives).fill(0).map((_, index) => <span key={index}>❤️</span>);
 
   return <div>
     <p>{livesUi}</p>
-    <p>Score: {score}</p>
+    <p>Score: {gameState.score}</p>
     <p>
       {question.text}
     </p>
