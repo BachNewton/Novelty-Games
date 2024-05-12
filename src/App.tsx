@@ -1,33 +1,26 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import { useState } from 'react';
 import { Question } from './Data';
 
 export default function App({ prop }: any) {
-  const [rollercoaster, setRollercoaster] = useState('Loading');
+  const [rollercoaster, setRollercoaster] = useState('Loading...');
+  const [options, setOptions] = useState([] as Array<string>);
 
   const question = prop as Promise<Question>;
 
   question.then(question => {
     setRollercoaster(question.text);
+    setOptions(question.options)
   });
 
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
         <p>
           {rollercoaster}
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        {options.map(option => <button key={option}>{option}</button>)}
       </header>
     </div>
   );
