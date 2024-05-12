@@ -1,10 +1,4 @@
-import Rollercoaster from './Data';
-
-interface Question {
-    text: string;
-    options: Array<string>;
-    correctIndex: number;
-}
+import { Question, Rollercoaster } from './Data';
 
 export default function createQuestion(coasters: Array<Rollercoaster>): Question {
     const allParks = new Set([...coasters.map(coaster => coaster.park.name)]);

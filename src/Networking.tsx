@@ -1,7 +1,8 @@
-import Rollercoaster from './Data';
+import { Rollercoaster } from './Data';
 import createQuestion from './QuestionCreator';
 
-export default function fecthData(): Promise<string> {
+export default function fecthData(): Promise<Array<Rollercoaster>> {
+    // Alernative API: https://rcdb-api.vercel.app/api/coasters
     const URL = 'https://raw.githubusercontent.com/fabianrguez/rcdb-api/main/db/coasters.json';
 
     return fetch(URL).then(response => response.json()).then(json => {
@@ -10,10 +11,7 @@ export default function fecthData(): Promise<string> {
         const filteredRollercoasters = filterCoasters(rollercoasters);
         console.log('Filtered Rollercoasters', filteredRollercoasters);
 
-        const question = createQuestion(filteredRollercoasters);
-        console.log(question);
-
-        return 'Hello World!';
+        return filteredRollercoasters;
     });
 }
 

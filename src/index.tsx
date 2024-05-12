@@ -4,9 +4,9 @@ import './index.css';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
-import fecthData from './Networking';
+import createGame from './Game';
 
-const questionText = fecthData();
+const question = createGame();
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -14,7 +14,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <App
-      prop={questionText}
+      prop={question}
     />
   </React.StrictMode>
 );

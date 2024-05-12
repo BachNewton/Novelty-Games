@@ -1,4 +1,4 @@
-export default interface Rollercoaster {
+export interface Rollercoaster {
     name: string;
     make: string;
     model: string;
@@ -13,4 +13,10 @@ interface Status {
 
 interface Park {
     name: string;
+}
+
+export interface Question {
+    text: string;
+    options: Array<string>;
+    correctIndex: number;
 }

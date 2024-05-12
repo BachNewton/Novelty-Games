@@ -2,14 +2,15 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { useState } from 'react';
+import { Question } from './Data';
 
 export default function App({ prop }: any) {
   const [rollercoaster, setRollercoaster] = useState('Loading');
 
-  const questionText = prop as Promise<string>;
+  const question = prop as Promise<Question>;
 
-  questionText.then(text => {
-    setRollercoaster(text);
+  question.then(question => {
+    setRollercoaster(question.text);
   });
 
   return (
