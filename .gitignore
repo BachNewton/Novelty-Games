@@ -9,7 +9,8 @@
 /coverage
 
 # production
-/build
+# Include in repo for GH Pages
+# /build
 
 # misc
 .DS_Store
