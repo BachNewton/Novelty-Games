@@ -117,7 +117,9 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
     }
   });
 
-  const livesUi = new Array(gameState.lives).fill(0).map((_, index) => <span key={index}>❤️</span>);
+  const livesUi = gameState.lives > 0
+    ? new Array(gameState.lives).fill(0).map((_, index) => <span key={index}>❤️</span>)
+    : <span>☠️</span>;
 
   return <div>
     <p>{livesUi}</p>
