@@ -9,7 +9,9 @@ interface GameState {
   activeQuestion: number,
   uiState: UiState,
   lives: number,
-  score: number
+  score: number,
+  highScore: number,
+  isNewHighScore: boolean,
 }
 
 enum UiState {
@@ -21,6 +23,7 @@ enum UiState {
 }
 
 const POST_QUESTION_DELAY = 1000;
+const HIGH_SCORE_KEY = 'HIGH_SCORE_KEY';
 
 export default function App({ prop }: any) {
   const [gameState, setGameState] = useState({ uiState: UiState.LOADING } as GameState)
@@ -43,13 +46,21 @@ export default function App({ prop }: any) {
 }
 
 function resetGame(coasters: Array<Rollercoaster>, setGameState: React.Dispatch<React.SetStateAction<GameState>>) {
+  const savedHighScore = localStorage.getItem(HIGH_SCORE_KEY);
+
+  const highScore = savedHighScore === null
+    ? 0
+    : parseInt(savedHighScore);
+
   setGameState({
     coasters: coasters,
     questions: createQuestions(coasters),
     activeQuestion: 0,
     uiState: UiState.SHOW_QUESTION,
     lives: 3,
-    score: 0
+    score: 0,
+    highScore: highScore,
+    isNewHighScore: false,
   } as GameState);
 }
 
@@ -68,9 +79,15 @@ function GameOverUi(gameState: GameState, setGameState: React.Dispatch<React.Set
     resetGame(gameState.coasters, setGameState);
   };
 
+  const newHighScoreUi = gameState.isNewHighScore
+    ? <p>New High Score!</p>
+    : <></>;
+
   return <div>
     Game Over!
     <p>Final Score: {gameState.score}</p>
+    <p>High Score: {gameState.highScore}</p>
+    {newHighScoreUi}
     <button onClick={playAgain}>Play again</button>
   </div>;
 }
@@ -87,6 +104,13 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
       if (index === question.correctIndex) {
         gameState.uiState = UiState.SHOW_ANSWER_CORRECT;
         gameState.score++;
+
+        if (gameState.score > gameState.highScore) {
+          gameState.highScore++;
+          gameState.isNewHighScore = true;
+          localStorage.setItem(HIGH_SCORE_KEY, gameState.highScore.toString());
+        }
+
         setGameState({ ...gameState });
       } else {
         gameState.uiState = UiState.SHOW_ANSWER_INCORRECT;
@@ -124,6 +148,7 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
     : <span>☠️</span>;
 
   return <div>
+    <p>High Score: {gameState.highScore}</p>
     <p>{livesUi}</p>
     <p>Score: {gameState.score}</p>
     <p>Question #{gameState.activeQuestion + 1} of {gameState.questions.length}</p>
