@@ -20,6 +20,8 @@ enum UiState {
   GAME_OVER
 }
 
+const POST_QUESTION_DELAY = 1000;
+
 export default function App({ prop }: any) {
   const [gameState, setGameState] = useState({ uiState: UiState.LOADING } as GameState)
 
@@ -101,7 +103,7 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
         }
 
         setGameState({ ...gameState });
-      }, 2000)
+      }, POST_QUESTION_DELAY);
     };
 
     if (gameState.uiState === UiState.SHOW_QUESTION) {
