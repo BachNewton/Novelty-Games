@@ -4,9 +4,9 @@ import './index.css';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
-import createGame from './Game';
+import fecthData from './Networking';
 
-const questions = createGame();
+const coasters = fecthData();
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -14,7 +14,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <App
-      prop={questions}
+      prop={coasters}
     />
   </React.StrictMode>
 );

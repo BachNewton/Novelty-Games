@@ -1,8 +1,10 @@
 import './App.css';
 import { useState } from 'react';
-import { Question } from './Data';
+import { Question, Rollercoaster } from './Data';
+import createQuestions from './Game';
 
 interface GameState {
+  coasters: Array<Rollercoaster>,
   questions: Array<Question>,
   activeQuestion: number,
   uiState: UiState,
@@ -14,37 +16,61 @@ enum UiState {
   LOADING,
   SHOW_QUESTION,
   SHOW_ANSWER_CORRECT,
-  SHOW_ANSWER_INCORRECT
+  SHOW_ANSWER_INCORRECT,
+  GAME_OVER
 }
 
 export default function App({ prop }: any) {
   const [gameState, setGameState] = useState({ uiState: UiState.LOADING } as GameState)
 
-  const pendingQuestions = prop as Promise<Array<Question>>;
+  const pendingCoasters = prop as Promise<Array<Rollercoaster>>;
 
-  pendingQuestions.then(readyQuestions => {
-    if (readyQuestions === gameState.questions) return;
+  pendingCoasters.then(readyCoasters => {
+    if (readyCoasters === gameState.coasters) return;
 
-    setGameState({
-      questions: readyQuestions,
-      activeQuestion: 0,
-      uiState: UiState.SHOW_QUESTION,
-      lives: 3,
-      score: 0
-    } as GameState);
+    resetGame(readyCoasters, setGameState);
   });
-
-  const ui = gameState.uiState === UiState.LOADING
-    ? LoadingUi()
-    : QuestionUi(gameState, setGameState)
 
   return (
     <div className="App">
       <header className="App-header">
-        {ui}
+        {Ui(gameState, setGameState)}
       </header>
     </div>
   );
+}
+
+function resetGame(coasters: Array<Rollercoaster>, setGameState: React.Dispatch<React.SetStateAction<GameState>>) {
+  setGameState({
+    coasters: coasters,
+    questions: createQuestions(coasters),
+    activeQuestion: 0,
+    uiState: UiState.SHOW_QUESTION,
+    lives: 3,
+    score: 0
+  } as GameState);
+}
+
+function Ui(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>): JSX.Element {
+  if (gameState.uiState === UiState.LOADING) {
+    return LoadingUi();
+  } else if (gameState.uiState === UiState.GAME_OVER) {
+    return GameOverUi(gameState, setGameState);
+  } else {
+    return QuestionUi(gameState, setGameState);
+  }
+}
+
+function GameOverUi(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>) {
+  const playAgain = () => {
+    resetGame(gameState.coasters, setGameState);
+  };
+
+  return <div>
+    Game Over!
+    <p>Final Score: {gameState.score}</p>
+    <button onClick={playAgain}>Play again</button>
+  </div>;
 }
 
 function LoadingUi() {
@@ -69,8 +95,13 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
       setTimeout(() => {
         gameState.uiState = UiState.SHOW_QUESTION;
         gameState.activeQuestion++;
+
+        if (gameState.lives === 0 || gameState.activeQuestion >= gameState.questions.length) {
+          gameState.uiState = UiState.GAME_OVER;
+        }
+
         setGameState({ ...gameState });
-      }, 3000)
+      }, 2000)
     };
 
     if (gameState.uiState === UiState.SHOW_QUESTION) {
@@ -91,6 +122,7 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
   return <div>
     <p>{livesUi}</p>
     <p>Score: {gameState.score}</p>
+    <p>Question #{gameState.activeQuestion + 1} of {gameState.questions.length}</p>
     <p>
       {question.text}
     </p>
