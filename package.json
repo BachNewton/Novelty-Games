@@ -34,8 +34,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -b gh-pages -d build"
+    "deploy": "gh-pages-clean && gh-pages -b gh-pages -d build"
   },
+  "homepage": "https://bachnewton.github.io/PWA-Trivia/",
   "eslintConfig": {
     "extends": [
       "react-app",
