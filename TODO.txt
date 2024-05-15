@@ -1,5 +1,1 @@
-- Add coaster year to the question.
-
-- Coasters with no make should be shown as "Unknown".
-
 - (must be optional) Add images of the coasters to the question.

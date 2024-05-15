@@ -5,7 +5,7 @@ export default function fecthData(): Promise<Array<Rollercoaster>> {
     const URL = 'https://raw.githubusercontent.com/fabianrguez/rcdb-api/main/db/coasters.json';
 
     return fetch(URL).then(response => response.json()).then(json => {
-        const rollercoasters = json as Array<Rollercoaster>;
+        const rollercoasters = cleanData(json);
         console.log('All Rollercoasters', rollercoasters);
 
         const filteredRollercoasters = filterCoasters(rollercoasters);
@@ -13,6 +13,21 @@ export default function fecthData(): Promise<Array<Rollercoaster>> {
 
         return filteredRollercoasters;
     });
+}
+
+function cleanData(json: any): Array<Rollercoaster> {
+    const rollercoasters = json as Array<Rollercoaster>;
+
+    rollercoasters.forEach(coaster => {
+        const opened = coaster.status.date.opened;
+        const opendYear = opened.substring(0, opened.indexOf('-'));
+        // Only keep the year from the opened data.
+        coaster.status.date.opened = opendYear === '' ? 'Unknown' : opendYear;
+
+        coaster.model = coaster.model === '' ? 'Unknown' : coaster.model;
+    });
+
+    return rollercoasters;
 }
 
 function filterCoasters(coasters: Array<Rollercoaster>): Array<Rollercoaster> {

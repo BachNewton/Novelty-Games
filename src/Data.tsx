@@ -8,7 +8,12 @@ export interface Rollercoaster {
 }
 
 interface Status {
-    state: string
+    state: string;
+    date: Date;
+}
+
+interface Date {
+    opened: string;
 }
 
 interface Park {
