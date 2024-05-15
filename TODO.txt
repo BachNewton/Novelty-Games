@@ -1,5 +1,3 @@
-- Remove coasters from a park with the word "pizza" in the name.
-
 - Remove coasters from a park with the word "farm" in the name but aren't "Knott’s Berry Farm".
 
 - Add coaster year to the question.

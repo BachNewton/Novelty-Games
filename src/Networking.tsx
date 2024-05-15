@@ -24,6 +24,7 @@ function filterCoasters(coasters: Array<Rollercoaster>): Array<Rollercoaster> {
         if (['Junior Coaster', 'Kiddie Coaster', 'Family Coaster'].includes(coaster.model)) return false;
         if (coaster.make === 'Wiegand') return false;
         if (parksCoastersCount.get(coaster.park.name) === 1) return false;
+        if (coaster.park.name.includes('Pizza')) return false;
 
         return true;
     })
