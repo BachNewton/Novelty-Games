@@ -40,6 +40,7 @@ function filterCoasters(coasters: Array<Rollercoaster>): Array<Rollercoaster> {
         if (coaster.make === 'Wiegand') return false;
         if (parksCoastersCount.get(coaster.park.name) === 1) return false;
         if (coaster.park.name.includes('Pizza')) return false;
+        if (coaster.park.name.includes('Farm') && coaster.park.name !== "Knott's Berry Farm") return false;
 
         return true;
     })
