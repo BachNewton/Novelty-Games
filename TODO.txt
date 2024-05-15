@@ -1,0 +1,11 @@
+- Remove coasters from a park with the word "pizza" in the name.
+
+- Remove coasters from a park with the word "farm" in the name but aren't "Knott’s Berry Farm".
+
+- Remove coasters from a park that only has one coaster in it.
+
+- Add coaster year to the question.
+
+- Coasters with no make should be shown as "Unknown".
+
+- (must be optional) Add images of the coasters to the question.
