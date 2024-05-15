@@ -24,7 +24,7 @@ function cleanData(json: any): Array<Rollercoaster> {
         // Only keep the year from the opened data.
         coaster.status.date.opened = opendYear === '' ? 'Unknown' : opendYear;
 
-        coaster.model = coaster.model === '' ? 'Unknown' : coaster.model;
+        coaster.make = coaster.make === '' ? 'Unknown' : coaster.make;
     });
 
     return rollercoasters;
