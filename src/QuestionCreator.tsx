@@ -9,8 +9,6 @@ export default function createQuestion(coasters: Array<Rollercoaster>, coasterAn
     const correctIndex = Math.floor(Math.random() * 4);
     const options = incorrectOptions.slice(0, correctIndex).concat(coasterAnswer.park.name).concat(incorrectOptions.slice(correctIndex));
 
-    console.log(text, options, correctIndex);
-
     return { text: text, options: options, correctIndex: correctIndex } as Question;
 }
 
