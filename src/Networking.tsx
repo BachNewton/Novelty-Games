@@ -1,10 +1,29 @@
 import { Rollercoaster } from './Data';
 
+const RCDB_NAME = "RollerCoasterDatabase";
+const RCDB_OBJ_STORE_NAME = "coasters";
+const RCDB_KEY_PATH = "coasters_json";
+
 export default function fecthData(): Promise<Array<Rollercoaster>> {
     // Alernative API: https://rcdb-api.vercel.app/api/coasters
     const URL = 'https://raw.githubusercontent.com/fabianrguez/rcdb-api/main/db/coasters.json';
 
     return fetch(URL).then(response => response.json()).then(json => {
+        const request = indexedDB.open(RCDB_NAME);
+
+        request.onupgradeneeded = (event) => {
+            const request = event.target as IDBOpenDBRequest
+            request.result.createObjectStore(RCDB_OBJ_STORE_NAME);
+        };
+
+        request.onsuccess = (event) => {
+            const request = event.target as IDBOpenDBRequest
+            const db = request.result;
+            const transaction = db.transaction(RCDB_OBJ_STORE_NAME, "readwrite");
+            const objectStore = transaction.objectStore(RCDB_OBJ_STORE_NAME);
+            objectStore.put(json, RCDB_KEY_PATH);
+        };
+
         const rollercoasters = cleanData(json);
         console.log('All Rollercoasters', rollercoasters);
 
