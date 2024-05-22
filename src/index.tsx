@@ -4,9 +4,9 @@ import './index.css';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
-import fecthData from './Networking';
+import { get as getFromRepo } from './Repository';
 
-const coasters = fecthData();
+const coasters = getFromRepo();
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
