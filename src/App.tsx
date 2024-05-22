@@ -39,6 +39,7 @@ export default function App({ prop }: any) {
   return (
     <div className="App">
       <header className="App-header">
+        <code id="version-label">v1.0.0</code>
         {Ui(gameState, setGameState)}
       </header>
     </div>
