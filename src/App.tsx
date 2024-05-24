@@ -24,7 +24,7 @@ enum UiState {
   GAME_OVER
 }
 
-const APP_VERSION = 'v1.1.0';
+const APP_VERSION = 'v1.1.1';
 const POST_QUESTION_DELAY = 1000;
 const HIGH_SCORE_KEY = 'HIGH_SCORE_KEY';
 const DISABLE_IMAGES_KEY = 'DISABLE_IMAGES_KEY';

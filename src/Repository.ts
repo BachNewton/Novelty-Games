@@ -35,7 +35,8 @@ function cleanData(json: any): Array<Rollercoaster> {
 
     rollercoasters.forEach(coaster => {
         const opened = coaster.status.date.opened;
-        const opendYear = opened.substring(0, opened.indexOf('-'));
+        const index = opened.indexOf('-');
+        const opendYear = index === -1 ? opened : opened.substring(0, index);
         // Only keep the year from the opened data.
         coaster.status.date.opened = opendYear === '' ? 'Unknown' : opendYear;
 
