@@ -2,6 +2,7 @@ import './App.css';
 import { useState } from 'react';
 import { Question, Rollercoaster } from './Data';
 import createQuestions from './Game';
+import AsyncImage from './AsyncImage';
 
 interface GameState {
   coasters: Array<Rollercoaster>,
@@ -22,6 +23,7 @@ enum UiState {
   GAME_OVER
 }
 
+const APP_VERSION = 'v1.1.0';
 const POST_QUESTION_DELAY = 1000;
 const HIGH_SCORE_KEY = 'HIGH_SCORE_KEY';
 
@@ -39,7 +41,7 @@ export default function App({ prop }: any) {
   return (
     <div className="App">
       <header className="App-header">
-        <code id="version-label">v1.0.0</code>
+        <code id="version-label">{APP_VERSION}</code>
         {Ui(gameState, setGameState)}
       </header>
     </div>
@@ -152,8 +154,9 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
     <p>High Score: {gameState.highScore}</p>
     <p>{livesUi}</p>
     <p>Score: {gameState.score}</p>
-    <p>Question #{gameState.activeQuestion + 1} of {gameState.questions.length}</p>
-    <p>
+    <p style={{ marginBottom: 0 }}>Question #{gameState.activeQuestion + 1} of {gameState.questions.length}</p>
+    <AsyncImage src={question.imageUrl} />
+    <p style={{ marginTop: 0 }}>
       {question.text}
     </p>
     {optionsUi}

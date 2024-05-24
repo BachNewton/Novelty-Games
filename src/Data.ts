@@ -5,6 +5,7 @@ export interface Rollercoaster {
     status: Status;
     park: Park;
     country: string;
+    mainPicture: MainPicture;
 }
 
 interface Status {
@@ -20,8 +21,13 @@ interface Park {
     name: string;
 }
 
+interface MainPicture {
+    url: string;
+}
+
 export interface Question {
     text: string;
     options: Array<string>;
     correctIndex: number;
+    imageUrl: string;
 }

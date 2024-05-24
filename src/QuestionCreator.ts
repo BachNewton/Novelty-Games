@@ -8,8 +8,9 @@ export default function createQuestion(coasters: Array<Rollercoaster>, coasterAn
     const text = `Which park is the coaster "${coasterAnswer.name}" made by "${coasterAnswer.make}" in "${coasterAnswer.status.date.opened}" located in?`;
     const correctIndex = Math.floor(Math.random() * 4);
     const options = incorrectOptions.slice(0, correctIndex).concat(coasterAnswer.park.name).concat(incorrectOptions.slice(correctIndex));
+    const imageUrl = coasterAnswer.mainPicture.url;
 
-    return { text: text, options: options, correctIndex: correctIndex } as Question;
+    return { text: text, options: options, correctIndex: correctIndex, imageUrl: imageUrl } as Question;
 }
 
 function getOptions(numberOfOptions: number, allOptions: Set<string>, isNot: string): Array<string> {
