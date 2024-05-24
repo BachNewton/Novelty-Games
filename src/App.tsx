@@ -13,6 +13,7 @@ interface GameState {
   score: number,
   highScore: number,
   isNewHighScore: boolean,
+  disableImages: boolean
 }
 
 enum UiState {
@@ -26,6 +27,7 @@ enum UiState {
 const APP_VERSION = 'v1.1.0';
 const POST_QUESTION_DELAY = 1000;
 const HIGH_SCORE_KEY = 'HIGH_SCORE_KEY';
+const DISABLE_IMAGES_KEY = 'DISABLE_IMAGES_KEY';
 
 export default function App({ prop }: any) {
   const [gameState, setGameState] = useState({ uiState: UiState.LOADING } as GameState)
@@ -50,10 +52,13 @@ export default function App({ prop }: any) {
 
 function resetGame(coasters: Array<Rollercoaster>, setGameState: React.Dispatch<React.SetStateAction<GameState>>) {
   const savedHighScore = localStorage.getItem(HIGH_SCORE_KEY);
+  const savedDisableImages = localStorage.getItem(DISABLE_IMAGES_KEY);
 
   const highScore = savedHighScore === null
     ? 0
     : parseInt(savedHighScore);
+
+  const disableImages = savedDisableImages === null ? false : Boolean(savedDisableImages);
 
   setGameState({
     coasters: coasters,
@@ -64,6 +69,7 @@ function resetGame(coasters: Array<Rollercoaster>, setGameState: React.Dispatch<
     score: 0,
     highScore: highScore,
     isNewHighScore: false,
+    disableImages: disableImages
   } as GameState);
 }
 
@@ -155,7 +161,7 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
     <p>{livesUi}</p>
     <p>Score: {gameState.score}</p>
     <p style={{ marginBottom: 0 }}>Question #{gameState.activeQuestion + 1} of {gameState.questions.length}</p>
-    <AsyncImage src={question.imageUrl} />
+    <AsyncImage src={question.imageUrl} disableImages={gameState.disableImages} />
     <p style={{ marginTop: 0 }}>
       {question.text}
     </p>
