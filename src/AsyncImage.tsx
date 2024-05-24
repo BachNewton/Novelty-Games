@@ -5,15 +5,17 @@ const HEIGHT = '17vh';
 interface AsyncImageProps {
     src: string;
     disableImages: boolean;
+    onClick: () => void;
 }
 
-const AsyncImage: React.FC<AsyncImageProps> = ({ src, disableImages }) => {
+const AsyncImage: React.FC<AsyncImageProps> = ({ src, disableImages, onClick }) => {
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
+        setIsLoaded(false);
+
         if (disableImages) return;
 
-        setIsLoaded(false);
         const image = new Image();
         image.onload = () => setIsLoaded(true);
         image.src = src;
@@ -21,13 +23,17 @@ const AsyncImage: React.FC<AsyncImageProps> = ({ src, disableImages }) => {
         return () => {
             image.onload = null; // Cleanup to avoid memory leaks
         };
-    }, [src]);
+    }, [src, disableImages]);
 
-    const content = isLoaded
-        ? <img src={src} style={{ height: HEIGHT }} />
-        : <>(Loading Coaster Image)</>;
+    if (disableImages) {
+        return <div><input type='checkbox' onClick={onClick} />Enable Images</div>;
+    } else {
+        const content = isLoaded
+            ? <img src={src} style={{ height: HEIGHT }} />
+            : <>(Loading Coaster Image)<br />(Click to disable)</>;
 
-    return <div style={{ height: HEIGHT, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>{content}</div>;
+        return <div style={{ height: HEIGHT, display: 'flex', justifyContent: 'center', alignItems: 'center' }} onClick={onClick}>{content}</div>;
+    }
 };
 
 export default AsyncImage;

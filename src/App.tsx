@@ -58,7 +58,7 @@ function resetGame(coasters: Array<Rollercoaster>, setGameState: React.Dispatch<
     ? 0
     : parseInt(savedHighScore);
 
-  const disableImages = savedDisableImages === null ? false : Boolean(savedDisableImages);
+  const disableImages = savedDisableImages === 'true' ? true : false;
 
   setGameState({
     coasters: coasters,
@@ -156,12 +156,19 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
     ? new Array(gameState.lives).fill(0).map((_, index) => <span key={index}>❤️</span>)
     : <span>☠️</span>;
 
+  const onImageSectionClick = () => {
+    const flipped = !gameState.disableImages;
+    localStorage.setItem(DISABLE_IMAGES_KEY, flipped.toString());
+    gameState.disableImages = flipped;
+    setGameState({ ...gameState });
+  };
+
   return <div>
     <p>High Score: {gameState.highScore}</p>
     <p>{livesUi}</p>
     <p>Score: {gameState.score}</p>
     <p style={{ marginBottom: 0 }}>Question #{gameState.activeQuestion + 1} of {gameState.questions.length}</p>
-    <AsyncImage src={question.imageUrl} disableImages={gameState.disableImages} />
+    <AsyncImage src={question.imageUrl} disableImages={gameState.disableImages} onClick={onImageSectionClick} />
     <p style={{ marginTop: 0 }}>
       {question.text}
     </p>
