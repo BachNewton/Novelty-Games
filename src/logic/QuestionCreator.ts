@@ -1,16 +1,15 @@
 import { Data, DataType, Question, Rollercoaster } from './Data';
 
 export default function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
-    const coasters = data as Array<Rollercoaster>;
+    const copiedData = [...data];
+    const shuffledData = [];
 
-    const copiedCoasters = [...coasters];
-    const shuffledCoasters = [];
-    while (copiedCoasters.length > 0) {
-        const randomIndex = Math.floor(Math.random() * copiedCoasters.length);
-        shuffledCoasters.push(copiedCoasters.splice(randomIndex, 1)[0]);
+    while (copiedData.length > 0) {
+        const randomIndex = Math.floor(Math.random() * copiedData.length);
+        shuffledData.push(copiedData.splice(randomIndex, 1)[0]);
     }
 
-    return shuffledCoasters.map((coaster) => createQuestion(coasters, coaster));
+    return shuffledData.map((data) => createQuestion(data as Array<Rollercoaster>, data as Rollercoaster));
 }
 
 function createQuestion(coasters: Array<Rollercoaster>, coasterAnswer: Rollercoaster): Question {
