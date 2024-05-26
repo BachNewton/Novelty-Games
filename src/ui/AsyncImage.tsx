@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const HEIGHT = '30vh';
+const HEIGHT = '29vh';
 
 interface AsyncImageProps {
     src: string;
@@ -26,7 +26,7 @@ const AsyncImage: React.FC<AsyncImageProps> = ({ src, disableImages, onClick }) 
     }, [src, disableImages]);
 
     if (disableImages) {
-        return <div><input type='checkbox' onClick={onClick} />Enable Images</div>;
+        return <div><br /></div>;
     } else {
         const content = isLoaded
             ? <img src={src} style={{ height: HEIGHT, maxWidth: '100vw', objectFit: 'contain' }} />

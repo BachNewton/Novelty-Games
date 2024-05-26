@@ -2,7 +2,7 @@
   text-align: center;
 }
 
-.Game-header {
+.Game header {
   background-color: #282c34;
   min-height: 100vh;
   display: flex;
@@ -29,11 +29,15 @@ header button {
   background-color: red;
 }
 
-#home-button {
+.top-left {
   position: fixed;
   top: 0;
   left: 0;
-  font-size: 1em;
   margin-top: 0.3em;
   margin-left: 0.3em;
+}
+
+.top-left button {
+  font-size: 1em;
+  margin-right: 1em;
 }

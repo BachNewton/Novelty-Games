@@ -48,10 +48,25 @@ const Game: React.FC<GameProps> = ({ pendingData, dataType, onHomeClicked }) => 
     resetGame(readyData, dataType, setGameState);
   });
 
+  const onEnableImagesButtonClicked = () => {
+    gameState.disableImages = false;
+    gameState.usedImages = true;
+    localStorage.setItem(DISABLE_IMAGES_KEY, gameState.disableImages.toString());
+
+    setGameState({ ...gameState });
+  };
+
+  const enableImagesButton = gameState.disableImages
+    ? <button onClick={onEnableImagesButtonClicked}>🖼️</button>
+    : <></>;
+
   return (
     <div className="Game">
-      <button id='home-button' onClick={onHomeClicked}>🏠</button>
-      <header className="Game-header">
+      <div className='top-left'>
+        <button onClick={onHomeClicked}>🏠</button>
+        {enableImagesButton}
+      </div>
+      <header>
         {Ui(gameState, setGameState)}
       </header>
     </div>
@@ -187,13 +202,8 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
   });
 
   const onImageSectionClick = () => {
-    const flipped = !gameState.disableImages;
-    localStorage.setItem(DISABLE_IMAGES_KEY, flipped.toString());
-    gameState.disableImages = flipped;
-
-    if (!gameState.disableImages) {
-      gameState.usedImages = true;
-    }
+    gameState.disableImages = true;
+    localStorage.setItem(DISABLE_IMAGES_KEY, gameState.disableImages.toString());
 
     setGameState({ ...gameState });
   };
