@@ -1,7 +1,7 @@
-import './css/App.css';
+import '../css/App.css';
 import { useState } from 'react';
-import { Question, Rollercoaster } from './Data';
-import createQuestions from './Game';
+import { Question, Rollercoaster } from '../logic/Data';
+import createQuestions from '../logic/Game';
 import AsyncImage from './AsyncImage';
 
 interface GameState {
