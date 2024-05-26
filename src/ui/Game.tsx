@@ -210,9 +210,11 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
 }
 
 function StatsUi(gameState: GameState) {
-  const livesUi =
-    new Array(gameState.lives).fill(0).map((_, index) => <span key={index}>❤️</span>)
-      .concat(new Array(MAX_LIVES - gameState.lives).fill(0).map((_, index) => <span key={index}>🖤</span>));
+  let livesString = '';
+  for (let i = 0; i < MAX_LIVES; i++) {
+    livesString += i < gameState.lives ? '❤️' : '🖤';
+  }
+  const livesUi = <span>{livesString}</span>
 
   return <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
     <p>Score: {gameState.score}</p>

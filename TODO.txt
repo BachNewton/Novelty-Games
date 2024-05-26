@@ -1,4 +1,3 @@
-- Set a max image width to avoid horizontal scrolling
 - Add a filter UI system
 - Add Pokemon trivia
 - Add Flag Game

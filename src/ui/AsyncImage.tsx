@@ -29,7 +29,7 @@ const AsyncImage: React.FC<AsyncImageProps> = ({ src, disableImages, onClick }) 
         return <div><input type='checkbox' onClick={onClick} />Enable Images</div>;
     } else {
         const content = isLoaded
-            ? <img src={src} style={{ height: HEIGHT }} />
+            ? <img src={src} style={{ height: HEIGHT, maxWidth: '100vw', objectFit: 'contain' }} />
             : <>Loading Image...<br /><br />(Click to disable)</>;
 
         return <div style={{ height: HEIGHT, display: 'flex', justifyContent: 'center', alignItems: 'center' }} onClick={onClick}>{content}</div>;
