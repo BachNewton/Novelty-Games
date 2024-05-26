@@ -164,10 +164,6 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
     }
   });
 
-  const livesUi = gameState.lives > 0
-    ? new Array(gameState.lives).fill(0).map((_, index) => <span key={index}>❤️</span>)
-    : <span>☠️</span>;
-
   const onImageSectionClick = () => {
     const flipped = !gameState.disableImages;
     localStorage.setItem(DISABLE_IMAGES_KEY, flipped.toString());
@@ -176,14 +172,24 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
   };
 
   return <div>
-    <p>High Score: {gameState.highScore}</p>
-    <p>{livesUi}</p>
-    <p>Score: {gameState.score}</p>
-    <p style={{ marginBottom: 0 }}>Question #{gameState.activeQuestion + 1} of {gameState.questions.length}</p>
+    {StatsUi(gameState)}
+    <p style={{ marginBottom: 0, marginTop: 0 }}>Question #{gameState.activeQuestion + 1} of {gameState.questions.length}</p>
     <AsyncImage src={question.imageUrl} disableImages={gameState.disableImages} onClick={onImageSectionClick} />
     <p style={{ marginTop: 0 }}>
       {question.text}
     </p>
     {optionsUi}
+  </div>;
+}
+
+function StatsUi(gameState: GameState) {
+  const livesUi =
+    new Array(gameState.lives).fill(0).map((_, index) => <span key={index}>❤️</span>)
+      .concat(new Array(MAX_LIVES - gameState.lives).fill(0).map((_, index) => <span key={index}>🖤</span>));
+
+  return <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
+    <p>Score: {gameState.score}</p>
+    <p>{livesUi}</p>
+    <p>High Score: {gameState.highScore}</p>
   </div>;
 }
