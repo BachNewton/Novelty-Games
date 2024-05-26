@@ -1,19 +1,19 @@
-import { Rollercoaster } from "./Data";
+import { DataType, Rollercoaster } from "./Data";
 import { get as getFromDb, store as storeInDb } from "./Database";
 import { get as getFromNetwork } from "./Networking";
 
-export function get(): Promise<Array<Rollercoaster>> {
-    return getFromDb().then(json => {
-        console.log('From DB:', json);
+export function get(dataType: DataType): Promise<Array<Rollercoaster>> {
+    return getFromDb(dataType).then(json => {
+        console.log('Found in Database', dataType, json);
 
         return handleJson(json);
     }).catch(_ => {
-        console.log('No data in DB');
+        console.log('No data in Database', dataType);
 
         return getFromNetwork().then(json => {
             console.log('From Network:', json);
 
-            storeInDb(json);
+            storeInDb(dataType, json);
 
             return handleJson(json);
         });

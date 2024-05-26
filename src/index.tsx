@@ -3,10 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './css/index.css';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
-import { get as getFromRepo } from './logic/Repository';
 import Home from './ui/Home';
-
-const coasters = getFromRepo();
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

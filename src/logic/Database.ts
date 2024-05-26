@@ -1,23 +1,29 @@
-const RCDB_NAME = "RollerCoasterDatabase";
-const RCDB_OBJ_STORE_NAME = "coasters";
-const RCDB_KEY_PATH = "coasters_json";
+import { DataType } from "./Data";
 
-export function get(): Promise<any> {
+const DATABASE_POSTFIX = "_Database";
+const OBJECT_STORE_POSTFIX = "_ObjectStore";
+const KEY_PATH_POSTFIX = "_json";
+
+export function get(dataType: DataType): Promise<any> {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open(RCDB_NAME);
+        const databaseName = getDatabaseName(dataType);
+        const objectStoreName = getObjectStoreName(dataType);
+
+        const request = indexedDB.open(databaseName);
 
         request.onupgradeneeded = (event) => {
-            console.log('Creating the Database');
+            console.log('Creating the Database', databaseName);
+            console.log('Creating ObjectStore', objectStoreName);
             const request = event.target as IDBOpenDBRequest
-            request.result.createObjectStore(RCDB_OBJ_STORE_NAME);
+            request.result.createObjectStore(objectStoreName);
         };
 
         request.onsuccess = (event) => {
             const request = event.target as IDBOpenDBRequest
             const db = request.result;
-            const transaction = db.transaction(RCDB_OBJ_STORE_NAME, "readwrite");
-            const objectStore = transaction.objectStore(RCDB_OBJ_STORE_NAME);
-            const getRequest = objectStore.get(RCDB_KEY_PATH);
+            const transaction = db.transaction(objectStoreName, "readwrite");
+            const objectStore = transaction.objectStore(objectStoreName);
+            const getRequest = objectStore.get(getKeyPathName(dataType));
             getRequest.onsuccess = event => {
                 const request = event.target as IDBRequest;
                 const json = request.result;
@@ -35,16 +41,30 @@ export function get(): Promise<any> {
     });
 }
 
-export function store(json: any) {
-    const request = indexedDB.open(RCDB_NAME);
+export function store(dataType: DataType, json: any) {
+    const request = indexedDB.open(getDatabaseName(dataType));
+
+    const objectStoreName = getObjectStoreName(dataType);
 
     request.onsuccess = (event) => {
         const request = event.target as IDBOpenDBRequest
         const db = request.result;
-        const transaction = db.transaction(RCDB_OBJ_STORE_NAME, "readwrite");
-        const objectStore = transaction.objectStore(RCDB_OBJ_STORE_NAME);
-        objectStore.put(json, RCDB_KEY_PATH).onsuccess = _ => {
-            console.log('Data stored in Database');
+        const transaction = db.transaction(objectStoreName, "readwrite");
+        const objectStore = transaction.objectStore(objectStoreName);
+        objectStore.put(json, getKeyPathName(dataType)).onsuccess = _ => {
+            console.log('Data stored in Database', dataType);
         };
     };
+}
+
+function getDatabaseName(dataType: DataType): string {
+    return dataType + DATABASE_POSTFIX;
+}
+
+function getObjectStoreName(dataType: DataType): string {
+    return dataType + OBJECT_STORE_POSTFIX;
+}
+
+function getKeyPathName(dataType: DataType): string {
+    return dataType + KEY_PATH_POSTFIX;
 }

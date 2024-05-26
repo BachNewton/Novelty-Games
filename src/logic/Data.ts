@@ -31,3 +31,8 @@ export interface Question {
     correctIndex: number;
     imageUrl: string;
 }
+
+export enum DataType {
+    ROLLERCOASTERS = 'ROLLERCOASTERS',
+    MUSIC = 'MUSIC'
+}

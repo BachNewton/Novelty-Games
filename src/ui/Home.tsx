@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import '../css/Home.css';
 import App from './App';
-import { Rollercoaster } from '../logic/Data';
+import { DataType, Rollercoaster } from '../logic/Data';
 import { get as getFromRepo } from '../logic/Repository';
 
-const APP_VERSION = 'v1.2.0';
+const APP_VERSION = 'v1.3.0';
 
 interface State {
     ui: UiState,
@@ -20,7 +20,7 @@ const Home: React.FC = () => {
     const [state, setState] = useState({ ui: UiState.HOME } as State);
 
     const onRollercoastersClick = () => {
-        state.coasters = getFromRepo();
+        state.coasters = getFromRepo(DataType.ROLLERCOASTERS);
         state.ui = UiState.ROLLERCOASTERS;
         setState({ ...state });
     };
