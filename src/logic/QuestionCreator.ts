@@ -1,4 +1,4 @@
-import { Data, DataType, Question, Rollercoaster } from './Data';
+import { Data, DataType, Question, Rollercoaster, Song } from './Data';
 
 export default function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
     const copiedData = [...data];
@@ -9,27 +9,78 @@ export default function createQuestions(data: Array<Data>, dataType: DataType): 
         shuffledData.push(copiedData.splice(randomIndex, 1)[0]);
     }
 
-    return shuffledData.map((coasterAnswer) => createQuestion(data as Array<Rollercoaster>, coasterAnswer as Rollercoaster));
+    const optionsPool = getOptionsPool(data, dataType);
+    return shuffledData.map((coasterAnswer) => createQuestion(optionsPool, coasterAnswer as Rollercoaster, dataType));
 }
 
-function createQuestion(coasters: Array<Rollercoaster>, coasterAnswer: Rollercoaster): Question {
-    const allParks = new Set([...coasters.map(coaster => coaster.park.name)]);
+function getOptionsPool(data: Array<Data>, dataType: DataType,): Set<string> {
+    if (dataType === DataType.ROLLERCOASTERS) {
+        const coasters = data as Array<Rollercoaster>;
+        return new Set([...coasters.map(coaster => coaster.park.name)]);
+    } else {
+        const songs = data as Array<Song>;
+        return new Set([...songs.map(song => song.Artist)]);
+    }
+}
 
-    const incorrectOptions = getOptions(3, allParks, coasterAnswer.park.name)
+function createQuestion(optionsPool: Set<string>, answer: Data, dataType: DataType): Question {
+    const incorrectOptions = getOptions(3, optionsPool, getIsNot(answer, dataType))
 
-    const text = `Which park is the coaster "${coasterAnswer.name}" made by "${coasterAnswer.make}" in "${coasterAnswer.status.date.opened}" located in?`;
+    const text = getQuestionText(answer, dataType);
     const correctIndex = Math.floor(Math.random() * 4);
-    const options = incorrectOptions.slice(0, correctIndex).concat(coasterAnswer.park.name).concat(incorrectOptions.slice(correctIndex));
-    const imageUrl = coasterAnswer.mainPicture.url;
+    const options = incorrectOptions.slice(0, correctIndex).concat(getCorrectOption(answer, dataType)).concat(incorrectOptions.slice(correctIndex));
+    const imageUrl = getImageUrl(answer, dataType);
 
     return { text: text, options: options, correctIndex: correctIndex, imageUrl: imageUrl } as Question;
 }
 
-function getOptions(numberOfOptions: number, allOptions: Set<string>, isNot: string): Array<string> {
+function getIsNot(answer: Data, dataType: DataType): string {
+    if (dataType === DataType.ROLLERCOASTERS) {
+        const coaster = answer as Rollercoaster;
+        return coaster.park.name;
+    } else {
+        const song = answer as Song;
+        return song.Artist;
+    }
+}
+
+function getQuestionText(answer: Data, dataType: DataType): string {
+    if (dataType === DataType.ROLLERCOASTERS) {
+        const coaster = answer as Rollercoaster;
+        return `Which park is the coaster "${coaster.name}" made by "${coaster.make}" in "${coaster.status.date.opened}" located in?`;
+    } else {
+        const song = answer as Song;
+        return `Which artist created the song "${song.Name}" in "${song.Year}"?`;
+    }
+}
+
+function getCorrectOption(answer: Data, dataType: DataType): string {
+    if (dataType === DataType.ROLLERCOASTERS) {
+        const coaster = answer as Rollercoaster;
+        return coaster.park.name;
+    } else {
+        const song = answer as Song;
+        return song.Artist;
+    }
+}
+
+function getImageUrl(answer: Data, dataType: DataType): string {
+    if (dataType === DataType.ROLLERCOASTERS) {
+        const coaster = answer as Rollercoaster;
+        return coaster.mainPicture.url;
+    } else {
+        const song = answer as Song;
+        return song.imageUrl;
+    }
+}
+
+function getOptions(numberOfOptions: number, optionsPool: Set<string>, isNot: string): Array<string> {
     const remainingOptions = [] as Array<string>;
-    allOptions.delete(isNot);
-    allOptions.forEach(value => {
-        remainingOptions.push(value);
+
+    optionsPool.forEach(option => {
+        if (option === isNot) return;
+
+        remainingOptions.push(option);
     });
 
     const options = [] as Array<string>;

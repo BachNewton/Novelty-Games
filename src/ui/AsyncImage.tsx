@@ -30,7 +30,7 @@ const AsyncImage: React.FC<AsyncImageProps> = ({ src, disableImages, onClick }) 
     } else {
         const content = isLoaded
             ? <img src={src} style={{ height: HEIGHT }} />
-            : <>(Loading Coaster Image)<br />(Click to disable)</>;
+            : <>(Loading Image)<br />(Click to disable)</>;
 
         return <div style={{ height: HEIGHT, display: 'flex', justifyContent: 'center', alignItems: 'center' }} onClick={onClick}>{content}</div>;
     }

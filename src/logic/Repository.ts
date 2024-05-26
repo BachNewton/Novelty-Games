@@ -1,4 +1,4 @@
-import { DataType, Rollercoaster, Data } from "./Data";
+import { DataType, Rollercoaster, Data, Song } from "./Data";
 import { get as getFromDb, store as storeInDb } from "./Database";
 import { get as getFromNetwork } from "./Networking";
 
@@ -21,15 +21,26 @@ export function get(dataType: DataType): Promise<Array<Data>> {
 }
 
 function handleJson(dataType: DataType, json: any): Array<Data> {
-    if (dataType !== DataType.ROLLERCOASTERS) return json as Array<Data>;
+    if (dataType !== DataType.ROLLERCOASTERS) {
+        const songs = json as Array<Song>;
+        console.log('All Songs', songs);
 
-    const rollercoasters = cleanData(json);
-    console.log('All Rollercoasters', rollercoasters);
+        songs.forEach(song => song.imageUrl = getSongImageUrl(song.SongID));
 
-    const filteredRollercoasters = filterCoasters(rollercoasters);
-    console.log('Filtered Rollercoasters', filteredRollercoasters);
+        return songs;
+    } else {
+        const rollercoasters = cleanData(json);
+        console.log('All Rollercoasters', rollercoasters);
 
-    return filteredRollercoasters;
+        const filteredRollercoasters = filterCoasters(rollercoasters);
+        console.log('Filtered Rollercoasters', filteredRollercoasters);
+
+        return filteredRollercoasters;
+    }
+}
+
+function getSongImageUrl(songId: string): string {
+    return 'https://cdn.rb4.app/art/' + songId + '.png';
 }
 
 function cleanData(json: any): Array<Rollercoaster> {

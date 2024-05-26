@@ -28,7 +28,10 @@ const Home: React.FC = () => {
     };
 
     const onMusicClick = () => {
-        alert('Work in progress. Please come back later.');
+        state.data = getFromRepo(DataType.MUSIC);
+        state.dataType = DataType.MUSIC;
+        state.ui = UiState.GAME;
+        setState({ ...state });
     };
 
     if (state.ui === UiState.HOME) {

@@ -29,6 +29,10 @@ interface MainPicture {
 
 export interface Song extends Data {
     Name: string;
+    Artist: string;
+    Year: number;
+    SongID: string;
+    imageUrl: string;
 }
 
 export interface Question {
