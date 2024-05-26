@@ -1,4 +1,4 @@
-import './App.css';
+import './css/App.css';
 import { useState } from 'react';
 import { Question, Rollercoaster } from './Data';
 import createQuestions from './Game';
