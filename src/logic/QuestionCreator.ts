@@ -9,7 +9,7 @@ export default function createQuestions(data: Array<Data>, dataType: DataType): 
         shuffledData.push(copiedData.splice(randomIndex, 1)[0]);
     }
 
-    return shuffledData.map((data) => createQuestion(data as Array<Rollercoaster>, data as Rollercoaster));
+    return shuffledData.map((coasterAnswer) => createQuestion(data as Array<Rollercoaster>, coasterAnswer as Rollercoaster));
 }
 
 function createQuestion(coasters: Array<Rollercoaster>, coasterAnswer: Rollercoaster): Question {
