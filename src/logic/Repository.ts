@@ -10,8 +10,8 @@ export function get(dataType: DataType): Promise<Array<Rollercoaster>> {
     }).catch(_ => {
         console.log('No data in Database', dataType);
 
-        return getFromNetwork().then(json => {
-            console.log('From Network:', json);
+        return getFromNetwork(dataType).then(json => {
+            console.log('From Network', dataType, json);
 
             storeInDb(dataType, json);
 

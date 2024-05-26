@@ -1,8 +1,25 @@
-export function get(): Promise<any> {
-    // Alernative API: https://rcdb-api.vercel.app/api/coasters
-    const URL = 'https://raw.githubusercontent.com/fabianrguez/rcdb-api/main/db/coasters.json';
+import { DataType } from "./Data";
 
-    return fetch(URL).then(response => response.json()).then(json => {
+// Alernative API: https://rcdb-api.vercel.app/api/coasters
+const ROLLERCOASTERS_URL = 'https://raw.githubusercontent.com/fabianrguez/rcdb-api/main/db/coasters.json';
+
+const MUSIC_URL = 'https://rb4.app/songList';
+
+export function get(dataType: DataType): Promise<any> {
+    const url = getUrl(dataType);
+
+    console.log('Fetching data for', dataType);
+    console.log('Fecthing data from', url);
+
+    return fetch(url).then(response => response.json()).then(json => {
         return json;
     });
+}
+
+function getUrl(dataType: DataType) {
+    if (dataType === DataType.ROLLERCOASTERS) {
+        return ROLLERCOASTERS_URL;
+    } else {
+        return MUSIC_URL;
+    }
 }
