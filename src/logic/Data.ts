@@ -1,4 +1,6 @@
-export interface Rollercoaster {
+export interface Data { }
+
+export interface Rollercoaster extends Data {
     name: string;
     make: string;
     model: string;
@@ -23,6 +25,10 @@ interface Park {
 
 interface MainPicture {
     url: string;
+}
+
+export interface Song extends Data {
+    Name: string;
 }
 
 export interface Question {

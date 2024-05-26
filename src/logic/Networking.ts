@@ -3,7 +3,7 @@ import { DataType } from "./Data";
 // Alernative API: https://rcdb-api.vercel.app/api/coasters
 const ROLLERCOASTERS_URL = 'https://raw.githubusercontent.com/fabianrguez/rcdb-api/main/db/coasters.json';
 
-const MUSIC_URL = 'https://rb4.app/songList';
+const MUSIC_URL = 'https://raw.githubusercontent.com/BachNewton/PWA-Trivia/main/db/music.json';
 
 export function get(dataType: DataType): Promise<any> {
     const url = getUrl(dataType);

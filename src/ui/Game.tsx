@@ -1,19 +1,25 @@
-import '../css/App.css';
+import '../css/Game.css';
 import { useState } from 'react';
-import { Question, Rollercoaster } from '../logic/Data';
-import createQuestions from '../logic/Game';
+import { Data, DataType, Question } from '../logic/Data';
+import createQuestions from '../logic/QuestionCreator';
 import AsyncImage from './AsyncImage';
 
+interface GameProps {
+  pendingData: Promise<Array<Data>>;
+  dataType: DataType;
+}
+
 interface GameState {
-  coasters: Array<Rollercoaster>,
-  questions: Array<Question>,
-  activeQuestion: number,
-  uiState: UiState,
-  lives: number,
-  score: number,
-  highScore: number,
-  isNewHighScore: boolean,
-  disableImages: boolean
+  data: Array<Data>;
+  dataType: DataType;
+  questions: Array<Question>;
+  activeQuestion: number;
+  uiState: UiState;
+  lives: number;
+  score: number;
+  highScore: number;
+  isNewHighScore: boolean;
+  disableImages: boolean;
 }
 
 enum UiState {
@@ -25,31 +31,32 @@ enum UiState {
 }
 
 const POST_QUESTION_DELAY = 1000;
-const HIGH_SCORE_KEY = 'HIGH_SCORE_KEY';
+const MAX_LIVES = 3;
+const HIGH_SCORE_KEY_POSTFIX = '_HIGH_SCORE_KEY';
 const DISABLE_IMAGES_KEY = 'DISABLE_IMAGES_KEY';
 
-export default function App({ prop }: any) {
+const Game: React.FC<GameProps> = ({ pendingData, dataType }) => {
   const [gameState, setGameState] = useState({ uiState: UiState.LOADING } as GameState)
 
-  const pendingCoasters = prop as Promise<Array<Rollercoaster>>;
+  pendingData.then(readyData => {
+    if (readyData === gameState.data) return;
 
-  pendingCoasters.then(readyCoasters => {
-    if (readyCoasters === gameState.coasters) return;
-
-    resetGame(readyCoasters, setGameState);
+    resetGame(readyData, dataType, setGameState);
   });
 
   return (
-    <div className="App">
-      <header className="App-header">
+    <div className="Game">
+      <header className="Game-header">
         {Ui(gameState, setGameState)}
       </header>
     </div>
   );
-}
+};
 
-function resetGame(coasters: Array<Rollercoaster>, setGameState: React.Dispatch<React.SetStateAction<GameState>>) {
-  const savedHighScore = localStorage.getItem(HIGH_SCORE_KEY);
+export default Game;
+
+function resetGame(data: Array<Data>, dataType: DataType, setGameState: React.Dispatch<React.SetStateAction<GameState>>) {
+  const savedHighScore = localStorage.getItem(getHighScoreKey(dataType));
   const savedDisableImages = localStorage.getItem(DISABLE_IMAGES_KEY);
 
   const highScore = savedHighScore === null
@@ -59,16 +66,21 @@ function resetGame(coasters: Array<Rollercoaster>, setGameState: React.Dispatch<
   const disableImages = savedDisableImages === 'true' ? true : false;
 
   setGameState({
-    coasters: coasters,
-    questions: createQuestions(coasters),
+    data: data,
+    dataType: dataType,
+    questions: createQuestions(data, dataType),
     activeQuestion: 0,
     uiState: UiState.SHOW_QUESTION,
-    lives: 3,
+    lives: MAX_LIVES,
     score: 0,
     highScore: highScore,
     isNewHighScore: false,
     disableImages: disableImages
   } as GameState);
+}
+
+function getHighScoreKey(dataType: DataType): string {
+  return dataType + HIGH_SCORE_KEY_POSTFIX;
 }
 
 function Ui(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>): JSX.Element {
@@ -83,7 +95,7 @@ function Ui(gameState: GameState, setGameState: React.Dispatch<React.SetStateAct
 
 function GameOverUi(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>) {
   const playAgain = () => {
-    resetGame(gameState.coasters, setGameState);
+    resetGame(gameState.data, gameState.dataType, setGameState);
   };
 
   const newHighScoreUi = gameState.isNewHighScore
@@ -115,7 +127,7 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
         if (gameState.score > gameState.highScore) {
           gameState.highScore++;
           gameState.isNewHighScore = true;
-          localStorage.setItem(HIGH_SCORE_KEY, gameState.highScore.toString());
+          localStorage.setItem(getHighScoreKey(gameState.dataType), gameState.highScore.toString());
         }
 
         setGameState({ ...gameState });

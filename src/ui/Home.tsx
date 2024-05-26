@@ -1,27 +1,29 @@
 import { useState } from 'react';
 import '../css/Home.css';
-import App from './App';
-import { DataType, Rollercoaster } from '../logic/Data';
+import Game from './Game';
+import { DataType, Data } from '../logic/Data';
 import { get as getFromRepo } from '../logic/Repository';
 
-const APP_VERSION = 'v1.3.0';
+const APP_VERSION = 'v2.0.0';
 
 interface State {
     ui: UiState,
-    coasters: Promise<Array<Rollercoaster>>
+    data: Promise<Array<Data>>,
+    dataType: DataType
 }
 
 enum UiState {
     HOME,
-    ROLLERCOASTERS
+    GAME
 }
 
 const Home: React.FC = () => {
     const [state, setState] = useState({ ui: UiState.HOME } as State);
 
     const onRollercoastersClick = () => {
-        state.coasters = getFromRepo(DataType.ROLLERCOASTERS);
-        state.ui = UiState.ROLLERCOASTERS;
+        state.data = getFromRepo(DataType.ROLLERCOASTERS);
+        state.dataType = DataType.ROLLERCOASTERS;
+        state.ui = UiState.GAME;
         setState({ ...state });
     };
 
@@ -41,7 +43,7 @@ const Home: React.FC = () => {
             </div>
         );
     } else {
-        return <App prop={state.coasters} />;
+        return <Game pendingData={state.data} dataType={state.dataType} />;
     }
 };
 

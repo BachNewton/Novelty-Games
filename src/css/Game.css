@@ -1,8 +1,8 @@
-.App {
+.Game {
   text-align: center;
 }
 
-.App-header {
+.Game-header {
   background-color: #282c34;
   min-height: 100vh;
   display: flex;

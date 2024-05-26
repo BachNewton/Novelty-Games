@@ -1,6 +1,19 @@
-import { Question, Rollercoaster } from './Data';
+import { Data, DataType, Question, Rollercoaster } from './Data';
 
-export default function createQuestion(coasters: Array<Rollercoaster>, coasterAnswer: Rollercoaster): Question {
+export default function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
+    const coasters = data as Array<Rollercoaster>;
+
+    const copiedCoasters = [...coasters];
+    const shuffledCoasters = [];
+    while (copiedCoasters.length > 0) {
+        const randomIndex = Math.floor(Math.random() * copiedCoasters.length);
+        shuffledCoasters.push(copiedCoasters.splice(randomIndex, 1)[0]);
+    }
+
+    return shuffledCoasters.map((coaster) => createQuestion(coasters, coaster));
+}
+
+function createQuestion(coasters: Array<Rollercoaster>, coasterAnswer: Rollercoaster): Question {
     const allParks = new Set([...coasters.map(coaster => coaster.park.name)]);
 
     const incorrectOptions = getOptions(3, allParks, coasterAnswer.park.name)

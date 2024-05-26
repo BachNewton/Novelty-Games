@@ -1,12 +1,12 @@
-import { DataType, Rollercoaster } from "./Data";
+import { DataType, Rollercoaster, Data } from "./Data";
 import { get as getFromDb, store as storeInDb } from "./Database";
 import { get as getFromNetwork } from "./Networking";
 
-export function get(dataType: DataType): Promise<Array<Rollercoaster>> {
+export function get(dataType: DataType): Promise<Array<Data>> {
     return getFromDb(dataType).then(json => {
         console.log('Found in Database', dataType, json);
 
-        return handleJson(json);
+        return handleJson(dataType, json);
     }).catch(_ => {
         console.log('No data in Database', dataType);
 
@@ -15,12 +15,14 @@ export function get(dataType: DataType): Promise<Array<Rollercoaster>> {
 
             storeInDb(dataType, json);
 
-            return handleJson(json);
+            return handleJson(dataType, json);
         });
     });
 }
 
-function handleJson(json: any): Array<Rollercoaster> {
+function handleJson(dataType: DataType, json: any): Array<Data> {
+    if (dataType !== DataType.ROLLERCOASTERS) return json as Array<Data>;
+
     const rollercoasters = cleanData(json);
     console.log('All Rollercoasters', rollercoasters);
 
