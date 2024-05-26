@@ -24,7 +24,6 @@ enum UiState {
   GAME_OVER
 }
 
-const APP_VERSION = 'v1.1.1';
 const POST_QUESTION_DELAY = 1000;
 const HIGH_SCORE_KEY = 'HIGH_SCORE_KEY';
 const DISABLE_IMAGES_KEY = 'DISABLE_IMAGES_KEY';
@@ -43,7 +42,6 @@ export default function App({ prop }: any) {
   return (
     <div className="App">
       <header className="App-header">
-        <code id="version-label">{APP_VERSION}</code>
         {Ui(gameState, setGameState)}
       </header>
     </div>

@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './css/index.css';
-import App from './ui/App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 import { get as getFromRepo } from './logic/Repository';
+import Home from './ui/Home';
 
 const coasters = getFromRepo();
 
@@ -14,9 +14,7 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <App
-      prop={coasters}
-    />
+    <Home />
   </React.StrictMode>
 );
 
