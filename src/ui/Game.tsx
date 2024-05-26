@@ -19,8 +19,10 @@ interface GameState {
   lives: number;
   score: number;
   highScore: number;
+  hardcoreHighScore: number;
   isNewHighScore: boolean;
   disableImages: boolean;
+  usedImages: boolean;
 }
 
 enum UiState {
@@ -34,6 +36,7 @@ enum UiState {
 const POST_QUESTION_DELAY = 1000;
 const MAX_LIVES = 3;
 const HIGH_SCORE_KEY_POSTFIX = '_HIGH_SCORE_KEY';
+const HIGH_SCORE_HARDCORE_KEY_POSTFIX = HIGH_SCORE_KEY_POSTFIX + '_HARDCORE';
 const DISABLE_IMAGES_KEY = 'DISABLE_IMAGES_KEY';
 
 const Game: React.FC<GameProps> = ({ pendingData, dataType, onHomeClicked }) => {
@@ -59,11 +62,11 @@ export default Game;
 
 function resetGame(data: Array<Data>, dataType: DataType, setGameState: React.Dispatch<React.SetStateAction<GameState>>) {
   const savedHighScore = localStorage.getItem(getHighScoreKey(dataType));
+  const savedHardcoreHighScore = localStorage.getItem(getHardcoreHighScoreKey(dataType));
   const savedDisableImages = localStorage.getItem(DISABLE_IMAGES_KEY);
 
-  const highScore = savedHighScore === null
-    ? 0
-    : parseInt(savedHighScore);
+  const highScore = savedHighScore === null ? 0 : parseInt(savedHighScore);
+  const hardcoreHighScore = savedHardcoreHighScore === null ? 0 : parseInt(savedHardcoreHighScore);
 
   const disableImages = savedDisableImages === 'true' ? true : false;
 
@@ -76,13 +79,19 @@ function resetGame(data: Array<Data>, dataType: DataType, setGameState: React.Di
     lives: MAX_LIVES,
     score: 0,
     highScore: highScore,
+    hardcoreHighScore: hardcoreHighScore,
     isNewHighScore: false,
-    disableImages: disableImages
+    disableImages: disableImages,
+    usedImages: !disableImages
   } as GameState);
 }
 
 function getHighScoreKey(dataType: DataType): string {
   return dataType + HIGH_SCORE_KEY_POSTFIX;
+}
+
+function getHardcoreHighScoreKey(dataType: DataType): string {
+  return dataType + HIGH_SCORE_HARDCORE_KEY_POSTFIX;
 }
 
 function Ui(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>): JSX.Element {
@@ -107,10 +116,17 @@ function GameOverUi(gameState: GameState, setGameState: React.Dispatch<React.Set
   return <div>
     Game Over!
     <p>Final Score: {gameState.score}</p>
-    <p>High Score: {gameState.highScore}</p>
+    {HighScoreUi(gameState)}
     {newHighScoreUi}
     <button onClick={playAgain}>Play again</button>
   </div>;
+}
+
+function HighScoreUi(gameState: GameState) {
+  const highScoreHardcore = gameState.usedImages ? '' : ' 😈';
+  const highScore = gameState.usedImages ? gameState.highScore : gameState.hardcoreHighScore;
+
+  return <p>High Score: {highScore}{highScoreHardcore}</p>;
 }
 
 function LoadingUi() {
@@ -130,6 +146,12 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
           gameState.highScore++;
           gameState.isNewHighScore = true;
           localStorage.setItem(getHighScoreKey(gameState.dataType), gameState.highScore.toString());
+        }
+
+        if (gameState.score > gameState.hardcoreHighScore && !gameState.usedImages) {
+          gameState.hardcoreHighScore++;
+          gameState.isNewHighScore = true;
+          localStorage.setItem(getHardcoreHighScoreKey(gameState.dataType), gameState.hardcoreHighScore.toString());
         }
 
         setGameState({ ...gameState });
@@ -168,6 +190,11 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
     const flipped = !gameState.disableImages;
     localStorage.setItem(DISABLE_IMAGES_KEY, flipped.toString());
     gameState.disableImages = flipped;
+
+    if (!gameState.disableImages) {
+      gameState.usedImages = true;
+    }
+
     setGameState({ ...gameState });
   };
 
@@ -190,6 +217,6 @@ function StatsUi(gameState: GameState) {
   return <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
     <p>Score: {gameState.score}</p>
     <p>{livesUi}</p>
-    <p>High Score: {gameState.highScore}</p>
+    {HighScoreUi(gameState)}
   </div>;
 }

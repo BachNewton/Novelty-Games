@@ -4,7 +4,7 @@ import Game from './Game';
 import { DataType, Data } from '../logic/Data';
 import { get as getFromRepo } from '../logic/Repository';
 
-const APP_VERSION = 'v2.0.0';
+const APP_VERSION = 'v2.1.0';
 
 interface State {
     ui: UiState,
