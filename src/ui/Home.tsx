@@ -34,6 +34,11 @@ const Home: React.FC = () => {
         setState({ ...state });
     };
 
+    const onHomeClicked = () => {
+        state.ui = UiState.HOME;
+        setState({ ...state });
+    };
+
     if (state.ui === UiState.HOME) {
         return (
             <div className='Home'>
@@ -46,7 +51,7 @@ const Home: React.FC = () => {
             </div>
         );
     } else {
-        return <Game pendingData={state.data} dataType={state.dataType} />;
+        return <Game pendingData={state.data} dataType={state.dataType} onHomeClicked={onHomeClicked} />;
     }
 };
 

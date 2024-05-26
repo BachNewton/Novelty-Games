@@ -7,6 +7,7 @@ import AsyncImage from './AsyncImage';
 interface GameProps {
   pendingData: Promise<Array<Data>>;
   dataType: DataType;
+  onHomeClicked: () => void;
 }
 
 interface GameState {
@@ -35,7 +36,7 @@ const MAX_LIVES = 3;
 const HIGH_SCORE_KEY_POSTFIX = '_HIGH_SCORE_KEY';
 const DISABLE_IMAGES_KEY = 'DISABLE_IMAGES_KEY';
 
-const Game: React.FC<GameProps> = ({ pendingData, dataType }) => {
+const Game: React.FC<GameProps> = ({ pendingData, dataType, onHomeClicked }) => {
   const [gameState, setGameState] = useState({ uiState: UiState.LOADING } as GameState)
 
   pendingData.then(readyData => {
@@ -46,6 +47,7 @@ const Game: React.FC<GameProps> = ({ pendingData, dataType }) => {
 
   return (
     <div className="Game">
+      <button id='home-button' onClick={onHomeClicked}>🏠</button>
       <header className="Game-header">
         {Ui(gameState, setGameState)}
       </header>
