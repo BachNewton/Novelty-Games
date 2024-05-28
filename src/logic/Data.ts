@@ -35,6 +35,35 @@ export interface Song extends Data {
     imageUrl: string;
 }
 
+export interface PokemonAll {
+    results: Array<PokemonEntry>;
+}
+
+interface PokemonEntry {
+    url: string;
+}
+
+export interface Pokemon {
+    species: Species;
+    sprites: Sprites;
+}
+
+interface Species {
+    name: string;
+}
+
+interface Sprites {
+    other: OtherSprites;
+}
+
+interface OtherSprites {
+    'official-artwork': OfficalArtwork;
+}
+
+interface OfficalArtwork {
+    front_default: string;
+}
+
 export interface Question {
     text: string;
     options: Array<string>;
@@ -44,5 +73,7 @@ export interface Question {
 
 export enum DataType {
     ROLLERCOASTERS = 'ROLLERCOASTERS',
-    MUSIC = 'MUSIC'
+    MUSIC = 'MUSIC',
+    POKEMON = 'POKEMON',
+    POKEMON_ALL = 'POKEMON_ALL'
 }

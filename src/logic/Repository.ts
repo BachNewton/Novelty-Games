@@ -1,46 +1,51 @@
-import { DataType, Rollercoaster, Data, Song } from "./Data";
+import { DataType, Rollercoaster, Data, Song, PokemonAll, Pokemon } from "./Data";
 import { get as getFromDb, store as storeInDb } from "./Database";
 import { get as getFromNetwork } from "./Networking";
 
-export function get(dataType: DataType): Promise<Array<Data>> {
+export function get(dataType: DataType, urls?: Array<string>): Promise<Array<Data>> {
     return getFromDb(dataType).then(json => {
         console.log('Found in Database', dataType, json);
 
-        return handleJson(dataType, json);
+        return handleJsons(dataType, [json]);
     }).catch(_ => {
         console.log('No data in Database', dataType);
 
-        return getFromNetwork(dataType).then(json => {
-            console.log('From Network', dataType, json);
+        return getFromNetwork(dataType, urls).then(jsons => {
+            console.log('From Network', dataType, jsons);
 
-            storeInDb(dataType, json);
+            // Pokemon storage is not yet supported
+            if (dataType !== DataType.POKEMON && dataType !== DataType.POKEMON_ALL) {
+                storeInDb(dataType, jsons[0]);
+            }
 
-            return handleJson(dataType, json);
+            return handleJsons(dataType, jsons);
         });
     });
 }
 
-function handleJson(dataType: DataType, json: any): Array<Data> {
-    if (dataType !== DataType.ROLLERCOASTERS) {
-        const songs = json as Array<Song>;
-        console.log('All Songs', songs);
-
-        songs.forEach(song => song.imageUrl = getSongImageUrl(song.SongID));
-
-        return songs;
-    } else {
-        const rollercoasters = cleanData(json);
-        console.log('All Rollercoasters', rollercoasters);
-
-        const filteredRollercoasters = filterCoasters(rollercoasters);
-        console.log('Filtered Rollercoasters', filteredRollercoasters);
-
-        return filteredRollercoasters;
+async function handleJsons(dataType: DataType, jsons: Array<any>): Promise<Array<Data>> {
+    switch (dataType) {
+        case DataType.ROLLERCOASTERS:
+            return handleRollercoastersJson(jsons[0]);
+        case DataType.MUSIC:
+            return handleSongsJson(jsons[0]);
+        case DataType.POKEMON_ALL:
+            return await handlePokemonAllJson(jsons[0]);
+        case DataType.POKEMON:
+            return handlePokemonJsons(jsons);
+        default:
+            throw new Error('Unsupported DataType: ' + dataType);
     }
 }
 
-function getSongImageUrl(songId: string): string {
-    return 'https://cdn.rb4.app/art/' + songId + '.png';
+function handleRollercoastersJson(json: any): Array<Rollercoaster> {
+    const rollercoasters = cleanData(json);
+    console.log('All Rollercoasters', rollercoasters);
+
+    const filteredRollercoasters = filterCoasters(rollercoasters);
+    console.log('Filtered Rollercoasters', filteredRollercoasters);
+
+    return filteredRollercoasters;
 }
 
 function cleanData(json: any): Array<Rollercoaster> {
@@ -57,6 +62,30 @@ function cleanData(json: any): Array<Rollercoaster> {
     });
 
     return rollercoasters;
+}
+
+function handleSongsJson(json: any): Array<Song> {
+    const songs = json as Array<Song>;
+    console.log('All Songs', songs);
+
+    songs.forEach(song => song.imageUrl = getSongImageUrl(song.SongID));
+
+    return songs;
+}
+
+function getSongImageUrl(songId: string): string {
+    return 'https://cdn.rb4.app/art/' + songId + '.png';
+}
+
+async function handlePokemonAllJson(json: any): Promise<Array<Pokemon>> {
+    const pokemonAll = json as PokemonAll;
+
+    const urls = pokemonAll.results.map(pokemonEntry => pokemonEntry.url);
+    return await get(DataType.POKEMON, urls) as Array<Pokemon>;
+}
+
+function handlePokemonJsons(jsons: Array<any>): Array<Pokemon> {
+    return jsons as Array<Pokemon>;
 }
 
 function filterCoasters(coasters: Array<Rollercoaster>): Array<Rollercoaster> {

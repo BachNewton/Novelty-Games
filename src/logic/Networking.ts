@@ -5,21 +5,38 @@ const ROLLERCOASTERS_URL = 'https://raw.githubusercontent.com/fabianrguez/rcdb-a
 
 const MUSIC_URL = 'https://raw.githubusercontent.com/BachNewton/PWA-Trivia/main/db/music.json';
 
-export function get(dataType: DataType): Promise<any> {
-    const url = getUrl(dataType);
+const POKEMON_URL = 'https://pokeapi.co/api/v2/pokemon?limit=100000';
+
+export async function get(dataType: DataType, optionalUrls?: Array<string>): Promise<any> {
+    const urls = optionalUrls === undefined ? [getUrl(dataType)] : optionalUrls;
 
     console.log('Fetching data for', dataType);
-    console.log('Fecthing data from', url);
+    console.log('Fecthing data from', urls);
 
-    return fetch(url).then(response => response.json()).then(json => {
-        return json;
-    });
+    return await getFrom(urls);
 }
 
-function getUrl(dataType: DataType) {
-    if (dataType === DataType.ROLLERCOASTERS) {
-        return ROLLERCOASTERS_URL;
-    } else {
-        return MUSIC_URL;
+function getUrl(dataType: DataType): string {
+    switch (dataType) {
+        case DataType.ROLLERCOASTERS:
+            return ROLLERCOASTERS_URL;
+        case DataType.MUSIC:
+            return MUSIC_URL;
+        case DataType.POKEMON_ALL:
+            return POKEMON_URL;
+        case DataType.POKEMON:
+            return ''; // optional urls should be provided
+        default:
+            throw new Error('Unsupported DataType: ' + dataType);
     }
+}
+
+function getFrom(urls: Array<string>): Promise<Array<any>> {
+    return Promise.all(urls.map(url => fetchJson(url)));
+}
+
+async function fetchJson(url: string): Promise<any> {
+    const response = await fetch(url);
+    const json = await response.json();
+    return json;
 }
