@@ -1,3 +1,3 @@
 - Add a filter UI system
-- Add Pokemon trivia
 - Add Flag Game
+- Add a progress bar for loading (for long networking calls)
