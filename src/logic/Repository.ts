@@ -3,20 +3,17 @@ import { get as getFromDb, store as storeInDb } from "./Database";
 import { get as getFromNetwork } from "./Networking";
 
 export function get(dataType: DataType, urls?: Array<string>): Promise<Array<Data>> {
-    return getFromDb(dataType).then(json => {
-        console.log('Found in Database', dataType, json);
+    return getFromDb(dataType).then(jsons => {
+        console.log('Found in Database', dataType, jsons);
 
-        return handleJsons(dataType, [json]);
+        return handleJsons(dataType, jsons);
     }).catch(_ => {
         console.log('No data in Database', dataType);
 
         return getFromNetwork(dataType, urls).then(jsons => {
             console.log('From Network', dataType, jsons);
 
-            // Pokemon storage is not yet supported
-            if (dataType !== DataType.POKEMON && dataType !== DataType.POKEMON_ALL) {
-                storeInDb(dataType, jsons[0]);
-            }
+            storeInDb(dataType, jsons);
 
             return handleJsons(dataType, jsons);
         });
@@ -85,7 +82,11 @@ async function handlePokemonAllJson(json: any): Promise<Array<Pokemon>> {
 }
 
 function handlePokemonJsons(jsons: Array<any>): Array<Pokemon> {
-    return jsons as Array<Pokemon>;
+    const pokemon = jsons as Array<Pokemon>;
+
+    console.log('All Pokemon', pokemon);
+
+    return pokemon;
 }
 
 function filterCoasters(coasters: Array<Rollercoaster>): Array<Rollercoaster> {

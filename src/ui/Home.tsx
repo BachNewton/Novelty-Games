@@ -39,6 +39,7 @@ const Home: React.FC = () => {
     };
 
     const onPokemonClick = () => {
+        // getFromRepo(DataType.POKEMON_ALL);
         alert('Pokémon is not ready yet. Please come back later.');
     };
 
