@@ -1,3 +1,4 @@
 - Add a filter UI system
 - Add Flag Game
 - Add a progress bar for loading (for long networking calls)
+    - // objectStore.count().onsuccess = ev => console.log(ev);
