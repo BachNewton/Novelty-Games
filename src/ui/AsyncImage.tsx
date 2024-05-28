@@ -32,7 +32,11 @@ const AsyncImage: React.FC<AsyncImageProps> = ({ src, disableImages, onClick }) 
             ? <img src={src} style={{ height: HEIGHT, maxWidth: '100vw', objectFit: 'contain' }} />
             : <>Loading Image...<br /><br />(Click to disable)</>;
 
-        return <div style={{ height: HEIGHT, display: 'flex', justifyContent: 'center', alignItems: 'center' }} onClick={onClick}>{content}</div>;
+        return <div
+            style={{ height: HEIGHT, width: '100vw', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+            onClick={onClick}>
+            {content}
+        </div>;
     }
 };
 
