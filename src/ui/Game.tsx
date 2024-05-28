@@ -60,11 +60,22 @@ const Game: React.FC<GameProps> = ({ pendingData, dataType, onHomeClicked }) => 
     ? <button onClick={onEnableImagesButtonClicked}>🖼️</button>
     : <></>;
 
+  const onSettingsButtonClicked = () => {
+    alert('Settings are not ready yet. Please come back later.');
+  };
+
+  const settingsButton = gameState.dataType === DataType.ROLLERCOASTERS
+    ? <button onClick={onSettingsButtonClicked}>⚙️</button>
+    : <></>;
+
   return (
     <div className="Game">
       <div className='top-left'>
         <button onClick={onHomeClicked}>🏠</button>
         {enableImagesButton}
+      </div>
+      <div className='top-right'>
+        {settingsButton}
       </div>
       <header>
         {Ui(gameState, setGameState)}

@@ -4,7 +4,7 @@ import Game from './Game';
 import { DataType, Data } from '../logic/Data';
 import { get as getFromRepo } from '../logic/Repository';
 
-const APP_VERSION = 'v2.1.0';
+const APP_VERSION = 'v2.2.0';
 
 interface State {
     ui: UiState,
@@ -34,6 +34,14 @@ const Home: React.FC = () => {
         setState({ ...state });
     };
 
+    const onFlagGameClick = () => {
+        alert('Flag Game is not ready yet. Please come back later.');
+    };
+
+    const onPokemonClick = () => {
+        alert('Pokémon is not ready yet. Please come back later.');
+    };
+
     const onHomeClicked = () => {
         state.ui = UiState.HOME;
         setState({ ...state });
@@ -48,6 +56,8 @@ const Home: React.FC = () => {
                 <div><br /><br /><br /></div>
                 <button onClick={onRollercoastersClick}>Rollercoasters 🎢</button>
                 <button onClick={onMusicClick}>Music 🎵</button>
+                <button onClick={onFlagGameClick}>Flag Game 🎌</button>
+                <button onClick={onPokemonClick}>Pokémon 👾</button>
             </div>
         );
     } else {
