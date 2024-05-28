@@ -1,4 +1,4 @@
-import { Data, DataType, Question, Rollercoaster, Song } from './Data';
+import { Data, DataType, Pokemon, Question, Rollercoaster, Song } from './Data';
 
 export default function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
     const copiedData = [...data];
@@ -9,68 +9,91 @@ export default function createQuestions(data: Array<Data>, dataType: DataType): 
         shuffledData.push(copiedData.splice(randomIndex, 1)[0]);
     }
 
-    const optionsPool = getOptionsPool(data, dataType);
-    return shuffledData.map((coasterAnswer) => createQuestion(optionsPool, coasterAnswer as Rollercoaster, dataType));
+    const optionsPool = getOptionsPool(dataType, data);
+    return shuffledData.map((answer) => createQuestion(optionsPool, answer, dataType));
 }
 
-function getOptionsPool(data: Array<Data>, dataType: DataType,): Set<string> {
-    if (dataType === DataType.ROLLERCOASTERS) {
-        const coasters = data as Array<Rollercoaster>;
-        return new Set([...coasters.map(coaster => coaster.park.name)]);
-    } else {
-        const songs = data as Array<Song>;
-        return new Set([...songs.map(song => song.Artist)]);
+function getOptionsPool(dataType: DataType, data: Array<Data>): Set<string> {
+    switch (dataType) {
+        case DataType.ROLLERCOASTERS:
+            return new Set([...(data as Array<Rollercoaster>).map(coaster => coaster.park.name)]);
+        case DataType.MUSIC:
+            return new Set([...(data as Array<Song>).map(song => song.Artist)]);
+        case DataType.POKEMON:
+            return new Set([...(data as Array<Pokemon>).map(pokemon => pokemon.formattedName)]);
+        default:
+            throw new Error('Unsupported DataType: ' + dataType);
     }
 }
 
 function createQuestion(optionsPool: Set<string>, answer: Data, dataType: DataType): Question {
-    const incorrectOptions = getOptions(3, optionsPool, getIsNot(answer, dataType))
+    const incorrectOptions = getOptions(3, optionsPool, getIsNot(dataType, answer))
 
     const text = getQuestionText(answer, dataType);
     const correctIndex = Math.floor(Math.random() * 4);
-    const options = incorrectOptions.slice(0, correctIndex).concat(getCorrectOption(answer, dataType)).concat(incorrectOptions.slice(correctIndex));
+    const options = incorrectOptions.slice(0, correctIndex).concat(getCorrectOption(dataType, answer)).concat(incorrectOptions.slice(correctIndex));
     const imageUrl = getImageUrl(answer, dataType);
 
     return { text: text, options: options, correctIndex: correctIndex, imageUrl: imageUrl } as Question;
 }
 
-function getIsNot(answer: Data, dataType: DataType): string {
-    if (dataType === DataType.ROLLERCOASTERS) {
-        const coaster = answer as Rollercoaster;
-        return coaster.park.name;
-    } else {
-        const song = answer as Song;
-        return song.Artist;
+function getIsNot(dataType: DataType, answer: Data): string {
+    switch (dataType) {
+        case DataType.ROLLERCOASTERS:
+            return (answer as Rollercoaster).park.name;
+        case DataType.MUSIC:
+            return (answer as Song).Artist;
+        case DataType.POKEMON:
+            return (answer as Pokemon).formattedName;
+        default:
+            throw new Error('Unsupported DataType: ' + dataType);
     }
 }
 
 function getQuestionText(answer: Data, dataType: DataType): string {
-    if (dataType === DataType.ROLLERCOASTERS) {
-        const coaster = answer as Rollercoaster;
-        return `Which park is the coaster "${coaster.name}" made by "${coaster.make}" in "${coaster.status.date.opened}" located in?`;
-    } else {
-        const song = answer as Song;
-        return `Which artist created the song "${song.Name}" in "${song.Year}"?`;
+    switch (dataType) {
+        case DataType.ROLLERCOASTERS:
+            const coaster = answer as Rollercoaster;
+            return `Which park is the coaster "${coaster.name}" made by "${coaster.make}" in "${coaster.status.date.opened}" located in?`;
+        case DataType.MUSIC:
+            const song = answer as Song;
+            return `Which artist created the song "${song.Name}" in "${song.Year}"?`;
+        case DataType.POKEMON:
+            return "Who's that Pokémon?!";
+        default:
+            throw new Error('Unsupported DataType: ' + dataType);
     }
 }
 
-function getCorrectOption(answer: Data, dataType: DataType): string {
-    if (dataType === DataType.ROLLERCOASTERS) {
-        const coaster = answer as Rollercoaster;
-        return coaster.park.name;
-    } else {
-        const song = answer as Song;
-        return song.Artist;
+function getCorrectOption(dataType: DataType, answer: Data): string {
+    switch (dataType) {
+        case DataType.ROLLERCOASTERS:
+            const coaster = answer as Rollercoaster;
+            return coaster.park.name;
+        case DataType.MUSIC:
+            const song = answer as Song;
+            return song.Artist;
+        case DataType.POKEMON:
+            const pokemon = answer as Pokemon;
+            return pokemon.formattedName;
+        default:
+            throw new Error('Unsupported DataType: ' + dataType);
     }
 }
 
 function getImageUrl(answer: Data, dataType: DataType): string {
-    if (dataType === DataType.ROLLERCOASTERS) {
-        const coaster = answer as Rollercoaster;
-        return coaster.mainPicture.url;
-    } else {
-        const song = answer as Song;
-        return song.imageUrl;
+    switch (dataType) {
+        case DataType.ROLLERCOASTERS:
+            const coaster = answer as Rollercoaster;
+            return coaster.mainPicture.url;
+        case DataType.MUSIC:
+            const song = answer as Song;
+            return song.imageUrl;
+        case DataType.POKEMON:
+            const pokemon = answer as Pokemon;
+            return pokemon.sprites.other['official-artwork'].front_default;
+        default:
+            throw new Error('Unsupported DataType: ' + dataType);
     }
 }
 

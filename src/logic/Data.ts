@@ -46,6 +46,7 @@ interface PokemonEntry {
 export interface Pokemon {
     species: Species;
     sprites: Sprites;
+    formattedName: string;
 }
 
 interface Species {

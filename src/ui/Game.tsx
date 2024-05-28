@@ -221,7 +221,7 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
 
   return <div>
     {StatsUi(gameState)}
-    <p style={{ marginBottom: 0, marginTop: 0 }}>Question #{gameState.activeQuestion + 1} of {gameState.questions.length}</p>
+    <p style={{ marginBottom: 0, marginTop: 0 }}>Question #{(gameState.activeQuestion + 1).toLocaleString()} of {gameState.questions.length.toLocaleString()}</p>
     <AsyncImage src={question.imageUrl} disableImages={gameState.disableImages} onClick={onImageSectionClick} />
     <p style={{ marginTop: 0, marginLeft: '0.4em', marginRight: '0.4em' }}>
       {question.text}

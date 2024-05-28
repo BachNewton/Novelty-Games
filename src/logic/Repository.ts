@@ -83,10 +83,20 @@ async function handlePokemonAllJson(json: any): Promise<Array<Pokemon>> {
 
 function handlePokemonJsons(jsons: Array<any>): Array<Pokemon> {
     const pokemon = jsons as Array<Pokemon>;
-
     console.log('All Pokemon', pokemon);
 
-    return pokemon;
+    const filteredPokemon = pokemon.filter(it => it.sprites.other["official-artwork"].front_default !== null);
+    console.log('Filtered Pokemon', filteredPokemon);
+
+    filteredPokemon.forEach(it => {
+        it.formattedName = toCapitalizedSeparatedWords(it.species.name);
+    });
+
+    return filteredPokemon;
+}
+
+function toCapitalizedSeparatedWords(str: string): string {
+    return (str[0].toUpperCase() + str.slice(1)).replace(/-([a-zA-Z])/g, (_, followingChar) => ` ${followingChar.toUpperCase()}`);
 }
 
 function filterCoasters(coasters: Array<Rollercoaster>): Array<Rollercoaster> {
