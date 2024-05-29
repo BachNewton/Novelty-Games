@@ -15,7 +15,7 @@ export function get(
     }).catch(_ => {
         console.log('No data in Database', dataType);
 
-        return getFromNetwork(dataType, urls).then(jsons => {
+        return getFromNetwork(dataType, progressEmitter, urls).then(jsons => {
             console.log('From Network', dataType, jsons);
 
             storeInDb(dataType, jsons);

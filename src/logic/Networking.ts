@@ -1,4 +1,5 @@
 import { DataType } from "./Data";
+import { ProgressEmitter } from "./ProgressUpdater";
 
 // Alernative API: https://rcdb-api.vercel.app/api/coasters
 const ROLLERCOASTERS_URL = 'https://raw.githubusercontent.com/fabianrguez/rcdb-api/main/db/coasters.json';
@@ -7,13 +8,13 @@ const MUSIC_URL = 'https://raw.githubusercontent.com/BachNewton/PWA-Trivia/main/
 
 const POKEMON_URL = 'https://pokeapi.co/api/v2/pokemon?limit=100000';
 
-export async function get(dataType: DataType, optionalUrls?: Array<string>): Promise<any> {
+export async function get(dataType: DataType, progressEmitter: ProgressEmitter, optionalUrls?: Array<string>): Promise<any> {
     const urls = optionalUrls === undefined ? [getUrl(dataType)] : optionalUrls;
 
     console.log('Fetching data for', dataType);
     console.log('Fecthing data from', urls);
 
-    return await getFrom(urls);
+    return await getFrom(urls, progressEmitter);
 }
 
 function getUrl(dataType: DataType): string {
@@ -31,8 +32,17 @@ function getUrl(dataType: DataType): string {
     }
 }
 
-function getFrom(urls: Array<string>): Promise<Array<any>> {
-    return Promise.all(urls.map(url => fetchJson(url)));
+async function getFrom(urls: Array<string>, progressEmitter: ProgressEmitter): Promise<Array<any>> {
+    const total = urls.length;
+    let current = 0
+
+    progressEmitter.emit({ current: current, total }); // Emit initial progress
+
+    return await Promise.all(urls.map(async url => {
+        const json = await fetchJson(url);
+        progressEmitter.emit({ current: ++current, total }); // Update progress for each fetched JSON
+        return json;
+    }));
 }
 
 async function fetchJson(url: string): Promise<any> {

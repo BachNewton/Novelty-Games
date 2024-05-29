@@ -1,5 +1,5 @@
 import { DataType } from "./Data";
-import { ProgressEmitter, ProgressEvent } from "./ProgressUpdater";
+import { ProgressEmitter } from "./ProgressUpdater";
 
 const DATABASE_POSTFIX = "_Database";
 const OBJECT_STORE_POSTFIX = "_ObjectStore";
@@ -38,7 +38,7 @@ export function get(
 
                 const jsons = new Array<any>;
                 let index = 0;
-                progressEmitter.emit({ current: index, total: count } as ProgressEvent)
+                progressEmitter.emit({ current: index, total: count })
 
                 const cursorRequest = objectStore.openCursor();
                 cursorRequest.onsuccess = (event: Event) => {
@@ -46,7 +46,7 @@ export function get(
                     if (cursor !== null) {
                         jsons.push(cursor.value);
                         index++;
-                        progressEmitter.emit({ current: index, total: count } as ProgressEvent)
+                        progressEmitter.emit({ current: index, total: count })
                         cursor.continue();
                     } else {
                         resolve(jsons);
