@@ -1,12 +1,17 @@
 import { DataType, Rollercoaster, Data, Song, PokemonAll, Pokemon } from "./Data";
 import { get as getFromDb, store as storeInDb } from "./Database";
 import { get as getFromNetwork } from "./Networking";
+import { ProgressEmitter } from "./ProgressUpdater";
 
-export function get(dataType: DataType, urls?: Array<string>): Promise<Array<Data>> {
-    return getFromDb(dataType).then(jsons => {
+export function get(
+    dataType: DataType,
+    progressEmitter: ProgressEmitter,
+    urls?: Array<string>
+): Promise<Array<Data>> {
+    return getFromDb(dataType, progressEmitter).then(jsons => {
         console.log('Found in Database', dataType, jsons);
 
-        return handleJsons(dataType, jsons);
+        return handleJsons(dataType, jsons, progressEmitter);
     }).catch(_ => {
         console.log('No data in Database', dataType);
 
@@ -15,19 +20,19 @@ export function get(dataType: DataType, urls?: Array<string>): Promise<Array<Dat
 
             storeInDb(dataType, jsons);
 
-            return handleJsons(dataType, jsons);
+            return handleJsons(dataType, jsons, progressEmitter);
         });
     });
 }
 
-async function handleJsons(dataType: DataType, jsons: Array<any>): Promise<Array<Data>> {
+async function handleJsons(dataType: DataType, jsons: Array<any>, progressEmitter: ProgressEmitter): Promise<Array<Data>> {
     switch (dataType) {
         case DataType.ROLLERCOASTERS:
             return handleRollercoastersJson(jsons[0]);
         case DataType.MUSIC:
             return handleSongsJson(jsons[0]);
         case DataType.POKEMON_ALL:
-            return await handlePokemonAllJson(jsons[0]);
+            return await handlePokemonAllJson(jsons[0], progressEmitter);
         case DataType.POKEMON:
             return handlePokemonJsons(jsons);
         default:
@@ -74,11 +79,11 @@ function getSongImageUrl(songId: string): string {
     return 'https://cdn.rb4.app/art/' + songId + '.png';
 }
 
-async function handlePokemonAllJson(json: any): Promise<Array<Pokemon>> {
+async function handlePokemonAllJson(json: any, progressEmitter: ProgressEmitter): Promise<Array<Pokemon>> {
     const pokemonAll = json as PokemonAll;
 
     const urls = pokemonAll.results.map(pokemonEntry => pokemonEntry.url);
-    return await get(DataType.POKEMON, urls) as Array<Pokemon>;
+    return await get(DataType.POKEMON, progressEmitter, urls) as Array<Pokemon>;
 }
 
 function handlePokemonJsons(jsons: Array<any>): Array<Pokemon> {

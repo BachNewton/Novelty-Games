@@ -1,13 +1,15 @@
 import '../css/Game.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Data, DataType, Question } from '../logic/Data';
 import createQuestions from '../logic/QuestionCreator';
 import AsyncImage from './AsyncImage';
+import { ProgressListener, ProgressEvent } from '../logic/ProgressUpdater';
 
 interface GameProps {
   pendingData: Promise<Array<Data>>;
   dataType: DataType;
   onHomeClicked: () => void;
+  progressListener: ProgressListener;
 }
 
 interface GameState {
@@ -23,6 +25,7 @@ interface GameState {
   isNewHighScore: boolean;
   disableImages: boolean;
   usedImages: boolean;
+  progressEvent: ProgressEvent;
 }
 
 enum UiState {
@@ -39,14 +42,19 @@ const HIGH_SCORE_KEY_POSTFIX = '_HIGH_SCORE_KEY';
 const HIGH_SCORE_HARDCORE_KEY_POSTFIX = HIGH_SCORE_KEY_POSTFIX + '_HARDCORE';
 const DISABLE_IMAGES_KEY = 'DISABLE_IMAGES_KEY';
 
-const Game: React.FC<GameProps> = ({ pendingData, dataType, onHomeClicked }) => {
+const Game: React.FC<GameProps> = ({ pendingData, dataType, onHomeClicked, progressListener }) => {
   const [gameState, setGameState] = useState({ uiState: UiState.LOADING } as GameState)
 
-  pendingData.then(readyData => {
-    if (readyData === gameState.data) return;
+  useEffect(() => {
+    progressListener.setListener(event => {
+      gameState.progressEvent = event;
+      setGameState({ ...gameState });
+    });
+  }, [progressListener]);
 
-    resetGame(readyData, dataType, setGameState);
-  });
+  useEffect(() => {
+    pendingData.then(readyData => resetGame(readyData, dataType, setGameState));
+  }, [pendingData]);
 
   const onEnableImagesButtonClicked = () => {
     gameState.disableImages = false;
@@ -122,7 +130,7 @@ function getHardcoreHighScoreKey(dataType: DataType): string {
 
 function Ui(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>): JSX.Element {
   if (gameState.uiState === UiState.LOADING) {
-    return LoadingUi();
+    return LoadingUi(gameState);
   } else if (gameState.uiState === UiState.GAME_OVER) {
     return GameOverUi(gameState, setGameState);
   } else {
@@ -155,8 +163,12 @@ function HighScoreUi(gameState: GameState) {
   return <p>High Score: {highScore}{highScoreHardcore}</p>;
 }
 
-function LoadingUi() {
-  return <p>Loading...</p>
+function LoadingUi(gameState: GameState) {
+  const loadingPercent = gameState.progressEvent === undefined
+    ? 0
+    : (gameState.progressEvent.current * 100 / gameState.progressEvent.total).toFixed(1);
+
+  return <p>Loading... {loadingPercent}%</p>
 }
 
 function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>) {

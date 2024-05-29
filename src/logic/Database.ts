@@ -1,10 +1,14 @@
 import { DataType } from "./Data";
+import { ProgressEmitter, ProgressEvent } from "./ProgressUpdater";
 
 const DATABASE_POSTFIX = "_Database";
 const OBJECT_STORE_POSTFIX = "_ObjectStore";
 const KEY_PATH_POSTFIX = "_json";
 
-export function get(dataType: DataType): Promise<Array<any>> {
+export function get(
+    dataType: DataType,
+    progressEmitter: ProgressEmitter
+): Promise<Array<any>> {
     return new Promise((resolve, reject) => {
         const databaseName = getDatabaseName(dataType);
         const objectStoreName = getObjectStoreName(dataType);
@@ -23,16 +27,32 @@ export function get(dataType: DataType): Promise<Array<any>> {
             const db = request.result;
             const transaction = db.transaction(objectStoreName, "readwrite");
             const objectStore = transaction.objectStore(objectStoreName);
-            const getAllRequest = objectStore.getAll();
-            getAllRequest.onsuccess = event => {
-                const request = event.target as IDBRequest;
-                const jsons = request.result;
-                if (jsons === undefined || jsons.length === 0) {
+
+            objectStore.count().onsuccess = event => {
+                const count = (event.target as IDBRequest).result as number;
+
+                if (count === 0) {
                     reject();
-                } else {
-                    resolve(jsons);
+                    return;
                 }
-            }
+
+                const jsons = new Array<any>;
+                let index = 0;
+                progressEmitter.emit({ current: index, total: count } as ProgressEvent)
+
+                const cursorRequest = objectStore.openCursor();
+                cursorRequest.onsuccess = (event: Event) => {
+                    const cursor = (event.target as IDBRequest).result as IDBCursorWithValue;
+                    if (cursor !== null) {
+                        jsons.push(cursor.value);
+                        index++;
+                        progressEmitter.emit({ current: index, total: count } as ProgressEvent)
+                        cursor.continue();
+                    } else {
+                        resolve(jsons);
+                    }
+                };
+            };
         };
 
         request.onerror = _ => {

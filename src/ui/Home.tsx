@@ -3,8 +3,9 @@ import '../css/Home.css';
 import Game from './Game';
 import { DataType, Data } from '../logic/Data';
 import { get as getFromRepo } from '../logic/Repository';
+import { ProgressUpdater } from '../logic/ProgressUpdater';
 
-const APP_VERSION = 'v3.0.0';
+const APP_VERSION = 'v3.1.0';
 
 interface State {
     ui: UiState,
@@ -17,18 +18,20 @@ enum UiState {
     GAME
 }
 
+const progressUpdater = new ProgressUpdater();
+
 const Home: React.FC = () => {
     const [state, setState] = useState({ ui: UiState.HOME } as State);
 
     const onRollercoastersClick = () => {
-        state.data = getFromRepo(DataType.ROLLERCOASTERS);
+        state.data = getFromRepo(DataType.ROLLERCOASTERS, progressUpdater);
         state.dataType = DataType.ROLLERCOASTERS;
         state.ui = UiState.GAME;
         setState({ ...state });
     };
 
     const onMusicClick = () => {
-        state.data = getFromRepo(DataType.MUSIC);
+        state.data = getFromRepo(DataType.MUSIC, progressUpdater);
         state.dataType = DataType.MUSIC;
         state.ui = UiState.GAME;
         setState({ ...state });
@@ -39,7 +42,7 @@ const Home: React.FC = () => {
     };
 
     const onPokemonClick = () => {
-        state.data = getFromRepo(DataType.POKEMON_ALL);
+        state.data = getFromRepo(DataType.POKEMON_ALL, progressUpdater);
         state.dataType = DataType.POKEMON;
         state.ui = UiState.GAME;
         setState({ ...state });
@@ -64,7 +67,12 @@ const Home: React.FC = () => {
             </div>
         );
     } else {
-        return <Game pendingData={state.data} dataType={state.dataType} onHomeClicked={onHomeClicked} />;
+        return <Game
+            pendingData={state.data}
+            dataType={state.dataType}
+            onHomeClicked={onHomeClicked}
+            progressListener={progressUpdater}
+        />;
     }
 };
 
