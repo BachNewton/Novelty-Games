@@ -16,21 +16,16 @@ export function get(
         const request = indexedDB.open(databaseName);
 
         request.onupgradeneeded = (event) => {
-            console.log('Creating the Database', databaseName);
-            console.log('Creating ObjectStore', objectStoreName);
-            const request = event.target as IDBOpenDBRequest
-            request.result.createObjectStore(objectStoreName);
+            upgradeDatabase(databaseName, objectStoreName, event);
         };
 
         request.onsuccess = (event) => {
             const request = event.target as IDBOpenDBRequest
             const db = request.result;
-            const transaction = db.transaction(objectStoreName, "readwrite");
+            const transaction = db.transaction(objectStoreName, "readonly");
             const objectStore = transaction.objectStore(objectStoreName);
 
-            objectStore.count().onsuccess = event => {
-                const count = (event.target as IDBRequest).result as number;
-
+            getObjectStoreCount(objectStore).then(count => {
                 if (count === 0) {
                     reject();
                     return;
@@ -52,7 +47,7 @@ export function get(
                         resolve(jsons);
                     }
                 };
-            };
+            });
         };
 
         request.onerror = _ => {
@@ -77,6 +72,47 @@ export function store(dataType: DataType, jsons: Array<any>) {
             };
         });
     };
+}
+
+export function isDataStored(dataType: DataType): Promise<boolean> {
+    return new Promise((resolve, _) => {
+        const databaseName = getDatabaseName(dataType);
+        const objectStoreName = getObjectStoreName(dataType);
+
+        const request = indexedDB.open(databaseName);
+
+        request.onupgradeneeded = (event) => {
+            console.log(dataType, 'isDataStored', 'onupgradeneeded');
+            upgradeDatabase(databaseName, objectStoreName, event);
+        };
+
+        request.onsuccess = (event) => {
+            console.log(dataType, 'isDataStored', 'onsuccess');
+            const request = event.target as IDBOpenDBRequest
+            const db = request.result;
+            const transaction = db.transaction(objectStoreName, "readonly");
+            const objectStore = transaction.objectStore(objectStoreName);
+            getObjectStoreCount(objectStore).then(count => {
+                resolve(count > 0);
+            });
+        };
+    });
+}
+
+function upgradeDatabase(databaseName: string, objectStoreName: string, event: IDBVersionChangeEvent) {
+    console.log('Creating the Database', databaseName);
+    console.log('Creating ObjectStore', objectStoreName);
+    const request = event.target as IDBOpenDBRequest
+    request.result.createObjectStore(objectStoreName);
+}
+
+function getObjectStoreCount(objectStore: IDBObjectStore): Promise<number> {
+    return new Promise((resolve, _) => {
+        objectStore.count().onsuccess = event => {
+            const count = (event.target as IDBRequest).result as number;
+            resolve(count);
+        }
+    });
 }
 
 function getDatabaseName(dataType: DataType): string {
