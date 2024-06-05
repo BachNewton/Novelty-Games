@@ -1,1 +1,5 @@
 - Add a filter UI system
+- Cache images (For Flag Game and Pokemon)
+- Let AsyncImage handle a list of src which it rotates through
+- Add Pokemon cries to Pokemon game
+- Add something related to Pokemon types to Pokemon game
