@@ -82,12 +82,10 @@ export function isDataStored(dataType: DataType): Promise<boolean> {
         const request = indexedDB.open(databaseName);
 
         request.onupgradeneeded = (event) => {
-            console.log(dataType, 'isDataStored', 'onupgradeneeded');
             upgradeDatabase(databaseName, objectStoreName, event);
         };
 
         request.onsuccess = (event) => {
-            console.log(dataType, 'isDataStored', 'onsuccess');
             const request = event.target as IDBOpenDBRequest
             const db = request.result;
             const transaction = db.transaction(objectStoreName, "readonly");

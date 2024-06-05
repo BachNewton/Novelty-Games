@@ -80,7 +80,7 @@ const Home: React.FC = () => {
         ? <button className='delete-button' onClick={onDeleteMusicClick}>🗑️</button>
         : <></>;
 
-    const deletePokemonButtonUi = state.isDataStored.get(DataType.POKEMON_ALL) === true && state.isDataStored.get(DataType.POKEMON) === true
+    const deletePokemonButtonUi = state.isDataStored.get(DataType.POKEMON_ALL) === true || state.isDataStored.get(DataType.POKEMON) === true
         ? <button className='delete-button' onClick={onDeletePokemonClick}>🗑️</button>
         : <></>;
 
