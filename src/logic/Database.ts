@@ -97,6 +97,11 @@ export function isDataStored(dataType: DataType): Promise<boolean> {
     });
 }
 
+export function deleteData(dataType: DataType) {
+    const databaseName = getDatabaseName(dataType);
+    indexedDB.deleteDatabase(databaseName)
+}
+
 function upgradeDatabase(databaseName: string, objectStoreName: string, event: IDBVersionChangeEvent) {
     console.log('Creating the Database', databaseName);
     console.log('Creating ObjectStore', objectStoreName);
