@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import '../css/Home.css';
 import Game from './Game';
 import { DataType, Data } from '../logic/Data';
