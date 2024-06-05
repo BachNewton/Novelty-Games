@@ -1,4 +1,4 @@
-import { DataType, Rollercoaster, Data, Song, PokemonAll, Pokemon } from "./Data";
+import { DataType, Rollercoaster, Data, Song, PokemonAll, Pokemon, Flag } from "./Data";
 import { get as getFromDb, store as storeInDb } from "./Database";
 import { get as getFromNetwork } from "./Networking";
 import { ProgressEmitter } from "./ProgressUpdater";
@@ -31,6 +31,8 @@ async function handleJsons(dataType: DataType, jsons: Array<any>, progressEmitte
             return handleRollercoastersJson(jsons[0]);
         case DataType.MUSIC:
             return handleSongsJson(jsons[0]);
+        case DataType.FLAG_GAME:
+            return handleFlagGameJson(jsons[0]);
         case DataType.POKEMON_ALL:
             return await handlePokemonAllJson(jsons[0], progressEmitter);
         case DataType.POKEMON:
@@ -84,6 +86,14 @@ async function handlePokemonAllJson(json: any, progressEmitter: ProgressEmitter)
 
     const urls = pokemonAll.results.map(pokemonEntry => pokemonEntry.url);
     return await get(DataType.POKEMON, progressEmitter, urls) as Array<Pokemon>;
+}
+
+function handleFlagGameJson(json: any): Array<Flag> {
+    return Object.keys(json).map(id => { return { name: json[id], imageUrl: getFlagImageUrl(id) } });
+}
+
+function getFlagImageUrl(id: string): string {
+    return `https://flagcdn.com/${id}.svg`;
 }
 
 function handlePokemonJsons(jsons: Array<any>): Array<Pokemon> {

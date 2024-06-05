@@ -6,6 +6,8 @@ const ROLLERCOASTERS_URL = 'https://raw.githubusercontent.com/fabianrguez/rcdb-a
 
 const MUSIC_URL = 'https://raw.githubusercontent.com/BachNewton/PWA-Trivia/main/db/music.json';
 
+const FLAG_GAME_URL = 'https://flagcdn.com/en/codes.json';
+
 const POKEMON_URL = 'https://pokeapi.co/api/v2/pokemon?limit=100000';
 
 export async function get(dataType: DataType, progressEmitter: ProgressEmitter, optionalUrls?: Array<string>): Promise<any> {
@@ -23,6 +25,8 @@ function getUrl(dataType: DataType): string {
             return ROLLERCOASTERS_URL;
         case DataType.MUSIC:
             return MUSIC_URL;
+        case DataType.FLAG_GAME:
+            return FLAG_GAME_URL;
         case DataType.POKEMON_ALL:
             return POKEMON_URL;
         case DataType.POKEMON:

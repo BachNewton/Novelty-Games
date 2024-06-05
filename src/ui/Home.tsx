@@ -6,7 +6,7 @@ import { get as getFromRepo } from '../logic/Repository';
 import { ProgressUpdater } from '../logic/ProgressUpdater';
 import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from '../logic/Database';
 
-const APP_VERSION = 'v3.2.1';
+const APP_VERSION = 'v4.0.0';
 
 interface State {
     ui: UiState,
@@ -54,7 +54,10 @@ const Home: React.FC = () => {
     };
 
     const onFlagGameClick = () => {
-        alert('Flag Game is not ready yet. Please come back later.');
+        state.data = getFromRepo(DataType.FLAG_GAME, progressUpdater);
+        state.dataType = DataType.FLAG_GAME;
+        state.ui = UiState.GAME;
+        setState({ ...state });
     };
 
     const onPokemonClick = () => {
@@ -80,6 +83,14 @@ const Home: React.FC = () => {
         setState({ ...state });
     };
 
+    const onDeleteFlagGameClick = () => {
+        if (confirmedDelete(DataType.FLAG_GAME) === false) return;
+
+        deleteDataFromDb(DataType.FLAG_GAME);
+        state.isDataStored.set(DataType.FLAG_GAME, false);
+        setState({ ...state });
+    };
+
     const onDeletePokemonClick = () => {
         if (confirmedDelete(DataType.POKEMON) === false) return;
 
@@ -96,6 +107,10 @@ const Home: React.FC = () => {
 
     const deleteMusicButtonUi = state.isDataStored.get(DataType.MUSIC) === true
         ? <button className='delete-button' onClick={onDeleteMusicClick}>🗑️</button>
+        : <></>;
+
+    const deleteFlagGameButtonUi = state.isDataStored.get(DataType.FLAG_GAME) === true
+        ? <button className='delete-button' onClick={onDeleteFlagGameClick}>🗑️</button>
         : <></>;
 
     const deletePokemonButtonUi = state.isDataStored.get(DataType.POKEMON_ALL) === true || state.isDataStored.get(DataType.POKEMON) === true
@@ -125,6 +140,7 @@ const Home: React.FC = () => {
                 </div>
                 <div className='game-option'>
                     <button className='play-button' onClick={onFlagGameClick}>{getGameName(DataType.FLAG_GAME)}</button>
+                    {deleteFlagGameButtonUi}
                 </div>
                 <div className='game-option'>
                     <button className='play-button' onClick={onPokemonClick}>{getGameName(DataType.POKEMON)}</button>

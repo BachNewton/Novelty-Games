@@ -35,6 +35,11 @@ export interface Song extends Data {
     imageUrl: string;
 }
 
+export interface Flag extends Data {
+    name: string;
+    imageUrl: string;
+}
+
 export interface PokemonAll {
     results: Array<PokemonEntry>;
 }
