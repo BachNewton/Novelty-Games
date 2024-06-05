@@ -99,7 +99,7 @@ export function isDataStored(dataType: DataType): Promise<boolean> {
 
 export function deleteData(dataType: DataType) {
     const databaseName = getDatabaseName(dataType);
-    indexedDB.deleteDatabase(databaseName)
+    indexedDB.deleteDatabase(databaseName);
 }
 
 function upgradeDatabase(databaseName: string, objectStoreName: string, event: IDBVersionChangeEvent) {
