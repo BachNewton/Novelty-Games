@@ -6,7 +6,7 @@ import { get as getFromRepo } from '../logic/Repository';
 import { ProgressUpdater } from '../logic/ProgressUpdater';
 import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from '../logic/Database';
 
-const APP_VERSION = 'v3.2.0';
+const APP_VERSION = 'v3.2.1';
 
 interface State {
     ui: UiState,

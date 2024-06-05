@@ -22,6 +22,8 @@ export function get(
         request.onsuccess = (event) => {
             const request = event.target as IDBOpenDBRequest
             const db = request.result;
+            closeOnVersionChange(db);
+
             const transaction = db.transaction(objectStoreName, "readonly");
             const objectStore = transaction.objectStore(objectStoreName);
 
@@ -64,6 +66,8 @@ export function store(dataType: DataType, jsons: Array<any>) {
     request.onsuccess = (event) => {
         const request = event.target as IDBOpenDBRequest
         const db = request.result;
+        closeOnVersionChange(db);
+
         const transaction = db.transaction(objectStoreName, "readwrite");
         const objectStore = transaction.objectStore(objectStoreName);
         jsons.forEach((json, index) => {
@@ -88,6 +92,8 @@ export function isDataStored(dataType: DataType): Promise<boolean> {
         request.onsuccess = (event) => {
             const request = event.target as IDBOpenDBRequest
             const db = request.result;
+            closeOnVersionChange(db);
+
             const transaction = db.transaction(objectStoreName, "readonly");
             const objectStore = transaction.objectStore(objectStoreName);
             getObjectStoreCount(objectStore).then(count => {
@@ -99,7 +105,17 @@ export function isDataStored(dataType: DataType): Promise<boolean> {
 
 export function deleteData(dataType: DataType) {
     const databaseName = getDatabaseName(dataType);
-    indexedDB.deleteDatabase(databaseName);
+
+    indexedDB.deleteDatabase(databaseName).onsuccess = _ => {
+        console.log('Database deleted', databaseName);
+    };
+}
+
+function closeOnVersionChange(db: IDBDatabase) {
+    db.addEventListener('versionchange', e => {
+        console.log('Closing', db.name)
+        db.close();
+    });
 }
 
 function upgradeDatabase(databaseName: string, objectStoreName: string, event: IDBVersionChangeEvent) {
