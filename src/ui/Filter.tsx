@@ -28,7 +28,6 @@ const Filter: React.FC<FilterProps> = ({ pendingCoasters, onCancel, onConfirm })
             state.coasters = readyCoasters;
             state.countriesCoastersCount = getCountriesCoastersCount(readyCoasters);
             state.countriesCheckedMap = getCountriesCheckedMap(state.countriesCoastersCount);
-            console.log(state.countriesCheckedMap);
             state.ui = UiState.FILTER;
             setState({ ...state });
         });
@@ -60,10 +59,6 @@ function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<St
             state.countriesCheckedMap.set(country, !before);
             setState({ ...state });
         };
-
-        if (state.countriesCheckedMap.get(country) === undefined) {
-            console.log(country);
-        }
 
         return <tr key={index}>
             <td><input type="checkbox" checked={state.countriesCheckedMap.get(country)} onChange={onChange} /></td>
