@@ -6,7 +6,7 @@ import { get as getFromRepo } from '../logic/Repository';
 import { ProgressUpdater } from '../logic/ProgressUpdater';
 import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from '../logic/Database';
 import Filter from './Filter';
-import { RollercoasterFilter, filter, saveFilter } from '../logic/FilterRepo';
+import { RollercoasterFilter, deleteFilter, filter, saveFilter } from '../logic/FilterRepo';
 
 const APP_VERSION = 'v4.1.0';
 
@@ -80,6 +80,7 @@ const Home: React.FC = () => {
         if (confirmedDelete(DataType.ROLLERCOASTERS) === false) return;
 
         deleteDataFromDb(DataType.ROLLERCOASTERS);
+        deleteFilter();
         state.isDataStored.set(DataType.ROLLERCOASTERS, false);
         setState({ ...state });
     };

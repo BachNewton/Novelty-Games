@@ -45,6 +45,10 @@ export async function filter(coasters: Promise<Array<Rollercoaster>>): Promise<A
     return filteredCoasters;
 }
 
+export function deleteFilter() {
+    localStorage.removeItem(ROLLERCOASTER_FILTER_KEY);
+}
+
 function baseFilter(coasters: Array<Rollercoaster>): Array<Rollercoaster> {
     const parksCoastersCount = getParksCoastersCount(coasters);
 
