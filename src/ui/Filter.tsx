@@ -9,9 +9,10 @@ interface FilterProps {
 }
 
 interface State {
-    countriesCheckedMap: Map<string, boolean>;
     coasters: Array<Rollercoaster>;
     ui: UiState;
+    countriesCheckedMap: Map<string, boolean>;
+    countriesCoastersCount: Map<string, number>;
 }
 
 enum UiState {
@@ -25,7 +26,9 @@ const Filter: React.FC<FilterProps> = ({ pendingCoasters, onCancel, onConfirm })
     useEffect(() => {
         pendingCoasters.then(readyCoasters => {
             state.coasters = readyCoasters;
-            state.countriesCheckedMap = new Map();
+            state.countriesCoastersCount = getCountriesCoastersCount(readyCoasters);
+            state.countriesCheckedMap = getCountriesCheckedMap(state.countriesCoastersCount);
+            console.log(state.countriesCheckedMap);
             state.ui = UiState.FILTER;
             setState({ ...state });
         });
@@ -48,20 +51,22 @@ function LoadingUi() {
 }
 
 function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<State>>, onCancel: () => void, onConfirm: () => void) {
-    const countriesCoastersCount = getCountriesCheckedMap(state.coasters);
-
-    const countriesCoastersCountUi = Array.from(countriesCoastersCount).sort((a, b) => b[1] - a[1]).map((countryCoasterCount, index) => {
+    const countriesCoastersCountUi = Array.from(state.countriesCoastersCount).sort((a, b) => b[1] - a[1]).map((countryCoasterCount, index) => {
         const country = countryCoasterCount[0];
         const coastersCount = countryCoasterCount[1];
 
-        const onClick = () => {
+        const onChange = () => {
             const before = state.countriesCheckedMap.get(country) === true;
             state.countriesCheckedMap.set(country, !before);
             setState({ ...state });
         };
 
+        if (state.countriesCheckedMap.get(country) === undefined) {
+            console.log(country);
+        }
+
         return <tr key={index}>
-            <td><input type="checkbox" checked={state.countriesCheckedMap.get(country)} onClick={onClick} /></td>
+            <td><input type="checkbox" checked={state.countriesCheckedMap.get(country)} onChange={onChange} /></td>
             <td>{country}</td>
             <td>{coastersCount}</td>
         </tr>
@@ -72,17 +77,19 @@ function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<St
         <button style={{ position: 'fixed', right: '0.25em' }}>Confirm ✅</button>
         <h1>Coaster Filters</h1>
         <table style={{ textAlign: 'left' }}>
-            <tr>
-                <th></th>
-                <th>Country</th>
-                <th>Coaster Count</th>
-            </tr>
-            {countriesCoastersCountUi}
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Country</th>
+                    <th>Coaster Count</th>
+                </tr>
+            </thead>
+            <tbody>{countriesCoastersCountUi}</tbody>
         </table>
     </div>;
 }
 
-function getCountriesCheckedMap(coasters: Array<Rollercoaster>) {
+function getCountriesCoastersCount(coasters: Array<Rollercoaster>) {
     const countriesCoastersCount = new Map<string, number>();
 
     for (const coaster of coasters) {
@@ -92,6 +99,16 @@ function getCountriesCheckedMap(coasters: Array<Rollercoaster>) {
     }
 
     return countriesCoastersCount;
+}
+
+function getCountriesCheckedMap(countriesCoastersCount: Map<string, number>): Map<string, boolean> {
+    const countriesCheckedMap = new Map<string, boolean>();
+
+    for (const country of Array.from(countriesCoastersCount.keys())) {
+        countriesCheckedMap.set(country, true); // Default all filters to enabled
+    }
+
+    return countriesCheckedMap;
 }
 
 export default Filter;
