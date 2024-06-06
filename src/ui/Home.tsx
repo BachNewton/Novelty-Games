@@ -115,6 +115,13 @@ const Home: React.FC = () => {
         setState({ ...state });
     };
 
+    const onFilterCancelClicked = () => {
+        state.ui = UiState.HOME;
+        setState({ ...state });
+    };
+
+    const onFilterConfirmClicked = () => { };
+
     switch (state.ui) {
         case UiState.HOME:
             return HomeUi(
@@ -137,7 +144,11 @@ const Home: React.FC = () => {
                 progressListener={progressUpdater}
             />;
         case UiState.FILTER:
-            return <Filter pendingCoasters={state.data as Promise<Array<Rollercoaster>>} onDone={() => { }} />
+            return <Filter
+                pendingCoasters={state.data as Promise<Array<Rollercoaster>>}
+                onCancel={onFilterCancelClicked}
+                onConfirm={onFilterConfirmClicked}
+            />;
     }
 };
 

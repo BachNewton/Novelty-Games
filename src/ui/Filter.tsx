@@ -4,7 +4,8 @@ import { Rollercoaster } from "../logic/Data";
 
 interface FilterProps {
     pendingCoasters: Promise<Array<Rollercoaster>>;
-    onDone: () => void;
+    onCancel: () => void;
+    onConfirm: () => void;
 }
 
 interface State {
@@ -18,7 +19,7 @@ enum UiState {
     FILTER
 }
 
-const Filter: React.FC<FilterProps> = ({ pendingCoasters }) => {
+const Filter: React.FC<FilterProps> = ({ pendingCoasters, onCancel, onConfirm }) => {
     const [state, setState] = useState({ ui: UiState.LOADING } as State);
 
     useEffect(() => {
@@ -30,15 +31,15 @@ const Filter: React.FC<FilterProps> = ({ pendingCoasters }) => {
         });
     }, [pendingCoasters]);
 
-    return <div className="Filter">{Ui(state, setState)}</div>;
+    return <div className="Filter">{Ui(state, setState, onCancel, onConfirm)}</div>;
 };
 
-function Ui(state: State, setState: React.Dispatch<React.SetStateAction<State>>) {
+function Ui(state: State, setState: React.Dispatch<React.SetStateAction<State>>, onCancel: () => void, onConfirm: () => void) {
     switch (state.ui) {
         case UiState.LOADING:
             return LoadingUi();
         case UiState.FILTER:
-            return FilterUi(state, setState);
+            return FilterUi(state, setState, onCancel, onConfirm);
     }
 }
 
@@ -46,7 +47,7 @@ function LoadingUi() {
     return <p>Loading...</p>;
 }
 
-function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<State>>) {
+function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<State>>, onCancel: () => void, onConfirm: () => void) {
     const countriesCoastersCount = getCountriesCheckedMap(state.coasters);
 
     const countriesCoastersCountUi = Array.from(countriesCoastersCount).sort((a, b) => b[1] - a[1]).map((countryCoasterCount, index) => {
@@ -67,6 +68,8 @@ function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<St
     });
 
     return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <button style={{ position: 'fixed', left: '0.25em' }} onClick={onCancel}>Cancel ❌</button>
+        <button style={{ position: 'fixed', right: '0.25em' }}>Confirm ✅</button>
         <h1>Coaster Filters</h1>
         <table style={{ textAlign: 'left' }}>
             <tr>
