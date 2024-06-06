@@ -1,6 +1,6 @@
 import '../css/Game.css';
 import { useEffect, useState } from 'react';
-import { Data, DataType, Question, Rollercoaster } from '../logic/Data';
+import { Data, DataType, Question } from '../logic/Data';
 import createQuestions from '../logic/QuestionCreator';
 import AsyncImage from './AsyncImage';
 import { ProgressListener, ProgressEvent } from '../logic/ProgressUpdater';

@@ -33,7 +33,7 @@ export function get(
                     return;
                 }
 
-                const jsons = new Array<any>;
+                const jsons = new Array<any>();
                 let index = 0;
                 progressEmitter.emit({ current: index, total: count })
 
