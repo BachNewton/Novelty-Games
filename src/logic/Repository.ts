@@ -44,12 +44,10 @@ async function handleJsons(dataType: DataType, jsons: Array<any>, progressEmitte
 
 function handleRollercoastersJson(json: any): Array<Rollercoaster> {
     const rollercoasters = cleanData(json);
+
     console.log('All Rollercoasters', rollercoasters);
 
-    const filteredRollercoasters = filterCoasters(rollercoasters);
-    console.log('Filtered Rollercoasters', filteredRollercoasters);
-
-    return rollercoasters; // filteredRollercoasters;
+    return rollercoasters;
 }
 
 function cleanData(json: any): Array<Rollercoaster> {
@@ -112,31 +110,4 @@ function handlePokemonJsons(jsons: Array<any>): Array<Pokemon> {
 
 function toCapitalizedSeparatedWords(str: string): string {
     return (str[0].toUpperCase() + str.slice(1)).replace(/-([a-zA-Z])/g, (_, followingChar) => ` ${followingChar.toUpperCase()}`);
-}
-
-function filterCoasters(coasters: Array<Rollercoaster>): Array<Rollercoaster> {
-    const parksCoastersCount = getParksCoastersCount(coasters);
-
-    return coasters.filter(coaster => {
-        if (coaster.status.state !== 'Operating') return false;
-        if (coaster.country !== 'United States') return false;
-        if (['Junior Coaster', 'Kiddie Coaster', 'Family Coaster'].includes(coaster.model)) return false;
-        if (coaster.make === 'Wiegand') return false;
-        if (parksCoastersCount.get(coaster.park.name) === 1) return false;
-        if (coaster.park.name.includes('Pizza')) return false;
-        if (coaster.park.name.includes('Farm') && coaster.park.name !== "Knott's Berry Farm") return false;
-
-        return true;
-    })
-}
-
-function getParksCoastersCount(coasters: Array<Rollercoaster>): Map<string, number> {
-    const parksCoastersCount = new Map<string, number>();
-
-    for (const coaster of coasters) {
-        const count = parksCoastersCount.get(coaster.park.name);
-        parksCoastersCount.set(coaster.park.name, count === undefined ? 1 : count + 1);
-    }
-
-    return parksCoastersCount;
 }

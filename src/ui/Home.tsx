@@ -6,6 +6,7 @@ import { get as getFromRepo } from '../logic/Repository';
 import { ProgressUpdater } from '../logic/ProgressUpdater';
 import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from '../logic/Database';
 import Filter from './Filter';
+import { RollercoasterFilter, filter, saveFilter } from '../logic/FilterRepo';
 
 const APP_VERSION = 'v4.1.0';
 
@@ -42,7 +43,7 @@ const Home: React.FC = () => {
     }
 
     const onRollercoastersClick = () => {
-        state.data = getFromRepo(DataType.ROLLERCOASTERS, progressUpdater);
+        state.data = filter(getFromRepo(DataType.ROLLERCOASTERS, progressUpdater) as Promise<Array<Rollercoaster>>);
         state.dataType = DataType.ROLLERCOASTERS;
         state.ui = UiState.GAME;
         setState({ ...state });
@@ -120,7 +121,11 @@ const Home: React.FC = () => {
         setState({ ...state });
     };
 
-    const onFilterConfirmClicked = () => { };
+    const onFilterConfirmClicked = (rollercoasterFilter: RollercoasterFilter) => {
+        saveFilter(rollercoasterFilter);
+        state.ui = UiState.HOME;
+        setState({ ...state });
+    };
 
     switch (state.ui) {
         case UiState.HOME:
