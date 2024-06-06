@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import '../css/Home.css';
 import Game from './Game';
-import { DataType, Data } from '../logic/Data';
+import { DataType, Data, Rollercoaster } from '../logic/Data';
 import { get as getFromRepo } from '../logic/Repository';
 import { ProgressUpdater } from '../logic/ProgressUpdater';
 import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from '../logic/Database';
+import Filter from './Filter';
 
-const APP_VERSION = 'v4.0.0';
+const APP_VERSION = 'v4.1.0';
 
 interface State {
     ui: UiState,
@@ -17,7 +18,8 @@ interface State {
 
 enum UiState {
     HOME,
-    GAME
+    GAME,
+    FILTER
 }
 
 const progressUpdater = new ProgressUpdater();
@@ -67,6 +69,12 @@ const Home: React.FC = () => {
         setState({ ...state });
     };
 
+    const onFilterRollercoastersClick = () => {
+        state.data = getFromRepo(DataType.ROLLERCOASTERS, progressUpdater);
+        state.ui = UiState.FILTER;
+        setState({ ...state });
+    };
+
     const onDeleteRollercoastersClick = () => {
         if (confirmedDelete(DataType.ROLLERCOASTERS) === false) return;
 
@@ -101,62 +109,95 @@ const Home: React.FC = () => {
         setState({ ...state });
     };
 
-    const deleteRollercoastersButtonUi = state.isDataStored.get(DataType.ROLLERCOASTERS) === true
-        ? <button className='delete-button' onClick={onDeleteRollercoastersClick}>🗑️</button>
-        : <></>;
-
-    const deleteMusicButtonUi = state.isDataStored.get(DataType.MUSIC) === true
-        ? <button className='delete-button' onClick={onDeleteMusicClick}>🗑️</button>
-        : <></>;
-
-    const deleteFlagGameButtonUi = state.isDataStored.get(DataType.FLAG_GAME) === true
-        ? <button className='delete-button' onClick={onDeleteFlagGameClick}>🗑️</button>
-        : <></>;
-
-    const deletePokemonButtonUi = state.isDataStored.get(DataType.POKEMON_ALL) === true || state.isDataStored.get(DataType.POKEMON) === true
-        ? <button className='delete-button' onClick={onDeletePokemonClick}>🗑️</button>
-        : <></>;
-
     const onHomeClicked = () => {
         state.ui = UiState.HOME;
         setRefreshDataStoredNeeded(true);
         setState({ ...state });
     };
 
-    if (state.ui === UiState.HOME) {
-        return (
-            <div className='Home'>
-                <code id='version-label'>{APP_VERSION}</code>
-                <h3>🃏 Kyle's Novelty Trivia Games 🕹️</h3>
-                <div>Created by: Kyle Hutchinson</div>
-                <div><br /><br /><br /></div>
-                <div className='game-option'>
-                    <button className='play-button' onClick={onRollercoastersClick}>{getGameName(DataType.ROLLERCOASTERS)}</button>
-                    {deleteRollercoastersButtonUi}
-                </div>
-                <div className='game-option'>
-                    <button className='play-button' onClick={onMusicClick}>{getGameName(DataType.MUSIC)}</button>
-                    {deleteMusicButtonUi}
-                </div>
-                <div className='game-option'>
-                    <button className='play-button' onClick={onFlagGameClick}>{getGameName(DataType.FLAG_GAME)}</button>
-                    {deleteFlagGameButtonUi}
-                </div>
-                <div className='game-option'>
-                    <button className='play-button' onClick={onPokemonClick}>{getGameName(DataType.POKEMON)}</button>
-                    {deletePokemonButtonUi}
-                </div>
-            </div>
-        );
-    } else {
-        return <Game
-            pendingData={state.data}
-            dataType={state.dataType}
-            onHomeClicked={onHomeClicked}
-            progressListener={progressUpdater}
-        />;
+    switch (state.ui) {
+        case UiState.HOME:
+            return HomeUi(
+                state.isDataStored,
+                onRollercoastersClick,
+                onMusicClick,
+                onFlagGameClick,
+                onPokemonClick,
+                onFilterRollercoastersClick,
+                onDeleteRollercoastersClick,
+                onDeleteMusicClick,
+                onDeleteFlagGameClick,
+                onDeletePokemonClick
+            );
+        case UiState.GAME:
+            return <Game
+                pendingData={state.data}
+                dataType={state.dataType}
+                onHomeClicked={onHomeClicked}
+                progressListener={progressUpdater}
+            />;
+        case UiState.FILTER:
+            return <Filter pendingCoasters={state.data as Promise<Array<Rollercoaster>>} onDone={() => { }} />
     }
 };
+
+function HomeUi(
+    isDataStored: Map<DataType, boolean>,
+    onRollercoastersClick: () => void,
+    onMusicClick: () => void,
+    onFlagGameClick: () => void,
+    onPokemonClick: () => void,
+    onFilterRollercoastersClick: () => void,
+    onDeleteRollercoastersClick: () => void,
+    onDeleteMusicClick: () => void,
+    onDeleteFlagGameClick: () => void,
+    onDeletePokemonClick: () => void
+) {
+
+    const filterRollercoastersButtonUi = isDataStored.get(DataType.ROLLERCOASTERS) === true
+        ? <button className='option-button' onClick={onFilterRollercoastersClick}>⚙️</button>
+        : <></>;
+
+    const deleteRollercoastersButtonUi = isDataStored.get(DataType.ROLLERCOASTERS) === true
+        ? <button className='option-button' onClick={onDeleteRollercoastersClick}>🗑️</button>
+        : <></>;
+
+    const deleteMusicButtonUi = isDataStored.get(DataType.MUSIC) === true
+        ? <button className='option-button' onClick={onDeleteMusicClick}>🗑️</button>
+        : <></>;
+
+    const deleteFlagGameButtonUi = isDataStored.get(DataType.FLAG_GAME) === true
+        ? <button className='option-button' onClick={onDeleteFlagGameClick}>🗑️</button>
+        : <></>;
+
+    const deletePokemonButtonUi = isDataStored.get(DataType.POKEMON_ALL) === true || isDataStored.get(DataType.POKEMON) === true
+        ? <button className='option-button' onClick={onDeletePokemonClick}>🗑️</button>
+        : <></>;
+
+    return <div className='Home'>
+        <code id='version-label'>{APP_VERSION}</code>
+        <h3>🃏 Kyle's Novelty Trivia Games 🕹️</h3>
+        <div>Created by: Kyle Hutchinson</div>
+        <div><br /><br /><br /></div>
+        <div className='game-option'>
+            <button className='play-button' onClick={onRollercoastersClick}>{getGameName(DataType.ROLLERCOASTERS)}</button>
+            {filterRollercoastersButtonUi}
+            {deleteRollercoastersButtonUi}
+        </div>
+        <div className='game-option'>
+            <button className='play-button' onClick={onMusicClick}>{getGameName(DataType.MUSIC)}</button>
+            {deleteMusicButtonUi}
+        </div>
+        <div className='game-option'>
+            <button className='play-button' onClick={onFlagGameClick}>{getGameName(DataType.FLAG_GAME)}</button>
+            {deleteFlagGameButtonUi}
+        </div>
+        <div className='game-option'>
+            <button className='play-button' onClick={onPokemonClick}>{getGameName(DataType.POKEMON)}</button>
+            {deletePokemonButtonUi}
+        </div>
+    </div>;
+}
 
 function confirmedDelete(dataType: DataType): boolean {
     const gameName = getGameName(dataType);

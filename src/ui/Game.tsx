@@ -4,7 +4,6 @@ import { Data, DataType, Question, Rollercoaster } from '../logic/Data';
 import createQuestions from '../logic/QuestionCreator';
 import AsyncImage from './AsyncImage';
 import { ProgressListener, ProgressEvent } from '../logic/ProgressUpdater';
-import Filter from './Filter';
 
 interface GameProps {
   pendingData: Promise<Array<Data>>;
@@ -34,8 +33,7 @@ enum UiState {
   SHOW_QUESTION,
   SHOW_ANSWER_CORRECT,
   SHOW_ANSWER_INCORRECT,
-  GAME_OVER,
-  FILTER
+  GAME_OVER
 }
 
 const POST_QUESTION_DELAY = 1000;
@@ -70,24 +68,11 @@ const Game: React.FC<GameProps> = ({ pendingData, dataType, onHomeClicked, progr
     ? <button onClick={onEnableImagesButtonClicked}>🖼️</button>
     : <></>;
 
-  const onSettingsButtonClicked = () => {
-    alert('Settings are not ready yet. Please come back later.');
-    // gameState.uiState = UiState.FILTER;
-    // setGameState({ ...gameState });
-  };
-
-  const settingsButton = gameState.dataType === DataType.ROLLERCOASTERS
-    ? <button onClick={onSettingsButtonClicked}>⚙️</button>
-    : <></>;
-
   return (
     <div className="Game">
       <div className='top-left'>
         <button onClick={onHomeClicked}>🏠</button>
         {enableImagesButton}
-      </div>
-      <div className='top-right'>
-        {settingsButton}
       </div>
       <header>
         {Ui(gameState, setGameState)}
@@ -138,8 +123,6 @@ function Ui(gameState: GameState, setGameState: React.Dispatch<React.SetStateAct
       return LoadingUi(gameState);
     case UiState.GAME_OVER:
       return GameOverUi(gameState, setGameState);
-    case UiState.FILTER:
-      return <Filter coasters={gameState.data as Array<Rollercoaster>} />;
     default:
       return QuestionUi(gameState, setGameState);
   }
@@ -175,7 +158,7 @@ function LoadingUi(gameState: GameState) {
     ? 0
     : (gameState.progressEvent.current * 100 / gameState.progressEvent.total).toFixed(1);
 
-  return <p>Loading... {loadingPercent}%</p>
+  return <p>Loading... {loadingPercent}%</p>;
 }
 
 function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>) {
