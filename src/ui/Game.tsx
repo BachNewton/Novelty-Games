@@ -1,9 +1,10 @@
 import '../css/Game.css';
 import { useEffect, useState } from 'react';
-import { Data, DataType, Question } from '../logic/Data';
+import { Data, DataType, Question, Rollercoaster } from '../logic/Data';
 import createQuestions from '../logic/QuestionCreator';
 import AsyncImage from './AsyncImage';
 import { ProgressListener, ProgressEvent } from '../logic/ProgressUpdater';
+import Filter from './Filter';
 
 interface GameProps {
   pendingData: Promise<Array<Data>>;
@@ -33,7 +34,8 @@ enum UiState {
   SHOW_QUESTION,
   SHOW_ANSWER_CORRECT,
   SHOW_ANSWER_INCORRECT,
-  GAME_OVER
+  GAME_OVER,
+  FILTER
 }
 
 const POST_QUESTION_DELAY = 1000;
@@ -70,6 +72,8 @@ const Game: React.FC<GameProps> = ({ pendingData, dataType, onHomeClicked, progr
 
   const onSettingsButtonClicked = () => {
     alert('Settings are not ready yet. Please come back later.');
+    // gameState.uiState = UiState.FILTER;
+    // setGameState({ ...gameState });
   };
 
   const settingsButton = gameState.dataType === DataType.ROLLERCOASTERS
@@ -129,12 +133,15 @@ function getHardcoreHighScoreKey(dataType: DataType): string {
 }
 
 function Ui(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>): JSX.Element {
-  if (gameState.uiState === UiState.LOADING) {
-    return LoadingUi(gameState);
-  } else if (gameState.uiState === UiState.GAME_OVER) {
-    return GameOverUi(gameState, setGameState);
-  } else {
-    return QuestionUi(gameState, setGameState);
+  switch (gameState.uiState) {
+    case UiState.LOADING:
+      return LoadingUi(gameState);
+    case UiState.GAME_OVER:
+      return GameOverUi(gameState, setGameState);
+    case UiState.FILTER:
+      return <Filter coasters={gameState.data as Array<Rollercoaster>} />;
+    default:
+      return QuestionUi(gameState, setGameState);
   }
 }
 

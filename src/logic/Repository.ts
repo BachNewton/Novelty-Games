@@ -49,7 +49,7 @@ function handleRollercoastersJson(json: any): Array<Rollercoaster> {
     const filteredRollercoasters = filterCoasters(rollercoasters);
     console.log('Filtered Rollercoasters', filteredRollercoasters);
 
-    return filteredRollercoasters;
+    return rollercoasters; // filteredRollercoasters;
 }
 
 function cleanData(json: any): Array<Rollercoaster> {
