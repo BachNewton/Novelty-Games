@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/PWA-Trivia/static/css/main.6aceaab7.css",
-    "main.js": "/PWA-Trivia/static/js/main.6ba8c479.js",
+    "main.js": "/PWA-Trivia/static/js/main.28587d1d.js",
     "static/js/453.ed3810f9.chunk.js": "/PWA-Trivia/static/js/453.ed3810f9.chunk.js",
     "service-worker.js": "/PWA-Trivia/service-worker.js",
     "index.html": "/PWA-Trivia/index.html",
     "main.6aceaab7.css.map": "/PWA-Trivia/static/css/main.6aceaab7.css.map",
-    "main.6ba8c479.js.map": "/PWA-Trivia/static/js/main.6ba8c479.js.map",
+    "main.28587d1d.js.map": "/PWA-Trivia/static/js/main.28587d1d.js.map",
     "453.ed3810f9.chunk.js.map": "/PWA-Trivia/static/js/453.ed3810f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.6aceaab7.css",
-    "static/js/main.6ba8c479.js"
+    "static/js/main.28587d1d.js"
   ]
 }
