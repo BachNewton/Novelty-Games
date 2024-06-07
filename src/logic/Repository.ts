@@ -61,6 +61,8 @@ function cleanData(json: any): Array<Rollercoaster> {
         coaster.status.date.opened = opendYear === '' ? 'Unknown' : opendYear;
 
         coaster.make = coaster.make === '' ? 'Unknown' : coaster.make;
+
+        coaster.country = coaster.country === '' ? 'Unknown' : coaster.country;
     });
 
     return rollercoasters;

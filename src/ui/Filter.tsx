@@ -92,9 +92,8 @@ function getCountriesCoastersCount(coasters: Array<Rollercoaster>) {
     const countriesCoastersCount = new Map<string, number>();
 
     for (const coaster of coasters) {
-        const country = coaster.country === '' ? 'Unknown' : coaster.country;
-        const count = countriesCoastersCount.get(country);
-        countriesCoastersCount.set(country, count === undefined ? 1 : count + 1);
+        const count = countriesCoastersCount.get(coaster.country);
+        countriesCoastersCount.set(coaster.country, count === undefined ? 1 : count + 1);
     }
 
     return countriesCoastersCount;
