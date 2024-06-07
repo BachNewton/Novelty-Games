@@ -8,7 +8,7 @@ import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from
 import Filter from './Filter';
 import { RollercoasterFilter, deleteFilter, filter, saveFilter } from '../logic/FilterRepo';
 
-const APP_VERSION = 'v4.2.0';
+const APP_VERSION = 'v4.2.2';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -47,11 +47,13 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
             state.versionState = VersionState.OUTDATED;
             setState({ ...state });
         };
+
         updateListener.onNoUpdateFound = () => {
             console.log('No update of the app has been found');
             state.versionState = VersionState.CURRENT;
             setState({ ...state });
         };
+
         if (!navigator.onLine) {
             console.log('App if offline and can not check for updates');
             state.versionState = VersionState.UNKNOWN;
@@ -251,13 +253,13 @@ function HomeUi(
 function VersionStateUi(versionState: VersionState) {
     switch (versionState) {
         case VersionState.CHECKING:
-            return <>☁️ Checking Version...</>;
+            return <>☁️ Checking for updates...</>;
         case VersionState.CURRENT:
             return <>✔️ Up-to-date</>;
         case VersionState.OUTDATED:
             return <button onClick={() => { window.location.reload() }}>🔄 Update App</button>;
         case VersionState.UNKNOWN:
-            return <>❌ Unknown Version</>;
+            return <>✖️ Offline</>;
     }
 }
 

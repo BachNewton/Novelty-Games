@@ -64,6 +64,8 @@ function registerValidSW(swUrl: string, config?: Config) {
     .then((registration) => {
       const updateFoundWaitTime = 5000; // 5 seconds
       const updateFoundTimeout = setTimeout(() => {
+        if (!navigator.onLine) return; // If not online, skip all this
+
         console.log(`No update found after ${updateFoundWaitTime / 1000} seconds of waiting`);
         if (config && config.onNoUpdateFound) {
           config.onNoUpdateFound();
