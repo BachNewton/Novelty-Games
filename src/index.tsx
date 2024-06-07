@@ -9,9 +9,11 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
+const updateListener = { onUpdate: () => { } };
+
 root.render(
   <React.StrictMode>
-    <Home />
+    <Home updateListener={updateListener} />
   </React.StrictMode>
 );
 
@@ -19,14 +21,16 @@ root.render(
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://cra.link/PWA
 serviceWorkerRegistration.register({
-  onUpdate: (e) => {
-    const { waiting: { postMessage = null } = {} as any, update } = e || {};
-    if (postMessage) {
-      postMessage({ type: 'SKIP_WAITING' });
-    }
-    update().then(() => {
-      window.location.reload();
-    });
+  onUpdate: (registration) => {
+    console.log('register', 'onUpdate');
+
+    registration.waiting?.postMessage({ type: "SKIP_WAITING" });
+    console.log('registration', registration);
+    updateListener.onUpdate();
+  },
+  onSuccess(registration) {
+    console.log('register', 'onSuccess');
+    console.log('registration', registration);
   },
 });
 

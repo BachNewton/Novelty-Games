@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import '../css/Home.css';
 import Game from './Game';
 import { DataType, Data, Rollercoaster } from '../logic/Data';
@@ -8,7 +8,11 @@ import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from
 import Filter from './Filter';
 import { RollercoasterFilter, deleteFilter, filter, saveFilter } from '../logic/FilterRepo';
 
-const APP_VERSION = 'A';
+const APP_VERSION = 'J';
+
+interface HomeProps {
+    updateListener: { onUpdate: () => void };
+}
 
 interface State {
     ui: UiState;
@@ -33,9 +37,18 @@ enum VersionState {
 
 const progressUpdater = new ProgressUpdater();
 
-const Home: React.FC = () => {
+const Home: React.FC<HomeProps> = ({ updateListener }) => {
     const [state, setState] = useState({ ui: UiState.HOME, isDataStored: new Map(), versionState: VersionState.CHECKING } as State);
     const [refreshDataStoredNeeded, setRefreshDataStoredNeeded] = useState(true);
+
+    useEffect(() => {
+        updateListener.onUpdate = () => {
+            console.log('UI needs an update');
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
+        };
+    }, []);
 
     if (refreshDataStoredNeeded) {
         for (const dataTypeName in DataType) {
