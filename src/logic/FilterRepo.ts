@@ -49,7 +49,7 @@ export function deleteFilter() {
     localStorage.removeItem(ROLLERCOASTER_FILTER_KEY);
 }
 
-function baseFilter(coasters: Array<Rollercoaster>): Array<Rollercoaster> {
+export function baseFilter(coasters: Array<Rollercoaster>): Array<Rollercoaster> {
     const parksCoastersCount = getParksCoastersCount(coasters);
 
     return coasters.filter(coaster => {

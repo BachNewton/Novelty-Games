@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import '../css/Filter.css';
 import { Rollercoaster } from "../logic/Data";
-import { RollercoasterFilter, loadFilter, saveFilter } from "../logic/FilterRepo";
+import { RollercoasterFilter, baseFilter, loadFilter, saveFilter } from "../logic/FilterRepo";
 
 interface FilterProps {
     pendingCoasters: Promise<Array<Rollercoaster>>;
@@ -26,8 +26,10 @@ const Filter: React.FC<FilterProps> = ({ pendingCoasters, onCancel, onConfirm })
 
     useEffect(() => {
         pendingCoasters.then(readyCoasters => {
-            state.coasters = readyCoasters;
-            state.countriesCoastersCount = getCountriesCoastersCount(readyCoasters);
+            const coasters = baseFilter(readyCoasters);
+
+            state.coasters = coasters;
+            state.countriesCoastersCount = getCountriesCoastersCount(coasters);
 
             const filter = loadFilter();
             state.rollercoasterFilter = filter === null ? getAndSaveDefaultFilter(state.countriesCoastersCount) : filter;
@@ -75,6 +77,17 @@ function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<St
         <button style={{ position: 'fixed', left: '0.25em' }} onClick={onCancel}>❌ Cancel</button>
         <button style={{ position: 'fixed', right: '0.25em' }} onClick={onConfirm}>Confirm ✅</button>
         <h1>Coaster Filters</h1>
+        <div className="bottom-border">
+            <h3>Default filter already applied</h3>
+            <ul>
+                <li>Only operating coasters</li>
+                <li>Exclude 'Junior Coaster', 'Kiddie Coaster', and 'Family Coaster' coaster models</li>
+                <li>Exclude Wiegand coaster maker</li>
+                <li>Exclude all parks with 1 coaster or less</li>
+                <li>Exclude all parks with 'Pizza' in the name</li>
+                <li>Exclude all parks with 'Farm' in the name, except "Knott's Berry Farm"</li>
+            </ul>
+        </div>
         <table style={{ textAlign: 'left' }}>
             <thead>
                 <tr>
