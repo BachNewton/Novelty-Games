@@ -8,7 +8,7 @@ import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from
 import Filter from './Filter';
 import { RollercoasterFilter, deleteFilter, filter, saveFilter } from '../logic/FilterRepo';
 
-const APP_VERSION = 'v4.3.1';
+const APP_VERSION = 'v4.3.5';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -58,7 +58,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
             console.log('App if offline and can not check for updates');
             state.versionState = VersionState.UNKNOWN;
         }
-    }, []);
+    }, [state]);
 
     if (refreshDataStoredNeeded) {
         for (const dataTypeName in DataType) {
