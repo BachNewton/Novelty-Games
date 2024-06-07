@@ -51,7 +51,8 @@ const Filter: React.FC<FilterProps> = ({ pendingCoasters, onCancel, onConfirm })
             state.rollercoasterFilter = filter === null
                 ? getAndSaveDefaultFilter(
                     getCountriesCheckedMap(getCountriesCoastersCount(state.allCoasters, state.filteredCoasters)),
-                    getModelsCheckedMap(getModelsCoastersCount(state.allCoasters, state.filteredCoasters))
+                    getModelsCheckedMap(getModelsCoastersCount(state.allCoasters, state.filteredCoasters)),
+                    getParksCheckedMap(getParksCoastersCount(state.allCoasters, state.filteredCoasters))
                 )
                 : filter;
 
@@ -82,7 +83,8 @@ function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<St
 
     const filterSections: Array<FilterSection> = [
         { name: 'Model', getFilter: filter => filter.models, getProperty: coaster => coaster.model },
-        { name: 'Country', getFilter: filter => filter.countries, getProperty: coaster => coaster.country }
+        { name: 'Country', getFilter: filter => filter.countries, getProperty: coaster => coaster.country },
+        { name: 'Park', getFilter: filter => filter.parks, getProperty: coaster => coaster.park.name }
     ];
 
     const filterSectionsUi: Array<FilterSectionUi> = filterSections.map(filterSection => {
@@ -139,9 +141,6 @@ function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<St
             <ul>
                 <li>Only operating coasters</li>
                 <li>Exclude Wiegand coaster maker</li>
-                <li>Exclude all parks with 1 coaster or less</li>
-                <li>Exclude all parks with 'Pizza' in the name</li>
-                <li>Exclude all parks with 'Farm' in the name, except "Knott's Berry Farm"</li>
             </ul>
         </div>
         {filterSectionTables}
@@ -154,6 +153,10 @@ function getCountriesCoastersCount(allCoasters: Array<Rollercoaster>, filteredCo
 
 function getModelsCoastersCount(allCoasters: Array<Rollercoaster>, filteredCoasters: Array<Rollercoaster>) {
     return getCoasterCountBasedOnProperty(allCoasters, filteredCoasters, coaster => coaster.model);
+}
+
+function getParksCoastersCount(allCoasters: Array<Rollercoaster>, filteredCoasters: Array<Rollercoaster>) {
+    return getCoasterCountBasedOnProperty(allCoasters, filteredCoasters, coaster => coaster.park.name);
 }
 
 function getCoasterCountBasedOnProperty(
@@ -178,12 +181,23 @@ function getCoasterCountBasedOnProperty(
     return coastersCount;
 }
 
-function getAndSaveDefaultFilter(countriesCheckedMap: Map<string, boolean>, modelsCheckedMap: Map<string, boolean>): RollercoasterFilter {
-    const rollercoasterFilter = { countries: countriesCheckedMap, models: modelsCheckedMap } as RollercoasterFilter;
+function getAndSaveDefaultFilter(
+    countriesCheckedMap: Map<string, boolean>,
+    modelsCheckedMap: Map<string, boolean>,
+    parksCheckedMap: Map<string, boolean>
+): RollercoasterFilter {
+    const rollercoasterFilter: RollercoasterFilter = { countries: countriesCheckedMap, models: modelsCheckedMap, parks: parksCheckedMap };
 
     saveFilter(rollercoasterFilter);
 
     return rollercoasterFilter;
+}
+
+function temp(
+    countriesCheckedMap: Map<string, boolean>,
+    modelsCheckedMap: Map<string, boolean>,
+): RollercoasterFilter {
+    return { countries: countriesCheckedMap, models: modelsCheckedMap, parks: new Map() };
 }
 
 function getCountriesCheckedMap(countriesCoastersCount: Map<string, FilterResult>): Map<string, boolean> {
@@ -204,6 +218,19 @@ function getModelsCheckedMap(modelsCoastersCount: Map<string, FilterResult>): Ma
     }
 
     return modelsCheckedMap;
+}
+
+function getParksCheckedMap(parksCoastersCount: Map<string, FilterResult>): Map<string, boolean> {
+    const parksCheckedMap = new Map<string, boolean>();
+
+    for (const park of Array.from(parksCoastersCount.keys())) {
+        const hasPizzaInName = park.includes('Pizza');
+        const hasFarmInName = park.includes('Farm') && park !== "Knott's Berry Farm";
+        const includePark = !hasPizzaInName && !hasFarmInName;
+        parksCheckedMap.set(park, includePark);
+    }
+
+    return parksCheckedMap;
 }
 
 export default Filter;

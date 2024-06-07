@@ -5,11 +5,13 @@ const ROLLERCOASTER_FILTER_KEY = 'ROLLERCOASTER_FILTER_KEY';
 export interface RollercoasterFilter {
     countries: Map<string, boolean>;
     models: Map<string, boolean>;
+    parks: Map<string, boolean>;
 }
 
 interface RollercoasterFilterJson {
     countries: [string, boolean][];
     models: [string, boolean][];
+    parks: [string, boolean][];
 }
 
 export interface FilterAndPropertyGetter {
@@ -18,10 +20,11 @@ export interface FilterAndPropertyGetter {
 }
 
 export function saveFilter(rollercoasterFilter: RollercoasterFilter) {
-    const rollercoasterFilterJson = {
+    const rollercoasterFilterJson: RollercoasterFilterJson = {
         countries: Array.from(rollercoasterFilter.countries.entries()),
-        models: Array.from(rollercoasterFilter.models.entries())
-    } as RollercoasterFilterJson;
+        models: Array.from(rollercoasterFilter.models.entries()),
+        parks: Array.from(rollercoasterFilter.parks.entries())
+    };
 
     localStorage.setItem(ROLLERCOASTER_FILTER_KEY, JSON.stringify(rollercoasterFilterJson));
 }
@@ -34,7 +37,8 @@ export function loadFilter(): RollercoasterFilter | null {
 
         return {
             countries: new Map(rollercoasterFilterJson.countries),
-            models: new Map(rollercoasterFilterJson.models)
+            models: new Map(rollercoasterFilterJson.models),
+            parks: new Map(rollercoasterFilterJson.parks)
         };
     } else {
         return null;
@@ -71,7 +75,8 @@ export function filterByProperties(
 function filterAll(filter: RollercoasterFilter, coasters: Array<Rollercoaster>): Array<Rollercoaster> {
     return filterByProperties(coasters, [
         { filter: filter.countries, getProperty: coaster => coaster.country },
-        { filter: filter.models, getProperty: coaster => coaster.model }
+        { filter: filter.models, getProperty: coaster => coaster.model },
+        { filter: filter.parks, getProperty: coaster => coaster.park.name }
     ]);
 }
 
@@ -92,26 +97,10 @@ export function deleteFilter() {
 }
 
 export function baseFilter(coasters: Array<Rollercoaster>): Array<Rollercoaster> {
-    const parksCoastersCount = getParksCoastersCount(coasters);
-
     return coasters.filter(coaster => {
         if (coaster.status.state !== 'Operating') return false;
         if (coaster.make === 'Wiegand') return false;
-        if (parksCoastersCount.get(coaster.park.name) === 1) return false;
-        if (coaster.park.name.includes('Pizza')) return false;
-        if (coaster.park.name.includes('Farm') && coaster.park.name !== "Knott's Berry Farm") return false;
 
         return true;
     })
-}
-
-function getParksCoastersCount(coasters: Array<Rollercoaster>): Map<string, number> {
-    const parksCoastersCount = new Map<string, number>();
-
-    for (const coaster of coasters) {
-        const count = parksCoastersCount.get(coaster.park.name);
-        parksCoastersCount.set(coaster.park.name, count === undefined ? 1 : count + 1);
-    }
-
-    return parksCoastersCount;
 }
