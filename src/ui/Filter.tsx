@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import '../css/Filter.css';
 import { Rollercoaster } from "../logic/Data";
-import { RollercoasterFilter, baseFilter, loadFilter, saveFilter } from "../logic/FilterRepo";
+import { RollercoasterFilter, baseFilter, filter, loadFilter, saveFilter } from "../logic/FilterRepo";
 
 interface FilterProps {
     pendingCoasters: Promise<Array<Rollercoaster>>;
@@ -10,9 +10,9 @@ interface FilterProps {
 }
 
 interface State {
-    coasters: Array<Rollercoaster>;
+    allCoasters: Array<Rollercoaster>;
+    filteredCoasters: Array<Rollercoaster>;
     ui: UiState;
-    countriesCoastersCount: Map<string, number>;
     rollercoasterFilter: RollercoasterFilter;
 }
 
@@ -21,18 +21,23 @@ enum UiState {
     FILTER
 }
 
+interface FilterResult {
+    before: number;
+    after: number;
+}
+
 const Filter: React.FC<FilterProps> = ({ pendingCoasters, onCancel, onConfirm }) => {
     const [state, setState] = useState({ ui: UiState.LOADING } as State);
 
     useEffect(() => {
         pendingCoasters.then(readyCoasters => {
-            const coasters = baseFilter(readyCoasters);
-
-            state.coasters = coasters;
-            state.countriesCoastersCount = getCountriesCoastersCount(coasters);
+            state.allCoasters = readyCoasters;
+            state.filteredCoasters = baseFilter(readyCoasters);
+            console.log('Base filtered coasters', state.filteredCoasters);
 
             const filter = loadFilter();
-            state.rollercoasterFilter = filter === null ? getAndSaveDefaultFilter(state.countriesCoastersCount) : filter;
+            const countriesCheckedMap = getCountriesCheckedMap(getCountriesCoastersCount(state.allCoasters, state.filteredCoasters));
+            state.rollercoasterFilter = filter === null ? getAndSaveDefaultFilter(countriesCheckedMap) : filter;
 
             state.ui = UiState.FILTER;
             setState({ ...state });
@@ -56,9 +61,9 @@ function LoadingUi() {
 }
 
 function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<State>>, onCancel: () => void, onConfirm: () => void) {
-    const countriesCoastersCountUi = Array.from(state.countriesCoastersCount).sort((a, b) => b[1] - a[1]).map((countryCoasterCount, index) => {
+    const countriesCoastersCountUi = Array.from(getCountriesCoastersCount(state.allCoasters, state.filteredCoasters)).sort((a, b) => b[1].after - a[1].after).map((countryCoasterCount, index) => {
         const country = countryCoasterCount[0];
-        const coastersCount = countryCoasterCount[1];
+        const filerResult = countryCoasterCount[1];
 
         const onChange = () => {
             const before = state.rollercoasterFilter.countries.get(country) === true;
@@ -69,7 +74,7 @@ function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<St
         return <tr key={index}>
             <td><input type="checkbox" checked={state.rollercoasterFilter.countries.get(country)} onChange={onChange} /></td>
             <td>{country}</td>
-            <td>{coastersCount}</td>
+            <td>{filerResult.after} <span className="before-filter">{filerResult.before}</span></td>
         </tr>
     });
 
@@ -101,26 +106,31 @@ function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<St
     </div>;
 }
 
-function getCountriesCoastersCount(coasters: Array<Rollercoaster>) {
-    const countriesCoastersCount = new Map<string, number>();
+function getCountriesCoastersCount(allCoasters: Array<Rollercoaster>, filteredCoasters: Array<Rollercoaster>) {
+    const countriesCoastersCount = new Map<string, FilterResult>();
 
-    for (const coaster of coasters) {
-        const count = countriesCoastersCount.get(coaster.country);
-        countriesCoastersCount.set(coaster.country, count === undefined ? 1 : count + 1);
+    for (const coaster of allCoasters) {
+        const filterResult = countriesCoastersCount.get(coaster.country);
+        countriesCoastersCount.set(coaster.country, { before: (filterResult?.before || 0) + 1, after: filterResult?.after || 0 });
+    }
+
+    for (const coaster of filteredCoasters) {
+        const filterResult = countriesCoastersCount.get(coaster.country);
+        countriesCoastersCount.set(coaster.country, { before: filterResult?.before || 0, after: (filterResult?.after || 0) + 1 });
     }
 
     return countriesCoastersCount;
 }
 
-function getAndSaveDefaultFilter(countriesCoastersCount: Map<string, number>): RollercoasterFilter {
-    const rollercoasterFilter = { countries: getCountriesCheckedMap(countriesCoastersCount) } as RollercoasterFilter;
+function getAndSaveDefaultFilter(countriesCheckedMap: Map<string, boolean>): RollercoasterFilter {
+    const rollercoasterFilter = { countries: countriesCheckedMap } as RollercoasterFilter;
 
     saveFilter(rollercoasterFilter);
 
     return rollercoasterFilter;
 }
 
-function getCountriesCheckedMap(countriesCoastersCount: Map<string, number>): Map<string, boolean> {
+function getCountriesCheckedMap(countriesCoastersCount: Map<string, FilterResult>): Map<string, boolean> {
     const countriesCheckedMap = new Map<string, boolean>();
 
     for (const country of Array.from(countriesCoastersCount.keys())) {

@@ -10,3 +10,8 @@
     border-bottom-style: solid;
     border-width: 1px;
 }
+
+.before-filter {
+    text-decoration: line-through;
+    color: grey;
+}

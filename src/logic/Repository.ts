@@ -63,6 +63,8 @@ function cleanData(json: any): Array<Rollercoaster> {
         coaster.make = coaster.make === '' ? 'Unknown' : coaster.make;
 
         coaster.country = coaster.country === '' ? 'Unknown' : coaster.country;
+
+        coaster.model = coaster.model === '' ? 'Unknown' : coaster.model;
     });
 
     return rollercoasters;
