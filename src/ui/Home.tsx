@@ -8,10 +8,10 @@ import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from
 import Filter from './Filter';
 import { RollercoasterFilter, deleteFilter, filter, saveFilter } from '../logic/FilterRepo';
 
-const APP_VERSION = 'J';
+const APP_VERSION = 'v4.2.0';
 
 interface HomeProps {
-    updateListener: { onUpdate: () => void };
+    updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
 }
 
 interface State {
@@ -42,12 +42,20 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
     const [refreshDataStoredNeeded, setRefreshDataStoredNeeded] = useState(true);
 
     useEffect(() => {
-        updateListener.onUpdate = () => {
-            console.log('UI needs an update');
-            setTimeout(() => {
-                window.location.reload();
-            }, 5000);
+        updateListener.onUpdateAvailable = () => {
+            console.log('Newer version of the app is available');
+            state.versionState = VersionState.OUTDATED;
+            setState({ ...state });
         };
+        updateListener.onNoUpdateFound = () => {
+            console.log('No update of the app has been found');
+            state.versionState = VersionState.CURRENT;
+            setState({ ...state });
+        };
+        if (!navigator.onLine) {
+            console.log('App if offline and can not check for updates');
+            state.versionState = VersionState.UNKNOWN;
+        }
     }, []);
 
     if (refreshDataStoredNeeded) {
@@ -247,7 +255,7 @@ function VersionStateUi(versionState: VersionState) {
         case VersionState.CURRENT:
             return <>✔️ Up-to-date</>;
         case VersionState.OUTDATED:
-            return <button>🔄 Update App</button>;
+            return <button onClick={() => { window.location.reload() }}>🔄 Update App</button>;
         case VersionState.UNKNOWN:
             return <>❌ Unknown Version</>;
     }

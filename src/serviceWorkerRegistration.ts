@@ -21,6 +21,7 @@ const isLocalhost = Boolean(
 type Config = {
   onSuccess?: (registration: ServiceWorkerRegistration) => void;
   onUpdate?: (registration: ServiceWorkerRegistration) => void;
+  onNoUpdateFound?: () => void;
 };
 
 export function register(config?: Config) {
@@ -61,7 +62,17 @@ function registerValidSW(swUrl: string, config?: Config) {
   navigator.serviceWorker
     .register(swUrl)
     .then((registration) => {
+      const updateFoundWaitTime = 5000; // 5 seconds
+      const updateFoundTimeout = setTimeout(() => {
+        console.log(`No update found after ${updateFoundWaitTime / 1000} seconds of waiting`);
+        if (config && config.onNoUpdateFound) {
+          config.onNoUpdateFound();
+        }
+      }, updateFoundWaitTime);
+
       registration.onupdatefound = () => {
+        clearTimeout(updateFoundTimeout);
+
         const installingWorker = registration.installing;
         if (installingWorker == null) {
           return;

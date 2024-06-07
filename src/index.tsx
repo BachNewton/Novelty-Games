@@ -9,7 +9,7 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-const updateListener = { onUpdate: () => { } };
+const updateListener = { onUpdateAvailable: () => { }, onNoUpdateFound: () => { } };
 
 root.render(
   <React.StrictMode>
@@ -22,16 +22,10 @@ root.render(
 // Learn more about service workers: https://cra.link/PWA
 serviceWorkerRegistration.register({
   onUpdate: (registration) => {
-    console.log('register', 'onUpdate');
-
     registration.waiting?.postMessage({ type: "SKIP_WAITING" });
-    console.log('registration', registration);
-    updateListener.onUpdate();
+    updateListener.onUpdateAvailable();
   },
-  onSuccess(registration) {
-    console.log('register', 'onSuccess');
-    console.log('registration', registration);
-  },
+  onNoUpdateFound: () => { updateListener.onNoUpdateFound(); }
 });
 
 // If you want to start measuring performance in your app, pass a function
