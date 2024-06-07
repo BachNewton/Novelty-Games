@@ -193,13 +193,6 @@ function getAndSaveDefaultFilter(
     return rollercoasterFilter;
 }
 
-function temp(
-    countriesCheckedMap: Map<string, boolean>,
-    modelsCheckedMap: Map<string, boolean>,
-): RollercoasterFilter {
-    return { countries: countriesCheckedMap, models: modelsCheckedMap, parks: new Map() };
-}
-
 function getCountriesCheckedMap(countriesCoastersCount: Map<string, FilterResult>): Map<string, boolean> {
     const countriesCheckedMap = new Map<string, boolean>();
 
@@ -224,9 +217,10 @@ function getParksCheckedMap(parksCoastersCount: Map<string, FilterResult>): Map<
     const parksCheckedMap = new Map<string, boolean>();
 
     for (const park of Array.from(parksCoastersCount.keys())) {
+        const onlyOneCoaster = parksCoastersCount.get(park)?.before === 1;
         const hasPizzaInName = park.includes('Pizza');
         const hasFarmInName = park.includes('Farm') && park !== "Knott's Berry Farm";
-        const includePark = !hasPizzaInName && !hasFarmInName;
+        const includePark = !onlyOneCoaster && !hasPizzaInName && !hasFarmInName;
         parksCheckedMap.set(park, includePark);
     }
 
