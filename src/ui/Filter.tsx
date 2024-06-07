@@ -92,7 +92,7 @@ function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<St
             return { filter: it.getFilter(state.rollercoasterFilter), getProperty: it.getProperty };
         });
 
-        const sectionFilteredCoasters = filterByProperties(state.filteredCoasters, filtersAndPropertyGetters)
+        const sectionFilteredCoasters = filterByProperties(state.filteredCoasters, filtersAndPropertyGetters);
         const sectionCoasterCount = getCoasterCountBasedOnProperty(state.allCoasters, sectionFilteredCoasters, filterSection.getProperty);
 
         return {
