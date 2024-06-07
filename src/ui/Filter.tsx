@@ -69,7 +69,7 @@ function LoadingUi() {
 function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<State>>, onCancel: () => void, onConfirm: () => void) {
     const sorter = (a: [string, FilterResult], b: [string, FilterResult]) => b[1].after - a[1].after;
 
-    const modelsCoastersCountUi = Array.from(getModelsCoastersCount(state.allCoasters, state.filteredCoasters)).sort(sorter).map((countryCoasterCount, index) => {
+    const modelsCoastersCountUi = Array.from(getModelsCoastersCount(state.allCoasters, filterByProperty(state.rollercoasterFilter.countries, state.filteredCoasters, coaster => coaster.country))).sort(sorter).map((countryCoasterCount, index) => {
         const model = countryCoasterCount[0];
         const filerResult = countryCoasterCount[1];
 
