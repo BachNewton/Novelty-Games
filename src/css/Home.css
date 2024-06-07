@@ -6,6 +6,12 @@
     font-size: 10px;
 }
 
+#version-state {
+    position: fixed;
+    top: 0.25em;
+    left: 0.25em;
+}
+
 .Home {
     text-align: center;
     color: white;

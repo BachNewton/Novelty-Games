@@ -8,13 +8,14 @@ import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from
 import Filter from './Filter';
 import { RollercoasterFilter, deleteFilter, filter, saveFilter } from '../logic/FilterRepo';
 
-const APP_VERSION = 'v4.1.1';
+const APP_VERSION = 'A';
 
 interface State {
-    ui: UiState,
-    data: Promise<Array<Data>>,
-    dataType: DataType,
-    isDataStored: Map<DataType, boolean>
+    ui: UiState;
+    data: Promise<Array<Data>>;
+    dataType: DataType;
+    isDataStored: Map<DataType, boolean>;
+    versionState: VersionState;
 }
 
 enum UiState {
@@ -23,10 +24,17 @@ enum UiState {
     FILTER
 }
 
+enum VersionState {
+    CURRENT,
+    UNKNOWN,
+    OUTDATED,
+    CHECKING
+}
+
 const progressUpdater = new ProgressUpdater();
 
 const Home: React.FC = () => {
-    const [state, setState] = useState({ ui: UiState.HOME, isDataStored: new Map() } as State);
+    const [state, setState] = useState({ ui: UiState.HOME, isDataStored: new Map(), versionState: VersionState.CHECKING } as State);
     const [refreshDataStoredNeeded, setRefreshDataStoredNeeded] = useState(true);
 
     if (refreshDataStoredNeeded) {
@@ -131,6 +139,7 @@ const Home: React.FC = () => {
     switch (state.ui) {
         case UiState.HOME:
             return HomeUi(
+                state.versionState,
                 state.isDataStored,
                 onRollercoastersClick,
                 onMusicClick,
@@ -159,6 +168,7 @@ const Home: React.FC = () => {
 };
 
 function HomeUi(
+    versionState: VersionState,
     isDataStored: Map<DataType, boolean>,
     onRollercoastersClick: () => void,
     onMusicClick: () => void,
@@ -192,6 +202,7 @@ function HomeUi(
         : <></>;
 
     return <div className='Home'>
+        <div id='version-state'>{VersionStateUi(versionState)}</div>
         <code id='version-label'>{APP_VERSION}</code>
         <h3>🃏 Kyle's Novelty Trivia Games 🕹️</h3>
         <div>Created by: Kyle Hutchinson</div>
@@ -214,6 +225,19 @@ function HomeUi(
             {deletePokemonButtonUi}
         </div>
     </div>;
+}
+
+function VersionStateUi(versionState: VersionState) {
+    switch (versionState) {
+        case VersionState.CHECKING:
+            return <>☁️ Checking Version...</>;
+        case VersionState.CURRENT:
+            return <>✔️ Up-to-date</>;
+        case VersionState.OUTDATED:
+            return <button>🔄 Update App</button>;
+        case VersionState.UNKNOWN:
+            return <>❌ Unknown Version</>;
+    }
 }
 
 function confirmedDelete(dataType: DataType): boolean {
