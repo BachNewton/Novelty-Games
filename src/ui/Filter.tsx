@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
 import '../css/Filter.css';
 import { Rollercoaster } from "../logic/Data";
-import { RollercoasterFilter, baseFilter, filterByProperty, loadFilter, saveFilter } from "../logic/FilterRepo";
+import { FilterAndPropertyGetter, RollercoasterFilter, baseFilter, filterByProperties, loadFilter, saveFilter } from "../logic/FilterRepo";
 
 interface FilterProps {
     pendingCoasters: Promise<Array<Rollercoaster>>;
     onCancel: () => void;
     onConfirm: (rollercoasterFilter: RollercoasterFilter) => void;
+}
+
+interface FilterSection {
+    getFilter: (filter: RollercoasterFilter) => Map<string, boolean>;
+    getProperty: (coaster: Rollercoaster) => string;
+    name: string;
+}
+
+interface FilterSectionUi {
+    rows: JSX.Element[];
+    name: string;
 }
 
 interface State {
@@ -69,38 +80,54 @@ function LoadingUi() {
 function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<State>>, onCancel: () => void, onConfirm: () => void) {
     const sorter = (a: [string, FilterResult], b: [string, FilterResult]) => b[1].after - a[1].after;
 
-    const modelsCoastersCountUi = Array.from(getModelsCoastersCount(state.allCoasters, filterByProperty(state.rollercoasterFilter.countries, state.filteredCoasters, coaster => coaster.country))).sort(sorter).map((countryCoasterCount, index) => {
-        const model = countryCoasterCount[0];
-        const filerResult = countryCoasterCount[1];
+    const filterSections: Array<FilterSection> = [
+        { name: 'Model', getFilter: filter => filter.models, getProperty: coaster => coaster.model },
+        { name: 'Country', getFilter: filter => filter.countries, getProperty: coaster => coaster.country }
+    ];
 
-        const onChange = () => {
-            const before = state.rollercoasterFilter.models.get(model) === true;
-            state.rollercoasterFilter.models.set(model, !before);
-            setState({ ...state });
-        };
+    const filterSectionsUi: Array<FilterSectionUi> = filterSections.map(filterSection => {
+        const filtersAndPropertyGetters: Array<FilterAndPropertyGetter> = filterSections.filter(it => it !== filterSection).map(it => {
+            return { filter: it.getFilter(state.rollercoasterFilter), getProperty: it.getProperty };
+        });
 
-        return <tr key={index}>
-            <td><input type="checkbox" checked={state.rollercoasterFilter.models.get(model)} onChange={onChange} /></td>
-            <td>{model}</td>
-            <td>{filerResult.after} <span className="before-filter">{filerResult.before}</span></td>
-        </tr>
+        const sectionFilteredCoasters = filterByProperties(state.filteredCoasters, filtersAndPropertyGetters)
+        const sectionCoasterCount = getCoasterCountBasedOnProperty(state.allCoasters, sectionFilteredCoasters, filterSection.getProperty);
+
+        return {
+            name: filterSection.name,
+            rows: Array.from(sectionCoasterCount).sort(sorter).map((coasterCount, index) => {
+                const section = coasterCount[0];
+                const filerResult = coasterCount[1];
+                const filter = filterSection.getFilter(state.rollercoasterFilter);
+
+                const onChange = () => {
+                    const before = filter.get(section) === true;
+                    filter.set(section, !before);
+                    setState({ ...state });
+                };
+
+                return <tr key={index}>
+                    <td><input type="checkbox" checked={filter.get(section)} onChange={onChange} /></td>
+                    <td>{section}</td>
+                    <td>{filerResult.after} <span className="before-filter">{filerResult.before}</span></td>
+                </tr>
+            })
+        }
     });
 
-    const countriesCoastersCountUi = Array.from(getCountriesCoastersCount(state.allCoasters, filterByProperty(state.rollercoasterFilter.models, state.filteredCoasters, coaster => coaster.model))).sort(sorter).map((countryCoasterCount, index) => {
-        const country = countryCoasterCount[0];
-        const filerResult = countryCoasterCount[1];
+    const filterSectionTables = filterSectionsUi.map((filterSectionUi, index) => {
+        const className = index === filterSectionsUi.length - 1 ? '' : 'bottom-border';
 
-        const onChange = () => {
-            const before = state.rollercoasterFilter.countries.get(country) === true;
-            state.rollercoasterFilter.countries.set(country, !before);
-            setState({ ...state });
-        };
-
-        return <tr key={index}>
-            <td><input type="checkbox" checked={state.rollercoasterFilter.countries.get(country)} onChange={onChange} /></td>
-            <td>{country}</td>
-            <td>{filerResult.after} <span className="before-filter">{filerResult.before}</span></td>
-        </tr>
+        return <table key={index} className={className} style={{ textAlign: 'left', paddingBottom: '2em' }}>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>{filterSectionUi.name}</th>
+                    <th>Coaster Count</th>
+                </tr>
+            </thead>
+            <tbody>{filterSectionUi.rows}</tbody>
+        </table>
     });
 
     return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -117,27 +144,7 @@ function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<St
                 <li>Exclude all parks with 'Farm' in the name, except "Knott's Berry Farm"</li>
             </ul>
         </div>
-        <table className="bottom-border" style={{ textAlign: 'left' }}>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Model</th>
-                    <th>Coaster Count</th>
-                </tr>
-            </thead>
-            <tbody>{modelsCoastersCountUi}</tbody>
-        </table>
-        <br />
-        <table style={{ textAlign: 'left' }}>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Country</th>
-                    <th>Coaster Count</th>
-                </tr>
-            </thead>
-            <tbody>{countriesCoastersCountUi}</tbody>
-        </table>
+        {filterSectionTables}
     </div>;
 }
 

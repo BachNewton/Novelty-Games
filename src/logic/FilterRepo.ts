@@ -12,6 +12,11 @@ interface RollercoasterFilterJson {
     models: [string, boolean][];
 }
 
+export interface FilterAndPropertyGetter {
+    filter: Map<string, boolean>;
+    getProperty: (coaster: Rollercoaster) => string;
+}
+
 export function saveFilter(rollercoasterFilter: RollercoasterFilter) {
     const rollercoasterFilterJson = {
         countries: Array.from(rollercoasterFilter.countries.entries()),
@@ -50,16 +55,27 @@ export async function filter(coasters: Promise<Array<Rollercoaster>>): Promise<A
     return filteredCoasters;
 }
 
-function filterAll(filter: RollercoasterFilter, coasters: Array<Rollercoaster>): Array<Rollercoaster> {
-    const filterByCountry = filterByProperty(filter.countries, coasters, coaster => coaster.country);
-    const filterByModel = filterByProperty(filter.models, filterByCountry, coaster => coaster.model);
+export function filterByProperties(
+    coasters: Array<Rollercoaster>,
+    filtersAndPropertyGetters: Array<FilterAndPropertyGetter>
+): Array<Rollercoaster> {
+    let filteredCoasters = coasters;
 
-    const filteredCoasters = filterByModel;
+    for (const filterPropertyGetter of filtersAndPropertyGetters) {
+        filteredCoasters = filterByProperty(filterPropertyGetter.filter, filteredCoasters, filterPropertyGetter.getProperty);
+    }
 
     return filteredCoasters;
 }
 
-export function filterByProperty(
+function filterAll(filter: RollercoasterFilter, coasters: Array<Rollercoaster>): Array<Rollercoaster> {
+    return filterByProperties(coasters, [
+        { filter: filter.countries, getProperty: coaster => coaster.country },
+        { filter: filter.models, getProperty: coaster => coaster.model }
+    ]);
+}
+
+function filterByProperty(
     filter: Map<string, boolean>,
     coasters: Array<Rollercoaster>,
     getProperty: (coaster: Rollercoaster) => string
