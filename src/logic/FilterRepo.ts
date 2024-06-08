@@ -66,35 +66,31 @@ export async function filter(pendingCoasters: Promise<Array<Rollercoaster>>): Pr
 export function getFilter(coasters: Array<Rollercoaster>, baseFilteredCoasters: Array<Rollercoaster>): RollercoasterFilter {
     const loadedFilter = loadFilter();
 
-    if (loadedFilter === null) {
-        const defaultFilter = getDefaultFilter(
-            getCountriesDefaultFilter(getCountriesCoastersCount(coasters, baseFilteredCoasters)),
-            getModelsDefaultFilter(getModelsCoastersCount(coasters, baseFilteredCoasters)),
-            getParksDefaultFilter(getParksCoastersCount(coasters, baseFilteredCoasters))
-        );
+    const filter: RollercoasterFilter = loadedFilter === null
+        ? { countries: new Map(), models: new Map(), parks: new Map() }
+        : loadedFilter;
 
-        saveFilter(defaultFilter);
+    const isCountriesEmpty = filter.countries.size === 0;
+    const isModelsEmpty = filter.models.size === 0;
+    const isParksEmpty = filter.parks.size === 0;
 
-        return defaultFilter;
-    } else {
-        if (loadedFilter.countries.size === 0 || loadedFilter.models.size === 0 || loadedFilter.parks.size === 0) {
-            if (loadedFilter.countries.size === 0) {
-                loadedFilter.countries = getCountriesDefaultFilter(getCountriesCoastersCount(coasters, baseFilteredCoasters));
-            }
-
-            if (loadedFilter.models.size === 0) {
-                loadedFilter.models = getModelsDefaultFilter(getModelsCoastersCount(coasters, baseFilteredCoasters));
-            }
-
-            if (loadedFilter.parks.size === 0) {
-                loadedFilter.parks = getParksDefaultFilter(getParksCoastersCount(coasters, baseFilteredCoasters));
-            }
-
-            saveFilter(loadedFilter);
+    if (isCountriesEmpty || isModelsEmpty || isParksEmpty) {
+        if (isCountriesEmpty) {
+            filter.countries = getCountriesDefaultFilter(getCountriesCoastersCount(coasters, baseFilteredCoasters));
         }
 
-        return loadedFilter;
+        if (isModelsEmpty) {
+            filter.models = getModelsDefaultFilter(getModelsCoastersCount(coasters, baseFilteredCoasters));
+        }
+
+        if (isParksEmpty) {
+            filter.parks = getParksDefaultFilter(getParksCoastersCount(coasters, baseFilteredCoasters));
+        }
+
+        saveFilter(filter);
     }
+
+    return filter;
 }
 
 function getCountriesCoastersCount(allCoasters: Array<Rollercoaster>, filteredCoasters: Array<Rollercoaster>) {
@@ -129,14 +125,6 @@ function getCoasterCountBasedOnProperty(
     }
 
     return coastersCount;
-}
-
-function getDefaultFilter(
-    countriesDefaultFilter: Map<string, boolean>,
-    modelsDefaultFilter: Map<string, boolean>,
-    parksDefaultFilter: Map<string, boolean>
-): RollercoasterFilter {
-    return { countries: countriesDefaultFilter, models: modelsDefaultFilter, parks: parksDefaultFilter };
 }
 
 function getCountriesDefaultFilter(countriesCoastersCount: Map<string, FilterResult>): Map<string, boolean> {
