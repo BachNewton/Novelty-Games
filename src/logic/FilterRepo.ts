@@ -19,6 +19,11 @@ export interface FilterAndPropertyGetter {
     getProperty: (coaster: Rollercoaster) => string;
 }
 
+export interface FilterResult {
+    before: number;
+    after: number;
+}
+
 export function saveFilter(rollercoasterFilter: RollercoasterFilter) {
     const rollercoasterFilterJson: RollercoasterFilterJson = {
         countries: Array.from(rollercoasterFilter.countries.entries()),
@@ -29,7 +34,7 @@ export function saveFilter(rollercoasterFilter: RollercoasterFilter) {
     localStorage.setItem(ROLLERCOASTER_FILTER_KEY, JSON.stringify(rollercoasterFilterJson));
 }
 
-export function loadFilter(): RollercoasterFilter | null {
+function loadFilter(): RollercoasterFilter | null {
     const rollercoasterFilterJsonString = localStorage.getItem(ROLLERCOASTER_FILTER_KEY);
 
     if (rollercoasterFilterJsonString !== null) {
@@ -45,18 +50,127 @@ export function loadFilter(): RollercoasterFilter | null {
     }
 }
 
-export async function filter(coasters: Promise<Array<Rollercoaster>>): Promise<Array<Rollercoaster>> {
-    const baseFilteredCoasters = baseFilter(await coasters);
+export async function filter(pendingCoasters: Promise<Array<Rollercoaster>>): Promise<Array<Rollercoaster>> {
+    const coasters = await pendingCoasters;
 
-    const filter = loadFilter();
+    const baseFilteredCoasters = baseFilter(coasters);
 
-    const filteredCoasters = filter === null
-        ? baseFilteredCoasters
-        : filterAll(filter, baseFilteredCoasters);
+    const filter = getFilter(coasters, baseFilteredCoasters);
+    const filteredCoasters = filterAll(filter, baseFilteredCoasters);
 
     console.log('Filtered Rollercoasters', filteredCoasters);
 
     return filteredCoasters;
+}
+
+export function getFilter(coasters: Array<Rollercoaster>, baseFilteredCoasters: Array<Rollercoaster>): RollercoasterFilter {
+    const loadedFilter = loadFilter();
+
+    if (loadedFilter === null) {
+        const defaultFilter = getDefaultFilter(
+            getCountriesDefaultFilter(getCountriesCoastersCount(coasters, baseFilteredCoasters)),
+            getModelsDefaultFilter(getModelsCoastersCount(coasters, baseFilteredCoasters)),
+            getParksDefaultFilter(getParksCoastersCount(coasters, baseFilteredCoasters))
+        );
+
+        saveFilter(defaultFilter);
+
+        return defaultFilter;
+    } else {
+        if (loadedFilter.countries.size === 0 || loadedFilter.models.size === 0 || loadedFilter.parks.size === 0) {
+            if (loadedFilter.countries.size === 0) {
+                loadedFilter.countries = getCountriesDefaultFilter(getCountriesCoastersCount(coasters, baseFilteredCoasters));
+            }
+
+            if (loadedFilter.models.size === 0) {
+                loadedFilter.models = getModelsDefaultFilter(getModelsCoastersCount(coasters, baseFilteredCoasters));
+            }
+
+            if (loadedFilter.parks.size === 0) {
+                loadedFilter.parks = getParksDefaultFilter(getParksCoastersCount(coasters, baseFilteredCoasters));
+            }
+
+            saveFilter(loadedFilter);
+        }
+
+        return loadedFilter;
+    }
+}
+
+function getCountriesCoastersCount(allCoasters: Array<Rollercoaster>, filteredCoasters: Array<Rollercoaster>) {
+    return getCoasterCountBasedOnProperty(allCoasters, filteredCoasters, coaster => coaster.country);
+}
+
+function getModelsCoastersCount(allCoasters: Array<Rollercoaster>, filteredCoasters: Array<Rollercoaster>) {
+    return getCoasterCountBasedOnProperty(allCoasters, filteredCoasters, coaster => coaster.model);
+}
+
+function getParksCoastersCount(allCoasters: Array<Rollercoaster>, filteredCoasters: Array<Rollercoaster>) {
+    return getCoasterCountBasedOnProperty(allCoasters, filteredCoasters, coaster => coaster.park.name);
+}
+
+function getCoasterCountBasedOnProperty(
+    allCoasters: Array<Rollercoaster>,
+    filteredCoasters: Array<Rollercoaster>,
+    getProperty: (coaster: Rollercoaster) => string
+): Map<string, FilterResult> {
+    const coastersCount = new Map<string, FilterResult>();
+
+    for (const coaster of allCoasters) {
+        const property = getProperty(coaster)
+        const filterResult = coastersCount.get(property);
+        coastersCount.set(property, { before: (filterResult?.before || 0) + 1, after: filterResult?.after || 0 });
+    }
+
+    for (const coaster of filteredCoasters) {
+        const property = getProperty(coaster)
+        const filterResult = coastersCount.get(property);
+        coastersCount.set(property, { before: filterResult?.before || 0, after: (filterResult?.after || 0) + 1 });
+    }
+
+    return coastersCount;
+}
+
+function getDefaultFilter(
+    countriesDefaultFilter: Map<string, boolean>,
+    modelsDefaultFilter: Map<string, boolean>,
+    parksDefaultFilter: Map<string, boolean>
+): RollercoasterFilter {
+    return { countries: countriesDefaultFilter, models: modelsDefaultFilter, parks: parksDefaultFilter };
+}
+
+function getCountriesDefaultFilter(countriesCoastersCount: Map<string, FilterResult>): Map<string, boolean> {
+    const countriesCheckedMap = new Map<string, boolean>();
+
+    for (const country of Array.from(countriesCoastersCount.keys())) {
+        countriesCheckedMap.set(country, country === 'United States');
+    }
+
+    return countriesCheckedMap;
+}
+
+function getModelsDefaultFilter(modelsCoastersCount: Map<string, FilterResult>): Map<string, boolean> {
+    const modelsCheckedMap = new Map<string, boolean>();
+
+    for (const model of Array.from(modelsCoastersCount.keys())) {
+        modelsCheckedMap.set(model, !['Junior Coaster', 'Kiddie Coaster', 'Family Coaster'].includes(model));
+    }
+
+    return modelsCheckedMap;
+}
+
+function getParksDefaultFilter(parksCoastersCount: Map<string, FilterResult>): Map<string, boolean> {
+    const parksCheckedMap = new Map<string, boolean>();
+
+    for (const park of Array.from(parksCoastersCount.keys())) {
+        const onlyOneCoaster = parksCoastersCount.get(park)?.after === 1;
+        const hasPizzaInName = park.includes('Pizza');
+        const hasFarmInName = park.includes('Farm') && park !== "Knott's Berry Farm";
+        const includePark = !onlyOneCoaster && !hasPizzaInName && !hasFarmInName;
+        parksCheckedMap.set(park, includePark);
+    }
+
+    return parksCheckedMap;
 }
 
 export function filterByProperties(

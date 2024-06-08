@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import '../css/Filter.css';
 import { Rollercoaster } from "../logic/Data";
-import { FilterAndPropertyGetter, RollercoasterFilter, baseFilter, filterByProperties, loadFilter, saveFilter } from "../logic/FilterRepo";
+import { FilterAndPropertyGetter, FilterResult, RollercoasterFilter, baseFilter, filterByProperties, getFilter } from "../logic/FilterRepo";
 
 interface FilterProps {
     pendingCoasters: Promise<Array<Rollercoaster>>;
@@ -32,11 +32,6 @@ enum UiState {
     FILTER
 }
 
-interface FilterResult {
-    before: number;
-    after: number;
-}
-
 const Filter: React.FC<FilterProps> = ({ pendingCoasters, onCancel, onConfirm }) => {
     const [state, setState] = useState({ ui: UiState.LOADING } as State);
 
@@ -46,15 +41,7 @@ const Filter: React.FC<FilterProps> = ({ pendingCoasters, onCancel, onConfirm })
             state.filteredCoasters = baseFilter(readyCoasters);
             console.log('Base filtered coasters', state.filteredCoasters);
 
-            const filter = loadFilter();
-
-            state.rollercoasterFilter = filter === null
-                ? getAndSaveDefaultFilter(
-                    getCountriesCheckedMap(getCountriesCoastersCount(state.allCoasters, state.filteredCoasters)),
-                    getModelsCheckedMap(getModelsCoastersCount(state.allCoasters, state.filteredCoasters)),
-                    getParksCheckedMap(getParksCoastersCount(state.allCoasters, state.filteredCoasters))
-                )
-                : filter;
+            state.rollercoasterFilter = getFilter(state.allCoasters, state.filteredCoasters);
 
             state.ui = UiState.FILTER;
 
@@ -147,18 +134,6 @@ function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<St
     </div>;
 }
 
-function getCountriesCoastersCount(allCoasters: Array<Rollercoaster>, filteredCoasters: Array<Rollercoaster>) {
-    return getCoasterCountBasedOnProperty(allCoasters, filteredCoasters, coaster => coaster.country);
-}
-
-function getModelsCoastersCount(allCoasters: Array<Rollercoaster>, filteredCoasters: Array<Rollercoaster>) {
-    return getCoasterCountBasedOnProperty(allCoasters, filteredCoasters, coaster => coaster.model);
-}
-
-function getParksCoastersCount(allCoasters: Array<Rollercoaster>, filteredCoasters: Array<Rollercoaster>) {
-    return getCoasterCountBasedOnProperty(allCoasters, filteredCoasters, coaster => coaster.park.name);
-}
-
 function getCoasterCountBasedOnProperty(
     allCoasters: Array<Rollercoaster>,
     filteredCoasters: Array<Rollercoaster>,
@@ -179,52 +154,6 @@ function getCoasterCountBasedOnProperty(
     }
 
     return coastersCount;
-}
-
-function getAndSaveDefaultFilter(
-    countriesCheckedMap: Map<string, boolean>,
-    modelsCheckedMap: Map<string, boolean>,
-    parksCheckedMap: Map<string, boolean>
-): RollercoasterFilter {
-    const rollercoasterFilter: RollercoasterFilter = { countries: countriesCheckedMap, models: modelsCheckedMap, parks: parksCheckedMap };
-
-    saveFilter(rollercoasterFilter);
-
-    return rollercoasterFilter;
-}
-
-function getCountriesCheckedMap(countriesCoastersCount: Map<string, FilterResult>): Map<string, boolean> {
-    const countriesCheckedMap = new Map<string, boolean>();
-
-    for (const country of Array.from(countriesCoastersCount.keys())) {
-        countriesCheckedMap.set(country, country === 'United States'); // Default only USA enabled
-    }
-
-    return countriesCheckedMap;
-}
-
-function getModelsCheckedMap(modelsCoastersCount: Map<string, FilterResult>): Map<string, boolean> {
-    const modelsCheckedMap = new Map<string, boolean>();
-
-    for (const model of Array.from(modelsCoastersCount.keys())) {
-        modelsCheckedMap.set(model, !['Junior Coaster', 'Kiddie Coaster', 'Family Coaster'].includes(model));
-    }
-
-    return modelsCheckedMap;
-}
-
-function getParksCheckedMap(parksCoastersCount: Map<string, FilterResult>): Map<string, boolean> {
-    const parksCheckedMap = new Map<string, boolean>();
-
-    for (const park of Array.from(parksCoastersCount.keys())) {
-        const onlyOneCoaster = parksCoastersCount.get(park)?.before === 1;
-        const hasPizzaInName = park.includes('Pizza');
-        const hasFarmInName = park.includes('Farm') && park !== "Knott's Berry Farm";
-        const includePark = !onlyOneCoaster && !hasPizzaInName && !hasFarmInName;
-        parksCheckedMap.set(park, includePark);
-    }
-
-    return parksCheckedMap;
 }
 
 export default Filter;
