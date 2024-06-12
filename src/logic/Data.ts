@@ -33,6 +33,7 @@ export interface Song extends Data {
     Year: number;
     SongID: string;
     imageUrl: string;
+    Spotify: string;
 }
 
 export interface Flag extends Data {
@@ -68,13 +69,6 @@ interface OtherSprites {
 
 interface OfficalArtwork {
     front_default: string;
-}
-
-export interface Question {
-    text: string;
-    options: Array<string>;
-    correctIndex: number;
-    imageUrl: string;
 }
 
 export enum DataType {

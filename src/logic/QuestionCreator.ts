@@ -1,6 +1,14 @@
-import { Data, DataType, Flag, Pokemon, Question, Rollercoaster, Song } from './Data';
+import { Data, DataType, Flag, Pokemon, Rollercoaster, Song } from './Data';
 
-export default function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
+export interface Question {
+    text: string;
+    options: Array<string>;
+    correctIndex: number;
+    imageUrl: string;
+    spotifyId: string | null;
+}
+
+export function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
     const copiedData = [...data];
     const shuffledData = [];
 
@@ -35,8 +43,22 @@ function createQuestion(optionsPool: Set<string>, answer: Data, dataType: DataTy
     const correctIndex = Math.floor(Math.random() * 4);
     const options = incorrectOptions.slice(0, correctIndex).concat(getCorrectOption(dataType, answer)).concat(incorrectOptions.slice(correctIndex));
     const imageUrl = getImageUrl(answer, dataType);
+    const spotifyId = getSpotifyId(dataType, answer);
 
-    return { text: text, options: options, correctIndex: correctIndex, imageUrl: imageUrl } as Question;
+    return { text: text, options: options, correctIndex: correctIndex, imageUrl: imageUrl, spotifyId: spotifyId };
+}
+
+function getSpotifyId(dataType: DataType, answer: Data): string | null {
+    switch (dataType) {
+        case DataType.MUSIC:
+            return (answer as Song).Spotify;
+        case DataType.ROLLERCOASTERS:
+        case DataType.FLAG_GAME:
+        case DataType.POKEMON:
+            return null;
+        default:
+            throw new Error('Unsupported DataType: ' + dataType);
+    }
 }
 
 function getIsNot(dataType: DataType, answer: Data): string {

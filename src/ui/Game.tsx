@@ -1,7 +1,7 @@
 import '../css/Game.css';
 import { useEffect, useState } from 'react';
-import { Data, DataType, Question } from '../logic/Data';
-import createQuestions from '../logic/QuestionCreator';
+import { Data, DataType } from '../logic/Data';
+import { createQuestions, Question } from '../logic/QuestionCreator';
 import AsyncImage from './AsyncImage';
 import { ProgressListener, ProgressEvent } from '../logic/ProgressUpdater';
 import MusicPlayer from './MusicPlayer';
@@ -228,15 +228,19 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
       <p style={{ marginBottom: 0, marginTop: 0 }}>Question #{(gameState.activeQuestion + 1).toLocaleString()} of {gameState.questions.length.toLocaleString()}</p>
       <AsyncImage src={question.imageUrl} disableImages={gameState.disableImages} onClick={onImageSectionClick} />
     </div>
-
-    <div style={{ display: 'flex', justifyContent: 'center' }}>
-      <MusicPlayer />
-    </div>
-
+    {MusicPlayerUi(question)}
     <p style={{ marginTop: 0, marginLeft: '0.4em', marginRight: '0.4em' }}>
       {question.text}
     </p>
     {optionsUi}
+  </div>;
+}
+
+function MusicPlayerUi(question: Question) {
+  if (question.spotifyId === null) return <></>;
+
+  return <div style={{ display: 'flex', justifyContent: 'center' }}>
+    <MusicPlayer id={question.spotifyId} />
   </div>;
 }
 
