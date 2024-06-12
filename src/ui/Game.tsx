@@ -1,9 +1,10 @@
 import '../css/Game.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Data, DataType, Question } from '../logic/Data';
 import createQuestions from '../logic/QuestionCreator';
 import AsyncImage from './AsyncImage';
 import { ProgressListener, ProgressEvent } from '../logic/ProgressUpdater';
+import MusicPlayer from './MusicPlayer';
 
 interface GameProps {
   pendingData: Promise<Array<Data>>;
@@ -225,6 +226,11 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
     {StatsUi(gameState)}
     <p style={{ marginBottom: 0, marginTop: 0 }}>Question #{(gameState.activeQuestion + 1).toLocaleString()} of {gameState.questions.length.toLocaleString()}</p>
     <AsyncImage src={question.imageUrl} disableImages={gameState.disableImages} onClick={onImageSectionClick} />
+
+    <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <MusicPlayer />
+    </div>
+
     <p style={{ marginTop: 0, marginLeft: '0.4em', marginRight: '0.4em' }}>
       {question.text}
     </p>
