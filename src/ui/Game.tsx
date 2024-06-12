@@ -1,5 +1,5 @@
 import '../css/Game.css';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Data, DataType, Question } from '../logic/Data';
 import createQuestions from '../logic/QuestionCreator';
 import AsyncImage from './AsyncImage';
@@ -223,9 +223,11 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
   };
 
   return <div>
-    {StatsUi(gameState)}
-    <p style={{ marginBottom: 0, marginTop: 0 }}>Question #{(gameState.activeQuestion + 1).toLocaleString()} of {gameState.questions.length.toLocaleString()}</p>
-    <AsyncImage src={question.imageUrl} disableImages={gameState.disableImages} onClick={onImageSectionClick} />
+    <div style={{ position: 'relative', zIndex: 1 }}>
+      {StatsUi(gameState)}
+      <p style={{ marginBottom: 0, marginTop: 0 }}>Question #{(gameState.activeQuestion + 1).toLocaleString()} of {gameState.questions.length.toLocaleString()}</p>
+      <AsyncImage src={question.imageUrl} disableImages={gameState.disableImages} onClick={onImageSectionClick} />
+    </div>
 
     <div style={{ display: 'flex', justifyContent: 'center' }}>
       <MusicPlayer />
