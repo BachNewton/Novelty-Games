@@ -73,33 +73,11 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         setRefreshDataStoredNeeded(false);
     }
 
-    const onRollercoastersClick = () => {
-        state.data = filter(getFromRepo(DataType.ROLLERCOASTERS, progressUpdater) as Promise<Array<Rollercoaster>>);
-        state.dataType = DataType.ROLLERCOASTERS;
-        state.ui = UiState.GAME;
-        setState({ ...state });
-    };
-
-    const onMusicClick = () => {
-        state.data = getFromRepo(DataType.MUSIC, progressUpdater);
-        state.dataType = DataType.MUSIC;
-        state.ui = UiState.GAME;
-        setState({ ...state });
-    };
-
-    const onFlagGameClick = () => {
-        state.data = getFromRepo(DataType.FLAG_GAME, progressUpdater);
-        state.dataType = DataType.FLAG_GAME;
-        state.ui = UiState.GAME;
-        setState({ ...state });
-    };
-
-    const onPokemonClick = () => {
-        state.data = getFromRepo(DataType.POKEMON_ALL, progressUpdater);
-        state.dataType = DataType.POKEMON;
-        state.ui = UiState.GAME;
-        setState({ ...state });
-    };
+    const onGameClickMap = getOnGameClickMap(
+        [DataType.ROLLERCOASTERS, DataType.MUSIC, DataType.FLAG_GAME, DataType.POKEMON],
+        state,
+        setState
+    );
 
     const onFilterRollercoastersClick = () => {
         state.data = getFromRepo(DataType.ROLLERCOASTERS, progressUpdater);
@@ -164,10 +142,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
             return HomeUi(
                 state.versionState,
                 state.isDataStored,
-                onRollercoastersClick,
-                onMusicClick,
-                onFlagGameClick,
-                onPokemonClick,
+                onGameClickMap,
                 onFilterRollercoastersClick,
                 onDeleteRollercoastersClick,
                 onDeleteMusicClick,
@@ -193,10 +168,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
 function HomeUi(
     versionState: VersionState,
     isDataStored: Map<DataType, boolean>,
-    onRollercoastersClick: () => void,
-    onMusicClick: () => void,
-    onFlagGameClick: () => void,
-    onPokemonClick: () => void,
+    onGameClickMap: Map<DataType, () => void>,
     onFilterRollercoastersClick: () => void,
     onDeleteRollercoastersClick: () => void,
     onDeleteMusicClick: () => void,
@@ -231,20 +203,20 @@ function HomeUi(
         <div>Created by: Kyle Hutchinson</div>
         <div><br /><br /><br /></div>
         <div className='game-option'>
-            <button className='play-button' onClick={onRollercoastersClick}>{getGameName(DataType.ROLLERCOASTERS)}</button>
+            <button className='play-button' onClick={onGameClickMap.get(DataType.ROLLERCOASTERS)}>{getGameName(DataType.ROLLERCOASTERS)}</button>
             {filterRollercoastersButtonUi}
             {deleteRollercoastersButtonUi}
         </div>
         <div className='game-option'>
-            <button className='play-button' onClick={onMusicClick}>{getGameName(DataType.MUSIC)}</button>
+            <button className='play-button' onClick={onGameClickMap.get(DataType.MUSIC)}>{getGameName(DataType.MUSIC)}</button>
             {deleteMusicButtonUi}
         </div>
         <div className='game-option'>
-            <button className='play-button' onClick={onFlagGameClick}>{getGameName(DataType.FLAG_GAME)}</button>
+            <button className='play-button' onClick={onGameClickMap.get(DataType.FLAG_GAME)}>{getGameName(DataType.FLAG_GAME)}</button>
             {deleteFlagGameButtonUi}
         </div>
         <div className='game-option'>
-            <button className='play-button' onClick={onPokemonClick}>{getGameName(DataType.POKEMON)}</button>
+            <button className='play-button' onClick={onGameClickMap.get(DataType.POKEMON)}>{getGameName(DataType.POKEMON)}</button>
             {deletePokemonButtonUi}
         </div>
     </div>;
@@ -278,6 +250,57 @@ function getGameName(dataType: DataType): string {
             return 'Flag Game 🎌';
         case DataType.POKEMON:
             return 'Pokémon 👾';
+        case DataType.FORTNITE_FESTIVAL:
+            return 'Fortnite Festival 👨‍🎤';
+        default:
+            throw new Error('Unsupported DataType: ' + dataType);
+    }
+}
+
+function getOnGameClickMap(
+    dataTypes: Array<DataType>,
+    state: State,
+    setState: React.Dispatch<React.SetStateAction<State>>
+): Map<DataType, () => void> {
+    const onGameClickMap = new Map<DataType, () => void>();
+
+    for (const dataType of dataTypes) {
+        onGameClickMap.set(dataType, () => {
+            const data = getFromRepo(getRepoBaseDataType(dataType), progressUpdater);
+            state.data = hasFilter(dataType) ? filter(data as Promise<Array<Rollercoaster>>) : data;
+            state.dataType = dataType;
+            state.ui = UiState.GAME;
+
+            setState({ ...state });
+        });
+    }
+
+    return onGameClickMap;
+}
+
+function getRepoBaseDataType(dataType: DataType): DataType {
+    switch (dataType) {
+        case DataType.POKEMON:
+            return DataType.POKEMON_ALL;
+        case DataType.ROLLERCOASTERS:
+        case DataType.MUSIC:
+        case DataType.FLAG_GAME:
+        case DataType.FORTNITE_FESTIVAL:
+            return dataType;
+        default:
+            throw new Error('Unsupported DataType: ' + dataType);
+    }
+}
+
+function hasFilter(dataType: DataType): boolean {
+    switch (dataType) {
+        case DataType.ROLLERCOASTERS:
+            return true;
+        case DataType.MUSIC:
+        case DataType.FLAG_GAME:
+        case DataType.POKEMON:
+        case DataType.FORTNITE_FESTIVAL:
+            return false;
         default:
             throw new Error('Unsupported DataType: ' + dataType);
     }
