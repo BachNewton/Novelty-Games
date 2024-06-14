@@ -17,6 +17,10 @@ jobs:
         run: npm install  # Install dependencies from package.json
       - name: Run the scrape script
         run: node scrapper/scrape.js
+      - name: Configure Git user
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'github-actions[BOT]@users.noreply.github.com'
       - name: Add new files
         run: git add .
       - name: Commit changes
