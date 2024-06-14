@@ -17,3 +17,7 @@ jobs:
         run: npm install  # Install dependencies from package.json
       - name: Run the scrape script
         run: node scrapper/scrape.js
+      - name: Add new files
+        run: git add .
+      - name: Commit changes
+        run: git commit -m "Updated Fortnite Festival json file"
