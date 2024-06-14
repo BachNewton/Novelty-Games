@@ -3,6 +3,9 @@ name: Scrape Fortnite Festival
 on:
   workflow_dispatch: # Allow manual triggering
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest  # Define the runner OS
