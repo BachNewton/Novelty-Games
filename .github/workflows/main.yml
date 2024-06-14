@@ -2,6 +2,8 @@ name: Scrape Fortnite Festival
 
 on:
   workflow_dispatch: # Allow manual triggering
+  schedule: # Trigger the workflow on a schedule
+    - cron: '0 0 * * FRI' # Runs at 00:00 on Fridays (UTC)
 
 permissions:
   contents: write
