@@ -1,0 +1,19 @@
+name: Run Node Script
+
+on:
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Define the runner OS
+
+    steps:
+      - uses: actions/checkout@v3  # Checkout the code from the repository
+      - name: Use Node.js 22.3.9  # Define the Node.js version
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.3.9
+      - name: Install dependencies
+        run: npm install  # Install dependencies from package.json
+      - name: Run your Node script
+        run: node scrapper/scrape.js
