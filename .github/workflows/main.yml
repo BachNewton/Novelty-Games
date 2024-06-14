@@ -27,6 +27,6 @@ jobs:
       - name: Add new files
         run: git add .
       - name: Commit changes
-        run: git commit -m "Updated Fortnite Festival json file"
+        run: git commit -a -m "Updated Fortnite Festival json file"
       - name: Push changes
         run: git push
