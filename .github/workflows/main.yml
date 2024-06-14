@@ -9,10 +9,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3  # Checkout the code from the repository
-      - name: Use Node.js 22.3.0  # Define the Node.js version
+      - name: Use Node.js 22  # Define the Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: 22.3.0
+          node-version: 22
       - name: Install dependencies
         run: npm install  # Install dependencies from package.json
       - name: Run the scrape script
