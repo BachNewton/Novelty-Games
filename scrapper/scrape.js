@@ -21,9 +21,9 @@ function getMatch(html, regex) {
 
     const songNameRegex = /<h1 class="c-ewDgRt c-ewDgRt-ikEhgBV-css">(.+?)<\/h1>/g;
     const artistRegex = /<strong class="c-ewDgRt c-ewDgRt-KoHnu-variant-tertiary c-ewDgRt-ihgsrmT-css">(.+?)<\/strong>/g;
-    const yearAndLengthRegex = /<strong class="c-ewDgRt c-ewDgRt-bAMqTJ-variant-quaternary c-ewDgRt-iGSDkZ-css">(.+?)<!-- --> · <!-- -->(.+?)<\/strong>/g;
+    const yearAndLengthRegex = /<strong class="c-ewDgRt c-ewDgRt-bAMqTJ-variant-quaternary c-ewDgRt-iGSDkZ-css">(.+?)(?:<!-- -->)? · (?:<!-- -->)?(.+?)<\/strong>/g;
     const sampleMp3Regex = /<source src="(.+?)" type="audio\/mp3">/g;
-    const albumArtRegex = /<img alt="" loading="lazy" width="180" height="180" decoding="async" data-nimg="1" style="color:transparent" src="(.+?)">/g;
+    const albumArtSelector = '#__next > div.c-cTzty.c-cTzty-ieGPAZP-css > div.c-cTzty.c-cTzty-ijfAQdd-css img';
 
     const songs = [];
 
@@ -34,6 +34,7 @@ function getMatch(html, regex) {
 
     for (const match of songLinksMatches) {
         const songLink = match[1];
+
         const url = SONG_URL + songLink;
         console.log('Opening:', url);
         await page.goto(url);
@@ -51,7 +52,7 @@ function getMatch(html, regex) {
         const sampleMp3Match = getMatch(songHtml, sampleMp3Regex);
         const sampleMp3 = sampleMp3Match === undefined ? null : sampleMp3Match[1];
         console.log('Sample MP3:', sampleMp3);
-        const albumArt = getMatch(songHtml, albumArtRegex)[1];
+        const albumArt = await page.$eval(albumArtSelector, el => el.getAttribute('src'));
         console.log('Album Art:', albumArt);
 
         songs.push({
