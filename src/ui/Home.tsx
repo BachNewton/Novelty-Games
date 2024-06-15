@@ -8,7 +8,7 @@ import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from
 import Filter from './Filter';
 import { RollercoasterFilter, deleteFilter, filter, saveFilter } from '../logic/FilterRepo';
 
-const APP_VERSION = 'v4.6.2';
+const APP_VERSION = 'v5.0.0';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -120,7 +120,7 @@ function HomeUi(
     state: State,
     setState: React.Dispatch<React.SetStateAction<State>>
 ) {
-    const gameOptionsUi = [DataType.ROLLERCOASTERS, DataType.MUSIC, DataType.FLAG_GAME, DataType.POKEMON].map((dataType, index) => {
+    const gameOptionsUi = [DataType.ROLLERCOASTERS, DataType.MUSIC, DataType.FLAG_GAME, DataType.POKEMON, DataType.FORTNITE_FESTIVAL].map((dataType, index) => {
         const onGameClick = () => {
             const data = getFromRepo(getRepoBaseDataType(dataType), progressUpdater);
             state.data = hasFilter(dataType) ? filter(data as Promise<Array<Rollercoaster>>) : data;

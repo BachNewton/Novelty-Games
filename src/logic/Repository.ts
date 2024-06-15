@@ -1,4 +1,4 @@
-import { DataType, Rollercoaster, Data, Song, PokemonAll, Pokemon, Flag } from "./Data";
+import { DataType, Rollercoaster, Data, Song, PokemonAll, Pokemon, Flag, FestivalSong } from "./Data";
 import { get as getFromDb, store as storeInDb } from "./Database";
 import { get as getFromNetwork } from "./Networking";
 import { ProgressEmitter } from "./ProgressUpdater";
@@ -37,6 +37,8 @@ async function handleJsons(dataType: DataType, jsons: Array<any>, progressEmitte
             return await handlePokemonAllJson(jsons[0], progressEmitter);
         case DataType.POKEMON:
             return handlePokemonJsons(jsons);
+        case DataType.FORTNITE_FESTIVAL:
+            return handleFestivalJson(jsons[0]);
         default:
             throw new Error('Unsupported DataType: ' + dataType);
     }
@@ -114,4 +116,11 @@ function handlePokemonJsons(jsons: Array<any>): Array<Pokemon> {
 
 function toCapitalizedSeparatedWords(str: string): string {
     return (str[0].toUpperCase() + str.slice(1)).replace(/-([a-zA-Z])/g, (_, followingChar) => ` ${followingChar.toUpperCase()}`);
+}
+
+function handleFestivalJson(json: any): Array<FestivalSong> {
+    const festivalSong = json as Array<FestivalSong>;
+    console.log('All Festival Songs', festivalSong);
+    festivalSong.forEach(song => song.artist = song.artist.replace('&amp;', '&'));
+    return festivalSong;
 }

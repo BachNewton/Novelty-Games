@@ -36,6 +36,15 @@ export interface Song extends Data {
     Spotify: string;
 }
 
+export interface FestivalSong extends Data {
+    name: string;
+    artist: string;
+    year: string;
+    length: string;
+    sampleMp3: string | null;
+    albumArt: string;
+}
+
 export interface Flag extends Data {
     name: string;
     imageUrl: string;

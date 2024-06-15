@@ -6,6 +6,8 @@ const ROLLERCOASTERS_URL = 'https://raw.githubusercontent.com/fabianrguez/rcdb-a
 
 const MUSIC_URL = 'https://raw.githubusercontent.com/BachNewton/PWA-Trivia/main/db/music.json';
 
+const FESTIVAL_URL = 'https://raw.githubusercontent.com/BachNewton/PWA-Trivia/main/db/fortniteFestivalSongs.json';
+
 const FLAG_GAME_URL = 'https://flagcdn.com/en/codes.json';
 
 const POKEMON_URL = 'https://pokeapi.co/api/v2/pokemon?limit=100000';
@@ -31,6 +33,8 @@ function getUrl(dataType: DataType): string {
             return POKEMON_URL;
         case DataType.POKEMON:
             return ''; // optional urls should be provided
+        case DataType.FORTNITE_FESTIVAL:
+            return FESTIVAL_URL;
         default:
             throw new Error('Unsupported DataType: ' + dataType);
     }

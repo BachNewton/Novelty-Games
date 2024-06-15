@@ -1,4 +1,4 @@
-import { Data, DataType, Flag, Pokemon, Rollercoaster, Song } from './Data';
+import { Data, DataType, FestivalSong, Flag, Pokemon, Rollercoaster, Song } from './Data';
 
 export interface Question {
     text: string;
@@ -27,6 +27,8 @@ function getOptionsPool(dataType: DataType, data: Array<Data>): Set<string> {
             return new Set([...(data as Array<Rollercoaster>).map(coaster => coaster.park.name)]);
         case DataType.MUSIC:
             return new Set([...(data as Array<Song>).map(song => song.Artist)]);
+        case DataType.FORTNITE_FESTIVAL:
+            return new Set([...(data as Array<FestivalSong>).map(song => song.artist)]);
         case DataType.FLAG_GAME:
             return new Set([...(data as Array<Flag>).map(flag => flag.name)]);
         case DataType.POKEMON:
@@ -55,6 +57,7 @@ function getSpotifyId(dataType: DataType, answer: Data): string | null {
         case DataType.ROLLERCOASTERS:
         case DataType.FLAG_GAME:
         case DataType.POKEMON:
+        case DataType.FORTNITE_FESTIVAL:
             return null;
         default:
             throw new Error('Unsupported DataType: ' + dataType);
@@ -67,6 +70,8 @@ function getIsNot(dataType: DataType, answer: Data): string {
             return (answer as Rollercoaster).park.name;
         case DataType.MUSIC:
             return (answer as Song).Artist;
+        case DataType.FORTNITE_FESTIVAL:
+            return (answer as FestivalSong).artist;
         case DataType.FLAG_GAME:
             return (answer as Flag).name;
         case DataType.POKEMON:
@@ -84,6 +89,9 @@ function getQuestionText(answer: Data, dataType: DataType): string {
         case DataType.MUSIC:
             const song = answer as Song;
             return `Which artist created the song "${song.Name}" in "${song.Year}"?`;
+        case DataType.FORTNITE_FESTIVAL:
+            const festivalSong = answer as FestivalSong;
+            return `Which artist created the song "${festivalSong.name}" in "${festivalSong.year}"?`;
         case DataType.FLAG_GAME:
             return 'Name this flag!';
         case DataType.POKEMON:
@@ -101,6 +109,9 @@ function getCorrectOption(dataType: DataType, answer: Data): string {
         case DataType.MUSIC:
             const song = answer as Song;
             return song.Artist;
+        case DataType.FORTNITE_FESTIVAL:
+            const festivalSong = answer as FestivalSong;
+            return festivalSong.artist;
         case DataType.FLAG_GAME:
             const flag = answer as Flag;
             return flag.name;
@@ -120,6 +131,9 @@ function getImageUrl(answer: Data, dataType: DataType): string {
         case DataType.MUSIC:
             const song = answer as Song;
             return song.imageUrl;
+        case DataType.FORTNITE_FESTIVAL:
+            const festivalSong = answer as FestivalSong;
+            return festivalSong.albumArt;
         case DataType.FLAG_GAME:
             const flag = answer as Flag;
             return flag.imageUrl;
