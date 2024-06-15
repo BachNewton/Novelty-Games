@@ -8,7 +8,7 @@ import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from
 import Filter from './Filter';
 import { RollercoasterFilter, deleteFilter, filter, saveFilter } from '../logic/FilterRepo';
 
-const APP_VERSION = 'v4.6.1';
+const APP_VERSION = 'v4.6.2';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -73,53 +73,6 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         setRefreshDataStoredNeeded(false);
     }
 
-    const onGameClickMap = getOnGameClickMap(
-        [DataType.ROLLERCOASTERS, DataType.MUSIC, DataType.FLAG_GAME, DataType.POKEMON],
-        state,
-        setState
-    );
-
-    const onFilterRollercoastersClick = () => {
-        state.data = getFromRepo(DataType.ROLLERCOASTERS, progressUpdater);
-        state.ui = UiState.FILTER;
-        setState({ ...state });
-    };
-
-    const onDeleteRollercoastersClick = () => {
-        if (confirmedDelete(DataType.ROLLERCOASTERS) === false) return;
-
-        deleteDataFromDb(DataType.ROLLERCOASTERS);
-        deleteFilter();
-        state.isDataStored.set(DataType.ROLLERCOASTERS, false);
-        setState({ ...state });
-    };
-
-    const onDeleteMusicClick = () => {
-        if (confirmedDelete(DataType.MUSIC) === false) return;
-
-        deleteDataFromDb(DataType.MUSIC);
-        state.isDataStored.set(DataType.MUSIC, false);
-        setState({ ...state });
-    };
-
-    const onDeleteFlagGameClick = () => {
-        if (confirmedDelete(DataType.FLAG_GAME) === false) return;
-
-        deleteDataFromDb(DataType.FLAG_GAME);
-        state.isDataStored.set(DataType.FLAG_GAME, false);
-        setState({ ...state });
-    };
-
-    const onDeletePokemonClick = () => {
-        if (confirmedDelete(DataType.POKEMON) === false) return;
-
-        deleteDataFromDb(DataType.POKEMON_ALL);
-        deleteDataFromDb(DataType.POKEMON);
-        state.isDataStored.set(DataType.POKEMON_ALL, false);
-        state.isDataStored.set(DataType.POKEMON, false);
-        setState({ ...state });
-    };
-
     const onHomeClicked = () => {
         state.ui = UiState.HOME;
         setRefreshDataStoredNeeded(true);
@@ -142,12 +95,8 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
             return HomeUi(
                 state.versionState,
                 state.isDataStored,
-                onGameClickMap,
-                onFilterRollercoastersClick,
-                onDeleteRollercoastersClick,
-                onDeleteMusicClick,
-                onDeleteFlagGameClick,
-                onDeletePokemonClick
+                state,
+                setState
             );
         case UiState.GAME:
             return <Game
@@ -168,33 +117,48 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
 function HomeUi(
     versionState: VersionState,
     isDataStored: Map<DataType, boolean>,
-    onGameClickMap: Map<DataType, () => void>,
-    onFilterRollercoastersClick: () => void,
-    onDeleteRollercoastersClick: () => void,
-    onDeleteMusicClick: () => void,
-    onDeleteFlagGameClick: () => void,
-    onDeletePokemonClick: () => void
+    state: State,
+    setState: React.Dispatch<React.SetStateAction<State>>
 ) {
+    const gameOptionsUi = [DataType.ROLLERCOASTERS, DataType.MUSIC, DataType.FLAG_GAME, DataType.POKEMON].map((dataType, index) => {
+        const onGameClick = () => {
+            const data = getFromRepo(getRepoBaseDataType(dataType), progressUpdater);
+            state.data = hasFilter(dataType) ? filter(data as Promise<Array<Rollercoaster>>) : data;
+            state.dataType = dataType;
+            state.ui = UiState.GAME;
 
-    const filterRollercoastersButtonUi = isDataStored.get(DataType.ROLLERCOASTERS) === true
-        ? <button className='option-button' onClick={onFilterRollercoastersClick}>⚙️</button>
-        : <></>;
+            setState({ ...state });
+        };
 
-    const deleteRollercoastersButtonUi = isDataStored.get(DataType.ROLLERCOASTERS) === true
-        ? <button className='option-button' onClick={onDeleteRollercoastersClick}>🗑️</button>
-        : <></>;
+        const onDeleteClick = () => {
+            if (confirmedDelete(dataType) === false) return;
 
-    const deleteMusicButtonUi = isDataStored.get(DataType.MUSIC) === true
-        ? <button className='option-button' onClick={onDeleteMusicClick}>🗑️</button>
-        : <></>;
+            deleteData(dataType, state);
+            if (dataType === DataType.POKEMON) deleteData(DataType.POKEMON_ALL, state);
 
-    const deleteFlagGameButtonUi = isDataStored.get(DataType.FLAG_GAME) === true
-        ? <button className='option-button' onClick={onDeleteFlagGameClick}>🗑️</button>
-        : <></>;
+            setState({ ...state });
+        };
 
-    const deletePokemonButtonUi = isDataStored.get(DataType.POKEMON_ALL) === true || isDataStored.get(DataType.POKEMON) === true
-        ? <button className='option-button' onClick={onDeletePokemonClick}>🗑️</button>
-        : <></>;
+        const onFilterClick = () => {
+            state.data = getFromRepo(DataType.ROLLERCOASTERS, progressUpdater);
+            state.ui = UiState.FILTER;
+            setState({ ...state });
+        };
+
+        const filterButtonUi = hasFilter(dataType) && isDataStored.get(dataType) === true
+            ? <button className='option-button' onClick={onFilterClick}>⚙️</button>
+            : <></>;
+
+        const deleteButtonUi = isDataStored.get(dataType) === true || (dataType === DataType.POKEMON && isDataStored.get(DataType.POKEMON_ALL) === true)
+            ? <button className='option-button' onClick={onDeleteClick}>🗑️</button>
+            : <></>;
+
+        return <div className='game-option' key={index}>
+            <button className='play-button' onClick={onGameClick}>{getGameName(dataType)}</button>
+            {filterButtonUi}
+            {deleteButtonUi}
+        </div>
+    });
 
     return <div className='Home'>
         <div id='version-state'>{VersionStateUi(versionState)}</div>
@@ -202,23 +166,7 @@ function HomeUi(
         <h3>🃏 Kyle's Novelty Trivia Games 🕹️</h3>
         <div>Created by: Kyle Hutchinson</div>
         <div><br /><br /><br /></div>
-        <div className='game-option'>
-            <button className='play-button' onClick={onGameClickMap.get(DataType.ROLLERCOASTERS)}>{getGameName(DataType.ROLLERCOASTERS)}</button>
-            {filterRollercoastersButtonUi}
-            {deleteRollercoastersButtonUi}
-        </div>
-        <div className='game-option'>
-            <button className='play-button' onClick={onGameClickMap.get(DataType.MUSIC)}>{getGameName(DataType.MUSIC)}</button>
-            {deleteMusicButtonUi}
-        </div>
-        <div className='game-option'>
-            <button className='play-button' onClick={onGameClickMap.get(DataType.FLAG_GAME)}>{getGameName(DataType.FLAG_GAME)}</button>
-            {deleteFlagGameButtonUi}
-        </div>
-        <div className='game-option'>
-            <button className='play-button' onClick={onGameClickMap.get(DataType.POKEMON)}>{getGameName(DataType.POKEMON)}</button>
-            {deletePokemonButtonUi}
-        </div>
+        {gameOptionsUi}
     </div>;
 }
 
@@ -240,6 +188,13 @@ function confirmedDelete(dataType: DataType): boolean {
     return window.confirm(`Are you sure you want to delete your stored data for ${gameName}? Your High Score will NOT be deleted.`);
 }
 
+function deleteData(dataType: DataType, state: State) {
+    deleteDataFromDb(dataType);
+    if (hasFilter(dataType)) deleteFilter();
+
+    state.isDataStored.set(dataType, false);
+}
+
 function getGameName(dataType: DataType): string {
     switch (dataType) {
         case DataType.ROLLERCOASTERS:
@@ -255,27 +210,6 @@ function getGameName(dataType: DataType): string {
         default:
             throw new Error('Unsupported DataType: ' + dataType);
     }
-}
-
-function getOnGameClickMap(
-    dataTypes: Array<DataType>,
-    state: State,
-    setState: React.Dispatch<React.SetStateAction<State>>
-): Map<DataType, () => void> {
-    const onGameClickMap = new Map<DataType, () => void>();
-
-    for (const dataType of dataTypes) {
-        onGameClickMap.set(dataType, () => {
-            const data = getFromRepo(getRepoBaseDataType(dataType), progressUpdater);
-            state.data = hasFilter(dataType) ? filter(data as Promise<Array<Rollercoaster>>) : data;
-            state.dataType = dataType;
-            state.ui = UiState.GAME;
-
-            setState({ ...state });
-        });
-    }
-
-    return onGameClickMap;
 }
 
 function getRepoBaseDataType(dataType: DataType): DataType {
@@ -299,6 +233,7 @@ function hasFilter(dataType: DataType): boolean {
         case DataType.MUSIC:
         case DataType.FLAG_GAME:
         case DataType.POKEMON:
+        case DataType.POKEMON_ALL:
         case DataType.FORTNITE_FESTIVAL:
             return false;
         default:
