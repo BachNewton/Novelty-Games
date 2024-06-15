@@ -195,7 +195,7 @@ function deleteData(dataType: DataType, state: State) {
     state.isDataStored.set(dataType, false);
 }
 
-function getGameName(dataType: DataType): string {
+export function getGameName(dataType: DataType): string {
     switch (dataType) {
         case DataType.ROLLERCOASTERS:
             return 'Rollercoasters 🎢';

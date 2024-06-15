@@ -6,6 +6,7 @@ export interface Question {
     correctIndex: number;
     imageUrl: string;
     spotifyId: string | null;
+    audioLink: string | null;
 }
 
 export function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
@@ -46,8 +47,9 @@ function createQuestion(optionsPool: Set<string>, answer: Data, dataType: DataTy
     const options = incorrectOptions.slice(0, correctIndex).concat(getCorrectOption(dataType, answer)).concat(incorrectOptions.slice(correctIndex));
     const imageUrl = getImageUrl(answer, dataType);
     const spotifyId = getSpotifyId(dataType, answer);
+    const audioLink = getAudioLink(dataType, answer);
 
-    return { text: text, options: options, correctIndex: correctIndex, imageUrl: imageUrl, spotifyId: spotifyId };
+    return { text: text, options: options, correctIndex: correctIndex, imageUrl: imageUrl, spotifyId: spotifyId, audioLink: audioLink };
 }
 
 function getSpotifyId(dataType: DataType, answer: Data): string | null {
@@ -58,6 +60,20 @@ function getSpotifyId(dataType: DataType, answer: Data): string | null {
         case DataType.FLAG_GAME:
         case DataType.POKEMON:
         case DataType.FORTNITE_FESTIVAL:
+            return null;
+        default:
+            throw new Error('Unsupported DataType: ' + dataType);
+    }
+}
+
+function getAudioLink(dataType: DataType, answer: Data): string | null {
+    switch (dataType) {
+        case DataType.FORTNITE_FESTIVAL:
+            return (answer as FestivalSong).sampleMp3;
+        case DataType.ROLLERCOASTERS:
+        case DataType.FLAG_GAME:
+        case DataType.POKEMON:
+        case DataType.MUSIC:
             return null;
         default:
             throw new Error('Unsupported DataType: ' + dataType);

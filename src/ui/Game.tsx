@@ -5,6 +5,7 @@ import { createQuestions, Question } from '../logic/QuestionCreator';
 import AsyncImage from './AsyncImage';
 import { ProgressListener, ProgressEvent } from '../logic/ProgressUpdater';
 import MusicPlayer from './MusicPlayer';
+import { getGameName } from './Home';
 
 interface GameProps {
   pendingData: Promise<Array<Data>>;
@@ -139,6 +140,7 @@ function GameOverUi(gameState: GameState, setGameState: React.Dispatch<React.Set
     : <></>;
 
   return <div>
+    <p>{getGameName(gameState.dataType)}</p>
     Game Over!
     <p>Final Score: {gameState.score}</p>
     {HighScoreUi(gameState)}
@@ -237,6 +239,10 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
 }
 
 function MusicPlayerUi(question: Question) {
+  if (question.audioLink !== null) {
+    return <audio preload='none' controls src={question.audioLink} style={{ height: '21px' }} />;
+  }
+
   if (question.spotifyId === null) return <></>;
 
   return <div style={{ display: 'flex', justifyContent: 'center' }}>
