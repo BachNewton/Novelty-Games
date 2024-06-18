@@ -4,12 +4,23 @@ import './css/index.css';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 import Home from './ui/Home';
+import io from 'socket.io-client';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
 const updateListener = { onUpdateAvailable: () => { }, onNoUpdateFound: () => { } };
+
+const socket = io('http://localhost:3000/');
+
+socket.on('connect', () => {
+  console.log('Connected to server');
+});
+
+socket.on('disconnect', () => {
+  console.log('Disconnected from server');
+});
 
 root.render(
   <React.StrictMode>
