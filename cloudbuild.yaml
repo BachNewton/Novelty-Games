@@ -1,3 +1,7 @@
+env:
+  - name: PORT
+    value: '3000'
+
 steps:
 - name: 'Install Node packages'
   entrypoint: npm
