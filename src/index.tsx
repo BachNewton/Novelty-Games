@@ -4,6 +4,8 @@ import './css/index.css';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 import Home from './ui/Home';
+import Board from './mille-bornes/ui/Board';
+import { startGame } from './mille-bornes/logic/Temp';
 // import io from 'socket.io-client';
 
 const root = ReactDOM.createRoot(
@@ -24,7 +26,8 @@ const updateListener = { onUpdateAvailable: () => { }, onNoUpdateFound: () => { 
 
 root.render(
   <React.StrictMode>
-    <Home updateListener={updateListener} />
+    {/* <Home updateListener={updateListener} /> */}
+    <Board game={startGame()} />
   </React.StrictMode>
 );
 

@@ -1,0 +1,23 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="192" height="264" version="1.1" xmlns="http://www.w3.org/2000/svg">
+
+<!-- green-bordered card background -->
+<rect x="5" y="5" rx="11" ry="11" width="182" height="254"
+style="fill: rgb(255,255,255);
+stroke-width: 2;
+stroke: rgb(24,117,52)" />
+
+<!-- top gray dot -->
+<circle cx="96" cy="59" r="32"
+style="fill: rgb(178,178,178)" />
+
+<!-- center gray dot -->
+<circle cx="96" cy="132" r="32"
+style="fill: rgb(178,178,178)" />
+
+<!-- bottom green dot -->
+<circle cx="96" cy="205" r="32"
+style="fill: rgb(24,117,52)" />
+
+</svg>
