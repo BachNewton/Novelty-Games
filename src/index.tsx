@@ -12,7 +12,7 @@ const root = ReactDOM.createRoot(
 
 const updateListener = { onUpdateAvailable: () => { }, onNoUpdateFound: () => { } };
 
-const socket = io('35.184.159.91:80');
+const socket = io('http://35.184.159.91/');
 
 socket.on('connect', () => {
   console.log('Connected to server');
