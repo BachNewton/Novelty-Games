@@ -8,7 +8,7 @@ import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from
 import Filter from './Filter';
 import { RollercoasterFilter, deleteFilter, filter, saveFilter } from '../logic/FilterRepo';
 
-const APP_VERSION = 'v5.1.0';
+const APP_VERSION = 'v5.2.0';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };

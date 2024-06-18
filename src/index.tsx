@@ -4,7 +4,7 @@ import './css/index.css';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 import Home from './ui/Home';
-import io from 'socket.io-client';
+// import io from 'socket.io-client';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -12,15 +12,15 @@ const root = ReactDOM.createRoot(
 
 const updateListener = { onUpdateAvailable: () => { }, onNoUpdateFound: () => { } };
 
-const socket = io('http://35.184.159.91/');
+// const socket = io('http://35.184.159.91/');
 
-socket.on('connect', () => {
-  console.log('Connected to server');
-});
+// socket.on('connect', () => {
+//   console.log('Connected to server');
+// });
 
-socket.on('disconnect', () => {
-  console.log('Disconnected from server');
-});
+// socket.on('disconnect', () => {
+//   console.log('Disconnected from server');
+// });
 
 root.render(
   <React.StrictMode>

@@ -4,3 +4,4 @@
 - Add something related to Pokemon types to Pokemon game
 - Start loading the next image so there is less wait time
 - Move puppeteer to dev deps
+- Move server deps into their own package.json
