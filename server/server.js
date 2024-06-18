@@ -1,13 +1,19 @@
 import express from 'express';
-import cors from 'cors';
-import http from 'http';
+// import cors from 'cors';
+// import http from 'http';
 import { Server } from 'socket.io';
+import { createServer } from 'node:http';
 
 const app = express();
-app.use(cors({ origin: '*' }));
-const server = http.createServer(app);
+// app.use(cors({ origin: '*' }));
+// const server = http.createServer(app);
+const server = createServer(app);
 const io = new Server(server);
 const PORT = 80;
+
+app.get('/', (_, res) => {
+    res.send('<h1>Novelty Games Server</h1>');
+});
 
 io.on('connection', (socket) => {
     console.log('Connection:', socket.id);
