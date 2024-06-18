@@ -1,22 +1,28 @@
-import MB_BACK from '../images/MB-back.svg';
-import { Card, Game } from '../logic/Data';
+import '../css/Cards.css';
+import { Card } from "../logic/Card";
+import { Game } from "../logic/Data";
+import CardUi from "./Card";
+import TableauUi from "./Tableau";
 
 interface BoardProps {
     game: Game;
 }
 
 const Board: React.FC<BoardProps> = ({ game }) => {
-    const hand = game.hand.map((card, index) =>
-        <div key={index} style={{ flexGrow: 1 }}>
-            <img src={card.image} style={{ maxWidth: '100%' }} />
-        </div>
+    return <div>
+        <TableauUi tableauData={game.tableau} />
+        {HandUi(game.hand)}
+    </div>
+};
+
+function HandUi(hand: Array<Card>) {
+    const cards = hand.map((card, index) =>
+        <CardUi card={card} key={index} />
     );
 
-    return <div style={{
-        display: 'flex', maxWidth: '100vw'
-    }}>
-        {hand}
-    </div >;
-};
+    return <div className="cards">
+        {cards}
+    </div>;
+}
 
 export default Board;

@@ -1,38 +1,51 @@
-import MB_25 from '../images/MB-25.svg';
-import MB_50 from '../images/MB-50.svg';
-import MB_75 from '../images/MB-75.svg';
-import MB_100 from '../images/MB-100.svg';
-import MB_200 from '../images/MB-200.svg';
-import MB_ROLL from '../images/MB-roll.svg';
-import { Card, CardType } from './Data';
 import { shuffleArray } from '../../util/Randomizer';
-import { Game } from '../logic/Data';
+import { Game, Tableau } from '../logic/Data';
+import { AceCard, Card, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, EmergencyCard, LimitCard, RollCard, SealantCard, TankerCard, UnlimitedCard } from './Card';
 
 export function startGame(): Game {
     const deck = shuffleArray(createDeck());
     const hand = deck.splice(0, 6);
+    const tableau: Tableau = {
+        battleArea: new RollCard(),
+        speedArea: new UnlimitedCard(),
+        distanceArea: [new Distance25Card(), new Distance25Card(), new Distance50Card(), new Distance75Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance200Card()],
+        safetyArea: [new AceCard(), new TankerCard()]
+    };
 
-    return { deck: deck, hand: hand };
+    return { deck: deck, hand: hand, tableau: tableau };
 }
 
 function createDeck(): Array<Card> {
     const deck: Array<Card> = [];
 
-    const distance25: Card = { type: CardType.DISTANCE, image: MB_25 };
-    const distance50: Card = { type: CardType.DISTANCE, image: MB_50 };
-    const distance75: Card = { type: CardType.DISTANCE, image: MB_75 };
-    const distance100: Card = { type: CardType.DISTANCE, image: MB_100 };
-    const distance200: Card = { type: CardType.DISTANCE, image: MB_200 };
+    const distance25Cards = new Array(10).fill(new Distance25Card());
+    const distance50Cards = new Array(10).fill(new Distance50Card());
+    const distance75Cards = new Array(10).fill(new Distance75Card());
+    const distance100Cards = new Array(12).fill(new Distance100Card());
+    const distance200Cards = new Array(4).fill(new Distance200Card());
 
-    const roll: Card = { type: CardType.REMEDIES, image: MB_ROLL };
+    const rollCards = new Array(14).fill(new RollCard());
 
-    const distance25s: Array<Card> = new Array(10).fill(distance25);
-    const distance50s = new Array(10).fill(distance50);
-    const distance75s = new Array(10).fill(distance75);
-    const distance100s = new Array(12).fill(distance100);
-    const distance200s = new Array(4).fill(distance200);
+    const limitCards = new Array(4).fill(new LimitCard());
+    const unlimitedCards = new Array(6).fill(new UnlimitedCard());
 
-    const rolls = new Array(14).fill(roll);
+    const aceCard = new AceCard();
+    const emergencyCard = new EmergencyCard();
+    const sealantCard = new SealantCard();
+    const tankerCard = new TankerCard();
 
-    return deck.concat(distance25s, distance50s, distance75s, distance100s, distance200s, rolls);
+    return deck.concat(
+        distance25Cards,
+        distance50Cards,
+        distance75Cards,
+        distance100Cards,
+        distance200Cards,
+        rollCards,
+        limitCards,
+        unlimitedCards,
+        aceCard,
+        emergencyCard,
+        sealantCard,
+        tankerCard
+    );
 }

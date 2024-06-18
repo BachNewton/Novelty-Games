@@ -1,0 +1,113 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="192" height="264" version="1.1" xmlns="http://www.w3.org/2000/svg">
+
+<!-- purple-bordered card background -->
+<rect x="5" y="5" rx="11" ry="11" width="182" height="254"
+style="fill: rgb(255,255,255);
+stroke-width: 2;
+stroke: rgb(70,24,198)" />
+
+<!-- purple tire -->
+<circle cx="96" cy="132" r="72"
+style="fill: rgb(70,24,198)" />
+
+<!-- white wheel -->
+<circle cx="96" cy="132" r="36"
+style="fill: rgb(255,255,255)" />
+
+<!-- center black dot -->
+<circle cx="96" cy="132" r="9"
+style="fill: rgb(0,0,0)" />
+
+<!-- outer black dot 1 -->
+<circle cx="86" cy="113" r="3"
+style="fill: rgb(0,0,0)" />
+
+<!-- outer black dot 2 -->
+<circle cx="110" cy="117" r="3"
+style="fill: rgb(0,0,0)" />
+
+<!-- outer black dot 3 -->
+<circle cx="75" cy="135" r="3"
+style="fill: rgb(0,0,0)" />
+
+<!-- outer black dot 4 -->
+<circle cx="92" cy="152" r="3"
+style="fill: rgb(0,0,0)" />
+
+<!-- outer black dot 5 -->
+<circle cx="114" cy="141" r="3"
+style="fill: rgb(0,0,0)" />
+
+<!-- bottom black line -->
+<line x1="24" y1="227" x2="167" y2="227"
+style="stroke: rgb(0,0,0);
+stroke-width: 3" />
+
+<!-- black lines and triangles forming arrows, from left to right -->
+
+<line x1="36" y1="227" x2="36" y2="216"
+style="stroke: rgb(0,0,0);
+stroke-width: 3" />
+
+<polygon points="36,208 32,217 40,217"
+style="fill: rgb(0,0,0)" />
+
+<line x1="51" y1="227" x2="51" y2="216"
+style="stroke: rgb(0,0,0);
+stroke-width: 3" />
+
+<polygon points="51,208 47,217 55,217"
+style="fill: rgb(0,0,0)" />
+
+<line x1="66" y1="227" x2="66" y2="216"
+style="stroke: rgb(0,0,0);
+stroke-width: 3" />
+
+<polygon points="66,208 62,217 70,217"
+style="fill: rgb(0,0,0)" />
+
+<line x1="81" y1="227" x2="81" y2="216"
+style="stroke: rgb(0,0,0);
+stroke-width: 3" />
+
+<polygon points="81,208 77,217 85,217"
+style="fill: rgb(0,0,0)" />
+
+<line x1="96" y1="227" x2="96" y2="216"
+style="stroke: rgb(0,0,0);
+stroke-width: 3" />
+
+<polygon points="96,208 92,217 100,217"
+style="fill: rgb(0,0,0)" />
+
+<line x1="111" y1="227" x2="111" y2="216"
+style="stroke: rgb(0,0,0);
+stroke-width: 3" />
+
+<polygon points="111,208 107,217 115,217"
+style="fill: rgb(0,0,0)" />
+
+<line x1="126" y1="227" x2="126" y2="216"
+style="stroke: rgb(0,0,0);
+stroke-width: 3" />
+
+<polygon points="126,208 122,217 130,217"
+style="fill: rgb(0,0,0)" />
+
+<line x1="141" y1="227" x2="141" y2="216"
+style="stroke: rgb(0,0,0);
+stroke-width: 3" />
+
+<polygon points="141,208 137,217 145,217"
+style="fill: rgb(0,0,0)" />
+
+<line x1="156" y1="227" x2="156" y2="216"
+style="stroke: rgb(0,0,0);
+stroke-width: 3" />
+
+<polygon points="156,208 152,217 160,217"
+style="fill: rgb(0,0,0)" />
+
+</svg>

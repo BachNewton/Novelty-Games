@@ -1,0 +1,65 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="192" height="264" version="1.1" xmlns="http://www.w3.org/2000/svg">
+
+<!-- purple-bordered card background -->
+<rect x="5" y="5" rx="11" ry="11" width="182" height="254"
+style="fill: rgb(255,255,255);
+stroke-width: 2;
+stroke: rgb(70,24,198)" />
+
+<!-- upper left purple line -->
+<line x1="25" y1="80" x2="68" y2="96"
+style="stroke: rgb(70,24,198);
+stroke-width: 2" />
+
+<!-- center left purple line -->
+<line x1="25" y1="107" x2="68" y2="107"
+style="stroke: rgb(70,24,198);
+stroke-width: 2" />
+
+<!-- lower left purple line -->
+<line x1="25" y1="134" x2="68" y2="118"
+style="stroke: rgb(70,24,198);
+stroke-width: 2" />
+
+<!-- upper right purple line -->
+<line x1="123" y1="96" x2="166" y2="80"
+style="stroke: rgb(70,24,198);
+stroke-width: 2" />
+
+<!-- center right purple line -->
+<line x1="123" y1="107" x2="166" y2="107"
+style="stroke: rgb(70,24,198);
+stroke-width: 2" />
+
+<!-- lower right purple line -->
+<line x1="123" y1="118" x2="166" y2="134"
+style="stroke: rgb(70,24,198);
+stroke-width: 2" />
+
+<!-- bottom black curved bar -->
+<path d="M 30 144
+Q 95.5 136 161 144
+L 160 154
+Q 95.5 147 31 154
+Z"
+style="fill: rgb(0,0,0)" />
+
+<!-- purple siren -->
+<path d="M 74 79
+Q 95.5 70 117 79
+V 144
+H 74
+Z"
+style="fill: rgb(70,24,198)" />
+
+<!-- white center of siren -->
+<path d="M 85 95
+Q 95.5 90 106 95
+V 127
+H 85
+Z"
+style="fill: rgb(255,255,255)" />
+
+</svg>
