@@ -1,0 +1,6 @@
+steps:
+- name: 'Install Node packages'
+  entrypoint: npm
+  args: ['install']
+
+images: ['gcr.io/novelty-games/novelty-games-server']
