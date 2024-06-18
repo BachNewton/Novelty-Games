@@ -4,7 +4,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 
 const app = express();
-app.use(cors({ origin: 'http://localhost:3001' }));
+app.use(cors({ origin: 'http://localhost:3000' }));
 const server = http.createServer(app);
 const io = new Server(server);
 const PORT = 80;
