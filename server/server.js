@@ -7,6 +7,7 @@ const app = express();
 app.use(cors({ origin: 'http://localhost:3001' }));
 const server = http.createServer(app);
 const io = new Server(server);
+const PORT = 80;
 
 io.on('connection', (socket) => {
     console.log('Connection:', socket.id);
@@ -24,6 +25,6 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(3000, () => {
-    console.log('Server listening on port 3000');
+server.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
 });
