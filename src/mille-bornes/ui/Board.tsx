@@ -23,15 +23,43 @@ const Board: React.FC<BoardProps> = ({ game }) => {
         <TableauUi tableauData={otherPlayer.tableau} key={index} />
     );
 
-    return <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '100vh' }}>
-        <div className="cards">
+    return <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '100vh', overflow: 'hidden' }}>
+        <div className="cards" style={{ minHeight: 0, display: 'flex' }}>
             <CardUi />
             <CardUi card={game.discard} />
         </div>
         {otherPlayersTableau}
         <TableauUi tableauData={game.currentPlayer.tableau} />
         <Hand hand={game.currentPlayer.hand} onPlayCard={onPlayCard} />
-    </div>
+    </div>;
+
+    // const catImage = 'https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500';
+
+    // const style: React.CSSProperties = {
+    //     borderColor: 'yellow',
+    //     borderWidth: '1px',
+    //     borderStyle: 'solid',
+    //     boxSizing: 'border-box',
+    //     minHeight: 0,
+    //     display: 'flex'
+    // };
+
+    // const catStyle: React.CSSProperties = {
+    //     borderColor: 'magenta',
+    //     borderWidth: '1px',
+    //     borderStyle: 'solid',
+    //     boxSizing: 'border-box',
+    //     objectFit: 'contain'
+    // };
+
+    // return <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '100vh' }}>
+    //     <div style={style}><img style={catStyle} src={catImage} /></div>
+    //     <div style={style}><img style={catStyle} src={catImage} /></div>
+    //     <div style={style}><img style={catStyle} src={catImage} /></div>
+    //     <div style={style}><img style={catStyle} src={catImage} /></div>
+    //     <div style={style}><img style={catStyle} src={catImage} /></div>
+    //     <div style={style}><img style={catStyle} src={catImage} /></div>
+    // </div>
 };
 
 export default Board;

@@ -24,7 +24,7 @@ const Hand: React.FC<HandProps> = ({ hand, onPlayCard }) => {
         return <CardUi card={card} key={index} onClick={onClick} isHighlighted={card === hightlightedCard} />
     });
 
-    return <div className="cards">
+    return <div style={{ minHeight: 0, display: 'flex' }} className="cards">
         {cards}
     </div>;
 }
