@@ -18,25 +18,25 @@ export function startGame(): Game {
 function createDeck(): Array<Card> {
     const deck: Array<Card> = [];
 
-    const distance25Cards = new Array(10).fill(new Distance25Card());
-    const distance50Cards = new Array(10).fill(new Distance50Card());
-    const distance75Cards = new Array(10).fill(new Distance75Card());
-    const distance100Cards = new Array(12).fill(new Distance100Card());
-    const distance200Cards = new Array(4).fill(new Distance200Card());
+    const distance25Cards = Array.from({ length: 10 }, () => new Distance25Card());
+    const distance50Cards = Array.from({ length: 10 }, () => new Distance50Card());
+    const distance75Cards = Array.from({ length: 10 }, () => new Distance75Card());
+    const distance100Cards = Array.from({ length: 12 }, () => new Distance100Card());
+    const distance200Cards = Array.from({ length: 4 }, () => new Distance200Card());
 
-    const rollCards = new Array(14).fill(new RollCard());
-    const stopCards = new Array(5).fill(new StopCard());
+    const rollCards = Array.from({ length: 14 }, () => new RollCard());
+    const stopCards = Array.from({ length: 5 }, () => new StopCard());
 
-    const limitCards = new Array(4).fill(new LimitCard());
-    const unlimitedCards = new Array(6).fill(new UnlimitedCard());
+    const limitCards = Array.from({ length: 4 }, () => new LimitCard());
+    const unlimitedCards = Array.from({ length: 6 }, () => new UnlimitedCard());
 
-    const emptyCards = new Array(3).fill(new EmptyCard());
-    const flatCards = new Array(3).fill(new FlatCard());
-    const crashCards = new Array(3).fill(new CrashCard());
+    const emptyCards = Array.from({ length: 3 }, () => new EmptyCard());
+    const flatCards = Array.from({ length: 3 }, () => new FlatCard());
+    const crashCards = Array.from({ length: 3 }, () => new CrashCard());
 
-    const repairCards = new Array(6).fill(new RepairCard());
-    const gasCards = new Array(6).fill(new GasCard());
-    const spareCards = new Array(6).fill(new SpareCard());
+    const repairCards = Array.from({ length: 6 }, () => new RepairCard());
+    const gasCards = Array.from({ length: 6 }, () => new GasCard());
+    const spareCards = Array.from({ length: 6 }, () => new SpareCard());
 
     const aceCard = new AceCard();
     const emergencyCard = new EmergencyCard();
