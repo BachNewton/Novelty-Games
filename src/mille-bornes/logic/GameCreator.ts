@@ -1,18 +1,38 @@
 import { shuffleArray } from '../../util/Randomizer';
-import { Game, Tableau } from './Data';
+import { Game, Player } from './Data';
 import { AceCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, EmergencyCard, EmptyCard, FlatCard, GasCard, LimitCard, RepairCard, RollCard, SealantCard, SpareCard, StopCard, TankerCard, UnlimitedCard } from './Card';
 
 export function startGame(): Game {
     const deck = shuffleArray(createDeck());
-    const hand = deck.splice(0, 6);
-    const tableau: Tableau = {
-        battleArea: null,
-        speedArea: null,
-        distanceArea: [new Distance25Card(), new Distance25Card(), new Distance25Card(), new Distance50Card(), new Distance50Card(), new Distance75Card(), new Distance75Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance200Card(), new Distance200Card()],
-        safetyArea: []
+
+    const kyle: Player = {
+        name: 'Kyle',
+        hand: deck.splice(0, 6),
+        tableau: {
+            battleArea: null,
+            speedArea: null,
+            distanceArea: [],
+            safetyArea: []
+        },
+        team: 1
     };
 
-    return { deck: deck, hand: hand, tableau: tableau, discard: null };
+    const players: Array<Player> = [
+        kyle,
+        {
+            name: 'Eric',
+            hand: deck.splice(0, 6),
+            tableau: {
+                battleArea: null,
+                speedArea: null,
+                distanceArea: [],
+                safetyArea: []
+            },
+            team: 2
+        }
+    ];
+
+    return { deck: deck, discard: null, players: players, currentPlayer: kyle };
 }
 
 function createDeck(): Array<Card> {

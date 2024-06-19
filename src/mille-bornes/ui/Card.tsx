@@ -10,7 +10,7 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ card, translateY, onClick, isHighlighted }) => {
-    const imgStyle: React.CSSProperties = { maxWidth: '100%' };
+    const imgStyle: React.CSSProperties = { maxWidth: '100%', height: '100%' };
 
     if (isHighlighted) {
         imgStyle.borderColor = 'yellow';

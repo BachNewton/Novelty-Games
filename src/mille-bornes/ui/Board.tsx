@@ -19,13 +19,18 @@ const Board: React.FC<BoardProps> = ({ game }) => {
         setState({ ...state });
     };
 
-    return <div>
+    const otherPlayersTableau = game.players.filter(player => player !== game.currentPlayer).map((otherPlayer, index) =>
+        <TableauUi tableauData={otherPlayer.tableau} key={index} />
+    );
+
+    return <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '100vh' }}>
         <div className="cards">
             <CardUi />
             <CardUi card={game.discard} />
         </div>
-        <TableauUi tableauData={game.tableau} />
-        <Hand hand={game.hand} onPlayCard={onPlayCard} />
+        {otherPlayersTableau}
+        <TableauUi tableauData={game.currentPlayer.tableau} />
+        <Hand hand={game.currentPlayer.hand} onPlayCard={onPlayCard} />
     </div>
 };
 

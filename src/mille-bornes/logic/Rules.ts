@@ -3,15 +3,15 @@ import { Game, Tableau } from "./Data";
 
 export function playCard(card: Card, game: Game) {
     // Remove card from hand
-    game.hand = game.hand.filter(handCard => handCard !== card);
+    game.currentPlayer.hand = game.currentPlayer.hand.filter(handCard => handCard !== card);
 
-    if (canCardBePlayed(card, game.tableau)) {
+    if (canCardBePlayed(card, game.currentPlayer.tableau)) {
         if (card instanceof RollCard) {
-            game.tableau.battleArea = card;
+            game.currentPlayer.tableau.battleArea = card;
         } else if (isInstanceOfDistanceCard(card)) {
-            game.tableau.distanceArea.push(card as DistanceCard);
+            game.currentPlayer.tableau.distanceArea.push(card as DistanceCard);
         } else if (card instanceof UnlimitedCard) {
-            game.tableau.speedArea = card;
+            game.currentPlayer.tableau.speedArea = card;
         }
     } else {
         game.discard = card;
@@ -44,8 +44,9 @@ function canRollCardBePlayed(tableau: Tableau): boolean {
 
 function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau): boolean {
     const battleArea = tableau.battleArea;
+    const speedAreaLimit = tableau.speedArea === null ? 200 : tableau.speedArea.limit;
 
-    if (battleArea instanceof RollCard && tableau.speedArea && tableau.speedArea.limit >= distanceCard.amount) return true;
+    if (battleArea instanceof RollCard && speedAreaLimit >= distanceCard.amount) return true;
 
     return false;
 }
