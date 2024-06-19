@@ -1,7 +1,5 @@
-import '../css/Cards.css';
-import { Card } from "../logic/Card";
 import { Game } from "../logic/Data";
-import CardUi from "./Card";
+import Hand from './Hand';
 import TableauUi from "./Tableau";
 
 interface BoardProps {
@@ -11,18 +9,8 @@ interface BoardProps {
 const Board: React.FC<BoardProps> = ({ game }) => {
     return <div>
         <TableauUi tableauData={game.tableau} />
-        {HandUi(game.hand)}
+        <Hand hand={game.hand} />
     </div>
 };
-
-function HandUi(hand: Array<Card>) {
-    const cards = hand.map((card, index) =>
-        <CardUi card={card} key={index} />
-    );
-
-    return <div className="cards">
-        {cards}
-    </div>;
-}
 
 export default Board;
