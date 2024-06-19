@@ -1,0 +1,27 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="192" height="264" version="1.1" xmlns="http://www.w3.org/2000/svg">
+
+<!-- green-bordered card background -->
+<rect x="5" y="5" rx="11" ry="11" width="182" height="254"
+style="fill: rgb(255,255,255);
+stroke-width: 2;
+stroke: rgb(24,117,52)" />
+
+<!-- circular top of green wrench -->
+<circle cx="96" cy="88" r="63"
+style="fill: rgb(24,117,52)" />
+
+<!-- rectangular cut-out of wrench -->
+<rect x="69" y="13" width="54" height="84"
+style="fill: rgb(255,255,255)" />
+
+<!-- green handle of wrench -->
+<rect x="69" y="139" width="54" height="93"
+style="fill: rgb(24,117,52)" />
+
+<!-- black nut -->
+<polygon points="73,52 73,79 96,93 119,79 119,52 96,38"
+style="fill: rgb(0,0,0)" />
+
+</svg>

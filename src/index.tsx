@@ -5,7 +5,7 @@ import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 import Home from './ui/Home';
 import Board from './mille-bornes/ui/Board';
-import { startGame } from './mille-bornes/logic/Temp';
+import { startGame } from './mille-bornes/logic/GameCreator';
 // import io from 'socket.io-client';
 
 const root = ReactDOM.createRoot(

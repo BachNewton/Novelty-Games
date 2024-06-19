@@ -1,6 +1,6 @@
 import { shuffleArray } from '../../util/Randomizer';
-import { Game, Tableau } from '../logic/Data';
-import { AceCard, Card, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, EmergencyCard, LimitCard, RollCard, SealantCard, TankerCard, UnlimitedCard } from './Card';
+import { Game, Tableau } from './Data';
+import { AceCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, EmergencyCard, EmptyCard, FlatCard, GasCard, LimitCard, RepairCard, RollCard, SealantCard, SpareCard, StopCard, TankerCard, UnlimitedCard } from './Card';
 
 export function startGame(): Game {
     const deck = shuffleArray(createDeck());
@@ -25,9 +25,18 @@ function createDeck(): Array<Card> {
     const distance200Cards = new Array(4).fill(new Distance200Card());
 
     const rollCards = new Array(14).fill(new RollCard());
+    const stopCards = new Array(5).fill(new StopCard());
 
     const limitCards = new Array(4).fill(new LimitCard());
     const unlimitedCards = new Array(6).fill(new UnlimitedCard());
+
+    const emptyCards = new Array(3).fill(new EmptyCard());
+    const flatCards = new Array(3).fill(new FlatCard());
+    const crashCards = new Array(3).fill(new CrashCard());
+
+    const repairCards = new Array(6).fill(new RepairCard());
+    const gasCards = new Array(6).fill(new GasCard());
+    const spareCards = new Array(6).fill(new SpareCard());
 
     const aceCard = new AceCard();
     const emergencyCard = new EmergencyCard();
@@ -41,8 +50,15 @@ function createDeck(): Array<Card> {
         distance100Cards,
         distance200Cards,
         rollCards,
+        stopCards,
         limitCards,
         unlimitedCards,
+        emptyCards,
+        flatCards,
+        crashCards,
+        repairCards,
+        gasCards,
+        spareCards,
         aceCard,
         emergencyCard,
         sealantCard,

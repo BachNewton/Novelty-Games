@@ -1,0 +1,55 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="192" height="264" version="1.1" xmlns="http://www.w3.org/2000/svg">
+
+<!-- red-bordered card background -->
+<rect x="5" y="5" rx="11" ry="11" width="182" height="254"
+style="fill: rgb(255,255,255);
+stroke-width: 2;
+stroke: rgb(239,31,29)" />
+
+<!-- red tire -->
+<circle cx="96" cy="168" r="71"
+style="fill: rgb(239,31,29)" />
+
+<!-- cover-up part of tire -->
+<rect x="22" y="198" width="150" height="53"
+style="fill: rgb(255,255,255)" />
+
+<!-- white wheel -->
+<circle cx="96" cy="159" r="36"
+style="fill: rgb(255,255,255)" />
+
+<!-- center black dot -->
+<circle cx="96" cy="159" r="9"
+style="fill: rgb(0,0,0)" />
+
+<!-- outer black dot 1 -->
+<circle cx="86" cy="140" r="3"
+style="fill: rgb(0,0,0)" />
+
+<!-- outer black dot 2 -->
+<circle cx="110" cy="144" r="3"
+style="fill: rgb(0,0,0)" />
+
+<!-- outer black dot 3 -->
+<circle cx="75" cy="162" r="3"
+style="fill: rgb(0,0,0)" />
+
+<!-- outer black dot 4 -->
+<circle cx="92" cy="179" r="3"
+style="fill: rgb(0,0,0)" />
+
+<!-- outer black dot 5 -->
+<circle cx="114" cy="168" r="3"
+style="fill: rgb(0,0,0)" />
+
+<!-- cover-up part of wheel -->
+<polygon points="66,190 131,188 131,196 66,196"
+style="fill: rgb(239,31,29)" />
+
+<!-- black arrow -->
+<polygon points="54,189 48,207 52,205 52,226 56,226 56,205 60,207"
+style="flll: rgb(0,0,0)" />
+
+</svg>

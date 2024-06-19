@@ -1,0 +1,30 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="192" height="264" version="1.1" xmlns="http://www.w3.org/2000/svg">
+
+<!-- red-bordered card background -->
+<rect x="5" y="5" rx="11" ry="11" width="182" height="254"
+style="fill: rgb(255,255,255);
+stroke-width: 2;
+stroke: rgb(239,31,29)" />
+
+<!-- red exclamation mark -->
+<path d="M 84 167
+H 107
+L 126 62
+Q 126 35 96 35
+Q 66 35 65 62
+Z"
+style="fill: rgb(239,31,29)" />
+
+<!-- bottom red dot -->
+<circle cx="96" cy="204" r="25"
+style="fill: rgb(239,31,29)" />
+
+<!-- black-bordered lightning bolt -->
+<polygon points="26,205 90,91 105,115 164,58 101,171 85,148"
+style="fill: rgb(255,255,255);
+stroke-width: 3;
+stroke: rgb(0,0,0)" />
+
+</svg>

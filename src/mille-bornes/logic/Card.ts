@@ -4,12 +4,19 @@ import MB_75 from '../images/MB-75.svg';
 import MB_100 from '../images/MB-100.svg';
 import MB_200 from '../images/MB-200.svg';
 import MB_ROLL from '../images/MB-roll.svg';
+import MB_STOP from '../images/MB-stop.svg';
 import MB_ACE from '../images/MB-ace.svg';
 import MB_EMERGENCY from '../images/MB-emergency.svg';
 import MB_SEALANT from '../images/MB-sealant.svg';
 import MB_TANKER from '../images/MB-tanker.svg';
 import MB_UNLIMITED from '../images/MB-unlimited.svg';
 import MB_LIMIT from '../images/MB-limit.svg';
+import MB_CRASH from '../images/MB-crash.svg';
+import MB_EMPTY from '../images/MB-empty.svg';
+import MB_FLAT from '../images/MB-flat.svg';
+import MB_GAS from '../images/MB-gas.svg';
+import MB_REPAIR from '../images/MB-repair.svg';
+import MB_SPARE from '../images/MB-spare.svg';
 
 export interface Card {
     image: string;
@@ -28,11 +35,67 @@ export interface DistanceCard extends Card {
     amount: number;
 }
 
+export class CrashCard implements HazardCard {
+    image: string;
+
+    constructor() {
+        this.image = MB_CRASH;
+    }
+}
+
+export class EmptyCard implements HazardCard {
+    image: string;
+
+    constructor() {
+        this.image = MB_EMPTY;
+    }
+}
+
+export class FlatCard implements HazardCard {
+    image: string;
+
+    constructor() {
+        this.image = MB_FLAT;
+    }
+}
+
+export class GasCard implements RemedyCard {
+    image: string;
+
+    constructor() {
+        this.image = MB_GAS;
+    }
+}
+
+export class RepairCard implements RemedyCard {
+    image: string;
+
+    constructor() {
+        this.image = MB_REPAIR;
+    }
+}
+
+export class SpareCard implements RemedyCard {
+    image: string;
+
+    constructor() {
+        this.image = MB_SPARE;
+    }
+}
+
 export class RollCard implements RemedyCard {
     image: string;
 
     constructor() {
         this.image = MB_ROLL;
+    }
+}
+
+export class StopCard implements HazardCard {
+    image: string;
+
+    constructor() {
+        this.image = MB_STOP;
     }
 }
 
