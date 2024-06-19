@@ -1,4 +1,4 @@
-import { Card, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, GasCard, RepairCard, RollCard, SpareCard, StopCard } from "./Card";
+import { Card, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, GasCard, LimitCard, RepairCard, RollCard, SpareCard, StopCard, UnlimitedCard } from "./Card";
 import { Game, Tableau } from "./Data";
 
 export function playCard(card: Card, game: Game) {
@@ -10,6 +10,8 @@ export function playCard(card: Card, game: Game) {
             game.tableau.battleArea = card;
         } else if (isInstanceOfDistanceCard(card)) {
             game.tableau.distanceArea.push(card as DistanceCard);
+        } else if (card instanceof UnlimitedCard) {
+            game.tableau.speedArea = card;
         }
     } else {
         game.discard = card;
@@ -19,6 +21,7 @@ export function playCard(card: Card, game: Game) {
 function canCardBePlayed(card: Card, tableau: Tableau) {
     if (card instanceof RollCard) return canRollCardBePlayed(tableau);
     if (isInstanceOfDistanceCard(card)) return canDistanceCardBePlayed(card as DistanceCard, tableau);
+    if (card instanceof UnlimitedCard) return canUnlimitedCardBePlayed(tableau);
 
     return false;
 }
@@ -42,8 +45,13 @@ function canRollCardBePlayed(tableau: Tableau): boolean {
 function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau): boolean {
     const battleArea = tableau.battleArea;
 
-    if (battleArea instanceof RollCard) return true;
-    if (tableau.speedArea && tableau.speedArea.limit >= distanceCard.amount) return true;
+    if (battleArea instanceof RollCard && tableau.speedArea && tableau.speedArea.limit >= distanceCard.amount) return true;
+
+    return false;
+}
+
+function canUnlimitedCardBePlayed(tableau: Tableau): boolean {
+    if (tableau.speedArea instanceof LimitCard) return true;
 
     return false;
 }
