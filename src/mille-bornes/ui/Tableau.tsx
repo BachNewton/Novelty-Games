@@ -11,9 +11,17 @@ const Tableau: React.FC<TableauProps> = ({ tableauData }) => {
         <CardUi card={safetyCard} key={index} />
     );
 
-    const distanceCards = tableauData.distanceArea.map((distanceCard, index) =>
-        <CardUi card={distanceCard} key={index} />
-    );
+    const distanceCards = [25, 50, 75, 100, 200].map((amount, index) => {
+        const distanceCards = tableauData.distanceArea.filter(distanceCard => distanceCard.amount === amount);
+
+        const distanceCardsUi = distanceCards.map((distanceCard, index) =>
+            <CardUi card={distanceCard} translateY={index * -80} key={index} />
+        );
+
+        return <div key={index}>
+            {distanceCardsUi}
+        </div>;
+    });
 
     const battleCard = <CardUi card={tableauData.battleArea} />;
     const speedCard = <CardUi card={tableauData.speedArea} />;
@@ -23,10 +31,10 @@ const Tableau: React.FC<TableauProps> = ({ tableauData }) => {
             {safetyCards}
         </div>
         <div style={{ display: 'flex' }}>
-            <div className="cards" style={{ flexGrow: 1 }}>
+            <div className="cards" style={{ flexGrow: 1, height: '0px' }}>
                 {distanceCards}
             </div>
-            <div style={{ flexGrow: 1, marginLeft: '15px' }}>
+            <div style={{ flexGrow: 1, marginLeft: '5%' }}>
                 {battleCard}
                 {speedCard}
             </div>
