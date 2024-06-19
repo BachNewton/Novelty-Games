@@ -6,9 +6,9 @@ export function startGame(): Game {
     const deck = shuffleArray(createDeck());
     const hand = deck.splice(0, 6);
     const tableau: Tableau = {
-        battleArea: new RollCard(),
-        speedArea: new UnlimitedCard(),
-        distanceArea: [new Distance25Card(), new Distance25Card(), new Distance50Card(), new Distance75Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance200Card()],
+        battleArea: null,
+        speedArea: null,
+        distanceArea: [new Distance25Card(), new Distance25Card(), new Distance50Card(), new Distance75Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance200Card(), new Distance200Card()],
         safetyArea: [new AceCard(), new TankerCard()]
     };
 

@@ -7,8 +7,8 @@ export interface Game {
 }
 
 export interface Tableau {
-    battleArea: BattleCard;
-    speedArea: SpeedCard;
+    battleArea: BattleCard | null;
+    speedArea: SpeedCard | null;
     distanceArea: Array<DistanceCard>;
     safetyArea: Array<SafetyCard>;
 }
