@@ -4,6 +4,7 @@ export interface Game {
     deck: Array<Card>;
     hand: Array<Card>;
     tableau: Tableau;
+    discard: Card | null;
 }
 
 export interface Tableau {

@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import '../css/Cards.css';
+import { useState } from 'react';
 import { Card } from "../logic/Card";
 import CardUi from "./Card";
 

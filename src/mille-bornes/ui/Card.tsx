@@ -1,28 +1,28 @@
 import { Card as CardData } from "../logic/Card";
 import MB_OUTLINE from "../images/MB-outline.svg";
+import MB_BACK from "../images/MB-back.svg";
 
 interface CardProps {
-    card: CardData | null;
+    card?: CardData | null;
     translateY?: number;
     onClick?: () => void;
     isHighlighted?: boolean;
 }
 
 const Card: React.FC<CardProps> = ({ card, translateY, onClick, isHighlighted }) => {
-    const style: React.CSSProperties = {
-        flexGrow: 1,
-        transform: `translateY(${translateY || 0}%)`,
-    };
+    const imgStyle: React.CSSProperties = { maxWidth: '100%' };
 
     if (isHighlighted) {
-        style.borderColor = 'yellow';
-        style.borderWidth = '3px';
-        style.borderStyle = 'solid';
-        style.boxSizing = 'border-box';
+        imgStyle.borderColor = 'yellow';
+        imgStyle.borderWidth = '3px';
+        imgStyle.borderStyle = 'solid';
+        imgStyle.boxSizing = 'border-box';
     }
 
-    return <div style={style}>
-        <img src={card?.image || MB_OUTLINE} style={{ maxWidth: '100%' }} onClick={onClick} />
+    const src = card === undefined ? MB_BACK : card === null ? MB_OUTLINE : card.image;
+
+    return <div style={{ flexGrow: 1, transform: `translateY(${translateY || 0}%)` }}>
+        <img src={src} style={imgStyle} onClick={onClick} />
     </div>
 }
 

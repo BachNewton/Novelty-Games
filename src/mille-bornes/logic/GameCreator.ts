@@ -9,10 +9,10 @@ export function startGame(): Game {
         battleArea: null,
         speedArea: null,
         distanceArea: [new Distance25Card(), new Distance25Card(), new Distance25Card(), new Distance50Card(), new Distance50Card(), new Distance75Card(), new Distance75Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance200Card(), new Distance200Card()],
-        safetyArea: [new AceCard(), new TankerCard()]
+        safetyArea: []
     };
 
-    return { deck: deck, hand: hand, tableau: tableau };
+    return { deck: deck, hand: hand, tableau: tableau, discard: null };
 }
 
 function createDeck(): Array<Card> {
@@ -38,10 +38,10 @@ function createDeck(): Array<Card> {
     const gasCards = Array.from({ length: 6 }, () => new GasCard());
     const spareCards = Array.from({ length: 6 }, () => new SpareCard());
 
-    const aceCard = new AceCard();
-    const emergencyCard = new EmergencyCard();
-    const sealantCard = new SealantCard();
-    const tankerCard = new TankerCard();
+    // const aceCard = new AceCard();
+    // const emergencyCard = new EmergencyCard();
+    // const sealantCard = new SealantCard();
+    // const tankerCard = new TankerCard();
 
     return deck.concat(
         distance25Cards,
@@ -59,9 +59,9 @@ function createDeck(): Array<Card> {
         repairCards,
         gasCards,
         spareCards,
-        aceCard,
-        emergencyCard,
-        sealantCard,
-        tankerCard
+        // aceCard,
+        // emergencyCard,
+        // sealantCard,
+        // tankerCard
     );
 }
