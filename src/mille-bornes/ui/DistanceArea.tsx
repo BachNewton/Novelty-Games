@@ -12,18 +12,18 @@ const DistanceArea: React.FC<DistanceAreaProps> = ({ distanceArea }) => {
         const distanceCards = distanceArea.filter(distanceCard => distanceCard.amount === amount);
 
         const distanceCardsUi = distanceCards.map((distanceCard, index) =>
-            <CardUi card={distanceCard} translateY={index * -90} key={index} />
+            <CardUi card={distanceCard} key={index} />
         );
 
-        return <div key={index}>
+        return <div style={{ display: 'grid', minHeight: 0 }} key={index}>
             {distanceCardsUi}
         </div>;
     });
 
 
-    return <div style={{ display: 'flex', minHeight: 0 }}>
+    return <div style={{ display: 'grid', gridAutoFlow: 'column', minHeight: 0, justifyContent: 'start' }}>
         {distanceAreaUi}
-    </div>;
+    </div>
 };
 
 export default DistanceArea;

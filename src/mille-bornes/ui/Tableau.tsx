@@ -1,30 +1,23 @@
-import '../css/Cards.css';
+import { AceCard, EmergencyCard, SealantCard, TankerCard } from '../logic/Card';
 import { Tableau as TableauData } from "../logic/Data";
 import CardUi from "./Card";
 import DistanceArea from './DistanceArea';
+import SafetyArea from './SafetyArea';
 
 interface TableauProps {
     tableauData: TableauData;
 }
 
 const Tableau: React.FC<TableauProps> = ({ tableauData }) => {
-    const safetyCards = tableauData.safetyArea.map((safetyCard, index) =>
-        <CardUi card={safetyCard} key={index} />
-    );
-
-    const battleCard = <CardUi card={tableauData.battleArea} />;
-    const speedCard = <CardUi card={tableauData.speedArea} />;
-
-    return <div style={{ minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-        <div className="cards" style={{ minHeight: 0 }}>
-            {safetyCards}
-        </div>
-        <div style={{ display: 'flex', minHeight: 0 }}>
+    return <div style={{ display: 'grid', gridAutoFlow: 'column', justifyContent: 'space-evenly', minHeight: 0, padding: '0.5% 0' }}>
+        <div style={{ display: 'grid', alignContent: 'center', minHeight: 0 }}>
+            <SafetyArea safetyArea={tableauData.safetyArea} />
             <DistanceArea distanceArea={tableauData.distanceArea} />
-            <div style={{ marginLeft: '5%', display: 'flex', flexDirection: 'column' }}>
-                {battleCard}
-                {speedCard}
-            </div>
+        </div>
+
+        <div style={{ display: 'grid', minHeight: 0 }}>
+            <CardUi card={tableauData.battleArea} />
+            <CardUi card={tableauData.speedArea} />
         </div>
     </div>;
 }

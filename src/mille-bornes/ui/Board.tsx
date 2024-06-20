@@ -1,12 +1,10 @@
-import '../css/Cards.css';
 import { useState } from "react";
 import { Card } from "../logic/Card";
 import { Game } from "../logic/Data";
 import { playCard } from "../logic/Rules";
 import Hand from './Hand';
 import TableauUi from "./Tableau";
-import CardUi from "./Card";
-import MB_OUTLINE from "../images/MB-outline.svg";
+import DeckAndDiscard from './DeckAndDiscard';
 
 interface BoardProps {
     game: Game;
@@ -24,68 +22,15 @@ const Board: React.FC<BoardProps> = ({ game }) => {
         <TableauUi tableauData={otherPlayer.tableau} key={index} />
     );
 
-    // return <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '100vh', overflow: 'hidden' }}>
-    //     <div className="cards" style={{ minHeight: 0, display: 'flex' }}>
-    //         <CardUi />
-    //         <CardUi card={game.discard} />
-    //     </div>
-    //     {otherPlayersTableau}
-    //     <TableauUi tableauData={game.currentPlayer.tableau} />
-    //     <Hand hand={game.currentPlayer.hand} onPlayCard={onPlayCard} />
-    // </div>;
+    // gridTemplateRows: '1fr 3fr 3fr 3fr'
+    return <div style={{ display: 'grid', height: '100vh' }}>
+        <div>This is the stats for the game<br />Which can sometimes<br />Take up many lines</div>
+        <DeckAndDiscard discard={game.discard} />
 
-    const imgStyle: React.CSSProperties = {
-        minHeight: 0,
-        height: '100%',
-        objectFit: 'contain',
-        width: '100%',
-        objectPosition: 'bottom'
-    };
+        {otherPlayersTableau}
+        <TableauUi tableauData={game.currentPlayer.tableau} />
 
-    const table = <div style={{ display: 'grid', gridAutoFlow: 'column', justifyContent: 'space-evenly', minHeight: 0 }}>
-        <div style={{ display: 'grid', alignContent: 'center', minHeight: 0 }}>
-            <div style={{ display: 'grid', gridAutoFlow: 'column', minHeight: 0 }}>
-                <img style={imgStyle} src={MB_OUTLINE} />
-                <img style={imgStyle} src={MB_OUTLINE} />
-                <img style={imgStyle} src={MB_OUTLINE} />
-                <img style={imgStyle} src={MB_OUTLINE} />
-            </div>
-            <div style={{ display: 'grid', gridAutoFlow: 'column', minHeight: 0 }}>
-                <img style={imgStyle} src={MB_OUTLINE} />
-                <img style={imgStyle} src={MB_OUTLINE} />
-                <img style={imgStyle} src={MB_OUTLINE} />
-                <img style={imgStyle} src={MB_OUTLINE} />
-                <img style={imgStyle} src={MB_OUTLINE} />
-            </div>
-        </div>
-
-        <div style={{ display: 'grid', minHeight: 0 }}>
-            <img style={imgStyle} src={MB_OUTLINE} />
-            <img style={imgStyle} src={MB_OUTLINE} />
-        </div>
-    </div>;
-
-    return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: '1fr 3fr 3fr 3fr' }}>
-        <div style={{ display: 'grid', gridAutoFlow: 'column', justifyContent: 'start', alignContent: 'space-between', minHeight: 0 }}>
-            <img style={imgStyle} src={MB_OUTLINE} />
-            <img style={imgStyle} src={MB_OUTLINE} />
-        </div>
-
-
-        {table}
-        {table}
-        {table}
-
-
-        <div style={{ display: 'grid', gridAutoFlow: 'column', minHeight: 0 }}>
-            <img style={imgStyle} src={MB_OUTLINE} />
-            <img style={imgStyle} src={MB_OUTLINE} />
-            <img style={imgStyle} src={MB_OUTLINE} />
-            <img style={imgStyle} src={MB_OUTLINE} />
-            <img style={imgStyle} src={MB_OUTLINE} />
-            <img style={imgStyle} src={MB_OUTLINE} />
-            <img style={imgStyle} src={MB_OUTLINE} />
-        </div>
+        <Hand hand={game.currentPlayer.hand} onPlayCard={onPlayCard} />
     </div>;
 };
 

@@ -12,7 +12,7 @@ export function startGame(): Game {
             battleArea: new RollCard(),
             speedArea: new LimitCard(),
             distanceArea: [new Distance25Card(), new Distance25Card(), new Distance50Card(), new Distance75Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance200Card()],
-            safetyArea: [new AceCard(), new EmergencyCard(), new SealantCard(), new TankerCard()]
+            safetyArea: [new AceCard()]
         },
         team: 1
     };
@@ -25,8 +25,8 @@ export function startGame(): Game {
             tableau: {
                 battleArea: new StopCard(),
                 speedArea: new UnlimitedCard(),
-                distanceArea: [new Distance25Card(), new Distance25Card(), new Distance50Card(), new Distance75Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance200Card()],
-                safetyArea: [new AceCard(), new EmergencyCard(), new SealantCard(), new TankerCard()]
+                distanceArea: [new Distance25Card(), new Distance25Card(), new Distance75Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card()],
+                safetyArea: [new EmergencyCard(), new TankerCard(), new SealantCard()]
             },
             team: 2
         }

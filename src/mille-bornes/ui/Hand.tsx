@@ -1,4 +1,3 @@
-import '../css/Cards.css';
 import { useState } from 'react';
 import { Card } from "../logic/Card";
 import CardUi from "./Card";
@@ -24,9 +23,9 @@ const Hand: React.FC<HandProps> = ({ hand, onPlayCard }) => {
         return <CardUi card={card} key={index} onClick={onClick} isHighlighted={card === hightlightedCard} />
     });
 
-    return <div style={{ minHeight: 0, display: 'flex', justifyContent: 'center' }}>
+    return <div style={{ display: 'grid', gridAutoFlow: 'column', minHeight: 0 }}>
         {cards}
-    </div>;
+    </div>
 }
 
 export default Hand;
