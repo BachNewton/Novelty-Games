@@ -11,7 +11,7 @@ export function startGame(): Game {
         tableau: {
             battleArea: new RollCard(),
             speedArea: new LimitCard(),
-            distanceArea: [new Distance25Card(), new Distance25Card(), new Distance50Card(), new Distance75Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance200Card()],
+            distanceArea: [new Distance25Card(), new Distance50Card(), new Distance50Card(), new Distance50Card(), new Distance75Card(), new Distance75Card(), new Distance75Card(), new Distance75Card(), new Distance200Card()],
             safetyArea: [new AceCard()]
         },
         team: 1
