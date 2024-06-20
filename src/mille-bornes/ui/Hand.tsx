@@ -20,7 +20,7 @@ const Hand: React.FC<HandProps> = ({ hand, onPlayCard }) => {
             }
         };
 
-        return <CardUi card={card} key={index} onClick={onClick} isHighlighted={card === hightlightedCard} />
+        return <CardUi card={card} key={index} onClick={onClick} isHighlighted={card === hightlightedCard} objectPosition={'bottom'} />
     });
 
     return <div style={{ display: 'grid', gridAutoFlow: 'column', minHeight: 0 }}>

@@ -11,10 +11,11 @@ const DistanceArea: React.FC<DistanceAreaProps> = ({ distanceArea }) => {
     const distanceAreaUi = DISTANCE_CARD_AMOUNTS.map((amount, index) => {
         const distanceCards = distanceArea.filter(distanceCard => distanceCard.amount === amount);
         const distanceCardsUi = distanceCards.map((distanceCard, index) =>
-            <CardUi transform={`scale(${1}) translateY(${-index * 90}%)`} card={distanceCard} key={index} />
+            <CardUi transform={`translateY(${-index * 90}%)`} card={distanceCard} key={index} />
         );
 
-        return <div style={{ display: 'grid', minHeight: 0, height: `${100 * distanceCards.length}%` }} key={index}>
+        // TODO: 100 can be adjusted proportionally (100 * distanceCards.length)
+        return <div style={{ display: 'grid', minHeight: 0, height: `${100 * distanceCards.length}%`, zIndex: -1 }} key={index}>
             {distanceCardsUi}
         </div>;
     });

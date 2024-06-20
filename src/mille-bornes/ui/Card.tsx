@@ -7,15 +7,16 @@ interface CardProps {
     onClick?: () => void;
     isHighlighted?: boolean;
     transform?: string;
+    objectPosition?: string;
 }
 
-const Card: React.FC<CardProps> = ({ card, onClick, isHighlighted, transform }) => {
+const Card: React.FC<CardProps> = ({ card, onClick, isHighlighted, transform, objectPosition }) => {
     const imgStyle: React.CSSProperties = {
         minHeight: 0,
         height: '100%',
         objectFit: 'contain',
         width: '100%',
-        objectPosition: 'top', // bottom
+        objectPosition: objectPosition || 'top',
         transform: transform
     };
 

@@ -1,4 +1,3 @@
-import { AceCard, EmergencyCard, SealantCard, TankerCard } from '../logic/Card';
 import { Tableau as TableauData } from "../logic/Data";
 import CardUi from "./Card";
 import DistanceArea from './DistanceArea';
@@ -9,7 +8,7 @@ interface TableauProps {
 }
 
 const Tableau: React.FC<TableauProps> = ({ tableauData }) => {
-    return <div style={{ display: 'grid', gridAutoFlow: 'column', justifyContent: 'space-evenly', minHeight: 0, padding: '0.5% 0' }}>
+    return <div style={{ display: 'grid', gridAutoFlow: 'column', justifyContent: 'space-evenly', minHeight: 0, padding: '2% 0' }}>
         <div style={{ display: 'grid', alignContent: 'center', minHeight: 0 }}>
             <SafetyArea safetyArea={tableauData.safetyArea} />
             <DistanceArea distanceArea={tableauData.distanceArea} />
