@@ -49,11 +49,43 @@ const Board: React.FC<BoardProps> = ({ game }) => {
     //     borderWidth: '1px',
     //     borderStyle: 'solid',
     //     boxSizing: 'border-box',
-    //     objectFit: 'contain'
+    //     objectFit: 'contain',
+    //     width: '100%'
     // };
 
     // return <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '100vh' }}>
+    //     {/* <div style={{ flexGrow: 2, display: 'flex' }}>
+    //         <div style={{ minHeight: 0, display: 'flex' }}>
+    //             <img style={{}} src={catImage} />
+    //         </div>
+    //     </div>
+    //     <div style={{ flexGrow: 1, display: 'flex' }}>
+    //         <div style={{ minHeight: 0, display: 'flex' }}>
+    //             <img style={{}} src={catImage} />
+    //         </div>
+    //     </div>
+    //     <div style={{ flexGrow: 2, display: 'flex' }}>
+    //         <div style={{ minHeight: 0, display: 'flex' }}>
+    //             <img style={{}} src={catImage} />
+    //         </div>
+    //     </div>
+    //     <div style={{ flexGrow: 2, display: 'flex' }}>
+    //         <div style={{ minHeight: 0, display: 'flex' }}>
+    //             <img style={{}} src={catImage} />
+    //         </div>
+    //     </div> */}
     //     <div style={style}><img style={catStyle} src={catImage} /></div>
+    //     <div style={{
+    //         borderColor: 'yellow',
+    //         borderWidth: '1px',
+    //         borderStyle: 'solid',
+    //         boxSizing: 'border-box',
+    //         minHeight: 0,
+    //         display: 'flex'
+    //     }}>
+    //         <div style={style}><img style={catStyle} src={catImage} /></div>
+    //         <div style={style}><img style={catStyle} src={catImage} /></div>
+    //     </div>
     //     <div style={style}><img style={catStyle} src={catImage} /></div>
     //     <div style={style}><img style={catStyle} src={catImage} /></div>
     //     <div style={style}><img style={catStyle} src={catImage} /></div>

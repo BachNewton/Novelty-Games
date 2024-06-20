@@ -21,7 +21,7 @@ const Card: React.FC<CardProps> = ({ card, translateY, onClick, isHighlighted })
 
     const src = card === undefined ? MB_BACK : card === null ? MB_OUTLINE : card.image;
 
-    return <div style={{ flexGrow: 1, transform: `translateY(${translateY || 0}%)`, minHeight: 0 }}>
+    return <div style={{ transform: `translateY(${translateY || 0}%)`, minHeight: 0 }}>
         <img src={src} style={imgStyle} onClick={onClick} />
     </div>
 }
