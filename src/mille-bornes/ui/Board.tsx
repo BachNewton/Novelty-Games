@@ -6,6 +6,7 @@ import { playCard } from "../logic/Rules";
 import Hand from './Hand';
 import TableauUi from "./Tableau";
 import CardUi from "./Card";
+import MB_OUTLINE from "../images/MB-outline.svg";
 
 interface BoardProps {
     game: Game;
@@ -23,75 +24,69 @@ const Board: React.FC<BoardProps> = ({ game }) => {
         <TableauUi tableauData={otherPlayer.tableau} key={index} />
     );
 
-    return <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '100vh', overflow: 'hidden' }}>
-        <div className="cards" style={{ minHeight: 0, display: 'flex' }}>
-            <CardUi />
-            <CardUi card={game.discard} />
+    // return <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '100vh', overflow: 'hidden' }}>
+    //     <div className="cards" style={{ minHeight: 0, display: 'flex' }}>
+    //         <CardUi />
+    //         <CardUi card={game.discard} />
+    //     </div>
+    //     {otherPlayersTableau}
+    //     <TableauUi tableauData={game.currentPlayer.tableau} />
+    //     <Hand hand={game.currentPlayer.hand} onPlayCard={onPlayCard} />
+    // </div>;
+
+    const imgStyle: React.CSSProperties = {
+        minHeight: 0,
+        height: '100%',
+        objectFit: 'contain',
+        width: '100%',
+        objectPosition: 'bottom'
+    };
+
+    const table = <div style={{ display: 'grid', gridAutoFlow: 'column', justifyContent: 'space-evenly', minHeight: 0 }}>
+        <div style={{ display: 'grid', alignContent: 'center', minHeight: 0 }}>
+            <div style={{ display: 'grid', gridAutoFlow: 'column', minHeight: 0 }}>
+                <img style={imgStyle} src={MB_OUTLINE} />
+                <img style={imgStyle} src={MB_OUTLINE} />
+                <img style={imgStyle} src={MB_OUTLINE} />
+                <img style={imgStyle} src={MB_OUTLINE} />
+            </div>
+            <div style={{ display: 'grid', gridAutoFlow: 'column', minHeight: 0 }}>
+                <img style={imgStyle} src={MB_OUTLINE} />
+                <img style={imgStyle} src={MB_OUTLINE} />
+                <img style={imgStyle} src={MB_OUTLINE} />
+                <img style={imgStyle} src={MB_OUTLINE} />
+                <img style={imgStyle} src={MB_OUTLINE} />
+            </div>
         </div>
-        {otherPlayersTableau}
-        <TableauUi tableauData={game.currentPlayer.tableau} />
-        <Hand hand={game.currentPlayer.hand} onPlayCard={onPlayCard} />
+
+        <div style={{ display: 'grid', minHeight: 0 }}>
+            <img style={imgStyle} src={MB_OUTLINE} />
+            <img style={imgStyle} src={MB_OUTLINE} />
+        </div>
     </div>;
 
-    // const catImage = 'https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500';
+    return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: '1fr 3fr 3fr 3fr' }}>
+        <div style={{ display: 'grid', gridAutoFlow: 'column', justifyContent: 'start', alignContent: 'space-between', minHeight: 0 }}>
+            <img style={imgStyle} src={MB_OUTLINE} />
+            <img style={imgStyle} src={MB_OUTLINE} />
+        </div>
 
-    // const style: React.CSSProperties = {
-    //     borderColor: 'yellow',
-    //     borderWidth: '1px',
-    //     borderStyle: 'solid',
-    //     boxSizing: 'border-box',
-    //     minHeight: 0,
-    //     display: 'flex'
-    // };
 
-    // const catStyle: React.CSSProperties = {
-    //     borderColor: 'magenta',
-    //     borderWidth: '1px',
-    //     borderStyle: 'solid',
-    //     boxSizing: 'border-box',
-    //     objectFit: 'contain',
-    //     width: '100%'
-    // };
+        {table}
+        {table}
+        {table}
 
-    // return <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '100vh' }}>
-    //     {/* <div style={{ flexGrow: 2, display: 'flex' }}>
-    //         <div style={{ minHeight: 0, display: 'flex' }}>
-    //             <img style={{}} src={catImage} />
-    //         </div>
-    //     </div>
-    //     <div style={{ flexGrow: 1, display: 'flex' }}>
-    //         <div style={{ minHeight: 0, display: 'flex' }}>
-    //             <img style={{}} src={catImage} />
-    //         </div>
-    //     </div>
-    //     <div style={{ flexGrow: 2, display: 'flex' }}>
-    //         <div style={{ minHeight: 0, display: 'flex' }}>
-    //             <img style={{}} src={catImage} />
-    //         </div>
-    //     </div>
-    //     <div style={{ flexGrow: 2, display: 'flex' }}>
-    //         <div style={{ minHeight: 0, display: 'flex' }}>
-    //             <img style={{}} src={catImage} />
-    //         </div>
-    //     </div> */}
-    //     <div style={style}><img style={catStyle} src={catImage} /></div>
-    //     <div style={{
-    //         borderColor: 'yellow',
-    //         borderWidth: '1px',
-    //         borderStyle: 'solid',
-    //         boxSizing: 'border-box',
-    //         minHeight: 0,
-    //         display: 'flex'
-    //     }}>
-    //         <div style={style}><img style={catStyle} src={catImage} /></div>
-    //         <div style={style}><img style={catStyle} src={catImage} /></div>
-    //     </div>
-    //     <div style={style}><img style={catStyle} src={catImage} /></div>
-    //     <div style={style}><img style={catStyle} src={catImage} /></div>
-    //     <div style={style}><img style={catStyle} src={catImage} /></div>
-    //     <div style={style}><img style={catStyle} src={catImage} /></div>
-    //     <div style={style}><img style={catStyle} src={catImage} /></div>
-    // </div>
+
+        <div style={{ display: 'grid', gridAutoFlow: 'column', minHeight: 0 }}>
+            <img style={imgStyle} src={MB_OUTLINE} />
+            <img style={imgStyle} src={MB_OUTLINE} />
+            <img style={imgStyle} src={MB_OUTLINE} />
+            <img style={imgStyle} src={MB_OUTLINE} />
+            <img style={imgStyle} src={MB_OUTLINE} />
+            <img style={imgStyle} src={MB_OUTLINE} />
+            <img style={imgStyle} src={MB_OUTLINE} />
+        </div>
+    </div>;
 };
 
 export default Board;
