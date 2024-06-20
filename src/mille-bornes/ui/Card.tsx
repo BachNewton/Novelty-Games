@@ -15,7 +15,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, isHighlighted, transform }) 
         height: '100%',
         objectFit: 'contain',
         width: '100%',
-        objectPosition: 'bottom',
+        objectPosition: 'top', // bottom
         transform: transform
     };
 
