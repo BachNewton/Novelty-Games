@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card } from "../logic/Card";
+import { Card, LimitCard } from "../logic/Card";
 import { Game, Team } from "../logic/Data";
 import { canCardBePlayed, isInstanceOfHazardCard, playCard } from "../logic/Rules";
 import Hand from './Hand';
@@ -45,7 +45,7 @@ const Board: React.FC<BoardProps> = ({ game }) => {
             if (state.ui.card !== card) {
                 state.ui.card = card;
             } else {
-                if (isInstanceOfHazardCard(card) && canCardBePlayed(card, game)) {
+                if ((isInstanceOfHazardCard(card) || card instanceof LimitCard) && canCardBePlayed(card, game)) {
                     state.ui = new TeamSelection(card);
                 } else {
                     playCard(card, game, game.currentPlayer.team);
