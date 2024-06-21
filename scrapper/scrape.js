@@ -1,5 +1,5 @@
-const puppeteer = require('puppeteer');
-const fs = require('fs');
+import fs from 'fs';
+import puppeteer from 'puppeteer';
 
 function getMatch(html, regex) {
     return Array.from(html.matchAll(regex))[0];
