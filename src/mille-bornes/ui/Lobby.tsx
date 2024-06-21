@@ -1,8 +1,21 @@
-import MB25 from '../images/MB-25.svg';
+import { Communicator } from "../logic/Communicator";
+import { startGame } from "../logic/GameCreator";
 
-const Lobby: React.FC = () => {
+interface LobbyProps {
+    communicator: Communicator;
+}
+
+const Lobby: React.FC<LobbyProps> = ({ communicator }) => {
+    const onJoin = () => { };
+
+    const onCreate = () => {
+        const game = startGame();
+        communicator.startGame(game);
+    };
+
     return <div>
-        <img src={MB25} />
+        <button onClick={onJoin}>Join</button>
+        <button onClick={onCreate}>Create</button>
     </div>;
 };
 

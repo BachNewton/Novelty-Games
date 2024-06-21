@@ -6,7 +6,8 @@ import reportWebVitals from './reportWebVitals';
 import Home from './ui/Home';
 import Board from './mille-bornes/ui/Board';
 import { startGame } from './mille-bornes/logic/GameCreator';
-// import io from 'socket.io-client';
+import Lobby from './mille-bornes/ui/Lobby';
+import { Communicator } from './mille-bornes/logic/Communicator';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -14,20 +15,11 @@ const root = ReactDOM.createRoot(
 
 const updateListener = { onUpdateAvailable: () => { }, onNoUpdateFound: () => { } };
 
-// const socket = io('http://35.184.159.91/');
-
-// socket.on('connect', () => {
-//   console.log('Connected to server');
-// });
-
-// socket.on('disconnect', () => {
-//   console.log('Disconnected from server');
-// });
-
 root.render(
   <React.StrictMode>
     {/* <Home updateListener={updateListener} /> */}
-    <Board game={startGame()} />
+    {/* <Board game={startGame()} /> */}
+    <Lobby communicator={new Communicator()} />
   </React.StrictMode>
 );
 

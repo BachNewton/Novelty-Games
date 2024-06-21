@@ -17,10 +17,11 @@ app.get('/', (_, res) => {
 
 io.on('connection', (socket) => {
     console.log('Connection:', socket.id);
+    io.emit('connection', socket.id);
 
-    // Handle socket disconnection
     socket.on('disconnect', () => {
         console.log('Disconnect:', socket.id);
+        io.emit('disconnected', socket.id);
     });
 
     // // Handle incoming messages or events from the client
