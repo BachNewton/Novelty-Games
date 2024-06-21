@@ -20,7 +20,12 @@ export function startGame(): Game {
         hand: deck.splice(0, 6),
         team: kyleTeam
     };
-    kyleTeam.players.push(kyle);
+    const elliott: Player = {
+        name: 'Elliott',
+        hand: [],
+        team: kyleTeam
+    };
+    kyleTeam.players.push(kyle, elliott);
 
     const ericTeam: Team = {
         tableau: {
@@ -56,7 +61,9 @@ export function startGame(): Game {
     };
     garyTeam.players.push(gary);
 
-    return { deck: deck, discard: null, teams: [kyleTeam, ericTeam, garyTeam], currentPlayer: kyle };
+    const teams = [kyleTeam, ericTeam, garyTeam];
+
+    return { deck: deck, discard: null, teams: teams, currentPlayer: kyle };
 }
 
 function createDeck(): Array<Card> {

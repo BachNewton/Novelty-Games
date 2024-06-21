@@ -1,5 +1,29 @@
 import { Card, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, GasCard, LimitCard, RepairCard, RollCard, SpareCard, StopCard, UnlimitedCard } from "./Card";
-import { Game, Tableau } from "./Data";
+import { Game, Player, Tableau, Team } from "./Data";
+
+export function getNextPlayer(teams: Array<Team>, currentPlayer: Player): Player {
+    const playerOrder = getPlayerOrder(teams);
+    const nextPlayerIndex = (playerOrder.indexOf(currentPlayer) + 1) % playerOrder.length;
+    return playerOrder[nextPlayerIndex];
+}
+
+function getPlayerOrder(teams: Array<Team>): Array<Player> {
+    const teamWithMostPlayers = Math.max(...teams.map(team => team.players.length));
+
+    const playerOrder: Array<Player> = [];
+
+    for (let playerIndex = 0; playerIndex < teamWithMostPlayers; playerIndex++) {
+        for (let teamIndex = 0; teamIndex < teams.length; teamIndex++) {
+            const player = teams[teamIndex].players[playerIndex];
+
+            if (player !== undefined) {
+                playerOrder.push(player);
+            }
+        }
+    }
+
+    return playerOrder;
+}
 
 export function playCard(card: Card, game: Game) {
     // Remove card from hand

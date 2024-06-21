@@ -15,7 +15,7 @@ const DistanceArea: React.FC<DistanceAreaProps> = ({ distanceArea }) => {
         );
 
         if (distanceCardsUi.length === 0) {
-            distanceCardsUi.push(<CardUi card={null} />);
+            distanceCardsUi.push(<CardUi card={null} key={0} />);
         }
 
         return <div style={{ display: 'grid', minHeight: 0, height: `${60 * distanceCardsUi.length}%`, zIndex: -1 }} key={index}>
