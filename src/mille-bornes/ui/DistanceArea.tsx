@@ -14,7 +14,11 @@ const DistanceArea: React.FC<DistanceAreaProps> = ({ distanceArea }) => {
             <CardUi transform={`translateY(${-index * 90}%)`} card={distanceCard} key={index} />
         );
 
-        return <div style={{ display: 'grid', minHeight: 0, height: `${60 * distanceCards.length}%`, zIndex: -1 }} key={index}>
+        if (distanceCardsUi.length === 0) {
+            distanceCardsUi.push(<CardUi card={null} />);
+        }
+
+        return <div style={{ display: 'grid', minHeight: 0, height: `${60 * distanceCardsUi.length}%`, zIndex: -1 }} key={index}>
             {distanceCardsUi}
         </div>;
     });

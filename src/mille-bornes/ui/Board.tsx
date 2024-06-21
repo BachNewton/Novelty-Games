@@ -18,15 +18,16 @@ const Board: React.FC<BoardProps> = ({ game }) => {
         setState({ ...state });
     };
 
-    const otherPlayersTableau = game.players.filter(player => player !== game.currentPlayer).map((otherPlayer, index) =>
-        <TableauUi tableauData={otherPlayer.tableau} key={index} />
+    const otherTeamsTableau = game.teams.filter(team => team !== game.currentPlayer.team).map((otherTeam, index) =>
+        <TableauUi team={otherTeam} key={index} />
     );
 
-    return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: '1fr 3fr 3fr 1fr', overflow: 'hidden' }}>
+    const gridTemplateRows = '1fr ' + game.teams.map(_ => '3fr').join(' ') + '1fr';
+    return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: gridTemplateRows, overflow: 'hidden', color: 'white' }}>
         <DeckAndDiscard discard={game.discard} />
 
-        {otherPlayersTableau}
-        <TableauUi tableauData={game.currentPlayer.tableau} />
+        {otherTeamsTableau}
+        <TableauUi team={game.currentPlayer.team} />
 
         <Hand hand={game.currentPlayer.hand} onPlayCard={onPlayCard} />
     </div>;

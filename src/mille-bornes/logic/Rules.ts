@@ -5,13 +5,15 @@ export function playCard(card: Card, game: Game) {
     // Remove card from hand
     game.currentPlayer.hand = game.currentPlayer.hand.filter(handCard => handCard !== card);
 
-    if (canCardBePlayed(card, game.currentPlayer.tableau)) {
+    const tableau = game.currentPlayer.team.tableau;
+
+    if (canCardBePlayed(card, tableau)) {
         if (card instanceof RollCard) {
-            game.currentPlayer.tableau.battleArea = card;
+            tableau.battleArea = card;
         } else if (isInstanceOfDistanceCard(card)) {
-            game.currentPlayer.tableau.distanceArea.push(card as DistanceCard);
+            tableau.distanceArea.push(card as DistanceCard);
         } else if (card instanceof UnlimitedCard) {
-            game.currentPlayer.tableau.speedArea = card;
+            tableau.speedArea = card;
         }
     } else {
         game.discard = card;
