@@ -4,10 +4,7 @@ import './css/index.css';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 import Home from './ui/Home';
-import Board from './mille-bornes/ui/Board';
-import { startGame } from './mille-bornes/logic/GameCreator';
-import Lobby from './mille-bornes/ui/Lobby';
-import { Communicator } from './mille-bornes/logic/Communicator';
+import MilleBornesHome from './mille-bornes/ui/Home';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -18,8 +15,7 @@ const updateListener = { onUpdateAvailable: () => { }, onNoUpdateFound: () => { 
 root.render(
   <React.StrictMode>
     {/* <Home updateListener={updateListener} /> */}
-    {/* <Board game={startGame()} /> */}
-    <Lobby communicator={new Communicator()} />
+    <MilleBornesHome />
   </React.StrictMode>
 );
 

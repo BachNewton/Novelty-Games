@@ -1,4 +1,5 @@
 import { BattleCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, EmptyCard, FlatCard, GasCard, HazardCard, LimitCard, RemedyCard, RepairCard, RollCard, SpareCard, SpeedCard, StopCard, UnlimitedCard } from "./Card";
+import { Communicator } from "./Communicator";
 import { Game, Player, Tableau, Team } from "./Data";
 
 function getNextPlayer(game: Game): Player {
@@ -25,7 +26,7 @@ function getPlayerOrder(teams: Array<Team>): Array<Player> {
     return playerOrder;
 }
 
-export function playCard(card: Card, game: Game, targetTeam: Team) {
+export function playCard(card: Card, game: Game, targetTeam: Team, communicator: Communicator) {
     // Remove card from hand
     game.currentPlayer.hand = game.currentPlayer.hand.filter(handCard => handCard !== card);
 
@@ -44,6 +45,8 @@ export function playCard(card: Card, game: Game, targetTeam: Team) {
     game.currentPlayer = getNextPlayer(game);
     // Draw a card
     game.currentPlayer.hand.push(game.deck.splice(0, 1)[0]);
+
+    communicator.playCard(card, targetTeam);
 }
 
 export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {

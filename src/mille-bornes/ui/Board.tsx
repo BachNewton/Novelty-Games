@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, LimitCard } from "../logic/Card";
 import { Game, Team } from "../logic/Data";
 import { canCardBePlayed, isInstanceOfHazardCard, playCard } from "../logic/Rules";
 import Hand from './Hand';
 import TableauUi from "./Tableau";
 import DeckAndDiscard from './DeckAndDiscard';
+import { Communicator } from "../logic/Communicator";
 
 interface BoardProps {
     game: Game;
+    communicator: Communicator;
 }
 
 interface State {
@@ -37,8 +39,17 @@ class TeamSelection implements UiState {
     }
 }
 
-const Board: React.FC<BoardProps> = ({ game }) => {
+const Board: React.FC<BoardProps> = ({ game, communicator }) => {
     const [state, setState] = useState<State>({ game: game, ui: new CardSelection() });
+
+    // useEffect(() => {
+    //     communicator.addEventListener(GameEvent.TYPE, (e) => {
+    //         const event = e as GameEvent;
+
+    //         state.game = event.game;
+    //         setState({ ...state });
+    //     });
+    // }, [communicator]);
 
     const onPlayCard = (card: Card) => {
         if (state.ui instanceof CardSelection) {
@@ -48,7 +59,7 @@ const Board: React.FC<BoardProps> = ({ game }) => {
                 if ((isInstanceOfHazardCard(card) || card instanceof LimitCard) && canCardBePlayed(card, game)) {
                     state.ui = new TeamSelection(card);
                 } else {
-                    playCard(card, game, game.currentPlayer.team);
+                    playCard(card, game, game.currentPlayer.team, communicator);
                     state.ui.card = null;
                 }
             }
@@ -61,7 +72,7 @@ const Board: React.FC<BoardProps> = ({ game }) => {
         const onClick = () => {
             if (state.ui instanceof TeamSelection) {
                 if (state.ui.team === otherTeam) {
-                    playCard(state.ui.card, game, otherTeam);
+                    playCard(state.ui.card, game, otherTeam, communicator);
                     state.ui = new CardSelection();
                 } else {
                     state.ui.team = otherTeam;
