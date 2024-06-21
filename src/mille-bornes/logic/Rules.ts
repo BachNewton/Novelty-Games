@@ -1,9 +1,9 @@
 import { Card, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, GasCard, LimitCard, RepairCard, RollCard, SpareCard, StopCard, UnlimitedCard } from "./Card";
 import { Game, Player, Tableau, Team } from "./Data";
 
-export function getNextPlayer(teams: Array<Team>, currentPlayer: Player): Player {
-    const playerOrder = getPlayerOrder(teams);
-    const nextPlayerIndex = (playerOrder.indexOf(currentPlayer) + 1) % playerOrder.length;
+export function getNextPlayer(game: Game): Player {
+    const playerOrder = getPlayerOrder(game.teams);
+    const nextPlayerIndex = (playerOrder.indexOf(game.currentPlayer) + 1) % playerOrder.length;
     return playerOrder[nextPlayerIndex];
 }
 
@@ -42,6 +42,10 @@ export function playCard(card: Card, game: Game) {
     } else {
         game.discard = card;
     }
+
+    game.currentPlayer = getNextPlayer(game);
+    // Draw a card
+    game.currentPlayer.hand.push(game.deck.splice(0, 1)[0]);
 }
 
 function canCardBePlayed(card: Card, tableau: Tableau) {

@@ -17,15 +17,10 @@ export function startGame(): Game {
     };
     const kyle: Player = {
         name: 'Kyle',
-        hand: deck.splice(0, 6),
+        hand: deck.splice(0, 7),
         team: kyleTeam
     };
-    const elliott: Player = {
-        name: 'Elliott',
-        hand: [],
-        team: kyleTeam
-    };
-    kyleTeam.players.push(kyle, elliott);
+    kyleTeam.players.push(kyle);
 
     const ericTeam: Team = {
         tableau: {
