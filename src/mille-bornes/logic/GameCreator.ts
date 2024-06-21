@@ -9,13 +9,14 @@ export function startGame(): Game {
         name: 'Kyle',
         hand: deck.splice(0, 6),
         tableau: {
-            battleArea: new RollCard(),
-            speedArea: new LimitCard(),
-            distanceArea: [new Distance25Card(), new Distance50Card(), new Distance50Card(), new Distance50Card(), new Distance75Card(), new Distance75Card(), new Distance75Card(), new Distance75Card(), new Distance200Card()],
-            safetyArea: [new AceCard()]
+            battleArea: null,
+            speedArea: null,
+            distanceArea: [],
+            safetyArea: []
         },
         team: 1
     };
+
 
     const players: Array<Player> = [
         kyle,
@@ -23,10 +24,10 @@ export function startGame(): Game {
             name: 'Eric',
             hand: deck.splice(0, 6),
             tableau: {
-                battleArea: new StopCard(),
-                speedArea: new UnlimitedCard(),
-                distanceArea: [new Distance25Card(), new Distance25Card(), new Distance75Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card()],
-                safetyArea: [new EmergencyCard(), new TankerCard(), new SealantCard()]
+                battleArea: null,
+                speedArea: null,
+                distanceArea: [],
+                safetyArea: []
             },
             team: 2
         }

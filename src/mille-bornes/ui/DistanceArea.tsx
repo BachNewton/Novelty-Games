@@ -14,18 +14,11 @@ const DistanceArea: React.FC<DistanceAreaProps> = ({ distanceArea }) => {
             <CardUi transform={`translateY(${-index * 90}%)`} card={distanceCard} key={index} />
         );
 
-        // TODO: 100 can be adjusted proportionally (100 * distanceCards.length)
-        return <div style={{ display: 'grid', minHeight: 0, height: `${100 * distanceCards.length}%`, zIndex: -1 }} key={index}>
+        return <div style={{ display: 'grid', minHeight: 0, height: `${60 * distanceCards.length}%`, zIndex: -1 }} key={index}>
             {distanceCardsUi}
         </div>;
     });
 
-    // window.addEventListener('resize', () => {
-    //     console.log(window.innerWidth / window.innerHeight);
-    // });
-
-    // justifyContent: 'start'
-    // marginBottom: 5%
     return <div style={{ display: 'grid', gridAutoFlow: 'column', minHeight: 0 }}>
         {distanceAreaUi}
     </div>

@@ -22,7 +22,7 @@ const Board: React.FC<BoardProps> = ({ game }) => {
         <TableauUi tableauData={otherPlayer.tableau} key={index} />
     );
 
-    return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: '1fr 3fr 3fr 1fr' }}>
+    return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: '1fr 3fr 3fr 1fr', overflow: 'hidden' }}>
         <DeckAndDiscard discard={game.discard} />
 
         {otherPlayersTableau}
