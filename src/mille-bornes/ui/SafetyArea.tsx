@@ -12,10 +12,10 @@ const SafetyArea: React.FC<SafetyAreaProps> = ({ safetyArea }) => {
     const tankerCard = safetyArea.find(card => card instanceof TankerCard) || null;
 
     return <div style={{ display: 'grid', gridAutoFlow: 'column', minHeight: 0 }}>
-        <CardUi card={aceCard} transform={getTransform(aceCard)} />
-        <CardUi card={emergencyCard} transform={getTransform(emergencyCard)} />
-        <CardUi card={sealantCard} transform={getTransform(sealantCard)} />
-        <CardUi card={tankerCard} transform={getTransform(tankerCard)} />
+        <CardUi card={aceCard} transform={getTransform(aceCard)} objectPosition='bottom' />
+        <CardUi card={emergencyCard} transform={getTransform(emergencyCard)} objectPosition='bottom' />
+        <CardUi card={sealantCard} transform={getTransform(sealantCard)} objectPosition='bottom' />
+        <CardUi card={tankerCard} transform={getTransform(tankerCard)} objectPosition='bottom' />
     </div>;
 }
 

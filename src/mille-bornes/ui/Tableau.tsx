@@ -30,7 +30,7 @@ const Tableau: React.FC<TableauProps> = ({ team, onClick, isHighlighted, greyedO
 
         <div style={{ display: 'grid', gridAutoFlow: 'column', justifyContent: 'space-evenly', minHeight: 0 }}>
 
-            <div style={{ display: 'grid', alignContent: 'center', minHeight: 0 }}>
+            <div style={{ display: 'grid', alignContent: 'center', minHeight: 0, gridTemplateRows: '1fr 2fr' }}>
                 <SafetyArea safetyArea={tableauData.safetyArea} />
                 <DistanceArea distanceArea={tableauData.distanceArea} />
             </div>
