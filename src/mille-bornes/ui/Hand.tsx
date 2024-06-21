@@ -1,29 +1,24 @@
 import { useState } from 'react';
-import { Card } from "../logic/Card";
+import { Card, HazardCard } from "../logic/Card";
 import CardUi from "./Card";
 
 interface HandProps {
     hand: Array<Card>;
     onPlayCard: (card: Card) => void;
+    highlightedCard: Card | null;
+    greyedOut: boolean;
 }
 
-const Hand: React.FC<HandProps> = ({ hand, onPlayCard }) => {
-    const [hightlightedCard, setHighlightedCard] = useState<Card | null>(null);
+const Hand: React.FC<HandProps> = ({ hand, onPlayCard, highlightedCard, greyedOut }) => {
+    const cards = hand.map((card, index) => <CardUi
+        card={card}
+        key={index}
+        onClick={() => onPlayCard(card)}
+        isHighlighted={card === highlightedCard}
+        objectPosition={'bottom'}
+    />);
 
-    const cards = hand.map((card, index) => {
-        const onClick = () => {
-            if (card === hightlightedCard) {
-                setHighlightedCard(null);
-                onPlayCard(card);
-            } else {
-                setHighlightedCard(card);
-            }
-        };
-
-        return <CardUi card={card} key={index} onClick={onClick} isHighlighted={card === hightlightedCard} objectPosition={'bottom'} />
-    });
-
-    return <div style={{ display: 'grid', gridAutoFlow: 'column', minHeight: 0 }}>
+    return <div style={{ display: 'grid', gridAutoFlow: 'column', minHeight: 0, opacity: greyedOut ? 0.1 : 1 }}>
         {cards}
     </div>
 }

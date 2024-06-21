@@ -5,23 +5,27 @@ import SafetyArea from './SafetyArea';
 
 interface TableauProps {
     team: Team;
+    onClick?: () => void;
+    isHighlighted?: boolean;
+    greyedOut?: boolean;
 }
 
-const Tableau: React.FC<TableauProps> = ({ team }) => {
+const Tableau: React.FC<TableauProps> = ({ team, onClick, isHighlighted, greyedOut }) => {
     const tableauData = team.tableau;
     const teamName = 'Team ' + team.players.map(player => player.name).join(' & ');
 
     const tableauStyle: React.CSSProperties = {
-        borderColor: team.color,
-        borderWidth: '1px',
+        borderColor: isHighlighted ? 'yellow' : team.color,
+        borderWidth: isHighlighted ? '3px' : '1px',
         borderStyle: 'solid',
         boxSizing: 'border-box',
         display: 'grid',
         minHeight: 0,
-        margin: '2% 0'
+        margin: '2% 0',
+        opacity: greyedOut ? 0.1 : 1
     };
 
-    return <div style={tableauStyle} >
+    return <div style={tableauStyle} onClick={onClick} >
         <div style={{ textAlign: 'center' }}>{teamName}</div>
 
         <div style={{ display: 'grid', gridAutoFlow: 'column', justifyContent: 'space-evenly', minHeight: 0 }}>

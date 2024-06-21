@@ -1,7 +1,7 @@
-import { Card, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, GasCard, LimitCard, RepairCard, RollCard, SpareCard, StopCard, UnlimitedCard } from "./Card";
+import { Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, EmptyCard, FlatCard, GasCard, HazardCard, LimitCard, RepairCard, RollCard, SpareCard, StopCard, UnlimitedCard } from "./Card";
 import { Game, Player, Tableau, Team } from "./Data";
 
-export function getNextPlayer(game: Game): Player {
+function getNextPlayer(game: Game): Player {
     const playerOrder = getPlayerOrder(game.teams);
     const nextPlayerIndex = (playerOrder.indexOf(game.currentPlayer) + 1) % playerOrder.length;
     return playerOrder[nextPlayerIndex];
@@ -25,19 +25,19 @@ function getPlayerOrder(teams: Array<Team>): Array<Player> {
     return playerOrder;
 }
 
-export function playCard(card: Card, game: Game) {
+export function playCard(card: Card, game: Game, targetTeam: Team) {
     // Remove card from hand
     game.currentPlayer.hand = game.currentPlayer.hand.filter(handCard => handCard !== card);
 
-    const tableau = game.currentPlayer.team.tableau;
-
-    if (canCardBePlayed(card, tableau)) {
+    if (canCardBePlayed(card, game, targetTeam)) {
         if (card instanceof RollCard) {
-            tableau.battleArea = card;
+            targetTeam.tableau.battleArea = card;
         } else if (isInstanceOfDistanceCard(card)) {
-            tableau.distanceArea.push(card as DistanceCard);
+            targetTeam.tableau.distanceArea.push(card as DistanceCard);
         } else if (card instanceof UnlimitedCard) {
-            tableau.speedArea = card;
+            targetTeam.tableau.speedArea = card;
+        } else if (isInstanceOfHazardCard(card)) {
+            targetTeam.tableau.battleArea = card;
         }
     } else {
         game.discard = card;
@@ -48,16 +48,28 @@ export function playCard(card: Card, game: Game) {
     game.currentPlayer.hand.push(game.deck.splice(0, 1)[0]);
 }
 
-function canCardBePlayed(card: Card, tableau: Tableau) {
+export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
+    const tableau = game.currentPlayer.team.tableau;
+
     if (card instanceof RollCard) return canRollCardBePlayed(tableau);
     if (isInstanceOfDistanceCard(card)) return canDistanceCardBePlayed(card as DistanceCard, tableau);
     if (card instanceof UnlimitedCard) return canUnlimitedCardBePlayed(tableau);
+    if (isInstanceOfHazardCard(card)) {
+        const targetTeams = targetTeam === undefined
+            ? game.teams.filter(team => team !== game.currentPlayer.team)
+            : [targetTeam];
+        return canHazardCardBePlayed(card, targetTeams);
+    }
 
     return false;
 }
 
 function isInstanceOfDistanceCard(card: Card): boolean {
     return card instanceof Distance25Card || card instanceof Distance50Card || card instanceof Distance75Card || card instanceof Distance100Card || card instanceof Distance200Card;
+}
+
+export function isInstanceOfHazardCard(card: Card): boolean {
+    return card instanceof CrashCard || card instanceof EmptyCard || card instanceof FlatCard || card instanceof StopCard;
 }
 
 function canRollCardBePlayed(tableau: Tableau): boolean {
@@ -83,6 +95,15 @@ function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau): 
 
 function canUnlimitedCardBePlayed(tableau: Tableau): boolean {
     if (tableau.speedArea instanceof LimitCard) return true;
+
+    return false;
+}
+
+function canHazardCardBePlayed(hazardCard: HazardCard, teams: Array<Team>): boolean {
+    for (const team of teams) {
+        if (team.tableau.battleArea instanceof RollCard) return true;
+        if (team.tableau.battleArea instanceof StopCard && !(hazardCard instanceof StopCard)) return true;
+    }
 
     return false;
 }
