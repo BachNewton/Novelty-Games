@@ -1,4 +1,4 @@
-import { Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, EmptyCard, FlatCard, GasCard, HazardCard, LimitCard, RepairCard, RollCard, SpareCard, StopCard, UnlimitedCard } from "./Card";
+import { BattleCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, EmptyCard, FlatCard, GasCard, HazardCard, LimitCard, RemedyCard, RepairCard, RollCard, SpareCard, StopCard, UnlimitedCard } from "./Card";
 import { Game, Player, Tableau, Team } from "./Data";
 
 function getNextPlayer(game: Game): Player {
@@ -30,13 +30,11 @@ export function playCard(card: Card, game: Game, targetTeam: Team) {
     game.currentPlayer.hand = game.currentPlayer.hand.filter(handCard => handCard !== card);
 
     if (canCardBePlayed(card, game, targetTeam)) {
-        if (card instanceof RollCard) {
-            targetTeam.tableau.battleArea = card;
-        } else if (isInstanceOfDistanceCard(card)) {
+        if (isInstanceOfDistanceCard(card)) {
             targetTeam.tableau.distanceArea.push(card as DistanceCard);
         } else if (card instanceof UnlimitedCard) {
             targetTeam.tableau.speedArea = card;
-        } else if (isInstanceOfHazardCard(card)) {
+        } else if (isInstanceOfHazardCard(card) || isInstanceOfRemedyCard(card)) {
             targetTeam.tableau.battleArea = card;
         }
     } else {
@@ -51,7 +49,7 @@ export function playCard(card: Card, game: Game, targetTeam: Team) {
 export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
     const tableau = game.currentPlayer.team.tableau;
 
-    if (card instanceof RollCard) return canRollCardBePlayed(tableau);
+    if (isInstanceOfRemedyCard(card)) return canRemedyCardBePlayed(card, tableau.battleArea);
     if (isInstanceOfDistanceCard(card)) return canDistanceCardBePlayed(card as DistanceCard, tableau);
     if (card instanceof UnlimitedCard) return canUnlimitedCardBePlayed(tableau);
     if (isInstanceOfHazardCard(card)) {
@@ -72,16 +70,8 @@ export function isInstanceOfHazardCard(card: Card): boolean {
     return card instanceof CrashCard || card instanceof EmptyCard || card instanceof FlatCard || card instanceof StopCard;
 }
 
-function canRollCardBePlayed(tableau: Tableau): boolean {
-    const battleArea = tableau.battleArea;
-
-    if (battleArea === null) return true;
-    if (battleArea instanceof StopCard) return true;
-    if (battleArea instanceof GasCard) return true;
-    if (battleArea instanceof RepairCard) return true;
-    if (battleArea instanceof SpareCard) return true;
-
-    return false;
+function isInstanceOfRemedyCard(card: Card): boolean {
+    return card instanceof RepairCard || card instanceof GasCard || card instanceof SpareCard || card instanceof RollCard;
 }
 
 function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau): boolean {
@@ -102,8 +92,26 @@ function canUnlimitedCardBePlayed(tableau: Tableau): boolean {
 function canHazardCardBePlayed(hazardCard: HazardCard, teams: Array<Team>): boolean {
     for (const team of teams) {
         if (team.tableau.battleArea instanceof RollCard) return true;
-        if (team.tableau.battleArea instanceof StopCard && !(hazardCard instanceof StopCard)) return true;
     }
+
+    return false;
+}
+
+function canRemedyCardBePlayed(remedyCard: RemedyCard, battleArea: BattleCard | null): boolean {
+    if (remedyCard instanceof RollCard) return canRollCardBePlayed(battleArea);
+    if (remedyCard instanceof GasCard && battleArea instanceof EmptyCard) return true;
+    if (remedyCard instanceof RepairCard && battleArea instanceof CrashCard) return true;
+    if (remedyCard instanceof SpareCard && battleArea instanceof EmptyCard) return true;
+
+    return false;
+}
+
+function canRollCardBePlayed(battleArea: BattleCard | null): boolean {
+    if (battleArea === null) return true;
+    if (battleArea instanceof StopCard) return true;
+    if (battleArea instanceof GasCard) return true;
+    if (battleArea instanceof RepairCard) return true;
+    if (battleArea instanceof SpareCard) return true;
 
     return false;
 }
