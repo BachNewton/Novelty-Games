@@ -10,6 +10,7 @@ export interface Game {
 export interface Team {
     players: Array<Player>;
     tableau: Tableau;
+    color: string;
 }
 
 export interface Tableau {

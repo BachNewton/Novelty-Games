@@ -22,7 +22,7 @@ const Board: React.FC<BoardProps> = ({ game }) => {
         <TableauUi team={otherTeam} key={index} />
     );
 
-    const gridTemplateRows = '1fr ' + game.teams.map(_ => '3fr').join(' ') + '1fr';
+    const gridTemplateRows = '1fr ' + game.teams.map(_ => '3fr').join(' ') + ' 1fr';
     return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: gridTemplateRows, overflow: 'hidden', color: 'white' }}>
         <DeckAndDiscard discard={game.discard} />
 

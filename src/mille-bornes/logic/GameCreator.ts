@@ -12,7 +12,8 @@ export function startGame(): Game {
             distanceArea: [],
             safetyArea: []
         },
-        players: []
+        players: [],
+        color: 'blue'
     };
     const kyle: Player = {
         name: 'Kyle',
@@ -28,7 +29,8 @@ export function startGame(): Game {
             distanceArea: [],
             safetyArea: []
         },
-        players: []
+        players: [],
+        color: 'red'
     };
     const eric: Player = {
         name: 'Eric',
@@ -44,7 +46,8 @@ export function startGame(): Game {
             distanceArea: [],
             safetyArea: []
         },
-        players: []
+        players: [],
+        color: 'green'
     };
     const gary: Player = {
         name: 'Gary',

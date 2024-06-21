@@ -11,7 +11,17 @@ const Tableau: React.FC<TableauProps> = ({ team }) => {
     const tableauData = team.tableau;
     const teamName = 'Team ' + team.players.map(player => player.name).join(' & ');
 
-    return <div style={{ display: 'grid', minHeight: 0, padding: '2% 0' }} >
+    const tableauStyle: React.CSSProperties = {
+        borderColor: team.color,
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        boxSizing: 'border-box',
+        display: 'grid',
+        minHeight: 0,
+        margin: '2% 0'
+    };
+
+    return <div style={tableauStyle} >
         <div style={{ textAlign: 'center' }}>{teamName}</div>
 
         <div style={{ display: 'grid', gridAutoFlow: 'column', justifyContent: 'space-evenly', minHeight: 0 }}>
