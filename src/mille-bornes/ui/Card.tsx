@@ -30,7 +30,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, isHighlighted, transform, ob
     const src = card === undefined ? MB_BACK : card === null ? MB_OUTLINE : card.image;
 
     // TODO: transform: rotate(90deg);
-    return <img src={src} style={imgStyle} onClick={onClick} />;
+    return <img src={src} style={imgStyle} onClick={onClick} alt='Card' />;
 }
 
 export default Card;

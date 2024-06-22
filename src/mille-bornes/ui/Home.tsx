@@ -27,7 +27,7 @@ const Home: React.FC = () => {
             state.ui = UiState.BOARD;
             setState({ ...state });
         });
-    }, [COMMUNICATOR]);
+    }, [state]);
 
     const onStartGame = (lobbyTeams: Array<LobbyTeam>) => {
         const game = createGame(lobbyTeams);
@@ -41,7 +41,7 @@ const Home: React.FC = () => {
         case UiState.LOBBY:
             return <Lobby communicator={COMMUNICATOR} startGame={onStartGame} localId={LOCAL_ID} />;
         case UiState.BOARD:
-            return <Board communicator={COMMUNICATOR} game={state.game as Game} localId={LOCAL_ID} />;
+            return <Board communicator={COMMUNICATOR} startingGame={state.game as Game} localId={LOCAL_ID} />;
     }
 }
 

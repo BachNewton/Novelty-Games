@@ -1,14 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, LimitCard } from "../logic/Card";
 import { Game, Player, Team } from "../logic/Data";
 import { canCardBePlayed, getCurrentPlayerTeam, isInstanceOfHazardCard, playCard } from "../logic/Rules";
 import Hand from './Hand';
 import TableauUi from "./Tableau";
-import { Communicator } from "../logic/Communicator";
+import { Communicator, PlayCardEvent } from "../logic/Communicator";
 import DeckDiscardAndStats from "./DeckDiscardAndStats";
 
 interface BoardProps {
-    game: Game;
+    startingGame: Game;
     communicator: Communicator;
     localId: string;
 }
@@ -40,10 +40,18 @@ class TeamSelection implements UiState {
     }
 }
 
-const Board: React.FC<BoardProps> = ({ game, communicator, localId }) => {
-    const [state, setState] = useState<State>({ game: game, ui: new CardSelection() });
+const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) => {
+    const [state, setState] = useState<State>({ game: startingGame, ui: new CardSelection() });
 
-    const itIsYourTurn = getLocalPlayer(game, localId)?.localId === game.currentPlayer.localId;
+    useEffect(() => {
+        communicator.addEventListener(PlayCardEvent.TYPE, (event) => {
+            const playCardEvent = event as PlayCardEvent;
+            playCard(playCardEvent.card, state.game, getTeamById(playCardEvent.targetTeamId, state.game));
+            setState({ ...state });
+        });
+    }, [state]);
+
+    const itIsYourTurn = getLocalPlayer(state.game, localId)?.localId === state.game.currentPlayer.localId;
 
     const onPlayCard = (card: Card) => {
         if (state.ui instanceof CardSelection && itIsYourTurn) {
@@ -51,16 +59,16 @@ const Board: React.FC<BoardProps> = ({ game, communicator, localId }) => {
                 state.ui.card = card;
             } else {
                 if (isInstanceOfHazardCard(card) || card instanceof LimitCard) {
-                    if (canCardBePlayed(card, game)) {
+                    if (canCardBePlayed(card, state.game)) {
                         state.ui = new TeamSelection(card);
                     } else {
-                        playCard(card, game, null);
+                        playCard(card, state.game, null);
                         communicator.playCard(card, null);
                         state.ui.card = null;
                     }
                 } else {
-                    const targetTeam = getCurrentPlayerTeam(game);
-                    playCard(card, game, targetTeam);
+                    const targetTeam = getCurrentPlayerTeam(state.game);
+                    playCard(card, state.game, targetTeam);
                     communicator.playCard(card, targetTeam);
                     state.ui.card = null;
                 }
@@ -70,13 +78,13 @@ const Board: React.FC<BoardProps> = ({ game, communicator, localId }) => {
         }
     };
 
-    const localPlayerTeam = getLocalPlayerTeam(game, localId);
+    const localPlayerTeam = getLocalPlayerTeam(state.game, localId);
 
-    const otherTeamsTableau = game.teams.filter(team => team !== localPlayerTeam).map((otherTeam, index) => {
+    const otherTeamsTableau = state.game.teams.filter(team => team !== localPlayerTeam).map((otherTeam, index) => {
         const onClick = () => {
             if (state.ui instanceof TeamSelection) {
                 if (state.ui.team === otherTeam) {
-                    playCard(state.ui.card, game, otherTeam);
+                    playCard(state.ui.card, state.game, otherTeam);
                     communicator.playCard(state.ui.card, otherTeam);
                     state.ui = new CardSelection();
                 } else {
@@ -96,14 +104,14 @@ const Board: React.FC<BoardProps> = ({ game, communicator, localId }) => {
         ? <></>
         : <TableauUi team={localPlayerTeam} greyedOut={greyedOut} />;
 
-    const gridTemplateRows = '1fr ' + game.teams.map(_ => '3fr').join(' ') + ' 1fr';
+    const gridTemplateRows = '1fr ' + state.game.teams.map(_ => '3fr').join(' ') + ' 1fr';
     return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: gridTemplateRows, overflow: 'hidden', color: 'white' }}>
-        <DeckDiscardAndStats discard={game.discard} greyedOut={greyedOut} currentPlayer={game.currentPlayer} />
+        <DeckDiscardAndStats discard={state.game.discard} greyedOut={greyedOut} currentPlayer={state.game.currentPlayer} />
 
         {otherTeamsTableau}
         {localTeamsTableau}
 
-        <Hand hand={getLocalHandCards(game, localId)} onPlayCard={onPlayCard} highlightedCard={state.ui.card} greyedOut={greyedOut || !itIsYourTurn} />
+        <Hand hand={getLocalHandCards(state.game, localId)} onPlayCard={onPlayCard} highlightedCard={state.ui.card} greyedOut={greyedOut || !itIsYourTurn} />
     </div>;
 };
 
@@ -131,6 +139,10 @@ function getLocalPlayerTeam(game: Game, localId: string): Team | null {
     const localPlayerTeamId = getLocalPlayer(game, localId)?.teamId || null;
 
     return game.teams.find(team => team.id === localPlayerTeamId) || null;
+}
+
+function getTeamById(teamId: string | null, game: Game): Team | null {
+    return game.teams.find(team => team.id === teamId) || null;
 }
 
 export default Board;

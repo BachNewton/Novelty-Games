@@ -35,13 +35,13 @@ export class PlayCardEvent extends Event {
     static TYPE = 'PLAY_CARD';
 
     card: Card;
-    targetTeam: Team | null;
+    targetTeamId: string | null;
 
-    constructor(card: Card, targetTeam: Team | null) {
+    constructor(card: Card, targetTeamId: string | null) {
         super(PlayCardEvent.TYPE);
 
         this.card = createCard(card.image);
-        this.targetTeam = targetTeam === null ? null : createTeam(targetTeam);
+        this.targetTeamId = targetTeamId;
     }
 }
 
@@ -65,32 +65,17 @@ interface GameServerData extends ServerData {
 
 interface PlayCardData extends ServerData {
     card: Card;
-    targetTeam: Team | null;
+    targetTeamId: string | null;
 }
 
 const SERVER_URL = 'http://35.184.159.91/';
 
 export class Communicator extends EventTarget {
     private socket = io(window.location.hostname === 'localhost' ? 'http://localhost/' : SERVER_URL);
+    private doesEventTypeHaveListener = new Map<string, boolean>;
 
     constructor() {
         super();
-
-        // this.socket.on('connect', () => {
-        //     console.log(`You connected to the server with ID: ${this.socket.id}`);
-        // });
-
-        // this.socket.on('connection', (id: string) => {
-        //     console.log(`ID: ${id} connected to the server`);
-        // });
-
-        // this.socket.on('disconnect', (id: string) => {
-        //     console.log(`You disconnected from server with ID: ${this.socket.id}`);
-        // });
-
-        // this.socket.on('disconnected', (id: string) => {
-        //     console.log(`ID: ${id} disconnected from the server`);
-        // });
 
         this.socket.on('broadcast', (data: ServerData) => {
             console.log('Received data from server:', data);
@@ -100,11 +85,20 @@ export class Communicator extends EventTarget {
             } else if (data.type === ServerDataType.GAME) {
                 this.dispatchEvent(new GameEvent((data as GameServerData).game));
             } else if (data.type === ServerDataType.PLAY_CARD) {
-                //
+                const playCardData = data as PlayCardData;
+                this.dispatchEvent(new PlayCardEvent(playCardData.card, playCardData.targetTeamId));
             } else {
                 throw new Error('Unsupported ServerData: ' + data);
             }
         });
+    }
+
+    override addEventListener(type: string, callback: EventListenerOrEventListenerObject) {
+        if (this.doesEventTypeHaveListener.get(type)) return; // Only add the first listener provided
+
+        this.doesEventTypeHaveListener.set(type, true);
+
+        super.addEventListener(type, callback);
     }
 
     updateLobby(lobbyTeams: Array<LobbyTeam>) {
@@ -129,7 +123,7 @@ export class Communicator extends EventTarget {
         const data: PlayCardData = {
             type: ServerDataType.PLAY_CARD,
             card: card,
-            targetTeam: targetTeam
+            targetTeamId: targetTeam === null ? null : targetTeam.id
         };
 
         this.broadcast(data);

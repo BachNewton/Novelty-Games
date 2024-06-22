@@ -1,4 +1,4 @@
-import { BattleCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, EmptyCard, FlatCard, GasCard, HazardCard, LimitCard, RemedyCard, RepairCard, RollCard, SpareCard, SpeedCard, StopCard, UnlimitedCard } from "./Card";
+import { BattleCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, EmptyCard, FlatCard, GasCard, LimitCard, RemedyCard, RepairCard, RollCard, SpareCard, SpeedCard, StopCard, UnlimitedCard } from "./Card";
 import { Game, Player, Tableau, Team } from "./Data";
 
 function getNextPlayer(game: Game): Player {

@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Card, HazardCard } from "../logic/Card";
+import { Card } from "../logic/Card";
 import CardUi from "./Card";
 
 interface HandProps {

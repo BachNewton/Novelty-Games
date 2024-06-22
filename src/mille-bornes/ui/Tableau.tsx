@@ -1,4 +1,4 @@
-import { Tableau as TableauData, Team } from "../logic/Data";
+import { Team } from "../logic/Data";
 import CardUi from "./Card";
 import DistanceArea from './DistanceArea';
 import SafetyArea from './SafetyArea';

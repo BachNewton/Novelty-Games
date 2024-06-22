@@ -12,8 +12,8 @@ const DeckDiscardAndStats: React.FC<DeckDiscardAndStatsProps> = ({ discard, grey
     return <div style={{ display: 'flex', minHeight: 0 }}>
         <DeckDiscard discard={discard} greyedOut={greyedOut} />
 
-        <div style={{ flexGrow: 1, textAlign: 'center' }}>
-            It is {currentPlayer.name}'s turn
+        <div style={{ flexGrow: 1, textAlign: 'center', fontSize: '1.5em' }}>
+            It's <strong>{currentPlayer.name}</strong>'s turn
         </div>
     </div>
 };
