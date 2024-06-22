@@ -208,3 +208,48 @@ export class LimitCard implements SpeedCard {
         this.limit = 50;
     }
 }
+
+export function imageToCard(image: string): Card {
+    switch (image) {
+        case MB_CRASH:
+            return new CrashCard();
+        case MB_EMPTY:
+            return new EmptyCard();
+        case MB_FLAT:
+            return new FlatCard();
+        case MB_GAS:
+            return new GasCard();
+        case MB_REPAIR:
+            return new RepairCard();
+        case MB_SPARE:
+            return new SpareCard();
+        case MB_ROLL:
+            return new RollCard();
+        case MB_STOP:
+            return new StopCard();
+        case MB_25:
+            return new Distance25Card();
+        case MB_50:
+            return new Distance50Card();
+        case MB_75:
+            return new Distance75Card();
+        case MB_100:
+            return new Distance100Card();
+        case MB_200:
+            return new Distance200Card();
+        case MB_ACE:
+            return new AceCard();
+        case MB_EMERGENCY:
+            return new EmergencyCard();
+        case MB_SEALANT:
+            return new SealantCard();
+        case MB_TANKER:
+            return new TankerCard();
+        case MB_UNLIMITED:
+            return new UnlimitedCard();
+        case MB_LIMIT:
+            return new LimitCard();
+        default:
+            throw new Error('Image not supported: ' + image);
+    }
+}

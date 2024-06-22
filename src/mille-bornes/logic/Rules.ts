@@ -25,11 +25,11 @@ function getPlayerOrder(teams: Array<Team>): Array<Player> {
     return playerOrder;
 }
 
-export function playCard(card: Card, game: Game, targetTeam: Team) {
+export function playCard(card: Card, game: Game, targetTeam: Team | null) {
     // Remove card from hand
     game.currentPlayer.hand = game.currentPlayer.hand.filter(handCard => handCard !== card);
 
-    if (canCardBePlayed(card, game, targetTeam)) {
+    if (targetTeam && canCardBePlayed(card, game, targetTeam)) {
         if (isInstanceOfDistanceCard(card)) {
             targetTeam.tableau.distanceArea.push(card as DistanceCard);
         } else if (card instanceof UnlimitedCard || card instanceof LimitCard) {
@@ -108,7 +108,7 @@ function canRemedyCardBePlayed(remedyCard: RemedyCard, battleArea: BattleCard | 
     if (remedyCard instanceof RollCard) return canRollCardBePlayed(battleArea);
     if (remedyCard instanceof GasCard && battleArea instanceof EmptyCard) return true;
     if (remedyCard instanceof RepairCard && battleArea instanceof CrashCard) return true;
-    if (remedyCard instanceof SpareCard && battleArea instanceof EmptyCard) return true;
+    if (remedyCard instanceof SpareCard && battleArea instanceof FlatCard) return true;
 
     return false;
 }

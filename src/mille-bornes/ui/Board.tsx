@@ -48,8 +48,13 @@ const Board: React.FC<BoardProps> = ({ game, communicator, localId }) => {
             if (state.ui.card !== card) {
                 state.ui.card = card;
             } else {
-                if ((isInstanceOfHazardCard(card) || card instanceof LimitCard) && canCardBePlayed(card, game)) {
-                    state.ui = new TeamSelection(card);
+                if (isInstanceOfHazardCard(card) || card instanceof LimitCard) {
+                    if (canCardBePlayed(card, game)) {
+                        state.ui = new TeamSelection(card);
+                    } else {
+                        playCard(card, game, null);
+                        state.ui.card = null;
+                    }
                 } else {
                     playCard(card, game, getCurrentPlayerTeam(game));
                     state.ui.card = null;

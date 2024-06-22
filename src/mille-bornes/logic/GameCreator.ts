@@ -4,7 +4,8 @@ import { AceCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25C
 import { LobbyTeam } from '../ui/Lobby';
 
 export function createGame(lobbyTeams: Array<LobbyTeam>): Game {
-    const deck = shuffleArray(createDeck());
+    let deck = shuffleArray(createDeck());
+    deck = deck.filter(card => card instanceof LimitCard).concat(deck.filter(card => !(card instanceof LimitCard)));
 
     const teams: Array<Team> = lobbyTeams.map((lobbyTeam, lobbyIndex) => {
         const team: Team = {
