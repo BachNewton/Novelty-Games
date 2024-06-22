@@ -1,23 +1,90 @@
-import { Communicator } from "../logic/Communicator";
-import { Game } from "../logic/Data";
-import { startGame } from "../logic/GameCreator";
+import { useEffect, useState } from "react";
+import { Communicator, LobbyUpdateEvent } from "../logic/Communicator";
+
+const LOCAL_ID = Math.random().toString();
 
 interface LobbyProps {
     communicator: Communicator;
-    onReady: (game: Game) => void;
+    startGame: (lobbyTeams: Array<LobbyTeam>) => void;
 }
 
-const Lobby: React.FC<LobbyProps> = ({ communicator, onReady }) => {
-    const onJoin = () => { };
+export interface LobbyTeam {
+    players: Array<LobbyPlayer>;
+    color: string;
+}
 
-    const onCreate = () => {
-        const game = startGame();
-        onReady(game);
+interface LobbyPlayer {
+    name: string;
+    localId: string;
+}
+
+const Lobby: React.FC<LobbyProps> = ({ communicator, startGame }) => {
+    const [lobbyTeams, setLobbyTeams] = useState<Array<LobbyTeam>>([]);
+
+    useEffect(() => {
+        communicator.addEventListener(LobbyUpdateEvent.TYPE, (event) => {
+            setLobbyTeams([...(event as LobbyUpdateEvent).lobbyTeams]);
+        });
+    }, [communicator]);
+
+    const onAddTeam = () => {
+        lobbyTeams.push({
+            players: [],
+            color: lobbyTeams.length === 0 ? 'blue' : lobbyTeams.length === 1 ? 'red' : 'green'
+        });
+
+        setLobbyTeams([...lobbyTeams]);
+        communicator.updateLobby(lobbyTeams);
     };
 
+    const addTeamButton = lobbyTeams.length < 3
+        ? <button onClick={onAddTeam}>Add Team</button>
+        : <></>;
+
+    const lobbyTeamsUi = lobbyTeams.map((lobbyTeam, index) => {
+        const onAddPlayer = () => {
+            const name = prompt('What is the name of this player?') || 'Player';
+            lobbyTeam.players.push({
+                name: name,
+                localId: LOCAL_ID
+            });
+
+            setLobbyTeams([...lobbyTeams]);
+            communicator.updateLobby(lobbyTeams);
+        };
+
+        const addPlayerButton = lobbyTeam.players.length < 2
+            ? <button onClick={onAddPlayer}>Add Player</button>
+            : <></>;
+
+        const playersUi = lobbyTeam.players.map((player, index) => <div key={index}>
+            {player.name}
+        </div>);
+
+        return <div key={index}>
+            <div>
+                ----- Team #{index + 1} -----
+            </div>
+            {addPlayerButton}
+            {playersUi}
+        </div>;
+    });
+
+    const onStartGame = () => {
+        startGame(lobbyTeams);
+    };
+
+    const startGameButton = lobbyTeams.length >= 2 && lobbyTeams.every(team => team.players.length >= 1)
+        ? <button onClick={onStartGame}>Start Game</button>
+        : <></>;
+
     return <div>
-        <button onClick={onJoin}>Join</button>
-        <button onClick={onCreate}>Create</button>
+        ----- Lobby -----
+        <div>
+            {addTeamButton}
+        </div>
+        {lobbyTeamsUi}
+        {startGameButton}
     </div>;
 };
 

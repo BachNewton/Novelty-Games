@@ -17,19 +17,16 @@ app.get('/', (_, res) => {
 
 io.on('connection', (socket) => {
     console.log('Connection:', socket.id);
-    io.emit('connection', socket.id);
+    socket.broadcast.emit('connection', socket.id);
 
     socket.on('disconnect', () => {
         console.log('Disconnect:', socket.id);
-        io.emit('disconnected', socket.id);
+        socket.broadcast.emit('disconnected', socket.id);
     });
 
-    // // Handle incoming messages or events from the client
-    // socket.on('message', msg => {
-    //     console.log('Message received:', msg);
-    //     // You can broadcast the message to other clients or perform actions
-    //     io.emit('message-broadcast', msg);
-    // });
+    socket.on('broadcast', (data) => {
+        socket.broadcast.emit('broadcast', data);
+    });
 });
 
 server.listen(PORT, () => {

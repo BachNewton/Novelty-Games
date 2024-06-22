@@ -42,15 +42,6 @@ class TeamSelection implements UiState {
 const Board: React.FC<BoardProps> = ({ game, communicator }) => {
     const [state, setState] = useState<State>({ game: game, ui: new CardSelection() });
 
-    // useEffect(() => {
-    //     communicator.addEventListener(GameEvent.TYPE, (e) => {
-    //         const event = e as GameEvent;
-
-    //         state.game = event.game;
-    //         setState({ ...state });
-    //     });
-    // }, [communicator]);
-
     const onPlayCard = (card: Card) => {
         if (state.ui instanceof CardSelection) {
             if (state.ui.card !== card) {
@@ -59,7 +50,7 @@ const Board: React.FC<BoardProps> = ({ game, communicator }) => {
                 if ((isInstanceOfHazardCard(card) || card instanceof LimitCard) && canCardBePlayed(card, game)) {
                     state.ui = new TeamSelection(card);
                 } else {
-                    playCard(card, game, game.currentPlayer.team, communicator);
+                    playCard(card, game, game.currentPlayer.team);
                     state.ui.card = null;
                 }
             }
@@ -72,7 +63,7 @@ const Board: React.FC<BoardProps> = ({ game, communicator }) => {
         const onClick = () => {
             if (state.ui instanceof TeamSelection) {
                 if (state.ui.team === otherTeam) {
-                    playCard(state.ui.card, game, otherTeam, communicator);
+                    playCard(state.ui.card, game, otherTeam);
                     state.ui = new CardSelection();
                 } else {
                     state.ui.team = otherTeam;

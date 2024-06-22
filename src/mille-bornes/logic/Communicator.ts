@@ -1,25 +1,34 @@
-import { Card } from "./Card";
-import { Team } from "./Data";
-// import io from 'socket.io-client';
+import { LobbyTeam } from "../ui/Lobby";
+import io from 'socket.io-client';
 
-export class PLAY_CARD_EVENT extends Event {
-    static TYPE = 'PLAY_CARD';
+export class LobbyUpdateEvent extends Event {
+    static TYPE = 'LOBBY_UPDATE';
 
-    card: Card;
-    targetTeam: Team
+    lobbyTeams: Array<LobbyTeam>;
 
-    constructor(card: Card, targetTeam: Team) {
-        super(PLAY_CARD_EVENT.TYPE);
+    constructor(lobbyTeams: Array<LobbyTeam>) {
+        super(LobbyUpdateEvent.TYPE);
 
-        this.card = card;
-        this.targetTeam = targetTeam;
+        this.lobbyTeams = lobbyTeams;
     }
+}
+
+interface ServerData {
+    type: ServerDataType;
+}
+
+enum ServerDataType {
+    LOBBY_UPDATE
+}
+
+interface LobbyUpdateServerData extends ServerData {
+    lobbyTeams: Array<LobbyTeam>;
 }
 
 const SERVER_URL = 'http://35.184.159.91/';
 
 export class Communicator extends EventTarget {
-    // private socket = io(window.location.hostname === 'localhost' ? 'http://localhost/' : SERVER_URL);
+    private socket = io(window.location.hostname === 'localhost' ? 'http://localhost/' : SERVER_URL);
 
     constructor() {
         super();
@@ -39,9 +48,24 @@ export class Communicator extends EventTarget {
         // this.socket.on('disconnected', (id: string) => {
         //     console.log(`ID: ${id} disconnected from the server`);
         // });
+
+        this.socket.on('broadcast', (data: ServerData) => {
+            if (data.type === ServerDataType.LOBBY_UPDATE) {
+                this.dispatchEvent(new LobbyUpdateEvent((data as LobbyUpdateServerData).lobbyTeams));
+            }
+        });
     }
 
-    playCard(card: Card, targetTeam: Team) {
-        //
+    updateLobby(lobbyTeams: Array<LobbyTeam>) {
+        const data: LobbyUpdateServerData = {
+            type: ServerDataType.LOBBY_UPDATE,
+            lobbyTeams: lobbyTeams
+        };
+
+        this.broadcast(data);
+    }
+
+    private broadcast(data: ServerData) {
+        this.socket.emit('broadcast', data);
     }
 }

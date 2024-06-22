@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Communicator } from "../logic/Communicator";
-import Lobby from "./Lobby";
+import Lobby, { LobbyTeam } from "./Lobby";
 import Board from "./Board";
 import { Game } from "../logic/Data";
 
@@ -18,19 +18,13 @@ enum UiState {
 const Home: React.FC = () => {
     const [state, setState] = useState<State>({ ui: UiState.LOBBY, communicator: new Communicator() });
 
-    const onReady = (game: Game) => {
-        state.ui = UiState.BOARD;
-        state.game = game;
-        setState({ ...state });
+    const onStartGame = (lobbyTeams: Array<LobbyTeam>) => {
+        console.log(lobbyTeams);
     };
-
-    useEffect(() => {
-        // state.communicator.addEventListener()
-    }, [])
 
     switch (state.ui) {
         case UiState.LOBBY:
-            return <Lobby communicator={state.communicator} onReady={onReady} />;
+            return <Lobby communicator={state.communicator} startGame={onStartGame} />;
         case UiState.BOARD:
             return <Board communicator={state.communicator} game={state.game as Game} />;
     }
