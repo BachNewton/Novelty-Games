@@ -72,7 +72,7 @@ const SERVER_URL = 'http://35.184.159.91/';
 
 export class Communicator extends EventTarget {
     private socket = io(window.location.hostname === 'localhost' ? 'http://localhost/' : SERVER_URL);
-    private doesEventTypeHaveListener = new Map<string, boolean>;
+    private doesEventTypeHaveListener = new Map<string, boolean>();
 
     constructor() {
         super();
