@@ -1,12 +1,12 @@
 import { Card } from "../logic/Card";
-import CardUi from "../ui/Card";
+import CardUi from "./Card";
 
-interface DeckAndDiscardProps {
+interface DeckDiscardProps {
     discard: Card | null;
     greyedOut: boolean;
 }
 
-const DeckAndDiscard: React.FC<DeckAndDiscardProps> = ({ discard, greyedOut }) => {
+const DeckDiscard: React.FC<DeckDiscardProps> = ({ discard, greyedOut }) => {
     const style: React.CSSProperties = {
         display: 'grid',
         gridAutoFlow: 'column',
@@ -22,4 +22,4 @@ const DeckAndDiscard: React.FC<DeckAndDiscardProps> = ({ discard, greyedOut }) =
     </div>;
 };
 
-export default DeckAndDiscard;
+export default DeckDiscard;

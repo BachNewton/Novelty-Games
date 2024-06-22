@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card, LimitCard } from "../logic/Card";
-import { Game, Team } from "../logic/Data";
+import { Game, Player, Team } from "../logic/Data";
 import { canCardBePlayed, getCurrentPlayerTeam, isInstanceOfHazardCard, playCard } from "../logic/Rules";
 import Hand from './Hand';
 import TableauUi from "./Tableau";
-import DeckAndDiscard from './DeckAndDiscard';
 import { Communicator } from "../logic/Communicator";
+import DeckDiscardAndStats from "./DeckDiscardAndStats";
 
 interface BoardProps {
     game: Game;
@@ -43,8 +43,10 @@ class TeamSelection implements UiState {
 const Board: React.FC<BoardProps> = ({ game, communicator, localId }) => {
     const [state, setState] = useState<State>({ game: game, ui: new CardSelection() });
 
+    const itIsYourTurn = getLocalPlayer(game, localId)?.localId === game.currentPlayer.localId;
+
     const onPlayCard = (card: Card) => {
-        if (state.ui instanceof CardSelection) {
+        if (state.ui instanceof CardSelection && itIsYourTurn) {
             if (state.ui.card !== card) {
                 state.ui.card = card;
             } else {
@@ -65,7 +67,9 @@ const Board: React.FC<BoardProps> = ({ game, communicator, localId }) => {
         }
     };
 
-    const otherTeamsTableau = game.teams.filter(team => team !== getCurrentPlayerTeam(game)).map((otherTeam, index) => {
+    const localPlayerTeam = getLocalPlayerTeam(game, localId);
+
+    const otherTeamsTableau = game.teams.filter(team => team !== localPlayerTeam).map((otherTeam, index) => {
         const onClick = () => {
             if (state.ui instanceof TeamSelection) {
                 if (state.ui.team === otherTeam) {
@@ -82,16 +86,47 @@ const Board: React.FC<BoardProps> = ({ game, communicator, localId }) => {
         return <TableauUi onClick={onClick} team={otherTeam} key={index} isHighlighted={state.ui instanceof TeamSelection && state.ui.team === otherTeam} />
     });
 
-    const gridTemplateRows = '1fr ' + game.teams.map(_ => '3fr').join(' ') + ' 1fr';
     const greyedOut = state.ui instanceof TeamSelection;
+
+    const localTeamsTableau = localPlayerTeam === null
+        ? <></>
+        : <TableauUi team={localPlayerTeam} greyedOut={greyedOut} />;
+
+    const gridTemplateRows = '1fr ' + game.teams.map(_ => '3fr').join(' ') + ' 1fr';
     return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: gridTemplateRows, overflow: 'hidden', color: 'white' }}>
-        <DeckAndDiscard discard={game.discard} greyedOut={greyedOut} />
+        <DeckDiscardAndStats discard={game.discard} greyedOut={greyedOut} currentPlayer={game.currentPlayer} />
 
         {otherTeamsTableau}
-        <TableauUi team={getCurrentPlayerTeam(game)} greyedOut={greyedOut} />
+        {localTeamsTableau}
 
-        <Hand hand={game.currentPlayer.hand} onPlayCard={onPlayCard} highlightedCard={state.ui.card} greyedOut={greyedOut} />
+        <Hand hand={getLocalHandCards(game, localId)} onPlayCard={onPlayCard} highlightedCard={state.ui.card} greyedOut={greyedOut || !itIsYourTurn} />
     </div>;
 };
+
+function getLocalPlayer(game: Game, localId: string): Player | null {
+    if (game.currentPlayer.localId === localId) {
+        return game.currentPlayer;
+    }
+
+    for (const team of game.teams) {
+        for (const player of team.players) {
+            if (player.localId === localId) {
+                return player;
+            }
+        }
+    }
+
+    return null;
+}
+
+function getLocalHandCards(game: Game, localId: string): Array<Card> {
+    return getLocalPlayer(game, localId)?.hand || [];
+}
+
+function getLocalPlayerTeam(game: Game, localId: string): Team | null {
+    const localPlayerTeamId = getLocalPlayer(game, localId)?.teamId || null;
+
+    return game.teams.find(team => team.id === localPlayerTeamId) || null;
+}
 
 export default Board;
