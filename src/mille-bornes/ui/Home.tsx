@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { Communicator } from "../logic/Communicator";
+import { Communicator, GameEvent } from "../logic/Communicator";
 import Lobby, { LobbyTeam } from "./Lobby";
 import Board from "./Board";
 import { Game } from "../logic/Data";
+import { createGame } from "../logic/GameCreator";
 
 interface State {
     ui: UiState;
-    communicator: Communicator;
     game?: Game;
 }
 
@@ -15,18 +15,33 @@ enum UiState {
     BOARD
 }
 
+const LOCAL_ID = Math.random().toString();
+const COMMUNICATOR = new Communicator();
+
 const Home: React.FC = () => {
-    const [state, setState] = useState<State>({ ui: UiState.LOBBY, communicator: new Communicator() });
+    const [state, setState] = useState<State>({ ui: UiState.LOBBY });
+
+    useEffect(() => {
+        COMMUNICATOR.addEventListener(GameEvent.TYPE, (event) => {
+            state.ui = UiState.BOARD;
+            state.game = (event as GameEvent).game;
+            setState({ ...state });
+        });
+    }, [COMMUNICATOR]);
 
     const onStartGame = (lobbyTeams: Array<LobbyTeam>) => {
-        console.log(lobbyTeams);
+        const game = createGame(lobbyTeams);
+        state.ui = UiState.BOARD;
+        state.game = game
+        setState({ ...state });
+        COMMUNICATOR.startGame(game);
     };
 
     switch (state.ui) {
         case UiState.LOBBY:
-            return <Lobby communicator={state.communicator} startGame={onStartGame} />;
+            return <Lobby communicator={COMMUNICATOR} startGame={onStartGame} localId={LOCAL_ID} />;
         case UiState.BOARD:
-            return <Board communicator={state.communicator} game={state.game as Game} />;
+            return <Board communicator={COMMUNICATOR} game={state.game as Game} localId={LOCAL_ID} />;
     }
 }
 

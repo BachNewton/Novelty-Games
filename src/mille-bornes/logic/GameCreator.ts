@@ -1,64 +1,41 @@
 import { shuffleArray } from '../../util/Randomizer';
 import { Game, Player, Team } from './Data';
 import { AceCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, EmergencyCard, EmptyCard, FlatCard, GasCard, LimitCard, RepairCard, RollCard, SealantCard, SpareCard, StopCard, TankerCard, UnlimitedCard } from './Card';
+import { LobbyTeam } from '../ui/Lobby';
 
-export function startGame(): Game {
+export function createGame(lobbyTeams: Array<LobbyTeam>): Game {
     const deck = shuffleArray(createDeck());
 
-    const kyleTeam: Team = {
-        tableau: {
-            battleArea: null,
-            speedArea: null,
-            distanceArea: [],
-            safetyArea: []
-        },
-        players: [],
-        color: 'blue'
-    };
-    const kyle: Player = {
-        name: 'Kyle',
-        hand: deck.splice(0, 7),
-        team: kyleTeam
-    };
-    kyleTeam.players.push(kyle);
+    const teams: Array<Team> = lobbyTeams.map((lobbyTeam, lobbyIndex) => {
+        const team: Team = {
+            tableau: {
+                battleArea: null,
+                speedArea: null,
+                distanceArea: [],
+                safetyArea: []
+            },
+            players: [],
+            color: lobbyIndex === 0 ? 'blue' : lobbyIndex === 1 ? 'red' : 'green',
+            id: Math.random().toString()
+        };
 
-    const ericTeam: Team = {
-        tableau: {
-            battleArea: null,
-            speedArea: null,
-            distanceArea: [],
-            safetyArea: []
-        },
-        players: [],
-        color: 'red'
-    };
-    const eric: Player = {
-        name: 'Eric',
-        hand: deck.splice(0, 6),
-        team: ericTeam
-    };
-    ericTeam.players.push(eric);
+        const players = lobbyTeam.players.map((lobbyPlayer, playerIndex) => {
+            const player: Player = {
+                name: lobbyPlayer.name,
+                localId: lobbyPlayer.localId,
+                teamId: team.id,
+                hand: deck.splice(0, 6).concat(lobbyIndex === 0 && playerIndex === 0 ? deck.splice(0, 1) : [])
+            };
 
-    const garyTeam: Team = {
-        tableau: {
-            battleArea: null,
-            speedArea: null,
-            distanceArea: [],
-            safetyArea: []
-        },
-        players: [],
-        color: 'green'
-    };
-    const gary: Player = {
-        name: 'Gary',
-        hand: deck.splice(0, 6),
-        team: garyTeam
-    };
-    garyTeam.players.push(gary);
+            return player;
+        });
 
-    const teams = [kyleTeam, ericTeam, garyTeam];
+        team.players = players;
 
-    return { deck: deck, discard: null, teams: teams, currentPlayer: kyle };
+        return team;
+    });
+
+    return { deck: deck, discard: null, teams: teams, currentPlayer: teams[0].players[0] };
 }
 
 function createDeck(): Array<Card> {

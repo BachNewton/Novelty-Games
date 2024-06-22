@@ -1,15 +1,28 @@
 import { LobbyTeam } from "../ui/Lobby";
 import io from 'socket.io-client';
+import { Game } from "./Data";
 
-export class LobbyUpdateEvent extends Event {
-    static TYPE = 'LOBBY_UPDATE';
+export class LobbyEvent extends Event {
+    static TYPE = 'LOBBY';
 
     lobbyTeams: Array<LobbyTeam>;
 
     constructor(lobbyTeams: Array<LobbyTeam>) {
-        super(LobbyUpdateEvent.TYPE);
+        super(LobbyEvent.TYPE);
 
         this.lobbyTeams = lobbyTeams;
+    }
+}
+
+export class GameEvent extends Event {
+    static TYPE = 'GAME';
+
+    game: Game;
+
+    constructor(game: Game) {
+        super(GameEvent.TYPE);
+
+        this.game = game;
     }
 }
 
@@ -18,11 +31,16 @@ interface ServerData {
 }
 
 enum ServerDataType {
-    LOBBY_UPDATE
+    LOBBY,
+    GAME
 }
 
-interface LobbyUpdateServerData extends ServerData {
+interface LobbyServerData extends ServerData {
     lobbyTeams: Array<LobbyTeam>;
+}
+
+interface GameServerData extends ServerData {
+    game: Game;
 }
 
 const SERVER_URL = 'http://35.184.159.91/';
@@ -50,22 +68,39 @@ export class Communicator extends EventTarget {
         // });
 
         this.socket.on('broadcast', (data: ServerData) => {
-            if (data.type === ServerDataType.LOBBY_UPDATE) {
-                this.dispatchEvent(new LobbyUpdateEvent((data as LobbyUpdateServerData).lobbyTeams));
+            console.log('Received data from server:', data);
+
+            if (data.type === ServerDataType.LOBBY) {
+                this.dispatchEvent(new LobbyEvent((data as LobbyServerData).lobbyTeams));
+            } else if (data.type === ServerDataType.GAME) {
+                this.dispatchEvent(new GameEvent((data as GameServerData).game));
+            } else {
+                throw new Error('Unsupported ServerData: ' + data);
             }
         });
     }
 
     updateLobby(lobbyTeams: Array<LobbyTeam>) {
-        const data: LobbyUpdateServerData = {
-            type: ServerDataType.LOBBY_UPDATE,
+        const data: LobbyServerData = {
+            type: ServerDataType.LOBBY,
             lobbyTeams: lobbyTeams
         };
 
         this.broadcast(data);
     }
 
+    startGame(game: Game) {
+        const data: GameServerData = {
+            type: ServerDataType.GAME,
+            game: game
+        };
+
+        this.broadcast(data);
+    }
+
     private broadcast(data: ServerData) {
+        console.log('Sending data to server:', data);
+
         this.socket.emit('broadcast', data);
     }
 }

@@ -47,16 +47,16 @@ export function playCard(card: Card, game: Game, targetTeam: Team) {
 }
 
 export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
-    const tableau = game.currentPlayer.team.tableau;
+    const tableau = getCurrentPlayerTeam(game).tableau;
     const targetTeams = targetTeam === undefined
-        ? game.teams.filter(team => team !== game.currentPlayer.team)
+        ? game.teams.filter(team => team !== getCurrentPlayerTeam(game))
         : [targetTeam];
 
     if (isInstanceOfRemedyCard(card)) return canRemedyCardBePlayed(card, tableau.battleArea);
     if (isInstanceOfDistanceCard(card)) return canDistanceCardBePlayed(card as DistanceCard, tableau);
     if (card instanceof UnlimitedCard) return canUnlimitedCardBePlayed(tableau.speedArea);
     if (card instanceof LimitCard) return canLimitCardBePlayed(targetTeams);
-    if (isInstanceOfHazardCard(card)) return canHazardCardBePlayed(card, targetTeams);
+    if (isInstanceOfHazardCard(card)) return canHazardCardBePlayed(targetTeams);
 
     return false;
 }
@@ -96,7 +96,7 @@ function canLimitCardBePlayed(teams: Array<Team>): boolean {
     return false;
 }
 
-function canHazardCardBePlayed(hazardCard: HazardCard, teams: Array<Team>): boolean {
+function canHazardCardBePlayed(teams: Array<Team>): boolean {
     for (const team of teams) {
         if (team.tableau.battleArea instanceof RollCard) return true;
     }
@@ -121,4 +121,8 @@ function canRollCardBePlayed(battleArea: BattleCard | null): boolean {
     if (battleArea instanceof SpareCard) return true;
 
     return false;
+}
+
+export function getCurrentPlayerTeam(game: Game): Team {
+    return game.teams.find(team => team.id === game.currentPlayer.teamId) as Team;
 }

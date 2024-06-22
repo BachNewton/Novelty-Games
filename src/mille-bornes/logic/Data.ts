@@ -11,6 +11,7 @@ export interface Team {
     players: Array<Player>;
     tableau: Tableau;
     color: string;
+    id: string;
 }
 
 export interface Tableau {
@@ -23,5 +24,6 @@ export interface Tableau {
 export interface Player {
     name: string;
     hand: Array<Card>;
-    team: Team;
+    teamId: string;
+    localId: string;
 }

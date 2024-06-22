@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
-import { Communicator, LobbyUpdateEvent } from "../logic/Communicator";
-
-const LOCAL_ID = Math.random().toString();
+import { Communicator, LobbyEvent } from "../logic/Communicator";
 
 interface LobbyProps {
     communicator: Communicator;
     startGame: (lobbyTeams: Array<LobbyTeam>) => void;
+    localId: string;
 }
 
 export interface LobbyTeam {
     players: Array<LobbyPlayer>;
-    color: string;
 }
 
 interface LobbyPlayer {
@@ -18,19 +16,21 @@ interface LobbyPlayer {
     localId: string;
 }
 
-const Lobby: React.FC<LobbyProps> = ({ communicator, startGame }) => {
-    const [lobbyTeams, setLobbyTeams] = useState<Array<LobbyTeam>>([]);
+const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId }) => {
+    const [lobbyTeams, setLobbyTeams] = useState<Array<LobbyTeam>>([
+        { players: [{ name: 'Kyle', localId: localId }] },
+        { players: [{ name: 'Eric', localId: localId }] },
+    ]);
 
     useEffect(() => {
-        communicator.addEventListener(LobbyUpdateEvent.TYPE, (event) => {
-            setLobbyTeams([...(event as LobbyUpdateEvent).lobbyTeams]);
+        communicator.addEventListener(LobbyEvent.TYPE, (event) => {
+            setLobbyTeams([...(event as LobbyEvent).lobbyTeams]);
         });
     }, [communicator]);
 
     const onAddTeam = () => {
         lobbyTeams.push({
-            players: [],
-            color: lobbyTeams.length === 0 ? 'blue' : lobbyTeams.length === 1 ? 'red' : 'green'
+            players: []
         });
 
         setLobbyTeams([...lobbyTeams]);
@@ -46,7 +46,7 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame }) => {
             const name = prompt('What is the name of this player?') || 'Player';
             lobbyTeam.players.push({
                 name: name,
-                localId: LOCAL_ID
+                localId: localId
             });
 
             setLobbyTeams([...lobbyTeams]);
