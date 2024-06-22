@@ -4,7 +4,6 @@ import Lobby, { LobbyTeam } from "./Lobby";
 import Board from "./Board";
 import { Game } from "../logic/Data";
 import { createGame } from "../logic/GameCreator";
-import { imageToCard } from "../logic/Card";
 
 interface State {
     ui: UiState;
@@ -24,22 +23,7 @@ const Home: React.FC = () => {
 
     useEffect(() => {
         COMMUNICATOR.addEventListener(GameEvent.TYPE, (event) => {
-            const game = (event as GameEvent).game;
-
-            game.deck = game.deck.map(card => imageToCard(card.image));
-            game.teams = game.teams.map(team => {
-                team.players = team.players.map(player => {
-                    player.hand = player.hand.map(card => imageToCard(card.image));
-
-                    return player;
-                });
-
-                return team;
-            });
-            game.currentPlayer = game.teams[0].players[0];
-
-            state.game = game;
-
+            state.game = (event as GameEvent).game;
             state.ui = UiState.BOARD;
             setState({ ...state });
         });

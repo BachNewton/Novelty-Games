@@ -55,10 +55,13 @@ const Board: React.FC<BoardProps> = ({ game, communicator, localId }) => {
                         state.ui = new TeamSelection(card);
                     } else {
                         playCard(card, game, null);
+                        communicator.playCard(card, null);
                         state.ui.card = null;
                     }
                 } else {
-                    playCard(card, game, getCurrentPlayerTeam(game));
+                    const targetTeam = getCurrentPlayerTeam(game);
+                    playCard(card, game, targetTeam);
+                    communicator.playCard(card, targetTeam);
                     state.ui.card = null;
                 }
             }
@@ -74,6 +77,7 @@ const Board: React.FC<BoardProps> = ({ game, communicator, localId }) => {
             if (state.ui instanceof TeamSelection) {
                 if (state.ui.team === otherTeam) {
                     playCard(state.ui.card, game, otherTeam);
+                    communicator.playCard(state.ui.card, otherTeam);
                     state.ui = new CardSelection();
                 } else {
                     state.ui.team = otherTeam;

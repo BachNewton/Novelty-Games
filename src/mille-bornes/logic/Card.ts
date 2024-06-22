@@ -209,7 +209,7 @@ export class LimitCard implements SpeedCard {
     }
 }
 
-export function imageToCard(image: string): Card {
+export function createCard(image: string): Card {
     switch (image) {
         case MB_CRASH:
             return new CrashCard();

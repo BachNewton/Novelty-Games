@@ -1,6 +1,7 @@
 import { LobbyTeam } from "../ui/Lobby";
 import io from 'socket.io-client';
-import { Game } from "./Data";
+import { Game, Team, createTeam } from "./Data";
+import { Card, createCard } from "./Card";
 
 export class LobbyEvent extends Event {
     static TYPE = 'LOBBY';
@@ -22,7 +23,25 @@ export class GameEvent extends Event {
     constructor(game: Game) {
         super(GameEvent.TYPE);
 
+        game.deck = game.deck.map(card => createCard(card.image));
+        game.teams = game.teams.map(team => createTeam(team));
+        game.currentPlayer = game.teams[0].players[0];
+
         this.game = game;
+    }
+}
+
+export class PlayCardEvent extends Event {
+    static TYPE = 'PLAY_CARD';
+
+    card: Card;
+    targetTeam: Team | null;
+
+    constructor(card: Card, targetTeam: Team | null) {
+        super(PlayCardEvent.TYPE);
+
+        this.card = createCard(card.image);
+        this.targetTeam = targetTeam === null ? null : createTeam(targetTeam);
     }
 }
 
@@ -32,7 +51,8 @@ interface ServerData {
 
 enum ServerDataType {
     LOBBY,
-    GAME
+    GAME,
+    PLAY_CARD
 }
 
 interface LobbyServerData extends ServerData {
@@ -41,6 +61,11 @@ interface LobbyServerData extends ServerData {
 
 interface GameServerData extends ServerData {
     game: Game;
+}
+
+interface PlayCardData extends ServerData {
+    card: Card;
+    targetTeam: Team | null;
 }
 
 const SERVER_URL = 'http://35.184.159.91/';
@@ -74,6 +99,8 @@ export class Communicator extends EventTarget {
                 this.dispatchEvent(new LobbyEvent((data as LobbyServerData).lobbyTeams));
             } else if (data.type === ServerDataType.GAME) {
                 this.dispatchEvent(new GameEvent((data as GameServerData).game));
+            } else if (data.type === ServerDataType.PLAY_CARD) {
+                //
             } else {
                 throw new Error('Unsupported ServerData: ' + data);
             }
@@ -93,6 +120,16 @@ export class Communicator extends EventTarget {
         const data: GameServerData = {
             type: ServerDataType.GAME,
             game: game
+        };
+
+        this.broadcast(data);
+    }
+
+    playCard(card: Card, targetTeam: Team | null) {
+        const data: PlayCardData = {
+            type: ServerDataType.PLAY_CARD,
+            card: card,
+            targetTeam: targetTeam
         };
 
         this.broadcast(data);

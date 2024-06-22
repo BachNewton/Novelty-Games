@@ -1,4 +1,4 @@
-import { BattleCard, Card, DistanceCard, SafetyCard, SpeedCard } from "./Card";
+import { BattleCard, Card, DistanceCard, SafetyCard, SpeedCard, createCard } from "./Card";
 
 export interface Game {
     deck: Array<Card>;
@@ -12,6 +12,16 @@ export interface Team {
     tableau: Tableau;
     color: string;
     id: string;
+}
+
+export function createTeam(team: Team): Team {
+    team.players = team.players.map(player => {
+        player.hand = player.hand.map(card => createCard(card.image));
+
+        return player;
+    });
+
+    return team;
 }
 
 export interface Tableau {
