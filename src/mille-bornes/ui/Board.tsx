@@ -113,7 +113,12 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) =>
 
     const gridTemplateRows = '1fr ' + state.game.teams.map(_ => '3fr').join(' ') + ' 1fr';
     return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: gridTemplateRows, overflow: 'hidden', color: 'white' }}>
-        <DeckDiscardAndStats discard={state.game.discard} greyedOut={greyedOut} currentPlayer={state.game.currentPlayer} />
+        <DeckDiscardAndStats
+            discard={state.game.discard}
+            greyedOut={greyedOut}
+            currentPlayer={state.game.currentPlayer}
+            remainingCardsInDeck={state.game.deck.length}
+        />
 
         {otherTeamsTableau}
         {localTeamsTableau}

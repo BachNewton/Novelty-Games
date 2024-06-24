@@ -31,16 +31,16 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null) {
 
     let wasSafetyCardOrCoupFourréPlayed = false;
 
-    const handleCoupFourré = (playerWithCoupFourré: Player) => {
-        // Draw a card
-        // TODO: Handle an empty deck
+    const drawACard = (player: Player) => {
         const nextCard = game.deck.pop();
         if (nextCard !== undefined) {
-            playerWithCoupFourré.hand.push(nextCard);
+            player.hand.push(nextCard);
         }
+    };
 
+    const handleCoupFourré = (playerWithCoupFourré: Player) => {
+        drawACard(playerWithCoupFourré);
         game.currentPlayer = playerWithCoupFourré;
-
         wasSafetyCardOrCoupFourréPlayed = true;
     };
 
@@ -98,12 +98,7 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null) {
         game.currentPlayer = getNextPlayer(game);
     }
 
-    // Draw a card
-    // TODO: Handle an empty deck
-    const nextCard = game.deck.pop();
-    if (nextCard !== undefined) {
-        game.currentPlayer.hand.push(nextCard);
-    }
+    drawACard(game.currentPlayer);
 }
 
 export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
