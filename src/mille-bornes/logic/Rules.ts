@@ -138,6 +138,9 @@ function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau): 
     const speedArea = getVisibleSpeedCard(tableau.speedArea)
     const speedAreaLimit = speedArea === null ? 200 : speedArea.limit;
 
+    // A max of 2 Distance200Cards can be played per hand
+    if (distanceCard instanceof Distance200Card && tableau.distanceArea.filter(distanceCard => distanceCard instanceof Distance200Card).length >= 2) return false;
+
     if (battleArea instanceof RollCard && speedAreaLimit >= distanceCard.amount) return true;
     if (hasEmergencyCard(tableau.safetyArea) && (battleArea === null || isInstanceOfRemedyCard(battleArea) || battleArea instanceof StopCard)) return true;
 
