@@ -5,6 +5,7 @@ export interface Game {
     discard: Card | null;
     teams: Array<Team>;
     currentPlayer: Player;
+    extention: boolean;
 }
 
 export interface Team {

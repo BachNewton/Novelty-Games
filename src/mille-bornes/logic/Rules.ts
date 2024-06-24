@@ -1,6 +1,9 @@
 import { AceCard, BattleCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, EmergencyCard, EmptyCard, FlatCard, GasCard, HazardCard, LimitCard, RemedyCard, RepairCard, RollCard, SafetyCard, SealantCard, SpareCard, SpeedCard, StopCard, TankerCard, UnlimitedCard } from "./Card";
 import { Game, Player, Tableau, Team } from "./Data";
 
+const MAX_TARGET_DISTANCE = 1000;
+const TARGET_DISTANCE = 750;
+
 function getNextPlayer(game: Game): Player {
     const playerOrder = getPlayerOrder(game.teams);
     const nextPlayerIndex = (playerOrder.indexOf(game.currentPlayer) + 1) % playerOrder.length;
@@ -108,7 +111,7 @@ export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
         : [targetTeam];
 
     if (isInstanceOfRemedyCard(card)) return canRemedyCardBePlayed(card, getVisibleBattleCard(tableau.battleArea));
-    if (isInstanceOfDistanceCard(card)) return canDistanceCardBePlayed(card as DistanceCard, tableau, game.teams);
+    if (isInstanceOfDistanceCard(card)) return canDistanceCardBePlayed(card as DistanceCard, tableau, game.teams, game.extention);
     if (card instanceof UnlimitedCard) return canUnlimitedCardBePlayed(getVisibleSpeedCard(tableau.speedArea));
     if (card instanceof LimitCard) return canLimitCardBePlayed(targetTeams);
     if (isInstanceOfHazardCard(card)) return canHazardCardBePlayed(card, targetTeams);
@@ -133,7 +136,7 @@ function isInstanceOfRemedyCard(card: Card): boolean {
     return card instanceof RepairCard || card instanceof GasCard || card instanceof SpareCard || card instanceof RollCard;
 }
 
-function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau, teams: Array<Team>): boolean {
+function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau, teams: Array<Team>, extention: boolean): boolean {
     const battleArea = getVisibleBattleCard(tableau.battleArea);
     const speedArea = getVisibleSpeedCard(tableau.speedArea)
     const speedAreaLimit = speedArea === null ? 200 : speedArea.limit;
@@ -141,7 +144,7 @@ function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau, t
     // A max of 2 Distance200Cards can be played per hand
     if (distanceCard instanceof Distance200Card && tableau.distanceArea.filter(distanceCard => distanceCard instanceof Distance200Card).length >= 2) return false;
 
-    if (getTotalDistance(tableau.distanceArea) + distanceCard.amount > getTargetDistance(teams)) return false;
+    if (getTotalDistance(tableau.distanceArea) + distanceCard.amount > getTargetDistance(teams, extention)) return false;
 
     if (battleArea instanceof RollCard && speedAreaLimit >= distanceCard.amount) return true;
     if (hasEmergencyCard(tableau.safetyArea) && (battleArea === null || isInstanceOfRemedyCard(battleArea) || battleArea instanceof StopCard)) return true;
@@ -277,14 +280,18 @@ function getTotalDistance(distanceArea: Array<DistanceCard>): number {
     return distanceArea.reduce((accumulator: number, distanceCard: DistanceCard) => accumulator + distanceCard.amount, 0);
 }
 
-function getTargetDistance(teams: Array<Team>): number {
-    if (teams.length === 2 && teams[0].players.length === 2 && teams[1].players.length === 2) {
-        return 1000;
+function getTargetDistance(teams: Array<Team>, extention: boolean): number {
+    if (extention || (teams.length === 2 && teams[0].players.length === 2 && teams[1].players.length === 2)) {
+        return MAX_TARGET_DISTANCE;
     } else {
-        return 750;
+        return TARGET_DISTANCE;
     }
 }
 
-export function getRemainingDistance(distanceArea: Array<DistanceCard>, teams: Array<Team>): number {
-    return getTargetDistance(teams) - getTotalDistance(distanceArea);
+export function isGameAtMaxTargetDistance(teams: Array<Team>): boolean {
+    return getTargetDistance(teams, false) === getTargetDistance(teams, true);
+}
+
+export function getRemainingDistance(distanceArea: Array<DistanceCard>, teams: Array<Team>, extention: boolean): number {
+    return getTargetDistance(teams, extention) - getTotalDistance(distanceArea);
 }

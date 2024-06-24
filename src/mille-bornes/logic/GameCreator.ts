@@ -27,9 +27,12 @@ export function createGame(lobbyTeams: Array<LobbyTeam>): Game {
                 hand: deck.splice(0, 6).concat(lobbyIndex === 0 && playerIndex === 0 ? deck.splice(0, 1) : [])
             };
 
-            // player.hand.push(new AceCard(), new EmergencyCard(), new SealantCard(), new TankerCard());
-            // player.hand.push(new CrashCard(), new StopCard(), new EmptyCard(), new FlatCard());
             // player.hand.push(new RollCard());
+            // player.hand = player.hand.concat(Array.from({ length: 5 }, () => new Distance25Card()));
+            // player.hand = player.hand.concat(Array.from({ length: 5 }, () => new Distance50Card()));
+            // player.hand = player.hand.concat(Array.from({ length: 5 }, () => new Distance75Card()));
+            // player.hand = player.hand.concat(Array.from({ length: 5 }, () => new Distance100Card()));
+            // player.hand = player.hand.concat(Array.from({ length: 5 }, () => new Distance200Card()));
 
             return player;
         });
@@ -39,7 +42,7 @@ export function createGame(lobbyTeams: Array<LobbyTeam>): Game {
         return team;
     });
 
-    return { deck: deck, discard: null, teams: teams, currentPlayer: teams[0].players[0] };
+    return { deck: deck, discard: null, teams: teams, currentPlayer: teams[0].players[0], extention: false };
 }
 
 function createDeck(): Array<Card> {

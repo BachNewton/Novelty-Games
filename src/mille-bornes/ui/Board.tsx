@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, LimitCard } from "../logic/Card";
 import { Game, Player, Team } from "../logic/Data";
-import { canCardBePlayed, getCurrentPlayerTeam, getRemainingDistance, isInstanceOfHazardCard, playCard } from "../logic/Rules";
+import { canCardBePlayed, getCurrentPlayerTeam, getRemainingDistance, isGameAtMaxTargetDistance, isInstanceOfHazardCard, playCard } from "../logic/Rules";
 import Hand from './Hand';
 import TableauUi from "./Tableau";
 import { Communicator, PlayCardEvent } from "../logic/Communicator";
@@ -46,7 +46,15 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) =>
     useEffect(() => {
         communicator.addEventListener(PlayCardEvent.TYPE, (event) => {
             const playCardEvent = event as PlayCardEvent;
-            playCard(playCardEvent.card, state.game, getTeamById(playCardEvent.targetTeamId, state.game));
+            const targetTeam = getTeamById(playCardEvent.targetTeamId, state.game);
+            playCard(playCardEvent.card, state.game, targetTeam);
+            state.game.extention = playCardEvent.isExtentionCalled;
+
+            const isGameOver = state.game.teams.some(team => getRemainingDistance(team.tableau.distanceArea, state.game.teams, state.game.extention) === 0);
+            if (isGameOver) {
+                throw new Error("The game is over");
+            }
+
             setState({ ...state });
         });
     }, [state]);
@@ -54,28 +62,44 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) =>
     const itIsYourTurn = getLocalPlayer(state.game, localId)?.localId === state.game.currentPlayer.localId;
 
     const onPlayCard = (card: Card) => {
-        if (state.ui instanceof CardSelection && itIsYourTurn) {
-            if (state.ui.card !== card) {
-                state.ui.card = card;
-            } else {
-                if (isInstanceOfHazardCard(card) || card instanceof LimitCard) {
-                    if (canCardBePlayed(card, state.game)) {
-                        state.ui = new TeamSelection(card);
-                    } else {
-                        playCard(card, state.game, null);
-                        communicator.playCard(card, null);
-                        state.ui.card = null;
-                    }
+        if (!(state.ui instanceof CardSelection) || !itIsYourTurn) return;
+
+        if (state.ui.card !== card) {
+            state.ui.card = card;
+        } else {
+            if (isInstanceOfHazardCard(card) || card instanceof LimitCard) {
+                if (canCardBePlayed(card, state.game)) {
+                    state.ui = new TeamSelection(card);
                 } else {
-                    const targetTeam = getCurrentPlayerTeam(state.game);
-                    playCard(card, state.game, targetTeam);
-                    communicator.playCard(card, targetTeam);
+                    playCard(card, state.game, null);
+                    communicator.playCard(card, null);
                     state.ui.card = null;
                 }
-            }
+            } else {
+                const targetTeam = getCurrentPlayerTeam(state.game);
+                playCard(card, state.game, targetTeam);
 
-            setState({ ...state });
+                const teamAtTargetDistance = getRemainingDistance(targetTeam.tableau.distanceArea, state.game.teams, state.game.extention) === 0;
+                if (teamAtTargetDistance) {
+                    if (state.game.extention || isGameAtMaxTargetDistance(state.game.teams)) {
+                        throw new Error("The game is over");
+                    } else {
+                        const calledExtention = window.confirm('Your team has reached the target! Would like to to call an extention?');
+
+                        if (calledExtention) {
+                            state.game.extention = true;
+                        } else {
+                            throw new Error("The game is over");
+                        }
+                    }
+                }
+
+                communicator.playCard(card, targetTeam, state.game.extention);
+                state.ui.card = null;
+            }
         }
+
+        setState({ ...state });
     };
 
     const localPlayerTeam = getLocalPlayerTeam(state.game, localId);
@@ -100,7 +124,7 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) =>
             team={otherTeam}
             key={index}
             isHighlighted={state.ui instanceof TeamSelection && state.ui.team === otherTeam}
-            remainingDistance={getRemainingDistance(otherTeam.tableau.distanceArea, state.game.teams)}
+            remainingDistance={getRemainingDistance(otherTeam.tableau.distanceArea, state.game.teams, state.game.extention)}
         />;
     });
 
@@ -111,7 +135,7 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) =>
         : <TableauUi
             team={localPlayerTeam}
             greyedOut={greyedOut}
-            remainingDistance={getRemainingDistance(localPlayerTeam.tableau.distanceArea, state.game.teams)}
+            remainingDistance={getRemainingDistance(localPlayerTeam.tableau.distanceArea, state.game.teams, state.game.extention)}
         />;
 
     const isCardPlayable = (card: Card) => canCardBePlayed(card, state.game);
@@ -123,6 +147,7 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) =>
             greyedOut={greyedOut}
             currentPlayer={state.game.currentPlayer}
             remainingCardsInDeck={state.game.deck.length}
+            extentionCalled={state.game.extention}
         />
 
         {otherTeamsTableau}

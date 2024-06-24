@@ -36,12 +36,14 @@ export class PlayCardEvent extends Event {
 
     card: Card;
     targetTeamId: string | null;
+    isExtentionCalled: boolean;
 
-    constructor(card: Card, targetTeamId: string | null) {
+    constructor(card: Card, targetTeamId: string | null, isExtentionCalled: boolean) {
         super(PlayCardEvent.TYPE);
 
         this.card = createCard(card.image);
         this.targetTeamId = targetTeamId;
+        this.isExtentionCalled = isExtentionCalled;
     }
 }
 
@@ -66,6 +68,7 @@ interface GameServerData extends ServerData {
 interface PlayCardData extends ServerData {
     card: Card;
     targetTeamId: string | null;
+    isExtentionCalled: boolean;
 }
 
 const SERVER_URL = 'http://35.184.159.91/';
@@ -86,7 +89,7 @@ export class Communicator extends EventTarget {
                 this.dispatchEvent(new GameEvent((data as GameServerData).game));
             } else if (data.type === ServerDataType.PLAY_CARD) {
                 const playCardData = data as PlayCardData;
-                this.dispatchEvent(new PlayCardEvent(playCardData.card, playCardData.targetTeamId));
+                this.dispatchEvent(new PlayCardEvent(playCardData.card, playCardData.targetTeamId, playCardData.isExtentionCalled));
             } else {
                 throw new Error('Unsupported ServerData: ' + data);
             }
@@ -119,11 +122,12 @@ export class Communicator extends EventTarget {
         this.broadcast(data);
     }
 
-    playCard(card: Card, targetTeam: Team | null) {
+    playCard(card: Card, targetTeam: Team | null, isExtentionCalled: boolean = false) {
         const data: PlayCardData = {
             type: ServerDataType.PLAY_CARD,
             card: card,
-            targetTeamId: targetTeam === null ? null : targetTeam.id
+            targetTeamId: targetTeam === null ? null : targetTeam.id,
+            isExtentionCalled: isExtentionCalled
         };
 
         this.broadcast(data);
