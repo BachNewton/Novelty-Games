@@ -8,16 +8,18 @@ interface CardProps {
     isHighlighted?: boolean;
     transform?: string;
     objectPosition?: string;
+    isGreyedOut?: boolean;
 }
 
-const Card: React.FC<CardProps> = ({ card, onClick, isHighlighted, transform, objectPosition }) => {
+const Card: React.FC<CardProps> = ({ card, onClick, isHighlighted, transform, objectPosition, isGreyedOut }) => {
     const imgStyle: React.CSSProperties = {
         minHeight: 0,
         height: '100%',
         objectFit: 'contain',
         width: '100%',
         objectPosition: objectPosition || 'top',
-        transform: transform
+        transform: transform,
+        opacity: isGreyedOut ? 0.25 : 1
     };
 
     if (isHighlighted) {
@@ -29,7 +31,6 @@ const Card: React.FC<CardProps> = ({ card, onClick, isHighlighted, transform, ob
 
     const src = card === undefined ? MB_BACK : card === null ? MB_OUTLINE : card.image;
 
-    // TODO: transform: rotate(90deg);
     return <img src={src} style={imgStyle} onClick={onClick} alt='Card' />;
 }
 

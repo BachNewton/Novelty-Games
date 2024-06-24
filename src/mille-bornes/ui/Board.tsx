@@ -104,6 +104,8 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) =>
         ? <></>
         : <TableauUi team={localPlayerTeam} greyedOut={greyedOut} />;
 
+    const isCardPlayable = (card: Card) => canCardBePlayed(card, state.game);
+
     const gridTemplateRows = '1fr ' + state.game.teams.map(_ => '3fr').join(' ') + ' 1fr';
     return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: gridTemplateRows, overflow: 'hidden', color: 'white' }}>
         <DeckDiscardAndStats discard={state.game.discard} greyedOut={greyedOut} currentPlayer={state.game.currentPlayer} />
@@ -111,7 +113,13 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) =>
         {otherTeamsTableau}
         {localTeamsTableau}
 
-        <Hand hand={getLocalHandCards(state.game, localId)} onPlayCard={onPlayCard} highlightedCard={state.ui.card} greyedOut={greyedOut || !itIsYourTurn} />
+        <Hand
+            hand={getLocalHandCards(state.game, localId)}
+            onPlayCard={onPlayCard}
+            highlightedCard={state.ui.card}
+            greyedOut={greyedOut || !itIsYourTurn}
+            isCardPlayable={isCardPlayable}
+        />
     </div>;
 };
 

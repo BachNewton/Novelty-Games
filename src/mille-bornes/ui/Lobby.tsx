@@ -17,7 +17,10 @@ interface LobbyPlayer {
 }
 
 const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId }) => {
-    const [lobbyTeams, setLobbyTeams] = useState<Array<LobbyTeam>>([]);
+    const [lobbyTeams, setLobbyTeams] = useState<Array<LobbyTeam>>([
+        { players: [{ name: 'Kyle', localId: localId }] },
+        { players: [{ name: 'Eric', localId: localId }] }
+    ]);
 
     useEffect(() => {
         communicator.addEventListener(LobbyEvent.TYPE, (event) => {

@@ -25,8 +25,8 @@ export function createTeam(team: Team): Team {
 }
 
 export interface Tableau {
-    battleArea: BattleCard | null;
-    speedArea: SpeedCard | null;
+    battleArea: Array<BattleCard>;
+    speedArea: Array<SpeedCard>;
     distanceArea: Array<DistanceCard>;
     safetyArea: Array<SafetyCard>;
 }

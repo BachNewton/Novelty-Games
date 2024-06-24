@@ -1,4 +1,5 @@
 import { Team } from "../logic/Data";
+import { getVisibleBattleCard, getVisibleSpeedCard } from "../logic/Rules";
 import CardUi from "./Card";
 import DistanceArea from './DistanceArea';
 import SafetyArea from './SafetyArea';
@@ -36,8 +37,8 @@ const Tableau: React.FC<TableauProps> = ({ team, onClick, isHighlighted, greyedO
             </div>
 
             <div style={{ display: 'grid', minHeight: 0 }}>
-                <CardUi card={tableauData.battleArea} />
-                <CardUi card={tableauData.speedArea} />
+                <CardUi card={getVisibleBattleCard(tableauData.battleArea)} />
+                <CardUi card={getVisibleSpeedCard(tableauData.speedArea)} />
             </div>
         </div>
     </div >

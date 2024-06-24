@@ -1,4 +1,5 @@
-import { AceCard, BattleCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, EmergencyCard, EmptyCard, FlatCard, GasCard, LimitCard, RemedyCard, RepairCard, RollCard, SafetyCard, SealantCard, SpareCard, SpeedCard, StopCard, TankerCard, UnlimitedCard } from "./Card";
+import SafetyArea from "../ui/SafetyArea";
+import { AceCard, BattleCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, EmergencyCard, EmptyCard, FlatCard, GasCard, HazardCard, LimitCard, RemedyCard, RepairCard, RollCard, SafetyCard, SealantCard, SpareCard, SpeedCard, StopCard, TankerCard, UnlimitedCard } from "./Card";
 import { Game, Player, Tableau, Team } from "./Data";
 
 function getNextPlayer(game: Game): Player {
@@ -33,19 +34,44 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null) {
         if (isInstanceOfDistanceCard(card)) {
             targetTeam.tableau.distanceArea.push(card as DistanceCard);
         } else if (card instanceof UnlimitedCard || card instanceof LimitCard) {
-            targetTeam.tableau.speedArea = card;
+            targetTeam.tableau.speedArea.push(card);
         } else if (isInstanceOfHazardCard(card) || isInstanceOfRemedyCard(card)) {
-            targetTeam.tableau.battleArea = card;
+            targetTeam.tableau.battleArea.push(card);
         } else if (isInstanceOfSafteyCard(card)) {
             targetTeam.tableau.safetyArea.push(card as SafetyCard);
+
+            const battleCard = getVisibleBattleCard(targetTeam.tableau.battleArea);
+
+            if (
+                (card instanceof AceCard && battleCard instanceof CrashCard) ||
+                (card instanceof SealantCard && battleCard instanceof FlatCard) ||
+                (card instanceof EmergencyCard && battleCard instanceof StopCard) ||
+                (card instanceof TankerCard && battleCard instanceof EmptyCard)
+            ) {
+                // Remove the top card
+                targetTeam.tableau.battleArea.pop();
+            }
+
+            if (card instanceof EmergencyCard) {
+                // Remove all cards from the Speed Area
+                targetTeam.tableau.speedArea = [];
+            }
         }
     } else {
         game.discard = card;
     }
 
-    game.currentPlayer = getNextPlayer(game);
+    // Only move to the next player if a safety card wasn't played
+    if (!isInstanceOfSafteyCard(card)) {
+        game.currentPlayer = getNextPlayer(game);
+    }
+
     // Draw a card
-    game.currentPlayer.hand.push(game.deck.splice(0, 1)[0]);
+    // TODO: Handle an empty deck
+    const nextCard = game.deck.pop();
+    if (nextCard !== undefined) {
+        game.currentPlayer.hand.push(nextCard);
+    }
 }
 
 export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
@@ -54,11 +80,11 @@ export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
         ? game.teams.filter(team => team !== getCurrentPlayerTeam(game))
         : [targetTeam];
 
-    if (isInstanceOfRemedyCard(card)) return canRemedyCardBePlayed(card, tableau.battleArea);
+    if (isInstanceOfRemedyCard(card)) return canRemedyCardBePlayed(card, getVisibleBattleCard(tableau.battleArea));
     if (isInstanceOfDistanceCard(card)) return canDistanceCardBePlayed(card as DistanceCard, tableau);
-    if (card instanceof UnlimitedCard) return canUnlimitedCardBePlayed(tableau.speedArea);
+    if (card instanceof UnlimitedCard) return canUnlimitedCardBePlayed(getVisibleSpeedCard(tableau.speedArea));
     if (card instanceof LimitCard) return canLimitCardBePlayed(targetTeams);
-    if (isInstanceOfHazardCard(card)) return canHazardCardBePlayed(targetTeams);
+    if (isInstanceOfHazardCard(card)) return canHazardCardBePlayed(card, targetTeams);
     if (isInstanceOfSafteyCard(card)) return true; // Safety cards can always be played
 
     return false;
@@ -81,10 +107,12 @@ function isInstanceOfRemedyCard(card: Card): boolean {
 }
 
 function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau): boolean {
-    const battleArea = tableau.battleArea;
-    const speedAreaLimit = tableau.speedArea === null ? 200 : tableau.speedArea.limit;
+    const battleArea = getVisibleBattleCard(tableau.battleArea);
+    const speedArea = getVisibleSpeedCard(tableau.speedArea)
+    const speedAreaLimit = speedArea === null ? 200 : speedArea.limit;
 
     if (battleArea instanceof RollCard && speedAreaLimit >= distanceCard.amount) return true;
+    if (hasEmergencyCard(tableau.safetyArea) && (battleArea === null || isInstanceOfRemedyCard(battleArea) || battleArea instanceof StopCard)) return true;
 
     return false;
 }
@@ -97,15 +125,23 @@ function canUnlimitedCardBePlayed(speedArea: SpeedCard | null): boolean {
 
 function canLimitCardBePlayed(teams: Array<Team>): boolean {
     for (const team of teams) {
-        if (team.tableau.speedArea === null || team.tableau.speedArea instanceof UnlimitedCard) return true;
+        if (hasEmergencyCard(team.tableau.safetyArea)) continue;
+
+        const speedArea = getVisibleSpeedCard(team.tableau.speedArea)
+        if (speedArea === null || speedArea instanceof UnlimitedCard) return true;
     }
 
     return false;
 }
 
-function canHazardCardBePlayed(teams: Array<Team>): boolean {
+function canHazardCardBePlayed(hazardCard: HazardCard, teams: Array<Team>): boolean {
     for (const team of teams) {
-        if (team.tableau.battleArea instanceof RollCard) return true;
+        if (hazardCard instanceof FlatCard && hasSealantCard(team.tableau.safetyArea)) continue;
+        if (hazardCard instanceof CrashCard && hasAceCard(team.tableau.safetyArea)) continue;
+        if (hazardCard instanceof EmptyCard && hasTankerCard(team.tableau.safetyArea)) continue;
+        if (hazardCard instanceof StopCard && hasEmergencyCard(team.tableau.safetyArea)) continue;
+
+        if (getVisibleBattleCard(team.tableau.battleArea) instanceof RollCard || hasEmergencyCard(team.tableau.safetyArea)) return true;
     }
 
     return false;
@@ -132,4 +168,28 @@ function canRollCardBePlayed(battleArea: BattleCard | null): boolean {
 
 export function getCurrentPlayerTeam(game: Game): Team {
     return game.teams.find(team => team.id === game.currentPlayer.teamId) as Team;
+}
+
+export function getVisibleBattleCard(battleArea: Array<BattleCard>): BattleCard | null {
+    return battleArea[battleArea.length - 1] || null;
+}
+
+export function getVisibleSpeedCard(speedArea: Array<SpeedCard>): SpeedCard | null {
+    return speedArea[speedArea.length - 1] || null;
+}
+
+function hasAceCard(safetyArea: Array<SafetyCard>): boolean {
+    return safetyArea.find(safetyCard => safetyCard instanceof AceCard) !== undefined;
+}
+
+function hasSealantCard(safetyArea: Array<SafetyCard>): boolean {
+    return safetyArea.find(safetyCard => safetyCard instanceof SealantCard) !== undefined;
+}
+
+function hasEmergencyCard(safetyArea: Array<SafetyCard>): boolean {
+    return safetyArea.find(safetyCard => safetyCard instanceof EmergencyCard) !== undefined;
+}
+
+function hasTankerCard(safetyArea: Array<SafetyCard>): boolean {
+    return safetyArea.find(safetyCard => safetyCard instanceof TankerCard) !== undefined;
 }
