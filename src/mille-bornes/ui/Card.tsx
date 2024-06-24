@@ -19,7 +19,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, isHighlighted, transform, ob
         width: '100%',
         objectPosition: objectPosition || 'top',
         transform: transform,
-        opacity: isGreyedOut ? 0.25 : 1
+        opacity: isGreyedOut ? 0.45 : 1
     };
 
     if (isHighlighted) {

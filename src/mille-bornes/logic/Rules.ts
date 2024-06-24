@@ -1,4 +1,3 @@
-import SafetyArea from "../ui/SafetyArea";
 import { AceCard, BattleCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, EmergencyCard, EmptyCard, FlatCard, GasCard, HazardCard, LimitCard, RemedyCard, RepairCard, RollCard, SafetyCard, SealantCard, SpareCard, SpeedCard, StopCard, TankerCard, UnlimitedCard } from "./Card";
 import { Game, Player, Tableau, Team } from "./Data";
 
@@ -30,12 +29,43 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null) {
     // Remove card from hand
     game.currentPlayer.hand = game.currentPlayer.hand.filter(handCard => handCard !== card);
 
+    let wasSafetyCardOrCoupFourréPlayed = false;
+
+    const handleCoupFourré = (playerWithCoupFourré: Player) => {
+        // Draw a card
+        // TODO: Handle an empty deck
+        const nextCard = game.deck.pop();
+        if (nextCard !== undefined) {
+            playerWithCoupFourré.hand.push(nextCard);
+        }
+
+        game.currentPlayer = playerWithCoupFourré;
+
+        wasSafetyCardOrCoupFourréPlayed = true;
+    };
+
     if (targetTeam && canCardBePlayed(card, game, targetTeam)) {
         if (isInstanceOfDistanceCard(card)) {
             targetTeam.tableau.distanceArea.push(card as DistanceCard);
-        } else if (card instanceof UnlimitedCard || card instanceof LimitCard) {
+        } else if (card instanceof UnlimitedCard) {
             targetTeam.tableau.speedArea.push(card);
-        } else if (isInstanceOfHazardCard(card) || isInstanceOfRemedyCard(card)) {
+        } else if (card instanceof LimitCard) {
+            const playerWithCoupFourré = getPlayerWithCoupFourré(card, targetTeam);
+
+            if (playerWithCoupFourré === null) {
+                targetTeam.tableau.speedArea.push(card);
+            } else {
+                handleCoupFourré(playerWithCoupFourré);
+            }
+        } else if (isInstanceOfHazardCard(card)) {
+            const playerWithCoupFourré = getPlayerWithCoupFourré(card, targetTeam);
+
+            if (playerWithCoupFourré === null) {
+                targetTeam.tableau.battleArea.push(card);
+            } else {
+                handleCoupFourré(playerWithCoupFourré);
+            }
+        } else if (isInstanceOfRemedyCard(card)) {
             targetTeam.tableau.battleArea.push(card);
         } else if (isInstanceOfSafteyCard(card)) {
             targetTeam.tableau.safetyArea.push(card as SafetyCard);
@@ -56,13 +86,15 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null) {
                 // Remove all cards from the Speed Area
                 targetTeam.tableau.speedArea = [];
             }
+
+            wasSafetyCardOrCoupFourréPlayed = true;
         }
     } else {
         game.discard = card;
     }
 
-    // Only move to the next player if a safety card wasn't played
-    if (!isInstanceOfSafteyCard(card)) {
+    // Only move to the next player if a safety card or a coup-fourré wasn't played
+    if (!wasSafetyCardOrCoupFourréPlayed) {
         game.currentPlayer = getNextPlayer(game);
     }
 
@@ -178,18 +210,65 @@ export function getVisibleSpeedCard(speedArea: Array<SpeedCard>): SpeedCard | nu
     return speedArea[speedArea.length - 1] || null;
 }
 
-function hasAceCard(safetyArea: Array<SafetyCard>): boolean {
-    return safetyArea.find(safetyCard => safetyCard instanceof AceCard) !== undefined;
+function hasAceCard(cards: Array<Card>): boolean {
+    return cards.find(card => card instanceof AceCard) !== undefined;
 }
 
-function hasSealantCard(safetyArea: Array<SafetyCard>): boolean {
-    return safetyArea.find(safetyCard => safetyCard instanceof SealantCard) !== undefined;
+function hasSealantCard(cards: Array<Card>): boolean {
+    return cards.find(card => card instanceof SealantCard) !== undefined;
 }
 
-function hasEmergencyCard(safetyArea: Array<SafetyCard>): boolean {
-    return safetyArea.find(safetyCard => safetyCard instanceof EmergencyCard) !== undefined;
+function hasEmergencyCard(cards: Array<Card>): boolean {
+    return cards.find(card => card instanceof EmergencyCard) !== undefined;
 }
 
-function hasTankerCard(safetyArea: Array<SafetyCard>): boolean {
-    return safetyArea.find(safetyCard => safetyCard instanceof TankerCard) !== undefined;
+function hasTankerCard(cards: Array<Card>): boolean {
+    return cards.find(card => card instanceof TankerCard) !== undefined;
+}
+
+function getPlayerWithCoupFourré(attackingCard: HazardCard | LimitCard, targetTeam: Team): Player | null {
+    const playCoupFourré = (player: Player, safetyCard: SafetyCard) => {
+        player.hand.splice(player.hand.indexOf(safetyCard), 1);
+        safetyCard.coupFourré = true;
+        targetTeam.tableau.safetyArea.push(safetyCard);
+    };
+
+    if (attackingCard instanceof CrashCard) {
+        const playerWithAce = targetTeam.players.find(player => hasAceCard(player.hand));
+
+        if (playerWithAce !== undefined) {
+            playCoupFourré(playerWithAce, playerWithAce.hand.find(card => card instanceof AceCard) as SafetyCard);
+            return playerWithAce;
+        }
+    }
+
+    if (attackingCard instanceof EmptyCard) {
+        const playerWithTanker = targetTeam.players.find(player => hasTankerCard(player.hand));
+
+        if (playerWithTanker !== undefined) {
+            playCoupFourré(playerWithTanker, playerWithTanker.hand.find(card => card instanceof TankerCard) as SafetyCard);
+            return playerWithTanker;
+        }
+    }
+
+    if (attackingCard instanceof StopCard || attackingCard instanceof LimitCard) {
+        const playerWithEmergency = targetTeam.players.find(player => hasEmergencyCard(player.hand));
+
+        if (playerWithEmergency !== undefined) {
+            playCoupFourré(playerWithEmergency, playerWithEmergency.hand.find(card => card instanceof EmergencyCard) as SafetyCard);
+            targetTeam.tableau.speedArea = [];
+            return playerWithEmergency;
+        }
+    }
+
+    if (attackingCard instanceof FlatCard) {
+        const playerWithSealant = targetTeam.players.find(player => hasSealantCard(player.hand));
+
+        if (playerWithSealant !== undefined) {
+            playCoupFourré(playerWithSealant, playerWithSealant.hand.find(card => card instanceof SealantCard) as SafetyCard);
+            return playerWithSealant;
+        }
+    }
+
+    return null;
 }

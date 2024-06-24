@@ -95,7 +95,12 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) =>
             }
         };
 
-        return <TableauUi onClick={onClick} team={otherTeam} key={index} isHighlighted={state.ui instanceof TeamSelection && state.ui.team === otherTeam} />
+        return <TableauUi
+            onClick={onClick}
+            team={otherTeam}
+            key={index}
+            isHighlighted={state.ui instanceof TeamSelection && state.ui.team === otherTeam}
+        />;
     });
 
     const greyedOut = state.ui instanceof TeamSelection;
