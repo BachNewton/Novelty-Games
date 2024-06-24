@@ -9,9 +9,10 @@ interface TableauProps {
     onClick?: () => void;
     isHighlighted?: boolean;
     greyedOut?: boolean;
+    remainingDistance: number;
 }
 
-const Tableau: React.FC<TableauProps> = ({ team, onClick, isHighlighted, greyedOut }) => {
+const Tableau: React.FC<TableauProps> = ({ team, onClick, isHighlighted, greyedOut, remainingDistance }) => {
     const tableauData = team.tableau;
     const teamName = 'Team ' + team.players.map(player => player.name).join(' & ');
 
@@ -27,7 +28,9 @@ const Tableau: React.FC<TableauProps> = ({ team, onClick, isHighlighted, greyedO
     };
 
     return <div style={tableauStyle} onClick={onClick} >
-        <div style={{ textAlign: 'center' }}>{teamName}</div>
+        <div style={{ textAlign: 'center' }}>
+            <strong>{teamName}</strong> has <strong>{remainingDistance}</strong> km to go!
+        </div>
 
         <div style={{ display: 'grid', gridAutoFlow: 'column', justifyContent: 'space-evenly', minHeight: 0 }}>
 

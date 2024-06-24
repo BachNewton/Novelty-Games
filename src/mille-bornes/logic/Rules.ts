@@ -108,7 +108,7 @@ export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
         : [targetTeam];
 
     if (isInstanceOfRemedyCard(card)) return canRemedyCardBePlayed(card, getVisibleBattleCard(tableau.battleArea));
-    if (isInstanceOfDistanceCard(card)) return canDistanceCardBePlayed(card as DistanceCard, tableau);
+    if (isInstanceOfDistanceCard(card)) return canDistanceCardBePlayed(card as DistanceCard, tableau, game.teams);
     if (card instanceof UnlimitedCard) return canUnlimitedCardBePlayed(getVisibleSpeedCard(tableau.speedArea));
     if (card instanceof LimitCard) return canLimitCardBePlayed(targetTeams);
     if (isInstanceOfHazardCard(card)) return canHazardCardBePlayed(card, targetTeams);
@@ -133,13 +133,15 @@ function isInstanceOfRemedyCard(card: Card): boolean {
     return card instanceof RepairCard || card instanceof GasCard || card instanceof SpareCard || card instanceof RollCard;
 }
 
-function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau): boolean {
+function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau, teams: Array<Team>): boolean {
     const battleArea = getVisibleBattleCard(tableau.battleArea);
     const speedArea = getVisibleSpeedCard(tableau.speedArea)
     const speedAreaLimit = speedArea === null ? 200 : speedArea.limit;
 
     // A max of 2 Distance200Cards can be played per hand
     if (distanceCard instanceof Distance200Card && tableau.distanceArea.filter(distanceCard => distanceCard instanceof Distance200Card).length >= 2) return false;
+
+    if (getTotalDistance(tableau.distanceArea) + distanceCard.amount > getTargetDistance(teams)) return false;
 
     if (battleArea instanceof RollCard && speedAreaLimit >= distanceCard.amount) return true;
     if (hasEmergencyCard(tableau.safetyArea) && (battleArea === null || isInstanceOfRemedyCard(battleArea) || battleArea instanceof StopCard)) return true;
@@ -269,4 +271,20 @@ function getPlayerWithCoupFourré(attackingCard: HazardCard | LimitCard, targetT
     }
 
     return null;
+}
+
+function getTotalDistance(distanceArea: Array<DistanceCard>): number {
+    return distanceArea.reduce((accumulator: number, distanceCard: DistanceCard) => accumulator + distanceCard.amount, 0);
+}
+
+function getTargetDistance(teams: Array<Team>): number {
+    if (teams.length === 2 && teams[0].players.length === 2 && teams[1].players.length === 2) {
+        return 1000;
+    } else {
+        return 750;
+    }
+}
+
+export function getRemainingDistance(distanceArea: Array<DistanceCard>, teams: Array<Team>): number {
+    return getTargetDistance(teams) - getTotalDistance(distanceArea);
 }

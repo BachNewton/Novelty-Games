@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, LimitCard } from "../logic/Card";
 import { Game, Player, Team } from "../logic/Data";
-import { canCardBePlayed, getCurrentPlayerTeam, isInstanceOfHazardCard, playCard } from "../logic/Rules";
+import { canCardBePlayed, getCurrentPlayerTeam, getRemainingDistance, isInstanceOfHazardCard, playCard } from "../logic/Rules";
 import Hand from './Hand';
 import TableauUi from "./Tableau";
 import { Communicator, PlayCardEvent } from "../logic/Communicator";
@@ -100,6 +100,7 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) =>
             team={otherTeam}
             key={index}
             isHighlighted={state.ui instanceof TeamSelection && state.ui.team === otherTeam}
+            remainingDistance={getRemainingDistance(otherTeam.tableau.distanceArea, state.game.teams)}
         />;
     });
 
@@ -107,7 +108,11 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) =>
 
     const localTeamsTableau = localPlayerTeam === null
         ? <></>
-        : <TableauUi team={localPlayerTeam} greyedOut={greyedOut} />;
+        : <TableauUi
+            team={localPlayerTeam}
+            greyedOut={greyedOut}
+            remainingDistance={getRemainingDistance(localPlayerTeam.tableau.distanceArea, state.game.teams)}
+        />;
 
     const isCardPlayable = (card: Card) => canCardBePlayed(card, state.game);
 
