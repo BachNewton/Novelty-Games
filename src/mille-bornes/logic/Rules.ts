@@ -276,7 +276,7 @@ function getPlayerWithCoupFourré(attackingCard: HazardCard | LimitCard, targetT
     return null;
 }
 
-function getTotalDistance(distanceArea: Array<DistanceCard>): number {
+export function getTotalDistance(distanceArea: Array<DistanceCard>): number {
     return distanceArea.reduce((accumulator: number, distanceCard: DistanceCard) => accumulator + distanceCard.amount, 0);
 }
 

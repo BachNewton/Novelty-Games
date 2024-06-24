@@ -11,6 +11,7 @@ interface BoardProps {
     startingGame: Game;
     communicator: Communicator;
     localId: string;
+    onGameOver: (game: Game) => void;
 }
 
 interface State {
@@ -40,7 +41,7 @@ class TeamSelection implements UiState {
     }
 }
 
-const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) => {
+const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onGameOver }) => {
     const [state, setState] = useState<State>({ game: startingGame, ui: new CardSelection() });
 
     useEffect(() => {
@@ -52,7 +53,7 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) =>
 
             const isGameOver = state.game.teams.some(team => getRemainingDistance(team.tableau.distanceArea, state.game.teams, state.game.extention) === 0);
             if (isGameOver) {
-                throw new Error("The game is over");
+                onGameOver(state.game);
             }
 
             setState({ ...state });
@@ -82,14 +83,14 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId }) =>
                 const teamAtTargetDistance = getRemainingDistance(targetTeam.tableau.distanceArea, state.game.teams, state.game.extention) === 0;
                 if (teamAtTargetDistance) {
                     if (state.game.extention || isGameAtMaxTargetDistance(state.game.teams)) {
-                        throw new Error("The game is over");
+                        onGameOver(state.game);
                     } else {
                         const calledExtention = window.confirm('Your team has reached the target! Would like to to call an extention?');
 
                         if (calledExtention) {
                             state.game.extention = true;
                         } else {
-                            throw new Error("The game is over");
+                            onGameOver(state.game);
                         }
                     }
                 }
