@@ -27,7 +27,7 @@ export function createGame(lobbyTeams: Array<LobbyTeam>): Game {
                 hand: deck.splice(0, 6).concat(lobbyIndex === 0 && playerIndex === 0 ? deck.splice(0, 1) : [])
             };
 
-            player.hand.push(new AceCard(), new EmergencyCard(), new SealantCard(), new TankerCard());
+            // player.hand.push(new AceCard(), new EmergencyCard(), new SealantCard(), new TankerCard());
 
             return player;
         });
@@ -63,10 +63,10 @@ function createDeck(): Array<Card> {
     const gasCards = Array.from({ length: 6 }, () => new GasCard());
     const spareCards = Array.from({ length: 6 }, () => new SpareCard());
 
-    // const aceCard = new AceCard();
-    // const emergencyCard = new EmergencyCard();
-    // const sealantCard = new SealantCard();
-    // const tankerCard = new TankerCard();
+    const aceCard = new AceCard();
+    const emergencyCard = new EmergencyCard();
+    const sealantCard = new SealantCard();
+    const tankerCard = new TankerCard();
 
     return deck.concat(
         distance25Cards,
