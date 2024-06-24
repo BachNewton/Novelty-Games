@@ -27,6 +27,8 @@ export function createGame(lobbyTeams: Array<LobbyTeam>): Game {
                 hand: deck.splice(0, 6).concat(lobbyIndex === 0 && playerIndex === 0 ? deck.splice(0, 1) : [])
             };
 
+            player.hand.push(new AceCard(), new EmergencyCard(), new SealantCard(), new TankerCard());
+
             return player;
         });
 
@@ -82,9 +84,9 @@ function createDeck(): Array<Card> {
         repairCards,
         gasCards,
         spareCards,
-        // aceCard,
-        // emergencyCard,
-        // sealantCard,
-        // tankerCard
+        aceCard,
+        emergencyCard,
+        sealantCard,
+        tankerCard
     );
 }

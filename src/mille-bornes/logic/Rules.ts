@@ -1,4 +1,4 @@
-import { BattleCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, EmptyCard, FlatCard, GasCard, LimitCard, RemedyCard, RepairCard, RollCard, SpareCard, SpeedCard, StopCard, UnlimitedCard } from "./Card";
+import { AceCard, BattleCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, EmergencyCard, EmptyCard, FlatCard, GasCard, LimitCard, RemedyCard, RepairCard, RollCard, SafetyCard, SealantCard, SpareCard, SpeedCard, StopCard, TankerCard, UnlimitedCard } from "./Card";
 import { Game, Player, Tableau, Team } from "./Data";
 
 function getNextPlayer(game: Game): Player {
@@ -36,6 +36,8 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null) {
             targetTeam.tableau.speedArea = card;
         } else if (isInstanceOfHazardCard(card) || isInstanceOfRemedyCard(card)) {
             targetTeam.tableau.battleArea = card;
+        } else if (isInstanceOfSafteyCard(card)) {
+            targetTeam.tableau.safetyArea.push(card as SafetyCard);
         }
     } else {
         game.discard = card;
@@ -57,8 +59,13 @@ export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
     if (card instanceof UnlimitedCard) return canUnlimitedCardBePlayed(tableau.speedArea);
     if (card instanceof LimitCard) return canLimitCardBePlayed(targetTeams);
     if (isInstanceOfHazardCard(card)) return canHazardCardBePlayed(targetTeams);
+    if (isInstanceOfSafteyCard(card)) return true; // Safety cards can always be played
 
     return false;
+}
+
+function isInstanceOfSafteyCard(card: Card): boolean {
+    return card instanceof AceCard || card instanceof TankerCard || card instanceof SealantCard || card instanceof EmergencyCard;
 }
 
 function isInstanceOfDistanceCard(card: Card): boolean {
