@@ -75,7 +75,7 @@ const SERVER_URL = 'http://35.184.159.91/';
 
 export class Communicator extends EventTarget {
     private socket = io(window.location.hostname === 'localhost' ? 'http://localhost/' : SERVER_URL);
-    private doesEventTypeHaveListener = new Map<string, boolean>();
+    private existingEventListeners = new Map<string, EventListenerOrEventListenerObject>();
 
     constructor() {
         super();
@@ -97,9 +97,13 @@ export class Communicator extends EventTarget {
     }
 
     override addEventListener(type: string, callback: EventListenerOrEventListenerObject) {
-        if (this.doesEventTypeHaveListener.get(type)) return; // Only add the first listener provided
+        const existingCallback = this.existingEventListeners.get(type);
 
-        this.doesEventTypeHaveListener.set(type, true);
+        if (existingCallback !== undefined) {
+            super.removeEventListener(type, existingCallback);
+        }
+
+        this.existingEventListeners.set(type, callback);
 
         super.addEventListener(type, callback);
     }
