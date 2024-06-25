@@ -11,7 +11,7 @@ const app = express();
 const server = createServer(credentials, app);
 const io = new Server(server, {
     cors: {
-        origin: ['*']
+        origin: ['https://bachnewton.github.io']
     }
 });
 
