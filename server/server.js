@@ -6,7 +6,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: ['https://bachnewton.github.io/Novelty-Games/']
+        origin: ['*']
     }
 });
 const PORT = 80;
