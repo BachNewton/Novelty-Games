@@ -65,6 +65,10 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         }
     }, [state]);
 
+    const onHomeButtonClicked = () => {
+        setState(new HomeState(state.versionState));
+    };
+
     const onMilleBornesClick = () => {
         setState(new MilleBornesState(state.versionState));
     };
@@ -74,7 +78,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
     };
 
     if (state instanceof MilleBornesState) {
-        return <MilleBornesHome />;
+        return <MilleBornesHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else if (state instanceof TriviaState) {
         return <TriviaHome updateListener={updateListener} />;
     } else {

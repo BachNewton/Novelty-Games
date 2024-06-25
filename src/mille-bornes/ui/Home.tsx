@@ -7,6 +7,10 @@ import Lobby, { LobbyPlayer, LobbyTeam } from "./Lobby";
 import Board from "./Board";
 import Scoreboard from "./Scoreboard";
 
+interface HomeProps {
+    onHomeButtonClicked: () => void;
+}
+
 interface State { }
 
 class LobbyState implements State { }
@@ -30,7 +34,7 @@ class ScoreboardState implements State {
 const LOCAL_ID = Math.random().toString();
 const COMMUNICATOR = new Communicator();
 
-const Home: React.FC = () => {
+const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
     const [state, setState] = useState<State>(new LobbyState());
 
     useEffect(() => {
@@ -76,7 +80,7 @@ const Home: React.FC = () => {
     } else if (state instanceof ScoreboardState) {
         return <Scoreboard game={state.game} onBackToLobby={onBackToLobby} onPlayNextRound={onPlayNextRound} />;
     } else {
-        return <Lobby communicator={COMMUNICATOR} startGame={onStartGame} localId={LOCAL_ID} />;
+        return <Lobby onHomeButtonClicked={onHomeButtonClicked} communicator={COMMUNICATOR} startGame={onStartGame} localId={LOCAL_ID} />;
     }
 }
 

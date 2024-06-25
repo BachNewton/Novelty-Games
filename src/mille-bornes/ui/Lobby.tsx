@@ -5,6 +5,7 @@ interface LobbyProps {
     communicator: Communicator;
     startGame: (lobbyTeams: Array<LobbyTeam>) => void;
     localId: string;
+    onHomeButtonClicked: () => void;
 }
 
 export interface LobbyTeam {
@@ -17,7 +18,7 @@ export interface LobbyPlayer {
     localId: string;
 }
 
-const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId }) => {
+const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeButtonClicked }) => {
     const [lobbyTeams, setLobbyTeams] = useState<Array<LobbyTeam>>([]);
 
     useEffect(() => {
@@ -88,7 +89,17 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId }) => {
         ? <button style={{ fontSize: '1.5em' }} onClick={onStartGame}>Start Game</button>
         : <></>;
 
+    const homeButtonStyle: React.CSSProperties = {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        marginTop: '0.3em',
+        marginLeft: '0.3em',
+        fontSize: '1em'
+    };
+
     return <div style={{ color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
+        <button style={homeButtonStyle} onClick={onHomeButtonClicked}>🏠</button>
         <div style={{ fontSize: '1.75em', marginBottom: '1em' }}>🏎️ Mille Bornes Lobby 🏁</div>
         <div>
             {addTeamButton}
