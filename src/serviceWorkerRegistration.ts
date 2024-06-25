@@ -10,6 +10,8 @@
 // To learn more about the benefits of this model and instructions on how to
 // opt-in, read https://cra.link/PWA
 
+const UPDATE_FOUND_WAIT_TIME = 3000; // 3 seconds
+
 const isLocalhost = Boolean(
   window.location.hostname === 'localhost' ||
   // [::1] is the IPv6 localhost address.
@@ -62,15 +64,14 @@ function registerValidSW(swUrl: string, config?: Config) {
   navigator.serviceWorker
     .register(swUrl)
     .then((registration) => {
-      const updateFoundWaitTime = 5000; // 5 seconds
       const updateFoundTimeout = setTimeout(() => {
         if (!navigator.onLine) return; // If not online, skip all this
 
-        console.log(`No update found after ${updateFoundWaitTime / 1000} seconds of waiting`);
+        console.log(`No update found after ${UPDATE_FOUND_WAIT_TIME / 1000} seconds of waiting`);
         if (config && config.onNoUpdateFound) {
           config.onNoUpdateFound();
         }
-      }, updateFoundWaitTime);
+      }, UPDATE_FOUND_WAIT_TIME);
 
       registration.onupdatefound = () => {
         clearTimeout(updateFoundTimeout);

@@ -4,7 +4,6 @@ import './css/index.css';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 import Home from './ui/Home';
-import MilleBornesHome from './mille-bornes/ui/Home';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -14,8 +13,7 @@ const updateListener = { onUpdateAvailable: () => { }, onNoUpdateFound: () => { 
 
 root.render(
   <React.StrictMode>
-    {/* <Home updateListener={updateListener} /> */}
-    <MilleBornesHome />
+    <Home updateListener={updateListener} />
   </React.StrictMode>
 );
 
