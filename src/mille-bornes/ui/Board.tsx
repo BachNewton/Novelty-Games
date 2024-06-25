@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, LimitCard } from "../logic/Card";
 import { Game, Player, Team } from "../logic/Data";
-import { canCardBePlayed, checkIfAllPlayersHaveNoCards, getCurrentPlayerTeam, getRemainingDistance, isGameAtMaxTargetDistance, isInstanceOfHazardCard, playCard } from "../logic/Rules";
+import { canCardBePlayed, getCurrentPlayerTeam, getRemainingDistance, isGameAtMaxTargetDistance, isInstanceOfHazardCard, playCard } from "../logic/Rules";
 import Hand from './Hand';
 import TableauUi from "./Tableau";
 import { Communicator, PlayCardEvent } from "../logic/Communicator";
@@ -48,11 +48,11 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
         communicator.addEventListener(PlayCardEvent.TYPE, (event) => {
             const playCardEvent = event as PlayCardEvent;
             const targetTeam = getTeamById(playCardEvent.targetTeamId, state.game);
-            playCard(playCardEvent.card, state.game, targetTeam);
+            playCard(playCardEvent.card, state.game, targetTeam, onRoundOver);
             state.game.extention = playCardEvent.isExtentionCalled;
 
-            const isGameOver = state.game.teams.some(team => getRemainingDistance(team.tableau.distanceArea, state.game.teams, state.game.extention) === 0);
-            if (isGameOver || checkIfAllPlayersHaveNoCards(state.game)) {
+            const isRoundOver = state.game.teams.some(team => getRemainingDistance(team.tableau.distanceArea, state.game.teams, state.game.extention) === 0);
+            if (isRoundOver) {
                 onRoundOver(state.game);
             }
 
@@ -72,17 +72,13 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
                 if (canCardBePlayed(card, state.game)) {
                     state.ui = new TeamSelection(card);
                 } else {
-                    playCard(card, state.game, null);
+                    playCard(card, state.game, null, onRoundOver);
                     communicator.playCard(card, null);
                     state.ui.card = null;
-
-                    if (checkIfAllPlayersHaveNoCards(state.game)) {
-                        onRoundOver(state.game);
-                    }
                 }
             } else {
                 const targetTeam = getCurrentPlayerTeam(state.game);
-                playCard(card, state.game, targetTeam);
+                playCard(card, state.game, targetTeam, onRoundOver);
 
                 const teamAtTargetDistance = getRemainingDistance(targetTeam.tableau.distanceArea, state.game.teams, state.game.extention) === 0;
                 if (teamAtTargetDistance) {
@@ -101,10 +97,6 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
 
                 communicator.playCard(card, targetTeam, state.game.extention);
                 state.ui.card = null;
-
-                if (checkIfAllPlayersHaveNoCards(state.game)) {
-                    onRoundOver(state.game);
-                }
             }
         }
 
@@ -117,13 +109,9 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
         const onClick = () => {
             if (state.ui instanceof TeamSelection) {
                 if (state.ui.team === otherTeam) {
-                    playCard(state.ui.card, state.game, otherTeam);
+                    playCard(state.ui.card, state.game, otherTeam, onRoundOver);
                     communicator.playCard(state.ui.card, otherTeam);
                     state.ui = new CardSelection();
-
-                    if (checkIfAllPlayersHaveNoCards(state.game)) {
-                        onRoundOver(state.game);
-                    }
                 } else {
                     state.ui.team = otherTeam;
                 }

@@ -28,7 +28,7 @@ function getPlayerOrder(teams: Array<Team>): Array<Player> {
     return playerOrder;
 }
 
-export function playCard(card: Card, game: Game, targetTeam: Team | null) {
+export function playCard(card: Card, game: Game, targetTeam: Team | null, onRoundOver: (game: Game) => void) {
     // Remove card from hand
     const indexOfPlayedCard = game.currentPlayer.hand.indexOf(card);
     if (indexOfPlayedCard !== -1) {
@@ -36,8 +36,9 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null) {
         game.currentPlayer.hand.splice(indexOfPlayedCard, 1);
     } else {
         // If the card can't be found, this must be an online players.
-        // If so, just remove any card as the only thing that's important is that the total cards in the player's hand is correct.
-        game.currentPlayer.hand.pop();
+        // If so, we'll look for the card using its image and remove it like that.
+        const playedCard = game.currentPlayer.hand.find(handCard => handCard.image === card.image) as Card;
+        game.currentPlayer.hand = game.currentPlayer.hand.filter(handCard => handCard !== playedCard);
     }
 
     let wasSafetyCardOrCoupFourréPlayed = false;
@@ -110,10 +111,16 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null) {
     }
 
     drawACard(game.currentPlayer);
-}
 
-export function checkIfAllPlayersHaveNoCards(game: Game): boolean {
-    return game.teams.every(team => team.players.every(player => player.hand.length === 0));
+    const doAllPlayersHaveNoCards = game.teams.every(team => team.players.every(player => player.hand.length === 0));
+    if (doAllPlayersHaveNoCards) {
+        onRoundOver(game);
+    } else {
+        // Loop through the player order until we get to a player who still has cards to play
+        while (game.currentPlayer.hand.length === 0) {
+            game.currentPlayer = getNextPlayer(game);
+        }
+    }
 }
 
 export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
@@ -140,7 +147,7 @@ function isInstanceOfDistanceCard(card: Card): boolean {
     return card instanceof Distance25Card || card instanceof Distance50Card || card instanceof Distance75Card || card instanceof Distance100Card || card instanceof Distance200Card;
 }
 
-export function isInstanceOfHazardCard(card: Card): boolean {
+export function isInstanceOfHazardCard(card: Card | null): boolean {
     return card instanceof CrashCard || card instanceof EmptyCard || card instanceof FlatCard || card instanceof StopCard;
 }
 
@@ -183,11 +190,16 @@ function canLimitCardBePlayed(teams: Array<Team>): boolean {
 
 function canHazardCardBePlayed(hazardCard: HazardCard, teams: Array<Team>): boolean {
     for (const team of teams) {
+        // You can't play a hazard card on a player who has the safety card to block it
         if (hazardCard instanceof FlatCard && hasSealantCard(team.tableau.safetyArea)) continue;
         if (hazardCard instanceof CrashCard && hasAceCard(team.tableau.safetyArea)) continue;
         if (hazardCard instanceof EmptyCard && hasTankerCard(team.tableau.safetyArea)) continue;
         if (hazardCard instanceof StopCard && hasEmergencyCard(team.tableau.safetyArea)) continue;
 
+        // You can't play a hazard card on a player who already has a hazard card to deal with
+        if (isInstanceOfHazardCard(getVisibleBattleCard(team.tableau.battleArea))) continue;
+
+        // You can only play a hazard card on a player who has a roll or an Emergency card
         if (getVisibleBattleCard(team.tableau.battleArea) instanceof RollCard || hasEmergencyCard(team.tableau.safetyArea)) return true;
     }
 

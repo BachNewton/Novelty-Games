@@ -25,6 +25,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('broadcast', (data) => {
+        console.log('Socket ID:', socket.id, 'Broadcast data:', data);
         socket.broadcast.emit('broadcast', data);
     });
 });
