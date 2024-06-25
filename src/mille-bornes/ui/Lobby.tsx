@@ -18,11 +18,7 @@ export interface LobbyPlayer {
 }
 
 const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId }) => {
-    const [lobbyTeams, setLobbyTeams] = useState<Array<LobbyTeam>>([
-        // { accumulatedScore: 0, players: [{ name: 'Kyle', localId: localId }, { name: 'Elliott', localId: localId }] },
-        // { accumulatedScore: 0, players: [{ name: 'Eric', localId: localId }] },
-        // { accumulatedScore: 0, players: [{ name: 'Gary', localId: localId }] }
-    ]);
+    const [lobbyTeams, setLobbyTeams] = useState<Array<LobbyTeam>>([]);
 
     useEffect(() => {
         communicator.addEventListener(LobbyEvent.TYPE, (event) => {
@@ -41,7 +37,7 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId }) => {
     };
 
     const addTeamButton = lobbyTeams.length < 3
-        ? <button onClick={onAddTeam}>Add Team</button>
+        ? <button style={{ fontSize: '1em' }} onClick={onAddTeam}>Add Team</button>
         : <></>;
 
     const lobbyTeamsUi = lobbyTeams.map((lobbyTeam, index) => {
@@ -57,20 +53,31 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId }) => {
         };
 
         const addPlayerButton = lobbyTeam.players.length < 2
-            ? <button onClick={onAddPlayer}>Add Player</button>
+            ? <button style={{ fontSize: '1em' }} onClick={onAddPlayer}>Add Player</button>
             : <></>;
 
-        const playersUi = lobbyTeam.players.map((player, index) => <div key={index}>
-            {player.name}
-        </div>);
+        const onRemovePlayer = (removePlayer: LobbyPlayer) => {
+            lobbyTeam.players = lobbyTeam.players.filter(player => player !== removePlayer);
+            setLobbyTeams([...lobbyTeams]);
+            communicator.updateLobby(lobbyTeams);
+        };
 
-        return <div key={index}>
-            <div>
-                ----- Team #{index + 1} -----
-            </div>
-            {addPlayerButton}
-            {playersUi}
-        </div>;
+        const playersUi = lobbyTeam.players.map((player, index) => <tr key={index}>
+            <td style={{ fontSize: '1.5em' }}>{player.name}</td>
+            <td style={{ textAlign: 'center' }}><button style={{ fontSize: '1em' }} onClick={() => onRemovePlayer(player)}>Remove</button></td>
+        </tr>);
+
+        return <table key={index} style={{ fontSize: '1em', border: '1px solid white', padding: '0.5em 0', margin: '1em 0', width: '75%' }}>
+            <thead>
+                <tr>
+                    <th>Team #{index + 1}</th>
+                    <th>{addPlayerButton}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {playersUi}
+            </tbody>
+        </table>;
     });
 
     const onStartGame = () => {
@@ -78,11 +85,11 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId }) => {
     };
 
     const startGameButton = lobbyTeams.length >= 2 && lobbyTeams.every(team => team.players.length >= 1)
-        ? <button onClick={onStartGame}>Start Game</button>
+        ? <button style={{ fontSize: '1.5em' }} onClick={onStartGame}>Start Game</button>
         : <></>;
 
-    return <div>
-        ----- Lobby -----
+    return <div style={{ color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
+        <div style={{ fontSize: '1.75em', marginBottom: '1em' }}>🏎️ Mille Bornes Lobby 🏁</div>
         <div>
             {addTeamButton}
         </div>
