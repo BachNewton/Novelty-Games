@@ -1,8 +1,8 @@
 import { AceCard, BattleCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, EmergencyCard, EmptyCard, FlatCard, GasCard, HazardCard, LimitCard, RemedyCard, RepairCard, RollCard, SafetyCard, SealantCard, SpareCard, SpeedCard, StopCard, TankerCard, UnlimitedCard } from "./Card";
 import { Game, Player, Tableau, Team } from "./Data";
 
-const MAX_TARGET_DISTANCE = 100;
-const TARGET_DISTANCE = 75;
+const MAX_TARGET_DISTANCE = 1000;
+const TARGET_DISTANCE = 750;
 
 function getNextPlayer(game: Game): Player {
     const playerOrder = getPlayerOrder(game.teams);
@@ -30,7 +30,15 @@ function getPlayerOrder(teams: Array<Team>): Array<Player> {
 
 export function playCard(card: Card, game: Game, targetTeam: Team | null) {
     // Remove card from hand
-    game.currentPlayer.hand = game.currentPlayer.hand.filter(handCard => handCard !== card);
+    const indexOfPlayedCard = game.currentPlayer.hand.indexOf(card);
+    if (indexOfPlayedCard !== -1) {
+        // Local player
+        game.currentPlayer.hand.splice(indexOfPlayedCard, 1);
+    } else {
+        // If the card can't be found, this must be an online players.
+        // If so, just remove any card as the only thing that's important is that the total cards in the player's hand is correct.
+        game.currentPlayer.hand.pop();
+    }
 
     let wasSafetyCardOrCoupFourréPlayed = false;
 
@@ -102,6 +110,10 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null) {
     }
 
     drawACard(game.currentPlayer);
+}
+
+export function checkIfAllPlayersHaveNoCards(game: Game): boolean {
+    return game.teams.every(team => team.players.every(player => player.hand.length === 0));
 }
 
 export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {

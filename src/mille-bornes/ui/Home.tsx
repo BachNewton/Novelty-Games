@@ -39,8 +39,6 @@ const Home: React.FC = () => {
         });
     }, [state]);
 
-    // TODO: Ending condition: all players have played or discarded all their cards.
-
     const onStartGame = (lobbyTeams: Array<LobbyTeam>) => {
         const game = createGame(lobbyTeams);
         setState(new BoardState(game));
@@ -51,14 +49,12 @@ const Home: React.FC = () => {
         setState(new ScoreboardState(calculateScore(game)));
     };
 
-    if (state instanceof LobbyState) {
-        return <Lobby communicator={COMMUNICATOR} startGame={onStartGame} localId={LOCAL_ID} />;
-    } else if (state instanceof BoardState) {
+    if (state instanceof BoardState) {
         return <Board communicator={COMMUNICATOR} startingGame={state.game} localId={LOCAL_ID} onGameOver={onGameOver} />;
     } else if (state instanceof ScoreboardState) {
         return <Scoreboard scores={state.scores} />;
     } else {
-        throw new Error('This state is not supproted: ' + state);
+        return <Lobby communicator={COMMUNICATOR} startGame={onStartGame} localId={LOCAL_ID} />;
     }
 }
 

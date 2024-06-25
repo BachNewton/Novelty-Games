@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, LimitCard } from "../logic/Card";
 import { Game, Player, Team } from "../logic/Data";
-import { canCardBePlayed, getCurrentPlayerTeam, getRemainingDistance, isGameAtMaxTargetDistance, isInstanceOfHazardCard, playCard } from "../logic/Rules";
+import { canCardBePlayed, checkIfAllPlayersHaveNoCards, getCurrentPlayerTeam, getRemainingDistance, isGameAtMaxTargetDistance, isInstanceOfHazardCard, playCard } from "../logic/Rules";
 import Hand from './Hand';
 import TableauUi from "./Tableau";
 import { Communicator, PlayCardEvent } from "../logic/Communicator";
@@ -52,7 +52,7 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onGa
             state.game.extention = playCardEvent.isExtentionCalled;
 
             const isGameOver = state.game.teams.some(team => getRemainingDistance(team.tableau.distanceArea, state.game.teams, state.game.extention) === 0);
-            if (isGameOver) {
+            if (isGameOver || checkIfAllPlayersHaveNoCards(state.game)) {
                 onGameOver(state.game);
             }
 
@@ -75,6 +75,10 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onGa
                     playCard(card, state.game, null);
                     communicator.playCard(card, null);
                     state.ui.card = null;
+
+                    if (checkIfAllPlayersHaveNoCards(state.game)) {
+                        onGameOver(state.game);
+                    }
                 }
             } else {
                 const targetTeam = getCurrentPlayerTeam(state.game);
@@ -97,6 +101,10 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onGa
 
                 communicator.playCard(card, targetTeam, state.game.extention);
                 state.ui.card = null;
+
+                if (checkIfAllPlayersHaveNoCards(state.game)) {
+                    onGameOver(state.game);
+                }
             }
         }
 
@@ -112,6 +120,10 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onGa
                     playCard(state.ui.card, state.game, otherTeam);
                     communicator.playCard(state.ui.card, otherTeam);
                     state.ui = new CardSelection();
+
+                    if (checkIfAllPlayersHaveNoCards(state.game)) {
+                        onGameOver(state.game);
+                    }
                 } else {
                     state.ui.team = otherTeam;
                 }

@@ -27,13 +27,6 @@ export function createGame(lobbyTeams: Array<LobbyTeam>): Game {
                 hand: deck.splice(0, 6).concat(lobbyIndex === 0 && playerIndex === 0 ? deck.splice(0, 1) : [])
             };
 
-            // player.hand.push(new RollCard());
-            // player.hand = player.hand.concat(Array.from({ length: 5 }, () => new Distance25Card()));
-            // player.hand = player.hand.concat(Array.from({ length: 5 }, () => new Distance50Card()));
-            // player.hand = player.hand.concat(Array.from({ length: 5 }, () => new Distance75Card()));
-            // player.hand = player.hand.concat(Array.from({ length: 5 }, () => new Distance100Card()));
-            // player.hand = player.hand.concat(Array.from({ length: 5 }, () => new Distance200Card()));
-
             return player;
         });
 
