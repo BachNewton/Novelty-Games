@@ -16,7 +16,7 @@ const Hand: React.FC<HandProps> = ({ hand, onPlayCard, highlightedCard, greyedOu
         onClick={() => onPlayCard(card)}
         isHighlighted={card === highlightedCard}
         objectPosition={'bottom'}
-        isGreyedOut={!isCardPlayable(card)}
+        isGreyedOut={!greyedOut && !isCardPlayable(card)} // Only grey out a card if the whole hand isn't already greyed out
     />);
 
     return <div style={{ display: 'grid', gridAutoFlow: 'column', minHeight: 0, opacity: greyedOut ? 0.1 : 1 }}>
