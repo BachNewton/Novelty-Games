@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import MilleBornesHome from './mille-bornes/ui/Home';
+import TriviaHome from './trivia/ui/Home';
 
 const APP_VERSION = 'v1.0.0';
 
@@ -7,14 +9,31 @@ interface HomeProps {
 }
 
 interface State {
-    ui: UiState;
     versionState: VersionState;
 }
 
-enum UiState {
-    HOME,
-    GAME,
-    FILTER
+class HomeState implements State {
+    versionState: VersionState;
+
+    constructor(versionState: VersionState) {
+        this.versionState = versionState;
+    }
+}
+
+class TriviaState implements State {
+    versionState: VersionState;
+
+    constructor(versionState: VersionState) {
+        this.versionState = versionState;
+    }
+}
+
+class MilleBornesState implements State {
+    versionState: VersionState;
+
+    constructor(versionState: VersionState) {
+        this.versionState = versionState;
+    }
 }
 
 enum VersionState {
@@ -25,7 +44,7 @@ enum VersionState {
 }
 
 const Home: React.FC<HomeProps> = ({ updateListener }) => {
-    const [state, setState] = useState({ ui: UiState.HOME, versionState: VersionState.CHECKING } as State);
+    const [state, setState] = useState<State>(new HomeState(VersionState.CHECKING));
 
     useEffect(() => {
         updateListener.onUpdateAvailable = () => {
@@ -46,12 +65,24 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         }
     }, [state]);
 
-    return HomeUi(state.versionState);
+    const onMilleBornesClick = () => {
+        setState(new MilleBornesState(state.versionState));
+    };
+
+    const onTriviaClick = () => {
+        setState(new TriviaState(state.versionState));
+    };
+
+    if (state instanceof MilleBornesState) {
+        return <MilleBornesHome />;
+    } else if (state instanceof TriviaState) {
+        return <TriviaHome updateListener={updateListener} />;
+    } else {
+        return HomeUi(state.versionState, onMilleBornesClick, onTriviaClick);
+    }
 };
 
-function HomeUi(
-    versionState: VersionState
-) {
+function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTriviaClick: () => void) {
     const versionStateStyle: React.CSSProperties = {
         position: 'fixed',
         top: '0.25em',
@@ -79,8 +110,8 @@ function HomeUi(
         <h2>🃏 Kyle's Novelty Games 🕹️</h2>
         <div>Created by: Kyle Hutchinson</div>
         <div><br /><br /><br /></div>
-        <button style={buttonStyle}>Trivia ❔</button>
-        <button style={buttonStyle}>Mille Bornes 🏎️</button>
+        <button style={buttonStyle} onClick={onTriviaClick}>Trivia ❔</button>
+        <button style={buttonStyle} onClick={onMilleBornesClick}>Mille Bornes 🏎️</button>
     </div>;
 }
 
