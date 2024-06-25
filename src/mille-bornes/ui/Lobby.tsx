@@ -9,15 +9,20 @@ interface LobbyProps {
 
 export interface LobbyTeam {
     players: Array<LobbyPlayer>;
+    accumulatedScore: number;
 }
 
-interface LobbyPlayer {
+export interface LobbyPlayer {
     name: string;
     localId: string;
 }
 
 const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId }) => {
-    const [lobbyTeams, setLobbyTeams] = useState<Array<LobbyTeam>>([]);
+    const [lobbyTeams, setLobbyTeams] = useState<Array<LobbyTeam>>([
+        // { accumulatedScore: 0, players: [{ name: 'Kyle', localId: localId }, { name: 'Elliott', localId: localId }] },
+        // { accumulatedScore: 0, players: [{ name: 'Eric', localId: localId }] },
+        // { accumulatedScore: 0, players: [{ name: 'Gary', localId: localId }] }
+    ]);
 
     useEffect(() => {
         communicator.addEventListener(LobbyEvent.TYPE, (event) => {
@@ -27,7 +32,8 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId }) => {
 
     const onAddTeam = () => {
         lobbyTeams.push({
-            players: []
+            players: [],
+            accumulatedScore: 0
         });
 
         setLobbyTeams([...lobbyTeams]);

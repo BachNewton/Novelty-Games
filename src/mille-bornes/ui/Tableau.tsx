@@ -14,7 +14,6 @@ interface TableauProps {
 
 const Tableau: React.FC<TableauProps> = ({ team, onClick, isHighlighted, greyedOut, remainingDistance }) => {
     const tableauData = team.tableau;
-    const teamName = 'Team ' + team.players.map(player => player.name).join(' & ');
 
     const tableauStyle: React.CSSProperties = {
         borderColor: isHighlighted ? 'yellow' : team.color,
@@ -29,7 +28,7 @@ const Tableau: React.FC<TableauProps> = ({ team, onClick, isHighlighted, greyedO
 
     return <div style={tableauStyle} onClick={onClick} >
         <div style={{ textAlign: 'center' }}>
-            <strong>{teamName}</strong> has <strong>{remainingDistance}</strong> km to go!
+            <strong>{getTeamName(team)}</strong> has <strong>{remainingDistance}</strong> km to go!
         </div>
 
         <div style={{ display: 'grid', gridAutoFlow: 'column', justifyContent: 'space-evenly', minHeight: 0 }}>
@@ -48,3 +47,7 @@ const Tableau: React.FC<TableauProps> = ({ team, onClick, isHighlighted, greyedO
 }
 
 export default Tableau;
+
+export function getTeamName(team: Team): string {
+    return 'Team ' + team.players.map(player => player.name).join(' & ');
+};

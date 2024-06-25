@@ -7,11 +7,12 @@ export interface Score {
     eachSafety: number;
     allSafeties: number;
     coupFourré: number;
-    tripCompleted?: number;
-    deplayedAction?: number;
-    safeTrip?: number;
-    extention?: number;
-    shutout?: number;
+    tripCompleted: number;
+    deplayedAction: number;
+    safeTrip: number;
+    extention: number;
+    shutout: number;
+    total: number;
 }
 
 export function calculateScore(game: Game): Map<Team, Score> {
@@ -22,7 +23,13 @@ export function calculateScore(game: Game): Map<Team, Score> {
             distance: 1 * getTotalDistance(team.tableau.distanceArea),
             eachSafety: 100 * team.tableau.safetyArea.length,
             allSafeties: team.tableau.safetyArea.length === 4 ? 300 : 0,
-            coupFourré: team.tableau.safetyArea.reduce((points: number, safetyCard: SafetyCard) => points + (safetyCard.coupFourré ? 300 : 0), 0)
+            coupFourré: team.tableau.safetyArea.reduce((points: number, safetyCard: SafetyCard) => points + (safetyCard.coupFourré ? 300 : 0), 0),
+            tripCompleted: 0,
+            deplayedAction: 0,
+            safeTrip: 0,
+            extention: 0,
+            shutout: 0,
+            total: team.accumulatedScore
         };
 
         const didTeamCompleteTrip = getRemainingDistance(team.tableau.distanceArea, game.teams, game.extention) === 0;
@@ -33,6 +40,17 @@ export function calculateScore(game: Game): Map<Team, Score> {
             score.extention = game.extention ? 200 : 0;
             score.shutout = game.teams.filter(otherTeam => otherTeam !== team).every(otherTeam => getTotalDistance(otherTeam.tableau.distanceArea) === 0) ? 500 : 0;
         }
+
+        score.total =
+            score.distance +
+            score.eachSafety +
+            score.allSafeties +
+            score.coupFourré +
+            score.tripCompleted +
+            score.deplayedAction +
+            score.safeTrip +
+            score.extention +
+            score.shutout;
 
         scores.set(team, score);
     }

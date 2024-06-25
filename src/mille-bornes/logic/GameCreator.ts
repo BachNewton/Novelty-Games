@@ -8,6 +8,7 @@ export function createGame(lobbyTeams: Array<LobbyTeam>): Game {
 
     const teams: Array<Team> = lobbyTeams.map((lobbyTeam, lobbyIndex) => {
         const team: Team = {
+            accumulatedScore: lobbyTeam.accumulatedScore,
             tableau: {
                 battleArea: [],
                 speedArea: [],

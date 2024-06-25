@@ -13,6 +13,7 @@ export interface Team {
     tableau: Tableau;
     color: string;
     id: string;
+    accumulatedScore: number;
 }
 
 export function createTeam(team: Team): Team {

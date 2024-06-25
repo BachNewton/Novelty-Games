@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Communicator, GameEvent } from "../logic/Communicator";
 import { Game, Team } from "../logic/Data";
 import { createGame } from "../logic/GameCreator";
-import { Score, calculateScore } from "../logic/ScoreboardCalculator";
-import Lobby, { LobbyTeam } from "./Lobby";
+import { Score } from "../logic/ScoreboardCalculator";
+import Lobby, { LobbyPlayer, LobbyTeam } from "./Lobby";
 import Board from "./Board";
 import Scoreboard from "./Scoreboard";
 
@@ -20,10 +20,10 @@ class BoardState implements State {
 }
 
 class ScoreboardState implements State {
-    scores: Map<Team, Score>;
+    game: Game;
 
-    constructor(scores: Map<Team, Score>) {
-        this.scores = scores;
+    constructor(game: Game) {
+        this.game = game;
     }
 }
 
@@ -45,14 +45,36 @@ const Home: React.FC = () => {
         COMMUNICATOR.startGame(game);
     };
 
-    const onGameOver = (game: Game) => {
-        setState(new ScoreboardState(calculateScore(game)));
+    const onRoundOver = (game: Game) => {
+        setState(new ScoreboardState(game));
+    };
+
+    const onBackToLobby = () => {
+        setState(new LobbyState());
+    };
+
+    const onPlayNextRound = (game: Game, scores: Map<Team, Score>) => {
+        const lobbyTeams = game.teams.map<LobbyTeam>(team => {
+            return {
+                accumulatedScore: scores.get(team)?.total || 0,
+                players: team.players.map<LobbyPlayer>(player => {
+                    return {
+                        name: player.name,
+                        localId: player.localId
+                    };
+                })
+            };
+        });
+
+        const newGame = createGame(lobbyTeams);
+        setState(new BoardState(newGame));
+        COMMUNICATOR.startGame(newGame);
     };
 
     if (state instanceof BoardState) {
-        return <Board communicator={COMMUNICATOR} startingGame={state.game} localId={LOCAL_ID} onGameOver={onGameOver} />;
+        return <Board communicator={COMMUNICATOR} startingGame={state.game} localId={LOCAL_ID} onRoundOver={onRoundOver} />;
     } else if (state instanceof ScoreboardState) {
-        return <Scoreboard scores={state.scores} />;
+        return <Scoreboard game={state.game} onBackToLobby={onBackToLobby} onPlayNextRound={onPlayNextRound} />;
     } else {
         return <Lobby communicator={COMMUNICATOR} startGame={onStartGame} localId={LOCAL_ID} />;
     }
