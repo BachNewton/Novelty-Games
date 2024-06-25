@@ -1,2 +1,2 @@
-# PWA-Trivia
-A Progress Web App with a trivia game
+# Novelty Games
+An all-in-one app for all of the novelty game ideas Kyle has
