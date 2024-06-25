@@ -49,7 +49,11 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
             const playCardEvent = event as PlayCardEvent;
             const targetTeam = getTeamById(playCardEvent.targetTeamId, state.game);
             playCard(playCardEvent.card, state.game, targetTeam, onRoundOver);
-            state.game.extention = playCardEvent.isExtentionCalled;
+
+            // We can't "uncall" an extention, so only update the extention state if it was called
+            if (playCardEvent.isExtentionCalled) {
+                state.game.extention = playCardEvent.isExtentionCalled;
+            }
 
             const isRoundOver = state.game.teams.some(team => getRemainingDistance(team.tableau.distanceArea, state.game.teams, state.game.extention) === 0);
             if (isRoundOver) {

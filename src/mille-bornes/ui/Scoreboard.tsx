@@ -14,8 +14,6 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ game, onBackToLobby, onPlayNext
     const scores = calculateScore(game);
     const sortedEntries = Array.from(scores.entries()).sort((a, b) => b[1].total - a[1].total);
 
-    sortedEntries[0][1].tripCompleted = 500;
-
     const teamScoresUi = sortedEntries.map((entry, index) => {
         const team = entry[0];
         const score = entry[1];
@@ -46,31 +44,35 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ game, onBackToLobby, onPlayNext
             : <></>;
 
         return <table key={index} style={{ border: '1px solid white', width: '90%' }}>
-            <tr>
-                <th>#{index + 1}: {getTeamName(team)}</th>
-                <th>Points</th>
-            </tr>
-            <tr>
-                <td>Distance</td>
-                <td style={{ textAlign: 'right' }}>{score.distance}</td>
-            </tr>
-            <tr>
-                <td>Each Safety</td>
-                <td style={{ textAlign: 'right' }}>{score.eachSafety}</td>
-            </tr>
-            <tr>
-                <td>All Safeties</td>
-                <td style={{ textAlign: 'right' }}>{score.allSafeties}</td>
-            </tr>
-            <tr>
-                <td>Coup-Fourré</td>
-                <td style={{ textAlign: 'right' }}>{score.coupFourré}</td>
-            </tr>
-            {ifCompletedUi}
-            <tr style={{ fontWeight: 900 }}>
-                <td>Total Score</td>
-                <td style={{ textAlign: 'right' }}>{score.total}</td>
-            </tr>
+            <thead>
+                <tr>
+                    <th>#{index + 1}: {getTeamName(team)}</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Distance</td>
+                    <td style={{ textAlign: 'right' }}>{score.distance}</td>
+                </tr>
+                <tr>
+                    <td>Each Safety</td>
+                    <td style={{ textAlign: 'right' }}>{score.eachSafety}</td>
+                </tr>
+                <tr>
+                    <td>All Safeties</td>
+                    <td style={{ textAlign: 'right' }}>{score.allSafeties}</td>
+                </tr>
+                <tr>
+                    <td>Coup-Fourré</td>
+                    <td style={{ textAlign: 'right' }}>{score.coupFourré}</td>
+                </tr>
+                {ifCompletedUi}
+                <tr style={{ fontWeight: 900 }}>
+                    <td>Total Score</td>
+                    <td style={{ textAlign: 'right' }}>{score.total}</td>
+                </tr>
+            </tbody>
         </table>;
     });
 
