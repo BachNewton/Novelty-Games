@@ -71,7 +71,7 @@ interface PlayCardData extends ServerData {
     isExtentionCalled: boolean;
 }
 
-const SERVER_URL = 'http://35.184.159.91/';
+const SERVER_URL = 'https://35.184.159.91/';
 
 export class Communicator extends EventTarget {
     private socket = io(SERVER_URL);
