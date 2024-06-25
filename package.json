@@ -40,7 +40,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages-clean && gh-pages -b gh-pages -d build"
   },
-  "homepage": "https://bachnewton.github.io/PWA-Trivia/",
+  "homepage": "https://bachnewton.github.io/Novelty-Games/",
   "eslintConfig": {
     "extends": [
       "react-app",

@@ -4,9 +4,9 @@ import { ProgressEmitter } from "./ProgressUpdater";
 // Alernative API: https://rcdb-api.vercel.app/api/coasters
 const ROLLERCOASTERS_URL = 'https://raw.githubusercontent.com/fabianrguez/rcdb-api/main/db/coasters.json';
 
-const MUSIC_URL = 'https://raw.githubusercontent.com/BachNewton/PWA-Trivia/main/db/music.json';
+const MUSIC_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/main/db/music.json';
 
-const FESTIVAL_URL = 'https://raw.githubusercontent.com/BachNewton/PWA-Trivia/main/db/fortniteFestivalSongs.json';
+const FESTIVAL_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/main/db/fortniteFestivalSongs.json';
 
 const FLAG_GAME_URL = 'https://flagcdn.com/en/codes.json';
 
