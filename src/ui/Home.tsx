@@ -2,39 +2,19 @@ import { useEffect, useState } from 'react';
 import MilleBornesHome from '../mille-bornes/ui/Home';
 import TriviaHome from '../trivia/ui/Home';
 
-const APP_VERSION = 'v1.0.0';
+const APP_VERSION = 'v1.0.1';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
 }
 
-interface State {
-    versionState: VersionState;
-}
+interface State { }
 
-class HomeState implements State {
-    versionState: VersionState;
+class HomeState implements State { }
 
-    constructor(versionState: VersionState) {
-        this.versionState = versionState;
-    }
-}
+class TriviaState implements State { }
 
-class TriviaState implements State {
-    versionState: VersionState;
-
-    constructor(versionState: VersionState) {
-        this.versionState = versionState;
-    }
-}
-
-class MilleBornesState implements State {
-    versionState: VersionState;
-
-    constructor(versionState: VersionState) {
-        this.versionState = versionState;
-    }
-}
+class MilleBornesState implements State { }
 
 enum VersionState {
     CURRENT,
@@ -44,37 +24,36 @@ enum VersionState {
 }
 
 const Home: React.FC<HomeProps> = ({ updateListener }) => {
-    const [state, setState] = useState<State>(new HomeState(VersionState.CHECKING));
+    const [state, setState] = useState<State>(new HomeState());
+    const [versionState, setVersionSate] = useState(VersionState.CHECKING);
 
     useEffect(() => {
         updateListener.onUpdateAvailable = () => {
             console.log('Newer version of the app is available');
-            state.versionState = VersionState.OUTDATED;
-            setState({ ...state });
+            setVersionSate(VersionState.OUTDATED);
         };
 
         updateListener.onNoUpdateFound = () => {
             console.log('No update of the app has been found');
-            state.versionState = VersionState.CURRENT;
-            setState({ ...state });
+            setVersionSate(VersionState.CURRENT);
         };
 
         if (!navigator.onLine) {
             console.log('App if offline and can not check for updates');
-            state.versionState = VersionState.UNKNOWN;
+            setVersionSate(VersionState.UNKNOWN);
         }
     }, [state]);
 
     const onHomeButtonClicked = () => {
-        setState(new HomeState(state.versionState));
+        setState(new HomeState());
     };
 
     const onMilleBornesClick = () => {
-        setState(new MilleBornesState(state.versionState));
+        setState(new MilleBornesState());
     };
 
     const onTriviaClick = () => {
-        setState(new TriviaState(state.versionState));
+        setState(new TriviaState());
     };
 
     if (state instanceof MilleBornesState) {
@@ -82,7 +61,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
     } else if (state instanceof TriviaState) {
         return <TriviaHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else {
-        return HomeUi(state.versionState, onMilleBornesClick, onTriviaClick);
+        return HomeUi(versionState, onMilleBornesClick, onTriviaClick);
     }
 };
 
