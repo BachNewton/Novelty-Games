@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import '../css/Home.css';
 import Game from './Game';
 import { DataType, Data, Rollercoaster } from '../logic/Data';
@@ -7,11 +7,10 @@ import { ProgressUpdater } from '../logic/ProgressUpdater';
 import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from '../logic/Database';
 import Filter from './Filter';
 import { RollercoasterFilter, deleteFilter, filter, saveFilter } from '../logic/FilterRepo';
-
-const APP_VERSION = 'v5.2.0';
+import HomeButton from '../../ui/HomeButton';
 
 interface HomeProps {
-    updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
+    onHomeButtonClicked: () => void;
 }
 
 interface State {
@@ -19,7 +18,6 @@ interface State {
     data: Promise<Array<Data>>;
     dataType: DataType;
     isDataStored: Map<DataType, boolean>;
-    versionState: VersionState;
 }
 
 enum UiState {
@@ -28,37 +26,11 @@ enum UiState {
     FILTER
 }
 
-enum VersionState {
-    CURRENT,
-    UNKNOWN,
-    OUTDATED,
-    CHECKING
-}
-
 const progressUpdater = new ProgressUpdater();
 
-const Home: React.FC<HomeProps> = ({ updateListener }) => {
-    const [state, setState] = useState({ ui: UiState.HOME, isDataStored: new Map(), versionState: VersionState.CHECKING } as State);
+const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
+    const [state, setState] = useState({ ui: UiState.HOME, isDataStored: new Map() } as State);
     const [refreshDataStoredNeeded, setRefreshDataStoredNeeded] = useState(true);
-
-    useEffect(() => {
-        updateListener.onUpdateAvailable = () => {
-            console.log('Newer version of the app is available');
-            state.versionState = VersionState.OUTDATED;
-            setState({ ...state });
-        };
-
-        updateListener.onNoUpdateFound = () => {
-            console.log('No update of the app has been found');
-            state.versionState = VersionState.CURRENT;
-            setState({ ...state });
-        };
-
-        if (!navigator.onLine) {
-            console.log('App if offline and can not check for updates');
-            state.versionState = VersionState.UNKNOWN;
-        }
-    }, [state]);
 
     if (refreshDataStoredNeeded) {
         for (const dataTypeName in DataType) {
@@ -73,7 +45,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         setRefreshDataStoredNeeded(false);
     }
 
-    const onHomeClicked = () => {
+    const onBackClicked = () => {
         state.ui = UiState.HOME;
         setRefreshDataStoredNeeded(true);
         setState({ ...state });
@@ -93,16 +65,16 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
     switch (state.ui) {
         case UiState.HOME:
             return HomeUi(
-                state.versionState,
                 state.isDataStored,
                 state,
-                setState
+                setState,
+                onHomeButtonClicked
             );
         case UiState.GAME:
             return <Game
                 pendingData={state.data}
                 dataType={state.dataType}
-                onHomeClicked={onHomeClicked}
+                onBackClicked={onBackClicked}
                 progressListener={progressUpdater}
             />;
         case UiState.FILTER:
@@ -115,10 +87,10 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
 };
 
 function HomeUi(
-    versionState: VersionState,
     isDataStored: Map<DataType, boolean>,
     state: State,
-    setState: React.Dispatch<React.SetStateAction<State>>
+    setState: React.Dispatch<React.SetStateAction<State>>,
+    onHomeButtonClicked: () => void
 ) {
     const gameOptionsUi = [DataType.ROLLERCOASTERS, DataType.MUSIC, DataType.FLAG_GAME, DataType.POKEMON, DataType.FORTNITE_FESTIVAL].map((dataType, index) => {
         const onGameClick = () => {
@@ -161,27 +133,13 @@ function HomeUi(
     });
 
     return <div className='Home'>
-        <div id='version-state'>{VersionStateUi(versionState)}</div>
-        <code id='version-label'>{APP_VERSION}</code>
-        <h3>🃏 Kyle's Novelty Trivia Games 🕹️</h3>
-        <div>Created by: Kyle Hutchinson</div>
+        <HomeButton onClick={onHomeButtonClicked} />
+        <h2>❔ Kyle's Trivia Games 🤯</h2>
         <div><br /><br /><br /></div>
         {gameOptionsUi}
     </div>;
 }
 
-function VersionStateUi(versionState: VersionState) {
-    switch (versionState) {
-        case VersionState.CHECKING:
-            return <>☁️ Checking for updates...</>;
-        case VersionState.CURRENT:
-            return <>✔️ Up-to-date</>;
-        case VersionState.OUTDATED:
-            return <button onClick={() => { window.location.reload() }}>🔄 Update App</button>;
-        case VersionState.UNKNOWN:
-            return <>✖️ Offline</>;
-    }
-}
 
 function confirmedDelete(dataType: DataType): boolean {
     const gameName = getGameName(dataType);

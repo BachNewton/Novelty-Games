@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Communicator, LobbyEvent } from "../logic/Communicator";
+import HomeButton from "../../ui/HomeButton";
 
 interface LobbyProps {
     communicator: Communicator;
@@ -99,7 +100,7 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
     };
 
     return <div style={{ color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
-        <button style={homeButtonStyle} onClick={onHomeButtonClicked}>🏠</button>
+        <HomeButton onClick={onHomeButtonClicked} />
         <div style={{ fontSize: '1.75em', marginBottom: '1em' }}>🏎️ Mille Bornes Lobby 🏁</div>
         <div>
             {addTeamButton}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import MilleBornesHome from './mille-bornes/ui/Home';
-import TriviaHome from './trivia/ui/Home';
+import MilleBornesHome from '../mille-bornes/ui/Home';
+import TriviaHome from '../trivia/ui/Home';
 
 const APP_VERSION = 'v1.0.0';
 
@@ -80,7 +80,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
     if (state instanceof MilleBornesState) {
         return <MilleBornesHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else if (state instanceof TriviaState) {
-        return <TriviaHome updateListener={updateListener} />;
+        return <TriviaHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else {
         return HomeUi(state.versionState, onMilleBornesClick, onTriviaClick);
     }

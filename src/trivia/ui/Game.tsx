@@ -10,7 +10,7 @@ import { getGameName } from './Home';
 interface GameProps {
   pendingData: Promise<Array<Data>>;
   dataType: DataType;
-  onHomeClicked: () => void;
+  onBackClicked: () => void;
   progressListener: ProgressListener;
 }
 
@@ -44,7 +44,7 @@ const HIGH_SCORE_KEY_POSTFIX = '_HIGH_SCORE_KEY';
 const HIGH_SCORE_HARDCORE_KEY_POSTFIX = HIGH_SCORE_KEY_POSTFIX + '_HARDCORE';
 const DISABLE_IMAGES_KEY = 'DISABLE_IMAGES_KEY';
 
-const Game: React.FC<GameProps> = ({ pendingData, dataType, onHomeClicked, progressListener }) => {
+const Game: React.FC<GameProps> = ({ pendingData, dataType, onBackClicked, progressListener }) => {
   const [gameState, setGameState] = useState({ uiState: UiState.LOADING } as GameState)
 
   useEffect(() => {
@@ -73,7 +73,7 @@ const Game: React.FC<GameProps> = ({ pendingData, dataType, onHomeClicked, progr
   return (
     <div className="Game">
       <div className='top-left'>
-        <button onClick={onHomeClicked}>🏠</button>
+        <button onClick={onBackClicked}>⬅️</button>
         {enableImagesButton}
       </div>
       <header>
