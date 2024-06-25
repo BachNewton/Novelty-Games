@@ -1,0 +1,124 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="192" height="264" version="1.1" xmlns="http://www.w3.org/2000/svg">
+
+<!-- purple-bordered card background -->
+<rect x="5" y="5" rx="11" ry="11" width="182" height="254"
+style="fill: rgb(255,255,255);
+stroke-width: 2;
+stroke: rgb(70,24,198)" />
+
+<!-- outer ring of purple wheel -->
+<circle cx="96" cy="132" r="73"
+style="fill: rgb(70,24,198)" />
+
+<!-- little white circles -->
+
+<circle cx="57" cy="89" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="67" cy="82" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="79" cy="77" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="92" cy="74" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="104" cy="75" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="116" cy="78" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="127" cy="84" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="137" cy="92" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="145" cy="101" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="149" cy="111" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="153" cy="123" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="153" cy="135" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="151" cy="147" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="147" cy="159" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="140" cy="169" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="131" cy="178" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="120" cy="184" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="108" cy="188" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="96" cy="190" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="83" cy="188" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="71" cy="184" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="60" cy="178" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="51" cy="169" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="45" cy="158" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="40" cy="147" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="38" cy="134" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="39" cy="122" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="43" cy="109" r="6"
+style="fill: rgb(255,255,255)" />
+
+<circle cx="49" cy="98" r="6"
+style="fill: rgb(255,255,255)" />
+
+<!-- large white circle -->
+<circle cx="96" cy="133" r="58"
+style="fill: rgb(255,255,255)" />
+
+<!-- inner black rectangle -->
+<rect x="66" y="112" width="60" height="42" rx="5" ry="5"
+style="fill: rgb(0,0,0)" />
+
+<!-- inner purple rectangle -->
+<rect x="77" y="116" width="38" height="32" rx="3" ry="3"
+style="fill: rgb(70,24,198)" />
+
+<!-- left purple bar -->
+<polygon points="84,120 39,100 36,104 82,133"
+style="fill: rgb(70,24,198)" />
+
+<!-- right purple bar -->
+<polygon points="107,121 111,132 155,104 152,100"
+style="fill: rgb(70,24,198)" />
+
+</svg>

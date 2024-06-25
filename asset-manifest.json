@@ -1,16 +1,37 @@
 {
   "files": {
-    "main.css": "/PWA-Trivia/static/css/main.e3f26079.css",
-    "main.js": "/PWA-Trivia/static/js/main.1def36b9.js",
-    "static/js/453.ed3810f9.chunk.js": "/PWA-Trivia/static/js/453.ed3810f9.chunk.js",
-    "service-worker.js": "/PWA-Trivia/service-worker.js",
-    "index.html": "/PWA-Trivia/index.html",
-    "main.e3f26079.css.map": "/PWA-Trivia/static/css/main.e3f26079.css.map",
-    "main.1def36b9.js.map": "/PWA-Trivia/static/js/main.1def36b9.js.map",
-    "453.ed3810f9.chunk.js.map": "/PWA-Trivia/static/js/453.ed3810f9.chunk.js.map"
+    "main.css": "/Novelty-Games/static/css/main.2994a98b.css",
+    "main.js": "/Novelty-Games/static/js/main.fcfc9420.js",
+    "static/js/453.ed3810f9.chunk.js": "/Novelty-Games/static/js/453.ed3810f9.chunk.js",
+    "service-worker.js": "/Novelty-Games/service-worker.js",
+    "static/media/MB-ace.svg": "/Novelty-Games/static/media/MB-ace.a8f8a88737891decb1997b8d24860914.svg",
+    "static/media/MB-sealant.svg": "/Novelty-Games/static/media/MB-sealant.f888814173ac2b0bdd02cf336035e0b2.svg",
+    "static/media/MB-200.svg": "/Novelty-Games/static/media/MB-200.a7553133d1d97d2706b28bfe1b3bb353.svg",
+    "static/media/MB-100.svg": "/Novelty-Games/static/media/MB-100.ef73bfb4947b64e319c3de2721b90434.svg",
+    "static/media/MB-50.svg": "/Novelty-Games/static/media/MB-50.21d1430d1258dcc98f7062e4dd8f4565.svg",
+    "static/media/MB-unlimited.svg": "/Novelty-Games/static/media/MB-unlimited.fa23bd0b000cff56f014b74ec71ed308.svg",
+    "static/media/MB-limit.svg": "/Novelty-Games/static/media/MB-limit.9e3b281317c8ab33892a2ca5afd2213b.svg",
+    "static/media/MB-25.svg": "/Novelty-Games/static/media/MB-25.e8b2f5b7f57cf40508c5f31140611573.svg",
+    "static/media/MB-75.svg": "/Novelty-Games/static/media/MB-75.9ba6f50a3ffdaa1199b9cb373e1d9add.svg",
+    "static/media/MB-emergency.svg": "/Novelty-Games/static/media/MB-emergency.1af63d8a4380898fe882bb6dca1c25af.svg",
+    "static/media/MB-gas.svg": "/Novelty-Games/static/media/MB-gas.7748265cfb340142076e30dcdcb81b99.svg",
+    "static/media/MB-flat.svg": "/Novelty-Games/static/media/MB-flat.853eceb5c3924a5b84db3c46fde18216.svg",
+    "static/media/MB-tanker.svg": "/Novelty-Games/static/media/MB-tanker.d624a9cc446cf64ba7d8c9d9a439c9af.svg",
+    "static/media/MB-spare.svg": "/Novelty-Games/static/media/MB-spare.c0944f88ea627a61dc1096d03bf3a287.svg",
+    "static/media/MB-empty.svg": "/Novelty-Games/static/media/MB-empty.e5b50130d1e17cee14d4431755dddc19.svg",
+    "static/media/MB-repair.svg": "/Novelty-Games/static/media/MB-repair.0363124aa082c452ad3df19770e3f2be.svg",
+    "static/media/MB-crash.svg": "/Novelty-Games/static/media/MB-crash.4e6f22ede8cbd3356066ddc9087cb868.svg",
+    "index.html": "/Novelty-Games/index.html",
+    "static/media/MB-roll.svg": "/Novelty-Games/static/media/MB-roll.68253e21b6efd6aede17e1dcc24c592b.svg",
+    "static/media/MB-stop.svg": "/Novelty-Games/static/media/MB-stop.97d4ceaf2635b72345600bf0463e7d04.svg",
+    "static/media/MB-outline.svg": "/Novelty-Games/static/media/MB-outline.9375dcb67c2602a348842bb92635c97b.svg",
+    "static/media/MB-back.svg": "/Novelty-Games/static/media/MB-back.73af888104565973b102803815b53578.svg",
+    "main.2994a98b.css.map": "/Novelty-Games/static/css/main.2994a98b.css.map",
+    "main.fcfc9420.js.map": "/Novelty-Games/static/js/main.fcfc9420.js.map",
+    "453.ed3810f9.chunk.js.map": "/Novelty-Games/static/js/453.ed3810f9.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.e3f26079.css",
-    "static/js/main.1def36b9.js"
+    "static/css/main.2994a98b.css",
+    "static/js/main.fcfc9420.js"
   ]
 }
