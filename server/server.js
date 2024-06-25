@@ -1,15 +1,21 @@
 import express from 'express';
 import { Server } from 'socket.io';
-import { createServer } from 'node:http';
+import { createServer } from 'node:https';
+import fs from 'fs';
+
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/novelty-games.mooo.com/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/novelty-games.mooo.com/fullchain.pem', 'utf8');
+const credentials = { key: privateKey, cert: certificate };
 
 const app = express();
-const server = createServer(app);
+const server = createServer(credentials, app);
 const io = new Server(server, {
     cors: {
         origin: ['*']
     }
 });
-const PORT = 80;
+
+const PORT = 443;
 
 app.get('/', (_, res) => {
     res.send('<h1>Novelty Games Server</h1>');
