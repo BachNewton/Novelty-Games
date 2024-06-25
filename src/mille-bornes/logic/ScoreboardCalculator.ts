@@ -12,7 +12,8 @@ export interface Score {
     safeTrip: number;
     extention: number;
     shutout: number;
-    total: number;
+    roundTotal: number;
+    gameTotal: number;
 }
 
 export function calculateScore(game: Game): Map<Team, Score> {
@@ -29,7 +30,8 @@ export function calculateScore(game: Game): Map<Team, Score> {
             safeTrip: 0,
             extention: 0,
             shutout: 0,
-            total: team.accumulatedScore
+            roundTotal: 0,
+            gameTotal: team.accumulatedScore
         };
 
         const didTeamCompleteTrip = getRemainingDistance(team.tableau.distanceArea, game.teams, game.extention) === 0;
@@ -41,7 +43,7 @@ export function calculateScore(game: Game): Map<Team, Score> {
             score.shutout = game.teams.filter(otherTeam => otherTeam !== team).every(otherTeam => getTotalDistance(otherTeam.tableau.distanceArea) === 0) ? 500 : 0;
         }
 
-        score.total =
+        score.roundTotal =
             score.distance +
             score.eachSafety +
             score.allSafeties +
@@ -51,6 +53,8 @@ export function calculateScore(game: Game): Map<Team, Score> {
             score.safeTrip +
             score.extention +
             score.shutout;
+
+        score.gameTotal += score.roundTotal;
 
         scores.set(team, score);
     }

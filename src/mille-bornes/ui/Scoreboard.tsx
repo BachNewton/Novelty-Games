@@ -12,7 +12,7 @@ interface ScoreboardProps {
 
 const Scoreboard: React.FC<ScoreboardProps> = ({ game, onBackToLobby, onPlayNextRound }) => {
     const scores = calculateScore(game);
-    const sortedEntries = Array.from(scores.entries()).sort((a, b) => b[1].total - a[1].total);
+    const sortedEntries = Array.from(scores.entries()).sort((a, b) => b[1].gameTotal - a[1].gameTotal);
 
     const teamScoresUi = sortedEntries.map((entry, index) => {
         const team = entry[0];
@@ -69,23 +69,34 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ game, onBackToLobby, onPlayNext
                 </tr>
                 {ifCompletedUi}
                 <tr style={{ fontWeight: 900 }}>
-                    <td>Total Score</td>
-                    <td style={{ textAlign: 'right' }}>{score.total}</td>
+                    <td>Round Score</td>
+                    <td style={{ textAlign: 'right' }}>{score.roundTotal}</td>
+                </tr>
+                <tr style={{ fontWeight: 900 }}>
+                    <td>Game Score</td>
+                    <td style={{ textAlign: 'right' }}>{score.gameTotal}</td>
                 </tr>
             </tbody>
         </table>;
     });
 
-    const buttonStyle: React.CSSProperties = {
+    const footerStyle: React.CSSProperties = {
         marginTop: '1em'
     };
 
-    const scoreboardButton = sortedEntries[0][1].total < SCORE_TO_WIN
-        ? <button onClick={() => onPlayNextRound(game, scores)} style={buttonStyle}>Play next round</button>
-        : <button onClick={onBackToLobby} style={buttonStyle}>Game Over - Back to Lobby</button>;
+    const isGameOver = sortedEntries[0][1].gameTotal >= SCORE_TO_WIN;
+
+    const declareWinner = isGameOver
+        ? <div style={footerStyle}>Game Over! {getTeamName(sortedEntries[0][0])} wins!</div>
+        : <></>;
+
+    const scoreboardButton = isGameOver
+        ? <button onClick={onBackToLobby} style={footerStyle}>Back to Lobby</button>
+        : <button onClick={() => onPlayNextRound(game, scores)} style={footerStyle}>Play next round</button>;
 
     return <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', color: 'white', justifyContent: 'center', alignItems: 'center' }}>
         {teamScoresUi}
+        {declareWinner}
         {scoreboardButton}
     </div>;
 };

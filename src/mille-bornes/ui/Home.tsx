@@ -56,7 +56,7 @@ const Home: React.FC = () => {
     const onPlayNextRound = (game: Game, scores: Map<Team, Score>) => {
         const lobbyTeams = game.teams.map<LobbyTeam>(team => {
             return {
-                accumulatedScore: scores.get(team)?.total || 0,
+                accumulatedScore: scores.get(team)?.gameTotal || 0,
                 players: team.players.map<LobbyPlayer>(player => {
                     return {
                         name: player.name,
