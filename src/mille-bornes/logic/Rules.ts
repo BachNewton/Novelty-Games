@@ -1,8 +1,8 @@
 import { AceCard, BattleCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, DistanceCard, EmergencyCard, EmptyCard, FlatCard, GasCard, HazardCard, LimitCard, RemedyCard, RepairCard, RollCard, SafetyCard, SealantCard, SpareCard, SpeedCard, StopCard, TankerCard, UnlimitedCard } from "./Card";
 import { Game, Player, Tableau, Team } from "./Data";
 
-const MAX_TARGET_DISTANCE = 1000;
-const TARGET_DISTANCE = 750;
+const MAX_TARGET_DISTANCE = 100;
+const TARGET_DISTANCE = 75;
 
 function getNextPlayer(game: Game): Player {
     const playerOrder = getPlayerOrder(game.teams);

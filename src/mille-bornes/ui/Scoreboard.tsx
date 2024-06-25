@@ -1,11 +1,16 @@
-import { Game } from "../logic/Data";
+import { Team } from "../logic/Data";
+import { Score } from "../logic/ScoreboardCalculator";
 
 interface ScoreboardProps {
-    game: Game;
+    scores: Map<Team, Score>;
 }
 
-const Scoreboard: React.FC<ScoreboardProps> = ({ game }) => {
-    return <div></div>;
+const Scoreboard: React.FC<ScoreboardProps> = ({ scores }) => {
+    console.log(scores);
+
+    return <div>
+        This is the Scoreboard
+    </div>;
 };
 
 export default Scoreboard;

@@ -1,33 +1,41 @@
 import { useEffect, useState } from "react";
 import { Communicator, GameEvent } from "../logic/Communicator";
+import { Game, Team } from "../logic/Data";
+import { createGame } from "../logic/GameCreator";
+import { Score, calculateScore } from "../logic/ScoreboardCalculator";
 import Lobby, { LobbyTeam } from "./Lobby";
 import Board from "./Board";
-import { Game } from "../logic/Data";
-import { createGame } from "../logic/GameCreator";
 import Scoreboard from "./Scoreboard";
 
-interface State {
-    ui: UiState;
-    game?: Game;
+interface State { }
+
+class LobbyState implements State { }
+
+class BoardState implements State {
+    game: Game;
+
+    constructor(game: Game) {
+        this.game = game;
+    }
 }
 
-enum UiState {
-    LOBBY,
-    BOARD,
-    SCOREBOARD
+class ScoreboardState implements State {
+    scores: Map<Team, Score>;
+
+    constructor(scores: Map<Team, Score>) {
+        this.scores = scores;
+    }
 }
 
 const LOCAL_ID = Math.random().toString();
 const COMMUNICATOR = new Communicator();
 
 const Home: React.FC = () => {
-    const [state, setState] = useState<State>({ ui: UiState.LOBBY });
+    const [state, setState] = useState<State>(new LobbyState());
 
     useEffect(() => {
         COMMUNICATOR.addEventListener(GameEvent.TYPE, (event) => {
-            state.game = (event as GameEvent).game;
-            state.ui = UiState.BOARD;
-            setState({ ...state });
+            setState(new BoardState((event as GameEvent).game));
         });
     }, [state]);
 
@@ -35,25 +43,22 @@ const Home: React.FC = () => {
 
     const onStartGame = (lobbyTeams: Array<LobbyTeam>) => {
         const game = createGame(lobbyTeams);
-        state.ui = UiState.BOARD;
-        state.game = game
-        setState({ ...state });
+        setState(new BoardState(game));
         COMMUNICATOR.startGame(game);
     };
 
     const onGameOver = (game: Game) => {
-        state.game = game;
-        state.ui = UiState.SCOREBOARD;
-        setState({ ...state });
+        setState(new ScoreboardState(calculateScore(game)));
     };
 
-    switch (state.ui) {
-        case UiState.LOBBY:
-            return <Lobby communicator={COMMUNICATOR} startGame={onStartGame} localId={LOCAL_ID} />;
-        case UiState.BOARD:
-            return <Board communicator={COMMUNICATOR} startingGame={state.game as Game} localId={LOCAL_ID} onGameOver={onGameOver} />;
-        case UiState.SCOREBOARD:
-            return <Scoreboard game={state.game as Game} />;
+    if (state instanceof LobbyState) {
+        return <Lobby communicator={COMMUNICATOR} startGame={onStartGame} localId={LOCAL_ID} />;
+    } else if (state instanceof BoardState) {
+        return <Board communicator={COMMUNICATOR} startingGame={state.game} localId={LOCAL_ID} onGameOver={onGameOver} />;
+    } else if (state instanceof ScoreboardState) {
+        return <Scoreboard scores={state.scores} />;
+    } else {
+        throw new Error('This state is not supproted: ' + state);
     }
 }
 
