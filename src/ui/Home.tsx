@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import MilleBornesHome from '../mille-bornes/ui/Home';
 import TriviaHome from '../trivia/ui/Home';
 
-const APP_VERSION = 'v1.0.1';
+const APP_VERSION = 'v1.0.2';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };

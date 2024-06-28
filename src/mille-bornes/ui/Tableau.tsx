@@ -31,14 +31,14 @@ const Tableau: React.FC<TableauProps> = ({ team, onClick, isHighlighted, greyedO
             <strong>{getTeamName(team)}</strong> has <strong>{remainingDistance}</strong> km to go!
         </div>
 
-        <div style={{ display: 'grid', gridAutoFlow: 'column', justifyContent: 'space-evenly', minHeight: 0 }}>
+        <div style={{ display: 'grid', gridAutoFlow: 'column', justifyContent: 'center', minHeight: 0, gridTemplateColumns: '3fr 1fr' }}>
 
-            <div style={{ display: 'grid', alignContent: 'center', minHeight: 0, gridTemplateRows: '1fr 2fr' }}>
+            <div style={{ display: 'grid', alignContent: 'center', justifyContent: 'center', minHeight: 0, gridTemplateRows: '1fr 2fr' }}>
                 <SafetyArea safetyArea={tableauData.safetyArea} />
                 <DistanceArea distanceArea={tableauData.distanceArea} />
             </div>
 
-            <div style={{ display: 'grid', minHeight: 0 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                 <CardUi card={getVisibleBattleCard(tableauData.battleArea)} />
                 <CardUi card={getVisibleSpeedCard(tableauData.speedArea)} />
             </div>
