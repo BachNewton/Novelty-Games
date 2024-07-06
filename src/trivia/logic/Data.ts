@@ -80,11 +80,20 @@ interface OfficalArtwork {
     front_default: string;
 }
 
+export interface Airplane {
+    make: string;
+    model: string;
+    imageUrl: string;
+    name: string;
+}
+
 export enum DataType {
     ROLLERCOASTERS = 'ROLLERCOASTERS',
     MUSIC = 'MUSIC',
     POKEMON = 'POKEMON',
     POKEMON_ALL = 'POKEMON_ALL',
     FLAG_GAME = 'FLAG_GAME',
-    FORTNITE_FESTIVAL = 'FORTNITE_FESTIVAL'
+    FORTNITE_FESTIVAL = 'FORTNITE_FESTIVAL',
+    AIRPLANES_ALL = 'AIRPLANES_ALL',
+    AIRPLANES = 'AIRPLANES'
 }

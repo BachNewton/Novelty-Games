@@ -12,6 +12,8 @@ const FLAG_GAME_URL = 'https://flagcdn.com/en/codes.json';
 
 const POKEMON_URL = 'https://pokeapi.co/api/v2/pokemon?limit=100000';
 
+export const AIRPLANES_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/main/db/airplanes/';
+
 export async function get(dataType: DataType, progressEmitter: ProgressEmitter, optionalUrls?: Array<string>): Promise<any> {
     const urls = optionalUrls === undefined ? [getUrl(dataType)] : optionalUrls;
 
@@ -32,9 +34,12 @@ function getUrl(dataType: DataType): string {
         case DataType.POKEMON_ALL:
             return POKEMON_URL;
         case DataType.POKEMON:
+        case DataType.AIRPLANES:
             return ''; // optional urls should be provided
         case DataType.FORTNITE_FESTIVAL:
             return FESTIVAL_URL;
+        case DataType.AIRPLANES_ALL:
+            return AIRPLANES_URL + 'index.json';
         default:
             throw new Error('Unsupported DataType: ' + dataType);
     }

@@ -1,4 +1,4 @@
-import { Data, DataType, FestivalSong, Flag, Pokemon, Rollercoaster, Song } from './Data';
+import { Airplane, Data, DataType, FestivalSong, Flag, Pokemon, Rollercoaster, Song } from './Data';
 
 export interface Question {
     text: string;
@@ -34,6 +34,8 @@ function getOptionsPool(dataType: DataType, data: Array<Data>): Set<string> {
             return new Set([...(data as Array<Flag>).map(flag => flag.name)]);
         case DataType.POKEMON:
             return new Set([...(data as Array<Pokemon>).map(pokemon => pokemon.formattedName)]);
+        case DataType.AIRPLANES:
+            return new Set([...(data as Array<Airplane>).map(airplane => airplane.name)]);
         default:
             throw new Error('Unsupported DataType: ' + dataType);
     }
@@ -60,6 +62,7 @@ function getSpotifyId(dataType: DataType, answer: Data): string | null {
         case DataType.FLAG_GAME:
         case DataType.POKEMON:
         case DataType.FORTNITE_FESTIVAL:
+        case DataType.AIRPLANES:
             return null;
         default:
             throw new Error('Unsupported DataType: ' + dataType);
@@ -74,6 +77,7 @@ function getAudioLink(dataType: DataType, answer: Data): string | null {
         case DataType.FLAG_GAME:
         case DataType.POKEMON:
         case DataType.MUSIC:
+        case DataType.AIRPLANES:
             return null;
         default:
             throw new Error('Unsupported DataType: ' + dataType);
@@ -92,6 +96,8 @@ function getIsNot(dataType: DataType, answer: Data): string {
             return (answer as Flag).name;
         case DataType.POKEMON:
             return (answer as Pokemon).formattedName;
+        case DataType.AIRPLANES:
+            return (answer as Airplane).name;
         default:
             throw new Error('Unsupported DataType: ' + dataType);
     }
@@ -112,6 +118,8 @@ function getQuestionText(answer: Data, dataType: DataType): string {
             return 'Name this flag!';
         case DataType.POKEMON:
             return "Who's that Pokémon?!";
+        case DataType.AIRPLANES:
+            return 'What is the make and model of this airplane?';
         default:
             throw new Error('Unsupported DataType: ' + dataType);
     }
@@ -134,6 +142,9 @@ function getCorrectOption(dataType: DataType, answer: Data): string {
         case DataType.POKEMON:
             const pokemon = answer as Pokemon;
             return pokemon.formattedName;
+        case DataType.AIRPLANES:
+            const airplane = answer as Airplane;
+            return airplane.name;
         default:
             throw new Error('Unsupported DataType: ' + dataType);
     }
@@ -156,6 +167,9 @@ function getImageUrl(answer: Data, dataType: DataType): string {
         case DataType.POKEMON:
             const pokemon = answer as Pokemon;
             return pokemon.sprites.other['official-artwork'].front_default;
+        case DataType.AIRPLANES:
+            const airplane = answer as Airplane;
+            return airplane.imageUrl;
         default:
             throw new Error('Unsupported DataType: ' + dataType);
     }

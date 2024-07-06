@@ -92,7 +92,14 @@ function HomeUi(
     setState: React.Dispatch<React.SetStateAction<State>>,
     onHomeButtonClicked: () => void
 ) {
-    const gameOptionsUi = [DataType.ROLLERCOASTERS, DataType.MUSIC, DataType.FLAG_GAME, DataType.POKEMON, DataType.FORTNITE_FESTIVAL].map((dataType, index) => {
+    const gameOptionsUi = [
+        DataType.ROLLERCOASTERS,
+        DataType.MUSIC,
+        DataType.FLAG_GAME,
+        DataType.POKEMON,
+        DataType.FORTNITE_FESTIVAL,
+        DataType.AIRPLANES
+    ].map((dataType, index) => {
         const onGameClick = () => {
             const data = getFromRepo(getRepoBaseDataType(dataType), progressUpdater);
             state.data = hasFilter(dataType) ? filter(data as Promise<Array<Rollercoaster>>) : data;
@@ -134,7 +141,7 @@ function HomeUi(
 
     return <div className='Home'>
         <HomeButton onClick={onHomeButtonClicked} />
-        <h2>❔ Kyle's Trivia Games 🤯</h2>
+        <h2>❓ Kyle's Trivia Games 🤯</h2>
         <div><br /><br /><br /></div>
         {gameOptionsUi}
     </div>;
@@ -165,6 +172,8 @@ export function getGameName(dataType: DataType): string {
             return 'Pokémon 👾';
         case DataType.FORTNITE_FESTIVAL:
             return 'Fortnite Festival 👨‍🎤';
+        case DataType.AIRPLANES:
+            return 'Airplanes ✈️';
         default:
             throw new Error('Unsupported DataType: ' + dataType);
     }
@@ -174,6 +183,8 @@ function getRepoBaseDataType(dataType: DataType): DataType {
     switch (dataType) {
         case DataType.POKEMON:
             return DataType.POKEMON_ALL;
+        case DataType.AIRPLANES:
+            return DataType.AIRPLANES_ALL;
         case DataType.ROLLERCOASTERS:
         case DataType.MUSIC:
         case DataType.FLAG_GAME:
@@ -193,6 +204,8 @@ function hasFilter(dataType: DataType): boolean {
         case DataType.POKEMON:
         case DataType.POKEMON_ALL:
         case DataType.FORTNITE_FESTIVAL:
+        case DataType.AIRPLANES:
+        case DataType.AIRPLANES_ALL:
             return false;
         default:
             throw new Error('Unsupported DataType: ' + dataType);

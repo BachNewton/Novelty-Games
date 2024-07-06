@@ -1,6 +1,6 @@
-import { DataType, Rollercoaster, Data, Song, PokemonAll, Pokemon, Flag, FestivalSong } from "./Data";
+import { DataType, Rollercoaster, Data, Song, PokemonAll, Pokemon, Flag, FestivalSong, Airplane } from "./Data";
 import { get as getFromDb, store as storeInDb } from "./Database";
-import { get as getFromNetwork } from "./Networking";
+import { AIRPLANES_URL, get as getFromNetwork } from "./Networking";
 import { ProgressEmitter } from "./ProgressUpdater";
 
 export function get(
@@ -37,6 +37,10 @@ async function handleJsons(dataType: DataType, jsons: Array<any>, progressEmitte
             return await handlePokemonAllJson(jsons[0], progressEmitter);
         case DataType.POKEMON:
             return handlePokemonJsons(jsons);
+        case DataType.AIRPLANES_ALL:
+            return await handleAirplanesAllJson(jsons[0], progressEmitter);
+        case DataType.AIRPLANES:
+            return handleAirplanesJsons(jsons);
         case DataType.FORTNITE_FESTIVAL:
             return handleFestivalJson(jsons[0]);
         default:
@@ -92,6 +96,13 @@ async function handlePokemonAllJson(json: any, progressEmitter: ProgressEmitter)
     return await get(DataType.POKEMON, progressEmitter, urls) as Array<Pokemon>;
 }
 
+async function handleAirplanesAllJson(json: any, progressEmitter: ProgressEmitter): Promise<Array<Airplane>> {
+    const airplanesAll = json as Array<string>;
+
+    const urls = airplanesAll.map(airplane => AIRPLANES_URL + airplane);
+    return await get(DataType.AIRPLANES, progressEmitter, urls) as Array<Airplane>;
+}
+
 function handleFlagGameJson(json: any): Array<Flag> {
     return Object.keys(json).map(id => { return { name: json[id], imageUrl: getFlagImageUrl(id) } });
 }
@@ -112,6 +123,14 @@ function handlePokemonJsons(jsons: Array<any>): Array<Pokemon> {
     });
 
     return filteredPokemon;
+}
+
+function handleAirplanesJsons(jsons: Array<any>): Array<Airplane> {
+    const airplanes = (jsons as Array<Array<Airplane>>).flat();
+    airplanes.forEach(airplane => airplane.name = airplane.make + ' - ' + airplane.model);
+    console.log('All Airplanes', airplanes);
+
+    return airplanes;
 }
 
 function toCapitalizedSeparatedWords(str: string): string {
