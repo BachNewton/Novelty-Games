@@ -2,7 +2,7 @@ import fs from 'fs';
 import puppeteer from 'puppeteer';
 
 const BASE_URL = 'https://fnzone.es/en/festival';
-const SONG_SELECTOR = '#__next > article.c-lmczj.c-lmczj-icFzQBq-css > div.c-dhzjXW.c-dhzjXW-ikbNnIq-css > a';
+const SONG_SELECTOR = '.c-dhzjXW.c-dhzjXW-ibfIEdm-css > a';
 const YEAR_AND_LENGTH_REGEX = /<strong>(\d+?)(?:<!-- -->)? · (?:<!-- -->)?(.+?)<\/strong>/g;
 
 function getMatch(html, regex) {
@@ -26,9 +26,11 @@ async function getSampleMp3(page) {
 
     const songs = await page.$$eval(SONG_SELECTOR, els => els.map(el => {
         const url = el.href;
-        const name = el.querySelector('strong').textContent;
-        const artist = el.querySelector('span').textContent;
-        const albumArt = el.querySelector('img').src;
+        const backgroundImage = window.getComputedStyle(el.firstElementChild).getPropertyValue('background-image');
+        const albumArt = backgroundImage.match(/"(.+?)"/g)[0];
+
+        const name = el.firstElementChild.firstElementChild.firstElementChild.textContent;
+        const artist = el.firstElementChild.firstElementChild.lastElementChild.textContent;
 
         return {
             url: url,
