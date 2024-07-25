@@ -1,11 +1,10 @@
 import '../css/Game.css';
 import { useEffect, useState } from 'react';
 import { Data, DataType } from '../logic/Data';
-import { createQuestions, Question } from '../logic/QuestionCreator';
-import AsyncImage from './AsyncImage';
+import { createQuestions, Question as QuestionData } from '../logic/QuestionCreator';
 import { ProgressListener, ProgressEvent } from '../logic/ProgressUpdater';
-import MusicPlayer from './MusicPlayer';
 import { getGameName } from './Home';
+import Question, { AnswerResult } from './Question';
 
 interface GameProps {
   pendingData: Promise<Array<Data>>;
@@ -17,7 +16,7 @@ interface GameProps {
 interface GameState {
   data: Array<Data>;
   dataType: DataType;
-  questions: Array<Question>;
+  questions: Array<QuestionData>;
   activeQuestion: number;
   uiState: UiState;
   lives: number;
@@ -41,7 +40,7 @@ class QuestionUiState implements UiState {
   }
 }
 
-enum QuestionState {
+export enum QuestionState {
   SHOW_QUESTION,
   SHOW_ANSWER_CORRECT,
   SHOW_ANSWER_INCORRECT
@@ -92,8 +91,6 @@ const Game: React.FC<GameProps> = ({ pendingData, dataType, onBackClicked, progr
   );
 };
 
-export default Game;
-
 function resetGame(data: Array<Data>, dataType: DataType, setGameState: React.Dispatch<React.SetStateAction<GameState>>) {
   const savedHighScore = localStorage.getItem(getHighScoreKey(dataType));
   const savedHardcoreHighScore = localStorage.getItem(getHardcoreHighScoreKey(dataType));
@@ -134,7 +131,7 @@ function Ui(gameState: GameState, setGameState: React.Dispatch<React.SetStateAct
   } else if (gameState.uiState instanceof GameOverUiState) {
     return GameOverUi(gameState, setGameState);
   } else if (gameState.uiState instanceof QuestionUiState) {
-    return QuestionUi(gameState, setGameState);
+    return QuestionUi(gameState, setGameState, gameState.uiState);
   } else {
     throw new Error('Unsupported UiState: ' + gameState.uiState);
   }
@@ -159,7 +156,7 @@ function GameOverUi(gameState: GameState, setGameState: React.Dispatch<React.Set
   </div>;
 }
 
-function HighScoreUi(gameState: GameState) {
+function HighScoreUi(gameState: GameState): JSX.Element {
   const highScoreHardcore = gameState.usedImages ? '' : ' 😈';
   const highScore = gameState.usedImages ? gameState.highScore : gameState.hardcoreHighScore;
 
@@ -174,102 +171,63 @@ function LoadingUi(gameState: GameState) {
   return <p>Loading... {loadingPercent}%</p>;
 }
 
-function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>) {
-  const question = gameState.questions[gameState.activeQuestion];
-
-  const optionsUi = question.options.map((option, index) => {
-    const onClick = () => {
-      if (index === question.correctIndex) {
-        gameState.uiState = new QuestionUiState(QuestionState.SHOW_ANSWER_CORRECT);
-        gameState.score++;
-
-        if (gameState.score > gameState.highScore) {
-          gameState.highScore++;
-          gameState.isNewHighScore = true;
-          localStorage.setItem(getHighScoreKey(gameState.dataType), gameState.highScore.toString());
-        }
-
-        if (gameState.score > gameState.hardcoreHighScore && !gameState.usedImages) {
-          gameState.hardcoreHighScore++;
-          gameState.isNewHighScore = true;
-          localStorage.setItem(getHardcoreHighScoreKey(gameState.dataType), gameState.hardcoreHighScore.toString());
-        }
-
-        setGameState({ ...gameState });
-      } else {
-        gameState.uiState = new QuestionUiState(QuestionState.SHOW_ANSWER_INCORRECT);
-        gameState.lives--;
-        setGameState({ ...gameState });
-      }
-
-      setTimeout(() => {
-        gameState.uiState = new QuestionUiState(QuestionState.SHOW_QUESTION);
-        gameState.activeQuestion++;
-
-        if (gameState.lives === 0 || gameState.activeQuestion >= gameState.questions.length) {
-          gameState.uiState = new GameOverUiState();
-        }
-
-        setGameState({ ...gameState });
-      }, POST_QUESTION_DELAY);
-    };
-
-    if (gameState.uiState instanceof QuestionUiState && gameState.uiState.state === QuestionState.SHOW_QUESTION) {
-      return <button key={index} onClick={onClick}>{option}</button>;
-    } else {
-      if (index === question.correctIndex) {
-        return <button key={index} className='button-correct'>{option}</button>;
-      } else if (gameState.uiState instanceof QuestionUiState && gameState.uiState.state === QuestionState.SHOW_ANSWER_INCORRECT) {
-        return <button key={index} className='button-incorrect'>{option}</button>;
-      } else {
-        return <button key={index}>{option}</button>;
-      }
-    }
-  });
-
-  const onImageSectionClick = () => {
+function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>, uiState: QuestionUiState) {
+  const onDisableImages = () => {
     gameState.disableImages = true;
     localStorage.setItem(DISABLE_IMAGES_KEY, gameState.disableImages.toString());
 
     setGameState({ ...gameState });
   };
 
-  return <div>
-    <div style={{ position: 'relative', zIndex: 1 }}>
-      {StatsUi(gameState)}
-      <p style={{ marginBottom: 0, marginTop: 0 }}>Question #{(gameState.activeQuestion + 1).toLocaleString()} of {gameState.questions.length.toLocaleString()}</p>
-      <AsyncImage src={question.imageUrl} disableImages={gameState.disableImages} onClick={onImageSectionClick} />
-    </div>
-    {MusicPlayerUi(question)}
-    <p style={{ marginTop: 0, marginLeft: '0.4em', marginRight: '0.4em' }}>
-      {question.text}
-    </p>
-    {optionsUi}
-  </div>;
+  const onQuestionAnswered = (result: AnswerResult) => {
+    if (result === AnswerResult.CORRECT) {
+      gameState.uiState = new QuestionUiState(QuestionState.SHOW_ANSWER_CORRECT);
+      gameState.score++;
+
+      if (gameState.score > gameState.highScore) {
+        gameState.highScore++;
+        gameState.isNewHighScore = true;
+        localStorage.setItem(getHighScoreKey(gameState.dataType), gameState.highScore.toString());
+      }
+
+      if (gameState.score > gameState.hardcoreHighScore && !gameState.usedImages) {
+        gameState.hardcoreHighScore++;
+        gameState.isNewHighScore = true;
+        localStorage.setItem(getHardcoreHighScoreKey(gameState.dataType), gameState.hardcoreHighScore.toString());
+      }
+
+      setGameState({ ...gameState });
+    } else {
+      gameState.uiState = new QuestionUiState(QuestionState.SHOW_ANSWER_INCORRECT);
+      gameState.lives--;
+      setGameState({ ...gameState });
+    }
+
+    setTimeout(() => {
+      gameState.uiState = new QuestionUiState(QuestionState.SHOW_QUESTION);
+      gameState.activeQuestion++;
+
+      if (gameState.lives === 0 || gameState.activeQuestion >= gameState.questions.length) {
+        gameState.uiState = new GameOverUiState();
+      }
+
+      setGameState({ ...gameState });
+    }, POST_QUESTION_DELAY);
+  };
+
+  return <Question
+    uiState={uiState.state}
+    question={gameState.questions[gameState.activeQuestion]}
+    questionNumber={gameState.activeQuestion + 1}
+    totalQuestions={gameState.questions.length}
+    disableImages={gameState.disableImages}
+    score={gameState.score}
+    lives={gameState.lives}
+    MAX_LIVES={MAX_LIVES}
+    onDisableImages={onDisableImages}
+    onQuestionAnswered={onQuestionAnswered}
+    HighScoreUi={() => HighScoreUi(gameState)}
+  />;
 }
 
-function MusicPlayerUi(question: Question) {
-  if (question.audioLink !== null) {
-    return <audio preload='none' controls src={question.audioLink} style={{ height: '21px' }} />;
-  }
-
-  if (question.spotifyId === null) return <></>;
-
-  return <div style={{ display: 'flex', justifyContent: 'center' }}>
-    <MusicPlayer id={question.spotifyId} />
-  </div>;
-}
-
-function StatsUi(gameState: GameState) {
-  let livesString = '';
-  for (let i = 0; i < MAX_LIVES; i++) {
-    livesString += i < gameState.lives ? '❤️' : '🖤';
-  }
-  const livesUi = <span>{livesString}</span>
-
-  return <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
-    <p>Score: {gameState.score}</p>
-    <p>{livesUi}</p>
-    {HighScoreUi(gameState)}
-  </div>;
-}
+export default Game;
