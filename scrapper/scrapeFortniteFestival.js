@@ -27,7 +27,7 @@ async function getSampleMp3(page) {
     const songs = await page.$$eval(SONG_SELECTOR, els => els.map(el => {
         const url = el.href;
         const backgroundImage = window.getComputedStyle(el.firstElementChild).getPropertyValue('background-image');
-        const albumArt = backgroundImage.match(/"(.+?)"/g)[0];
+        const albumArt = Array.from(backgroundImage.matchAll(/(https.+?)\"/g))[0][1];
 
         const name = el.firstElementChild.firstElementChild.firstElementChild.textContent;
         const artist = el.firstElementChild.firstElementChild.lastElementChild.textContent;
