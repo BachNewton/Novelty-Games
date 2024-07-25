@@ -30,12 +30,21 @@ interface GameState {
   progressEvent: ProgressEvent;
 }
 
-enum UiState {
-  LOADING,
+interface UiState { }
+class LoadingUiState implements UiState { }
+class GameOverUiState implements UiState { }
+class QuestionUiState implements UiState {
+  state: QuestionState;
+
+  constructor(state: QuestionState) {
+    this.state = state;
+  }
+}
+
+enum QuestionState {
   SHOW_QUESTION,
   SHOW_ANSWER_CORRECT,
-  SHOW_ANSWER_INCORRECT,
-  GAME_OVER
+  SHOW_ANSWER_INCORRECT
 }
 
 const POST_QUESTION_DELAY = 1000;
@@ -45,7 +54,7 @@ const HIGH_SCORE_HARDCORE_KEY_POSTFIX = HIGH_SCORE_KEY_POSTFIX + '_HARDCORE';
 const DISABLE_IMAGES_KEY = 'DISABLE_IMAGES_KEY';
 
 const Game: React.FC<GameProps> = ({ pendingData, dataType, onBackClicked, progressListener }) => {
-  const [gameState, setGameState] = useState({ uiState: UiState.LOADING } as GameState)
+  const [gameState, setGameState] = useState({ uiState: new LoadingUiState() } as GameState);
 
   useEffect(() => {
     progressListener.setListener(event => {
@@ -100,7 +109,7 @@ function resetGame(data: Array<Data>, dataType: DataType, setGameState: React.Di
     dataType: dataType,
     questions: createQuestions(data, dataType),
     activeQuestion: 0,
-    uiState: UiState.SHOW_QUESTION,
+    uiState: new QuestionUiState(QuestionState.SHOW_QUESTION) as UiState,
     lives: MAX_LIVES,
     score: 0,
     highScore: highScore,
@@ -120,13 +129,14 @@ function getHardcoreHighScoreKey(dataType: DataType): string {
 }
 
 function Ui(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>): JSX.Element {
-  switch (gameState.uiState) {
-    case UiState.LOADING:
-      return LoadingUi(gameState);
-    case UiState.GAME_OVER:
-      return GameOverUi(gameState, setGameState);
-    default:
-      return QuestionUi(gameState, setGameState);
+  if (gameState.uiState instanceof LoadingUiState) {
+    return LoadingUi(gameState);
+  } else if (gameState.uiState instanceof GameOverUiState) {
+    return GameOverUi(gameState, setGameState);
+  } else if (gameState.uiState instanceof QuestionUiState) {
+    return QuestionUi(gameState, setGameState);
+  } else {
+    throw new Error('Unsupported UiState: ' + gameState.uiState);
   }
 }
 
@@ -170,7 +180,7 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
   const optionsUi = question.options.map((option, index) => {
     const onClick = () => {
       if (index === question.correctIndex) {
-        gameState.uiState = UiState.SHOW_ANSWER_CORRECT;
+        gameState.uiState = new QuestionUiState(QuestionState.SHOW_ANSWER_CORRECT);
         gameState.score++;
 
         if (gameState.score > gameState.highScore) {
@@ -187,29 +197,29 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
 
         setGameState({ ...gameState });
       } else {
-        gameState.uiState = UiState.SHOW_ANSWER_INCORRECT;
+        gameState.uiState = new QuestionUiState(QuestionState.SHOW_ANSWER_INCORRECT);
         gameState.lives--;
         setGameState({ ...gameState });
       }
 
       setTimeout(() => {
-        gameState.uiState = UiState.SHOW_QUESTION;
+        gameState.uiState = new QuestionUiState(QuestionState.SHOW_QUESTION);
         gameState.activeQuestion++;
 
         if (gameState.lives === 0 || gameState.activeQuestion >= gameState.questions.length) {
-          gameState.uiState = UiState.GAME_OVER;
+          gameState.uiState = new GameOverUiState();
         }
 
         setGameState({ ...gameState });
       }, POST_QUESTION_DELAY);
     };
 
-    if (gameState.uiState === UiState.SHOW_QUESTION) {
+    if (gameState.uiState instanceof QuestionUiState && gameState.uiState.state === QuestionState.SHOW_QUESTION) {
       return <button key={index} onClick={onClick}>{option}</button>;
     } else {
       if (index === question.correctIndex) {
         return <button key={index} className='button-correct'>{option}</button>;
-      } else if (gameState.uiState === UiState.SHOW_ANSWER_INCORRECT) {
+      } else if (gameState.uiState instanceof QuestionUiState && gameState.uiState.state === QuestionState.SHOW_ANSWER_INCORRECT) {
         return <button key={index} className='button-incorrect'>{option}</button>;
       } else {
         return <button key={index}>{option}</button>;
