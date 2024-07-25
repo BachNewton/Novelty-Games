@@ -44,15 +44,21 @@ const Question: React.FC<QuestionProps> = ({
             }
         };
 
+        const buttonStyle: React.CSSProperties = {
+            width: '100%',
+            height: '100%',
+            fontSize: '1em'
+        };
+
         if (uiState === QuestionState.SHOW_QUESTION) {
-            return <button key={index} onClick={onClick}>{option}</button>;
+            return <button style={buttonStyle} key={index} onClick={onClick}>{option}</button>;
         } else {
             if (index === question.correctIndex) {
-                return <button key={index} className='button-correct'>{option}</button>;
+                return <button style={buttonStyle} key={index} className='button-correct'>{option}</button>;
             } else if (uiState === QuestionState.SHOW_ANSWER_INCORRECT) {
-                return <button key={index} className='button-incorrect'>{option}</button>;
+                return <button style={buttonStyle} key={index} className='button-incorrect'>{option}</button>;
             } else {
-                return <button key={index}>{option}</button>;
+                return <button style={buttonStyle} key={index}>{option}</button>;
             }
         }
     });
@@ -61,16 +67,16 @@ const Question: React.FC<QuestionProps> = ({
         onDisableImages();
     };
 
-    return <div>
-        <div style={{ position: 'relative', zIndex: 1 }}>
+    return <div style={{ height: '100vh', width: '100vw', textAlign: 'center', display: 'grid', justifyItems: 'center', alignItems: 'center' }}>
+        <div style={{ position: 'relative', zIndex: 1, width: '100%' }}>
             {StatsUi(score, lives, MAX_LIVES, HighScoreUi)}
             <p style={{ marginBottom: 0, marginTop: 0 }}>Question #{questionNumber.toLocaleString()} of {totalQuestions.toLocaleString()}</p>
             <AsyncImage src={question.imageUrl} disableImages={disableImages} onClick={onImageSectionClick} />
         </div>
         {MusicPlayerUi(question)}
-        <p style={{ marginTop: 0, marginLeft: '0.4em', marginRight: '0.4em' }}>
+        <div>
             {question.text}
-        </p>
+        </div>
         {optionsUi}
     </div>;
 };

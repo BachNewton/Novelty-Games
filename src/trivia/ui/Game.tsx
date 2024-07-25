@@ -79,14 +79,14 @@ const Game: React.FC<GameProps> = ({ pendingData, dataType, onBackClicked, progr
     : <></>;
 
   return (
-    <div className="Game">
+    <div style={{ color: 'white', fontSize: '1.25em' }}>
       <div className='top-left'>
         <button onClick={onBackClicked}>⬅️</button>
         {enableImagesButton}
       </div>
-      <header>
+      <div style={{ width: '100vw', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         {Ui(gameState, setGameState)}
-      </header>
+      </div>
     </div>
   );
 };
@@ -146,13 +146,13 @@ function GameOverUi(gameState: GameState, setGameState: React.Dispatch<React.Set
     ? <p>New High Score!</p>
     : <></>;
 
-  return <div>
+  return <div style={{ textAlign: 'center' }}>
     <p>{getGameName(gameState.dataType)}</p>
     Game Over!
     <p>Final Score: {gameState.score}</p>
     {HighScoreUi(gameState)}
     {newHighScoreUi}
-    <button onClick={playAgain}>Play again</button>
+    <button onClick={playAgain} style={{ fontSize: '1em' }}>Play again</button>
   </div>;
 }
 
@@ -168,7 +168,7 @@ function LoadingUi(gameState: GameState) {
     ? 0
     : (gameState.progressEvent.current * 100 / gameState.progressEvent.total).toFixed(1);
 
-  return <p>Loading... {loadingPercent}%</p>;
+  return <div>Loading... {loadingPercent}%</div>;
 }
 
 function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>, uiState: QuestionUiState) {
