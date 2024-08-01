@@ -1,4 +1,4 @@
-import { FortniteFestivalQuestion, MusicQuestion, Question as QuestionData } from '../data/QuestionData';
+import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, Question as QuestionData } from '../data/QuestionData';
 import AsyncImage from './AsyncImage';
 import { QuestionState } from './Game';
 import MusicPlayer from './MusicPlayer';
@@ -46,7 +46,7 @@ function QuestionUi(question: QuestionData, questionNumber: number, disableImage
     return <div>
         <div style={{ zIndex: 1, position: 'relative' }}>
             <div>Question #{questionNumber.toLocaleString()} of {totalQuestions.toLocaleString()}</div>
-            <AsyncImage src={question.imageUrl} disableImages={disableImages} onClick={onImageSectionClick} />
+            <AsyncImage src={(question as ImageQuestion).imageUrl} disableImages={disableImages} onClick={onImageSectionClick} />
         </div>
         {MusicPlayerUi(question)}
         <div style={{ margin: '0 0.5em' }}>

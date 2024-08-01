@@ -4,24 +4,37 @@ export interface Question {
     text: string;
     options: Array<string>;
     correctIndex: number;
-    imageUrl: string;
 }
 
-export class QuestionImpl implements Question {
+class QuestionImpl implements Question {
     text: string;
     options: string[];
     correctIndex: number;
-    imageUrl: string;
 
-    constructor(text: string, options: string[], correctIndex: number, imageUrl: string) {
+    constructor(text: string, options: string[], correctIndex: number) {
         this.text = text;
         this.options = options;
         this.correctIndex = correctIndex;
+    }
+}
+
+export class MultiImageQuestion extends QuestionImpl {
+    constructor(text: string, options: string[], correctIndex: number, imageUrl: string) {
+        super(text, options, correctIndex);
+    }
+}
+
+export class ImageQuestion extends QuestionImpl {
+    imageUrl: string;
+
+    constructor(text: string, options: string[], correctIndex: number, imageUrl: string) {
+        super(text, options, correctIndex);
+
         this.imageUrl = imageUrl;
     }
 }
 
-export class FortniteFestivalQuestion extends QuestionImpl {
+export class FortniteFestivalQuestion extends ImageQuestion {
     audioLink: string;
 
     constructor(text: string, options: string[], correctIndex: number, imageUrl: string, audioLink: string) {
@@ -31,7 +44,7 @@ export class FortniteFestivalQuestion extends QuestionImpl {
     }
 }
 
-export class MusicQuestion extends QuestionImpl {
+export class MusicQuestion extends ImageQuestion {
     spotifyId: string;
 
     constructor(text: string, options: string[], correctIndex: number, imageUrl: string, spotifyId: string) {

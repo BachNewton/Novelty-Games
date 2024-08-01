@@ -1,6 +1,6 @@
 import { Airplane, Data, DataType, FestivalSong, Flag, Rollercoaster, Song } from '../data/Data';
 import { Pokemon } from '../data/PokemonData';
-import { FortniteFestivalQuestion, MusicQuestion, Question, QuestionImpl } from '../data/QuestionData';
+import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, Question } from '../data/QuestionData';
 
 export function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
     const copiedData = [...data];
@@ -51,7 +51,7 @@ function createQuestion(optionsPool: Set<string>, answer: Data, dataType: DataTy
         case DataType.FLAG_GAME:
         case DataType.POKEMON:
         case DataType.AIRPLANES:
-            return new QuestionImpl(text, options, correctIndex, imageUrl);
+            return new ImageQuestion(text, options, correctIndex, imageUrl);
         default:
             throw new Error('Unsupported DataType: ' + dataType);
     }
