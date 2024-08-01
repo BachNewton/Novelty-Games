@@ -6,10 +6,9 @@ interface PokemonEntry {
     url: string;
 }
 
-export interface Pokemon {
+export interface NetworkPokemon {
     species: Species;
     sprites: Sprites;
-    formattedName: string;
 }
 
 interface Species {
@@ -26,4 +25,9 @@ interface OtherSprites {
 
 interface OfficalArtwork {
     front_default: string;
+}
+
+export interface Pokemon {
+    name: string;
+    imageUrl: string;
 }

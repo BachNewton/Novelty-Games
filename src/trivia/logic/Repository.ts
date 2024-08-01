@@ -1,5 +1,5 @@
 import { DataType, Rollercoaster, Data, Song, Flag, FestivalSong, Airplane } from "../data/Data";
-import { Pokemon, PokemonAll } from "../data/PokemonData";
+import { NetworkPokemon, Pokemon, PokemonAll } from "../data/PokemonData";
 import { get as getFromDb, store as storeInDb } from "./Database";
 import { AIRPLANES_URL, get as getFromNetwork } from "./Networking";
 import { ProgressEmitter } from "./ProgressUpdater";
@@ -123,17 +123,25 @@ function isUsStateFlag(id: string) {
 }
 
 function handlePokemonJsons(jsons: Array<any>): Array<Pokemon> {
-    const pokemon = jsons as Array<Pokemon>;
-    console.log('All Pokemon', pokemon);
+    const networkPokemon = jsons as Array<NetworkPokemon>;
+    console.log('All Network Pokemon', networkPokemon);
 
-    const filteredPokemon = pokemon.filter(it => it.sprites.other["official-artwork"].front_default !== null);
-    console.log('Filtered Pokemon', filteredPokemon);
+    const filteredNetworkPokemon = networkPokemon.filter(it => it.sprites.other["official-artwork"].front_default !== null);
+    console.log('Filtered Network Pokemon', filteredNetworkPokemon);
 
-    filteredPokemon.forEach(it => {
-        it.formattedName = toCapitalizedSeparatedWords(it.species.name);
+    const pokemon: Array<Pokemon> = filteredNetworkPokemon.map(it => {
+        return {
+            name: toCapitalizedSeparatedWords(it.species.name),
+            imageUrl: it.sprites.other["official-artwork"].front_default
+        };
     });
+    console.log('Pokemon:', pokemon);
 
-    return filteredPokemon;
+    return pokemon;
+}
+
+function toCapitalizedSeparatedWords(str: string): string {
+    return (str[0].toUpperCase() + str.slice(1)).replace(/-([a-zA-Z])/g, (_, followingChar) => ` ${followingChar.toUpperCase()}`);
 }
 
 function handleAirplanesJsons(jsons: Array<any>): Array<Airplane> {
@@ -142,10 +150,6 @@ function handleAirplanesJsons(jsons: Array<any>): Array<Airplane> {
     console.log('All Airplanes', airplanes);
 
     return airplanes;
-}
-
-function toCapitalizedSeparatedWords(str: string): string {
-    return (str[0].toUpperCase() + str.slice(1)).replace(/-([a-zA-Z])/g, (_, followingChar) => ` ${followingChar.toUpperCase()}`);
 }
 
 function handleFestivalJson(json: any): Array<FestivalSong> {

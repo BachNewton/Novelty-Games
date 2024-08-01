@@ -34,7 +34,7 @@ function getOptionsPool(dataType: DataType, data: Array<Data>): Set<string> {
         case DataType.FLAG_GAME:
             return new Set([...(data as Array<Flag>).map(flag => flag.name)]);
         case DataType.POKEMON:
-            return new Set([...(data as Array<Pokemon>).map(pokemon => pokemon.formattedName)]);
+            return new Set([...(data as Array<Pokemon>).map(pokemon => pokemon.name)]);
         case DataType.AIRPLANES:
             return new Set([...(data as Array<Airplane>).map(airplane => airplane.name)]);
         default:
@@ -96,7 +96,7 @@ function getIsNot(dataType: DataType, answer: Data): string {
         case DataType.FLAG_GAME:
             return (answer as Flag).name;
         case DataType.POKEMON:
-            return (answer as Pokemon).formattedName;
+            return (answer as Pokemon).name;
         case DataType.AIRPLANES:
             return (answer as Airplane).name;
         default:
@@ -142,7 +142,7 @@ function getCorrectOption(dataType: DataType, answer: Data): string {
             return flag.name;
         case DataType.POKEMON:
             const pokemon = answer as Pokemon;
-            return pokemon.formattedName;
+            return pokemon.name;
         case DataType.AIRPLANES:
             const airplane = answer as Airplane;
             return airplane.name;
@@ -167,7 +167,7 @@ function getImageUrl(answer: Data, dataType: DataType): string {
             return flag.imageUrl;
         case DataType.POKEMON:
             const pokemon = answer as Pokemon;
-            return pokemon.sprites.other['official-artwork'].front_default;
+            return pokemon.imageUrl;
         case DataType.AIRPLANES:
             const airplane = answer as Airplane;
             return airplane.imageUrl;
