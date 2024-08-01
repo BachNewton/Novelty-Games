@@ -26,7 +26,7 @@ const AsyncImage: React.FC<AsyncImageProps> = ({ src, disableImages, onClick }) 
     }, [src, disableImages]);
 
     if (disableImages) {
-        return <div><br /></div>;
+        return <></>;
     } else {
         const content = isLoaded
             ? <img src={src} style={{ height: HEIGHT, maxWidth: '100vw', objectFit: 'contain' }} alt='' />

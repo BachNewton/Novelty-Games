@@ -12,7 +12,7 @@ interface QuestionProps {
     score: number,
     lives: number;
     MAX_LIVES: number;
-    onDisableImages: () => void;
+    onImageSectionClick: () => void;
     onQuestionAnswered: (result: AnswerResult) => void;
     HighScoreUi: () => JSX.Element;
 }
@@ -31,11 +31,32 @@ const Question: React.FC<QuestionProps> = ({
     score,
     lives,
     MAX_LIVES,
-    onDisableImages,
+    onImageSectionClick,
     onQuestionAnswered,
     HighScoreUi
 }) => {
-    const optionsUi = question.options.map((option, index) => {
+    return <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', textAlign: 'center' }}>
+        {StatsUi(score, lives, MAX_LIVES, HighScoreUi)}
+        {QuestionUi(question, questionNumber, disableImages, totalQuestions, onImageSectionClick)}
+        {OptionsUi(question, uiState, onQuestionAnswered)}
+    </div>;
+};
+
+function QuestionUi(question: QuestionData, questionNumber: number, disableImages: boolean, totalQuestions: number, onImageSectionClick: () => void) {
+    return <div>
+        <div style={{ zIndex: 1, position: 'relative' }}>
+            <div>Question #{questionNumber.toLocaleString()} of {totalQuestions.toLocaleString()}</div>
+            <AsyncImage src={question.imageUrl} disableImages={disableImages} onClick={onImageSectionClick} />
+        </div>
+        {MusicPlayerUi(question)}
+        <div style={{ margin: '0 0.5em' }}>
+            {question.text}
+        </div>
+    </div>;
+}
+
+function OptionsUi(question: QuestionData, uiState: QuestionState, onQuestionAnswered: (result: AnswerResult) => void) {
+    const ui = question.options.map((option, index) => {
         const onClick = () => {
             if (index === question.correctIndex) {
                 onQuestionAnswered(AnswerResult.CORRECT);
@@ -45,8 +66,8 @@ const Question: React.FC<QuestionProps> = ({
         };
 
         const buttonStyle: React.CSSProperties = {
-            width: '100%',
-            height: '100%',
+            padding: '0.25em',
+            marginBottom: '0.75em',
             fontSize: '1em'
         };
 
@@ -63,23 +84,8 @@ const Question: React.FC<QuestionProps> = ({
         }
     });
 
-    const onImageSectionClick = () => {
-        onDisableImages();
-    };
-
-    return <div style={{ height: '100vh', width: '100vw', textAlign: 'center', display: 'grid', justifyItems: 'center', alignItems: 'center' }}>
-        <div style={{ position: 'relative', zIndex: 1, width: '100%' }}>
-            {StatsUi(score, lives, MAX_LIVES, HighScoreUi)}
-            <p style={{ marginBottom: 0, marginTop: 0 }}>Question #{questionNumber.toLocaleString()} of {totalQuestions.toLocaleString()}</p>
-            <AsyncImage src={question.imageUrl} disableImages={disableImages} onClick={onImageSectionClick} />
-        </div>
-        {MusicPlayerUi(question)}
-        <div>
-            {question.text}
-        </div>
-        {optionsUi}
-    </div>;
-};
+    return <div style={{ display: 'flex', flexDirection: 'column', padding: '0 0.5em' }}>{ui}</div>;
+}
 
 function StatsUi(score: number, lives: number, MAX_LIVES: number, HighScoreUi: () => JSX.Element) {
     let livesString = '';
@@ -88,7 +94,7 @@ function StatsUi(score: number, lives: number, MAX_LIVES: number, HighScoreUi: (
     }
     const livesUi = <span>{livesString}</span>
 
-    return <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
+    return <div style={{ display: 'flex', justifyContent: 'space-evenly', zIndex: 1 }}>
         <p>Score: {score}</p>
         <p>{livesUi}</p>
         {HighScoreUi()}

@@ -224,7 +224,7 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
     score={gameState.score}
     lives={gameState.lives}
     MAX_LIVES={MAX_LIVES}
-    onDisableImages={onDisableImages}
+    onImageSectionClick={onDisableImages}
     onQuestionAnswered={onQuestionAnswered}
     HighScoreUi={() => HighScoreUi(gameState)}
   />;
