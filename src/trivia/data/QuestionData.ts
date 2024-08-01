@@ -19,7 +19,7 @@ class QuestionImpl implements Question {
 }
 
 export class MultiImageQuestion extends QuestionImpl {
-    constructor(text: string, options: string[], correctIndex: number, imageUrl: string) {
+    constructor(text: string, options: string[], correctIndex: number) {
         super(text, options, correctIndex);
     }
 }

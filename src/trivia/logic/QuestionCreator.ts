@@ -1,18 +1,54 @@
+import { removeRandomElement, shuffleArray } from '../../util/Randomizer';
 import { Airplane, Data, DataType, FestivalSong, Flag, Rollercoaster, Song } from '../data/Data';
 import { Pokemon } from '../data/PokemonData';
-import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, Question } from '../data/QuestionData';
+import { FortniteFestivalQuestion, ImageQuestion, MultiImageQuestion, MusicQuestion, Question } from '../data/QuestionData';
 
 export function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
-    const copiedData = [...data];
-    const shuffledData = [];
+    const shuffledData = shuffleArray(data);
 
-    while (copiedData.length > 0) {
-        const randomIndex = Math.floor(Math.random() * copiedData.length);
-        shuffledData.push(copiedData.splice(randomIndex, 1)[0]);
-    }
+    // if (dataType === DataType.POKEMON) {
+    //     const optionsPool = new Set([...data]);
+    //     return shuffledData.map((questionTarget) => createMultiImageQuestion(optionsPool, questionTarget, dataType));
+    // }
 
     const optionsPool = getOptionsPool(dataType, data);
-    return shuffledData.map((answer) => createQuestion(optionsPool, answer, dataType));
+    return shuffledData.map((questionTarget) => createQuestion(optionsPool, questionTarget, dataType));
+}
+
+function createMultiImageQuestion(optionsPool: Set<Data>, questionTarget: Data, dataType: DataType) {
+    const targetStat = removeRandomElement(['HP', 'Attack', 'Defense', 'Special-Attack', 'Special-Defense', 'Speed']);
+
+    const otherOptions = getOptions(3, optionsPool, questionTarget) as Array<Pokemon>;
+
+    const getSorter = () => {
+        if (targetStat === 'HP') {
+            return (a: Pokemon, b: Pokemon) => b.stats.hp - a.stats.hp;
+        } else if (targetStat === 'Attack') {
+            return (a: Pokemon, b: Pokemon) => b.stats.attack - a.stats.attack;
+        } else if (targetStat === 'Defense') {
+            return (a: Pokemon, b: Pokemon) => b.stats.defense - a.stats.defense;
+        } else if (targetStat === 'Special-Attack') {
+            return (a: Pokemon, b: Pokemon) => b.stats.specialAttack - a.stats.specialAttack;
+        } else if (targetStat === 'Special-Defense') {
+            return (a: Pokemon, b: Pokemon) => b.stats.specialDefense - a.stats.specialDefense;
+        } else {
+            return (a: Pokemon, b: Pokemon) => b.stats.speed - a.stats.speed;
+        }
+    };
+
+    const answer = otherOptions.concat(questionTarget as Pokemon).sort(getSorter())[0];
+
+    const correctIndex = Math.floor(Math.random() * 4);
+
+    const allOptions = otherOptions.concat(questionTarget as Pokemon).filter(it => it !== answer);
+
+    const options = allOptions.slice(0, correctIndex).concat(answer).concat(allOptions.slice(correctIndex));
+
+    return new MultiImageQuestion(
+        `Which of these Pokémon has the highest ${targetStat} stat?`,
+        options.map(it => it.imageUrl),
+        correctIndex
+    );
 }
 
 function getOptionsPool(dataType: DataType, data: Array<Data>): Set<string> {
@@ -35,7 +71,7 @@ function getOptionsPool(dataType: DataType, data: Array<Data>): Set<string> {
 }
 
 function createQuestion(optionsPool: Set<string>, answer: Data, dataType: DataType): Question {
-    const incorrectOptions = getOptions(3, optionsPool, getIsNot(dataType, answer))
+    const incorrectOptions = getOptions(3, optionsPool, getIsNot(dataType, answer));
 
     const text = getQuestionText(answer, dataType);
     const correctIndex = Math.floor(Math.random() * 4);
@@ -148,8 +184,8 @@ function getImageUrl(answer: Data, dataType: DataType): string {
     }
 }
 
-function getOptions(numberOfOptions: number, optionsPool: Set<string>, isNot: string): Array<string> {
-    const remainingOptions = [] as Array<string>;
+function getOptions<T>(numberOfOptions: number, optionsPool: Set<T>, isNot: T): Array<T> {
+    const remainingOptions = [] as Array<T>;
 
     optionsPool.forEach(option => {
         if (option === isNot) return;
@@ -157,10 +193,9 @@ function getOptions(numberOfOptions: number, optionsPool: Set<string>, isNot: st
         remainingOptions.push(option);
     });
 
-    const options = [] as Array<string>;
+    const options = [] as Array<T>;
     while (options.length < numberOfOptions) {
-        const randomIndex = Math.floor(Math.random() * remainingOptions.length);
-        options.push(remainingOptions.splice(randomIndex, 1)[0]);
+        options.push(removeRandomElement(remainingOptions));
     }
 
     return options;

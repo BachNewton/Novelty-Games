@@ -1,4 +1,4 @@
-import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, Question as QuestionData } from '../data/QuestionData';
+import { FortniteFestivalQuestion, ImageQuestion, MultiImageQuestion, MusicQuestion, Question as QuestionData } from '../data/QuestionData';
 import AsyncImage from './AsyncImage';
 import { QuestionState } from './Game';
 import MusicPlayer from './MusicPlayer';
@@ -43,10 +43,14 @@ const Question: React.FC<QuestionProps> = ({
 };
 
 function QuestionUi(question: QuestionData, questionNumber: number, disableImages: boolean, totalQuestions: number, onImageSectionClick: () => void) {
+    const imageUi = question instanceof ImageQuestion
+        ? <AsyncImage src={question.imageUrl} disableImages={disableImages} onClick={onImageSectionClick} />
+        : <></>;
+
     return <div>
         <div style={{ zIndex: 1, position: 'relative' }}>
             <div>Question #{questionNumber.toLocaleString()} of {totalQuestions.toLocaleString()}</div>
-            <AsyncImage src={(question as ImageQuestion).imageUrl} disableImages={disableImages} onClick={onImageSectionClick} />
+            {imageUi}
         </div>
         {MusicPlayerUi(question)}
         <div style={{ margin: '0 0.5em' }}>
@@ -56,6 +60,17 @@ function QuestionUi(question: QuestionData, questionNumber: number, disableImage
 }
 
 function OptionsUi(question: QuestionData, uiState: QuestionState, onQuestionAnswered: (result: AnswerResult) => void) {
+    if (question instanceof MultiImageQuestion) {
+        const images = question.options.map((it, index) => <AsyncImage
+            key={index}
+            src={it}
+            disableImages={false}
+            onClick={() => { }}
+        />);
+
+        return <div>{images}</div>;
+    }
+
     const ui = question.options.map((option, index) => {
         const onClick = () => {
             if (index === question.correctIndex) {
