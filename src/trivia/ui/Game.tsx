@@ -1,7 +1,8 @@
 import '../css/Game.css';
 import { useEffect, useState } from 'react';
 import { Data, DataType } from '../data/Data';
-import { createQuestions, Question as QuestionData } from '../logic/QuestionCreator';
+import { createQuestions } from '../logic/QuestionCreator';
+import { Question as QuestionData } from '../data/QuestionData';
 import { ProgressListener, ProgressEvent } from '../logic/ProgressUpdater';
 import { getGameName } from './Home';
 import Question, { AnswerResult } from './Question';

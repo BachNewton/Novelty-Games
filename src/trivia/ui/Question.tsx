@@ -1,4 +1,4 @@
-import { Question as QuestionData } from '../logic/QuestionCreator';
+import { Question as QuestionData } from '../data/QuestionData';
 import AsyncImage from './AsyncImage';
 import { QuestionState } from './Game';
 import MusicPlayer from './MusicPlayer';

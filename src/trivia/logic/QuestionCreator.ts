@@ -1,14 +1,6 @@
 import { Airplane, Data, DataType, FestivalSong, Flag, Rollercoaster, Song } from '../data/Data';
 import { Pokemon } from '../data/PokemonData';
-
-export interface Question {
-    text: string;
-    options: Array<string>;
-    correctIndex: number;
-    imageUrl: string;
-    spotifyId: string | null;
-    audioLink: string | null;
-}
+import { Question } from '../data/QuestionData';
 
 export function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
     const copiedData = [...data];
