@@ -1,4 +1,4 @@
-import { Question as QuestionData } from '../data/QuestionData';
+import { FortniteFestivalQuestion, MusicQuestion, Question as QuestionData } from '../data/QuestionData';
 import AsyncImage from './AsyncImage';
 import { QuestionState } from './Game';
 import MusicPlayer from './MusicPlayer';
@@ -101,16 +101,16 @@ function StatsUi(score: number, lives: number, MAX_LIVES: number, HighScoreUi: (
     </div>;
 }
 
-function MusicPlayerUi(question: QuestionData) {
-    if (question.audioLink !== null) {
+function MusicPlayerUi(question: QuestionData): JSX.Element {
+    if (question instanceof FortniteFestivalQuestion) {
         return <audio preload='none' controls src={question.audioLink} style={{ height: '21px' }} />;
+    } else if (question instanceof MusicQuestion) {
+        return <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <MusicPlayer id={question.spotifyId} />
+        </div>;
+    } else {
+        return <></>;
     }
-
-    if (question.spotifyId === null) return <></>;
-
-    return <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <MusicPlayer id={question.spotifyId} />
-    </div>;
 }
 
 export default Question;

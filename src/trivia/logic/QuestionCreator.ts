@@ -1,6 +1,6 @@
 import { Airplane, Data, DataType, FestivalSong, Flag, Rollercoaster, Song } from '../data/Data';
 import { Pokemon } from '../data/PokemonData';
-import { Question } from '../data/QuestionData';
+import { FortniteFestivalQuestion, MusicQuestion, Question, QuestionImpl } from '../data/QuestionData';
 
 export function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
     const copiedData = [...data];
@@ -41,37 +41,17 @@ function createQuestion(optionsPool: Set<string>, answer: Data, dataType: DataTy
     const correctIndex = Math.floor(Math.random() * 4);
     const options = incorrectOptions.slice(0, correctIndex).concat(getCorrectOption(dataType, answer)).concat(incorrectOptions.slice(correctIndex));
     const imageUrl = getImageUrl(answer, dataType);
-    const spotifyId = getSpotifyId(dataType, answer);
-    const audioLink = getAudioLink(dataType, answer);
 
-    return { text: text, options: options, correctIndex: correctIndex, imageUrl: imageUrl, spotifyId: spotifyId, audioLink: audioLink };
-}
-
-function getSpotifyId(dataType: DataType, answer: Data): string | null {
     switch (dataType) {
+        case DataType.FORTNITE_FESTIVAL:
+            return new FortniteFestivalQuestion(text, options, correctIndex, imageUrl, (answer as FestivalSong).sampleMp3!!);
         case DataType.MUSIC:
-            return (answer as Song).Spotify;
+            return new MusicQuestion(text, options, correctIndex, imageUrl, (answer as Song).Spotify);
         case DataType.ROLLERCOASTERS:
         case DataType.FLAG_GAME:
         case DataType.POKEMON:
-        case DataType.FORTNITE_FESTIVAL:
         case DataType.AIRPLANES:
-            return null;
-        default:
-            throw new Error('Unsupported DataType: ' + dataType);
-    }
-}
-
-function getAudioLink(dataType: DataType, answer: Data): string | null {
-    switch (dataType) {
-        case DataType.FORTNITE_FESTIVAL:
-            return (answer as FestivalSong).sampleMp3;
-        case DataType.ROLLERCOASTERS:
-        case DataType.FLAG_GAME:
-        case DataType.POKEMON:
-        case DataType.MUSIC:
-        case DataType.AIRPLANES:
-            return null;
+            return new QuestionImpl(text, options, correctIndex, imageUrl);
         default:
             throw new Error('Unsupported DataType: ' + dataType);
     }
