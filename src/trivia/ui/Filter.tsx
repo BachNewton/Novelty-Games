@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import '../css/Filter.css';
-import { Rollercoaster } from "../logic/Data";
+import { Rollercoaster } from "../data/Data";
 import { FilterAndPropertyGetter, FilterResult, RollercoasterFilter, baseFilter, filterByProperties, getFilter } from "../logic/FilterRepo";
 
 interface FilterProps {

@@ -1,4 +1,4 @@
-import { Rollercoaster } from "./Data";
+import { Rollercoaster } from "../data/Data";
 
 const ROLLERCOASTER_FILTER_KEY = 'ROLLERCOASTER_FILTER_KEY';
 

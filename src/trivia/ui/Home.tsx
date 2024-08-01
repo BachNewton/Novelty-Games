@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import '../css/Home.css';
 import Game from './Game';
-import { DataType, Data, Rollercoaster } from '../logic/Data';
+import { DataType, Data, Rollercoaster } from '../data/Data';
 import { get as getFromRepo } from '../logic/Repository';
 import { ProgressUpdater } from '../logic/ProgressUpdater';
 import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from '../logic/Database';

@@ -1,4 +1,4 @@
-import { DataType, Rollercoaster, Data, Song, PokemonAll, Pokemon, Flag, FestivalSong, Airplane } from "./Data";
+import { DataType, Rollercoaster, Data, Song, PokemonAll, Pokemon, Flag, FestivalSong, Airplane } from "../data/Data";
 import { get as getFromDb, store as storeInDb } from "./Database";
 import { AIRPLANES_URL, get as getFromNetwork } from "./Networking";
 import { ProgressEmitter } from "./ProgressUpdater";

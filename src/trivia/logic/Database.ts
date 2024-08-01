@@ -1,4 +1,4 @@
-import { DataType } from "./Data";
+import { DataType } from "../data/Data";
 import { ProgressEmitter } from "./ProgressUpdater";
 
 const DATABASE_POSTFIX = "_Database";

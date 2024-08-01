@@ -1,4 +1,4 @@
-import { DataType } from "./Data";
+import { DataType } from "../data/Data";
 import { ProgressEmitter } from "./ProgressUpdater";
 
 // Alernative API: https://rcdb-api.vercel.app/api/coasters
