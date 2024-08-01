@@ -148,8 +148,13 @@ function toCapitalizedSeparatedWords(str: string): string {
 }
 
 function handleFestivalJson(json: any): Array<FestivalSong> {
-    const festivalSong = json as Array<FestivalSong>;
-    console.log('All Festival Songs', festivalSong);
-    festivalSong.forEach(song => song.artist = song.artist.replace('&amp;', '&'));
-    return festivalSong;
+    const festivalSongs = json as Array<FestivalSong>;
+
+    festivalSongs.forEach(song => song.artist = song.artist.replace('&amp;', '&'));
+    console.log('All Festival Songs', festivalSongs);
+
+    const filteredFestivalSongs = festivalSongs.filter(song => song.artist !== 'Epic Games');
+    console.log('Filtered Festival Songs', filteredFestivalSongs);
+
+    return filteredFestivalSongs;
 }
