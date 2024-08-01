@@ -1,4 +1,5 @@
-import { Airplane, Data, DataType, FestivalSong, Flag, Pokemon, Rollercoaster, Song } from '../data/Data';
+import { Airplane, Data, DataType, FestivalSong, Flag, Rollercoaster, Song } from '../data/Data';
+import { Pokemon } from '../data/PokemonData';
 
 export interface Question {
     text: string;
