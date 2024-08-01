@@ -132,7 +132,15 @@ function handlePokemonJsons(jsons: Array<any>): Array<Pokemon> {
     const pokemon: Array<Pokemon> = filteredNetworkPokemon.map(it => {
         return {
             name: toCapitalizedSeparatedWords(it.species.name),
-            imageUrl: it.sprites.other["official-artwork"].front_default
+            imageUrl: it.sprites.other["official-artwork"].front_default,
+            stats: {
+                hp: it.stats.find(stat => stat.stat.name === 'hp')!.base_stat,
+                attack: it.stats.find(stat => stat.stat.name === 'attack')!.base_stat,
+                defense: it.stats.find(stat => stat.stat.name === 'defense')!.base_stat,
+                specialAttack: it.stats.find(stat => stat.stat.name === 'special-attack')!.base_stat,
+                specialDefense: it.stats.find(stat => stat.stat.name === 'special-defense')!.base_stat,
+                speed: it.stats.find(stat => stat.stat.name === 'speed')!.base_stat
+            }
         };
     });
     console.log('Pokemon:', pokemon);

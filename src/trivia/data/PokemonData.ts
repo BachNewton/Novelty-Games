@@ -9,6 +9,7 @@ interface PokemonEntry {
 export interface NetworkPokemon {
     species: Species;
     sprites: Sprites;
+    stats: Array<NetworkStats>;
 }
 
 interface Species {
@@ -27,7 +28,26 @@ interface OfficalArtwork {
     front_default: string;
 }
 
+interface NetworkStats {
+    base_stat: number;
+    stat: Stat;
+}
+
+interface Stat {
+    name: string;
+}
+
 export interface Pokemon {
     name: string;
     imageUrl: string;
+    stats: Stats;
+}
+
+interface Stats {
+    hp: number;
+    attack: number;
+    defense: number;
+    specialAttack: number;
+    specialDefense: number;
+    speed: number;
 }
