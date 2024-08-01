@@ -141,7 +141,7 @@ function HomeUi(
 
     return <div className='Home'>
         <HomeButton onClick={onHomeButtonClicked} />
-        <h2>❓ Kyle's Trivia Games 🤯</h2>
+        <h2>🤔 Kyle's Trivia Games 🤯</h2>
         <div><br /></div>
         {gameOptionsUi}
     </div>;

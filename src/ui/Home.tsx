@@ -93,7 +93,7 @@ function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTr
         <h2>🃏 Kyle's Novelty Games 🕹️</h2>
         <div>Created by: Kyle Hutchinson</div>
         <div><br /><br /><br /></div>
-        <button style={buttonStyle} onClick={onTriviaClick}>Trivia ❓</button>
+        <button style={buttonStyle} onClick={onTriviaClick}>Trivia 🤔</button>
         <button style={buttonStyle} onClick={onMilleBornesClick}>Mille Bornes 🏎️</button>
     </div>;
 }
