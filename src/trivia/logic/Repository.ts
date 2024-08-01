@@ -104,11 +104,21 @@ async function handleAirplanesAllJson(json: any, progressEmitter: ProgressEmitte
 }
 
 function handleFlagGameJson(json: any): Array<Flag> {
-    return Object.keys(json).map(id => { return { name: json[id], imageUrl: getFlagImageUrl(id) } });
+    const flags = Object.keys(json).map(id => { return { name: json[id], imageUrl: getFlagImageUrl(id), isUsState: isUsStateFlag(id) } });
+    console.log('All Flags:', flags);
+
+    const filteredFlags = flags.filter(flag => !flag.isUsState);
+    console.log('Filtered Flags:', filteredFlags);
+
+    return filteredFlags;
 }
 
 function getFlagImageUrl(id: string): string {
     return `https://flagcdn.com/${id}.svg`;
+}
+
+function isUsStateFlag(id: string) {
+    return id.includes('us-');
 }
 
 function handlePokemonJsons(jsons: Array<any>): Array<Pokemon> {

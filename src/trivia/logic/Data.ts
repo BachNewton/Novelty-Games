@@ -48,6 +48,7 @@ export interface FestivalSong extends Data {
 export interface Flag extends Data {
     name: string;
     imageUrl: string;
+    isUsState: boolean;
 }
 
 export interface PokemonAll {
