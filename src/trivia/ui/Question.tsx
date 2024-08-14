@@ -105,12 +105,26 @@ function PokemonMultiImageQuestionUi(question: PokemonMultiImageQuestion, uiStat
             }
         }
 
-        return <img
+        const image = <img
             key={index}
             src={it.imageUrl}
             onClick={() => { if (uiState === QuestionState.SHOW_QUESTION) onOptionClick(index) }}
             style={imageStyle}
-        />
+        />;
+
+        return <div style={{ position: 'relative' }}>
+            {image}
+            <div style={{
+                display: uiState === QuestionState.SHOW_QUESTION ? 'none' : 'block',
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                background: 'rgba(0, 0, 0, 0.75)',
+                padding: '15px',
+                borderRadius: '30px'
+            }}>{question.optionStatGetters[index]()}</div>
+        </div>;
     });
 
     return <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: '10px' }}>{images}</div>;

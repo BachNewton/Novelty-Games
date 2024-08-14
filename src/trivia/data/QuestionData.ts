@@ -18,11 +18,13 @@ class QuestionImpl implements Question {
 
 export class PokemonMultiImageQuestion extends QuestionImpl {
     options: Array<Pokemon>;
+    optionStatGetters: Array<() => number>;
 
-    constructor(text: string, options: Array<Pokemon>, correctIndex: number) {
+    constructor(text: string, options: Array<Pokemon>, correctIndex: number, optionStatGetters: Array<() => number>) {
         super(text, correctIndex);
 
         this.options = options;
+        this.optionStatGetters = optionStatGetters;
     }
 }
 

@@ -7,47 +7,54 @@ export function createQuestions(data: Array<Data>, dataType: DataType): Array<Qu
     const shuffledData = shuffleArray(data);
 
     if (dataType === DataType.POKEMON) {
-        const optionsPool = new Set([...data]);
-        return shuffledData.map((questionTarget) => createMultiImageQuestion(optionsPool, questionTarget, dataType));
+        const optionsPool = new Set([...data]) as Set<Pokemon>;
+        return shuffledData.map((questionTarget) => createPokemonMultiImageQuestion(optionsPool, questionTarget as Pokemon));
     }
 
     const optionsPool = getOptionsPool(dataType, data);
     return shuffledData.map((questionTarget) => createQuestion(optionsPool, questionTarget, dataType));
 }
 
-function createMultiImageQuestion(optionsPool: Set<Data>, questionTarget: Data, dataType: DataType) {
+function getPokemonStateValue(pokemon: Pokemon, targetStat: String): number {
+    if (targetStat === 'HP') {
+        return pokemon.stats.hp;
+    } else if (targetStat === 'Attack') {
+        return pokemon.stats.attack;
+    } else if (targetStat === 'Defense') {
+        return pokemon.stats.defense;
+    } else if (targetStat === 'Special-Attack') {
+        return pokemon.stats.specialAttack;
+    } else if (targetStat === 'Special-Defense') {
+        return pokemon.stats.specialDefense;
+    } else {
+        return pokemon.stats.speed;
+    }
+}
+
+function createPokemonMultiImageQuestion(optionsPool: Set<Pokemon>, questionTarget: Pokemon) {
     const targetStat = removeRandomElement(['HP', 'Attack', 'Defense', 'Special-Attack', 'Special-Defense', 'Speed']);
 
-    const otherOptions = getOptions(3, optionsPool, questionTarget) as Array<Pokemon>;
+    const otherOptions = getOptions(3, optionsPool as Set<Pokemon>, (option: Pokemon) => {
+        return questionTarget === option;
+    });
 
-    const getSorter = () => {
-        if (targetStat === 'HP') {
-            return (a: Pokemon, b: Pokemon) => b.stats.hp - a.stats.hp;
-        } else if (targetStat === 'Attack') {
-            return (a: Pokemon, b: Pokemon) => b.stats.attack - a.stats.attack;
-        } else if (targetStat === 'Defense') {
-            return (a: Pokemon, b: Pokemon) => b.stats.defense - a.stats.defense;
-        } else if (targetStat === 'Special-Attack') {
-            return (a: Pokemon, b: Pokemon) => b.stats.specialAttack - a.stats.specialAttack;
-        } else if (targetStat === 'Special-Defense') {
-            return (a: Pokemon, b: Pokemon) => b.stats.specialDefense - a.stats.specialDefense;
-        } else {
-            return (a: Pokemon, b: Pokemon) => b.stats.speed - a.stats.speed;
-        }
-    };
-
-    const answer = otherOptions.concat(questionTarget as Pokemon).sort(getSorter())[0];
+    const answer = otherOptions.concat(questionTarget).sort((a, b) => getPokemonStateValue(b, targetStat) - getPokemonStateValue(a, targetStat))[0];
 
     const correctIndex = randomInt(4);
 
-    const allOptions = otherOptions.concat(questionTarget as Pokemon).filter(it => it !== answer);
+    const allOptions = otherOptions.concat(questionTarget).filter(it => it !== answer);
 
     const options = allOptions.slice(0, correctIndex).concat(answer).concat(allOptions.slice(correctIndex));
+
+    const optionStatGetters = options.map(option => {
+        return () => getPokemonStateValue(option, targetStat);
+    });
 
     return new PokemonMultiImageQuestion(
         `Which of these Pokémon has the highest ${targetStat} stat?`,
         options,
-        correctIndex
+        correctIndex,
+        optionStatGetters
     );
 }
 
@@ -71,7 +78,9 @@ function getOptionsPool(dataType: DataType, data: Array<Data>): Set<string> {
 }
 
 function createQuestion(optionsPool: Set<string>, answer: Data, dataType: DataType): Question {
-    const incorrectOptions = getOptions(3, optionsPool, getIsNot(dataType, answer));
+    const incorrectOptions = getOptions(3, optionsPool, (option: String) => {
+        return option === getIsNot(dataType, answer);
+    });
 
     const text = getQuestionText(answer, dataType);
     const correctIndex = randomInt(4);
@@ -184,11 +193,11 @@ function getImageUrl(answer: Data, dataType: DataType): string {
     }
 }
 
-function getOptions<T>(numberOfOptions: number, optionsPool: Set<T>, isNot: T): Array<T> {
+function getOptions<T>(numberOfOptions: number, optionsPool: Set<T>, filterCriteria: (option: T) => boolean): Array<T> {
     const remainingOptions = [] as Array<T>;
 
     optionsPool.forEach(option => {
-        if (option === isNot) return;
+        if (filterCriteria(option)) return;
 
         remainingOptions.push(option);
     });
