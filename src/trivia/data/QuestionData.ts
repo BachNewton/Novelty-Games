@@ -1,36 +1,40 @@
 import Question from "../ui/Question";
+import { Pokemon } from "./PokemonData";
 
 export interface Question {
     text: string;
-    options: Array<string>;
     correctIndex: number;
 }
 
 class QuestionImpl implements Question {
     text: string;
-    options: string[];
     correctIndex: number;
 
-    constructor(text: string, options: string[], correctIndex: number) {
+    constructor(text: string, correctIndex: number) {
         this.text = text;
-        this.options = options;
         this.correctIndex = correctIndex;
     }
 }
 
-export class MultiImageQuestion extends QuestionImpl {
-    constructor(text: string, options: string[], correctIndex: number) {
-        super(text, options, correctIndex);
+export class PokemonMultiImageQuestion extends QuestionImpl {
+    options: Array<Pokemon>;
+
+    constructor(text: string, options: Array<Pokemon>, correctIndex: number) {
+        super(text, correctIndex);
+
+        this.options = options;
     }
 }
 
 export class ImageQuestion extends QuestionImpl {
     imageUrl: string;
+    options: Array<string>;
 
     constructor(text: string, options: string[], correctIndex: number, imageUrl: string) {
-        super(text, options, correctIndex);
+        super(text, correctIndex);
 
         this.imageUrl = imageUrl;
+        this.options = options;
     }
 }
 

@@ -1,4 +1,4 @@
-import { FortniteFestivalQuestion, ImageQuestion, MultiImageQuestion, MusicQuestion, Question as QuestionData } from '../data/QuestionData';
+import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, PokemonMultiImageQuestion, Question as QuestionData } from '../data/QuestionData';
 import AsyncImage from './AsyncImage';
 import { QuestionState } from './Game';
 import MusicPlayer from './MusicPlayer';
@@ -60,17 +60,29 @@ function QuestionUi(question: QuestionData, questionNumber: number, disableImage
 }
 
 function OptionsUi(question: QuestionData, uiState: QuestionState, onQuestionAnswered: (result: AnswerResult) => void) {
-    if (question instanceof MultiImageQuestion) {
-        const images = question.options.map((it, index) => <AsyncImage
-            key={index}
-            src={it}
-            disableImages={false}
-            onClick={() => { }}
-        />);
-
-        return <div>{images}</div>;
+    if (question instanceof PokemonMultiImageQuestion) {
+        return <div>{PokemonMultiImageQuestionUi(question)}</div>;
+    } else if (question instanceof ImageQuestion) {
+        return <div style={{ display: 'flex', flexDirection: 'column', padding: '0 0.5em' }}>
+            {ImageQuestionUi(question, uiState, onQuestionAnswered)}
+        </div>;
+    } else {
+        throw new Error('Unsupported Question: ' + question);
     }
+}
 
+function PokemonMultiImageQuestionUi(question: PokemonMultiImageQuestion) {
+    const images = question.options.map((it, index) => <AsyncImage
+        key={index}
+        src={it.imageUrl}
+        disableImages={false}
+        onClick={() => { }}
+    />);
+
+    return images;
+}
+
+function ImageQuestionUi(question: ImageQuestion, uiState: QuestionState, onQuestionAnswered: (result: AnswerResult) => void) {
     const ui = question.options.map((option, index) => {
         const onClick = () => {
             if (index === question.correctIndex) {

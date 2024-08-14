@@ -1,7 +1,7 @@
 import { removeRandomElement, shuffleArray } from '../../util/Randomizer';
 import { Airplane, Data, DataType, FestivalSong, Flag, Rollercoaster, Song } from '../data/Data';
 import { Pokemon } from '../data/PokemonData';
-import { FortniteFestivalQuestion, ImageQuestion, MultiImageQuestion, MusicQuestion, Question } from '../data/QuestionData';
+import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, PokemonMultiImageQuestion, Question } from '../data/QuestionData';
 
 export function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
     const shuffledData = shuffleArray(data);
@@ -44,9 +44,9 @@ function createMultiImageQuestion(optionsPool: Set<Data>, questionTarget: Data, 
 
     const options = allOptions.slice(0, correctIndex).concat(answer).concat(allOptions.slice(correctIndex));
 
-    return new MultiImageQuestion(
+    return new PokemonMultiImageQuestion(
         `Which of these Pokémon has the highest ${targetStat} stat?`,
-        options.map(it => it.imageUrl),
+        options,
         correctIndex
     );
 }
