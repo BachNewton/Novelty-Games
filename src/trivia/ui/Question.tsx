@@ -1,3 +1,4 @@
+import { CSSProperties } from 'react';
 import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, PokemonMultiImageQuestion, Question as QuestionData } from '../data/QuestionData';
 import AsyncImage from './AsyncImage';
 import { QuestionState } from './Game';
@@ -69,7 +70,11 @@ function OptionsUi(question: QuestionData, uiState: QuestionState, onQuestionAns
     };
 
     if (question instanceof PokemonMultiImageQuestion) {
-        return <div>{PokemonMultiImageQuestionUi(question, onOptionClick)}</div>;
+        return <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr' }}>
+                {PokemonMultiImageQuestionUi(question, uiState, onOptionClick)}
+            </div>
+        </div>;
     } else if (question instanceof ImageQuestion) {
         return <div style={{ display: 'flex', flexDirection: 'column', padding: '0 0.5em' }}>
             {ImageQuestionUi(question, uiState, onOptionClick)}
@@ -79,13 +84,14 @@ function OptionsUi(question: QuestionData, uiState: QuestionState, onQuestionAns
     }
 }
 
-function PokemonMultiImageQuestionUi(question: PokemonMultiImageQuestion, onOptionClick: (index: number) => void) {
-    const images = question.options.map((it, index) => <AsyncImage
-        key={index}
-        src={it.imageUrl}
-        disableImages={false}
-        onClick={() => onOptionClick(index)}
-    />);
+function PokemonMultiImageQuestionUi(question: PokemonMultiImageQuestion, uiState: QuestionState, onOptionClick: (index: number) => void) {
+    const images = question.options.map((it, index) =>
+        <img
+            key={index}
+            src={it.imageUrl}
+            onClick={() => onOptionClick(index)}
+            style={{ width: '100%', height: '100%' }}
+        />);
 
     return images;
 }
