@@ -70,10 +70,8 @@ function OptionsUi(question: QuestionData, uiState: QuestionState, onQuestionAns
     };
 
     if (question instanceof PokemonMultiImageQuestion) {
-        return <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr' }}>
-                {PokemonMultiImageQuestionUi(question, uiState, onOptionClick)}
-            </div>
+        return <div style={{ display: 'flex', justifyContent: 'center', padding: '0 10px' }}>
+            {PokemonMultiImageQuestionUi(question, uiState, onOptionClick)}
         </div>;
     } else if (question instanceof ImageQuestion) {
         return <div style={{ display: 'flex', flexDirection: 'column', padding: '0 0.5em' }}>
@@ -85,15 +83,37 @@ function OptionsUi(question: QuestionData, uiState: QuestionState, onQuestionAns
 }
 
 function PokemonMultiImageQuestionUi(question: PokemonMultiImageQuestion, uiState: QuestionState, onOptionClick: (index: number) => void) {
-    const images = question.options.map((it, index) =>
-        <img
+    const images = question.options.map((it, index) => {
+        const imageStyle: CSSProperties = {
+            width: '100%',
+            height: '100%',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            boxSizing: 'border-box',
+            borderRadius: '30px'
+        };
+
+        if (uiState === QuestionState.SHOW_QUESTION) {
+            imageStyle.borderColor = 'white';
+        } else {
+            if (index === question.correctIndex) {
+                imageStyle.borderColor = 'lime';
+            } else if (uiState === QuestionState.SHOW_ANSWER_INCORRECT) {
+                imageStyle.borderColor = 'red';
+            } else {
+                imageStyle.borderColor = 'white';
+            }
+        }
+
+        return <img
             key={index}
             src={it.imageUrl}
-            onClick={() => onOptionClick(index)}
-            style={{ width: '100%', height: '100%' }}
-        />);
+            onClick={() => { if (uiState === QuestionState.SHOW_QUESTION) onOptionClick(index) }}
+            style={imageStyle}
+        />
+    });
 
-    return images;
+    return <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: '10px' }}>{images}</div>;
 }
 
 function ImageQuestionUi(question: ImageQuestion, uiState: QuestionState, onOptionClick: (index: number) => void) {

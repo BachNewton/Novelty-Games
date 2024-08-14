@@ -6,10 +6,10 @@ import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, PokemonMultiIma
 export function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
     const shuffledData = shuffleArray(data);
 
-    // if (dataType === DataType.POKEMON) {
-    //     const optionsPool = new Set([...data]);
-    //     return shuffledData.map((questionTarget) => createMultiImageQuestion(optionsPool, questionTarget, dataType));
-    // }
+    if (dataType === DataType.POKEMON) {
+        const optionsPool = new Set([...data]);
+        return shuffledData.map((questionTarget) => createMultiImageQuestion(optionsPool, questionTarget, dataType));
+    }
 
     const optionsPool = getOptionsPool(dataType, data);
     return shuffledData.map((questionTarget) => createQuestion(optionsPool, questionTarget, dataType));
