@@ -3,8 +3,8 @@ export function shuffleArray<T>(array: Array<T>): Array<T> {
     const shuffledArray: Array<T> = [];
 
     while (remainingElements.length > 0) {
-        const randomIndex = getRandomIndex(remainingElements)
-        shuffledArray.push(remainingElements.splice(randomIndex, 1)[0]);
+        const randomElement = removeRandomElement(remainingElements);
+        shuffledArray.push(randomElement);
     }
 
     return shuffledArray;
