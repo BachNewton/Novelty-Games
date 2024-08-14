@@ -1,4 +1,4 @@
-import { removeRandomElement, shuffleArray } from '../../util/Randomizer';
+import { randomInt, removeRandomElement, shuffleArray } from '../../util/Randomizer';
 import { Airplane, Data, DataType, FestivalSong, Flag, Rollercoaster, Song } from '../data/Data';
 import { Pokemon } from '../data/PokemonData';
 import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, PokemonMultiImageQuestion, Question } from '../data/QuestionData';
@@ -6,10 +6,10 @@ import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, PokemonMultiIma
 export function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
     const shuffledData = shuffleArray(data);
 
-    // if (dataType === DataType.POKEMON) {
-    //     const optionsPool = new Set([...data]);
-    //     return shuffledData.map((questionTarget) => createMultiImageQuestion(optionsPool, questionTarget, dataType));
-    // }
+    if (dataType === DataType.POKEMON) {
+        const optionsPool = new Set([...data]);
+        return shuffledData.map((questionTarget) => createMultiImageQuestion(optionsPool, questionTarget, dataType));
+    }
 
     const optionsPool = getOptionsPool(dataType, data);
     return shuffledData.map((questionTarget) => createQuestion(optionsPool, questionTarget, dataType));
@@ -38,7 +38,7 @@ function createMultiImageQuestion(optionsPool: Set<Data>, questionTarget: Data, 
 
     const answer = otherOptions.concat(questionTarget as Pokemon).sort(getSorter())[0];
 
-    const correctIndex = Math.floor(Math.random() * 4);
+    const correctIndex = randomInt(4);
 
     const allOptions = otherOptions.concat(questionTarget as Pokemon).filter(it => it !== answer);
 
@@ -74,7 +74,7 @@ function createQuestion(optionsPool: Set<string>, answer: Data, dataType: DataTy
     const incorrectOptions = getOptions(3, optionsPool, getIsNot(dataType, answer));
 
     const text = getQuestionText(answer, dataType);
-    const correctIndex = Math.floor(Math.random() * 4);
+    const correctIndex = randomInt(4);
     const options = incorrectOptions.slice(0, correctIndex).concat(getCorrectOption(dataType, answer)).concat(incorrectOptions.slice(correctIndex));
     const imageUrl = getImageUrl(answer, dataType);
 
