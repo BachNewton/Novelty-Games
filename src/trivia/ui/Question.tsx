@@ -60,38 +60,38 @@ function QuestionUi(question: QuestionData, questionNumber: number, disableImage
 }
 
 function OptionsUi(question: QuestionData, uiState: QuestionState, onQuestionAnswered: (result: AnswerResult) => void) {
+    const onOptionClick = (index: number) => {
+        if (index === question.correctIndex) {
+            onQuestionAnswered(AnswerResult.CORRECT);
+        } else {
+            onQuestionAnswered(AnswerResult.INCORRECT);
+        }
+    };
+
     if (question instanceof PokemonMultiImageQuestion) {
-        return <div>{PokemonMultiImageQuestionUi(question)}</div>;
+        return <div>{PokemonMultiImageQuestionUi(question, onOptionClick)}</div>;
     } else if (question instanceof ImageQuestion) {
         return <div style={{ display: 'flex', flexDirection: 'column', padding: '0 0.5em' }}>
-            {ImageQuestionUi(question, uiState, onQuestionAnswered)}
+            {ImageQuestionUi(question, uiState, onOptionClick)}
         </div>;
     } else {
         throw new Error('Unsupported Question: ' + question);
     }
 }
 
-function PokemonMultiImageQuestionUi(question: PokemonMultiImageQuestion) {
+function PokemonMultiImageQuestionUi(question: PokemonMultiImageQuestion, onOptionClick: (index: number) => void) {
     const images = question.options.map((it, index) => <AsyncImage
         key={index}
         src={it.imageUrl}
         disableImages={false}
-        onClick={() => { }}
+        onClick={() => onOptionClick(index)}
     />);
 
     return images;
 }
 
-function ImageQuestionUi(question: ImageQuestion, uiState: QuestionState, onQuestionAnswered: (result: AnswerResult) => void) {
+function ImageQuestionUi(question: ImageQuestion, uiState: QuestionState, onOptionClick: (index: number) => void) {
     const ui = question.options.map((option, index) => {
-        const onClick = () => {
-            if (index === question.correctIndex) {
-                onQuestionAnswered(AnswerResult.CORRECT);
-            } else {
-                onQuestionAnswered(AnswerResult.INCORRECT);
-            }
-        };
-
         const buttonStyle: React.CSSProperties = {
             padding: '0.25em',
             marginBottom: '0.75em',
@@ -99,7 +99,7 @@ function ImageQuestionUi(question: ImageQuestion, uiState: QuestionState, onQues
         };
 
         if (uiState === QuestionState.SHOW_QUESTION) {
-            return <button style={buttonStyle} key={index} onClick={onClick}>{option}</button>;
+            return <button style={buttonStyle} key={index} onClick={() => onOptionClick(index)}>{option}</button>;
         } else {
             if (index === question.correctIndex) {
                 return <button style={buttonStyle} key={index} className='button-correct'>{option}</button>;
