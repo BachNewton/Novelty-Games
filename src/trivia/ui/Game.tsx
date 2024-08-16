@@ -2,7 +2,7 @@ import '../css/Game.css';
 import { useEffect, useState } from 'react';
 import { Data, DataType } from '../data/Data';
 import { createQuestions } from '../logic/QuestionCreator';
-import { Question as QuestionData } from '../data/QuestionData';
+import { PokemonMultiImageQuestion, Question as QuestionData } from '../data/QuestionData';
 import { ProgressListener, ProgressEvent } from '../logic/ProgressUpdater';
 import { getGameName } from './Home';
 import Question, { AnswerResult } from './Question';
@@ -48,6 +48,7 @@ export enum QuestionState {
 }
 
 const POST_QUESTION_DELAY = 1000;
+const POST_QUESTION_DELAY_FOR_POKEMON_MULI_IMAGE_QUESTION = 1500;
 const MAX_LIVES = 3;
 const HIGH_SCORE_KEY_POSTFIX = '_HIGH_SCORE_KEY';
 const HIGH_SCORE_HARDCORE_KEY_POSTFIX = HIGH_SCORE_KEY_POSTFIX + '_HARDCORE';
@@ -173,6 +174,8 @@ function LoadingUi(gameState: GameState) {
 }
 
 function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.SetStateAction<GameState>>, uiState: QuestionUiState) {
+  const activeQuestion = gameState.questions[gameState.activeQuestion];
+
   const onDisableImages = () => {
     gameState.disableImages = true;
     localStorage.setItem(DISABLE_IMAGES_KEY, gameState.disableImages.toString());
@@ -213,12 +216,12 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
       }
 
       setGameState({ ...gameState });
-    }, POST_QUESTION_DELAY);
+    }, activeQuestion instanceof PokemonMultiImageQuestion ? POST_QUESTION_DELAY_FOR_POKEMON_MULI_IMAGE_QUESTION : POST_QUESTION_DELAY);
   };
 
   return <Question
     uiState={uiState.state}
-    question={gameState.questions[gameState.activeQuestion]}
+    question={activeQuestion}
     questionNumber={gameState.activeQuestion + 1}
     totalQuestions={gameState.questions.length}
     disableImages={gameState.disableImages}
