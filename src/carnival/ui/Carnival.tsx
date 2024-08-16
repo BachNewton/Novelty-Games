@@ -1,20 +1,24 @@
 import { useEffect, useRef } from "react";
 
+interface CarnivalProps {
+    goHome: () => void;
+}
+
 interface Box {
     x: number;
     y: number;
     width: number;
     height: number;
+    angle: number;
+    color: string;
+    speed: number;
 };
 
-const Carnival: React.FC = () => {
+const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    const boxWidth = 50;
-    const boxHeight = 50;
-    let x = 0;
-    let y = 0;
-    let angle = 0;
+    let level = 0;
+    const boxes = [createBox(level)];
 
     const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
         const canvas = canvasRef.current;
@@ -24,10 +28,17 @@ const Carnival: React.FC = () => {
         const mouseX = event.clientX - rect.left;
         const mouseY = event.clientY - rect.top;
 
-        console.log('mouseX:', mouseX, 'mouseY:', mouseY);
+        const box = boxes[level];
 
-        if (mouseX >= x && mouseX <= x + boxWidth && mouseY >= y && mouseY <= y + boxHeight) {
-            console.log('Box clicked!');
+        if (mouseX >= box.x && mouseX <= box.x + box.width && mouseY >= box.y && mouseY <= box.y + box.height) {
+            level++;
+
+            if (level >= 6) {
+                alert('You win!\nHi Nick! 😜');
+                goHome();
+            } else {
+                boxes.push(createBox(level));
+            }
         }
     };
 
@@ -47,16 +58,18 @@ const Carnival: React.FC = () => {
         const animate = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            ctx.fillStyle = 'red';
-            ctx.fillRect(x, y, boxWidth, boxHeight);
+            for (const box of boxes) {
+                ctx.fillStyle = box.color;
+                ctx.fillRect(box.x, box.y, box.width, box.height);
 
-            x += Math.cos(angle);
-            x = Math.min(x, canvas.width - boxWidth);
-            x = Math.max(x, 0);
-            y += Math.sin(angle);
-            y = Math.min(y, canvas.height - boxHeight);
-            y = Math.max(y, 0);
-            angle += 0.5 * Math.random() - 0.25;
+                box.x += box.speed * Math.cos(box.angle);
+                box.x = Math.min(box.x, canvas.width - box.width);
+                box.x = Math.max(box.x, 0);
+                box.y += box.speed * Math.sin(box.angle);
+                box.y = Math.min(box.y, canvas.height - box.height);
+                box.y = Math.max(box.y, 0);
+                box.angle += 0.5 * Math.random() - 0.25;
+            }
 
             requestAnimationFrame(animate);
         };
@@ -73,5 +86,74 @@ const Carnival: React.FC = () => {
         <canvas ref={canvasRef} onClick={handleCanvasClick} />
     </div>;
 };
+
+function createBox(level: number): Box {
+    return {
+        x: 0,
+        y: 0,
+        width: getSize(level),
+        height: getSize(level),
+        angle: 0.25 * Math.PI,
+        color: getColor(level),
+        speed: getSpeed(level)
+    };
+}
+
+function getSize(level: number): number {
+    switch (level) {
+        case 0:
+            return 100;
+        case 1:
+            return 90;
+        case 2:
+            return 80;
+        case 3:
+            return 65;
+        case 4:
+            return 45;
+        case 5:
+            return 40;
+        default:
+            throw new Error();
+    }
+}
+
+function getSpeed(level: number): number {
+    switch (level) {
+        case 0:
+            return 1;
+        case 1:
+            return 1.1;
+        case 2:
+            return 1.2;
+        case 3:
+            return 1.3;
+        case 4:
+            return 1.5;
+        case 5:
+            return 1.7;
+        default:
+            throw new Error();
+    }
+}
+
+function getColor(level: number): string {
+    switch (level) {
+        case 0:
+            return 'white';
+        case 1:
+            return 'blue';
+        case 2:
+            return 'green';
+        case 3:
+            return 'orange';
+        case 4:
+            return 'red';
+        case 5:
+            return 'black'
+        default:
+            throw new Error();
+    }
+}
 
 export default Carnival;

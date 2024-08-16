@@ -68,7 +68,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
     } else if (state instanceof TriviaState) {
         return <TriviaHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else if (state instanceof CarnivalState) {
-        return <Carnival />;
+        return <Carnival goHome={onHomeButtonClicked} />;
     } else {
         return HomeUi(versionState, onMilleBornesClick, onTriviaClick, onCarnivalClick);
     }
