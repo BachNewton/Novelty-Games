@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import MilleBornesHome from '../mille-bornes/ui/Home';
 import TriviaHome from '../trivia/ui/Home';
+import Carnival from '../carnival/ui/Carnival';
 
 const APP_VERSION = 'v1.5.3';
 
@@ -15,6 +16,8 @@ class HomeState implements State { }
 class TriviaState implements State { }
 
 class MilleBornesState implements State { }
+
+class CarnivalState implements State { }
 
 enum VersionState {
     CURRENT,
@@ -56,16 +59,22 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         setState(new TriviaState());
     };
 
+    const onCarnivalClick = () => {
+        setState(new CarnivalState());
+    }
+
     if (state instanceof MilleBornesState) {
         return <MilleBornesHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else if (state instanceof TriviaState) {
         return <TriviaHome onHomeButtonClicked={onHomeButtonClicked} />;
+    } else if (state instanceof CarnivalState) {
+        return <Carnival />;
     } else {
-        return HomeUi(versionState, onMilleBornesClick, onTriviaClick);
+        return HomeUi(versionState, onMilleBornesClick, onTriviaClick, onCarnivalClick);
     }
 };
 
-function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTriviaClick: () => void) {
+function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTriviaClick: () => void, onCarnivalClick: () => void) {
     const versionStateStyle: React.CSSProperties = {
         position: 'fixed',
         top: '0.25em',
@@ -95,6 +104,7 @@ function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTr
         <div><br /><br /><br /></div>
         <button style={buttonStyle} onClick={onTriviaClick}>Trivia 🤔</button>
         <button style={buttonStyle} onClick={onMilleBornesClick}>Mille Bornes 🏎️</button>
+        <button style={buttonStyle} onClick={onCarnivalClick}>Carnival 🎠</button>
     </div>;
 }
 
