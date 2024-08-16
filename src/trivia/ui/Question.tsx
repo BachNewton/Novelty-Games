@@ -93,13 +93,30 @@ function PokemonMultiImageQuestionUi(question: PokemonMultiImageQuestion, uiStat
             borderRadius: '30px'
         };
 
+        const textStyle: CSSProperties = {
+            display: uiState === QuestionState.SHOW_QUESTION ? 'none' : 'block',
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'rgba(0, 0, 0, 0.75)',
+            padding: '15px',
+            borderRadius: '30px',
+            fontSize: '1.25em',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: 'white'
+        };
+
         if (uiState === QuestionState.SHOW_QUESTION) {
             imageStyle.borderColor = 'white';
         } else {
             if (index === question.correctIndex) {
                 imageStyle.borderColor = 'lime';
+                textStyle.borderColor = 'lime';
             } else if (uiState === QuestionState.SHOW_ANSWER_INCORRECT) {
                 imageStyle.borderColor = 'red';
+                textStyle.borderColor = 'red';
             } else {
                 imageStyle.borderColor = 'white';
             }
@@ -113,16 +130,7 @@ function PokemonMultiImageQuestionUi(question: PokemonMultiImageQuestion, uiStat
 
         return <div style={{ position: 'relative' }} key={index}>
             {image}
-            <div style={{
-                display: uiState === QuestionState.SHOW_QUESTION ? 'none' : 'block',
-                position: 'absolute',
-                left: '50%',
-                top: '50%',
-                transform: 'translate(-50%, -50%)',
-                background: 'rgba(0, 0, 0, 0.75)',
-                padding: '15px',
-                borderRadius: '30px'
-            }}>{question.optionStatGetters[index]()}</div>
+            <div style={textStyle}>{question.optionStatGetters[index]()}</div>
         </div>;
     });
 
