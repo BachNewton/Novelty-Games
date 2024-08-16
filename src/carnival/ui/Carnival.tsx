@@ -27,12 +27,12 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
     let level = 0;
     let startTime = Date.now();
 
-    const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const onClick = (e: MouseEvent) => {
         const canvas = canvasRef.current;
         if (canvas === null) return;
 
-        const mouseX = event.clientX;
-        const mouseY = event.clientY;
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
 
         const box = boxes[level];
         const width = box.width * canvas.height * SIZE_TARGET;
@@ -68,6 +68,8 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
         };
 
         window.addEventListener('resize', resizeCanvas);
+
+        window.addEventListener('click', onClick);
 
         boxes = [createBox(0)]
         let previousTime = performance.now();
@@ -112,11 +114,12 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
 
         return () => {
             window.removeEventListener('resize', resizeCanvas);
+            window.removeEventListener('click', onClick);
         };
     }, []);
 
     return <div style={{ display: 'flex', height: '100vh' }}>
-        <canvas ref={canvasRef} onClick={handleCanvasClick} />
+        <canvas ref={canvasRef} />
     </div>;
 };
 
