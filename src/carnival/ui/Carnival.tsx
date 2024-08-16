@@ -18,6 +18,7 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     let level = 0;
+    let startTime = Date.now();
     const boxes = [createBox(level)];
 
     const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -34,7 +35,7 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
             level++;
 
             if (level >= 6) {
-                alert('You win!\nHi Nick! 😜');
+                alert(`You win!\n${getTime(startTime)}\nHi Nick! 😜`);
                 goHome();
             } else {
                 boxes.push(createBox(level));
@@ -57,6 +58,12 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
 
         const animate = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = 'white';
+            ctx.font = '40px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(getTime(startTime), canvas.width / 2, canvas.height / 2);
 
             for (const box of boxes) {
                 ctx.fillStyle = box.color;
@@ -86,6 +93,11 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
         <canvas ref={canvasRef} onClick={handleCanvasClick} />
     </div>;
 };
+
+function getTime(startTime: number): string {
+    const time = ((Date.now() - startTime) / 1000).toFixed(1);
+    return `${time}`;
+}
 
 function createBox(level: number): Box {
     return {
@@ -140,7 +152,7 @@ function getSpeed(level: number): number {
 function getColor(level: number): string {
     switch (level) {
         case 0:
-            return 'white';
+            return 'purple';
         case 1:
             return 'blue';
         case 2:
