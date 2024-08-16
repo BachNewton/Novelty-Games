@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/Novelty-Games/static/css/main.83160f32.css",
-    "main.js": "/Novelty-Games/static/js/main.7e6fbce2.js",
+    "main.js": "/Novelty-Games/static/js/main.d3a8da38.js",
     "static/js/453.ed3810f9.chunk.js": "/Novelty-Games/static/js/453.ed3810f9.chunk.js",
     "service-worker.js": "/Novelty-Games/service-worker.js",
     "static/media/MB-ace.svg": "/Novelty-Games/static/media/MB-ace.a8f8a88737891decb1997b8d24860914.svg",
@@ -27,11 +27,11 @@
     "static/media/MB-outline.svg": "/Novelty-Games/static/media/MB-outline.9375dcb67c2602a348842bb92635c97b.svg",
     "static/media/MB-back.svg": "/Novelty-Games/static/media/MB-back.73af888104565973b102803815b53578.svg",
     "main.83160f32.css.map": "/Novelty-Games/static/css/main.83160f32.css.map",
-    "main.7e6fbce2.js.map": "/Novelty-Games/static/js/main.7e6fbce2.js.map",
+    "main.d3a8da38.js.map": "/Novelty-Games/static/js/main.d3a8da38.js.map",
     "453.ed3810f9.chunk.js.map": "/Novelty-Games/static/js/453.ed3810f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.83160f32.css",
-    "static/js/main.7e6fbce2.js"
+    "static/js/main.d3a8da38.js"
   ]
 }
