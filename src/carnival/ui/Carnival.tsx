@@ -18,6 +18,8 @@ interface Box {
     speed: number;
 };
 
+let temp = ['', '', ''];
+
 const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -34,9 +36,17 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
         const mouseY = event.clientY - rect.top;
 
         const box = boxes[level];
+        const width = box.width * canvas.height * SIZE_TARGET;
+        const height = box.height * canvas.height * SIZE_TARGET;
 
-        if (mouseX >= box.x && mouseX <= box.x + box.width * canvas.height * SIZE_TARGET && mouseY >= box.y && mouseY <= box.y + box.height * canvas.height * SIZE_TARGET) {
+        temp[0] = `X: ${mouseX.toFixed(0)}, y: ${mouseY.toFixed(0)}`
+        temp[1] = `topLeft: (${box.x.toFixed(0)}, ${box.y.toFixed(0)}), bottomRight: (${(box.x + width).toFixed(0)}, ${(box.y + height).toFixed(0)})`;
+        temp[2] = 'Miss';
+
+        if (mouseX >= box.x && mouseX <= box.x + width && mouseY >= box.y && mouseY <= box.y + height) {
             level++;
+
+            temp[2] = 'Hit';
 
             if (level >= 6) {
                 alert(`You win!\n${getTime(startTime)}\nHi Nick! 😜`);
@@ -73,6 +83,11 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(getTime(startTime), canvas.width / 2, canvas.height / 2);
+
+            ctx.font = `25px Arial`;
+            ctx.fillText(temp[0], canvas.width / 2, canvas.height / 3);
+            ctx.fillText(temp[1], canvas.width / 2, canvas.height / 4);
+            ctx.fillText(temp[2], canvas.width / 2, canvas.height / 5);
 
             for (const box of boxes) {
                 ctx.fillStyle = box.color;
