@@ -19,13 +19,13 @@ interface Box {
 };
 
 let temp = ['', '', ''];
+const boxes = [createBox(0)];
 
 const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     let level = 0;
     let startTime = Date.now();
-    const boxes = [createBox(level)];
 
     const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
         const canvas = canvasRef.current;
