@@ -19,7 +19,7 @@ interface Box {
 };
 
 let temp = ['', '', ''];
-const boxes = [createBox(0)];
+let boxes: Array<Box> = [];
 
 const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,9 +31,8 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
         const canvas = canvasRef.current;
         if (canvas === null) return;
 
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left;
-        const mouseY = event.clientY - rect.top;
+        const mouseX = event.clientX;
+        const mouseY = event.clientY;
 
         const box = boxes[level];
         const width = box.width * canvas.height * SIZE_TARGET;
@@ -70,6 +69,7 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
 
         window.addEventListener('resize', resizeCanvas);
 
+        boxes = [createBox(0)]
         let previousTime = performance.now();
 
         const animate = (timeNow: number) => {
