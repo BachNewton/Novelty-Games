@@ -106,13 +106,12 @@ function PokemonMultiImageQuestionUi(question: PokemonMultiImageQuestion, uiStat
         }
 
         const image = <img
-            key={index}
             src={it.imageUrl}
             onClick={() => { if (uiState === QuestionState.SHOW_QUESTION) onOptionClick(index) }}
             style={imageStyle}
         />;
 
-        return <div style={{ position: 'relative' }}>
+        return <div style={{ position: 'relative' }} key={index}>
             {image}
             <div style={{
                 display: uiState === QuestionState.SHOW_QUESTION ? 'none' : 'block',

@@ -8,14 +8,14 @@ export function createQuestions(data: Array<Data>, dataType: DataType): Array<Qu
 
     if (dataType === DataType.POKEMON) {
         const optionsPool = new Set([...data]) as Set<Pokemon>;
-        return shuffledData.map((questionTarget) => createPokemonMultiImageQuestion(optionsPool, questionTarget as Pokemon));
+        return shuffledData.map(questionTarget => createPokemonMultiImageQuestion(optionsPool, questionTarget as Pokemon));
     }
 
     const optionsPool = getOptionsPool(dataType, data);
-    return shuffledData.map((questionTarget) => createQuestion(optionsPool, questionTarget, dataType));
+    return shuffledData.map(questionTarget => createQuestion(optionsPool, questionTarget, dataType));
 }
 
-function getPokemonStateValue(pokemon: Pokemon, targetStat: String): number {
+function getPokemonStatValue(pokemon: Pokemon, targetStat: String): number {
     if (targetStat === 'HP') {
         return pokemon.stats.hp;
     } else if (targetStat === 'Attack') {
@@ -31,14 +31,16 @@ function getPokemonStateValue(pokemon: Pokemon, targetStat: String): number {
     }
 }
 
-function createPokemonMultiImageQuestion(optionsPool: Set<Pokemon>, questionTarget: Pokemon) {
+function createPokemonMultiImageQuestion(optionsPool: Set<Pokemon>, questionTarget: Pokemon): PokemonMultiImageQuestion {
     const targetStat = removeRandomElement(['HP', 'Attack', 'Defense', 'Special-Attack', 'Special-Defense', 'Speed']);
 
     const otherOptions = getOptions(3, optionsPool as Set<Pokemon>, (option: Pokemon) => {
-        return questionTarget === option;
+        return getPokemonStatValue(questionTarget, targetStat) === getPokemonStatValue(option, targetStat);
+    }, (option1: Pokemon, option2: Pokemon) => {
+        return getPokemonStatValue(option1, targetStat) === getPokemonStatValue(option2, targetStat);
     });
 
-    const answer = otherOptions.concat(questionTarget).sort((a, b) => getPokemonStateValue(b, targetStat) - getPokemonStateValue(a, targetStat))[0];
+    const answer = otherOptions.concat(questionTarget).sort((a, b) => getPokemonStatValue(b, targetStat) - getPokemonStatValue(a, targetStat))[0];
 
     const correctIndex = randomInt(4);
 
@@ -47,7 +49,7 @@ function createPokemonMultiImageQuestion(optionsPool: Set<Pokemon>, questionTarg
     const options = allOptions.slice(0, correctIndex).concat(answer).concat(allOptions.slice(correctIndex));
 
     const optionStatGetters = options.map(option => {
-        return () => getPokemonStateValue(option, targetStat);
+        return () => getPokemonStatValue(option, targetStat);
     });
 
     return new PokemonMultiImageQuestion(
@@ -79,7 +81,9 @@ function getOptionsPool(dataType: DataType, data: Array<Data>): Set<string> {
 
 function createQuestion(optionsPool: Set<string>, answer: Data, dataType: DataType): Question {
     const incorrectOptions = getOptions(3, optionsPool, (option: String) => {
-        return option === getIsNot(dataType, answer);
+        return option === getOptionProperty(dataType, answer);
+    }, (option1: Data, option2: Data) => {
+        return option1 === option2;
     });
 
     const text = getQuestionText(answer, dataType);
@@ -102,20 +106,20 @@ function createQuestion(optionsPool: Set<string>, answer: Data, dataType: DataTy
     }
 }
 
-function getIsNot(dataType: DataType, answer: Data): string {
+function getOptionProperty(dataType: DataType, option: Data): string {
     switch (dataType) {
         case DataType.ROLLERCOASTERS:
-            return (answer as Rollercoaster).park.name;
+            return (option as Rollercoaster).park.name;
         case DataType.MUSIC:
-            return (answer as Song).Artist;
+            return (option as Song).Artist;
         case DataType.FORTNITE_FESTIVAL:
-            return (answer as FestivalSong).artist;
+            return (option as FestivalSong).artist;
         case DataType.FLAG_GAME:
-            return (answer as Flag).name;
+            return (option as Flag).name;
         case DataType.POKEMON:
-            return (answer as Pokemon).name;
+            return (option as Pokemon).name;
         case DataType.AIRPLANES:
-            return (answer as Airplane).name;
+            return (option as Airplane).name;
         default:
             throw new Error('Unsupported DataType: ' + dataType);
     }
@@ -193,7 +197,12 @@ function getImageUrl(answer: Data, dataType: DataType): string {
     }
 }
 
-function getOptions<T>(numberOfOptions: number, optionsPool: Set<T>, filterCriteria: (option: T) => boolean): Array<T> {
+function getOptions<T>(
+    numberOfOptions: number,
+    optionsPool: Set<T>,
+    filterCriteria: (option: T) => boolean,
+    isPropertyMatch: (option1: T, option2: T) => boolean
+): Array<T> {
     const remainingOptions = [] as Array<T>;
 
     optionsPool.forEach(option => {
@@ -204,7 +213,12 @@ function getOptions<T>(numberOfOptions: number, optionsPool: Set<T>, filterCrite
 
     const options = [] as Array<T>;
     while (options.length < numberOfOptions) {
-        options.push(removeRandomElement(remainingOptions));
+        const option = removeRandomElement(remainingOptions);
+
+        // If this option has a property which matches another already choosen option, then skip this option.
+        if (options.find(it => isPropertyMatch(it, option)) !== undefined) continue;
+
+        options.push(option);
     }
 
     return options;

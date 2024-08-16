@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import App from './trivia/ui/Game';
+import App from '../trivia/ui/Game';
 
-test('renders learn react link', () => {
+xtest('renders learn react link', () => {
   // render(<App temp="" />);
   // const linkElement = screen.getByText(/learn react/i);
   // expect(linkElement).toBeInTheDocument();

@@ -1,3 +1,5 @@
+import { Data } from "./Data";
+
 export interface PokemonAll {
     results: Array<PokemonEntry>;
 }
@@ -37,7 +39,7 @@ interface Stat {
     name: string;
 }
 
-export interface Pokemon {
+export interface Pokemon extends Data {
     name: string;
     imageUrl: string;
     stats: Stats;
