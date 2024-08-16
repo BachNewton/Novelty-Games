@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import '../css/Filter.css';
 import { Rollercoaster } from "../data/Data";
 import { FilterAndPropertyGetter, FilterResult, RollercoasterFilter, baseFilter, filterByProperties, getFilter } from "../logic/FilterRepo";
 
 interface FilterProps {
-    pendingCoasters: Promise<Array<Rollercoaster>>;
-    onCancel: () => void;
-    onConfirm: (rollercoasterFilter: RollercoasterFilter) => void;
+    coasters: Array<Rollercoaster>;
+    rollercoasterFilterGetter: RollercoasterFilterGetter;
+}
+
+export interface RollercoasterFilterGetter {
+    get: (() => RollercoasterFilter) | null;
 }
 
 interface FilterSection {
@@ -23,49 +26,25 @@ interface FilterSectionUi {
 interface State {
     allCoasters: Array<Rollercoaster>;
     filteredCoasters: Array<Rollercoaster>;
-    ui: UiState;
     rollercoasterFilter: RollercoasterFilter;
 }
 
-enum UiState {
-    LOADING,
-    FILTER
+function getInitState(coasters: Array<Rollercoaster>): State {
+    const filteredCoasters = baseFilter(coasters);
+    console.log('Base filtered coasters', filteredCoasters);
+
+    return {
+        allCoasters: coasters,
+        filteredCoasters: filteredCoasters,
+        rollercoasterFilter: getFilter(coasters, filteredCoasters)
+    };
 }
 
-const Filter: React.FC<FilterProps> = ({ pendingCoasters, onCancel, onConfirm }) => {
-    const [state, setState] = useState({ ui: UiState.LOADING } as State);
+const Filter: React.FC<FilterProps> = ({ coasters, rollercoasterFilterGetter }) => {
+    const [state, setState] = useState<State>(getInitState(coasters));
 
-    useEffect(() => {
-        pendingCoasters.then(readyCoasters => {
-            state.allCoasters = readyCoasters;
-            state.filteredCoasters = baseFilter(readyCoasters);
-            console.log('Base filtered coasters', state.filteredCoasters);
+    rollercoasterFilterGetter.get = () => state.rollercoasterFilter;
 
-            state.rollercoasterFilter = getFilter(state.allCoasters, state.filteredCoasters);
-
-            state.ui = UiState.FILTER;
-
-            setState({ ...state });
-        });
-    }, [pendingCoasters]);
-
-    return <div className="Filter">{Ui(state, setState, onCancel, () => { onConfirm(state.rollercoasterFilter) })}</div>;
-};
-
-function Ui(state: State, setState: React.Dispatch<React.SetStateAction<State>>, onCancel: () => void, onConfirm: () => void) {
-    switch (state.ui) {
-        case UiState.LOADING:
-            return LoadingUi();
-        case UiState.FILTER:
-            return FilterUi(state, setState, onCancel, onConfirm);
-    }
-}
-
-function LoadingUi() {
-    return <p>Loading...</p>;
-}
-
-function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<State>>, onCancel: () => void, onConfirm: () => void) {
     const sorter = (a: [string, FilterResult], b: [string, FilterResult]) => b[1].after - a[1].after;
 
     const filterSections: Array<FilterSection> = [
@@ -120,8 +99,6 @@ function FilterUi(state: State, setState: React.Dispatch<React.SetStateAction<St
     });
 
     return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <button style={{ position: 'fixed', left: '0.25em' }} onClick={onCancel}>❌ Cancel</button>
-        <button style={{ position: 'fixed', right: '0.25em' }} onClick={onConfirm}>Confirm ✅</button>
         <h1>Coaster Filters</h1>
         <div className="bottom-border">
             <h3>Default filter already applied</h3>

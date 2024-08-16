@@ -5,9 +5,10 @@ import { DataType, Data, Rollercoaster } from '../data/Data';
 import { get as getFromRepo } from '../logic/Repository';
 import { ProgressUpdater } from '../logic/ProgressUpdater';
 import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from '../logic/Database';
-import Filter from './Filter';
+import Filter, { RollercoasterFilterGetter } from './Filter';
 import { RollercoasterFilter, deleteFilter, filter, saveFilter } from '../logic/FilterRepo';
 import HomeButton from '../../ui/HomeButton';
+import SettingsPage from './SettingsPage';
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
@@ -51,12 +52,14 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
         setState({ ...state });
     };
 
-    const onFilterCancelClicked = () => {
+    const onSettingsPageCancelClicked = () => {
         state.ui = UiState.HOME;
         setState({ ...state });
     };
 
-    const onFilterConfirmClicked = (rollercoasterFilter: RollercoasterFilter) => {
+    const onFilterConfirmClicked = (rollercoasterFilter: RollercoasterFilter | undefined) => {
+        if (rollercoasterFilter === undefined) return;
+
         saveFilter(rollercoasterFilter);
         state.ui = UiState.HOME;
         setState({ ...state });
@@ -78,10 +81,18 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
                 progressListener={progressUpdater}
             />;
         case UiState.FILTER:
-            return <Filter
-                pendingCoasters={state.data as Promise<Array<Rollercoaster>>}
-                onCancel={onFilterCancelClicked}
-                onConfirm={onFilterConfirmClicked}
+            const rollercoasterFilterGetter: RollercoasterFilterGetter = { get: null };
+            const pendingCoasters = state.data as Promise<Array<Rollercoaster>>;
+            const pendingFilterUi = pendingCoasters.then(coasters => {
+                return <Filter
+                    coasters={coasters}
+                    rollercoasterFilterGetter={rollercoasterFilterGetter}
+                />;
+            });
+            return <SettingsPage
+                content={pendingFilterUi}
+                onCancel={onSettingsPageCancelClicked}
+                onConfirm={() => onFilterConfirmClicked(rollercoasterFilterGetter.get?.())}
             />;
     }
 };
