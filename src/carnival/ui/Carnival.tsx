@@ -80,10 +80,10 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
                 const height = box.height * canvas.height * SIZE_TARGET;
                 ctx.fillRect(box.x, box.y, width, height);
 
-                box.x += (deltaTime / TARGET_REFRESH_RATE) * box.speed * Math.cos(box.angle);
+                box.x += (TARGET_REFRESH_RATE / deltaTime) * box.speed * Math.cos(box.angle);
                 box.x = Math.min(box.x, canvas.width - box.width * canvas.height * SIZE_TARGET);
                 box.x = Math.max(box.x, 0);
-                box.y += (deltaTime / TARGET_REFRESH_RATE) * box.speed * Math.sin(box.angle);
+                box.y += (TARGET_REFRESH_RATE / deltaTime) * box.speed * Math.sin(box.angle);
                 box.y = Math.min(box.y, canvas.height - box.height * canvas.height * SIZE_TARGET);
                 box.y = Math.max(box.y, 0);
                 box.angle += 0.5 * Math.random() - 0.25;
