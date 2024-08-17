@@ -19,42 +19,10 @@ interface Box {
 };
 
 let temp = ['', '', ''];
-let boxes: Array<Box> = [];
+const renderIds: Array<number> = [];
 
 const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-
-    let level = 0;
-    let startTime = Date.now();
-
-    const onClick = (e: MouseEvent) => {
-        const canvas = canvasRef.current;
-        if (canvas === null) return;
-
-        const mouseX = e.clientX;
-        const mouseY = e.clientY;
-
-        const box = boxes[level];
-        const width = box.width * canvas.height * SIZE_TARGET;
-        const height = box.height * canvas.height * SIZE_TARGET;
-
-        temp[0] = `X: ${mouseX.toFixed(0)}, y: ${mouseY.toFixed(0)}`
-        temp[1] = `topLeft: (${box.x.toFixed(0)}, ${box.y.toFixed(0)}), bottomRight: (${(box.x + width).toFixed(0)}, ${(box.y + height).toFixed(0)})`;
-        temp[2] = 'Miss';
-
-        if (mouseX >= box.x && mouseX <= box.x + width && mouseY >= box.y && mouseY <= box.y + height) {
-            level++;
-
-            temp[2] = 'Hit';
-
-            if (level >= 6) {
-                alert(`You win!\n${getTime(startTime)}\nHi Nick! 😜`);
-                goHome();
-            } else {
-                boxes.push(createBox(level));
-            }
-        }
-    };
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -62,19 +30,41 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
         const ctx = canvas.getContext('2d');
         if (ctx === null) return;
 
+        let level = 0;
+        const startTime = Date.now();
+
         const resizeCanvas = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         };
 
-        window.addEventListener('resize', resizeCanvas);
+        const onClick = (e: MouseEvent) => {
+            console.log('onClick');
+            handleClick(e, canvas, level, boxes, startTime, goHome, () => {
+                console.log('onHit');
+                level++;
 
+                temp[2] = 'Hit';
+
+                if (level >= 6) {
+                    alert(`You win!\n${getTime(startTime)}\nHi Nick! 😜`);
+                    goHome();
+                } else {
+                    boxes.push(createBox(level));
+                }
+            });
+        };
+
+        window.addEventListener('resize', resizeCanvas);
         window.addEventListener('click', onClick);
 
-        boxes = [createBox(0)]
+        const boxes = [createBox(0)]
         let previousTime = performance.now();
 
-        const animate = (timeNow: number) => {
+        const renderId = Math.random();
+        renderIds.unshift(renderId);
+
+        const animate: FrameRequestCallback = (timeNow: DOMHighResTimeStamp) => {
             const deltaTime = timeNow - previousTime;
             previousTime = timeNow;
 
@@ -106,7 +96,9 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
                 box.angle += 0.5 * Math.random() - 0.25;
             }
 
-            requestAnimationFrame(animate);
+            if (renderId === renderIds[0]) {
+                requestAnimationFrame(animate);
+            }
         };
 
         resizeCanvas();
@@ -122,6 +114,33 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
         <canvas ref={canvasRef} />
     </div>;
 };
+
+function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, boxes: Array<Box>, startTime: number, goHome: () => void, onHit: () => void) {
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    const box = boxes[level];
+    const width = box.width * canvas.height * SIZE_TARGET;
+    const height = box.height * canvas.height * SIZE_TARGET;
+
+    temp[0] = `X: ${mouseX.toFixed(0)}, y: ${mouseY.toFixed(0)}`
+    temp[1] = `topLeft: (${box.x.toFixed(0)}, ${box.y.toFixed(0)}), bottomRight: (${(box.x + width).toFixed(0)}, ${(box.y + height).toFixed(0)})`;
+    temp[2] = 'Miss';
+
+    if (mouseX >= box.x && mouseX <= box.x + width && mouseY >= box.y && mouseY <= box.y + height) {
+        onHit();
+        level++;
+
+        temp[2] = 'Hit';
+
+        if (level >= 6) {
+            alert(`You win!\n${getTime(startTime)}\nHi Nick! 😜`);
+            goHome();
+        } else {
+            boxes.push(createBox(level));
+        }
+    }
+}
 
 function getFontSize(canvas: HTMLCanvasElement): number {
     return canvas.height * FONT_TARGET;
