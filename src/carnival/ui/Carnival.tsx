@@ -116,8 +116,8 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
 };
 
 function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, boxes: Array<Box>, startTime: number, goHome: () => void, onHit: () => void) {
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
+    const mouseX = e.pageX;
+    const mouseY = e.pageY;
 
     const box = boxes[level];
     const width = box.width * canvas.height * SIZE_TARGET;
