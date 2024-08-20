@@ -1,12 +1,9 @@
 import { useEffect, useRef } from "react";
+import { randomNum } from "../../util/Randomizer";
 
 interface CarnivalProps {
     goHome: () => void;
 }
-
-const SPEED_TARGET = 0.0002;
-const FONT_TARGET = 0.06;
-const SIZE_TARGET = 0.001;
 
 interface Box {
     x: number;
@@ -78,7 +75,7 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, go
         const deltaTime = timeNow - previousTime;
         previousTime = timeNow;
 
-        draw(deltaTime, canvas, ctx, boxes, rings, startTime);
+        draw(canvas, ctx, boxes, rings, startTime);
         update(deltaTime, canvas, boxes, rings);
 
         requestAnimationFrame(animate);
@@ -86,11 +83,11 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, go
     animate(previousTime);
 }
 
-function draw(deltaTime: number, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: Box[], rings: Ring[], startTime: number) {
+function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: Box[], rings: Ring[], startTime: number) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = 'white';
-    ctx.font = `${getFontSize(canvas)}px Arial`;
+    ctx.font = `${getFontSize(canvas)}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(getStopwatch(startTime), canvas.width / 2, canvas.height / 2);
@@ -106,17 +103,9 @@ function draw(deltaTime: number, canvas: HTMLCanvasElement, ctx: CanvasRendering
 
     for (const box of boxes) {
         ctx.fillStyle = box.color;
-        const width = box.width * canvas.height * SIZE_TARGET;
-        const height = box.height * canvas.height * SIZE_TARGET;
+        const width = box.width * canvas.height;
+        const height = box.height * canvas.height;
         ctx.fillRect(box.x, box.y, width, height);
-
-        box.x += SPEED_TARGET * deltaTime * canvas.height * box.speed * Math.cos(box.angle);
-        box.x = Math.min(box.x, canvas.width - box.width * canvas.height * SIZE_TARGET);
-        box.x = Math.max(box.x, 0);
-        box.y += SPEED_TARGET * deltaTime * canvas.height * box.speed * Math.sin(box.angle);
-        box.y = Math.min(box.y, canvas.height - box.height * canvas.height * SIZE_TARGET);
-        box.y = Math.max(box.y, 0);
-        box.angle += 0.5 * Math.random() - 0.25;
     }
 }
 
@@ -132,13 +121,13 @@ function update(deltaTime: number, canvas: HTMLCanvasElement, boxes: Box[], ring
     }
 
     for (const box of boxes) {
-        box.x += SPEED_TARGET * deltaTime * canvas.height * box.speed * Math.cos(box.angle);
-        box.x = Math.min(box.x, canvas.width - box.width * canvas.height * SIZE_TARGET);
+        box.x += box.speed * Math.cos(box.angle) * deltaTime * canvas.height;
+        box.x = Math.min(box.x, canvas.width - box.width * canvas.height);
         box.x = Math.max(box.x, 0);
-        box.y += SPEED_TARGET * deltaTime * canvas.height * box.speed * Math.sin(box.angle);
-        box.y = Math.min(box.y, canvas.height - box.height * canvas.height * SIZE_TARGET);
+        box.y += box.speed * Math.sin(box.angle) * deltaTime * canvas.height;
+        box.y = Math.min(box.y, canvas.height - box.height * canvas.height);
         box.y = Math.max(box.y, 0);
-        box.angle += 0.5 * Math.random() - 0.25;
+        box.angle += randomNum(-0.06, 0.06) * deltaTime;
     }
 }
 
@@ -153,8 +142,8 @@ function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, bo
     });
 
     const targetBox = boxes[level];
-    const width = targetBox.width * canvas.height * SIZE_TARGET;
-    const height = targetBox.height * canvas.height * SIZE_TARGET;
+    const width = targetBox.width * canvas.height;
+    const height = targetBox.height * canvas.height;
 
     if (mouseX >= targetBox.x && mouseX <= targetBox.x + width && mouseY >= targetBox.y && mouseY <= targetBox.y + height) {
         onHit();
@@ -162,7 +151,7 @@ function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, bo
 }
 
 function getFontSize(canvas: HTMLCanvasElement): number {
-    return canvas.height * FONT_TARGET;
+    return canvas.height * 0.06;
 }
 
 function getStopwatch(startTime: number): string {
@@ -185,17 +174,17 @@ function createBox(level: number): Box {
 function getSize(level: number): number {
     switch (level) {
         case 0:
-            return 100;
+            return 0.1;
         case 1:
-            return 90;
+            return 0.09;
         case 2:
-            return 80;
+            return 0.08;
         case 3:
-            return 65;
+            return 0.065;
         case 4:
-            return 45;
+            return 0.045;
         case 5:
-            return 40;
+            return 0.04;
         default:
             throw new Error();
     }
@@ -204,17 +193,17 @@ function getSize(level: number): number {
 function getSpeed(level: number): number {
     switch (level) {
         case 0:
-            return 1;
+            return 0.0005;
         case 1:
-            return 1.1;
+            return 0.0006;
         case 2:
-            return 1.2;
+            return 0.0007;
         case 3:
-            return 1.3;
+            return 0.0008;
         case 4:
-            return 1.5;
+            return 0.0009;
         case 5:
-            return 1.7;
+            return 0.0010;
         default:
             throw new Error();
     }
