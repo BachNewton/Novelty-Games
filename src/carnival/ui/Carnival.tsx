@@ -61,7 +61,7 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, go
     canvas.onclick = e => {
         console.log('Canvas clicked!', 'X:', e.clientX, 'Y:', e.clientY);
 
-        handleClick(e, canvas, level, boxes, startTime, goHome, () => {
+        handleClick(e, canvas, level, boxes, () => {
             console.log('onHit');
             level++;
 
@@ -121,30 +121,21 @@ function draw(deltaTime: number, canvas: HTMLCanvasElement, ctx: CanvasRendering
     }
 }
 
-function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, boxes: Array<Box>, startTime: number, goHome: () => void, onHit: () => void) {
+function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, boxes: Box[], onHit: () => void) {
     const mouseX = e.pageX;
     const mouseY = e.pageY;
 
-    const box = boxes[level];
-    const width = box.width * canvas.height * SIZE_TARGET;
-    const height = box.height * canvas.height * SIZE_TARGET;
+    const targetBox = boxes[level];
+    const width = targetBox.width * canvas.height * SIZE_TARGET;
+    const height = targetBox.height * canvas.height * SIZE_TARGET;
 
     temp[0] = `X: ${mouseX.toFixed(0)}, y: ${mouseY.toFixed(0)}`
-    temp[1] = `topLeft: (${box.x.toFixed(0)}, ${box.y.toFixed(0)}), bottomRight: (${(box.x + width).toFixed(0)}, ${(box.y + height).toFixed(0)})`;
+    temp[1] = `topLeft: (${targetBox.x.toFixed(0)}, ${targetBox.y.toFixed(0)}), bottomRight: (${(targetBox.x + width).toFixed(0)}, ${(targetBox.y + height).toFixed(0)})`;
     temp[2] = 'Miss';
 
-    if (mouseX >= box.x && mouseX <= box.x + width && mouseY >= box.y && mouseY <= box.y + height) {
+    if (mouseX >= targetBox.x && mouseX <= targetBox.x + width && mouseY >= targetBox.y && mouseY <= targetBox.y + height) {
+        console.log('handleClick determined a hit');
         onHit();
-        level++;
-
-        temp[2] = 'Hit';
-
-        if (level >= 6) {
-            alert(`You win!\n${getStopwatch(startTime)}\nHi Nick! 😜`);
-            goHome();
-        } else {
-            boxes.push(createBox(level));
-        }
     }
 }
 
