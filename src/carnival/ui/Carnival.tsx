@@ -35,6 +35,8 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
         const ctx = canvas.getContext('2d');
         if (ctx === null) return;
 
+        canvas.requestFullscreen();
+
         const resizeCanvas = () => {
             canvas.width = window.visualViewport?.width || window.innerWidth;
             canvas.height = window.visualViewport?.height || window.innerHeight;
@@ -45,9 +47,7 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
         initCanvas(canvas, ctx, goHome);
     }, []);
 
-    return <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-        <canvas ref={canvasRef} />
-    </div>;
+    return <canvas ref={canvasRef} style={{ backgroundColor: '#282c34' }} />;
 };
 
 function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, goHome: () => void) {
