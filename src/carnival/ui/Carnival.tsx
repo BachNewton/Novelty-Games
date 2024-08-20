@@ -45,7 +45,7 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
         initCanvas(canvas, ctx, goHome);
     }, []);
 
-    return <div style={{ display: 'flex', height: '100vh' }}>
+    return <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
         <canvas ref={canvasRef} />
     </div>;
 };
@@ -76,11 +76,20 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, go
         previousTime = timeNow;
 
         draw(canvas, ctx, boxes, rings, startTime);
+        drawDebug(canvas, ctx, deltaTime);
         update(deltaTime, canvas, boxes, rings);
 
         requestAnimationFrame(animate);
     };
     animate(previousTime);
+}
+
+function drawDebug(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, deltaTime: number) {
+    ctx.fillStyle = 'grey';
+    ctx.font = `${getFontSize(canvas) / 3}px sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText(`FPS: ${(1000 / deltaTime).toFixed(0)}`, 0, 0);
 }
 
 function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: Box[], rings: Ring[], startTime: number) {
@@ -195,17 +204,17 @@ function getSize(level: number): number {
 function getSpeed(level: number): number {
     switch (level) {
         case 0:
-            return 0.0005;
+            return 0.0004;
         case 1:
-            return 0.0006;
+            return 0.0005;
         case 2:
-            return 0.0007;
+            return 0.0006;
         case 3:
-            return 0.0008;
+            return 0.0007;
         case 4:
-            return 0.0009;
+            return 0.0008;
         case 5:
-            return 0.0010;
+            return 0.0009;
         default:
             throw new Error();
     }
