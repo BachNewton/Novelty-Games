@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 interface CarnivalProps {
     goHome: () => void;
@@ -18,7 +18,12 @@ interface Box {
     speed: number;
 };
 
-let temp = ['', '', ''];
+interface Ring {
+    x: number;
+    y: number;
+    radius: number;
+}
+
 let hasCanvasContextBeenSet = false;
 
 const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
@@ -34,17 +39,13 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
         if (ctx === null) return;
 
         const resizeCanvas = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = window.visualViewport?.width || window.innerWidth;
+            canvas.height = window.visualViewport?.height || window.innerHeight;
         };
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
         initCanvas(canvas, ctx, goHome);
-
-        return () => {
-            window.removeEventListener('resize', resizeCanvas);
-        };
     }, []);
 
     return <div style={{ display: 'flex', height: '100vh' }}>
@@ -53,28 +54,21 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
 };
 
 function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, goHome: () => void) {
-    console.log('initCanvas');
     let level = 0;
     const boxes = [createBox(level)];
+    const rings = new Array<Ring>();
     const startTime = Date.now();
 
     canvas.onclick = e => {
-        console.log('Canvas clicked!', 'X:', e.clientX, 'Y:', e.clientY);
-
-        handleClick(e, canvas, level, boxes, () => {
-            console.log('onHit');
+        handleClick(e, canvas, level, boxes, rings, () => {
             level++;
-
-            temp[2] = 'Hit';
 
             if (level >= 6) {
                 alert(`You win!\n${getStopwatch(startTime)}\nHi Nick! 😜`);
                 hasCanvasContextBeenSet = false;
                 goHome();
             } else {
-                console.log('Creating a new box');
                 boxes.push(createBox(level));
-                console.log('Box created - boxes:', boxes.length);
             }
         });
     };
@@ -84,14 +78,15 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, go
         const deltaTime = timeNow - previousTime;
         previousTime = timeNow;
 
-        draw(deltaTime, canvas, ctx, boxes, startTime);
+        draw(deltaTime, canvas, ctx, boxes, rings, startTime);
+        update(deltaTime, canvas, boxes, rings);
 
         requestAnimationFrame(animate);
     };
     animate(previousTime);
 }
 
-function draw(deltaTime: number, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: Box[], startTime: number) {
+function draw(deltaTime: number, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: Box[], rings: Ring[], startTime: number) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = 'white';
@@ -100,10 +95,14 @@ function draw(deltaTime: number, canvas: HTMLCanvasElement, ctx: CanvasRendering
     ctx.textBaseline = 'middle';
     ctx.fillText(getStopwatch(startTime), canvas.width / 2, canvas.height / 2);
 
-    ctx.font = `25px Arial`;
-    ctx.fillText(temp[0], canvas.width / 2, canvas.height / 3);
-    ctx.fillText(temp[1], canvas.width / 2, canvas.height / 4);
-    ctx.fillText(temp[2], canvas.width / 2, canvas.height / 5);
+    for (const ring of rings) {
+        ctx.beginPath();
+        ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.strokeStyle = 'grey';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
 
     for (const box of boxes) {
         ctx.fillStyle = box.color;
@@ -121,20 +120,43 @@ function draw(deltaTime: number, canvas: HTMLCanvasElement, ctx: CanvasRendering
     }
 }
 
-function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, boxes: Box[], onHit: () => void) {
+function update(deltaTime: number, canvas: HTMLCanvasElement, boxes: Box[], rings: Ring[]) {
+    for (const ring of rings) {
+        ring.radius += 0.00085 * deltaTime * canvas.height;
+    }
+
+    for (let i = rings.length - 1; i >= 0; i--) {
+        if (rings[i].radius > canvas.width && rings[i].radius > canvas.height) {
+            rings.splice(i, 1);
+        }
+    }
+
+    for (const box of boxes) {
+        box.x += SPEED_TARGET * deltaTime * canvas.height * box.speed * Math.cos(box.angle);
+        box.x = Math.min(box.x, canvas.width - box.width * canvas.height * SIZE_TARGET);
+        box.x = Math.max(box.x, 0);
+        box.y += SPEED_TARGET * deltaTime * canvas.height * box.speed * Math.sin(box.angle);
+        box.y = Math.min(box.y, canvas.height - box.height * canvas.height * SIZE_TARGET);
+        box.y = Math.max(box.y, 0);
+        box.angle += 0.5 * Math.random() - 0.25;
+    }
+}
+
+function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, boxes: Box[], rings: Ring[], onHit: () => void) {
     const mouseX = e.pageX;
     const mouseY = e.pageY;
+
+    rings.push({
+        x: mouseX,
+        y: mouseY,
+        radius: 10
+    });
 
     const targetBox = boxes[level];
     const width = targetBox.width * canvas.height * SIZE_TARGET;
     const height = targetBox.height * canvas.height * SIZE_TARGET;
 
-    temp[0] = `X: ${mouseX.toFixed(0)}, y: ${mouseY.toFixed(0)}`
-    temp[1] = `topLeft: (${targetBox.x.toFixed(0)}, ${targetBox.y.toFixed(0)}), bottomRight: (${(targetBox.x + width).toFixed(0)}, ${(targetBox.y + height).toFixed(0)})`;
-    temp[2] = 'Miss';
-
     if (mouseX >= targetBox.x && mouseX <= targetBox.x + width && mouseY >= targetBox.y && mouseY <= targetBox.y + height) {
-        console.log('handleClick determined a hit');
         onHit();
     }
 }
