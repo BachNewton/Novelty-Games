@@ -25,7 +25,6 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
-        console.log('useEffect', 'hasCanvasContextBeenSet:', hasCanvasContextBeenSet);
         if (hasCanvasContextBeenSet) return;
         hasCanvasContextBeenSet = true;
 
@@ -41,7 +40,7 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        startCanvas(canvas, ctx, goHome);
+        initCanvas(canvas, ctx, goHome);
 
         return () => {
             window.removeEventListener('resize', resizeCanvas);
@@ -53,17 +52,15 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
     </div>;
 };
 
-function startCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, goHome: () => void) {
-    console.log('Starting canvas');
+function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, goHome: () => void) {
+    console.log('initCanvas');
     let level = 0;
+    const boxes = [createBox(level)];
     const startTime = Date.now();
 
     canvas.onclick = e => {
         console.log('Canvas clicked!', 'X:', e.clientX, 'Y:', e.clientY);
-    };
 
-    const onClick = (e: MouseEvent) => {
-        console.log('onClick');
         handleClick(e, canvas, level, boxes, startTime, goHome, () => {
             console.log('onHit');
             level++;
@@ -71,54 +68,57 @@ function startCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, g
             temp[2] = 'Hit';
 
             if (level >= 6) {
-                alert(`You win!\n${getTime(startTime)}\nHi Nick! 😜`);
+                alert(`You win!\n${getStopwatch(startTime)}\nHi Nick! 😜`);
                 hasCanvasContextBeenSet = false;
                 goHome();
             } else {
+                console.log('Creating a new box');
                 boxes.push(createBox(level));
+                console.log('Box created - boxes:', boxes.length);
             }
         });
     };
 
-    const boxes = [createBox(0)]
     let previousTime = performance.now();
-
     const animate: FrameRequestCallback = (timeNow: DOMHighResTimeStamp) => {
         const deltaTime = timeNow - previousTime;
         previousTime = timeNow;
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = 'white';
-        ctx.font = `${getFontSize(canvas)}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(getTime(startTime), canvas.width / 2, canvas.height / 2);
-
-        ctx.font = `25px Arial`;
-        ctx.fillText(temp[0], canvas.width / 2, canvas.height / 3);
-        ctx.fillText(temp[1], canvas.width / 2, canvas.height / 4);
-        ctx.fillText(temp[2], canvas.width / 2, canvas.height / 5);
-
-        for (const box of boxes) {
-            ctx.fillStyle = box.color;
-            const width = box.width * canvas.height * SIZE_TARGET;
-            const height = box.height * canvas.height * SIZE_TARGET;
-            ctx.fillRect(box.x, box.y, width, height);
-
-            box.x += SPEED_TARGET * deltaTime * canvas.height * box.speed * Math.cos(box.angle);
-            box.x = Math.min(box.x, canvas.width - box.width * canvas.height * SIZE_TARGET);
-            box.x = Math.max(box.x, 0);
-            box.y += SPEED_TARGET * deltaTime * canvas.height * box.speed * Math.sin(box.angle);
-            box.y = Math.min(box.y, canvas.height - box.height * canvas.height * SIZE_TARGET);
-            box.y = Math.max(box.y, 0);
-            box.angle += 0.5 * Math.random() - 0.25;
-        }
+        draw(deltaTime, canvas, ctx, boxes, startTime);
 
         requestAnimationFrame(animate);
     };
-
     animate(previousTime);
+}
+
+function draw(deltaTime: number, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: Box[], startTime: number) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = 'white';
+    ctx.font = `${getFontSize(canvas)}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(getStopwatch(startTime), canvas.width / 2, canvas.height / 2);
+
+    ctx.font = `25px Arial`;
+    ctx.fillText(temp[0], canvas.width / 2, canvas.height / 3);
+    ctx.fillText(temp[1], canvas.width / 2, canvas.height / 4);
+    ctx.fillText(temp[2], canvas.width / 2, canvas.height / 5);
+
+    for (const box of boxes) {
+        ctx.fillStyle = box.color;
+        const width = box.width * canvas.height * SIZE_TARGET;
+        const height = box.height * canvas.height * SIZE_TARGET;
+        ctx.fillRect(box.x, box.y, width, height);
+
+        box.x += SPEED_TARGET * deltaTime * canvas.height * box.speed * Math.cos(box.angle);
+        box.x = Math.min(box.x, canvas.width - box.width * canvas.height * SIZE_TARGET);
+        box.x = Math.max(box.x, 0);
+        box.y += SPEED_TARGET * deltaTime * canvas.height * box.speed * Math.sin(box.angle);
+        box.y = Math.min(box.y, canvas.height - box.height * canvas.height * SIZE_TARGET);
+        box.y = Math.max(box.y, 0);
+        box.angle += 0.5 * Math.random() - 0.25;
+    }
 }
 
 function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, boxes: Array<Box>, startTime: number, goHome: () => void, onHit: () => void) {
@@ -140,7 +140,7 @@ function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, bo
         temp[2] = 'Hit';
 
         if (level >= 6) {
-            alert(`You win!\n${getTime(startTime)}\nHi Nick! 😜`);
+            alert(`You win!\n${getStopwatch(startTime)}\nHi Nick! 😜`);
             goHome();
         } else {
             boxes.push(createBox(level));
@@ -152,7 +152,7 @@ function getFontSize(canvas: HTMLCanvasElement): number {
     return canvas.height * FONT_TARGET;
 }
 
-function getTime(startTime: number): string {
+function getStopwatch(startTime: number): string {
     const time = ((Date.now() - startTime) / 1000).toFixed(1);
     return `${time}`;
 }
