@@ -52,7 +52,7 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
 
 function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, goHome: () => void) {
     let level = 0;
-    const boxes = [createBox(level)];
+    const boxes = [createBox(level, canvas)];
     const rings = new Array<Ring>();
     const startTime = Date.now();
 
@@ -65,7 +65,7 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, go
                 hasCanvasContextBeenSet = false;
                 goHome();
             } else {
-                boxes.push(createBox(level));
+                boxes.push(createBox(level, canvas));
             }
         });
     };
@@ -159,12 +159,14 @@ function getStopwatch(startTime: number): string {
     return `${time}`;
 }
 
-function createBox(level: number): Box {
+function createBox(level: number, canvas: HTMLCanvasElement): Box {
+    const size = getSize(level);
+
     return {
-        x: 0,
-        y: 0,
-        width: getSize(level),
-        height: getSize(level),
+        x: randomNum(0, canvas.width - size * canvas.height),
+        y: randomNum(0, canvas.height - size * canvas.height),
+        width: size,
+        height: size,
         angle: 0.25 * Math.PI,
         color: getColor(level),
         speed: getSpeed(level)
