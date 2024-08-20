@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface CarnivalProps {
     goHome: () => void;
@@ -19,94 +19,32 @@ interface Box {
 };
 
 let temp = ['', '', ''];
-const renderIds: Array<number> = [];
+let hasCanvasContextBeenSet = false;
 
 const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
+        console.log('useEffect', 'hasCanvasContextBeenSet:', hasCanvasContextBeenSet);
+        if (hasCanvasContextBeenSet) return;
+        hasCanvasContextBeenSet = true;
+
         const canvas = canvasRef.current;
         if (canvas === null) return;
         const ctx = canvas.getContext('2d');
         if (ctx === null) return;
 
-        let level = 0;
-        const startTime = Date.now();
-
         const resizeCanvas = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         };
-
-        const onClick = (e: MouseEvent) => {
-            console.log('onClick');
-            handleClick(e, canvas, level, boxes, startTime, goHome, () => {
-                console.log('onHit');
-                level++;
-
-                temp[2] = 'Hit';
-
-                if (level >= 6) {
-                    alert(`You win!\n${getTime(startTime)}\nHi Nick! 😜`);
-                    goHome();
-                } else {
-                    boxes.push(createBox(level));
-                }
-            });
-        };
-
-        window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('click', onClick);
-
-        const boxes = [createBox(0)]
-        let previousTime = performance.now();
-
-        const renderId = Math.random();
-        renderIds.unshift(renderId);
-
-        const animate: FrameRequestCallback = (timeNow: DOMHighResTimeStamp) => {
-            const deltaTime = timeNow - previousTime;
-            previousTime = timeNow;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = 'white';
-            ctx.font = `${getFontSize(canvas)}px Arial`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(getTime(startTime), canvas.width / 2, canvas.height / 2);
-
-            ctx.font = `25px Arial`;
-            ctx.fillText(temp[0], canvas.width / 2, canvas.height / 3);
-            ctx.fillText(temp[1], canvas.width / 2, canvas.height / 4);
-            ctx.fillText(temp[2], canvas.width / 2, canvas.height / 5);
-
-            for (const box of boxes) {
-                ctx.fillStyle = box.color;
-                const width = box.width * canvas.height * SIZE_TARGET;
-                const height = box.height * canvas.height * SIZE_TARGET;
-                ctx.fillRect(box.x, box.y, width, height);
-
-                box.x += SPEED_TARGET * deltaTime * canvas.height * box.speed * Math.cos(box.angle);
-                box.x = Math.min(box.x, canvas.width - box.width * canvas.height * SIZE_TARGET);
-                box.x = Math.max(box.x, 0);
-                box.y += SPEED_TARGET * deltaTime * canvas.height * box.speed * Math.sin(box.angle);
-                box.y = Math.min(box.y, canvas.height - box.height * canvas.height * SIZE_TARGET);
-                box.y = Math.max(box.y, 0);
-                box.angle += 0.5 * Math.random() - 0.25;
-            }
-
-            if (renderId === renderIds[0]) {
-                requestAnimationFrame(animate);
-            }
-        };
-
         resizeCanvas();
-        animate(previousTime);
+        window.addEventListener('resize', resizeCanvas);
+
+        startCanvas(canvas, ctx, goHome);
 
         return () => {
             window.removeEventListener('resize', resizeCanvas);
-            window.removeEventListener('click', onClick);
         };
     }, []);
 
@@ -114,6 +52,74 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
         <canvas ref={canvasRef} />
     </div>;
 };
+
+function startCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, goHome: () => void) {
+    console.log('Starting canvas');
+    let level = 0;
+    const startTime = Date.now();
+
+    canvas.onclick = e => {
+        console.log('Canvas clicked!', 'X:', e.clientX, 'Y:', e.clientY);
+    };
+
+    const onClick = (e: MouseEvent) => {
+        console.log('onClick');
+        handleClick(e, canvas, level, boxes, startTime, goHome, () => {
+            console.log('onHit');
+            level++;
+
+            temp[2] = 'Hit';
+
+            if (level >= 6) {
+                alert(`You win!\n${getTime(startTime)}\nHi Nick! 😜`);
+                hasCanvasContextBeenSet = false;
+                goHome();
+            } else {
+                boxes.push(createBox(level));
+            }
+        });
+    };
+
+    const boxes = [createBox(0)]
+    let previousTime = performance.now();
+
+    const animate: FrameRequestCallback = (timeNow: DOMHighResTimeStamp) => {
+        const deltaTime = timeNow - previousTime;
+        previousTime = timeNow;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = 'white';
+        ctx.font = `${getFontSize(canvas)}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(getTime(startTime), canvas.width / 2, canvas.height / 2);
+
+        ctx.font = `25px Arial`;
+        ctx.fillText(temp[0], canvas.width / 2, canvas.height / 3);
+        ctx.fillText(temp[1], canvas.width / 2, canvas.height / 4);
+        ctx.fillText(temp[2], canvas.width / 2, canvas.height / 5);
+
+        for (const box of boxes) {
+            ctx.fillStyle = box.color;
+            const width = box.width * canvas.height * SIZE_TARGET;
+            const height = box.height * canvas.height * SIZE_TARGET;
+            ctx.fillRect(box.x, box.y, width, height);
+
+            box.x += SPEED_TARGET * deltaTime * canvas.height * box.speed * Math.cos(box.angle);
+            box.x = Math.min(box.x, canvas.width - box.width * canvas.height * SIZE_TARGET);
+            box.x = Math.max(box.x, 0);
+            box.y += SPEED_TARGET * deltaTime * canvas.height * box.speed * Math.sin(box.angle);
+            box.y = Math.min(box.y, canvas.height - box.height * canvas.height * SIZE_TARGET);
+            box.y = Math.max(box.y, 0);
+            box.angle += 0.5 * Math.random() - 0.25;
+        }
+
+        requestAnimationFrame(animate);
+    };
+
+    animate(previousTime);
+}
 
 function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, boxes: Array<Box>, startTime: number, goHome: () => void, onHit: () => void) {
     const mouseX = e.pageX;
