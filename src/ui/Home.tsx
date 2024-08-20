@@ -3,7 +3,7 @@ import MilleBornesHome from '../mille-bornes/ui/Home';
 import TriviaHome from '../trivia/ui/Home';
 import Carnival from '../carnival/ui/Carnival';
 
-const APP_VERSION = 'v1.7.0';
+const APP_VERSION = 'v1.7.1';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
