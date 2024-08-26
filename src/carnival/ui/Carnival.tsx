@@ -1,24 +1,9 @@
 import { useEffect, useRef } from "react";
 import { randomNum } from "../../util/Randomizer";
+import { Box, Ring } from "../data/Data";
 
 interface CarnivalProps {
     goHome: () => void;
-}
-
-interface Box {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    angle: number;
-    color: string;
-    speed: number;
-};
-
-interface Ring {
-    x: number;
-    y: number;
-    radius: number;
 }
 
 let hasCanvasContextBeenSet = false;
@@ -103,7 +88,7 @@ function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: B
 
     for (const ring of rings) {
         ctx.beginPath();
-        ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
+        ctx.arc(ring.pos.x, ring.pos.y, ring.radius, 0, Math.PI * 2);
         ctx.closePath();
         ctx.strokeStyle = 'grey';
         ctx.lineWidth = 2;
@@ -114,7 +99,7 @@ function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: B
         ctx.fillStyle = box.color;
         const width = box.width * canvas.height;
         const height = box.height * canvas.height;
-        ctx.fillRect(box.x, box.y, width, height);
+        ctx.fillRect(box.pos.x, box.pos.y, width, height);
     }
 }
 
@@ -130,12 +115,12 @@ function update(deltaTime: number, canvas: HTMLCanvasElement, boxes: Box[], ring
     }
 
     for (const box of boxes) {
-        box.x += box.speed * Math.cos(box.angle) * deltaTime * canvas.height;
-        box.x = Math.min(box.x, canvas.width - box.width * canvas.height);
-        box.x = Math.max(box.x, 0);
-        box.y += box.speed * Math.sin(box.angle) * deltaTime * canvas.height;
-        box.y = Math.min(box.y, canvas.height - box.height * canvas.height);
-        box.y = Math.max(box.y, 0);
+        box.pos.x += box.speed * Math.cos(box.angle) * deltaTime * canvas.height;
+        box.pos.x = Math.min(box.pos.x, canvas.width - box.width * canvas.height);
+        box.pos.x = Math.max(box.pos.x, 0);
+        box.pos.y += box.speed * Math.sin(box.angle) * deltaTime * canvas.height;
+        box.pos.y = Math.min(box.pos.y, canvas.height - box.height * canvas.height);
+        box.pos.y = Math.max(box.pos.y, 0);
         box.angle += randomNum(-0.06, 0.06) * deltaTime;
     }
 }
@@ -145,8 +130,10 @@ function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, bo
     const mouseY = e.pageY;
 
     rings.push({
-        x: mouseX,
-        y: mouseY,
+        pos: {
+            x: mouseX,
+            y: mouseY,
+        },
         radius: 10
     });
 
@@ -154,7 +141,7 @@ function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, bo
     const width = targetBox.width * canvas.height;
     const height = targetBox.height * canvas.height;
 
-    if (mouseX >= targetBox.x && mouseX <= targetBox.x + width && mouseY >= targetBox.y && mouseY <= targetBox.y + height) {
+    if (mouseX >= targetBox.pos.x && mouseX <= targetBox.pos.x + width && mouseY >= targetBox.pos.y && mouseY <= targetBox.pos.y + height) {
         onHit();
     }
 }
@@ -172,8 +159,10 @@ function createBox(level: number, canvas: HTMLCanvasElement): Box {
     const size = getSize(level);
 
     return {
-        x: randomNum(0, canvas.width - size * canvas.height),
-        y: randomNum(0, canvas.height - size * canvas.height),
+        pos: {
+            x: randomNum(0, canvas.width - size * canvas.height),
+            y: randomNum(0, canvas.height - size * canvas.height),
+        },
         width: size,
         height: size,
         angle: 0.25 * Math.PI,
