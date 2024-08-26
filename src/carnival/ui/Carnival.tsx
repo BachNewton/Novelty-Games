@@ -39,7 +39,7 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
 
 function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, goHome: () => void) {
     let level = 0;
-    const boxes = [createBox(level, canvas)];
+    const boxes = [createBox(level)];
     const rings = new Array<Ring>();
     const startTime = Date.now();
 
@@ -52,7 +52,7 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, go
                 hasCanvasContextBeenSet = false;
                 goHome();
             } else {
-                boxes.push(createBox(level, canvas));
+                boxes.push(createBox(level));
             }
         });
     };
@@ -104,6 +104,11 @@ function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: B
         const width = box.width * canvas.width;
         const height = box.height * canvas.height;
         ctx.fillRect(x, y, width, height);
+
+        if (box.hitColor === null) continue;
+        ctx.strokeStyle = box.hitColor;
+        ctx.lineWidth = 8;
+        ctx.strokeRect(x, y, width, height);
     }
 }
 
@@ -146,7 +151,10 @@ function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, bo
 
     const targetBox = boxes[level];
 
-    if (collision({ x: mouseX / canvas.width, y: mouseY / canvas.height }, targetBox)) {
+    const hit = collision({ x: mouseX / canvas.width, y: mouseY / canvas.height }, targetBox);
+    const hitPreviousPos = collision({ x: mouseX / canvas.width, y: mouseY / canvas.height }, targetBox, true);
+    if (hit || hitPreviousPos) {
+        targetBox.hitColor = hit ? 'white' : 'gold';
         onHit();
     }
 }
@@ -160,7 +168,7 @@ function getStopwatch(startTime: number): string {
     return `${time}`;
 }
 
-function createBox(level: number, canvas: HTMLCanvasElement): Box {
+function createBox(level: number): Box {
     const size = getSize(level);
     const width = (16 / 9) * size;
     const height = 1 * size;
@@ -172,12 +180,13 @@ function createBox(level: number, canvas: HTMLCanvasElement): Box {
 
     return {
         pos: pos,
-        previousPos: pos,
+        previousPos: { x: pos.x, y: pos.y },
         width: width,
         height: height,
         angle: 0.25 * Math.PI,
         color: getColor(level),
-        speed: getSpeed(level)
+        speed: getSpeed(level),
+        hitColor: null
     };
 }
 

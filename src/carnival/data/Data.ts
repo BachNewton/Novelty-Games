@@ -6,6 +6,7 @@ export interface Box {
     angle: number;
     color: string;
     speed: number;
+    hitColor: string | null;
 };
 
 export interface Ring {
