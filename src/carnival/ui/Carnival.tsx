@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { randomNum } from "../../util/Randomizer";
-import { Box, Ring } from "../data/Data";
+import { Box, Position, Ring } from "../data/Data";
+import { collision } from "../logic/Collisions";
 
 interface CarnivalProps {
     goHome: () => void;
@@ -115,6 +116,9 @@ function update(deltaTime: number, canvas: HTMLCanvasElement, boxes: Box[], ring
     }
 
     for (const box of boxes) {
+        box.previousPos.x = box.pos.x;
+        box.previousPos.y = box.pos.y;
+
         box.pos.x += box.speed * Math.cos(box.angle) * deltaTime * canvas.height;
         box.pos.x = Math.min(box.pos.x, canvas.width - box.width * canvas.height);
         box.pos.x = Math.max(box.pos.x, 0);
@@ -138,10 +142,8 @@ function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, bo
     });
 
     const targetBox = boxes[level];
-    const width = targetBox.width * canvas.height;
-    const height = targetBox.height * canvas.height;
 
-    if (mouseX >= targetBox.pos.x && mouseX <= targetBox.pos.x + width && mouseY >= targetBox.pos.y && mouseY <= targetBox.pos.y + height) {
+    if (collision({ x: mouseX, y: mouseY }, targetBox, canvas.height)) {
         onHit();
     }
 }
@@ -158,11 +160,14 @@ function getStopwatch(startTime: number): string {
 function createBox(level: number, canvas: HTMLCanvasElement): Box {
     const size = getSize(level);
 
+    const pos: Position = {
+        x: randomNum(0, canvas.width - size * canvas.height),
+        y: randomNum(0, canvas.height - size * canvas.height)
+    };
+
     return {
-        pos: {
-            x: randomNum(0, canvas.width - size * canvas.height),
-            y: randomNum(0, canvas.height - size * canvas.height),
-        },
+        pos: pos,
+        previousPos: pos,
         width: size,
         height: size,
         angle: 0.25 * Math.PI,

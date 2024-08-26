@@ -1,5 +1,6 @@
 export interface Box {
     pos: Position;
+    previousPos: Position;
     width: number;
     height: number;
     angle: number;
@@ -12,7 +13,7 @@ export interface Ring {
     radius: number;
 }
 
-interface Position {
+export interface Position {
     x: number;
     y: number;
 }
