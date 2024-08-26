@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { randomNum } from "../../util/Randomizer";
 import { Box, Position, Ring } from "../data/Data";
 import { collision } from "../logic/Collisions";
+import { coerceToRange } from "../../util/Math";
 
 interface CarnivalProps {
     goHome: () => void;
@@ -22,8 +23,8 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
         if (ctx === null) return;
 
         const resizeCanvas = () => {
-            canvas.width = window.visualViewport?.width || window.innerWidth;
-            canvas.height = window.visualViewport?.height || window.innerHeight;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         };
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
@@ -98,9 +99,11 @@ function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: B
 
     for (const box of boxes) {
         ctx.fillStyle = box.color;
-        const width = box.width * canvas.height;
+        const x = box.pos.x * canvas.width;
+        const y = box.pos.y * canvas.height;
+        const width = box.width * canvas.width;
         const height = box.height * canvas.height;
-        ctx.fillRect(box.pos.x, box.pos.y, width, height);
+        ctx.fillRect(x, y, width, height);
     }
 }
 
@@ -119,12 +122,12 @@ function update(deltaTime: number, canvas: HTMLCanvasElement, boxes: Box[], ring
         box.previousPos.x = box.pos.x;
         box.previousPos.y = box.pos.y;
 
-        box.pos.x += box.speed * Math.cos(box.angle) * deltaTime * canvas.height;
-        box.pos.x = Math.min(box.pos.x, canvas.width - box.width * canvas.height);
-        box.pos.x = Math.max(box.pos.x, 0);
-        box.pos.y += box.speed * Math.sin(box.angle) * deltaTime * canvas.height;
-        box.pos.y = Math.min(box.pos.y, canvas.height - box.height * canvas.height);
-        box.pos.y = Math.max(box.pos.y, 0);
+        box.pos.x += box.speed * Math.cos(box.angle) * deltaTime;
+        box.pos.x = coerceToRange(box.pos.x, 0, 1 - box.width);
+
+        box.pos.y += box.speed * Math.sin(box.angle) * deltaTime;
+        box.pos.y = coerceToRange(box.pos.y, 0, 1 - box.height);
+
         box.angle += randomNum(-0.06, 0.06) * deltaTime;
     }
 }
@@ -143,7 +146,7 @@ function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, bo
 
     const targetBox = boxes[level];
 
-    if (collision({ x: mouseX, y: mouseY }, targetBox, canvas.height)) {
+    if (collision({ x: mouseX / canvas.width, y: mouseY / canvas.height }, targetBox)) {
         onHit();
     }
 }
@@ -159,17 +162,19 @@ function getStopwatch(startTime: number): string {
 
 function createBox(level: number, canvas: HTMLCanvasElement): Box {
     const size = getSize(level);
+    const width = (16 / 9) * size;
+    const height = 1 * size;
 
     const pos: Position = {
-        x: randomNum(0, canvas.width - size * canvas.height),
-        y: randomNum(0, canvas.height - size * canvas.height)
+        x: randomNum(0, 1 - width),
+        y: randomNum(0, 1 - height)
     };
 
     return {
         pos: pos,
         previousPos: pos,
-        width: size,
-        height: size,
+        width: width,
+        height: height,
         angle: 0.25 * Math.PI,
         color: getColor(level),
         speed: getSpeed(level)
