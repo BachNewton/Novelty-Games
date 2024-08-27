@@ -39,13 +39,15 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
 
 function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, goHome: () => void) {
     let level = 0;
+    let noMisses = true;
     const boxes = [createBox(level)];
     const rings = new Array<Ring>();
     const startTime = Date.now();
 
     canvas.onclick = e => {
-        handleClick(e, canvas, level, boxes, rings, () => {
+        handleClick(e, canvas, level, boxes, rings, noMisses, () => {
             level++;
+            noMisses = true;
 
             if (level >= 6) {
                 alert(`You win!\n${getStopwatch(startTime)}\nHi Nick! 😜`);
@@ -54,6 +56,8 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, go
             } else {
                 boxes.push(createBox(level));
             }
+        }, () => {
+            noMisses = false;
         });
     };
 
@@ -105,10 +109,24 @@ function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: B
         const height = box.height * canvas.height;
         ctx.fillRect(x, y, width, height);
 
-        if (box.hitColor === null) continue;
-        ctx.strokeStyle = box.hitColor;
-        ctx.lineWidth = 8;
-        ctx.strokeRect(x, y, width, height);
+        if (box.isPerfect !== null) {
+            ctx.strokeStyle = box.isPerfect ? 'white' : 'black';
+            ctx.lineWidth = box.isPerfect ? 7 : 3;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + width, y + height);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x + width, y);
+            ctx.lineTo(x, y + height);
+            ctx.stroke();
+        }
+
+        if (box.hitColor !== null) {
+            ctx.strokeStyle = box.hitColor;
+            ctx.lineWidth = 8;
+            ctx.strokeRect(x, y, width, height);
+        }
     }
 }
 
@@ -137,7 +155,7 @@ function update(deltaTime: number, canvas: HTMLCanvasElement, boxes: Box[], ring
     }
 }
 
-function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, boxes: Box[], rings: Ring[], onHit: () => void) {
+function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, boxes: Box[], rings: Ring[], noMisses: boolean, onHit: () => void, onMiss: () => void) {
     const mouseX = e.pageX;
     const mouseY = e.pageY;
 
@@ -155,7 +173,10 @@ function handleClick(e: MouseEvent, canvas: HTMLCanvasElement, level: number, bo
     const hitPreviousPos = collision({ x: mouseX / canvas.width, y: mouseY / canvas.height }, targetBox, true);
     if (hit || hitPreviousPos) {
         targetBox.hitColor = hit ? 'white' : 'gold';
+        targetBox.isPerfect = noMisses ? true : false;
         onHit();
+    } else {
+        onMiss();
     }
 }
 
@@ -186,7 +207,8 @@ function createBox(level: number): Box {
         angle: 0.25 * Math.PI,
         color: getColor(level),
         speed: getSpeed(level),
-        hitColor: null
+        hitColor: null,
+        isPerfect: null
     };
 }
 

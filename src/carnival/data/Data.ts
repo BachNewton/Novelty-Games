@@ -7,6 +7,7 @@ export interface Box {
     color: string;
     speed: number;
     hitColor: string | null;
+    isPerfect: boolean | null;
 };
 
 export interface Ring {
