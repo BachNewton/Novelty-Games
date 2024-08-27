@@ -117,7 +117,7 @@ function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: B
 
         if (box.isPerfect !== null) {
             ctx.strokeStyle = box.isPerfect ? 'white' : 'black';
-            ctx.lineWidth = box.isPerfect ? 7 : 3;
+            ctx.lineWidth = 7;
             ctx.beginPath();
             ctx.moveTo(x, y);
             ctx.lineTo(x + width, y + height);
@@ -130,7 +130,7 @@ function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: B
 
         if (box.hitColor !== null) {
             ctx.strokeStyle = box.hitColor;
-            ctx.lineWidth = 8;
+            ctx.lineWidth = 7;
             ctx.strokeRect(x, y, width, height);
         }
     }
