@@ -8,6 +8,10 @@ interface CarnivalProps {
     goHome: () => void;
 }
 
+const GAME_OVER_TIME = 5000;
+const PERFECT_BONUS_TIME = 1000;
+const PERFECT_SPEED = 0.6;
+
 let hasCanvasContextBeenSet = false;
 
 const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
@@ -43,24 +47,34 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, go
     let finalTime: string | null = null;
     const boxes = [createBox(level)];
     const rings = new Array<Ring>();
-    const startTime = Date.now();
+    const startTime = performance.now();
+    let perfectTime: number | null = null;
 
     canvas.onclick = e => {
         if (finalTime !== null) return;
 
         handleClick(e, canvas, level, boxes, rings, noMisses, () => {
             level++;
-            noMisses = true;
+
+            if (noMisses) {
+                if (perfectTime === null || perfectTime < performance.now()) {
+                    perfectTime = performance.now() + PERFECT_BONUS_TIME;
+                } else {
+                    perfectTime += PERFECT_BONUS_TIME;
+                }
+            }
 
             if (level >= 6) {
                 finalTime = getStopwatch(startTime);
                 setTimeout(() => {
                     hasCanvasContextBeenSet = false;
                     goHome();
-                }, 5000);
+                }, GAME_OVER_TIME);
             } else {
                 boxes.push(createBox(level));
             }
+
+            noMisses = true;
         }, () => {
             noMisses = false;
         });
@@ -71,9 +85,9 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, go
         const deltaTime = timeNow - previousTime;
         previousTime = timeNow;
 
-        draw(canvas, ctx, boxes, rings, startTime, finalTime);
+        draw(canvas, ctx, boxes, rings, startTime, finalTime, perfectTime);
         drawDebug(canvas, ctx, deltaTime);
-        update(deltaTime, canvas, boxes, rings);
+        update(deltaTime, canvas, boxes, rings, perfectTime);
 
         requestAnimationFrame(animate);
     };
@@ -88,8 +102,30 @@ function drawDebug(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, del
     ctx.fillText(`FPS: ${(1000 / deltaTime).toFixed(0)}`, 0, 0);
 }
 
-function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: Box[], rings: Ring[], startTime: number, finalTime: string | null) {
+function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: Box[], rings: Ring[], startTime: number, finalTime: string | null, perfectTime: number | null) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (perfectTime !== null && perfectTime >= performance.now()) {
+        ctx.fillStyle = 'grey';
+        ctx.beginPath();
+        const remainingTimePercentage = (performance.now() - perfectTime) / PERFECT_BONUS_TIME;
+        const startAngle = -Math.PI / 2;
+        const endAngle = startAngle - 2 * Math.PI * remainingTimePercentage;
+        ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 4, startAngle, endAngle);
+        ctx.lineTo(canvas.width / 2, canvas.height / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = 'gold';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = 'white';
+        ctx.font = `${getFontSize(canvas) / 2}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('YOU ARE', canvas.width / 2, 0.25 * canvas.height);
+        ctx.fillText('IN THE ZONE', canvas.width / 2, 0.75 * canvas.height);
+    }
 
     ctx.fillStyle = 'white';
     ctx.font = `${getFontSize(canvas)}px sans-serif`;
@@ -136,7 +172,7 @@ function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: B
     }
 }
 
-function update(deltaTime: number, canvas: HTMLCanvasElement, boxes: Box[], rings: Ring[]) {
+function update(deltaTime: number, canvas: HTMLCanvasElement, boxes: Box[], rings: Ring[], perfectTime: number | null) {
     for (const ring of rings) {
         ring.radius += 0.00085 * deltaTime * canvas.height;
     }
@@ -151,10 +187,12 @@ function update(deltaTime: number, canvas: HTMLCanvasElement, boxes: Box[], ring
         box.previousPos.x = box.pos.x;
         box.previousPos.y = box.pos.y;
 
-        box.pos.x += box.speed * Math.cos(box.angle) * deltaTime;
+        const speedScale = perfectTime !== null && perfectTime >= performance.now() ? PERFECT_SPEED : 1;
+
+        box.pos.x += speedScale * box.speed * Math.cos(box.angle) * deltaTime;
         box.pos.x = coerceToRange(box.pos.x, 0, 1 - box.width);
 
-        box.pos.y += box.speed * Math.sin(box.angle) * deltaTime;
+        box.pos.y += speedScale * box.speed * Math.sin(box.angle) * deltaTime;
         box.pos.y = coerceToRange(box.pos.y, 0, 1 - box.height);
 
         box.angle += randomNum(-0.06, 0.06) * deltaTime;
@@ -191,7 +229,7 @@ function getFontSize(canvas: HTMLCanvasElement): number {
 }
 
 function getStopwatch(startTime: number): string {
-    const time = ((Date.now() - startTime) / 1000).toFixed(1);
+    const time = ((performance.now() - startTime) / 1000).toFixed(1);
     return `${time}`;
 }
 
