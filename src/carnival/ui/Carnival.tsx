@@ -40,19 +40,24 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
 function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, goHome: () => void) {
     let level = 0;
     let noMisses = true;
+    let finalTime: string | null = null;
     const boxes = [createBox(level)];
     const rings = new Array<Ring>();
     const startTime = Date.now();
 
     canvas.onclick = e => {
+        if (finalTime !== null) return;
+
         handleClick(e, canvas, level, boxes, rings, noMisses, () => {
             level++;
             noMisses = true;
 
             if (level >= 6) {
-                alert(`You win!\n${getStopwatch(startTime)}\nHi Nick! 😜`);
-                hasCanvasContextBeenSet = false;
-                goHome();
+                finalTime = getStopwatch(startTime);
+                setTimeout(() => {
+                    hasCanvasContextBeenSet = false;
+                    goHome();
+                }, 5000);
             } else {
                 boxes.push(createBox(level));
             }
@@ -66,7 +71,7 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, go
         const deltaTime = timeNow - previousTime;
         previousTime = timeNow;
 
-        draw(canvas, ctx, boxes, rings, startTime);
+        draw(canvas, ctx, boxes, rings, startTime, finalTime);
         drawDebug(canvas, ctx, deltaTime);
         update(deltaTime, canvas, boxes, rings);
 
@@ -83,14 +88,15 @@ function drawDebug(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, del
     ctx.fillText(`FPS: ${(1000 / deltaTime).toFixed(0)}`, 0, 0);
 }
 
-function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: Box[], rings: Ring[], startTime: number) {
+function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: Box[], rings: Ring[], startTime: number, finalTime: string | null) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = 'white';
     ctx.font = `${getFontSize(canvas)}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(getStopwatch(startTime), canvas.width / 2, canvas.height / 2);
+    const text = finalTime === null ? getStopwatch(startTime) : `Game Over: ${finalTime}`;
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
     for (const ring of rings) {
         ctx.beginPath();
