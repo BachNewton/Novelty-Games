@@ -8,7 +8,7 @@ interface CarnivalProps {
     goHome: () => void;
 }
 
-const GAME_OVER_TIME = 5000;
+const GAME_OVER_TIME = 8000;
 const PERFECT_BONUS_TIME = 1000;
 const PERFECT_SPEED = 0.6;
 
@@ -47,8 +47,20 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, go
     let finalTime: string | null = null;
     const boxes = [createBox(level)];
     const rings = new Array<Ring>();
-    const startTime = performance.now();
+    let startTime = performance.now();
     let perfectTime: number | null = null;
+
+    canvas.ontouchstart = e => {
+        if (e.touches.length >= 3) {
+            level = 0;
+            noMisses = true;
+            finalTime = null;
+            boxes.splice(0, boxes.length, createBox(level));
+            rings.splice(0, rings.length);
+            startTime = performance.now();
+            perfectTime = null;
+        }
+    };
 
     canvas.onclick = e => {
         if (finalTime !== null) return;
@@ -127,12 +139,9 @@ function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: B
         ctx.fillText('IN THE ZONE', canvas.width / 2, 0.75 * canvas.height);
     }
 
-    ctx.fillStyle = 'white';
-    ctx.font = `${getFontSize(canvas)}px sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const text = finalTime === null ? getStopwatch(startTime) : `Game Over: ${finalTime}`;
-    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+    if (finalTime === null) {
+        drawTime(canvas, ctx, startTime, finalTime);
+    }
 
     for (const ring of rings) {
         ctx.beginPath();
@@ -170,6 +179,19 @@ function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, boxes: B
             ctx.strokeRect(x, y, width, height);
         }
     }
+
+    if (finalTime !== null) {
+        drawTime(canvas, ctx, startTime, finalTime);
+    }
+}
+
+function drawTime(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, startTime: number, finalTime: string | null) {
+    const text = finalTime === null ? getStopwatch(startTime) : `Game Over: ${finalTime}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'white';
+    ctx.font = `${getFontSize(canvas)}px sans-serif`;
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 }
 
 function update(deltaTime: number, canvas: HTMLCanvasElement, boxes: Box[], rings: Ring[], perfectTime: number | null) {
@@ -235,7 +257,7 @@ function getStopwatch(startTime: number): string {
 
 function createBox(level: number): Box {
     const size = getSize(level);
-    const width = (16 / 9) * size;
+    const width = (16 / 8) * size;
     const height = 1 * size;
 
     const pos: Position = {
