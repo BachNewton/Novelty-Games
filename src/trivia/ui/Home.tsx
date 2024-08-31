@@ -9,6 +9,7 @@ import Filter, { RollercoasterFilterGetter } from './Filter';
 import { RollercoasterFilter, deleteFilter, filter, saveFilter } from '../logic/FilterRepo';
 import HomeButton from '../../ui/HomeButton';
 import SettingsPage from './SettingsPage';
+import PokemonSettings, { PokemonQuestionType, PokemonSettingsQuestionTypeGetter, savePokemonQuestionTypeSelection } from './PokemonSettings';
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
@@ -65,6 +66,14 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
         setState({ ...state });
     };
 
+    const onPokemonConfirmClicked = (pokemonQuestionType: PokemonQuestionType | undefined) => {
+        if (pokemonQuestionType === undefined) return;
+
+        savePokemonQuestionTypeSelection(pokemonQuestionType);
+        state.ui = UiState.HOME;
+        setState({ ...state });
+    };
+
     switch (state.ui) {
         case UiState.HOME:
             return HomeUi(
@@ -81,7 +90,7 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
                 progressListener={progressUpdater}
             />;
         case UiState.SETTINGS:
-            return getSettingsUi(state.dataType, state.data, onSettingsPageCancelClicked, onFilterConfirmClicked);
+            return getSettingsUi(state.dataType, state.data, onSettingsPageCancelClicked, onFilterConfirmClicked, onPokemonConfirmClicked);
     }
 };
 
@@ -89,7 +98,8 @@ function getSettingsUi(
     dataType: DataType,
     data: Promise<Data>,
     onSettingsPageCancelClicked: () => void,
-    onFilterConfirmClicked: (rollercoasterFilter: RollercoasterFilter | undefined) => void
+    onFilterConfirmClicked: (rollercoasterFilter: RollercoasterFilter | undefined) => void,
+    onPokemonConfirmClicked: (pokemonQuestionType: PokemonQuestionType | undefined) => void
 ): JSX.Element {
     if (dataType === DataType.ROLLERCOASTERS) {
         const rollercoasterFilterGetter: RollercoasterFilterGetter = { get: null };
@@ -107,13 +117,12 @@ function getSettingsUi(
             onConfirm={() => onFilterConfirmClicked(rollercoasterFilterGetter.get?.())}
         />;
     } else if (dataType === DataType.POKEMON) {
-        const content = Promise.resolve(
-            <h1>Pokémon Settings - work in progress</h1>
-        );
+        const questionTypeGetter: PokemonSettingsQuestionTypeGetter = { get: null };
+        const content = Promise.resolve(<PokemonSettings questionTypeGetter={questionTypeGetter} />);
         return <SettingsPage
             content={content}
             onCancel={onSettingsPageCancelClicked}
-            onConfirm={() => { }}
+            onConfirm={() => onPokemonConfirmClicked(questionTypeGetter.get?.())}
         />;
     } else {
         throw new Error('DataType: ' + dataType + ', has no SettingsUi!');
