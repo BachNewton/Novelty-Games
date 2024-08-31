@@ -76,7 +76,7 @@ const Game: React.FC<GameProps> = ({ pendingData, dataType, onBackClicked, progr
     setGameState({ ...gameState });
   };
 
-  const enableImagesButton = gameState.disableImages
+  const enableImagesButton = gameState.disableImages && canImagesBeDisabled(gameState.dataType)
     ? <button onClick={onEnableImagesButtonClicked}>🖼️</button>
     : <></>;
 
@@ -93,6 +93,23 @@ const Game: React.FC<GameProps> = ({ pendingData, dataType, onBackClicked, progr
   );
 };
 
+function canImagesBeDisabled(dataType: DataType): boolean {
+  switch (dataType) {
+    case DataType.FLAG_GAME:
+    case DataType.POKEMON:
+    case DataType.POKEMON_ALL:
+    case DataType.AIRPLANES:
+    case DataType.AIRPLANES_ALL:
+      return false;
+    case DataType.ROLLERCOASTERS:
+    case DataType.MUSIC:
+    case DataType.FORTNITE_FESTIVAL:
+      return true;
+    default:
+      throw new Error('Unsupported DataType: ' + dataType);
+  }
+}
+
 function resetGame(data: Array<Data>, dataType: DataType, setGameState: React.Dispatch<React.SetStateAction<GameState>>) {
   const savedHighScore = localStorage.getItem(getHighScoreKey(dataType));
   const savedHardcoreHighScore = localStorage.getItem(getHardcoreHighScoreKey(dataType));
@@ -101,7 +118,7 @@ function resetGame(data: Array<Data>, dataType: DataType, setGameState: React.Di
   const highScore = savedHighScore === null ? 0 : parseInt(savedHighScore);
   const hardcoreHighScore = savedHardcoreHighScore === null ? 0 : parseInt(savedHardcoreHighScore);
 
-  const disableImages = savedDisableImages === 'true' ? true : false;
+  const disableImages = savedDisableImages === 'true' && canImagesBeDisabled(dataType) ? true : false;
 
   setGameState({
     data: data,
@@ -177,6 +194,8 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
   const activeQuestion = gameState.questions[gameState.activeQuestion];
 
   const onDisableImages = () => {
+    if (!canImagesBeDisabled(gameState.dataType)) return;
+
     gameState.disableImages = true;
     localStorage.setItem(DISABLE_IMAGES_KEY, gameState.disableImages.toString());
 
