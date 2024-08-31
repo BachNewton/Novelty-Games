@@ -6,6 +6,7 @@ import { PokemonMultiImageQuestion, Question as QuestionData } from '../data/Que
 import { ProgressListener, ProgressEvent } from '../logic/ProgressUpdater';
 import { getGameName } from './Home';
 import Question, { AnswerResult } from './Question';
+import { getPokemonQuestionTypeSelection } from './PokemonSettings';
 
 interface GameProps {
   pendingData: Promise<Array<Data>>;
@@ -137,7 +138,11 @@ function resetGame(data: Array<Data>, dataType: DataType, setGameState: React.Di
 }
 
 function getHighScoreKey(dataType: DataType): string {
-  return dataType + HIGH_SCORE_KEY_POSTFIX;
+  const questionTypeKey = dataType === DataType.POKEMON
+    ? '_' + getPokemonQuestionTypeSelection()
+    : '';
+
+  return dataType + questionTypeKey + HIGH_SCORE_KEY_POSTFIX;
 }
 
 function getHardcoreHighScoreKey(dataType: DataType): string {
