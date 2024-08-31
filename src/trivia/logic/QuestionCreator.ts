@@ -2,11 +2,12 @@ import { randomInt, removeRandomElement, shuffleArray } from '../../util/Randomi
 import { Airplane, Data, DataType, FestivalSong, Flag, Rollercoaster, Song } from '../data/Data';
 import { Pokemon } from '../data/PokemonData';
 import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, PokemonMultiImageQuestion, Question } from '../data/QuestionData';
+import { PokemonQuestionType, getPokemonQuestionTypeSelection } from '../ui/PokemonSettings';
 
 export function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
     const shuffledData = shuffleArray(data);
 
-    if (dataType === DataType.POKEMON) {
+    if (dataType === DataType.POKEMON && getPokemonQuestionTypeSelection() === PokemonQuestionType.STAT) {
         const optionsPool = new Set([...data]) as Set<Pokemon>;
         return shuffledData.map(questionTarget => createPokemonMultiImageQuestion(optionsPool, questionTarget as Pokemon));
     }
