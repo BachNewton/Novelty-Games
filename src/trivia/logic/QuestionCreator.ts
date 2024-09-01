@@ -39,7 +39,7 @@ function createPokemonTypeQuestion(questionTarget: Pokemon): PokemonTypeQuestion
     const correctIndex = randomInt(4);
 
     return new PokemonTypeQuestion(
-        'What is the effectiveness of this attacking type?',
+        'What is the effectiveness of this attacking type against this Pokémon?',
         options,
         correctIndex,
         questionTarget.imageUrl,

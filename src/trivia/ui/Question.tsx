@@ -3,6 +3,8 @@ import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, PokemonMultiIma
 import AsyncImage from './AsyncImage';
 import { QuestionState } from './Game';
 import MusicPlayer from './MusicPlayer';
+import PokemonTypeIcon from './PokemonTypeIcon';
+import { PokemonType } from '../data/PokemonData';
 
 interface QuestionProps {
     uiState: QuestionState;
@@ -159,7 +161,11 @@ function ImageQuestionUi(question: ImageQuestion, uiState: QuestionState, onOpti
     });
 
     if (question instanceof PokemonTypeQuestion) {
-        return <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>{ui}</div>;
+        return <>
+            <PokemonTypeIcon type={PokemonType.BUG} />
+            <br />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>{ui}</div>
+        </>;
     } else {
         return <div style={{ display: 'flex', flexDirection: 'column', padding: '0 0.5em' }}>{ui}</div>;
     }
