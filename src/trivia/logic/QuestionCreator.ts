@@ -1,13 +1,14 @@
 import { randomInt, removeRandomElement, shuffleArray } from '../../util/Randomizer';
 import { Airplane, Data, DataType, FestivalSong, Flag, Rollercoaster, Song } from '../data/Data';
-import { Pokemon } from '../data/PokemonData';
-import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, PokemonMultiImageQuestion, Question } from '../data/QuestionData';
+import { Pokemon, PokemonType } from '../data/PokemonData';
+import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, PokemonMultiImageQuestion, PokemonTypeQuestion, Question } from '../data/QuestionData';
 import { PokemonQuestionType, getPokemonQuestionTypeSelection } from '../ui/PokemonSettings';
 
 export function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
     const shuffledData = shuffleArray(data);
 
     if (dataType === DataType.POKEMON && getPokemonQuestionTypeSelection() === PokemonQuestionType.STAT) {
+        // return shuffledData.map(questionTarget => createPokemonTypeQuestion(questionTarget as Pokemon));
         const optionsPool = new Set([...data]) as Set<Pokemon>;
         return shuffledData.map(questionTarget => createPokemonMultiImageQuestion(optionsPool, questionTarget as Pokemon));
     }
@@ -30,6 +31,20 @@ function getPokemonStatValue(pokemon: Pokemon, targetStat: String): number {
     } else {
         return pokemon.stats.speed;
     }
+}
+
+function createPokemonTypeQuestion(questionTarget: Pokemon): PokemonTypeQuestion {
+    const targetType = removeRandomElement(Object.values(PokemonType));
+    const options = ['4x', '2x', '1x', '0.5x', '0.25x', '0x'];
+    const correctIndex = randomInt(4);
+
+    return new PokemonTypeQuestion(
+        'What is the effectiveness of this attacking type?',
+        options,
+        correctIndex,
+        questionTarget.imageUrl,
+        targetType
+    );
 }
 
 function createPokemonMultiImageQuestion(optionsPool: Set<Pokemon>, questionTarget: Pokemon): PokemonMultiImageQuestion {

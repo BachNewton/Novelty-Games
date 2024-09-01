@@ -1,5 +1,5 @@
 import Question from "../ui/Question";
-import { Pokemon } from "./PokemonData";
+import { Pokemon, PokemonType } from "./PokemonData";
 
 export interface Question {
     text: string;
@@ -37,6 +37,16 @@ export class ImageQuestion extends QuestionImpl {
 
         this.imageUrl = imageUrl;
         this.options = options;
+    }
+}
+
+export class PokemonTypeQuestion extends ImageQuestion {
+    attackingType: PokemonType;
+
+    constructor(text: string, options: string[], correctIndex: number, imageUrl: string, attackingType: PokemonType) {
+        super(text, options, correctIndex, imageUrl);
+
+        this.attackingType = attackingType;
     }
 }
 

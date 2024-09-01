@@ -1,5 +1,5 @@
 import { CSSProperties } from 'react';
-import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, PokemonMultiImageQuestion, Question as QuestionData } from '../data/QuestionData';
+import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, PokemonMultiImageQuestion, PokemonTypeQuestion, Question as QuestionData } from '../data/QuestionData';
 import AsyncImage from './AsyncImage';
 import { QuestionState } from './Game';
 import MusicPlayer from './MusicPlayer';
@@ -158,7 +158,11 @@ function ImageQuestionUi(question: ImageQuestion, uiState: QuestionState, onOpti
         }
     });
 
-    return <div style={{ display: 'flex', flexDirection: 'column', padding: '0 0.5em' }}>{ui}</div>;
+    if (question instanceof PokemonTypeQuestion) {
+        return <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>{ui}</div>;
+    } else {
+        return <div style={{ display: 'flex', flexDirection: 'column', padding: '0 0.5em' }}>{ui}</div>;
+    }
 }
 
 function StatsUi(score: number, lives: number, MAX_LIVES: number, HighScoreUi: () => JSX.Element) {
