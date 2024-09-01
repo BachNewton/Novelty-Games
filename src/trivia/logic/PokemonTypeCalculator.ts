@@ -28,8 +28,8 @@ function getEffectivenessAgainstType(attackingType: PokemonType, defendingType: 
                     return 2;
                 case PokemonType.FIRE:
                 case PokemonType.WATER:
-                case PokemonType.DRAGON:
                 case PokemonType.ROCK:
+                case PokemonType.DRAGON:
                     return 0.5;
                 default:
                     return 1;
