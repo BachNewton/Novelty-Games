@@ -1,5 +1,5 @@
 import { Data, DataType, Flag } from "../trivia/data/Data";
-import { Pokemon } from "../trivia/data/PokemonData";
+import { Pokemon, PokemonType } from "../trivia/data/PokemonData";
 import { PokemonMultiImageQuestion } from "../trivia/data/QuestionData";
 import { createQuestions } from "../trivia/logic/QuestionCreator";
 
@@ -15,7 +15,8 @@ describe('createQuestions function from QuestionCreator', () => {
                 specialAttack: 0,
                 specialDefense: 0,
                 speed: 0
-            }
+            },
+            typing: { primary: PokemonType.NORMAL, secondary: null }
         };
 
         const b: Pokemon = {
@@ -28,7 +29,8 @@ describe('createQuestions function from QuestionCreator', () => {
                 specialAttack: 0,
                 specialDefense: 0,
                 speed: 0
-            }
+            },
+            typing: { primary: PokemonType.NORMAL, secondary: null }
         };
 
         const c: Pokemon = {
@@ -41,7 +43,8 @@ describe('createQuestions function from QuestionCreator', () => {
                 specialAttack: 1,
                 specialDefense: 1,
                 speed: 1
-            }
+            },
+            typing: { primary: PokemonType.NORMAL, secondary: null }
         };
 
         const d: Pokemon = {
@@ -54,7 +57,8 @@ describe('createQuestions function from QuestionCreator', () => {
                 specialAttack: 2,
                 specialDefense: 2,
                 speed: 2
-            }
+            },
+            typing: { primary: PokemonType.NORMAL, secondary: null }
         };
 
         const e: Pokemon = {
@@ -67,7 +71,8 @@ describe('createQuestions function from QuestionCreator', () => {
                 specialAttack: 3,
                 specialDefense: 3,
                 speed: 3
-            }
+            },
+            typing: { primary: PokemonType.NORMAL, secondary: null }
         };
 
         const questions = createQuestions([a, b, c, d, e], DataType.POKEMON);

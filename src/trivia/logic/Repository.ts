@@ -1,5 +1,5 @@
 import { DataType, Rollercoaster, Data, Song, Flag, FestivalSong, Airplane } from "../data/Data";
-import { NetworkPokemon, Pokemon, PokemonAll } from "../data/PokemonData";
+import { NetworkPokemon, Pokemon, PokemonAll, PokemonType } from "../data/PokemonData";
 import { get as getFromDb, store as storeInDb } from "./Database";
 import { AIRPLANES_URL, get as getFromNetwork } from "./Networking";
 import { ProgressEmitter } from "./ProgressUpdater";
@@ -140,6 +140,10 @@ function handlePokemonJsons(jsons: Array<any>): Array<Pokemon> {
                 specialAttack: it.stats.find(stat => stat.stat.name === 'special-attack')!.base_stat,
                 specialDefense: it.stats.find(stat => stat.stat.name === 'special-defense')!.base_stat,
                 speed: it.stats.find(stat => stat.stat.name === 'speed')!.base_stat
+            },
+            typing: {
+                primary: it.types[0].type.name as PokemonType,
+                secondary: it.types[1]?.type?.name as PokemonType || null
             }
         };
     });
