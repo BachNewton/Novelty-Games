@@ -4,7 +4,6 @@ import AsyncImage, { ASYNC_IMAGE_HEIGHT } from './AsyncImage';
 import { QuestionState } from './Game';
 import MusicPlayer from './MusicPlayer';
 import PokemonTypeIcon from './PokemonTypeIcon';
-import { PokemonType } from '../data/PokemonData';
 
 interface QuestionProps {
     uiState: QuestionState;
@@ -47,7 +46,7 @@ const Question: React.FC<QuestionProps> = ({
 
 function QuestionUi(question: QuestionData, uiState: QuestionState, questionNumber: number, disableImages: boolean, totalQuestions: number, onImageSectionClick: () => void) {
     const defendingTypingUi = uiState !== QuestionState.SHOW_QUESTION && question instanceof PokemonTypeQuestion
-        ? <div style={{ display: 'flex', transform: `translate(0, ${-(2 / 3) * ASYNC_IMAGE_HEIGHT}vh)` }}>
+        ? <div style={{ display: 'flex', justifyContent: 'space-around', transform: `translate(0, ${-(2 / 3) * ASYNC_IMAGE_HEIGHT}vh)` }}>
             <PokemonTypeIcon type={question.defendingTyping.primary} />
             {question.defendingTyping.secondary === null ? <></> : <PokemonTypeIcon type={question.defendingTyping.secondary} />}
         </div>
@@ -172,8 +171,9 @@ function ImageQuestionUi(question: ImageQuestion, uiState: QuestionState, onOpti
 
     if (question instanceof PokemonTypeQuestion) {
         return <>
-            <PokemonTypeIcon type={question.attackingType} />
-            <br />
+            <div style={{ marginBottom: '0.5em' }}>
+                <PokemonTypeIcon type={question.attackingType} />
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>{ui}</div>
         </>;
     } else {
