@@ -1,6 +1,6 @@
 import { CSSProperties } from 'react';
 import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, PokemonMultiImageQuestion, PokemonTypeQuestion, Question as QuestionData } from '../data/QuestionData';
-import AsyncImage from './AsyncImage';
+import AsyncImage, { ASYNC_IMAGE_HEIGHT } from './AsyncImage';
 import { QuestionState } from './Game';
 import MusicPlayer from './MusicPlayer';
 import PokemonTypeIcon from './PokemonTypeIcon';
@@ -40,14 +40,24 @@ const Question: React.FC<QuestionProps> = ({
 }) => {
     return <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', textAlign: 'center' }}>
         {StatsUi(score, lives, MAX_LIVES, HighScoreUi)}
-        {QuestionUi(question, questionNumber, disableImages, totalQuestions, onImageSectionClick)}
+        {QuestionUi(question, uiState, questionNumber, disableImages, totalQuestions, onImageSectionClick)}
         {OptionsUi(question, uiState, onQuestionAnswered)}
     </div>;
 };
 
-function QuestionUi(question: QuestionData, questionNumber: number, disableImages: boolean, totalQuestions: number, onImageSectionClick: () => void) {
+function QuestionUi(question: QuestionData, uiState: QuestionState, questionNumber: number, disableImages: boolean, totalQuestions: number, onImageSectionClick: () => void) {
+    const defendingTypingUi = uiState !== QuestionState.SHOW_QUESTION && question instanceof PokemonTypeQuestion
+        ? <div style={{ display: 'flex', transform: `translate(0, ${-(2 / 3) * ASYNC_IMAGE_HEIGHT}vh)` }}>
+            <PokemonTypeIcon type={question.defendingTyping.primary} />
+            {question.defendingTyping.secondary === null ? <></> : <PokemonTypeIcon type={question.defendingTyping.secondary} />}
+        </div>
+        : <></>;
+
     const imageUi = question instanceof ImageQuestion
-        ? <AsyncImage src={question.imageUrl} disableImages={disableImages} onClick={onImageSectionClick} />
+        ? <div style={{ height: `${ASYNC_IMAGE_HEIGHT}vh` }}>
+            <AsyncImage src={question.imageUrl} disableImages={disableImages} onClick={onImageSectionClick} />
+            {defendingTypingUi}
+        </div>
         : <></>;
 
     return <div>

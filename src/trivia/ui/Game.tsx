@@ -2,7 +2,7 @@ import '../css/Game.css';
 import { useEffect, useState } from 'react';
 import { Data, DataType } from '../data/Data';
 import { createQuestions } from '../logic/QuestionCreator';
-import { PokemonMultiImageQuestion, Question as QuestionData } from '../data/QuestionData';
+import { PokemonMultiImageQuestion, PokemonTypeQuestion, Question as QuestionData } from '../data/QuestionData';
 import { ProgressListener, ProgressEvent } from '../logic/ProgressUpdater';
 import { getGameName } from './Home';
 import Question, { AnswerResult } from './Question';
@@ -50,6 +50,7 @@ export enum QuestionState {
 
 const POST_QUESTION_DELAY = 1000;
 const POST_QUESTION_DELAY_FOR_POKEMON_MULI_IMAGE_QUESTION = 1500;
+const POST_QUESTION_DELAY_FOR_POKEMON_TYPE_QUESTION = 1750;
 const MAX_LIVES = 3;
 const HIGH_SCORE_KEY_POSTFIX = '_HIGH_SCORE_KEY';
 const HIGH_SCORE_HARDCORE_KEY_POSTFIX = HIGH_SCORE_KEY_POSTFIX + '_HARDCORE';
@@ -240,7 +241,7 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
       }
 
       setGameState({ ...gameState });
-    }, activeQuestion instanceof PokemonMultiImageQuestion ? POST_QUESTION_DELAY_FOR_POKEMON_MULI_IMAGE_QUESTION : POST_QUESTION_DELAY);
+    }, getPostQuestionDelay(activeQuestion));
   };
 
   return <Question
@@ -256,6 +257,16 @@ function QuestionUi(gameState: GameState, setGameState: React.Dispatch<React.Set
     onQuestionAnswered={onQuestionAnswered}
     HighScoreUi={() => HighScoreUi(gameState)}
   />;
+}
+
+function getPostQuestionDelay(question: QuestionData): number {
+  if (question instanceof PokemonMultiImageQuestion) {
+    return POST_QUESTION_DELAY_FOR_POKEMON_MULI_IMAGE_QUESTION;
+  } else if (question instanceof PokemonTypeQuestion) {
+    return POST_QUESTION_DELAY_FOR_POKEMON_TYPE_QUESTION;
+  } else {
+    return POST_QUESTION_DELAY;
+  }
 }
 
 export default Game;

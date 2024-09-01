@@ -50,7 +50,8 @@ function createPokemonTypeQuestion(questionTarget: Pokemon): PokemonTypeQuestion
         options,
         correctIndex,
         questionTarget.imageUrl,
-        targetType
+        targetType,
+        questionTarget.typing
     );
 }
 

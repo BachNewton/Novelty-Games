@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
-const HEIGHT = '29vh';
+export const ASYNC_IMAGE_HEIGHT = 29;
+const HEIGHT = `${ASYNC_IMAGE_HEIGHT}vh`;
 
 interface AsyncImageProps {
     src: string;
