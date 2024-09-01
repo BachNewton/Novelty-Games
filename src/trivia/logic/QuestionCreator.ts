@@ -3,6 +3,7 @@ import { Airplane, Data, DataType, FestivalSong, Flag, Rollercoaster, Song } fro
 import { Pokemon, PokemonType } from '../data/PokemonData';
 import { FortniteFestivalQuestion, ImageQuestion, MusicQuestion, PokemonMultiImageQuestion, PokemonTypeQuestion, Question } from '../data/QuestionData';
 import { PokemonQuestionType, getPokemonQuestionTypeSelection } from '../ui/PokemonSettings';
+import { getEffectiveness } from './PokemonTypeCalculator';
 
 export function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
     const shuffledData = shuffleArray(data);
@@ -36,7 +37,8 @@ function getPokemonStatValue(pokemon: Pokemon, targetStat: String): number {
 function createPokemonTypeQuestion(questionTarget: Pokemon): PokemonTypeQuestion {
     const targetType = removeRandomElement(Object.values(PokemonType));
     const options = ['4x', '2x', '1x', '0.5x', '0.25x', '0x'];
-    const correctIndex = randomInt(4);
+    const effectiveness = getEffectiveness(targetType, questionTarget.typing) + 'x';
+    const correctIndex = options.indexOf(effectiveness);
 
     return new PokemonTypeQuestion(
         'What is the effectiveness of this attacking type against this Pokémon?',

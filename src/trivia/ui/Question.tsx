@@ -162,7 +162,7 @@ function ImageQuestionUi(question: ImageQuestion, uiState: QuestionState, onOpti
 
     if (question instanceof PokemonTypeQuestion) {
         return <>
-            <PokemonTypeIcon type={PokemonType.BUG} />
+            <PokemonTypeIcon type={question.attackingType} />
             <br />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>{ui}</div>
         </>;

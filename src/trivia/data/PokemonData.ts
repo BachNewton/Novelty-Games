@@ -64,7 +64,7 @@ interface Stats {
     speed: number;
 }
 
-interface PokemonTyping {
+export interface PokemonTyping {
     primary: PokemonType;
     secondary: PokemonType | null;
 }
