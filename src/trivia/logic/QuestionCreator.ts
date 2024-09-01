@@ -8,10 +8,15 @@ import { getEffectiveness } from './PokemonTypeCalculator';
 export function createQuestions(data: Array<Data>, dataType: DataType): Array<Question> {
     const shuffledData = shuffleArray(data);
 
-    if (dataType === DataType.POKEMON && getPokemonQuestionTypeSelection() === PokemonQuestionType.STAT) {
-        // return shuffledData.map(questionTarget => createPokemonTypeQuestion(questionTarget as Pokemon));
-        const optionsPool = new Set([...data]) as Set<Pokemon>;
-        return shuffledData.map(questionTarget => createPokemonMultiImageQuestion(optionsPool, questionTarget as Pokemon));
+    if (dataType === DataType.POKEMON) {
+        const pokemonQuestionType = getPokemonQuestionTypeSelection();
+
+        if (pokemonQuestionType === PokemonQuestionType.STAT) {
+            const optionsPool = new Set([...data]) as Set<Pokemon>;
+            return shuffledData.map(questionTarget => createPokemonMultiImageQuestion(optionsPool, questionTarget as Pokemon));
+        } else if (pokemonQuestionType === PokemonQuestionType.TYPE) {
+            return shuffledData.map(questionTarget => createPokemonTypeQuestion(questionTarget as Pokemon));
+        }
     }
 
     const optionsPool = getOptionsPool(dataType, data);
@@ -41,7 +46,7 @@ function createPokemonTypeQuestion(questionTarget: Pokemon): PokemonTypeQuestion
     const correctIndex = options.indexOf(effectiveness);
 
     return new PokemonTypeQuestion(
-        'What is the effectiveness of this attacking type against this Pokémon?',
+        `What is the effectiveness of this attacking type against ${questionTarget.name}?`,
         options,
         correctIndex,
         questionTarget.imageUrl,
