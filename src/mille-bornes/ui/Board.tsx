@@ -6,7 +6,7 @@ import Hand from './Hand';
 import TableauUi from "./Tableau";
 import { Communicator, PlayCardEvent } from "../logic/Communicator";
 import DeckDiscardAndStats from "./DeckDiscardAndStats";
-import { decideMove } from "../logic/ComputerPlayer";
+import { shouldComputerPlayerTakeItsTurn, takeComputerPlayerTurn } from "../logic/ComputerPlayer";
 
 interface BoardProps {
     startingGame: Game;
@@ -42,7 +42,7 @@ class TeamSelection implements UiState {
     }
 }
 
-let hasComputerTakenTurn = false;
+let canComputerPlayerMove = true;
 
 const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRoundOver: onRoundOver }) => {
     const [state, setState] = useState<State>({ game: startingGame, ui: new CardSelection() });
@@ -66,6 +66,19 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
             setState({ ...state });
         });
     }, [state]);
+
+    if (shouldComputerPlayerTakeItsTurn(state.game, localId, canComputerPlayerMove)) {
+        canComputerPlayerMove = false;
+        takeComputerPlayerTurn(state.game, onRoundOver);
+
+        console.log('Computer has taken its turn.');
+
+        setTimeout(() => {
+            console.log('Waited some time and now allowing computer to move again');
+            canComputerPlayerMove = true;
+            setState({ ...state });
+        }, 3000);
+    }
 
     const itIsYourTurn = state.game.currentPlayer.localId === localId && state.game.currentPlayer.type !== PlayerType.COMPUTER;
 
@@ -109,32 +122,6 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
 
         setState({ ...state });
     };
-
-    if (state.game.currentPlayer.localId === localId && state.game.currentPlayer.type === PlayerType.COMPUTER && !hasComputerTakenTurn) {
-        const currentPlayer = state.game.currentPlayer;
-        console.log(`Computer ${currentPlayer.name} will take their turn now.`);
-
-        const computerHand = currentPlayer.hand;
-        const currentPlayerTeam = getCurrentPlayerTeam(state.game);
-        const otherTeams = state.game.teams.filter(team => team !== currentPlayerTeam);
-
-        decideMove(
-            computerHand,
-            currentPlayerTeam,
-            otherTeams,
-            (card, targetTeam) => canCardBePlayed(card, state.game, targetTeam),
-            (card, targetTeam) => playCard(card, state.game, targetTeam, onRoundOver)
-        );
-
-        hasComputerTakenTurn = true;
-        console.log('Computer has taken its turn.');
-
-        setTimeout(() => {
-            console.log('Allowing the next computer to move');
-            hasComputerTakenTurn = false;
-            setState({ ...state });
-        }, 3000);
-    }
 
     const localPlayerTeam = getLocalPlayerTeam(state.game, localId);
     const otherTeams = getOtherTeams(state.game, localPlayerTeam);

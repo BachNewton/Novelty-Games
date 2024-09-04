@@ -1,9 +1,31 @@
 import { removeRandomElement } from "../../util/Randomizer";
 import { Card, LimitCard } from "./Card";
-import { Team } from "./Data";
-import { isInstanceOfHazardCard } from "./Rules";
+import { Game, PlayerType, Team } from "./Data";
+import { canCardBePlayed, getCurrentPlayerTeam, isInstanceOfHazardCard, playCard } from "./Rules";
 
-export function decideMove(
+/** @returns true if the current player is local and is also a computer and the comupter hasn't already taken its turn */
+export function shouldComputerPlayerTakeItsTurn(game: Game, localId: string, canComputerPlayerMove: boolean): boolean {
+    return game.currentPlayer.localId === localId && game.currentPlayer.type === PlayerType.COMPUTER && canComputerPlayerMove
+}
+
+export function takeComputerPlayerTurn(game: Game, onRoundOver: (game: Game) => void) {
+    const currentPlayer = game.currentPlayer;
+    console.log(`Computer ${currentPlayer.name} will take their turn now.`);
+
+    const computerHand = currentPlayer.hand;
+    const currentPlayerTeam = getCurrentPlayerTeam(game);
+    const otherTeams = game.teams.filter(team => team !== currentPlayerTeam);
+
+    decideMove(
+        computerHand,
+        currentPlayerTeam,
+        otherTeams,
+        (card, targetTeam) => canCardBePlayed(card, game, targetTeam),
+        (card, targetTeam) => playCard(card, game, targetTeam, onRoundOver)
+    );
+}
+
+function decideMove(
     myHand: Array<Card>,
     myTeam: Team,
     otherTeams: Array<Team>,
