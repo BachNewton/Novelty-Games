@@ -6,6 +6,7 @@ import Hand from './Hand';
 import TableauUi from "./Tableau";
 import { Communicator, PlayCardEvent } from "../logic/Communicator";
 import DeckDiscardAndStats from "./DeckDiscardAndStats";
+import { decideMove } from "../logic/ComputerPlayer";
 
 interface BoardProps {
     startingGame: Game;
@@ -40,6 +41,8 @@ class TeamSelection implements UiState {
         this.card = card;
     }
 }
+
+let hasComputerTakenTurn = false;
 
 const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRoundOver: onRoundOver }) => {
     const [state, setState] = useState<State>({ game: startingGame, ui: new CardSelection() });
@@ -108,8 +111,35 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
     };
 
     const localPlayerTeam = getLocalPlayerTeam(state.game, localId);
+    const otherTeams = getOtherTeams(state.game, localPlayerTeam);
 
-    const otherTeamsTableau = state.game.teams.filter(team => team !== localPlayerTeam).map((otherTeam, index) => {
+    console.log('hasComputerTakenTurn:', hasComputerTakenTurn);
+
+    if (itIsYourTurn && !hasComputerTakenTurn) {
+        const currentPlayer = state.game.currentPlayer;
+        console.log(`Computer ${currentPlayer.name} will take their turn now.`);
+
+        const computerHand = currentPlayer.hand;
+
+        decideMove(
+            computerHand,
+            getCurrentPlayerTeam(state.game),
+            otherTeams,
+            (card, targetTeam) => canCardBePlayed(card, state.game, targetTeam),
+            (card, targetTeam) => playCard(card, state.game, targetTeam, onRoundOver)
+        );
+
+        hasComputerTakenTurn = true;
+        console.log('Computer has taken its turn.');
+
+        setTimeout(() => {
+            console.log('Allowing the next computer to move');
+            hasComputerTakenTurn = false;
+            setState({ ...state });
+        }, 3500);
+    }
+
+    const otherTeamsTableau = otherTeams.map((otherTeam, index) => {
         const onClick = () => {
             if (state.ui instanceof TeamSelection) {
                 if (state.ui.team === otherTeam) {
@@ -192,6 +222,10 @@ function getLocalPlayerTeam(game: Game, localId: string): Team | null {
     const localPlayerTeamId = getLocalPlayer(game, localId)?.teamId || null;
 
     return game.teams.find(team => team.id === localPlayerTeamId) || null;
+}
+
+function getOtherTeams(game: Game, localPlayerTeam: Team | null): Array<Team> {
+    return game.teams.filter(team => team !== localPlayerTeam);
 }
 
 function getTeamById(teamId: string | null, game: Game): Team | null {
