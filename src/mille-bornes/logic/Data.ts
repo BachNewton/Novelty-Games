@@ -38,4 +38,9 @@ export interface Player {
     hand: Array<Card>;
     teamId: string;
     localId: string;
+    type: PlayerType;
+}
+
+export enum PlayerType {
+    HUMAN, COMPUTER
 }

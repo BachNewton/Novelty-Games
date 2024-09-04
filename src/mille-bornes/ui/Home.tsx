@@ -64,7 +64,8 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
                 players: team.players.map<LobbyPlayer>(player => {
                     return {
                         name: player.name,
-                        localId: player.localId
+                        localId: player.localId,
+                        type: player.type
                     };
                 })
             };

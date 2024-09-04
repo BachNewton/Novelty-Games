@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Communicator, LobbyEvent } from "../logic/Communicator";
 import HomeButton from "../../ui/HomeButton";
+import { PlayerType } from "../logic/Data";
 
 interface LobbyProps {
     communicator: Communicator;
@@ -17,12 +18,13 @@ export interface LobbyTeam {
 export interface LobbyPlayer {
     name: string;
     localId: string;
+    type: PlayerType;
 }
 
 const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeButtonClicked }) => {
     const [lobbyTeams, setLobbyTeams] = useState<Array<LobbyTeam>>([
-        { players: [{ name: 'Kyle', localId: localId }], accumulatedScore: 0 },
-        { players: [{ name: 'Eric', localId: localId }], accumulatedScore: 0 }
+        { players: [{ name: 'Kyle', localId: localId, type: PlayerType.HUMAN }], accumulatedScore: 0 },
+        { players: [{ name: 'Eric', localId: localId, type: PlayerType.COMPUTER }], accumulatedScore: 0 }
     ]);
 
     useEffect(() => {
@@ -50,7 +52,8 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
             const name = prompt('What is the name of this player?') || 'Player';
             lobbyTeam.players.push({
                 name: name,
-                localId: localId
+                localId: localId,
+                type: PlayerType.HUMAN
             });
 
             setLobbyTeams([...lobbyTeams]);

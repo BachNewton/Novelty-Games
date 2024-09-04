@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Card, LimitCard } from "../logic/Card";
-import { Game, Player, Team } from "../logic/Data";
+import { Game, Player, PlayerType, Team } from "../logic/Data";
 import { canCardBePlayed, getCurrentPlayerTeam, getRemainingDistance, isGameAtMaxTargetDistance, isInstanceOfHazardCard, playCard } from "../logic/Rules";
 import Hand from './Hand';
 import TableauUi from "./Tableau";
 import { Communicator, PlayCardEvent } from "../logic/Communicator";
 import DeckDiscardAndStats from "./DeckDiscardAndStats";
 import { decideMove } from "../logic/ComputerPlayer";
+import { stat } from "fs";
 
 interface BoardProps {
     startingGame: Game;
@@ -110,20 +111,19 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
         setState({ ...state });
     };
 
-    const localPlayerTeam = getLocalPlayerTeam(state.game, localId);
-    const otherTeams = getOtherTeams(state.game, localPlayerTeam);
+    console.log('game.currentPlayer.localId === localId:', state.game.currentPlayer.localId === localId, 'currentPlayer.type:', state.game.currentPlayer.type, 'hasComputerTakenTurn:', hasComputerTakenTurn);
 
-    console.log('hasComputerTakenTurn:', hasComputerTakenTurn);
-
-    if (itIsYourTurn && !hasComputerTakenTurn) {
+    if (state.game.currentPlayer.localId === localId && state.game.currentPlayer.type === PlayerType.COMPUTER && !hasComputerTakenTurn) {
         const currentPlayer = state.game.currentPlayer;
         console.log(`Computer ${currentPlayer.name} will take their turn now.`);
 
         const computerHand = currentPlayer.hand;
+        const currentPlayerTeam = getCurrentPlayerTeam(state.game);
+        const otherTeams = state.game.teams.filter(team => team !== currentPlayerTeam);
 
         decideMove(
             computerHand,
-            getCurrentPlayerTeam(state.game),
+            currentPlayerTeam,
             otherTeams,
             (card, targetTeam) => canCardBePlayed(card, state.game, targetTeam),
             (card, targetTeam) => playCard(card, state.game, targetTeam, onRoundOver)
@@ -138,6 +138,9 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
             setState({ ...state });
         }, 3500);
     }
+
+    const localPlayerTeam = getLocalPlayerTeam(state.game, localId);
+    const otherTeams = getOtherTeams(state.game, localPlayerTeam);
 
     const otherTeamsTableau = otherTeams.map((otherTeam, index) => {
         const onClick = () => {
@@ -199,13 +202,13 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
 };
 
 function getLocalPlayer(game: Game, localId: string): Player | null {
-    if (game.currentPlayer.localId === localId) {
+    if (game.currentPlayer.localId === localId && game.currentPlayer.type !== PlayerType.COMPUTER) {
         return game.currentPlayer;
     }
 
     for (const team of game.teams) {
         for (const player of team.players) {
-            if (player.localId === localId) {
+            if (player.localId === localId && game.currentPlayer.type !== PlayerType.COMPUTER) {
                 return player;
             }
         }
