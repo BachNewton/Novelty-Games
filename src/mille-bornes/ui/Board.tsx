@@ -7,7 +7,6 @@ import TableauUi from "./Tableau";
 import { Communicator, PlayCardEvent } from "../logic/Communicator";
 import DeckDiscardAndStats from "./DeckDiscardAndStats";
 import { decideMove } from "../logic/ComputerPlayer";
-import { stat } from "fs";
 
 interface BoardProps {
     startingGame: Game;
@@ -68,7 +67,7 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
         });
     }, [state]);
 
-    const itIsYourTurn = getLocalPlayer(state.game, localId)?.localId === state.game.currentPlayer.localId;
+    const itIsYourTurn = state.game.currentPlayer.localId === localId && state.game.currentPlayer.type !== PlayerType.COMPUTER;
 
     const onPlayCard = (card: Card) => {
         if (!(state.ui instanceof CardSelection) || !itIsYourTurn) return;
@@ -111,8 +110,6 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
         setState({ ...state });
     };
 
-    console.log('game.currentPlayer.localId === localId:', state.game.currentPlayer.localId === localId, 'currentPlayer.type:', state.game.currentPlayer.type, 'hasComputerTakenTurn:', hasComputerTakenTurn);
-
     if (state.game.currentPlayer.localId === localId && state.game.currentPlayer.type === PlayerType.COMPUTER && !hasComputerTakenTurn) {
         const currentPlayer = state.game.currentPlayer;
         console.log(`Computer ${currentPlayer.name} will take their turn now.`);
@@ -136,7 +133,7 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
             console.log('Allowing the next computer to move');
             hasComputerTakenTurn = false;
             setState({ ...state });
-        }, 3500);
+        }, 3000);
     }
 
     const localPlayerTeam = getLocalPlayerTeam(state.game, localId);
@@ -208,7 +205,7 @@ function getLocalPlayer(game: Game, localId: string): Player | null {
 
     for (const team of game.teams) {
         for (const player of team.players) {
-            if (player.localId === localId && game.currentPlayer.type !== PlayerType.COMPUTER) {
+            if (player.localId === localId && player.type !== PlayerType.COMPUTER) {
                 return player;
             }
         }
