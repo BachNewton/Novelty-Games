@@ -10,7 +10,6 @@ export function shouldComputerPlayerTakeItsTurn(game: Game, localId: string, can
 
 export function takeComputerPlayerTurn(game: Game, onRoundOver: (game: Game) => void) {
     const currentPlayer = game.currentPlayer;
-    console.log(`Computer ${currentPlayer.name} will take their turn now.`);
 
     const computerHand = currentPlayer.hand;
     const currentPlayerTeam = getCurrentPlayerTeam(game);

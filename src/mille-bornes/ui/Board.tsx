@@ -43,6 +43,7 @@ class TeamSelection implements UiState {
 }
 
 let canComputerPlayerMove = true;
+const COMPUTER_THINK_TIME = 2000;
 
 const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRoundOver: onRoundOver }) => {
     const [state, setState] = useState<State>({ game: startingGame, ui: new CardSelection() });
@@ -69,15 +70,14 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
 
     if (shouldComputerPlayerTakeItsTurn(state.game, localId, canComputerPlayerMove)) {
         canComputerPlayerMove = false;
-        takeComputerPlayerTurn(state.game, onRoundOver);
-
-        console.log('Computer has taken its turn.');
+        console.log(`Computer is fake "thinking" for ${COMPUTER_THINK_TIME} ms.`);
 
         setTimeout(() => {
-            console.log('Waited some time and now allowing computer to move again');
+            console.log('Computer is taking its turn now.');
+            takeComputerPlayerTurn(state.game, onRoundOver);
             canComputerPlayerMove = true;
             setState({ ...state });
-        }, 3000);
+        }, COMPUTER_THINK_TIME);
     }
 
     const itIsYourTurn = state.game.currentPlayer.localId === localId && state.game.currentPlayer.type !== PlayerType.COMPUTER;
