@@ -40,8 +40,6 @@ export class TouchBoxWorld implements GameWorld {
     }
 
     public draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
         if (this.perfectTime !== null && this.perfectTime >= performance.now()) {
             this.ctx.fillStyle = 'grey';
             this.ctx.beginPath();

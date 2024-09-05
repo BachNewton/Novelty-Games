@@ -57,6 +57,8 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, ga
         const deltaTime = timeNow - previousTime;
         previousTime = timeNow;
 
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         gameWorld.draw();
 
         drawDebug(canvas, ctx, deltaTime);
