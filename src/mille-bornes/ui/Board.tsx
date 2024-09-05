@@ -43,7 +43,7 @@ class TeamSelection implements UiState {
 }
 
 let canComputerPlayerMove = true;
-const COMPUTER_THINK_TIME = 2000;
+const COMPUTER_THINK_TIME = 1500;
 
 const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRoundOver: onRoundOver }) => {
     const [state, setState] = useState<State>({ game: startingGame, ui: new CardSelection() });
@@ -68,13 +68,29 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
         });
     }, [state]);
 
+    const checkIfTargetDistanceReached = (targetTeam: Team, shouldCallExtention: () => boolean) => {
+        const teamAtTargetDistance = getRemainingDistance(targetTeam.tableau.distanceArea, state.game.teams, state.game.extention) === 0;
+
+        if (teamAtTargetDistance) {
+            if (state.game.extention || isGameAtMaxTargetDistance(state.game.teams)) {
+                onRoundOver(state.game);
+            } else {
+                if (shouldCallExtention()) {
+                    state.game.extention = true;
+                } else {
+                    onRoundOver(state.game);
+                }
+            }
+        }
+    };
+
     if (shouldComputerPlayerTakeItsTurn(state.game, localId, canComputerPlayerMove)) {
         canComputerPlayerMove = false;
         console.log(`Computer is fake "thinking" for ${COMPUTER_THINK_TIME} ms.`);
 
         setTimeout(() => {
             console.log('Computer is taking its turn now.');
-            takeComputerPlayerTurn(state.game, onRoundOver);
+            takeComputerPlayerTurn(state.game, onRoundOver, communicator, checkIfTargetDistanceReached);
             canComputerPlayerMove = true;
             setState({ ...state });
         }, COMPUTER_THINK_TIME);
@@ -100,20 +116,10 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
                 const targetTeam = getCurrentPlayerTeam(state.game);
                 playCard(card, state.game, targetTeam, onRoundOver);
 
-                const teamAtTargetDistance = getRemainingDistance(targetTeam.tableau.distanceArea, state.game.teams, state.game.extention) === 0;
-                if (teamAtTargetDistance) {
-                    if (state.game.extention || isGameAtMaxTargetDistance(state.game.teams)) {
-                        onRoundOver(state.game);
-                    } else {
-                        const calledExtention = window.confirm('Your team has reached the target! Would like to to call an extention?');
-
-                        if (calledExtention) {
-                            state.game.extention = true;
-                        } else {
-                            onRoundOver(state.game);
-                        }
-                    }
-                }
+                checkIfTargetDistanceReached(
+                    targetTeam,
+                    () => window.confirm('Your team has reached the target! Would like to to call an extention?')
+                );
 
                 communicator.playCard(card, targetTeam, state.game.extention);
                 state.ui.card = null;
