@@ -1,4 +1,4 @@
-import { Box, Position } from "../data/Data";
+import { Box, Position } from "./Data";
 
 export function collision(pos: Position, box: Box, usePrevious: boolean = false): boolean {
     const x = usePrevious ? box.previousPos.x : box.pos.x;
