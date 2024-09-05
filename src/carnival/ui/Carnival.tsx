@@ -50,6 +50,18 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, ga
         gameWorld.onTouchStart(e);
     };
 
+    canvas.onmousedown = e => {
+        gameWorld.onMouseDown(e.pageX / canvas.width, e.pageY / canvas.height);
+    };
+
+    canvas.onmousemove = e => {
+        gameWorld.onMouseMove(e.pageX / canvas.width, e.pageY / canvas.height);
+    };
+
+    canvas.onmouseup = e => {
+        gameWorld.onMouseUp(e.pageX / canvas.width, e.pageY / canvas.height);
+    };
+
     canvas.onclick = e => {
         gameWorld.onClick(e);
     };

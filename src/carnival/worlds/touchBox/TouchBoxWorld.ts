@@ -39,6 +39,18 @@ export class TouchBoxWorld implements GameWorld {
         this.perfectTime = null;
     }
 
+    onMouseDown(x: number, y: number): void {
+        // Unused 
+    }
+
+    onMouseMove(x: number, y: number): void {
+        // Unused
+    }
+
+    onMouseUp(x: number, y: number): void {
+        // Unused
+    }
+
     public draw() {
         if (this.perfectTime !== null && this.perfectTime >= performance.now()) {
             this.ctx.fillStyle = 'grey';
