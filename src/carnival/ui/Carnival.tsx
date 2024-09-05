@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { GameWorld } from "../worlds/GameWorld";
 import { TouchBoxWorld } from "../worlds/touchBox/TouchBoxWorld";
+import { WigglerWorld } from "../worlds/wigglers/WigglerWorld";
 
 interface CarnivalProps {
     goHome: () => void;
@@ -29,10 +30,12 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
 
         window.addEventListener('resize', resizeCanvas);
 
-        const gameWorld: GameWorld = new TouchBoxWorld(canvas, ctx, () => {
-            hasCanvasContextBeenSet = false;
-            goHome();
-        });
+        // const gameWorld: GameWorld = new TouchBoxWorld(canvas, ctx, () => {
+        //     hasCanvasContextBeenSet = false;
+        //     goHome();
+        // });
+
+        const gameWorld: GameWorld = new WigglerWorld(canvas, ctx);
 
         initCanvas(canvas, ctx, gameWorld);
     }, []);
