@@ -1,6 +1,6 @@
 import { GameWorld } from "../GameWorld";
 import { Connection, HeldWiggler, Wiggler, createWiggler } from "./Data";
-import { isTouching } from "./Logic";
+import { checkEachPair, checkIntersection, isTouching } from "./Logic";
 
 export class WigglerWorld implements GameWorld {
     readonly canvas: HTMLCanvasElement;
@@ -26,23 +26,45 @@ export class WigglerWorld implements GameWorld {
         this.wigglers = [wiggler1, wiggler2, wiggler3, wiggler4, wiggler5];
 
         this.connections = [
-            { a: wiggler2, b: wiggler3 },
-            { a: wiggler2, b: wiggler4 },
-            { a: wiggler3, b: wiggler5 },
-            { a: wiggler4, b: wiggler5 },
-            { a: wiggler1, b: wiggler2 },
-            { a: wiggler1, b: wiggler3 },
-            { a: wiggler1, b: wiggler4 },
-            { a: wiggler1, b: wiggler5 }
+            { a: wiggler2, b: wiggler3, isUninterrupted: true },
+            { a: wiggler2, b: wiggler4, isUninterrupted: true },
+            { a: wiggler3, b: wiggler5, isUninterrupted: true },
+            { a: wiggler4, b: wiggler5, isUninterrupted: true },
+            { a: wiggler1, b: wiggler2, isUninterrupted: true },
+            { a: wiggler1, b: wiggler3, isUninterrupted: true },
+            { a: wiggler1, b: wiggler4, isUninterrupted: true },
+            { a: wiggler1, b: wiggler5, isUninterrupted: true }
         ];
+
+        // const temp = checkIntersection(
+        //     { a: createWiggler({ x: 0, y: 0 }), b: createWiggler({ x: 1, y: 1 }), isUninterrupted: true },
+        //     { a: createWiggler({ x: 1, y: 0 }), b: createWiggler({ x: 0, y: 1 }), isUninterrupted: true }
+        // );
+
+        // const temp2 = checkIntersection(
+        //     { a: createWiggler({ x: 0, y: 0 }), b: createWiggler({ x: 0, y: 1 }), isUninterrupted: true },
+        //     { a: createWiggler({ x: 0, y: 0 }), b: createWiggler({ x: 1, y: 0 }), isUninterrupted: true }
+        // );
+
+        // console.log(temp2);
     }
 
     draw(): void {
+        checkEachPair(this.connections, (a, b) => {
+            const isIntersection = checkIntersection(a, b);
+            a.isUninterrupted = !isIntersection;
+            b.isUninterrupted = !isIntersection;
+
+            // if (isIntersection) {
+            //     console.log('isIntersection', a, b);
+            // }
+        });
+
         for (const connection of this.connections) {
             this.ctx.beginPath();
             this.ctx.moveTo(connection.a.position.x * this.canvas.width, connection.a.position.y * this.canvas.height);
             this.ctx.lineTo(connection.b.position.x * this.canvas.width, connection.b.position.y * this.canvas.height);
-            this.ctx.strokeStyle = 'white';
+            this.ctx.strokeStyle = connection.isUninterrupted ? 'white' : 'red';
             this.ctx.lineWidth = 2;
             this.ctx.stroke();
         }
