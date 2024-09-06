@@ -22,8 +22,9 @@ export class WigglerWorld implements GameWorld {
         const wiggler3 = createWiggler({ x: 0.75, y: 0.25 });
         const wiggler4 = createWiggler({ x: 0.25, y: 0.75 });
         const wiggler5 = createWiggler({ x: 0.75, y: 0.75 });
+        const wiggler6 = createWiggler({ x: 0.75, y: 0.5 });
 
-        this.wigglers = [wiggler1, wiggler2, wiggler3, wiggler4, wiggler5];
+        this.wigglers = [wiggler1, wiggler2, wiggler3, wiggler4, wiggler5, wiggler6];
 
         this.connections = [
             { a: wiggler2, b: wiggler3, isUninterrupted: true },
@@ -33,31 +34,19 @@ export class WigglerWorld implements GameWorld {
             { a: wiggler1, b: wiggler2, isUninterrupted: true },
             { a: wiggler1, b: wiggler3, isUninterrupted: true },
             { a: wiggler1, b: wiggler4, isUninterrupted: true },
-            { a: wiggler1, b: wiggler5, isUninterrupted: true }
+            { a: wiggler1, b: wiggler5, isUninterrupted: true },
+            { a: wiggler1, b: wiggler6, isUninterrupted: true }
         ];
-
-        // const temp = checkIntersection(
-        //     { a: createWiggler({ x: 0, y: 0 }), b: createWiggler({ x: 1, y: 1 }), isUninterrupted: true },
-        //     { a: createWiggler({ x: 1, y: 0 }), b: createWiggler({ x: 0, y: 1 }), isUninterrupted: true }
-        // );
-
-        // const temp2 = checkIntersection(
-        //     { a: createWiggler({ x: 0, y: 0 }), b: createWiggler({ x: 0, y: 1 }), isUninterrupted: true },
-        //     { a: createWiggler({ x: 0, y: 0 }), b: createWiggler({ x: 1, y: 0 }), isUninterrupted: true }
-        // );
-
-        // console.log(temp2);
     }
 
     draw(): void {
-        checkEachPair(this.connections, (a, b) => {
-            const isIntersection = checkIntersection(a, b);
-            a.isUninterrupted = !isIntersection;
-            b.isUninterrupted = !isIntersection;
+        this.connections.forEach(connection => connection.isUninterrupted = true);
 
-            // if (isIntersection) {
-            //     console.log('isIntersection', a, b);
-            // }
+        checkEachPair(this.connections, (a, b) => {
+            if (checkIntersection(a, b)) {
+                a.isUninterrupted = false;
+                b.isUninterrupted = false;
+            }
         });
 
         for (const connection of this.connections) {
