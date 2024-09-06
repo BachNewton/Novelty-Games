@@ -6,7 +6,7 @@ export interface Wiggler {
 export interface Connection {
     a: Wiggler;
     b: Wiggler;
-    isUninterrupted: boolean;
+    isUninterrupted?: boolean;
 }
 
 export function createWiggler(position: Vector2D): Wiggler {

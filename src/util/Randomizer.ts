@@ -1,3 +1,7 @@
+/**
+ * @param array containing elements that should be shuffled
+ * @returns a new array of elements from the provided array in a random order
+ */
 export function shuffleArray<T>(array: Array<T>): Array<T> {
     const remainingElements = [...array];
     const shuffledArray: Array<T> = [];
