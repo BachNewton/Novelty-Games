@@ -22,7 +22,7 @@ export class WigglerWorld implements GameWorld {
         const wiggler3 = createWiggler({ x: 0.75, y: 0.25 });
         const wiggler4 = createWiggler({ x: 0.25, y: 0.75 });
         const wiggler5 = createWiggler({ x: 0.75, y: 0.75 });
-        const wiggler6 = createWiggler({ x: 0.75, y: 0.5 });
+        const wiggler6 = createWiggler({ x: (2 / 3), y: 0.5 });
 
         this.wigglers = [wiggler1, wiggler2, wiggler3, wiggler4, wiggler5, wiggler6];
 
@@ -40,21 +40,12 @@ export class WigglerWorld implements GameWorld {
     }
 
     draw(): void {
-        this.connections.forEach(connection => connection.isUninterrupted = true);
-
-        checkEachPair(this.connections, (a, b) => {
-            if (checkIntersection(a, b)) {
-                a.isUninterrupted = false;
-                b.isUninterrupted = false;
-            }
-        });
-
         for (const connection of this.connections) {
             this.ctx.beginPath();
             this.ctx.moveTo(connection.a.position.x * this.canvas.width, connection.a.position.y * this.canvas.height);
             this.ctx.lineTo(connection.b.position.x * this.canvas.width, connection.b.position.y * this.canvas.height);
             this.ctx.strokeStyle = connection.isUninterrupted ? 'white' : 'red';
-            this.ctx.lineWidth = 2;
+            this.ctx.lineWidth = connection.isUninterrupted ? 2 : 3;
             this.ctx.stroke();
         }
 
@@ -68,7 +59,14 @@ export class WigglerWorld implements GameWorld {
     }
 
     update(deltaTime: number): void {
-        // TODO
+        this.connections.forEach(connection => connection.isUninterrupted = true);
+
+        checkEachPair(this.connections, (a, b) => {
+            if (checkIntersection(a, b)) {
+                a.isUninterrupted = false;
+                b.isUninterrupted = false;
+            }
+        });
     }
 
     onTouchStart(e: TouchEvent): void {
