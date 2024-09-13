@@ -2,14 +2,16 @@ import { useEffect, useRef } from "react";
 import { GameWorld } from "../worlds/GameWorld";
 import { TouchBoxWorld } from "../worlds/touchBox/TouchBoxWorld";
 import { WigglerWorld } from "../worlds/wigglers/WigglerWorld";
+import { GameWorldType } from "../worlds/GameWorldType";
 
 interface CarnivalProps {
     goHome: () => void;
+    gameWorldType: GameWorldType;
 }
 
 let hasCanvasContextBeenSet = false;
 
-const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
+const Carnival: React.FC<CarnivalProps> = ({ goHome, gameWorldType }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -30,10 +32,7 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
 
         window.addEventListener('resize', resizeCanvas);
 
-        const gameWorld: GameWorld = new TouchBoxWorld(canvas, ctx, () => {
-            hasCanvasContextBeenSet = false;
-            goHome();
-        });
+        const gameWorld = createGameWorld(gameWorldType, canvas, ctx, goHome);
 
         initCanvas(canvas, ctx, gameWorld);
     }, []);
@@ -42,6 +41,20 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
         <canvas ref={canvasRef} />
     </div>;
 };
+
+function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, goHome: () => void): GameWorld {
+    switch (gameWorldType) {
+        case GameWorldType.TOUCH_BOX:
+            return new TouchBoxWorld(canvas, ctx, () => {
+                hasCanvasContextBeenSet = false;
+                goHome();
+            });
+        case GameWorldType.WIGGLERS:
+            return new WigglerWorld(canvas, ctx);
+        default:
+            throw new Error(`GameWorldType not supported: ${gameWorldType}`);
+    }
+}
 
 function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, gameWorld: GameWorld) {
     canvas.ontouchstart = e => {

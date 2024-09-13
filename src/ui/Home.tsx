@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import MilleBornesHome from '../mille-bornes/ui/Home';
 import TriviaHome from '../trivia/ui/Home';
 import Carnival from '../carnival/ui/Carnival';
+import { GameWorldType } from '../carnival/worlds/GameWorldType';
 
-const APP_VERSION = 'v1.10.0';
+const APP_VERSION = 'v1.11.0';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -18,6 +19,8 @@ class TriviaState implements State { }
 class MilleBornesState implements State { }
 
 class CarnivalState implements State { }
+
+class WigglersState implements State { }
 
 enum VersionState {
     CURRENT,
@@ -63,18 +66,23 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         setState(new CarnivalState());
     }
 
+    const onWigglersClick = () => {
+        setState(new WigglersState());
+    };
+
     if (state instanceof MilleBornesState) {
         return <MilleBornesHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else if (state instanceof TriviaState) {
         return <TriviaHome onHomeButtonClicked={onHomeButtonClicked} />;
-    } else if (state instanceof CarnivalState) {
-        return <Carnival goHome={onHomeButtonClicked} />;
+    } else if (state instanceof CarnivalState || state instanceof WigglersState) {
+        const gameWorldType = state instanceof CarnivalState ? GameWorldType.TOUCH_BOX : GameWorldType.WIGGLERS;
+        return <Carnival goHome={onHomeButtonClicked} gameWorldType={gameWorldType} />;
     } else {
-        return HomeUi(versionState, onMilleBornesClick, onTriviaClick, onCarnivalClick);
+        return HomeUi(versionState, onMilleBornesClick, onTriviaClick, onCarnivalClick, onWigglersClick);
     }
 };
 
-function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTriviaClick: () => void, onCarnivalClick: () => void) {
+function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTriviaClick: () => void, onCarnivalClick: () => void, onWigglersClick: () => void) {
     const versionStateStyle: React.CSSProperties = {
         position: 'fixed',
         top: '0.25em',
@@ -105,6 +113,7 @@ function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTr
         <button style={buttonStyle} onClick={onTriviaClick}>Trivia 🤔</button>
         <button style={buttonStyle} onClick={onMilleBornesClick}>Mille Bornes 🏎️</button>
         <button style={buttonStyle} onClick={onCarnivalClick}>Carnival 🎠</button>
+        <button style={buttonStyle} onClick={onWigglersClick}>Wigglers 👹</button>
     </div>;
 }
 
