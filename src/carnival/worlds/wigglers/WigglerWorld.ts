@@ -3,10 +3,12 @@ import { GameWorld } from "../GameWorld";
 import { Connection, HeldWiggler, Wiggler, createWiggler } from "./Data";
 import { checkEachPair, checkIntersection, isTouching } from "./Logic";
 
-const STARTUP_MOVE_SPEED = 0.0005;
-const STARTING_UI_STATE_TIME = 2500;
+const WIGGLE_MOVE_SPEED = 0.0002;
+const STARTING_UI_STATE_TIME = 3000;
 const WIGGLER_MOVE_TO_SATRTUP_THRESHOLD = 0.005;
-const HAPPY_TIME_REQUIREMENT = 1500;
+const HAPPY_TIME_REQUIREMENT = 2000;
+const STARTING_LEVEL = 5;
+const MAX_ROUNDS = 3;
 
 class UiState {
     start: number;
@@ -49,6 +51,7 @@ export class WigglerWorld implements GameWorld {
     connections: Array<Connection>;
     heldWiggler: HeldWiggler | null = null;
     level: number;
+    round: number;
     uiState: UiState;
 
     constructor(
@@ -61,14 +64,20 @@ export class WigglerWorld implements GameWorld {
         this.wigglers = [];
         this.connections = [];
         this.wigglersStarting = [];
-        this.level = -1;
         this.uiState = new UiState(-1);
 
-        this.setupWigglers(5);
+        this.level = STARTING_LEVEL;
+        this.round = 0;
+
+        this.setupWigglers();
     }
 
-    setupWigglers(level: number) {
-        this.level = level;
+    setupWigglers() {
+        this.round++;
+        if (this.round > MAX_ROUNDS) {
+            this.round = 1;
+            this.level++;
+        }
 
         this.wigglers = Array.from({ length: this.level }, () => createWiggler({ x: randomNum(0, 1), y: randomNum(0, 1) }));
         this.connections = [];
@@ -102,6 +111,10 @@ export class WigglerWorld implements GameWorld {
     }
 
     draw(): void {
+        if (this.uiState instanceof AngryUiState) {
+            this.drawHUD();
+        }
+
         for (const connection of this.connections) {
             this.ctx.beginPath();
             this.ctx.moveTo(connection.a.position.x * this.canvas.width, connection.a.position.y * this.canvas.height);
@@ -117,6 +130,10 @@ export class WigglerWorld implements GameWorld {
             this.ctx.closePath();
             this.ctx.fillStyle = this.uiState instanceof HappyUiState ? 'green' : 'blue';
             this.ctx.fill();
+        }
+
+        if (!(this.uiState instanceof AngryUiState)) {
+            this.drawHUD();
         }
     }
 
@@ -146,8 +163,8 @@ export class WigglerWorld implements GameWorld {
                 const directionX = wiggler.position.x > this.wigglersStarting[index].position.x ? -1 : 1;
                 const directionY = wiggler.position.y > this.wigglersStarting[index].position.y ? -1 : 1;
 
-                wiggler.position.x += directionX * STARTUP_MOVE_SPEED * deltaTime;
-                wiggler.position.y += directionY * STARTUP_MOVE_SPEED * deltaTime;
+                wiggler.position.x += directionX * WIGGLE_MOVE_SPEED * deltaTime;
+                wiggler.position.y += directionY * WIGGLE_MOVE_SPEED * deltaTime;
             });
 
             if (!atLeastOneWigglerWasMoved) {
@@ -178,7 +195,7 @@ export class WigglerWorld implements GameWorld {
         }
 
         if (this.uiState instanceof HappyUiState && performance.now() - this.uiState.start >= HAPPY_TIME_REQUIREMENT) {
-            this.setupWigglers(this.level + 1);
+            this.setupWigglers();
         }
     }
 
@@ -217,5 +234,46 @@ export class WigglerWorld implements GameWorld {
 
     onMouseUp(x: number, y: number): void {
         this.heldWiggler = null;
+    }
+
+    private drawHUD() {
+        const text = this.getText();
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillStyle = this.uiState instanceof AngryUiState ? 'grey' : this.uiState instanceof WigglingUiState ? 'HotPink' : this.uiState instanceof HappyUiState ? 'lime' : 'Yellow';
+        const fontSize = this.getFontSize();
+        this.ctx.font = `${fontSize}px sans-serif`;
+
+        let height = this.canvas.height / 2;
+        for (const line of text) {
+            this.ctx.fillText(line, this.canvas.width / 2, height);
+            height += fontSize;
+        }
+
+        this.ctx.textAlign = 'right';
+        this.ctx.textBaseline = 'top';
+        this.ctx.fillStyle = 'white';
+        const halfFont = fontSize / 2;
+        this.ctx.font = `${halfFont}px sans-serif`;
+        this.ctx.fillText(`Level: ${this.level - STARTING_LEVEL + 1}`, this.canvas.width - 10, 10);
+        this.ctx.fillText(`Round: ${this.round} of ${MAX_ROUNDS}`, this.canvas.width - 10, 10 + halfFont);
+    }
+
+    private getText(): Array<string> {
+        if (this.uiState instanceof StartingUiState) {
+            return ["These are", "happy Wigglers"];
+        } else if (this.uiState instanceof WigglingUiState) {
+            return ["Oh no!", '', "The Wigglers", "are wiggling again!"];
+        } else if (this.uiState instanceof AngryUiState) {
+            return ["Please help", "the Wigglers", "find happpiness!"];
+        } else if (this.uiState instanceof HappyUiState) {
+            return ["The Wigglers", "are happy again!"];
+        } else {
+            throw new Error(`UiState not valid: ${this.uiState}`);
+        }
+    }
+
+    private getFontSize(): number {
+        return this.canvas.height * 0.06;
     }
 }
