@@ -229,7 +229,7 @@ export class WigglerWorld implements GameWorld {
             this.level++;
         }
 
-        this.wigglers = Array.from({ length: this.level }, () => createWiggler({ x: randomNum(0, 1), y: randomNum(0, 1) }));
+        this.wigglers = Array.from({ length: this.level }, () => createWiggler({ x: randomNum(0.05, 0.95), y: randomNum(0.05, 0.95) }));
         this.connections = [];
 
         const allConnections = new Array<Connection>();
@@ -255,7 +255,7 @@ export class WigglerWorld implements GameWorld {
             }
         }
 
-        this.wigglersStarting = this.wigglers.map(() => createWiggler({ x: randomNum(0, 1), y: randomNum(0, 1) }));
+        this.wigglersStarting = this.wigglers.map(() => createWiggler({ x: randomNum(0.05, 0.95), y: randomNum(0.05, 0.95) }));
 
         this.uiState = new StartingUiState(performance.now());
     }
