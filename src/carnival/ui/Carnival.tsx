@@ -50,6 +50,14 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, ga
         gameWorld.onTouchStart(e);
     };
 
+    canvas.ontouchmove = e => {
+        gameWorld.onTouchMove(e);
+    };
+
+    canvas.ontouchend = e => {
+        gameWorld.onTouchEnd(e);
+    };
+
     canvas.onmousedown = e => {
         gameWorld.onMouseDown(e.pageX / canvas.width, e.pageY / canvas.height);
     };

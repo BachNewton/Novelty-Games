@@ -6,7 +6,7 @@ import { checkEachPair, checkIntersection, isTouching } from "./Logic";
 const WIGGLE_MOVE_SPEED = 0.0002;
 const STARTING_UI_STATE_TIME = 3000;
 const WIGGLER_MOVE_TO_SATRTUP_THRESHOLD = 0.005;
-const HAPPY_TIME_REQUIREMENT = 2000;
+const HAPPY_TIME_REQUIREMENT = 2500;
 const STARTING_LEVEL = 5;
 const MAX_ROUNDS = 3;
 
@@ -72,45 +72,7 @@ export class WigglerWorld implements GameWorld {
         this.setupWigglers();
     }
 
-    setupWigglers() {
-        this.round++;
-        if (this.round > MAX_ROUNDS) {
-            this.round = 1;
-            this.level++;
-        }
-
-        this.wigglers = Array.from({ length: this.level }, () => createWiggler({ x: randomNum(0, 1), y: randomNum(0, 1) }));
-        this.connections = [];
-
-        const allConnections = new Array<Connection>();
-        for (let i = 0; i < this.wigglers.length - 1; i++) {
-            for (let j = i + 1; j < this.wigglers.length; j++) {
-                allConnections.push({ a: this.wigglers[i], b: this.wigglers[j] });
-            }
-        }
-
-        const shuffledConnections = shuffleArray(allConnections);
-        for (const connection of shuffledConnections) {
-            let noIntersections = true;
-
-            for (const selectedConnections of this.connections) {
-                if (checkIntersection(connection, selectedConnections)) {
-                    noIntersections = false;
-                    break;
-                }
-            }
-
-            if (noIntersections) {
-                this.connections.push(connection);
-            }
-        }
-
-        this.wigglersStarting = this.wigglers.map(() => createWiggler({ x: randomNum(0, 1), y: randomNum(0, 1) }));
-
-        this.uiState = new StartingUiState(performance.now());
-    }
-
-    draw(): void {
+    public draw(): void {
         if (this.uiState instanceof AngryUiState) {
             this.drawHUD();
         }
@@ -137,7 +99,7 @@ export class WigglerWorld implements GameWorld {
         }
     }
 
-    update(deltaTime: number): void {
+    public update(deltaTime: number): void {
         if (this.uiState instanceof StartingUiState && performance.now() - this.uiState.start >= STARTING_UI_STATE_TIME) {
             this.uiState = new WigglingUiState(performance.now());
         }
@@ -199,15 +161,39 @@ export class WigglerWorld implements GameWorld {
         }
     }
 
-    onTouchStart(e: TouchEvent): void {
+    public onTouchStart(e: TouchEvent): void {
+        const x = e.touches[0].pageX / this.canvas.width;
+        const y = e.touches[0].pageY / this.canvas.height;
+        this.handleActionDown(x, y);
+    }
+
+    public onTouchMove(e: TouchEvent): void {
+        const x = e.touches[0].pageX / this.canvas.width;
+        const y = e.touches[0].pageY / this.canvas.height;
+        this.handleActionMove(x, y);
+    }
+
+    public onTouchEnd(e: TouchEvent): void {
+        this.handleActionUp();
+    }
+
+    public onClick(e: MouseEvent): void {
         // TODO
     }
 
-    onClick(e: MouseEvent): void {
-        // TODO
+    public onMouseDown(x: number, y: number): void {
+        this.handleActionDown(x, y);
     }
 
-    onMouseDown(x: number, y: number): void {
+    public onMouseMove(x: number, y: number): void {
+        this.handleActionMove(x, y);
+    }
+
+    public onMouseUp(x: number, y: number): void {
+        this.handleActionUp();
+    }
+
+    private handleActionDown(x: number, y: number): void {
         if (this.uiState instanceof StartingUiState || this.uiState instanceof WigglingUiState) return;
 
         for (const wiggler of this.wigglers) {
@@ -225,15 +211,53 @@ export class WigglerWorld implements GameWorld {
         }
     }
 
-    onMouseMove(x: number, y: number): void {
-        if (this.heldWiggler !== null) {
-            this.heldWiggler.wiggler.position.x = x + this.heldWiggler.offset.x;
-            this.heldWiggler.wiggler.position.y = y + this.heldWiggler.offset.y;
-        }
+    private handleActionMove(x: number, y: number): void {
+        if (this.heldWiggler === null) return;
+
+        this.heldWiggler.wiggler.position.x = x + this.heldWiggler.offset.x;
+        this.heldWiggler.wiggler.position.y = y + this.heldWiggler.offset.y;
     }
 
-    onMouseUp(x: number, y: number): void {
+    private handleActionUp(): void {
         this.heldWiggler = null;
+    }
+
+    private setupWigglers() {
+        this.round++;
+        if (this.round > MAX_ROUNDS) {
+            this.round = 1;
+            this.level++;
+        }
+
+        this.wigglers = Array.from({ length: this.level }, () => createWiggler({ x: randomNum(0, 1), y: randomNum(0, 1) }));
+        this.connections = [];
+
+        const allConnections = new Array<Connection>();
+        for (let i = 0; i < this.wigglers.length - 1; i++) {
+            for (let j = i + 1; j < this.wigglers.length; j++) {
+                allConnections.push({ a: this.wigglers[i], b: this.wigglers[j] });
+            }
+        }
+
+        const shuffledConnections = shuffleArray(allConnections);
+        for (const connection of shuffledConnections) {
+            let noIntersections = true;
+
+            for (const selectedConnections of this.connections) {
+                if (checkIntersection(connection, selectedConnections)) {
+                    noIntersections = false;
+                    break;
+                }
+            }
+
+            if (noIntersections) {
+                this.connections.push(connection);
+            }
+        }
+
+        this.wigglersStarting = this.wigglers.map(() => createWiggler({ x: randomNum(0, 1), y: randomNum(0, 1) }));
+
+        this.uiState = new StartingUiState(performance.now());
     }
 
     private drawHUD() {

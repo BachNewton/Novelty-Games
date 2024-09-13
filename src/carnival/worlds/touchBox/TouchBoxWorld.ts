@@ -159,6 +159,14 @@ export class TouchBoxWorld implements GameWorld {
         }
     }
 
+    public onTouchMove(e: TouchEvent): void {
+        //
+    }
+
+    public onTouchEnd(e: TouchEvent): void {
+        //
+    }
+
     public onClick(e: MouseEvent) {
         if (this.finalTime !== null) return;
 
