@@ -4,6 +4,7 @@ import { Connection, HeldWiggler, Wiggler, createWiggler } from "./Data";
 import { checkEachPair, checkIntersection, isTouching } from "./Logic";
 
 const STARTUP_MOVE_SPEED = 0.0005;
+const STARTING_UI_STATE_TIME = 2500;
 const WIGGLER_MOVE_TO_SATRTUP_THRESHOLD = 0.005;
 const HAPPY_TIME_REQUIREMENT = 1500;
 
@@ -15,7 +16,13 @@ class UiState {
     }
 }
 
-class StartupUiState extends UiState {
+class StartingUiState extends UiState {
+    constructor(start: number) {
+        super(start);
+    }
+}
+
+class WigglingUiState extends UiState {
     constructor(start: number) {
         super(start);
     }
@@ -62,7 +69,6 @@ export class WigglerWorld implements GameWorld {
 
     setupWigglers(level: number) {
         this.level = level;
-        this.uiState = new StartupUiState(performance.now());
 
         this.wigglers = Array.from({ length: this.level }, () => createWiggler({ x: randomNum(0, 1), y: randomNum(0, 1) }));
         this.connections = [];
@@ -91,6 +97,8 @@ export class WigglerWorld implements GameWorld {
         }
 
         this.wigglersStarting = this.wigglers.map(() => createWiggler({ x: randomNum(0, 1), y: randomNum(0, 1) }));
+
+        this.uiState = new StartingUiState(performance.now());
     }
 
     draw(): void {
@@ -113,11 +121,23 @@ export class WigglerWorld implements GameWorld {
     }
 
     update(deltaTime: number): void {
-        if (this.uiState instanceof StartupUiState) {
+        if (this.uiState instanceof StartingUiState && performance.now() - this.uiState.start >= STARTING_UI_STATE_TIME) {
+            this.uiState = new WigglingUiState(performance.now());
+        }
+
+        if (this.uiState instanceof WigglingUiState) {
             let atLeastOneWigglerWasMoved = false;
 
             this.wigglers.forEach((wiggler, index) => {
-                if (Math.abs(wiggler.position.x - this.wigglersStarting[index].position.x) < WIGGLER_MOVE_TO_SATRTUP_THRESHOLD && Math.abs(wiggler.position.y - this.wigglersStarting[index].position.y) < WIGGLER_MOVE_TO_SATRTUP_THRESHOLD) {
+                if (
+                    Math.abs(
+                        wiggler.position.x - this.wigglersStarting[index].position.x
+                    ) < WIGGLER_MOVE_TO_SATRTUP_THRESHOLD
+                    &&
+                    Math.abs(
+                        wiggler.position.y - this.wigglersStarting[index].position.y
+                    ) < WIGGLER_MOVE_TO_SATRTUP_THRESHOLD
+                ) {
                     return;
                 }
 
@@ -171,7 +191,7 @@ export class WigglerWorld implements GameWorld {
     }
 
     onMouseDown(x: number, y: number): void {
-        if (this.uiState instanceof StartupUiState) return;
+        if (this.uiState instanceof StartingUiState || this.uiState instanceof WigglingUiState) return;
 
         for (const wiggler of this.wigglers) {
             if (isTouching(x, y, wiggler)) {
