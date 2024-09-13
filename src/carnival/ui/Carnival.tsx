@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { GameWorld } from "../worlds/GameWorld";
 import { TouchBoxWorld } from "../worlds/touchBox/TouchBoxWorld";
+import { WigglerWorld } from "../worlds/wigglers/WigglerWorld";
 
 interface CarnivalProps {
     goHome: () => void;
@@ -45,6 +46,26 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
 function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, gameWorld: GameWorld) {
     canvas.ontouchstart = e => {
         gameWorld.onTouchStart(e);
+    };
+
+    canvas.ontouchmove = e => {
+        gameWorld.onTouchMove(e);
+    };
+
+    canvas.ontouchend = e => {
+        gameWorld.onTouchEnd(e);
+    };
+
+    canvas.onmousedown = e => {
+        gameWorld.onMouseDown(e.pageX / canvas.width, e.pageY / canvas.height);
+    };
+
+    canvas.onmousemove = e => {
+        gameWorld.onMouseMove(e.pageX / canvas.width, e.pageY / canvas.height);
+    };
+
+    canvas.onmouseup = e => {
+        gameWorld.onMouseUp(e.pageX / canvas.width, e.pageY / canvas.height);
     };
 
     canvas.onclick = e => {
