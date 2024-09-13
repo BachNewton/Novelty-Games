@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Card, LimitCard } from "../logic/Card";
-import { Game, Player, Team } from "../logic/Data";
+import { Game, Player, PlayerType, Team } from "../logic/Data";
 import { canCardBePlayed, getCurrentPlayerTeam, getRemainingDistance, isGameAtMaxTargetDistance, isInstanceOfHazardCard, playCard } from "../logic/Rules";
 import Hand from './Hand';
 import TableauUi from "./Tableau";
 import { Communicator, PlayCardEvent } from "../logic/Communicator";
 import DeckDiscardAndStats from "./DeckDiscardAndStats";
+import { shouldComputerPlayerTakeItsTurn, takeComputerPlayerTurn } from "../logic/ComputerPlayer";
 
 interface BoardProps {
     startingGame: Game;
@@ -41,6 +42,9 @@ class TeamSelection implements UiState {
     }
 }
 
+let canComputerPlayerMove = true;
+const COMPUTER_THINK_TIME = 1500;
+
 const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRoundOver: onRoundOver }) => {
     const [state, setState] = useState<State>({ game: startingGame, ui: new CardSelection() });
 
@@ -64,7 +68,35 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
         });
     }, [state]);
 
-    const itIsYourTurn = getLocalPlayer(state.game, localId)?.localId === state.game.currentPlayer.localId;
+    const checkIfTargetDistanceReached = (targetTeam: Team, shouldCallExtention: () => boolean) => {
+        const teamAtTargetDistance = getRemainingDistance(targetTeam.tableau.distanceArea, state.game.teams, state.game.extention) === 0;
+
+        if (teamAtTargetDistance) {
+            if (state.game.extention || isGameAtMaxTargetDistance(state.game.teams)) {
+                onRoundOver(state.game);
+            } else {
+                if (shouldCallExtention()) {
+                    state.game.extention = true;
+                } else {
+                    onRoundOver(state.game);
+                }
+            }
+        }
+    };
+
+    if (shouldComputerPlayerTakeItsTurn(state.game, localId, canComputerPlayerMove)) {
+        canComputerPlayerMove = false;
+        console.log(`Computer is fake "thinking" for ${COMPUTER_THINK_TIME} ms.`);
+
+        setTimeout(() => {
+            console.log('Computer is taking its turn now.');
+            takeComputerPlayerTurn(state.game, onRoundOver, communicator, checkIfTargetDistanceReached);
+            canComputerPlayerMove = true;
+            setState({ ...state });
+        }, COMPUTER_THINK_TIME);
+    }
+
+    const itIsYourTurn = state.game.currentPlayer.localId === localId && state.game.currentPlayer.type !== PlayerType.COMPUTER;
 
     const onPlayCard = (card: Card) => {
         if (!(state.ui instanceof CardSelection) || !itIsYourTurn) return;
@@ -84,20 +116,10 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
                 const targetTeam = getCurrentPlayerTeam(state.game);
                 playCard(card, state.game, targetTeam, onRoundOver);
 
-                const teamAtTargetDistance = getRemainingDistance(targetTeam.tableau.distanceArea, state.game.teams, state.game.extention) === 0;
-                if (teamAtTargetDistance) {
-                    if (state.game.extention || isGameAtMaxTargetDistance(state.game.teams)) {
-                        onRoundOver(state.game);
-                    } else {
-                        const calledExtention = window.confirm('Your team has reached the target! Would like to to call an extention?');
-
-                        if (calledExtention) {
-                            state.game.extention = true;
-                        } else {
-                            onRoundOver(state.game);
-                        }
-                    }
-                }
+                checkIfTargetDistanceReached(
+                    targetTeam,
+                    () => window.confirm('Your team has reached the target! Would like to to call an extention?')
+                );
 
                 communicator.playCard(card, targetTeam, state.game.extention);
                 state.ui.card = null;
@@ -108,8 +130,9 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
     };
 
     const localPlayerTeam = getLocalPlayerTeam(state.game, localId);
+    const otherTeams = getOtherTeams(state.game, localPlayerTeam);
 
-    const otherTeamsTableau = state.game.teams.filter(team => team !== localPlayerTeam).map((otherTeam, index) => {
+    const otherTeamsTableau = otherTeams.map((otherTeam, index) => {
         const onClick = () => {
             if (state.ui instanceof TeamSelection) {
                 if (state.ui.team === otherTeam) {
@@ -169,13 +192,13 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
 };
 
 function getLocalPlayer(game: Game, localId: string): Player | null {
-    if (game.currentPlayer.localId === localId) {
+    if (game.currentPlayer.localId === localId && game.currentPlayer.type !== PlayerType.COMPUTER) {
         return game.currentPlayer;
     }
 
     for (const team of game.teams) {
         for (const player of team.players) {
-            if (player.localId === localId) {
+            if (player.localId === localId && player.type !== PlayerType.COMPUTER) {
                 return player;
             }
         }
@@ -192,6 +215,10 @@ function getLocalPlayerTeam(game: Game, localId: string): Team | null {
     const localPlayerTeamId = getLocalPlayer(game, localId)?.teamId || null;
 
     return game.teams.find(team => team.id === localPlayerTeamId) || null;
+}
+
+function getOtherTeams(game: Game, localPlayerTeam: Team | null): Array<Team> {
+    return game.teams.filter(team => team !== localPlayerTeam);
 }
 
 function getTeamById(teamId: string | null, game: Game): Team | null {

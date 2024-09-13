@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Communicator, LobbyEvent } from "../logic/Communicator";
 import HomeButton from "../../ui/HomeButton";
+import { PlayerType } from "../logic/Data";
 
 interface LobbyProps {
     communicator: Communicator;
@@ -17,6 +18,7 @@ export interface LobbyTeam {
 export interface LobbyPlayer {
     name: string;
     localId: string;
+    type: PlayerType;
 }
 
 const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeButtonClicked }) => {
@@ -43,19 +45,27 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
         : <></>;
 
     const lobbyTeamsUi = lobbyTeams.map((lobbyTeam, index) => {
-        const onAddPlayer = () => {
+        const onAddPlayer = (playerType: PlayerType) => {
             const name = prompt('What is the name of this player?') || 'Player';
+            const namePrefix = playerType === PlayerType.COMPUTER ? '🤖 ' : '';
+
             lobbyTeam.players.push({
-                name: name,
-                localId: localId
+                name: namePrefix + name,
+                localId: localId,
+                type: playerType
             });
 
             setLobbyTeams([...lobbyTeams]);
+
             communicator.updateLobby(lobbyTeams);
         };
 
         const addPlayerButton = lobbyTeam.players.length < 2
-            ? <button style={{ fontSize: '1em' }} onClick={onAddPlayer}>Add Player</button>
+            ? <button style={{ fontSize: '1em' }} onClick={() => onAddPlayer(PlayerType.HUMAN)}>Add Player</button>
+            : <></>;
+
+        const addComputerButton = lobbyTeam.players.length < 2
+            ? <button style={{ fontSize: '1em' }} onClick={() => onAddPlayer(PlayerType.COMPUTER)}>Add Computer</button>
             : <></>;
 
         const onRemovePlayer = (removePlayer: LobbyPlayer) => {
@@ -66,6 +76,7 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
 
         const playersUi = lobbyTeam.players.map((player, index) => <tr key={index}>
             <td style={{ fontSize: '1.5em' }}>{player.name}</td>
+            <td></td>
             <td style={{ textAlign: 'center' }}><button style={{ fontSize: '1em' }} onClick={() => onRemovePlayer(player)}>Remove</button></td>
         </tr>);
 
@@ -74,6 +85,7 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
                 <tr>
                     <th>Team #{index + 1}</th>
                     <th>{addPlayerButton}</th>
+                    <th>{addComputerButton}</th>
                 </tr>
             </thead>
             <tbody>
