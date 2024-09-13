@@ -62,6 +62,7 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, ga
     };
 
     canvas.ontouchmove = e => {
+        e.preventDefault(); // Don't refresh the page when pulling down
         gameWorld.onTouchMove(e);
     };
 
