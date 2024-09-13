@@ -30,12 +30,10 @@ const Carnival: React.FC<CarnivalProps> = ({ goHome }) => {
 
         window.addEventListener('resize', resizeCanvas);
 
-        // const gameWorld: GameWorld = new TouchBoxWorld(canvas, ctx, () => {
-        //     hasCanvasContextBeenSet = false;
-        //     goHome();
-        // });
-
-        const gameWorld: GameWorld = new WigglerWorld(canvas, ctx);
+        const gameWorld: GameWorld = new TouchBoxWorld(canvas, ctx, () => {
+            hasCanvasContextBeenSet = false;
+            goHome();
+        });
 
         initCanvas(canvas, ctx, gameWorld);
     }, []);
