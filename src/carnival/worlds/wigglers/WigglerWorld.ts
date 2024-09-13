@@ -3,19 +3,46 @@ import { GameWorld } from "../GameWorld";
 import { Connection, HeldWiggler, Wiggler, createWiggler } from "./Data";
 import { checkEachPair, checkIntersection, isTouching } from "./Logic";
 
-const STARTUP_MOVE_SPEED = 0.0004;
+const STARTUP_MOVE_SPEED = 0.0005;
 const WIGGLER_MOVE_TO_SATRTUP_THRESHOLD = 0.005;
+const HAPPY_TIME_REQUIREMENT = 1500;
+
+class UiState {
+    start: number;
+
+    constructor(start: number) {
+        this.start = start;
+    }
+}
+
+class StartupUiState extends UiState {
+    constructor(start: number) {
+        super(start);
+    }
+}
+
+class AngryUiState extends UiState {
+    constructor(start: number) {
+        super(start);
+    }
+}
+
+class HappyUiState extends UiState {
+    constructor(start: number) {
+        super(start);
+    }
+}
 
 export class WigglerWorld implements GameWorld {
     readonly canvas: HTMLCanvasElement;
     readonly ctx: CanvasRenderingContext2D;
 
-    readonly wigglers: Array<Wiggler>;
-    readonly wigglersStarting: Array<Wiggler>;
-    readonly connections: Array<Connection>;
+    wigglers: Array<Wiggler>;
+    wigglersStarting: Array<Wiggler>;
+    connections: Array<Connection>;
     heldWiggler: HeldWiggler | null = null;
     level: number;
-    isInStartup: boolean;
+    uiState: UiState;
 
     constructor(
         canvas: HTMLCanvasElement,
@@ -24,29 +51,18 @@ export class WigglerWorld implements GameWorld {
         this.canvas = canvas;
         this.ctx = ctx;
 
-        // const wiggler1 = createWiggler({ x: 0.5, y: 0.5 });
-        // const wiggler2 = createWiggler({ x: 0.25, y: 0.25 });
-        // const wiggler3 = createWiggler({ x: 0.75, y: 0.25 });
-        // const wiggler4 = createWiggler({ x: 0.25, y: 0.75 });
-        // const wiggler5 = createWiggler({ x: 0.75, y: 0.75 });
-        // const wiggler6 = createWiggler({ x: (2 / 3), y: 0.5 });
+        this.wigglers = [];
+        this.connections = [];
+        this.wigglersStarting = [];
+        this.level = -1;
+        this.uiState = new UiState(-1);
 
-        // this.wigglers = [wiggler1, wiggler2, wiggler3, wiggler4, wiggler5, wiggler6];
+        this.setupWigglers(5);
+    }
 
-        // this.connections = [
-        //     { a: wiggler2, b: wiggler3, isUninterrupted: true },
-        //     { a: wiggler2, b: wiggler4, isUninterrupted: true },
-        //     { a: wiggler3, b: wiggler5, isUninterrupted: true },
-        //     { a: wiggler4, b: wiggler5, isUninterrupted: true },
-        //     { a: wiggler1, b: wiggler2, isUninterrupted: true },
-        //     { a: wiggler1, b: wiggler3, isUninterrupted: true },
-        //     { a: wiggler1, b: wiggler4, isUninterrupted: true },
-        //     { a: wiggler1, b: wiggler5, isUninterrupted: true },
-        //     { a: wiggler1, b: wiggler6, isUninterrupted: true }
-        // ];
-
-        this.level = 5;
-        this.isInStartup = true;
+    setupWigglers(level: number) {
+        this.level = level;
+        this.uiState = new StartupUiState(performance.now());
 
         this.wigglers = Array.from({ length: this.level }, () => createWiggler({ x: randomNum(0, 1), y: randomNum(0, 1) }));
         this.connections = [];
@@ -91,13 +107,13 @@ export class WigglerWorld implements GameWorld {
             this.ctx.beginPath();
             this.ctx.arc(wiggler.position.x * this.canvas.width, wiggler.position.y * this.canvas.height, wiggler.size * this.canvas.height, 0, Math.PI * 2);
             this.ctx.closePath();
-            this.ctx.fillStyle = 'blue';
+            this.ctx.fillStyle = this.uiState instanceof HappyUiState ? 'green' : 'blue';
             this.ctx.fill();
         }
     }
 
     update(deltaTime: number): void {
-        if (this.isInStartup) {
+        if (this.uiState instanceof StartupUiState) {
             let atLeastOneWigglerWasMoved = false;
 
             this.wigglers.forEach((wiggler, index) => {
@@ -115,18 +131,35 @@ export class WigglerWorld implements GameWorld {
             });
 
             if (!atLeastOneWigglerWasMoved) {
-                this.isInStartup = false;
+                this.uiState = new AngryUiState(performance.now());
             }
         }
 
         this.connections.forEach(connection => connection.isUninterrupted = true);
 
+        let allWigglersAreUninterrupted = true;
+
         checkEachPair(this.connections, (a, b) => {
             if (checkIntersection(a, b)) {
                 a.isUninterrupted = false;
                 b.isUninterrupted = false;
+                allWigglersAreUninterrupted = false;
             }
         });
+
+        if (allWigglersAreUninterrupted) {
+            if (this.uiState instanceof AngryUiState) {
+                this.uiState = new HappyUiState(performance.now());
+            }
+        } else {
+            if (this.uiState instanceof HappyUiState) {
+                this.uiState = new AngryUiState(performance.now());
+            }
+        }
+
+        if (this.uiState instanceof HappyUiState && performance.now() - this.uiState.start >= HAPPY_TIME_REQUIREMENT) {
+            this.setupWigglers(this.level + 1);
+        }
     }
 
     onTouchStart(e: TouchEvent): void {
@@ -138,7 +171,7 @@ export class WigglerWorld implements GameWorld {
     }
 
     onMouseDown(x: number, y: number): void {
-        if (this.isInStartup) return;
+        if (this.uiState instanceof StartupUiState) return;
 
         for (const wiggler of this.wigglers) {
             if (isTouching(x, y, wiggler)) {
