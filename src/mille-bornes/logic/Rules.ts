@@ -129,7 +129,7 @@ export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
         ? game.teams.filter(team => team !== getCurrentPlayerTeam(game))
         : [targetTeam];
 
-    if (isInstanceOfRemedyCard(card)) return canRemedyCardBePlayed(card, getVisibleBattleCard(tableau.battleArea));
+    if (isInstanceOfRemedyCard(card)) return canRemedyCardBePlayed(card, getVisibleBattleCard(tableau.battleArea), tableau.safetyArea);
     if (isInstanceOfDistanceCard(card)) return canDistanceCardBePlayed(card as DistanceCard, tableau, game.teams, game.extention);
     if (card instanceof UnlimitedCard) return canUnlimitedCardBePlayed(getVisibleSpeedCard(tableau.speedArea));
     if (card instanceof LimitCard) return canLimitCardBePlayed(targetTeams);
@@ -206,8 +206,8 @@ function canHazardCardBePlayed(hazardCard: HazardCard, teams: Array<Team>): bool
     return false;
 }
 
-function canRemedyCardBePlayed(remedyCard: RemedyCard, battleArea: BattleCard | null): boolean {
-    if (remedyCard instanceof RollCard) return canRollCardBePlayed(battleArea);
+function canRemedyCardBePlayed(remedyCard: RemedyCard, battleArea: BattleCard | null, safetyArea: Array<SafetyCard>): boolean {
+    if (remedyCard instanceof RollCard) return canRollCardBePlayed(battleArea, safetyArea);
     if (remedyCard instanceof GasCard && battleArea instanceof EmptyCard) return true;
     if (remedyCard instanceof RepairCard && battleArea instanceof CrashCard) return true;
     if (remedyCard instanceof SpareCard && battleArea instanceof FlatCard) return true;
@@ -215,7 +215,10 @@ function canRemedyCardBePlayed(remedyCard: RemedyCard, battleArea: BattleCard | 
     return false;
 }
 
-function canRollCardBePlayed(battleArea: BattleCard | null): boolean {
+function canRollCardBePlayed(battleArea: BattleCard | null, safetyArea: Array<SafetyCard>): boolean {
+    // You can't play a RollCard if you already have an EmergencyCard in play.
+    if (hasEmergencyCard(safetyArea)) return false;
+
     if (battleArea === null) return true;
     if (battleArea instanceof StopCard) return true;
     if (battleArea instanceof GasCard) return true;
