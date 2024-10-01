@@ -87,5 +87,3 @@ describe('createQuestions function from QuestionCreator', () => {
         });
     });
 });
-
-export { };

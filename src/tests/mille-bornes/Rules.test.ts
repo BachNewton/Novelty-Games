@@ -2,7 +2,7 @@ import { EmergencyCard, RollCard } from "../../mille-bornes/logic/Card";
 import { Game, Player, PlayerType, Team } from "../../mille-bornes/logic/Data";
 import { canCardBePlayed } from "../../mille-bornes/logic/Rules";
 
-describe('canCardBePlayed  function from Rules', () => {
+describe('canCardBePlayed function from Rules', () => {
     it('should not allow RollCard to be played when EmergencyCard has been played', () => {
         const rollCard = new RollCard();
 
