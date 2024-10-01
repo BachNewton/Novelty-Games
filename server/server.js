@@ -6,6 +6,7 @@ import fs from 'fs';
 const PORT = 443;
 const PRIVATE_KEY_FILE_PATH = '/etc/letsencrypt/live/novelty-games.mooo.com/privkey.pem';
 const CERTIFICATE_FILE_PATH = '/etc/letsencrypt/live/novelty-games.mooo.com/fullchain.pem';
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 function startServer() {
     const privateKey = fs.readFileSync(PRIVATE_KEY_FILE_PATH, 'utf8');
@@ -48,8 +49,14 @@ function startServer() {
 
 (async () => {
     while (true) {
+        console.log('Creating server');
         const server = startServer();
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        console.log('Waiting one week');
+        await new Promise(resolve => setTimeout(resolve, 7500));
+        console.log('Closing server');
         server.close();
+        server.closeAllConnections();
+        await new Promise(resolve => server.on('close', resolve));
+        console.log('Server closed');
     }
 })();
