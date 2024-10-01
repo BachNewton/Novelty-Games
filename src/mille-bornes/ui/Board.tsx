@@ -45,7 +45,7 @@ class TeamSelection implements UiState {
 let canComputerPlayerMove = true;
 const COMPUTER_THINK_TIME = 1500;
 
-const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRoundOver: onRoundOver }) => {
+const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRoundOver }) => {
     const [state, setState] = useState<State>({ game: startingGame, ui: new CardSelection() });
 
     useEffect(() => {

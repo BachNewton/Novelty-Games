@@ -102,15 +102,6 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
         ? <button style={{ fontSize: '1.5em' }} onClick={onStartGame}>Start Game</button>
         : <></>;
 
-    const homeButtonStyle: React.CSSProperties = {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        marginTop: '0.3em',
-        marginLeft: '0.3em',
-        fontSize: '1em'
-    };
-
     return <div style={{ color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
         <HomeButton onClick={onHomeButtonClicked} />
         <div style={{ fontSize: '1.75em', marginBottom: '1em' }}>🏎️ Mille Bornes Lobby 🏁</div>

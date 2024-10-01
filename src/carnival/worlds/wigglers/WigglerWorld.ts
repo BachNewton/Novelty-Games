@@ -18,29 +18,10 @@ class UiState {
     }
 }
 
-class StartingUiState extends UiState {
-    constructor(start: number) {
-        super(start);
-    }
-}
-
-class WigglingUiState extends UiState {
-    constructor(start: number) {
-        super(start);
-    }
-}
-
-class AngryUiState extends UiState {
-    constructor(start: number) {
-        super(start);
-    }
-}
-
-class HappyUiState extends UiState {
-    constructor(start: number) {
-        super(start);
-    }
-}
+class StartingUiState extends UiState { }
+class WigglingUiState extends UiState { }
+class AngryUiState extends UiState { }
+class HappyUiState extends UiState { }
 
 export class WigglerWorld implements GameWorld {
     readonly canvas: HTMLCanvasElement;

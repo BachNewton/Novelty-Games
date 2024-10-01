@@ -1,6 +1,6 @@
 import { Communicator } from "./Communicator";
 import { Game, PlayerType, Team } from "./Data";
-import { canCardBePlayed, getCurrentPlayerTeam, isInstanceOfHazardCard, playCard } from "./Rules";
+import { canCardBePlayed, getCurrentPlayerTeam, playCard } from "./Rules";
 import { DumbBot } from "./bots/DumbBot";
 
 /** @returns true if the current player is local and is also a computer and the comupter hasn't already taken its turn */
