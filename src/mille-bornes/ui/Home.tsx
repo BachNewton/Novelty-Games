@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Communicator, GameEvent } from "../logic/Communicator";
+import { Communicator } from "../logic/Communicator";
 import { Game, Team } from "../logic/Data";
 import { createGame } from "../logic/GameCreator";
 import { Score } from "../logic/ScoreboardCalculator";
 import Lobby, { LobbyPlayer, LobbyTeam } from "./Lobby";
 import Board from "./Board";
 import Scoreboard from "./Scoreboard";
+import { GameEvent, NewtorkCommunicator } from "../logic/NewtorkCommunicator";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
@@ -32,7 +33,7 @@ class ScoreboardState implements State {
 }
 
 const LOCAL_ID = Math.random().toString();
-const COMMUNICATOR = new Communicator();
+const COMMUNICATOR: Communicator = new NewtorkCommunicator();
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
     const [state, setState] = useState<State>(new LobbyState());

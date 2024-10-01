@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Communicator, LobbyEvent } from "../logic/Communicator";
+import { Communicator } from "../logic/Communicator";
 import HomeButton from "../../ui/HomeButton";
 import { PlayerType } from "../logic/Data";
+import { LobbyEvent } from "../logic/NewtorkCommunicator";
 
 interface LobbyProps {
     communicator: Communicator;

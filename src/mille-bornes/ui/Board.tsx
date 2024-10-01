@@ -4,9 +4,10 @@ import { Game, Player, PlayerType, Team } from "../logic/Data";
 import { canCardBePlayed, getCurrentPlayerTeam, getRemainingDistance, isGameAtMaxTargetDistance, isInstanceOfHazardCard, playCard } from "../logic/Rules";
 import Hand from './Hand';
 import TableauUi from "./Tableau";
-import { Communicator, PlayCardEvent } from "../logic/Communicator";
+import { Communicator } from "../logic/Communicator";
 import DeckDiscardAndStats from "./DeckDiscardAndStats";
 import { shouldComputerPlayerTakeItsTurn, takeComputerPlayerTurn } from "../logic/ComputerPlayer";
+import { PlayCardEvent } from "../logic/NewtorkCommunicator";
 
 interface BoardProps {
     startingGame: Game;
