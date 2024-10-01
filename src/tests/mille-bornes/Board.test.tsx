@@ -6,7 +6,7 @@ import { FakeCommunicator } from "./FakeCommunicator";
 import { CrashCard, RollCard } from "../../mille-bornes/logic/Card";
 
 describe('Board UI', () => {
-    it('should allow a player to play a crash card against another team', async () => {
+    it('should allow a player to play a crash card against another team', () => {
         const game = createTestingGame();
         game.teams[0].players[0].hand = [new CrashCard()];
         game.teams[1].tableau.battleArea = [new RollCard()];
