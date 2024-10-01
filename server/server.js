@@ -52,10 +52,9 @@ function startServer() {
         console.log('Creating server');
         const server = startServer();
         console.log('Waiting one week');
-        await new Promise(resolve => setTimeout(resolve, 7500));
+        await new Promise(resolve => setTimeout(resolve, ONE_WEEK_MS));
         console.log('Closing server');
         server.close();
-        server.closeAllConnections();
         await new Promise(resolve => server.on('close', resolve));
         console.log('Server closed');
     }
