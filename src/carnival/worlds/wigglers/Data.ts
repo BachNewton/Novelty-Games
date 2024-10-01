@@ -12,7 +12,7 @@ export interface Connection {
 export function createWiggler(position: Vector2D): Wiggler {
     return {
         position: position,
-        size: 0.025
+        size: 0.0325
     };
 }
 
