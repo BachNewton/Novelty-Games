@@ -1,37 +1,58 @@
-import { EmergencyCard } from "../../mille-bornes/logic/Card";
 import { Player, PlayerType, Team, Game } from "../../mille-bornes/logic/Data";
 
 export const TESTIING_LOCAL_ID = 'TESTING_LOCAL_ID';
 
 export function createTestingGame(): Game {
-    const teamId = 'teamId';
+    const teamId1 = 'teamId1';
+    const teamId2 = 'teamId2';
 
-    const player: Player = {
-        name: 'Test Player',
+    const player1: Player = {
+        name: 'Test Player 1',
         hand: [],
-        teamId: teamId,
+        teamId: teamId1,
         localId: TESTIING_LOCAL_ID,
         type: PlayerType.HUMAN
     };
 
-    const team: Team = {
-        players: [player],
+    const player2: Player = {
+        name: 'Test Player 2',
+        hand: [],
+        teamId: teamId2,
+        localId: TESTIING_LOCAL_ID,
+        type: PlayerType.HUMAN
+    };
+
+    const team1: Team = {
+        players: [player1],
         tableau: {
             battleArea: [],
             speedArea: [],
             distanceArea: [],
-            safetyArea: [new EmergencyCard()]
+            safetyArea: []
         },
-        color: '',
-        id: teamId,
+        color: 'blue',
+        id: teamId1,
+        accumulatedScore: -1
+    };
+
+    const team2: Team = {
+        players: [player2],
+        tableau: {
+            battleArea: [],
+            speedArea: [],
+            distanceArea: [],
+            safetyArea: []
+        },
+        color: 'red',
+        id: teamId2,
         accumulatedScore: -1
     };
 
     const game: Game = {
         deck: [],
         discard: null,
-        teams: [team],
-        currentPlayer: player,
+        teams: [team1, team2],
+        currentPlayer: player1,
         extention: false
     };
 
