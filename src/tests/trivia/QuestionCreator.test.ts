@@ -1,7 +1,7 @@
-import { Data, DataType, Flag } from "../trivia/data/Data";
-import { Pokemon, PokemonType } from "../trivia/data/PokemonData";
-import { PokemonMultiImageQuestion } from "../trivia/data/QuestionData";
-import { createQuestions } from "../trivia/logic/QuestionCreator";
+import { DataType } from "../../trivia/data/Data";
+import { Pokemon, PokemonType } from "../../trivia/data/PokemonData";
+import { PokemonMultiImageQuestion } from "../../trivia/data/QuestionData";
+import { createQuestions } from "../../trivia/logic/QuestionCreator";
 
 describe('createQuestions function from QuestionCreator', () => {
     it('should not include Pokemon with the same stat in a question', () => {
