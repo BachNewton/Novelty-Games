@@ -10,7 +10,7 @@ export const DumbBot: Bot = {
         myTeam: Team,
         otherTeams: Team[],
         canCardBePlayed: (card: Card, targetTeam?: Team | undefined) => boolean,
-        playCard: (card: Card, targetTeam: Team) => void
+        playCard: (card: Card, targetTeam: Team | null) => void
     ) => {
         const playableCards = myHand.filter(card => canCardBePlayed(card));
         const unplayableCards = myHand.filter(card => !canCardBePlayed(card));
@@ -20,7 +20,7 @@ export const DumbBot: Bot = {
 
         if (playableCards.length > 0) {
             const selectedCard = removeRandomElement(playableCards);
-            console.log('selectedCard:', selectedCard);
+            console.log('playing selectedCard:', selectedCard);
 
             if (isInstanceOfHazardCard(selectedCard) || selectedCard instanceof LimitCard) {
                 const validTargetTeams = otherTeams.filter(otherTeam => canCardBePlayed(selectedCard, otherTeam));
@@ -33,8 +33,8 @@ export const DumbBot: Bot = {
             }
         } else {
             const selectedCard = removeRandomElement(unplayableCards);
-            console.log('selectedCard:', selectedCard);
-            playCard(selectedCard, myTeam);
+            console.log('discarding selectedCard:', selectedCard);
+            playCard(selectedCard, null);
         }
     }
 };

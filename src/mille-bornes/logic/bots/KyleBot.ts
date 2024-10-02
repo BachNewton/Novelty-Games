@@ -8,7 +8,7 @@ export const KyleBot: Bot = {
         myTeam: Team,
         otherTeams: Team[],
         canCardBePlayed: (card: Card, targetTeam?: Team | undefined) => boolean,
-        playCard: (card: Card, targetTeam: Team) => void
+        playCard: (card: Card, targetTeam: Team | null) => void
     ) => {
         throw new Error("Function not implemented.");
     }
