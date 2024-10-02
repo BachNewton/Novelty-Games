@@ -4,7 +4,7 @@ import TriviaHome from '../trivia/ui/Home';
 import Carnival from '../carnival/ui/Carnival';
 import { GameWorldType } from '../carnival/worlds/GameWorldType';
 
-const APP_VERSION = 'v1.11.4';
+const APP_VERSION = 'v1.12.0';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };

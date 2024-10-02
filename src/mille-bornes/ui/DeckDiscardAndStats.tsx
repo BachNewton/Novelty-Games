@@ -8,11 +8,19 @@ interface DeckDiscardAndStatsProps {
     currentPlayer: Player;
     remainingCardsInDeck: number;
     extentionCalled: boolean;
+    onDiscardClicked: () => void;
+    isDiscardHighlighted: boolean;
 }
 
-const DeckDiscardAndStats: React.FC<DeckDiscardAndStatsProps> = ({ discard, greyedOut, currentPlayer, remainingCardsInDeck, extentionCalled }) => {
+const DeckDiscardAndStats: React.FC<DeckDiscardAndStatsProps> = ({ discard, greyedOut, currentPlayer, remainingCardsInDeck, extentionCalled, onDiscardClicked, isDiscardHighlighted }) => {
     return <div style={{ display: 'flex', minHeight: 0 }}>
-        <DeckDiscard discard={discard} greyedOut={greyedOut} remainingCardsInDeck={remainingCardsInDeck} />
+        <DeckDiscard
+            discard={discard}
+            greyedOut={greyedOut}
+            remainingCardsInDeck={remainingCardsInDeck}
+            onDiscardClicked={onDiscardClicked}
+            isDiscardHighlighted={isDiscardHighlighted}
+        />
 
         <div style={{ flexGrow: 1, textAlign: 'center', fontSize: '1.5em' }}>
             It's <strong>{currentPlayer.name}</strong>'s turn

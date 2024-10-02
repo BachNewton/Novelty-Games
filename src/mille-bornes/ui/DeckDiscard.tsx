@@ -5,16 +5,17 @@ interface DeckDiscardProps {
     discard: Card | null;
     greyedOut: boolean;
     remainingCardsInDeck: number;
+    onDiscardClicked: () => void;
+    isDiscardHighlighted: boolean;
 }
 
-const DeckDiscard: React.FC<DeckDiscardProps> = ({ discard, greyedOut, remainingCardsInDeck }) => {
+const DeckDiscard: React.FC<DeckDiscardProps> = ({ discard, greyedOut, remainingCardsInDeck, onDiscardClicked, isDiscardHighlighted }) => {
     const style: React.CSSProperties = {
         display: 'grid',
         gridAutoFlow: 'column',
         justifyContent: 'start',
         alignContent: 'space-between',
         minHeight: 0,
-        opacity: greyedOut ? 0.1 : 1,
         gridTemplateColumns: '1fr 1fr'
     };
 
@@ -28,13 +29,13 @@ const DeckDiscard: React.FC<DeckDiscardProps> = ({ discard, greyedOut, remaining
     };
 
     return <div style={style}>
-        <div style={{ minHeight: 0 }}>
+        <div style={{ minHeight: 0, opacity: greyedOut ? 0.1 : 1 }}>
             <CardUi card={remainingCardsInDeck === 0 ? null : undefined} />
             <div style={remainingCardsInDeckNumberStyle}>
                 {remainingCardsInDeck}
             </div>
         </div>
-        <CardUi card={discard} />
+        <CardUi card={discard} onClick={onDiscardClicked} isHighlighted={isDiscardHighlighted} />
     </div>;
 };
 

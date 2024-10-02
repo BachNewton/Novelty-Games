@@ -33,15 +33,24 @@ class CardSelection implements UiState {
     }
 }
 
-class TeamSelection implements UiState {
-    team: Team | null;
+class TargetSelection implements UiState {
     card: Card;
 
     constructor(card: Card) {
-        this.team = null;
         this.card = card;
     }
 }
+
+class TeamSelection extends TargetSelection {
+    team: Team;
+
+    constructor(card: Card, team: Team) {
+        super(card);
+        this.team = team;
+    }
+}
+
+class DiscardSelection extends TargetSelection { }
 
 let canComputerPlayerMove = true;
 const COMPUTER_THINK_TIME = 1500;
@@ -107,7 +116,7 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
         } else {
             if (isInstanceOfHazardCard(card) || card instanceof LimitCard) {
                 if (canCardBePlayed(card, state.game)) {
-                    state.ui = new TeamSelection(card);
+                    state.ui = new TargetSelection(card);
                 } else {
                     playCard(card, state.game, null, onRoundOver);
                     communicator.playCard(card, null);
@@ -135,13 +144,13 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
 
     const otherTeamsTableau = otherTeams.map((otherTeam, index) => {
         const onClick = () => {
-            if (state.ui instanceof TeamSelection) {
-                if (state.ui.team === otherTeam) {
+            if (state.ui instanceof TargetSelection) {
+                if (state.ui instanceof TeamSelection && state.ui.team === otherTeam) {
                     playCard(state.ui.card, state.game, otherTeam, onRoundOver);
                     communicator.playCard(state.ui.card, otherTeam);
                     state.ui = new CardSelection();
                 } else {
-                    state.ui.team = otherTeam;
+                    state.ui = new TeamSelection(state.ui.card, otherTeam)
                 }
 
                 setState({ ...state });
@@ -157,7 +166,7 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
         />;
     });
 
-    const greyedOut = state.ui instanceof TeamSelection;
+    const greyedOut = state.ui instanceof TargetSelection;
 
     const localTeamsTableau = localPlayerTeam === null
         ? <></>
@@ -169,6 +178,20 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
 
     const isCardPlayable = (card: Card) => canCardBePlayed(card, state.game);
 
+    const onDiscardClicked = () => {
+        if (state.ui instanceof TargetSelection) {
+            if (state.ui instanceof DiscardSelection) {
+                playCard(state.ui.card, state.game, null, onRoundOver);
+                communicator.playCard(state.ui.card, null);
+                state.ui = new CardSelection();
+            } else {
+                state.ui = new DiscardSelection(state.ui.card);
+            }
+
+            setState({ ...state });
+        }
+    };
+
     const gridTemplateRows = '1fr ' + state.game.teams.map(_ => '3fr').join(' ') + ' 1fr';
     return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: gridTemplateRows, overflow: 'hidden', color: 'white' }}>
         <DeckDiscardAndStats
@@ -177,6 +200,8 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
             currentPlayer={state.game.currentPlayer}
             remainingCardsInDeck={state.game.deck.length}
             extentionCalled={state.game.extention}
+            onDiscardClicked={onDiscardClicked}
+            isDiscardHighlighted={state.ui instanceof DiscardSelection}
         />
 
         {otherTeamsTableau}
