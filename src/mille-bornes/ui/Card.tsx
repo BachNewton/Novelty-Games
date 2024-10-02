@@ -1,6 +1,7 @@
 import { Card as CardData } from "../logic/Card";
 import MB_OUTLINE from "../images/MB-outline.svg";
 import MB_BACK from "../images/MB-back.svg";
+import { addHighlight } from "./UiUtil";
 
 interface CardProps {
     card?: CardData | null;
@@ -23,10 +24,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, isHighlighted, transform, ob
     };
 
     if (isHighlighted) {
-        imgStyle.borderColor = 'yellow';
-        imgStyle.borderWidth = '3px';
-        imgStyle.borderStyle = 'solid';
-        imgStyle.boxSizing = 'border-box';
+        addHighlight(imgStyle);
     }
 
     const src = card === undefined ? MB_BACK : card === null ? MB_OUTLINE : card.image;

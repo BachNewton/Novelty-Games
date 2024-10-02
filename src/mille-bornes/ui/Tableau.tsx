@@ -3,6 +3,7 @@ import { getVisibleBattleCard, getVisibleSpeedCard } from "../logic/Rules";
 import CardUi from "./Card";
 import DistanceArea from './DistanceArea';
 import SafetyArea from './SafetyArea';
+import { addHighlight } from "./UiUtil";
 
 interface TableauProps {
     team: Team;
@@ -16,8 +17,8 @@ const Tableau: React.FC<TableauProps> = ({ team, onClick, isHighlighted, greyedO
     const tableauData = team.tableau;
 
     const tableauStyle: React.CSSProperties = {
-        borderColor: isHighlighted ? 'yellow' : team.color,
-        borderWidth: isHighlighted ? '3px' : '1px',
+        borderColor: team.color,
+        borderWidth: '1px',
         borderStyle: 'solid',
         boxSizing: 'border-box',
         display: 'grid',
@@ -25,6 +26,10 @@ const Tableau: React.FC<TableauProps> = ({ team, onClick, isHighlighted, greyedO
         margin: '2% 0',
         opacity: greyedOut ? 0.1 : 1
     };
+
+    if (isHighlighted) {
+        addHighlight(tableauStyle);
+    }
 
     return <div style={tableauStyle} onClick={onClick} >
         <div style={{ textAlign: 'center' }}>
