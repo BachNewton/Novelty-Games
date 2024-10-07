@@ -3,7 +3,7 @@ import { getVisibleBattleCard, getVisibleSpeedCard } from "../logic/Rules";
 import CardUi from "./Card";
 import DistanceArea from './DistanceArea';
 import SafetyArea from './SafetyArea';
-import { addHighlight } from "./UiUtil";
+import { addHighlight, getTeamName } from "./UiUtil";
 
 interface TableauProps {
     team: Team;
@@ -52,7 +52,3 @@ const Tableau: React.FC<TableauProps> = ({ team, onClick, isHighlighted, greyedO
 }
 
 export default Tableau;
-
-export function getTeamName(team: Team): string {
-    return 'Team ' + team.players.map(player => player.name).join(' & ');
-};

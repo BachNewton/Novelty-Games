@@ -1,6 +1,6 @@
 import { Game, Team } from "../logic/Data";
 import { Score, calculateScore } from "../logic/ScoreboardCalculator";
-import { getTeamName } from "./Tableau";
+import { getTeamName } from "./UiUtil";
 
 const SCORE_TO_WIN = 5000;
 

@@ -1,4 +1,5 @@
 import { removeRandomElement } from "../../../util/Randomizer";
+import { getTeamName } from "../../ui/UiUtil";
 import { Card, DistanceCard, HazardCard, LimitCard, RemedyCard, SafetyCard, UnlimitedCard } from "../Card";
 import { Team } from "../Data";
 import { getRemainingDistance, getTotalDistance } from "../Rules";
@@ -22,10 +23,14 @@ export const KyleBot: Bot = {
         const unplayableCards = myHand.filter(card => !canCardBePlayed(card));
 
         if (playableCards.length > 0) {
+            console.log('KyleBot - choosing a playable card from:', playableCards);
             const choice = choosePlayableCard(playableCards, myTeam, otherTeams, canCardBePlayed, gameIsExtended);
+            console.log('KyleBot - I choose to play:', choice.card, 'on team:', choice.targetTeam);
             playCard(choice.card, choice.targetTeam);
         } else {
+            console.log('KyleBot - choosing a card to discard from:', unplayableCards);
             const choice = chooseUnplayableCards(unplayableCards);
+            console.log('KyleBot - I choose to discard:', choice.card);
             playCard(choice.card, choice.targetTeam);
         }
     }
@@ -38,27 +43,40 @@ function choosePlayableCard(
     canCardBePlayed: (card: Card, targetTeam?: Team | undefined) => boolean,
     gameIsExtended: boolean
 ): Choice {
+    console.log('KyleBot - considering safety cards');
     const safetyCards = playableCards.filter(card => card instanceof SafetyCard);
-    if (safetyCards.length > 0 && isAtLeastOneTeamOneCardAwayFromEndingTheRound(myTeam, otherTeams, gameIsExtended)) {
-        const choosenCard = removeRandomElement(safetyCards);
+    if (safetyCards.length > 0) {
+        if (isAtLeastOneTeamOneCardAwayFromEndingTheRound(myTeam, otherTeams, gameIsExtended)) {
+            console.log('KyleBot - some team is one card away from ending the round so I will play my safety card now');
+            const choosenCard = removeRandomElement(safetyCards);
 
-        return {
-            card: choosenCard,
-            targetTeam: myTeam
-        };
+            return {
+                card: choosenCard,
+                targetTeam: myTeam
+            };
+        } else {
+            console.log('KyleBot - not the time to play a safety card');
+        }
+    } else {
+        console.log('KyleBot - no safety cards to be played');
     }
 
+    console.log('KyleBot - considering hazard cards');
     const hazardCards = playableCards.filter(card => card instanceof HazardCard);
     if (hazardCards.length > 0) {
+        console.log('KyleBot - choosing a hazard card to play');
         const offensiveChoice = chooseOffensiveCard(otherTeams, hazardCards, canCardBePlayed);
 
         if (offensiveChoice !== null) {
             return offensiveChoice;
         }
     }
+    console.log('KyleBot - no hazard cards can be played');
 
+    console.log('KyleBot - considering remedy cards');
     const remedyCards = playableCards.filter(card => card instanceof RemedyCard);
     if (remedyCards.length > 0) {
+        console.log('KyleBot - choosing a remedy card to play');
         const choosenCard = remedyCards.shift() as RemedyCard;
 
         return {
@@ -66,10 +84,13 @@ function choosePlayableCard(
             targetTeam: myTeam
         };
     }
+    console.log('KyleBot - no remedy cards can be played');
 
+    console.log('KyleBot - considering distance cards');
     const distanceCards = playableCards.filter(card => card instanceof DistanceCard) as DistanceCard[];
     if (distanceCards.length > 0) {
         const has200CardBeenPlayed = distanceCards.find(card => card.amount === 200) !== undefined;
+        console.log('KyleBot - has a 200 card already been played?', has200CardBeenPlayed, 'if so, this will influence influence our decision');
 
         const rankedCards = distanceCards.sort((card1, card2) => {
             const card1Value = card1.amount === 200 && has200CardBeenPlayed ? card1.amount : 75 - 1;
@@ -85,7 +106,9 @@ function choosePlayableCard(
             targetTeam: myTeam
         };
     }
+    console.log('KyleBot - no distance cards can be played');
 
+    console.log('KyleBot - considering limit cards');
     const limitCards = playableCards.filter(card => card instanceof LimitCard);
     if (limitCards.length > 0) {
         const offensiveChoice = chooseOffensiveCard(otherTeams, limitCards, canCardBePlayed);
@@ -94,7 +117,9 @@ function choosePlayableCard(
             return offensiveChoice;
         }
     }
+    console.log('KyleBot - no limit cards can be played');
 
+    console.log('KyleBot - considering unlimited cards');
     const unlimitedCards = playableCards.filter(card => card instanceof UnlimitedCard);
     if (unlimitedCards.length > 0) {
         const choosenCard = limitCards.shift() as UnlimitedCard;
@@ -104,7 +129,9 @@ function choosePlayableCard(
             targetTeam: myTeam
         };
     }
+    console.log('KyleBot - no unlimited cards can be played');
 
+    console.log('KyleBot - something went wrong! I should have made a choice on what card to play!');
     throw new Error('Invalid state! Some choice ought to have been made!');
 }
 
@@ -136,9 +163,11 @@ function chooseOffensiveCard(
     canCardBePlayed: (card: Card, targetTeam?: Team | undefined) => boolean
 ): Choice | null {
     const furthestTeamFirst = sortByFurthestFirst(otherTeams);
+    console.log('KyleBot - considering teams in the order of their distance:', furthestTeamFirst.map(team => getTeamName(team)));
 
     while (furthestTeamFirst.length > 0) {
         const targetTeam = furthestTeamFirst.shift() as Team;
+        console.log(`KyleBot - determining if ${getTeamName(targetTeam)} can be targeted`);
 
         for (const offensiveCard of offensiveCards) {
             if (canCardBePlayed(offensiveCard, targetTeam)) {
