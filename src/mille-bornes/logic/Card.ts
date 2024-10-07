@@ -23,7 +23,14 @@ export interface Card {
 }
 
 export interface BattleCard extends Card { }
-export interface HazardCard extends BattleCard { }
+
+export class HazardCard implements BattleCard {
+    image: string;
+
+    constructor(image: string) {
+        this.image = image;
+    }
+}
 
 export class RemedyCard implements BattleCard {
     image: string;
@@ -51,27 +58,27 @@ export interface DistanceCard extends Card {
     amount: number;
 }
 
-export class CrashCard implements HazardCard {
-    image: string;
-
+export class CrashCard extends HazardCard {
     constructor() {
-        this.image = MB_CRASH;
+        super(MB_CRASH);
     }
 }
 
-export class EmptyCard implements HazardCard {
-    image: string;
-
+export class EmptyCard extends HazardCard {
     constructor() {
-        this.image = MB_EMPTY;
+        super(MB_EMPTY);
     }
 }
 
-export class FlatCard implements HazardCard {
-    image: string;
-
+export class FlatCard extends HazardCard {
     constructor() {
-        this.image = MB_FLAT;
+        super(MB_FLAT);
+    }
+}
+
+export class StopCard extends HazardCard {
+    constructor() {
+        super(MB_STOP);
     }
 }
 
@@ -96,14 +103,6 @@ export class SpareCard extends RemedyCard {
 export class RollCard extends RemedyCard {
     constructor() {
         super(MB_ROLL);
-    }
-}
-
-export class StopCard implements HazardCard {
-    image: string;
-
-    constructor() {
-        this.image = MB_STOP;
     }
 }
 

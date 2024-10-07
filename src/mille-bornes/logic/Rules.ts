@@ -69,7 +69,7 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null, onRoun
             } else {
                 handleCoupFourré(playerWithCoupFourré);
             }
-        } else if (isInstanceOfHazardCard(card)) {
+        } else if (card instanceof HazardCard) {
             const playerWithCoupFourré = getPlayerWithCoupFourré(card, targetTeam);
 
             if (playerWithCoupFourré === null) {
@@ -133,7 +133,7 @@ export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
     if (isInstanceOfDistanceCard(card)) return canDistanceCardBePlayed(card as DistanceCard, tableau, game.teams, game.extention);
     if (card instanceof UnlimitedCard) return canUnlimitedCardBePlayed(getVisibleSpeedCard(tableau.speedArea));
     if (card instanceof LimitCard) return canLimitCardBePlayed(targetTeams);
-    if (isInstanceOfHazardCard(card)) return canHazardCardBePlayed(card, targetTeams);
+    if (card instanceof HazardCard) return canHazardCardBePlayed(card, targetTeams);
     if (card instanceof SafetyCard) return true; // Safety cards can always be played
 
     return false;
@@ -141,10 +141,6 @@ export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
 
 function isInstanceOfDistanceCard(card: Card): boolean {
     return card instanceof Distance25Card || card instanceof Distance50Card || card instanceof Distance75Card || card instanceof Distance100Card || card instanceof Distance200Card;
-}
-
-export function isInstanceOfHazardCard(card: Card | null): boolean {
-    return card instanceof CrashCard || card instanceof EmptyCard || card instanceof FlatCard || card instanceof StopCard;
 }
 
 function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau, teams: Array<Team>, extention: boolean): boolean {
@@ -189,7 +185,7 @@ function canHazardCardBePlayed(hazardCard: HazardCard, teams: Array<Team>): bool
         if (hazardCard instanceof StopCard && hasEmergencyCard(team.tableau.safetyArea)) continue;
 
         // You can't play a hazard card on a player who already has a hazard card to deal with
-        if (isInstanceOfHazardCard(getVisibleBattleCard(team.tableau.battleArea))) continue;
+        if (getVisibleBattleCard(team.tableau.battleArea) instanceof HazardCard) continue;
 
         // You can only play a hazard card on a player who has a roll or an Emergency card
         if (getVisibleBattleCard(team.tableau.battleArea) instanceof RollCard || hasEmergencyCard(team.tableau.safetyArea)) return true;

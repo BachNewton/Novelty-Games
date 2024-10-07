@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Card, LimitCard } from "../logic/Card";
+import { Card, HazardCard, LimitCard } from "../logic/Card";
 import { Game, Player, PlayerType, Team } from "../logic/Data";
-import { canCardBePlayed, getCurrentPlayerTeam, getRemainingDistance, isGameAtMaxTargetDistance, isInstanceOfHazardCard, playCard } from "../logic/Rules";
+import { canCardBePlayed, getCurrentPlayerTeam, getRemainingDistance, isGameAtMaxTargetDistance, playCard } from "../logic/Rules";
 import Hand from './Hand';
 import TableauUi from "./Tableau";
 import { Communicator } from "../logic/Communicator";
@@ -114,7 +114,7 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
         if (state.ui.card !== card) {
             state.ui.card = card;
         } else {
-            if (isInstanceOfHazardCard(card) || card instanceof LimitCard) {
+            if (card instanceof HazardCard || card instanceof LimitCard) {
                 if (canCardBePlayed(card, state.game)) {
                     state.ui = new TargetSelection(card);
                 } else {

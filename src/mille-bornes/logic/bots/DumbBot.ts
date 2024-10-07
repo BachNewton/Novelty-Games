@@ -1,7 +1,6 @@
 import { removeRandomElement } from "../../../util/Randomizer";
-import { Card, LimitCard } from "../Card";
+import { Card, HazardCard, LimitCard } from "../Card";
 import { Team } from "../Data";
-import { isInstanceOfHazardCard } from "../Rules";
 import { Bot } from "./Bot";
 
 export const DumbBot: Bot = {
@@ -23,7 +22,7 @@ export const DumbBot: Bot = {
             const selectedCard = removeRandomElement(playableCards);
             console.log('playing selectedCard:', selectedCard);
 
-            if (isInstanceOfHazardCard(selectedCard) || selectedCard instanceof LimitCard) {
+            if (selectedCard instanceof HazardCard || selectedCard instanceof LimitCard) {
                 const validTargetTeams = otherTeams.filter(otherTeam => canCardBePlayed(selectedCard, otherTeam));
                 const targetTeam = removeRandomElement(validTargetTeams);
                 console.log('targetTeam:', targetTeam);
