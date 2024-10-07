@@ -77,7 +77,7 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null, onRoun
             } else {
                 handleCoupFourré(playerWithCoupFourré);
             }
-        } else if (isInstanceOfRemedyCard(card)) {
+        } else if (card instanceof RemedyCard) {
             targetTeam.tableau.battleArea.push(card);
         } else if (isInstanceOfSafteyCard(card)) {
             targetTeam.tableau.safetyArea.push(card as SafetyCard);
@@ -129,7 +129,7 @@ export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
         ? game.teams.filter(team => team !== getCurrentPlayerTeam(game))
         : [targetTeam];
 
-    if (isInstanceOfRemedyCard(card)) return canRemedyCardBePlayed(card, getVisibleBattleCard(tableau.battleArea), tableau.safetyArea);
+    if (card instanceof RemedyCard) return canRemedyCardBePlayed(card, getVisibleBattleCard(tableau.battleArea), tableau.safetyArea);
     if (isInstanceOfDistanceCard(card)) return canDistanceCardBePlayed(card as DistanceCard, tableau, game.teams, game.extention);
     if (card instanceof UnlimitedCard) return canUnlimitedCardBePlayed(getVisibleSpeedCard(tableau.speedArea));
     if (card instanceof LimitCard) return canLimitCardBePlayed(targetTeams);
@@ -151,10 +151,6 @@ export function isInstanceOfHazardCard(card: Card | null): boolean {
     return card instanceof CrashCard || card instanceof EmptyCard || card instanceof FlatCard || card instanceof StopCard;
 }
 
-function isInstanceOfRemedyCard(card: Card): boolean {
-    return card instanceof RepairCard || card instanceof GasCard || card instanceof SpareCard || card instanceof RollCard;
-}
-
 function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau, teams: Array<Team>, extention: boolean): boolean {
     const battleArea = getVisibleBattleCard(tableau.battleArea);
     const speedArea = getVisibleSpeedCard(tableau.speedArea)
@@ -166,7 +162,7 @@ function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau, t
     if (getTotalDistance(tableau.distanceArea) + distanceCard.amount > getTargetDistance(teams, extention)) return false;
 
     if (battleArea instanceof RollCard && speedAreaLimit >= distanceCard.amount) return true;
-    if (hasEmergencyCard(tableau.safetyArea) && (battleArea === null || isInstanceOfRemedyCard(battleArea) || battleArea instanceof StopCard)) return true;
+    if (hasEmergencyCard(tableau.safetyArea) && (battleArea === null || battleArea instanceof RemedyCard || battleArea instanceof StopCard)) return true;
 
     return false;
 }

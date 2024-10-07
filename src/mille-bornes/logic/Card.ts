@@ -24,7 +24,15 @@ export interface Card {
 
 export interface BattleCard extends Card { }
 export interface HazardCard extends BattleCard { }
-export interface RemedyCard extends BattleCard { }
+
+export class RemedyCard implements BattleCard {
+    image: string;
+
+    constructor(image: string) {
+        this.image = image;
+    }
+}
+
 export interface SpeedCard extends Card {
     limit: number;
 }
@@ -59,35 +67,27 @@ export class FlatCard implements HazardCard {
     }
 }
 
-export class GasCard implements RemedyCard {
-    image: string;
-
+export class GasCard extends RemedyCard {
     constructor() {
-        this.image = MB_GAS;
+        super(MB_GAS);
     }
 }
 
-export class RepairCard implements RemedyCard {
-    image: string;
-
+export class RepairCard extends RemedyCard {
     constructor() {
-        this.image = MB_REPAIR;
+        super(MB_REPAIR);
     }
 }
 
-export class SpareCard implements RemedyCard {
-    image: string;
-
+export class SpareCard extends RemedyCard {
     constructor() {
-        this.image = MB_SPARE;
+        super(MB_SPARE);
     }
 }
 
-export class RollCard implements RemedyCard {
-    image: string;
-
+export class RollCard extends RemedyCard {
     constructor() {
-        this.image = MB_ROLL;
+        super(MB_ROLL);
     }
 }
 
