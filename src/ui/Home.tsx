@@ -3,8 +3,10 @@ import MilleBornesHome from '../mille-bornes/ui/Home';
 import TriviaHome from '../trivia/ui/Home';
 import Carnival from '../carnival/ui/Carnival';
 import { GameWorldType } from '../carnival/worlds/GameWorldType';
+import { Communicator } from '../mille-bornes/logic/Communicator';
+import { NewtorkCommunicator } from '../mille-bornes/logic/NewtorkCommunicator';
 
-const APP_VERSION = 'v1.12.1';
+const APP_VERSION = 'v1.12.2';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -16,7 +18,13 @@ class HomeState implements State { }
 
 class TriviaState implements State { }
 
-class MilleBornesState implements State { }
+class MilleBornesState implements State {
+    communicator: Communicator;
+
+    constructor(communicator: Communicator) {
+        this.communicator = communicator;
+    }
+}
 
 class CarnivalState implements State { }
 
@@ -55,7 +63,8 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
     };
 
     const onMilleBornesClick = () => {
-        setState(new MilleBornesState());
+        const communicator = new NewtorkCommunicator();
+        setState(new MilleBornesState(communicator));
     };
 
     const onTriviaClick = () => {
@@ -71,7 +80,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
     };
 
     if (state instanceof MilleBornesState) {
-        return <MilleBornesHome onHomeButtonClicked={onHomeButtonClicked} />;
+        return <MilleBornesHome onHomeButtonClicked={onHomeButtonClicked} communicator={state.communicator} />;
     } else if (state instanceof TriviaState) {
         return <TriviaHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else if (state instanceof CarnivalState || state instanceof WigglersState) {

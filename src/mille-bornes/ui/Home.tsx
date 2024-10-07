@@ -6,10 +6,11 @@ import { Score } from "../logic/ScoreboardCalculator";
 import Lobby, { LobbyPlayer, LobbyTeam } from "./Lobby";
 import Board from "./Board";
 import Scoreboard from "./Scoreboard";
-import { GameEvent, NewtorkCommunicator } from "../logic/NewtorkCommunicator";
+import { GameEvent } from "../logic/NewtorkCommunicator";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
+    communicator: Communicator;
 }
 
 interface State { }
@@ -33,13 +34,12 @@ class ScoreboardState implements State {
 }
 
 const LOCAL_ID = Math.random().toString();
-const COMMUNICATOR: Communicator = new NewtorkCommunicator();
 
-const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
+const Home: React.FC<HomeProps> = ({ onHomeButtonClicked, communicator }) => {
     const [state, setState] = useState<State>(new LobbyState());
 
     useEffect(() => {
-        COMMUNICATOR.addEventListener(GameEvent.TYPE, (event) => {
+        communicator.addEventListener(GameEvent.TYPE, (event) => {
             setState(new BoardState((event as GameEvent).game));
         });
     }, [state]);
@@ -47,7 +47,7 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
     const onStartGame = (lobbyTeams: Array<LobbyTeam>) => {
         const game = createGame(lobbyTeams);
         setState(new BoardState(game));
-        COMMUNICATOR.startGame(game);
+        communicator.startGame(game);
     };
 
     const onRoundOver = (game: Game) => {
@@ -74,15 +74,15 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
 
         const newGame = createGame(lobbyTeams);
         setState(new BoardState(newGame));
-        COMMUNICATOR.startGame(newGame);
+        communicator.startGame(newGame);
     };
 
     if (state instanceof BoardState) {
-        return <Board communicator={COMMUNICATOR} startingGame={state.game} localId={LOCAL_ID} onRoundOver={onRoundOver} />;
+        return <Board communicator={communicator} startingGame={state.game} localId={LOCAL_ID} onRoundOver={onRoundOver} />;
     } else if (state instanceof ScoreboardState) {
         return <Scoreboard game={state.game} onBackToLobby={onBackToLobby} onPlayNextRound={onPlayNextRound} />;
     } else {
-        return <Lobby onHomeButtonClicked={onHomeButtonClicked} communicator={COMMUNICATOR} startGame={onStartGame} localId={LOCAL_ID} />;
+        return <Lobby onHomeButtonClicked={onHomeButtonClicked} communicator={communicator} startGame={onStartGame} localId={LOCAL_ID} />;
     }
 }
 
