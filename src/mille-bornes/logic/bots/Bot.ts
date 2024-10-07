@@ -7,6 +7,7 @@ export interface Bot {
         myTeam: Team,
         otherTeams: Array<Team>,
         canCardBePlayed: (card: Card, targetTeam?: Team) => boolean,
-        playCard: (card: Card, targetTeam: Team | null) => void
+        playCard: (card: Card, targetTeam: Team | null) => void,
+        gameIsExtended: boolean
     ) => void;
 }

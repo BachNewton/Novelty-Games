@@ -10,7 +10,8 @@ export const DumbBot: Bot = {
         myTeam: Team,
         otherTeams: Team[],
         canCardBePlayed: (card: Card, targetTeam?: Team | undefined) => boolean,
-        playCard: (card: Card, targetTeam: Team | null) => void
+        playCard: (card: Card, targetTeam: Team | null) => void,
+        gameIsExtended: boolean
     ) => {
         const playableCards = myHand.filter(card => canCardBePlayed(card));
         const unplayableCards = myHand.filter(card => !canCardBePlayed(card));

@@ -1,6 +1,7 @@
 import { Communicator } from "./Communicator";
 import { Game, PlayerType, Team } from "./Data";
 import { canCardBePlayed, getCurrentPlayerTeam, playCard } from "./Rules";
+import { Bot } from "./bots/Bot";
 import { DumbBot } from "./bots/DumbBot";
 
 /** @returns true if the current player is local and is also a computer and the comupter hasn't already taken its turn */
@@ -20,8 +21,11 @@ export function takeComputerPlayerTurn(
     const currentPlayerTeam = getCurrentPlayerTeam(game);
     const otherTeams = game.teams.filter(team => team !== currentPlayerTeam);
     const callExtention = false; // The computer will never call an extention
+    const gameIsExtended = game.extention;
 
-    DumbBot.decideMove(
+    const bot: Bot = DumbBot;
+
+    bot.decideMove(
         computerHand,
         currentPlayerTeam,
         otherTeams,
@@ -30,6 +34,7 @@ export function takeComputerPlayerTurn(
             playCard(card, game, targetTeam, onRoundOver);
             checkIfTargetDistanceReached(currentPlayerTeam, () => callExtention);
             communicator.playCard(card, targetTeam, callExtention);
-        }
+        },
+        gameIsExtended
     );
 }
