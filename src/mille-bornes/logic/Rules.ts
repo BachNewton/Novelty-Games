@@ -79,7 +79,7 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null, onRoun
             }
         } else if (card instanceof RemedyCard) {
             targetTeam.tableau.battleArea.push(card);
-        } else if (isInstanceOfSafteyCard(card)) {
+        } else if (card instanceof SafetyCard) {
             targetTeam.tableau.safetyArea.push(card as SafetyCard);
 
             const battleCard = getVisibleBattleCard(targetTeam.tableau.battleArea);
@@ -134,13 +134,9 @@ export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
     if (card instanceof UnlimitedCard) return canUnlimitedCardBePlayed(getVisibleSpeedCard(tableau.speedArea));
     if (card instanceof LimitCard) return canLimitCardBePlayed(targetTeams);
     if (isInstanceOfHazardCard(card)) return canHazardCardBePlayed(card, targetTeams);
-    if (isInstanceOfSafteyCard(card)) return true; // Safety cards can always be played
+    if (card instanceof SafetyCard) return true; // Safety cards can always be played
 
     return false;
-}
-
-function isInstanceOfSafteyCard(card: Card): boolean {
-    return card instanceof AceCard || card instanceof TankerCard || card instanceof SealantCard || card instanceof EmergencyCard;
 }
 
 function isInstanceOfDistanceCard(card: Card): boolean {

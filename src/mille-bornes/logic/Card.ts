@@ -36,9 +36,17 @@ export class RemedyCard implements BattleCard {
 export interface SpeedCard extends Card {
     limit: number;
 }
-export interface SafetyCard extends Card {
+
+export class SafetyCard implements Card {
+    image: string;
     coupFourré: boolean;
+
+    constructor(image: string) {
+        this.image = image;
+        this.coupFourré = false;
+    }
 }
+
 export interface DistanceCard extends Card {
     amount: number;
 }
@@ -149,43 +157,27 @@ export class Distance200Card implements DistanceCard {
     }
 }
 
-export class AceCard implements SafetyCard {
-    image: string;
-    coupFourré: boolean;
-
+export class AceCard extends SafetyCard {
     constructor() {
-        this.image = MB_ACE;
-        this.coupFourré = false;
+        super(MB_ACE);
     }
 }
 
-export class EmergencyCard implements SafetyCard {
-    image: string;
-    coupFourré: boolean;
-
+export class EmergencyCard extends SafetyCard {
     constructor() {
-        this.image = MB_EMERGENCY;
-        this.coupFourré = false;
+        super(MB_EMERGENCY);
     }
 }
 
-export class SealantCard implements SafetyCard {
-    image: string;
-    coupFourré: boolean;
-
+export class SealantCard extends SafetyCard {
     constructor() {
-        this.image = MB_SEALANT;
-        this.coupFourré = false;
+        super(MB_SEALANT);
     }
 }
 
-export class TankerCard implements SafetyCard {
-    image: string;
-    coupFourré: boolean;
-
+export class TankerCard extends SafetyCard {
     constructor() {
-        this.image = MB_TANKER;
-        this.coupFourré = false;
+        super(MB_TANKER);
     }
 }
 
