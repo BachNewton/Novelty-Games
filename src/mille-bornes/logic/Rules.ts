@@ -57,7 +57,7 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null, onRoun
     };
 
     if (targetTeam && canCardBePlayed(card, game, targetTeam)) {
-        if (isInstanceOfDistanceCard(card)) {
+        if (card instanceof DistanceCard) {
             targetTeam.tableau.distanceArea.push(card as DistanceCard);
         } else if (card instanceof UnlimitedCard) {
             targetTeam.tableau.speedArea.push(card);
@@ -130,17 +130,13 @@ export function canCardBePlayed(card: Card, game: Game, targetTeam?: Team) {
         : [targetTeam];
 
     if (card instanceof RemedyCard) return canRemedyCardBePlayed(card, getVisibleBattleCard(tableau.battleArea), tableau.safetyArea);
-    if (isInstanceOfDistanceCard(card)) return canDistanceCardBePlayed(card as DistanceCard, tableau, game.teams, game.extention);
+    if (card instanceof DistanceCard) return canDistanceCardBePlayed(card as DistanceCard, tableau, game.teams, game.extention);
     if (card instanceof UnlimitedCard) return canUnlimitedCardBePlayed(getVisibleSpeedCard(tableau.speedArea));
     if (card instanceof LimitCard) return canLimitCardBePlayed(targetTeams);
     if (card instanceof HazardCard) return canHazardCardBePlayed(card, targetTeams);
     if (card instanceof SafetyCard) return true; // Safety cards can always be played
 
     return false;
-}
-
-function isInstanceOfDistanceCard(card: Card): boolean {
-    return card instanceof Distance25Card || card instanceof Distance50Card || card instanceof Distance75Card || card instanceof Distance100Card || card instanceof Distance200Card;
 }
 
 function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau, teams: Array<Team>, extention: boolean): boolean {

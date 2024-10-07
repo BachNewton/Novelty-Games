@@ -54,8 +54,14 @@ export class SafetyCard implements Card {
     }
 }
 
-export interface DistanceCard extends Card {
+export class DistanceCard implements Card {
+    image: string;
     amount: number;
+
+    constructor(image: string, amount: number) {
+        this.image = image;
+        this.amount = amount;
+    }
 }
 
 export class CrashCard extends HazardCard {
@@ -106,53 +112,33 @@ export class RollCard extends RemedyCard {
     }
 }
 
-export class Distance25Card implements DistanceCard {
-    image: string;
-    amount: number;
-
+export class Distance25Card extends DistanceCard {
     constructor() {
-        this.image = MB_25;
-        this.amount = 25;
+        super(MB_25, 25);
     }
 }
 
-export class Distance50Card implements DistanceCard {
-    image: string;
-    amount: number;
-
+export class Distance50Card extends DistanceCard {
     constructor() {
-        this.image = MB_50;
-        this.amount = 50;
+        super(MB_50, 50);
     }
 }
 
-export class Distance75Card implements DistanceCard {
-    image: string;
-    amount: number;
-
+export class Distance75Card extends DistanceCard {
     constructor() {
-        this.image = MB_75;
-        this.amount = 75;
+        super(MB_75, 75);
     }
 }
 
-export class Distance100Card implements DistanceCard {
-    image: string;
-    amount: number;
-
+export class Distance100Card extends DistanceCard {
     constructor() {
-        this.image = MB_100;
-        this.amount = 100;
+        super(MB_100, 100);
     }
 }
 
-export class Distance200Card implements DistanceCard {
-    image: string;
-    amount: number;
-
+export class Distance200Card extends DistanceCard {
     constructor() {
-        this.image = MB_200;
-        this.amount = 200;
+        super(MB_200, 200);
     }
 }
 
