@@ -33,10 +33,18 @@ export const KyleBot: Bot = {
             }
         }
 
-        console.log('KyleBot - choosing a card to discard from:', unplayableCards);
-        const choice = chooseUnplayableCards(unplayableCards);
-        console.log('KyleBot - I choose to discard:', choice.card);
-        playCard(choice.card, choice.targetTeam);
+        if (unplayableCards.length > 0) {
+            console.log('KyleBot - choosing a card to discard from:', unplayableCards);
+            const choice = chooseUnplayableCards(unplayableCards);
+            console.log('KyleBot - I choose to discard:', choice.card);
+            playCard(choice.card, choice.targetTeam);
+            return;
+        }
+
+        console.log('KyleBot - there is nothing I want to play and nothing to discard. I must have only have Saftey card remaining.');
+        const safetyCard = playableCards.shift() as SafetyCard;
+        console.log('KyleBot - I choose to play:', safetyCard);
+        playCard(safetyCard, myTeam);
     }
 };
 
@@ -93,12 +101,12 @@ function choosePlayableCard(
     console.log('KyleBot - considering distance cards');
     const distanceCards = playableCards.filter(card => card instanceof DistanceCard) as DistanceCard[];
     if (distanceCards.length > 0) {
-        const has200CardBeenPlayed = distanceCards.find(card => card.amount === 200) !== undefined;
+        const has200CardBeenPlayed = myTeam.tableau.distanceArea.find(card => card.amount === 200) !== undefined;
         console.log('KyleBot - has a 200 card already been played?', has200CardBeenPlayed, 'if so, this will influence influence our decision');
 
         const rankedCards = distanceCards.sort((card1, card2) => {
-            const card1Value = card1.amount === 200 && !has200CardBeenPlayed ? 75 - 1 : card1.amount;
-            const card2Value = card2.amount === 200 && !has200CardBeenPlayed ? 75 - 1 : card2.amount;
+            const card1Value = calculateDistanceCardValue(card1, has200CardBeenPlayed);
+            const card2Value = calculateDistanceCardValue(card2, has200CardBeenPlayed);
 
             return card2Value - card1Value;
         });
@@ -156,10 +164,8 @@ function isAtLeastOneTeamOneCardAwayFromEndingTheRound(
     }).some(remainingDistance => remainingDistance === 200 || remainingDistance <= 100);
 }
 
-function sortByFurthestFirst(teams: Team[]): Team[] {
-    return teams.sort((team1, team2) => {
-        return getTotalDistance(team2.tableau.distanceArea) - getTotalDistance(team1.tableau.distanceArea);
-    });
+function calculateDistanceCardValue(card: DistanceCard, has200CardBeenPlayed: boolean): number {
+    return card.amount === 200 && !has200CardBeenPlayed ? 75 - 1 : card.amount;
 }
 
 function chooseOffensiveCard(
@@ -185,6 +191,12 @@ function chooseOffensiveCard(
     }
 
     return null;
+}
+
+function sortByFurthestFirst(teams: Team[]): Team[] {
+    return teams.sort((team1, team2) => {
+        return getTotalDistance(team2.tableau.distanceArea) - getTotalDistance(team1.tableau.distanceArea);
+    });
 }
 
 function chooseUnplayableCards(unplayableCards: Card[]): Choice {
