@@ -153,7 +153,7 @@ function isAtLeastOneTeamOneCardAwayFromEndingTheRound(
             teams,
             gameIsExtended
         );
-    }).some(remainingDistance => remainingDistance <= 200);
+    }).some(remainingDistance => remainingDistance === 200 || remainingDistance <= 100);
 }
 
 function sortByFurthestFirst(teams: Team[]): Team[] {
