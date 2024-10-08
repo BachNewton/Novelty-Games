@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 const DIALOG_CONTAINER_STYLE: React.CSSProperties = {
     backgroundColor: 'white',
@@ -18,6 +18,13 @@ interface DialogueProps {
 const Dialog: React.FC<DialogueProps> = ({ isOpen, title, options, onSelection }) => {
     const inputRef = useRef<HTMLInputElement>(null);
 
+    useEffect(() => {
+        if (inputRef.current) {
+            inputRef.current.value = '';
+            inputRef.current.focus();
+        }
+    }, [isOpen]);
+
     const dialogOverlayStyle: React.CSSProperties = {
         position: 'fixed',
         top: 0,
@@ -30,6 +37,8 @@ const Dialog: React.FC<DialogueProps> = ({ isOpen, title, options, onSelection }
         backgroundColor: 'rgba(0, 0, 0, 0.5)'
     };
 
+    const onConfirmation = () => onSelection(inputRef.current?.value || 'Player');
+
     const inputUi = options !== undefined
         ? options.map((option, index) => {
             const onClick = () => {
@@ -38,11 +47,11 @@ const Dialog: React.FC<DialogueProps> = ({ isOpen, title, options, onSelection }
 
             return <button key={index} onClick={onClick} style={{ fontSize: '1.25em', margin: '0.5em', padding: '0.5em' }}>{option}</button>;
         })
-        : <input ref={inputRef} style={{ fontSize: '1.25em' }} placeholder='Player' />;
+        : <input ref={inputRef} style={{ fontSize: '1.25em' }} placeholder='Player' onKeyDown={(e) => { if (e.key === 'Enter') onConfirmation() }} />;
 
     const confirmationButton = options !== undefined
         ? <></>
-        : <button onClick={() => onSelection(inputRef.current?.value || 'Player')} style={{ fontSize: '1.25em', margin: '0.5em' }}>Confirm</button>;
+        : <button onClick={() => onConfirmation()} style={{ fontSize: '1.25em', margin: '0.5em' }}>Confirm</button>;
 
 
     return <div style={dialogOverlayStyle}>
