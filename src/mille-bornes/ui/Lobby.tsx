@@ -3,6 +3,7 @@ import { Communicator } from "../logic/Communicator";
 import HomeButton from "../../ui/HomeButton";
 import { PlayerType } from "../logic/Data";
 import { LobbyEvent } from "../logic/NewtorkCommunicator";
+import Dialog from "./Dialog";
 
 interface LobbyProps {
     communicator: Communicator;
@@ -22,8 +23,21 @@ export interface LobbyPlayer {
     type: PlayerType;
 }
 
+interface DialogState { }
+
+class DialogClosedState implements DialogState { }
+
+class DialogOpenState implements DialogOpenState {
+    lobbyTeam: LobbyTeam;
+
+    constructor(lobbyTeam: LobbyTeam) {
+        this.lobbyTeam = lobbyTeam;
+    }
+}
+
 const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeButtonClicked }) => {
     const [lobbyTeams, setLobbyTeams] = useState<Array<LobbyTeam>>([]);
+    const [dialogState, setDialogState] = useState<DialogState>(new DialogClosedState());
 
     useEffect(() => {
         communicator.addEventListener(LobbyEvent.TYPE, (event) => {
@@ -46,14 +60,13 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
         : <></>;
 
     const lobbyTeamsUi = lobbyTeams.map((lobbyTeam, index) => {
-        const onAddPlayer = (playerType: PlayerType) => {
+        const onAddPlayer = () => {
             const name = prompt('What is the name of this player?') || 'Player';
-            const namePrefix = playerType === PlayerType.COMPUTER ? '🤖 ' : '';
 
             lobbyTeam.players.push({
-                name: namePrefix + name,
+                name: name,
                 localId: localId,
-                type: playerType
+                type: PlayerType.HUMAN
             });
 
             setLobbyTeams([...lobbyTeams]);
@@ -62,11 +75,11 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
         };
 
         const addPlayerButton = lobbyTeam.players.length < 2
-            ? <button style={{ fontSize: '1em' }} onClick={() => onAddPlayer(PlayerType.HUMAN)}>Add Player</button>
+            ? <button style={{ fontSize: '1em' }} onClick={() => onAddPlayer()}>Add Player</button>
             : <></>;
 
         const addComputerButton = lobbyTeam.players.length < 2
-            ? <button style={{ fontSize: '1em' }} onClick={() => onAddPlayer(PlayerType.COMPUTER)}>Add Computer</button>
+            ? <button style={{ fontSize: '1em' }} onClick={() => setDialogState(new DialogOpenState(lobbyTeam))}>Add Computer</button>
             : <></>;
 
         const onRemovePlayer = (removePlayer: LobbyPlayer) => {
@@ -103,15 +116,34 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
         ? <button style={{ fontSize: '1.5em' }} onClick={onStartGame}>Start Game</button>
         : <></>;
 
-    return <div style={{ color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
-        <HomeButton onClick={onHomeButtonClicked} />
-        <div style={{ fontSize: '1.75em', marginBottom: '1em' }}>🏎️ Mille Bornes Lobby 🏁</div>
-        <div>
-            {addTeamButton}
+    return <>
+        <div style={{ color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
+            <HomeButton onClick={onHomeButtonClicked} />
+            <div style={{ fontSize: '1.75em', marginBottom: '1em' }}>🏎️ Mille Bornes Lobby 🏁</div>
+            <div>
+                {addTeamButton}
+            </div>
+            {lobbyTeamsUi}
+            {startGameButton}
         </div>
-        {lobbyTeamsUi}
-        {startGameButton}
-    </div>;
+
+        <Dialog
+            isOpen={dialogState instanceof DialogOpenState}
+            title="Which computer bot's logic should be used?"
+            options={['KyleBot']}
+            onSelection={option => {
+                const lobbyTeam = (dialogState as DialogOpenState).lobbyTeam;
+
+                lobbyTeam.players.push({
+                    name: '🤖 ' + option,
+                    localId: localId,
+                    type: PlayerType.COMPUTER
+                });
+
+                setDialogState(new DialogClosedState());
+            }}
+        />
+    </>;
 };
 
 export default Lobby;
