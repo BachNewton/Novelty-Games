@@ -28,12 +28,15 @@ interface DialogState { }
 class DialogClosedState implements DialogState { }
 
 class DialogOpenState implements DialogOpenState {
-    lobbyTeam: LobbyTeam;
+    lobbyTeamsIndex: number;
 
-    constructor(lobbyTeam: LobbyTeam) {
-        this.lobbyTeam = lobbyTeam;
+    constructor(lobbyTeamsIndex: number) {
+        this.lobbyTeamsIndex = lobbyTeamsIndex;
     }
 }
+
+class DialogOpenComputerState extends DialogOpenState { }
+class DialogOpenHumanState extends DialogOpenState { }
 
 const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeButtonClicked }) => {
     const [lobbyTeams, setLobbyTeams] = useState<Array<LobbyTeam>>([]);
@@ -60,26 +63,12 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
         : <></>;
 
     const lobbyTeamsUi = lobbyTeams.map((lobbyTeam, index) => {
-        const onAddPlayer = () => {
-            const name = prompt('What is the name of this player?') || 'Player';
-
-            lobbyTeam.players.push({
-                name: name,
-                localId: localId,
-                type: PlayerType.HUMAN
-            });
-
-            setLobbyTeams([...lobbyTeams]);
-
-            communicator.updateLobby(lobbyTeams);
-        };
-
         const addPlayerButton = lobbyTeam.players.length < 2
-            ? <button style={{ fontSize: '1em' }} onClick={() => onAddPlayer()}>Add Player</button>
+            ? <button style={{ fontSize: '1em' }} onClick={() => setDialogState(new DialogOpenHumanState(index))}>Add Player</button>
             : <></>;
 
         const addComputerButton = lobbyTeam.players.length < 2
-            ? <button style={{ fontSize: '1em' }} onClick={() => setDialogState(new DialogOpenState(lobbyTeam))}>Add Computer</button>
+            ? <button style={{ fontSize: '1em' }} onClick={() => setDialogState(new DialogOpenComputerState(index))}>Add Computer</button>
             : <></>;
 
         const onRemovePlayer = (removePlayer: LobbyPlayer) => {
@@ -129,18 +118,23 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
 
         <Dialog
             isOpen={dialogState instanceof DialogOpenState}
-            title="Which computer bot's logic should be used?"
-            options={['KyleBot']}
-            onSelection={option => {
-                const lobbyTeam = (dialogState as DialogOpenState).lobbyTeam;
+            title={dialogState instanceof DialogOpenComputerState ? "Which computer bot's logic should be used?" : 'What is the name of this player?'}
+            options={dialogState instanceof DialogOpenComputerState ? ['KyleBot'] : undefined}
+            onSelection={selection => {
+                const lobbyTeamsIndex = (dialogState as DialogOpenState).lobbyTeamsIndex;
+                const lobbyTeam = lobbyTeams[lobbyTeamsIndex];
+                const namePrefix = dialogState instanceof DialogOpenComputerState ? '🤖 ' : '';
 
                 lobbyTeam.players.push({
-                    name: '🤖 ' + option,
+                    name: namePrefix + selection,
                     localId: localId,
-                    type: PlayerType.COMPUTER
+                    type: dialogState instanceof DialogOpenComputerState ? PlayerType.COMPUTER : PlayerType.HUMAN
                 });
 
                 setDialogState(new DialogClosedState());
+
+                setLobbyTeams([...lobbyTeams]);
+                communicator.updateLobby(lobbyTeams);
             }}
         />
     </>;

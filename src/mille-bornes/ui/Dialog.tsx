@@ -1,3 +1,5 @@
+import { useRef } from "react";
+
 const DIALOG_CONTAINER_STYLE: React.CSSProperties = {
     backgroundColor: 'white',
     padding: '20px',
@@ -9,11 +11,13 @@ const DIALOG_CONTAINER_STYLE: React.CSSProperties = {
 interface DialogueProps {
     isOpen: boolean;
     title: string;
-    options: string[];
-    onSelection: (option: string) => void;
+    options?: string[];
+    onSelection: (selection: string) => void;
 }
 
 const Dialog: React.FC<DialogueProps> = ({ isOpen, title, options, onSelection }) => {
+    const inputRef = useRef<HTMLInputElement>(null);
+
     const dialogOverlayStyle: React.CSSProperties = {
         position: 'fixed',
         top: 0,
@@ -26,13 +30,19 @@ const Dialog: React.FC<DialogueProps> = ({ isOpen, title, options, onSelection }
         backgroundColor: 'rgba(0, 0, 0, 0.5)'
     };
 
-    const optionsUi = options.map((option, index) => {
-        const onClick = () => {
-            onSelection(option);
-        };
+    const inputUi = options !== undefined
+        ? options.map((option, index) => {
+            const onClick = () => {
+                onSelection(option);
+            };
 
-        return <button key={index} onClick={onClick} style={{ fontSize: '1.25em', margin: '0.5em', padding: '0.5em' }}>{option}</button>;
-    });
+            return <button key={index} onClick={onClick} style={{ fontSize: '1.25em', margin: '0.5em', padding: '0.5em' }}>{option}</button>;
+        })
+        : <input ref={inputRef} style={{ fontSize: '1.25em' }} placeholder='Player' />;
+
+    const confirmationButton = options !== undefined
+        ? <></>
+        : <button onClick={() => onSelection(inputRef.current?.value || 'Player')} style={{ fontSize: '1.25em', margin: '0.5em' }}>Confirm</button>;
 
 
     return <div style={dialogOverlayStyle}>
@@ -40,7 +50,8 @@ const Dialog: React.FC<DialogueProps> = ({ isOpen, title, options, onSelection }
             <div style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center' }}>{title}</div>
             <br />
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {optionsUi}
+                {inputUi}
+                {confirmationButton}
             </div>
         </div>
     </div>;
