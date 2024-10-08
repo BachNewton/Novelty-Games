@@ -66,7 +66,8 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked, communicator }) => {
                     return {
                         name: player.name,
                         localId: player.localId,
-                        type: player.type
+                        type: player.type,
+                        botType: player.botType
                     };
                 })
             };

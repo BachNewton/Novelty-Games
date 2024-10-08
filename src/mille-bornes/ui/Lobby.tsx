@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Communicator } from "../logic/Communicator";
 import HomeButton from "../../ui/HomeButton";
-import { PlayerType } from "../logic/Data";
+import { BotType, PlayerType } from "../logic/Data";
 import { LobbyEvent } from "../logic/NewtorkCommunicator";
 import Dialog from "./Dialog";
 
@@ -21,6 +21,7 @@ export interface LobbyPlayer {
     name: string;
     localId: string;
     type: PlayerType;
+    botType: BotType | null;
 }
 
 interface DialogState { }
@@ -119,7 +120,7 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
         <Dialog
             isOpen={dialogState instanceof DialogOpenState}
             title={dialogState instanceof DialogOpenComputerState ? "Which computer bot's logic should be used?" : 'What is the name of this player?'}
-            options={dialogState instanceof DialogOpenComputerState ? ['KyleBot'] : undefined}
+            options={dialogState instanceof DialogOpenComputerState ? ['KyleBot', 'DumbBot'] : undefined}
             onSelection={selection => {
                 const lobbyTeamsIndex = (dialogState as DialogOpenState).lobbyTeamsIndex;
                 const lobbyTeam = lobbyTeams[lobbyTeamsIndex];
@@ -128,7 +129,8 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
                 lobbyTeam.players.push({
                     name: namePrefix + selection,
                     localId: localId,
-                    type: dialogState instanceof DialogOpenComputerState ? PlayerType.COMPUTER : PlayerType.HUMAN
+                    type: dialogState instanceof DialogOpenComputerState ? PlayerType.COMPUTER : PlayerType.HUMAN,
+                    botType: dialogState instanceof DialogOpenComputerState ? selection as BotType : null
                 });
 
                 setDialogState(new DialogClosedState());

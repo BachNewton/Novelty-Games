@@ -1,7 +1,8 @@
 import { Communicator } from "./Communicator";
-import { Game, PlayerType, Team } from "./Data";
+import { BotType, Game, PlayerType, Team } from "./Data";
 import { canCardBePlayed, getCurrentPlayerTeam, playCard } from "./Rules";
 import { Bot } from "./bots/Bot";
+import { DumbBot } from "./bots/DumbBot";
 import { KyleBot } from "./bots/KyleBot";
 
 /** @returns true if the current player is local and is also a computer and the comupter hasn't already taken its turn */
@@ -23,7 +24,7 @@ export function takeComputerPlayerTurn(
     const callExtention = false; // The computer will never call an extention
     const gameIsExtended = game.extention;
 
-    const bot: Bot = KyleBot;
+    const bot = getBot(currentPlayer.botType);
 
     bot.decideMove(
         computerHand,
@@ -37,4 +38,15 @@ export function takeComputerPlayerTurn(
         },
         gameIsExtended
     );
+}
+
+function getBot(botType: BotType | null): Bot {
+    switch (botType) {
+        case BotType.KYLE_BOT:
+            return KyleBot;
+        case BotType.DUMB_BOT:
+            return DumbBot;
+        default:
+            throw new Error('This BotType is not supported: ' + botType);
+    }
 }

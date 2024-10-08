@@ -6,7 +6,7 @@ import { GameWorldType } from '../carnival/worlds/GameWorldType';
 import { Communicator } from '../mille-bornes/logic/Communicator';
 import { NewtorkCommunicator } from '../mille-bornes/logic/NewtorkCommunicator';
 
-const APP_VERSION = 'v1.14.0';
+const APP_VERSION = 'v1.14.1';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };

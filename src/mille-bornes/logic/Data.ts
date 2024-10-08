@@ -39,8 +39,14 @@ export interface Player {
     teamId: string;
     localId: string;
     type: PlayerType;
+    botType: BotType | null;
 }
 
 export enum PlayerType {
     HUMAN, COMPUTER
+}
+
+export enum BotType {
+    KYLE_BOT = 'KyleBot',
+    DUMB_BOT = 'DumbBot'
 }

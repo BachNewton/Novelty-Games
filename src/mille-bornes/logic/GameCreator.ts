@@ -26,7 +26,8 @@ export function createGame(lobbyTeams: Array<LobbyTeam>): Game {
                 localId: lobbyPlayer.localId,
                 teamId: team.id,
                 hand: deck.splice(0, 6).concat(lobbyIndex === 0 && playerIndex === 0 ? deck.splice(0, 1) : []),
-                type: lobbyPlayer.type
+                type: lobbyPlayer.type,
+                botType: lobbyPlayer.botType
             };
 
             return player;

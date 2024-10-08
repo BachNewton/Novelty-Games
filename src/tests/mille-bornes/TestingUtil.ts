@@ -11,7 +11,8 @@ export function createTestingGame(): Game {
         hand: [],
         teamId: teamId1,
         localId: TESTIING_LOCAL_ID,
-        type: PlayerType.HUMAN
+        type: PlayerType.HUMAN,
+        botType: null
     };
 
     const player2: Player = {
@@ -19,7 +20,8 @@ export function createTestingGame(): Game {
         hand: [],
         teamId: teamId2,
         localId: TESTIING_LOCAL_ID,
-        type: PlayerType.HUMAN
+        type: PlayerType.HUMAN,
+        botType: null
     };
 
     const team1: Team = {
