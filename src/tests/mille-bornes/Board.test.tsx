@@ -1,9 +1,8 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import Board from "../../mille-bornes/ui/Board";
 import { TESTIING_LOCAL_ID, createTestingGame } from "./TestingUtil";
-import { Communicator } from "../../mille-bornes/logic/Communicator";
 import { FakeCommunicator } from "./FakeCommunicator";
-import { AceCard, CrashCard, RollCard, StopCard } from "../../mille-bornes/logic/Card";
+import { AceCard, Card, CrashCard, Distance100Card, RollCard, StopCard } from "../../mille-bornes/logic/Card";
 
 describe('Board UI', () => {
     it('should allow a player to play a crash card against another team', () => {
@@ -106,5 +105,34 @@ describe('Board UI', () => {
 
         // The CrashCard should be in the discard pile
         expect(game.discard?.image).toBe('MB-crash.svg');
+    });
+
+    it('should give the correct info to the communicator', () => {
+        const game = createTestingGame();
+        game.teams[0].players[0].hand = [new Distance100Card()];
+        game.teams[0].tableau.battleArea = [new RollCard()];
+        let temp: Card | null = null;
+
+        const communicator = new FakeCommunicator((card, targetTeam, isExtentionCalled) => {
+            temp = card;
+        });
+
+        const boardUi = <Board
+            startingGame={game}
+            localId={TESTIING_LOCAL_ID}
+            communicator={communicator}
+            onRoundOver={() => { }}
+        />;
+
+        render(boardUi);
+
+        const imageElements = screen.getAllByRole<HTMLImageElement>('img');
+        const distance100CardElement = imageElements.find(element => element.src === 'http://localhost/MB-100.svg')!;
+        fireEvent.click(distance100CardElement); // Select the Distance100Card
+        fireEvent.click(distance100CardElement); // Confirm the Distance100Card
+
+        expect(game.teams[0].tableau.distanceArea[0].image).toBe('MB-100.svg');
+
+        expect(temp).not.toBeNull();
     });
 });
