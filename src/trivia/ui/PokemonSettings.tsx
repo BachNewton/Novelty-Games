@@ -2,6 +2,10 @@ import { useState } from "react";
 
 const POKEMON_QUESTION_TYPE_SECTION_KEY = 'POKEMON_QUESTION_TYPE_SECTION_KEY';
 
+export enum PokemonQuestionType {
+    WHO = 'WHO', STAT = 'STAT', TYPE = 'TYPE'
+}
+
 interface PokemonSettingsProps {
     questionTypeGetter: PokemonSettingsQuestionTypeGetter;
 }
@@ -31,10 +35,6 @@ const PokemonSettings: React.FC<PokemonSettingsProps> = ({ questionTypeGetter })
         </div>
     </div>;
 };
-
-export enum PokemonQuestionType {
-    WHO = 'WHO', STAT = 'STAT', TYPE = 'TYPE'
-}
 
 export interface PokemonSettingsQuestionTypeGetter {
     get: (() => PokemonQuestionType) | null;

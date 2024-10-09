@@ -1,4 +1,3 @@
-import Question from "../ui/Question";
 import { Pokemon, PokemonType, PokemonTyping } from "./PokemonData";
 
 export interface Question {
