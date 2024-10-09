@@ -14,7 +14,7 @@ export function takeComputerPlayerTurn(
     game: Game,
     onRoundOver: (game: Game) => void,
     communicator: Communicator,
-    checkIfTargetDistanceReached: (targetTeam: Team, shouldCallExtention: () => boolean) => void
+    checkIfTargetDistanceReached: (targetTeam: Team) => void
 ) {
     const currentPlayer = game.currentPlayer;
 
@@ -33,7 +33,7 @@ export function takeComputerPlayerTurn(
         (card, targetTeam) => canCardBePlayed(card, game, targetTeam),
         (card, targetTeam) => {
             playCard(card, game, targetTeam, onRoundOver);
-            checkIfTargetDistanceReached(currentPlayerTeam, () => callExtention);
+            checkIfTargetDistanceReached(currentPlayerTeam);
             communicator.playCard(card, targetTeam, callExtention);
         },
         gameIsExtended

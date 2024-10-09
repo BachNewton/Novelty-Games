@@ -8,6 +8,7 @@ import { Communicator } from "../logic/Communicator";
 import DeckDiscardAndStats from "./DeckDiscardAndStats";
 import { shouldComputerPlayerTakeItsTurn, takeComputerPlayerTurn } from "../logic/ComputerPlayer";
 import { PlayCardEvent } from "../logic/NewtorkCommunicator";
+import Dialog from "./Dialog";
 
 interface BoardProps {
     startingGame: Game;
@@ -23,6 +24,16 @@ interface State {
 
 interface UiState {
     card: Card | null;
+}
+
+class DialogUiState implements UiState {
+    card: Card;
+    targetTeam: Team;
+
+    constructor(card: Card, targetTeam: Team) {
+        this.card = card;
+        this.targetTeam = targetTeam;
+    }
 }
 
 class CardSelection implements UiState {
@@ -78,18 +89,15 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
         });
     }, [state]);
 
-    const checkIfTargetDistanceReached = (targetTeam: Team, shouldCallExtention: () => boolean) => {
+    const checkIfTargetDistanceReached = (targetTeam: Team) => {
         const teamAtTargetDistance = getRemainingDistance(targetTeam.tableau.distanceArea, state.game.teams, state.game.extention) === 0;
 
         if (teamAtTargetDistance) {
             if (state.game.extention || isGameAtMaxTargetDistance(state.game.teams)) {
                 onRoundOver(state.game);
             } else {
-                if (shouldCallExtention()) {
-                    state.game.extention = true;
-                } else {
-                    onRoundOver(state.game);
-                }
+                state.ui = new DialogUiState(state.ui.card!, targetTeam);
+                setState({ ...state });
             }
         }
     };
@@ -125,14 +133,13 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
             } else {
                 const targetTeam = getCurrentPlayerTeam(state.game);
                 playCard(card, state.game, targetTeam, onRoundOver);
+                checkIfTargetDistanceReached(targetTeam);
 
-                checkIfTargetDistanceReached(
-                    targetTeam,
-                    () => window.confirm('Your team has reached the target! Would like to to call an extention?')
-                );
-
-                communicator.playCard(card, targetTeam, state.game.extention);
-                state.ui.card = null;
+                const userHasBeenPromptedForExtention = state.ui instanceof DialogUiState;
+                if (!userHasBeenPromptedForExtention) {
+                    communicator.playCard(card, targetTeam, false);
+                    state.ui.card = null;
+                }
             }
         }
 
@@ -192,29 +199,52 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
         }
     };
 
+    const onDialogSelection = (selection: string) => {
+        if (selection === 'Yes') {
+            state.game.extention = true;
+        } else {
+            onRoundOver(state.game);
+        }
+
+        const uiState = state.ui as DialogUiState;
+        communicator.playCard(uiState.card, uiState.targetTeam, state.game.extention);
+        state.ui = new CardSelection();
+
+        setState({ ...state });
+    };
+
     const gridTemplateRows = '1fr ' + state.game.teams.map(_ => '3fr').join(' ') + ' 1fr';
-    return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: gridTemplateRows, overflow: 'hidden', color: 'white' }}>
-        <DeckDiscardAndStats
-            discard={state.game.discard}
-            greyedOut={greyedOut}
-            currentPlayer={state.game.currentPlayer}
-            remainingCardsInDeck={state.game.deck.length}
-            extentionCalled={state.game.extention}
-            onDiscardClicked={onDiscardClicked}
-            isDiscardHighlighted={state.ui instanceof DiscardSelection}
-        />
+    return <>
+        <div style={{ display: 'grid', height: '100vh', gridTemplateRows: gridTemplateRows, overflow: 'hidden', color: 'white' }}>
+            <DeckDiscardAndStats
+                discard={state.game.discard}
+                greyedOut={greyedOut}
+                currentPlayer={state.game.currentPlayer}
+                remainingCardsInDeck={state.game.deck.length}
+                extentionCalled={state.game.extention}
+                onDiscardClicked={onDiscardClicked}
+                isDiscardHighlighted={state.ui instanceof DiscardSelection}
+            />
 
-        {otherTeamsTableau}
-        {localTeamsTableau}
+            {otherTeamsTableau}
+            {localTeamsTableau}
 
-        <Hand
-            hand={getLocalHandCards(state.game, localId)}
-            onPlayCard={onPlayCard}
-            highlightedCard={state.ui.card}
-            greyedOut={greyedOut || !itIsYourTurn}
-            isCardPlayable={isCardPlayable}
+            <Hand
+                hand={getLocalHandCards(state.game, localId)}
+                onPlayCard={onPlayCard}
+                highlightedCard={state.ui.card}
+                greyedOut={greyedOut || !itIsYourTurn}
+                isCardPlayable={isCardPlayable}
+            />
+        </div>
+
+        <Dialog
+            isOpen={state.ui instanceof DialogUiState}
+            title={['Your team has reached the target!', 'Would like to to call an extention?']}
+            options={['No', 'Yes']}
+            onSelection={onDialogSelection}
         />
-    </div>;
+    </>;
 };
 
 function getLocalPlayer(game: Game, localId: string): Player | null {

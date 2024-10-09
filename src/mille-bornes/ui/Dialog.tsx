@@ -10,7 +10,7 @@ const DIALOG_CONTAINER_STYLE: React.CSSProperties = {
 
 interface DialogueProps {
     isOpen: boolean;
-    title: string;
+    title: string | string[];
     options?: string[];
     onSelection: (selection: string) => void;
 }
@@ -53,10 +53,11 @@ const Dialog: React.FC<DialogueProps> = ({ isOpen, title, options, onSelection }
         ? <></>
         : <button onClick={() => onConfirmation()} style={{ fontSize: '1.25em', margin: '0.5em' }}>Confirm</button>;
 
+    const titleUi = title instanceof Array ? title.map((line, index) => <div key={index}>{line}</div>) : <div>{title}</div>;
 
     return <div style={dialogOverlayStyle}>
         <div style={DIALOG_CONTAINER_STYLE}>
-            <div style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center' }}>{title}</div>
+            <div style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center' }}>{titleUi}</div>
             <br />
             <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {inputUi}
