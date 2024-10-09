@@ -150,7 +150,7 @@ function canDistanceCardBePlayed(distanceCard: DistanceCard, tableau: Tableau, t
     if (getTotalDistance(tableau.distanceArea) + distanceCard.amount > getTargetDistance(teams, extention)) return false;
 
     if (battleArea instanceof RollCard && speedAreaLimit >= distanceCard.amount) return true;
-    if (hasEmergencyCard(tableau.safetyArea) && (battleArea === null || battleArea instanceof RemedyCard || battleArea instanceof StopCard)) return true;
+    if (hasSafetyCard(tableau.safetyArea, EmergencyCard) && (battleArea === null || battleArea instanceof RemedyCard || battleArea instanceof StopCard)) return true;
 
     return false;
 }
@@ -163,7 +163,7 @@ function canUnlimitedCardBePlayed(speedArea: SpeedCard | null): boolean {
 
 function canLimitCardBePlayed(teams: Array<Team>): boolean {
     for (const team of teams) {
-        if (hasEmergencyCard(team.tableau.safetyArea)) continue;
+        if (hasSafetyCard(team.tableau.safetyArea, EmergencyCard)) continue;
 
         const speedArea = getVisibleSpeedCard(team.tableau.speedArea)
         if (speedArea === null || speedArea instanceof UnlimitedCard) return true;
@@ -174,17 +174,19 @@ function canLimitCardBePlayed(teams: Array<Team>): boolean {
 
 function canHazardCardBePlayed(hazardCard: HazardCard, teams: Array<Team>): boolean {
     for (const team of teams) {
+        const safetyArea = team.tableau.safetyArea;
+
         // You can't play a hazard card on a player who has the safety card to block it
-        if (hazardCard instanceof FlatCard && hasSealantCard(team.tableau.safetyArea)) continue;
-        if (hazardCard instanceof CrashCard && hasAceCard(team.tableau.safetyArea)) continue;
-        if (hazardCard instanceof EmptyCard && hasTankerCard(team.tableau.safetyArea)) continue;
-        if (hazardCard instanceof StopCard && hasEmergencyCard(team.tableau.safetyArea)) continue;
+        if (hazardCard instanceof FlatCard && hasSafetyCard(safetyArea, SealantCard)) continue;
+        if (hazardCard instanceof CrashCard && hasSafetyCard(safetyArea, AceCard)) continue;
+        if (hazardCard instanceof EmptyCard && hasSafetyCard(safetyArea, TankerCard)) continue;
+        if (hazardCard instanceof StopCard && hasSafetyCard(safetyArea, EmergencyCard)) continue;
 
         // You can't play a hazard card on a player who already has a hazard card to deal with
         if (getVisibleBattleCard(team.tableau.battleArea) instanceof HazardCard) continue;
 
         // You can only play a hazard card on a player who has a roll or an Emergency card
-        if (getVisibleBattleCard(team.tableau.battleArea) instanceof RollCard || hasEmergencyCard(team.tableau.safetyArea)) return true;
+        if (getVisibleBattleCard(team.tableau.battleArea) instanceof RollCard || hasSafetyCard(safetyArea, EmergencyCard)) return true;
     }
 
     return false;
@@ -201,7 +203,7 @@ function canRemedyCardBePlayed(remedyCard: RemedyCard, battleArea: BattleCard | 
 
 function canRollCardBePlayed(battleArea: BattleCard | null, safetyArea: Array<SafetyCard>): boolean {
     // You can't play a RollCard if you already have an EmergencyCard in play.
-    if (hasEmergencyCard(safetyArea)) return false;
+    if (hasSafetyCard(safetyArea, EmergencyCard)) return false;
 
     if (battleArea === null) return true;
     if (battleArea instanceof StopCard) return true;
@@ -224,20 +226,8 @@ export function getVisibleSpeedCard(speedArea: Array<SpeedCard>): SpeedCard | nu
     return speedArea[speedArea.length - 1] || null;
 }
 
-function hasAceCard(cards: Array<Card>): boolean {
-    return cards.find(card => card instanceof AceCard) !== undefined;
-}
-
-function hasSealantCard(cards: Array<Card>): boolean {
-    return cards.find(card => card instanceof SealantCard) !== undefined;
-}
-
-function hasEmergencyCard(cards: Array<Card>): boolean {
-    return cards.find(card => card instanceof EmergencyCard) !== undefined;
-}
-
-function hasTankerCard(cards: Array<Card>): boolean {
-    return cards.find(card => card instanceof TankerCard) !== undefined;
+export function hasSafetyCard(safetyCards: Card[], safetyCardType: typeof SafetyCard): boolean {
+    return safetyCards.find(safetyCard => safetyCard instanceof safetyCardType) !== undefined;
 }
 
 function getPlayerWithCoupFourré(attackingCard: HazardCard | LimitCard, targetTeam: Team, updateDiscardPile: () => void): Player | null {
@@ -248,8 +238,10 @@ function getPlayerWithCoupFourré(attackingCard: HazardCard | LimitCard, targetT
         updateDiscardPile();
     };
 
+    const getPlayerWith = (safetyCardType: typeof SafetyCard) => targetTeam.players.find(player => hasSafetyCard(player.hand, safetyCardType));
+
     if (attackingCard instanceof CrashCard) {
-        const playerWithAce = targetTeam.players.find(player => hasAceCard(player.hand));
+        const playerWithAce = getPlayerWith(AceCard);
 
         if (playerWithAce !== undefined) {
             playCoupFourré(playerWithAce, playerWithAce.hand.find(card => card instanceof AceCard) as SafetyCard);
@@ -258,7 +250,7 @@ function getPlayerWithCoupFourré(attackingCard: HazardCard | LimitCard, targetT
     }
 
     if (attackingCard instanceof EmptyCard) {
-        const playerWithTanker = targetTeam.players.find(player => hasTankerCard(player.hand));
+        const playerWithTanker = getPlayerWith(TankerCard);
 
         if (playerWithTanker !== undefined) {
             playCoupFourré(playerWithTanker, playerWithTanker.hand.find(card => card instanceof TankerCard) as SafetyCard);
@@ -267,7 +259,7 @@ function getPlayerWithCoupFourré(attackingCard: HazardCard | LimitCard, targetT
     }
 
     if (attackingCard instanceof StopCard || attackingCard instanceof LimitCard) {
-        const playerWithEmergency = targetTeam.players.find(player => hasEmergencyCard(player.hand));
+        const playerWithEmergency = getPlayerWith(EmergencyCard);
 
         if (playerWithEmergency !== undefined) {
             playCoupFourré(playerWithEmergency, playerWithEmergency.hand.find(card => card instanceof EmergencyCard) as SafetyCard);
@@ -277,7 +269,7 @@ function getPlayerWithCoupFourré(attackingCard: HazardCard | LimitCard, targetT
     }
 
     if (attackingCard instanceof FlatCard) {
-        const playerWithSealant = targetTeam.players.find(player => hasSealantCard(player.hand));
+        const playerWithSealant = getPlayerWith(SealantCard);
 
         if (playerWithSealant !== undefined) {
             playCoupFourré(playerWithSealant, playerWithSealant.hand.find(card => card instanceof SealantCard) as SafetyCard);

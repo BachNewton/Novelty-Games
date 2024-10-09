@@ -208,3 +208,7 @@ function chooseUnplayableCards(unplayableCards: Card[]): Choice {
         targetTeam: null
     };
 }
+
+function calculateUnplayableCardValue(card: Card, otherTeams: Team[]): number {
+    return 0;
+}
