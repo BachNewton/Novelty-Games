@@ -1,8 +1,8 @@
 import { removeRandomElement } from "../../../util/Randomizer";
 import { getTeamName } from "../../ui/UiUtil";
-import { Card, DistanceCard, HazardCard, LimitCard, RemedyCard, SafetyCard, UnlimitedCard } from "../Card";
+import { AceCard, Card, DistanceCard, EmergencyCard, FlatCard, GasCard, HazardCard, LimitCard, RemedyCard, RepairCard, RollCard, SafetyCard, SealantCard, SpareCard, TankerCard, UnlimitedCard } from "../Card";
 import { Team } from "../Data";
-import { getRemainingDistance, getTotalDistance } from "../Rules";
+import { canHazardCardBePlayed, canLimitCardBePlayed, getRemainingDistance, getTotalDistance, hasSafetyCard } from "../Rules";
 import { Bot } from "./Bot";
 
 interface Choice {
@@ -23,7 +23,7 @@ export const KyleBot: Bot = {
         const unplayableCards = myHand.filter(card => !canCardBePlayed(card));
 
         if (playableCards.length > 0) {
-            console.log('KyleBot - choosing a playable card from:', playableCards);
+            console.log('KyleBot - considering a playable card from:', playableCards);
             const choice = choosePlayableCard(playableCards, myTeam, otherTeams, canCardBePlayed, gameIsExtended);
 
             if (choice !== null) {
@@ -31,11 +31,13 @@ export const KyleBot: Bot = {
                 playCard(choice.card, choice.targetTeam);
                 return;
             }
+        } else {
+            console.log('KyleBot - I have no playable cards');
         }
 
         if (unplayableCards.length > 0) {
             console.log('KyleBot - choosing a card to discard from:', unplayableCards);
-            const choice = chooseUnplayableCards(unplayableCards);
+            const choice = chooseUnplayableCards(unplayableCards, myHand, myTeam, otherTeams);
             console.log('KyleBot - I choose to discard:', choice.card);
             playCard(choice.card, choice.targetTeam);
             return;
@@ -199,9 +201,20 @@ function sortByFurthestFirst(teams: Team[]): Team[] {
     });
 }
 
-function chooseUnplayableCards(unplayableCards: Card[]): Choice {
-    console.log('KyleBot - I will randomly choose a card to discard');
-    const choosenCard = removeRandomElement(unplayableCards);
+function chooseUnplayableCards(unplayableCards: Card[], myHand: Card[], myTeam: Team, otherTeams: Team[]): Choice {
+    console.log('KyleBot - I need to place a value on all my unplayable cards');
+
+    const unplayableCardsValued = unplayableCards.map(card => {
+        return {
+            card: card,
+            value: calculateUnplayableCardValue(card, myHand, myTeam, otherTeams)
+        };
+    });
+
+    const unplayableCardsValuedAndSorted = unplayableCardsValued.sort((card1, card2) => card1.value - card2.value);
+    console.log('KyleBot - my unplayable cards have been valued and sorted:', unplayableCardsValuedAndSorted);
+
+    const choosenCard = unplayableCardsValuedAndSorted.shift()?.card!;
 
     return {
         card: choosenCard,
@@ -209,6 +222,30 @@ function chooseUnplayableCards(unplayableCards: Card[]): Choice {
     };
 }
 
-function calculateUnplayableCardValue(card: Card, otherTeams: Team[]): number {
-    return 0;
+function calculateUnplayableCardValue(card: Card, myHand: Card[], myTeam: Team, otherTeams: Team[]): number {
+    if (card instanceof HazardCard && !canHazardCardBePlayed(card, otherTeams)) {
+        console.log('KyleBot - HazardCard:', card, 'is useless because it cannot be played on any team');
+        return 0;
+    }
+
+    if (card instanceof LimitCard && !canLimitCardBePlayed(otherTeams)) {
+        console.log('KyleBot - LimitCard:', card, 'is useless because it cannot be played on any team');
+        return 0;
+    }
+
+    const isRemedyWithSafetyAvailable = (remedyCardType: typeof RemedyCard, safetyCardType: typeof SafetyCard) => {
+        return card instanceof remedyCardType && (hasSafetyCard(myTeam.tableau.safetyArea, safetyCardType) || myHand.find(card => card instanceof safetyCardType) !== undefined);
+    };
+
+    if (isRemedyWithSafetyAvailable(GasCard, TankerCard) || isRemedyWithSafetyAvailable(SpareCard, SealantCard) || isRemedyWithSafetyAvailable(RepairCard, AceCard) || isRemedyWithSafetyAvailable(RollCard, EmergencyCard)) {
+        console.log('KyleBot - RemedyCard:', card, 'is useless because I have its corresponding SafetyCard available');
+        return 0;
+    }
+
+    if (card instanceof UnlimitedCard && hasSafetyCard(myTeam.tableau.safetyArea, EmergencyCard)) {
+        console.log('KyleBot - UnlimitedCard:', card, 'is useless because I have its corresponding SafetyCard available');
+        return 0;
+    }
+
+    return 1;
 }

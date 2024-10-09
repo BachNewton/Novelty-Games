@@ -161,7 +161,7 @@ function canUnlimitedCardBePlayed(speedArea: SpeedCard | null): boolean {
     return false;
 }
 
-function canLimitCardBePlayed(teams: Array<Team>): boolean {
+export function canLimitCardBePlayed(teams: Array<Team>): boolean {
     for (const team of teams) {
         if (hasSafetyCard(team.tableau.safetyArea, EmergencyCard)) continue;
 
@@ -172,7 +172,7 @@ function canLimitCardBePlayed(teams: Array<Team>): boolean {
     return false;
 }
 
-function canHazardCardBePlayed(hazardCard: HazardCard, teams: Array<Team>): boolean {
+export function canHazardCardBePlayed(hazardCard: HazardCard, teams: Array<Team>): boolean {
     for (const team of teams) {
         const safetyArea = team.tableau.safetyArea;
 
