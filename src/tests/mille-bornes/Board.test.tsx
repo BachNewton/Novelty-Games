@@ -3,7 +3,7 @@ import Board from "../../mille-bornes/ui/Board";
 import { TESTIING_LOCAL_ID, createTestingGame, doubleClickImage } from "./TestingUtil";
 import { FakeCommunicator } from "./FakeCommunicator";
 import { AceCard, Card, CrashCard, Distance100Card, Distance50Card, RollCard, StopCard } from "../../mille-bornes/logic/Card";
-import { Team } from "../../mille-bornes/logic/Data";
+import { Game, Team } from "../../mille-bornes/logic/Data";
 
 describe('Board UI', () => {
     it('should allow a player to play a crash card against another team', () => {
@@ -153,11 +153,14 @@ describe('Board UI', () => {
             communicatorIsExtentionCalled = isExtentionCalled;
         });
 
+        let onRoundOverGame: Game | null = null;
+        const onRoundOver = (game: Game) => onRoundOverGame = game;
+
         const boardUi = <Board
             startingGame={game}
             localId={TESTIING_LOCAL_ID}
             communicator={communicator}
-            onRoundOver={() => { }}
+            onRoundOver={onRoundOver}
         />;
 
         render(boardUi);
@@ -169,9 +172,9 @@ describe('Board UI', () => {
         expect(extentionDialogElement).toBeVisible();
 
         // The communicator should not have received anything yet
-        expect(communicatorCard).toBe(null);
-        expect(communicatorTargetTeam).toBe(null);
-        expect(communicatorIsExtentionCalled).toBe(undefined);
+        expect(communicatorCard).toBeNull();
+        expect(communicatorTargetTeam).toBeNull();
+        expect(communicatorIsExtentionCalled).toBeUndefined();
 
         const yesButton = screen.getByText('Yes');
         fireEvent.click(yesButton);
@@ -183,6 +186,12 @@ describe('Board UI', () => {
 
         // Extention Dialog is gone now
         expect(extentionDialogElement).not.toBeVisible();
+
+        const raceExtentionAnnouncement = screen.getByText(/A race extention has been called/);
+        expect(raceExtentionAnnouncement).toBeVisible();
+
+        // onRoundOver should not have been called
+        expect(onRoundOverGame).toBeNull();
     });
 
     it('should allow the user to decline a race extention', () => {
@@ -204,11 +213,14 @@ describe('Board UI', () => {
             communicatorIsExtentionCalled = isExtentionCalled;
         });
 
+        let onRoundOverGame: Game | null = null;
+        const onRoundOver = (game: Game) => onRoundOverGame = game;
+
         const boardUi = <Board
             startingGame={game}
             localId={TESTIING_LOCAL_ID}
             communicator={communicator}
-            onRoundOver={() => { }}
+            onRoundOver={onRoundOver}
         />;
 
         render(boardUi);
@@ -220,9 +232,9 @@ describe('Board UI', () => {
         expect(extentionDialogElement).toBeVisible();
 
         // The communicator should not have received anything yet
-        expect(communicatorCard).toBe(null);
-        expect(communicatorTargetTeam).toBe(null);
-        expect(communicatorIsExtentionCalled).toBe(undefined);
+        expect(communicatorCard).toBeNull();
+        expect(communicatorTargetTeam).toBeNull();
+        expect(communicatorIsExtentionCalled).toBeUndefined();
 
         const noButton = screen.getByText('No');
         fireEvent.click(noButton);
@@ -232,7 +244,7 @@ describe('Board UI', () => {
         expect(communicatorTargetTeam).toBe(game.teams[0]);
         expect(communicatorIsExtentionCalled).toBe(false);
 
-        // Extention Dialog is gone now
-        expect(extentionDialogElement).not.toBeVisible();
+        // onRoundOver should have been called
+        expect(onRoundOverGame).toBe(game);
     });
 });
