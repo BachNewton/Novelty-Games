@@ -62,7 +62,7 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null, onRoun
         } else if (card instanceof UnlimitedCard) {
             targetTeam.tableau.speedArea.push(card);
         } else if (card instanceof LimitCard) {
-            const playerWithCoupFourré = getPlayerWithCoupFourré(card, targetTeam);
+            const playerWithCoupFourré = getPlayerWithCoupFourré(card, targetTeam, () => game.discard = card);
 
             if (playerWithCoupFourré === null) {
                 targetTeam.tableau.speedArea.push(card);
@@ -70,7 +70,7 @@ export function playCard(card: Card, game: Game, targetTeam: Team | null, onRoun
                 handleCoupFourré(playerWithCoupFourré);
             }
         } else if (card instanceof HazardCard) {
-            const playerWithCoupFourré = getPlayerWithCoupFourré(card, targetTeam);
+            const playerWithCoupFourré = getPlayerWithCoupFourré(card, targetTeam, () => game.discard = card);
 
             if (playerWithCoupFourré === null) {
                 targetTeam.tableau.battleArea.push(card);
@@ -240,11 +240,12 @@ function hasTankerCard(cards: Array<Card>): boolean {
     return cards.find(card => card instanceof TankerCard) !== undefined;
 }
 
-function getPlayerWithCoupFourré(attackingCard: HazardCard | LimitCard, targetTeam: Team): Player | null {
+function getPlayerWithCoupFourré(attackingCard: HazardCard | LimitCard, targetTeam: Team, updateDiscardPile: () => void): Player | null {
     const playCoupFourré = (player: Player, safetyCard: SafetyCard) => {
         player.hand.splice(player.hand.indexOf(safetyCard), 1);
         safetyCard.coupFourré = true;
         targetTeam.tableau.safetyArea.push(safetyCard);
+        updateDiscardPile();
     };
 
     if (attackingCard instanceof CrashCard) {

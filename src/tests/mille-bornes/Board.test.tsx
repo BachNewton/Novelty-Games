@@ -3,7 +3,7 @@ import Board from "../../mille-bornes/ui/Board";
 import { TESTIING_LOCAL_ID, createTestingGame } from "./TestingUtil";
 import { Communicator } from "../../mille-bornes/logic/Communicator";
 import { FakeCommunicator } from "./FakeCommunicator";
-import { CrashCard, RollCard, StopCard } from "../../mille-bornes/logic/Card";
+import { AceCard, CrashCard, RollCard, StopCard } from "../../mille-bornes/logic/Card";
 
 describe('Board UI', () => {
     it('should allow a player to play a crash card against another team', () => {
@@ -11,12 +11,10 @@ describe('Board UI', () => {
         game.teams[0].players[0].hand = [new CrashCard()];
         game.teams[1].tableau.battleArea = [new RollCard()];
 
-        const communicator: Communicator = new FakeCommunicator();
-
         const boardUi = <Board
             startingGame={game}
             localId={TESTIING_LOCAL_ID}
-            communicator={communicator}
+            communicator={new FakeCommunicator()}
             onRoundOver={() => { }}
         />;
 
@@ -44,12 +42,10 @@ describe('Board UI', () => {
         game.teams[1].tableau.battleArea = [new RollCard()];
         game.discard = new StopCard();
 
-        const communicator: Communicator = new FakeCommunicator();
-
         const boardUi = <Board
             startingGame={game}
             localId={TESTIING_LOCAL_ID}
-            communicator={communicator}
+            communicator={new FakeCommunicator()}
             onRoundOver={() => { }}
         />;
 
@@ -73,5 +69,42 @@ describe('Board UI', () => {
 
         // The CrashCard should be in the discard pile
         expect(game.discard.image).toBe('MB-crash.svg');
+    });
+
+    it('should show a hazard card in the discard pile if a coup-fourré is played to prevent it', () => {
+        const game = createTestingGame();
+        game.teams[0].players[0].hand = [new CrashCard()];
+        game.teams[1].players[0].hand = [new AceCard()];
+        game.teams[1].tableau.battleArea = [new RollCard()];
+
+        const boardUi = <Board
+            startingGame={game}
+            localId={TESTIING_LOCAL_ID}
+            communicator={new FakeCommunicator()}
+            onRoundOver={() => { }}
+        />;
+
+        render(boardUi);
+
+        const imageElements = screen.getAllByRole<HTMLImageElement>('img');
+        const crashCardElement = imageElements.find(element => element.src === 'http://localhost/MB-crash.svg')!;
+        fireEvent.click(crashCardElement); // Select the CrashCard
+        fireEvent.click(crashCardElement); // Confirm the CrashCard
+
+        const otherTeamTableau = screen.getByText('Team Test Player 2');
+        fireEvent.click(otherTeamTableau); // Select the team's tableau
+        fireEvent.click(otherTeamTableau); // Confirm the team's tableau
+
+        // Team 2 still has a RollCard in their tableau's battleArea
+        expect(game.teams[1].tableau.battleArea.length).toBe(1);
+        expect(game.teams[1].tableau.battleArea[0] instanceof RollCard).toBe(true);
+
+        // Team 2 should have played an AceCard as a coup-fourré
+        const playedAceCard = game.teams[1].tableau.safetyArea.find(safetyCard => safetyCard instanceof AceCard);
+        expect(playedAceCard).not.toBeUndefined();
+        expect(playedAceCard?.coupFourré).toBe(true);
+
+        // The CrashCard should be in the discard pile
+        expect(game.discard?.image).toBe('MB-crash.svg');
     });
 });
