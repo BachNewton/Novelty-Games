@@ -1,3 +1,4 @@
+import { screen, fireEvent } from "@testing-library/react";
 import { Player, PlayerType, Team, Game } from "../../mille-bornes/logic/Data";
 
 export const TESTIING_LOCAL_ID = 'TESTING_LOCAL_ID';
@@ -34,7 +35,7 @@ export function createTestingGame(): Game {
         },
         color: 'blue',
         id: teamId1,
-        accumulatedScore: -1
+        accumulatedScore: 0
     };
 
     const team2: Team = {
@@ -47,7 +48,7 @@ export function createTestingGame(): Game {
         },
         color: 'red',
         id: teamId2,
-        accumulatedScore: -1
+        accumulatedScore: 0
     };
 
     const game: Game = {
@@ -59,4 +60,11 @@ export function createTestingGame(): Game {
     };
 
     return game;
+}
+
+export function doubleClickImage(imageSrc: string) {
+    const imageElements = screen.getAllByRole<HTMLImageElement>('img');
+    const imageElement = imageElements.find(element => element.src === imageSrc)!;
+    fireEvent.click(imageElement);
+    fireEvent.click(imageElement);
 }

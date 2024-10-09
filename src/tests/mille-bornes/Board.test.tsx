@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import Board from "../../mille-bornes/ui/Board";
-import { TESTIING_LOCAL_ID, createTestingGame } from "./TestingUtil";
+import { TESTIING_LOCAL_ID, createTestingGame, doubleClickImage } from "./TestingUtil";
 import { FakeCommunicator } from "./FakeCommunicator";
-import { AceCard, Card, CrashCard, Distance100Card, RollCard, StopCard } from "../../mille-bornes/logic/Card";
+import { AceCard, Card, CrashCard, Distance100Card, Distance50Card, RollCard, StopCard } from "../../mille-bornes/logic/Card";
 import { Team } from "../../mille-bornes/logic/Data";
 
 describe('Board UI', () => {
@@ -20,10 +20,7 @@ describe('Board UI', () => {
 
         render(boardUi);
 
-        const imageElements = screen.getAllByRole<HTMLImageElement>('img');
-        const crashCardElement = imageElements.find(element => element.src === 'http://localhost/MB-crash.svg')!;
-        fireEvent.click(crashCardElement); // Select the CrashCard
-        fireEvent.click(crashCardElement); // Confirm the CrashCard
+        doubleClickImage('http://localhost/MB-crash.svg');
 
         const otherTeamTableau = screen.getByText('Team Test Player 2');
         fireEvent.click(otherTeamTableau); // Select the team's tableau
@@ -51,14 +48,10 @@ describe('Board UI', () => {
 
         render(boardUi);
 
-        const imageElements = screen.getAllByRole<HTMLImageElement>('img');
-        const crashCardElement = imageElements.find(element => element.src === 'http://localhost/MB-crash.svg')!;
-        fireEvent.click(crashCardElement); // Select the CrashCard
-        fireEvent.click(crashCardElement); // Confirm the CrashCard
+        doubleClickImage('http://localhost/MB-crash.svg');
 
-        const stopCardElement = imageElements.find(element => element.src === 'http://localhost/MB-stop.svg')!;
-        fireEvent.click(stopCardElement); // Select the StopCard in the discard pile
-        fireEvent.click(stopCardElement); // Confirm the StopCard in the discard pile
+        // Double click the StopCard in the discard pile
+        doubleClickImage('http://localhost/MB-stop.svg');
 
         // Player 1 has an empty hand after using the CrashCard
         expect(game.teams[0].players[0].hand.length).toBe(0);
@@ -86,10 +79,7 @@ describe('Board UI', () => {
 
         render(boardUi);
 
-        const imageElements = screen.getAllByRole<HTMLImageElement>('img');
-        const crashCardElement = imageElements.find(element => element.src === 'http://localhost/MB-crash.svg')!;
-        fireEvent.click(crashCardElement); // Select the CrashCard
-        fireEvent.click(crashCardElement); // Confirm the CrashCard
+        doubleClickImage('http://localhost/MB-crash.svg');
 
         const otherTeamTableau = screen.getByText('Team Test Player 2');
         fireEvent.click(otherTeamTableau); // Select the team's tableau
@@ -133,10 +123,7 @@ describe('Board UI', () => {
 
         render(boardUi);
 
-        const imageElements = screen.getAllByRole<HTMLImageElement>('img');
-        const distance100CardElement = imageElements.find(element => element.src === 'http://localhost/MB-100.svg')!;
-        fireEvent.click(distance100CardElement); // Select the Distance100Card
-        fireEvent.click(distance100CardElement); // Confirm the Distance100Card
+        doubleClickImage('http://localhost/MB-100.svg');
 
         // The DistanceCard should be in the team's distanceArea
         expect(game.teams[0].tableau.distanceArea[0]).toBe(distanceCard);
@@ -145,5 +132,107 @@ describe('Board UI', () => {
         expect(communicatorCard).toBe(distanceCard);
         expect(communicatorTargetTeam).toBe(game.teams[0]);
         expect(communicatorIsExtentionCalled).toBe(false);
+    });
+
+    it('should allow the user to call a race extention', () => {
+        const game = createTestingGame();
+        const distanceCard = new Distance50Card();
+        game.teams[0].players[0].hand = [distanceCard];
+        game.teams[0].tableau.battleArea = [new RollCard()];
+
+        // Distance at 700
+        game.teams[0].tableau.distanceArea = [new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card()];
+
+        let communicatorCard: Card | null = null;
+        let communicatorTargetTeam: Team | null = null;
+        let communicatorIsExtentionCalled: boolean | undefined = undefined;
+
+        const communicator = new FakeCommunicator((card, targetTeam, isExtentionCalled) => {
+            communicatorCard = card;
+            communicatorTargetTeam = targetTeam;
+            communicatorIsExtentionCalled = isExtentionCalled;
+        });
+
+        const boardUi = <Board
+            startingGame={game}
+            localId={TESTIING_LOCAL_ID}
+            communicator={communicator}
+            onRoundOver={() => { }}
+        />;
+
+        render(boardUi);
+
+        // An additional distance of 50 should end the race
+        doubleClickImage('http://localhost/MB-50.svg');
+
+        const extentionDialogElement = screen.getByText('Would like to to call an extention?');
+        expect(extentionDialogElement).toBeVisible();
+
+        // The communicator should not have received anything yet
+        expect(communicatorCard).toBe(null);
+        expect(communicatorTargetTeam).toBe(null);
+        expect(communicatorIsExtentionCalled).toBe(undefined);
+
+        const yesButton = screen.getByText('Yes');
+        fireEvent.click(yesButton);
+
+        // The communicator should have now received info
+        expect(communicatorCard).toBe(distanceCard);
+        expect(communicatorTargetTeam).toBe(game.teams[0]);
+        expect(communicatorIsExtentionCalled).toBe(true);
+
+        // Extention Dialog is gone now
+        expect(extentionDialogElement).not.toBeVisible();
+    });
+
+    it('should allow the user to decline a race extention', () => {
+        const game = createTestingGame();
+        const distanceCard = new Distance50Card();
+        game.teams[0].players[0].hand = [distanceCard];
+        game.teams[0].tableau.battleArea = [new RollCard()];
+
+        // Distance at 700
+        game.teams[0].tableau.distanceArea = [new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card(), new Distance100Card()];
+
+        let communicatorCard: Card | null = null;
+        let communicatorTargetTeam: Team | null = null;
+        let communicatorIsExtentionCalled: boolean | undefined = undefined;
+
+        const communicator = new FakeCommunicator((card, targetTeam, isExtentionCalled) => {
+            communicatorCard = card;
+            communicatorTargetTeam = targetTeam;
+            communicatorIsExtentionCalled = isExtentionCalled;
+        });
+
+        const boardUi = <Board
+            startingGame={game}
+            localId={TESTIING_LOCAL_ID}
+            communicator={communicator}
+            onRoundOver={() => { }}
+        />;
+
+        render(boardUi);
+
+        // An additional distance of 50 should end the race
+        doubleClickImage('http://localhost/MB-50.svg');
+
+        const extentionDialogElement = screen.getByText('Would like to to call an extention?');
+        expect(extentionDialogElement).toBeVisible();
+
+        // The communicator should not have received anything yet
+        expect(communicatorCard).toBe(null);
+        expect(communicatorTargetTeam).toBe(null);
+        expect(communicatorIsExtentionCalled).toBe(undefined);
+
+        const noButton = screen.getByText('No');
+        fireEvent.click(noButton);
+
+        // The communicator should have now received info
+        expect(communicatorCard).toBe(distanceCard);
+        expect(communicatorTargetTeam).toBe(game.teams[0]);
+        expect(communicatorIsExtentionCalled).toBe(false);
+
+        // Extention Dialog is gone now
+        expect(extentionDialogElement).not.toBeVisible();
     });
 });
