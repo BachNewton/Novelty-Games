@@ -3,6 +3,7 @@ import Board from "../../mille-bornes/ui/Board";
 import { TESTIING_LOCAL_ID, createTestingGame } from "./TestingUtil";
 import { FakeCommunicator } from "./FakeCommunicator";
 import { AceCard, Card, CrashCard, Distance100Card, RollCard, StopCard } from "../../mille-bornes/logic/Card";
+import { Team } from "../../mille-bornes/logic/Data";
 
 describe('Board UI', () => {
     it('should allow a player to play a crash card against another team', () => {
@@ -107,14 +108,20 @@ describe('Board UI', () => {
         expect(game.discard?.image).toBe('MB-crash.svg');
     });
 
-    it('should give the correct info to the communicator', () => {
+    it('should give the correct info to the communicator when playing a distance card', () => {
         const game = createTestingGame();
-        game.teams[0].players[0].hand = [new Distance100Card()];
+        const distanceCard = new Distance100Card();
+        game.teams[0].players[0].hand = [distanceCard];
         game.teams[0].tableau.battleArea = [new RollCard()];
-        let temp: Card | null = null;
+
+        let communicatorCard: Card | null = null;
+        let communicatorTargetTeam: Team | null = null;
+        let communicatorIsExtentionCalled: boolean | undefined = undefined;
 
         const communicator = new FakeCommunicator((card, targetTeam, isExtentionCalled) => {
-            temp = card;
+            communicatorCard = card;
+            communicatorTargetTeam = targetTeam;
+            communicatorIsExtentionCalled = isExtentionCalled;
         });
 
         const boardUi = <Board
@@ -131,8 +138,12 @@ describe('Board UI', () => {
         fireEvent.click(distance100CardElement); // Select the Distance100Card
         fireEvent.click(distance100CardElement); // Confirm the Distance100Card
 
-        expect(game.teams[0].tableau.distanceArea[0].image).toBe('MB-100.svg');
+        // The DistanceCard should be in the team's distanceArea
+        expect(game.teams[0].tableau.distanceArea[0]).toBe(distanceCard);
 
-        expect(temp).not.toBeNull();
+        // Info given to the communicator should be correct
+        expect(communicatorCard).toBe(distanceCard);
+        expect(communicatorTargetTeam).toBe(game.teams[0]);
+        expect(communicatorIsExtentionCalled).toBe(false);
     });
 });
