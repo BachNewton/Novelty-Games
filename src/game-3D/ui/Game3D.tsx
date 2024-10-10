@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { Sky } from 'three/examples/jsm/objects/Sky';
+import Stats from 'three/examples/jsm/libs/stats.module';
 
 let hasGameBeenSet = false;
 
@@ -20,6 +22,7 @@ const Game3D: React.FC = () => {
         const resize = () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
+            renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.render(scene, camera);
         }
@@ -35,6 +38,30 @@ const Game3D: React.FC = () => {
         cube.translateX(10);
         scene.add(cube);
 
+        const sun = new THREE.Vector3();
+
+        const sky = new Sky();
+        sky.scale.setScalar(10000);
+        scene.add(sky);
+
+        const skyUniforms = sky.material.uniforms;
+        skyUniforms['turbidity'].value = 10;
+        skyUniforms['rayleigh'].value = 2;
+        skyUniforms['mieCoefficient'].value = 0.005;
+        skyUniforms['mieDirectionalG'].value = 0.8;
+
+        const parameters = {
+            elevation: 2,
+            azimuth: 180
+        };
+
+        const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
+        const theta = THREE.MathUtils.degToRad(parameters.azimuth);
+
+        sun.setFromSphericalCoords(1, phi, theta);
+
+        sky.material.uniforms['sunPosition'].value.copy(sun);
+
         const ambientLight = new THREE.AmbientLight();
         const directionalLight = new THREE.DirectionalLight(0xffd700);
         directionalLight.position.set(1, 1, -1);
@@ -46,6 +73,9 @@ const Game3D: React.FC = () => {
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.update();
 
+        const stats = new Stats();
+        containerElement?.current?.appendChild(stats.dom);
+
         const animate = () => {
             cube.rotation.x += 0.01;
             cube.rotation.y += 0.01;
@@ -53,6 +83,8 @@ const Game3D: React.FC = () => {
             sailboat?.rotateY(0.001);
 
             renderer.render(scene, camera);
+
+            stats.update();
         };
 
         renderer.setAnimationLoop(animate);
