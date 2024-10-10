@@ -1,6 +1,6 @@
 import { removeRandomElement } from "../../../util/Randomizer";
 import { getTeamName } from "../../ui/UiUtil";
-import { AceCard, Card, DistanceCard, EmergencyCard, FlatCard, GasCard, HazardCard, LimitCard, RemedyCard, RepairCard, RollCard, SafetyCard, SealantCard, SpareCard, TankerCard, UnlimitedCard } from "../Card";
+import { AceCard, Card, DistanceCard, EmergencyCard, GasCard, HazardCard, LimitCard, RemedyCard, RepairCard, RollCard, SafetyCard, SealantCard, SpareCard, TankerCard, UnlimitedCard } from "../Card";
 import { Team } from "../Data";
 import { canHazardCardBePlayed, canLimitCardBePlayed, getRemainingDistance, getTotalDistance, hasSafetyCard } from "../Rules";
 import { Bot } from "./Bot";
