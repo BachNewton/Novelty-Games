@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 let hasGameBeenSet = false;
 
@@ -41,6 +42,16 @@ const Game3D: React.FC = () => {
 
         renderer.setAnimationLoop(animate);
         containerElement?.current?.appendChild(renderer.domElement);
+
+        const loader = new GLTFLoader();
+
+        loader.load('/public/models/sailboat/scene.gltf', (gltf) => {
+            scene.add(gltf.scene);
+        }, (xhr) => {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        }, (error) => {
+            console.error(error);
+        });
     }, []);
 
     return <div style={{ overflow: 'hidden', height: '100vh' }} ref={containerElement}></div>;
