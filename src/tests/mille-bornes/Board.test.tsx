@@ -137,7 +137,8 @@ describe('Board UI', () => {
     it('should allow the user to call a race extention', () => {
         const game = createTestingGame();
         const distanceCard = new Distance50Card();
-        game.teams[0].players[0].hand = [distanceCard];
+        // Player should have at least 2 cards so the round doesn't end after the last card is played
+        game.teams[0].players[0].hand = [distanceCard, new StopCard()];
         game.teams[0].tableau.battleArea = [new RollCard()];
 
         // Distance at 700
