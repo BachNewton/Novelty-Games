@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import MilleBornesHome from '../mille-bornes/ui/Home';
 import TriviaHome from '../trivia/ui/Home';
-import Carnival from '../carnival/ui/Carnival';
-import { GameWorldType } from '../carnival/worlds/GameWorldType';
 import { Communicator } from '../mille-bornes/logic/Communicator';
 import { NewtorkCommunicator } from '../mille-bornes/logic/NewtorkCommunicator';
+import Games2DHome from '../game-2D/ui/Home';
 
 const APP_VERSION = 'v1.15.0';
 
@@ -26,9 +25,7 @@ class MilleBornesState implements State {
     }
 }
 
-class CarnivalState implements State { }
-
-class WigglersState implements State { }
+class Game2DState implements State { }
 
 enum VersionState {
     CURRENT,
@@ -71,27 +68,22 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         setState(new TriviaState());
     };
 
-    const onCarnivalClick = () => {
-        setState(new CarnivalState());
-    }
-
-    const onWigglersClick = () => {
-        setState(new WigglersState());
+    const on2DGamesClick = () => {
+        setState(new Game2DState());
     };
 
     if (state instanceof MilleBornesState) {
         return <MilleBornesHome onHomeButtonClicked={onHomeButtonClicked} communicator={state.communicator} />;
     } else if (state instanceof TriviaState) {
         return <TriviaHome onHomeButtonClicked={onHomeButtonClicked} />;
-    } else if (state instanceof CarnivalState || state instanceof WigglersState) {
-        const gameWorldType = state instanceof CarnivalState ? GameWorldType.TOUCH_BOX : GameWorldType.WIGGLERS;
-        return <Carnival goHome={onHomeButtonClicked} gameWorldType={gameWorldType} />;
+    } else if (state instanceof Game2DState) {
+        return <Games2DHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else {
-        return HomeUi(versionState, onMilleBornesClick, onTriviaClick, onCarnivalClick, onWigglersClick);
+        return HomeUi(versionState, onMilleBornesClick, onTriviaClick, on2DGamesClick);
     }
 };
 
-function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTriviaClick: () => void, onCarnivalClick: () => void, onWigglersClick: () => void) {
+function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTriviaClick: () => void, on2DGamesClick: () => void) {
     const versionStateStyle: React.CSSProperties = {
         position: 'fixed',
         top: '0.25em',
@@ -116,13 +108,12 @@ function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTr
     return <div style={{ color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
         <div style={versionStateStyle}>{VersionStateUi(versionState)}</div>
         <code style={versionLabelStyle}>{APP_VERSION}</code>
-        <h2>🃏 Kyle's Novelty Games 🕹️</h2>
+        <h1>🃏 Novelty Games 🕹️</h1>
         <div>Created by: Kyle Hutchinson</div>
         <div><br /><br /><br /></div>
         <button style={buttonStyle} onClick={onTriviaClick}>Trivia 🤔</button>
         <button style={buttonStyle} onClick={onMilleBornesClick}>Mille Bornes 🏎️</button>
-        <button style={buttonStyle} onClick={onCarnivalClick}>Carnival 🎠</button>
-        <button style={buttonStyle} onClick={onWigglersClick}>Wigglers 👹</button>
+        <button style={buttonStyle} onClick={on2DGamesClick}>2D Games 🟦</button>
         <button style={buttonStyle} onClick={() => window.alert('Work in progress!')}>For The Stats 2 👑</button>
     </div>;
 }

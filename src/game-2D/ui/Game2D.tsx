@@ -4,14 +4,14 @@ import { TouchBoxWorld } from "../worlds/touchBox/TouchBoxWorld";
 import { WigglerWorld } from "../worlds/wigglers/WigglerWorld";
 import { GameWorldType } from "../worlds/GameWorldType";
 
-interface CarnivalProps {
+interface Game2DProps {
     goHome: () => void;
     gameWorldType: GameWorldType;
 }
 
 let hasCanvasContextBeenSet = false;
 
-const Carnival: React.FC<CarnivalProps> = ({ goHome, gameWorldType }) => {
+const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -115,4 +115,4 @@ function drawDebug(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, del
     ctx.fillText(`FPS: ${(1000 / deltaTime).toFixed(0)}`, 0, 0);
 }
 
-export default Carnival;
+export default Game2D;
