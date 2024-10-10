@@ -4,6 +4,7 @@ import TriviaHome from '../trivia/ui/Home';
 import { Communicator } from '../mille-bornes/logic/Communicator';
 import { NewtorkCommunicator } from '../mille-bornes/logic/NewtorkCommunicator';
 import Games2DHome from '../game-2D/ui/Home';
+import ToolsHome from '../tools/ui/Home';
 
 const APP_VERSION = 'v1.15.0';
 
@@ -26,6 +27,8 @@ class MilleBornesState implements State {
 }
 
 class Game2DState implements State { }
+
+class ToolsState implements State { }
 
 enum VersionState {
     CURRENT,
@@ -72,18 +75,24 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         setState(new Game2DState());
     };
 
+    const onToolsClick = () => {
+        setState(new ToolsState());
+    };
+
     if (state instanceof MilleBornesState) {
         return <MilleBornesHome onHomeButtonClicked={onHomeButtonClicked} communicator={state.communicator} />;
     } else if (state instanceof TriviaState) {
         return <TriviaHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else if (state instanceof Game2DState) {
         return <Games2DHome onHomeButtonClicked={onHomeButtonClicked} />;
+    } else if (state instanceof ToolsState) {
+        return <ToolsHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else {
-        return HomeUi(versionState, onMilleBornesClick, onTriviaClick, on2DGamesClick);
+        return HomeUi(versionState, onMilleBornesClick, onTriviaClick, on2DGamesClick, onToolsClick);
     }
 };
 
-function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTriviaClick: () => void, on2DGamesClick: () => void) {
+function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTriviaClick: () => void, on2DGamesClick: () => void, onToolsClick: () => void) {
     const versionStateStyle: React.CSSProperties = {
         position: 'fixed',
         top: '0.25em',
@@ -110,11 +119,12 @@ function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTr
         <code style={versionLabelStyle}>{APP_VERSION}</code>
         <h1>🃏 Novelty Games 🕹️</h1>
         <div>Created by: Kyle Hutchinson</div>
-        <div><br /><br /><br /></div>
+        <div><br /></div>
         <button style={buttonStyle} onClick={onTriviaClick}>Trivia 🤔</button>
         <button style={buttonStyle} onClick={onMilleBornesClick}>Mille Bornes 🏎️</button>
         <button style={buttonStyle} onClick={on2DGamesClick}>2D Games 🟦</button>
-        <button style={buttonStyle} onClick={() => window.alert('Work in progress!')}>For The Stats 2 👑</button>
+        <button style={buttonStyle} onClick={() => window.alert('Work in progress!')}>3D Games 🧊</button>
+        <button style={buttonStyle} onClick={onToolsClick}>Tools 🔨</button>
     </div>;
 }
 
