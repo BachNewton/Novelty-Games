@@ -4,9 +4,10 @@ import TriviaHome from '../trivia/ui/Home';
 import { Communicator } from '../mille-bornes/logic/Communicator';
 import { NewtorkCommunicator } from '../mille-bornes/logic/NewtorkCommunicator';
 import Games2DHome from '../game-2D/ui/Home';
+import Games3DHome from '../game-3D/ui/Home';
 import ToolsHome from '../tools/ui/Home';
 
-const APP_VERSION = 'v1.15.0';
+const APP_VERSION = 'v2.0.0';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -27,6 +28,8 @@ class MilleBornesState implements State {
 }
 
 class Game2DState implements State { }
+
+class Game3DState implements State { }
 
 class ToolsState implements State { }
 
@@ -75,6 +78,10 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         setState(new Game2DState());
     };
 
+    const on3DGamesClick = () => {
+        setState(new Game3DState());
+    };
+
     const onToolsClick = () => {
         setState(new ToolsState());
     };
@@ -85,14 +92,16 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         return <TriviaHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else if (state instanceof Game2DState) {
         return <Games2DHome onHomeButtonClicked={onHomeButtonClicked} />;
+    } else if (state instanceof Game3DState) {
+        return <Games3DHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else if (state instanceof ToolsState) {
         return <ToolsHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else {
-        return HomeUi(versionState, onMilleBornesClick, onTriviaClick, on2DGamesClick, onToolsClick);
+        return HomeUi(versionState, onMilleBornesClick, onTriviaClick, on2DGamesClick, on3DGamesClick, onToolsClick);
     }
 };
 
-function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTriviaClick: () => void, on2DGamesClick: () => void, onToolsClick: () => void) {
+function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTriviaClick: () => void, on2DGamesClick: () => void, on3DGamesClick: () => void, onToolsClick: () => void) {
     const versionStateStyle: React.CSSProperties = {
         position: 'fixed',
         top: '0.25em',
@@ -123,7 +132,7 @@ function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTr
         <button style={buttonStyle} onClick={onTriviaClick}>Trivia 🤔</button>
         <button style={buttonStyle} onClick={onMilleBornesClick}>Mille Bornes 🏎️</button>
         <button style={buttonStyle} onClick={on2DGamesClick}>2D Games 🟦</button>
-        <button style={buttonStyle} onClick={() => window.alert('Work in progress!')}>3D Games 🧊</button>
+        <button style={buttonStyle} onClick={on3DGamesClick}>3D Games 🧊</button>
         <button style={buttonStyle} onClick={onToolsClick}>Tools 🔨</button>
     </div>;
 }
