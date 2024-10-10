@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { GameWorld } from "../worlds/GameWorld";
-import { TouchBoxWorld } from "../worlds/touchBox/TouchBoxWorld";
+import { CarnivalWorld } from "../worlds/carnival/CarnivalWorld";
 import { WigglerWorld } from "../worlds/wigglers/WigglerWorld";
 import { GameWorldType } from "../worlds/GameWorldType";
 
@@ -44,8 +44,8 @@ const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
 
 function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, goHome: () => void): GameWorld {
     switch (gameWorldType) {
-        case GameWorldType.TOUCH_BOX:
-            return new TouchBoxWorld(canvas, ctx, () => {
+        case GameWorldType.CARNIVAL:
+            return new CarnivalWorld(canvas, ctx, () => {
                 hasCanvasContextBeenSet = false;
                 goHome();
             });

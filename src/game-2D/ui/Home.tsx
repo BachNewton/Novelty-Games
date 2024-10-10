@@ -30,7 +30,7 @@ function Ui(uiState: UiState, onHomeButtonClicked: () => void, onWigglersClick: 
     if (uiState instanceof MenuUiState) {
         return MenuUi(onHomeButtonClicked, onCarnivalClick, onWigglersClick);
     } else if (uiState instanceof CarnivalUiState) {
-        return <Game2D goHome={onHomeButtonClicked} gameWorldType={GameWorldType.TOUCH_BOX} />;
+        return <Game2D goHome={onHomeButtonClicked} gameWorldType={GameWorldType.CARNIVAL} />;
     } else if (uiState instanceof WigglersState) {
         return <Game2D goHome={onHomeButtonClicked} gameWorldType={GameWorldType.WIGGLERS} />;
     } else {
@@ -58,8 +58,8 @@ function MenuUi(onHomeButtonClicked: () => void, onWigglersClick: () => void, on
     return <div style={containerStyle}>
         <HomeButton onClick={onHomeButtonClicked} />
         <div style={{ fontSize: '1.75em', marginBottom: '1em' }}>🟠 2D Games 🟦</div>
-        <button style={buttonStyle} onClick={onWigglersClick}>Wigglers 👹</button>
         <button style={buttonStyle} onClick={onCarnivalClick}>Carnival 🎠</button>
+        <button style={buttonStyle} onClick={onWigglersClick}>Wigglers 👹</button>
     </div>;
 }
 

@@ -8,7 +8,7 @@ const GAME_OVER_TIME = 8000;
 const PERFECT_BONUS_TIME = 1000;
 const PERFECT_SPEED = 0.6;
 
-export class TouchBoxWorld implements GameWorld {
+export class CarnivalWorld implements GameWorld {
     readonly canvas: HTMLCanvasElement;
     readonly ctx: CanvasRenderingContext2D;
     readonly endWorld: () => void;

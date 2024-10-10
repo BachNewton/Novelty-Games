@@ -1,4 +1,4 @@
 export enum GameWorldType {
-    TOUCH_BOX,
+    CARNIVAL,
     WIGGLERS
 }
