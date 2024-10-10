@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import Board from "../../mille-bornes/ui/Board";
 import { TESTIING_LOCAL_ID, createTestingGame, doubleClickImage } from "./TestingUtil";
 import { FakeCommunicator } from "./FakeCommunicator";
-import { AceCard, Card, CrashCard, Distance100Card, Distance50Card, RollCard, StopCard } from "../../mille-bornes/logic/Card";
+import { AceCard, Card, CrashCard, Distance100Card, Distance50Card, RollCard, StopCard, UnlimitedCard } from "../../mille-bornes/logic/Card";
 import { Game, Team } from "../../mille-bornes/logic/Data";
 
 describe('Board UI', () => {
@@ -169,7 +169,7 @@ describe('Board UI', () => {
         // An additional distance of 50 should end the race
         doubleClickImage('http://localhost/MB-50.svg');
 
-        const extentionDialogElement = screen.getByText('Would like to to call an extention?');
+        const extentionDialogElement = screen.getByText('Would you like to to call an extention?');
         expect(extentionDialogElement).toBeVisible();
 
         // The communicator should not have received anything yet
@@ -198,7 +198,8 @@ describe('Board UI', () => {
     it('should allow the user to decline a race extention', () => {
         const game = createTestingGame();
         const distanceCard = new Distance50Card();
-        game.teams[0].players[0].hand = [distanceCard];
+        // Player should have at least 2 cards so the round doesn't end after the last card is played
+        game.teams[0].players[0].hand = [distanceCard, new StopCard()];
         game.teams[0].tableau.battleArea = [new RollCard()];
 
         // Distance at 700
@@ -229,7 +230,7 @@ describe('Board UI', () => {
         // An additional distance of 50 should end the race
         doubleClickImage('http://localhost/MB-50.svg');
 
-        const extentionDialogElement = screen.getByText('Would like to to call an extention?');
+        const extentionDialogElement = screen.getByText('Would you like to to call an extention?');
         expect(extentionDialogElement).toBeVisible();
 
         // The communicator should not have received anything yet

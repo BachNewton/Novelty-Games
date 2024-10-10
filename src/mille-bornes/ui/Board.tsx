@@ -89,20 +89,28 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
         });
     }, [state]);
 
-    const checkIfTargetDistanceReached = (targetTeam: Team) => {
+    const checkIfTargetDistanceReached = (targetTeam: Team, shouldBotCallExtention?: () => boolean) => {
         const teamAtTargetDistance = getRemainingDistance(targetTeam.tableau.distanceArea, state.game.teams, state.game.extention) === 0;
 
         if (teamAtTargetDistance) {
             if (state.game.extention || isGameAtMaxTargetDistance(state.game.teams)) {
                 onRoundOver(state.game);
             } else {
-                state.ui = new DialogUiState(state.ui.card!, targetTeam);
-                setState({ ...state });
+                if (shouldBotCallExtention !== undefined) {
+                    if (shouldBotCallExtention()) {
+                        state.game.extention = true;
+                    } else {
+                        onRoundOver(state.game);
+                    }
+                } else {
+                    state.ui = new DialogUiState(state.ui.card!, targetTeam);
+                    setState({ ...state });
+                }
             }
         }
     };
 
-    if (shouldComputerPlayerTakeItsTurn(state.game, localId, canComputerPlayerMove)) {
+    if (shouldComputerPlayerTakeItsTurn(state.game, state.ui instanceof DialogUiState, localId, canComputerPlayerMove)) {
         canComputerPlayerMove = false;
         console.log(`Computer is fake "thinking" for ${COMPUTER_THINK_TIME} ms.`);
 
@@ -240,7 +248,7 @@ const Board: React.FC<BoardProps> = ({ startingGame, communicator, localId, onRo
 
         <Dialog
             isOpen={state.ui instanceof DialogUiState}
-            title={['Your team has reached the target!', 'Would like to to call an extention?']}
+            title={['Your team has reached the target!', 'Would you like to to call an extention?']}
             options={['No', 'Yes']}
             onSelection={onDialogSelection}
         />

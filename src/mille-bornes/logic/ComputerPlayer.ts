@@ -6,15 +6,15 @@ import { DumbBot } from "./bots/DumbBot";
 import { KyleBot } from "./bots/KyleBot";
 
 /** @returns true if the current player is local and is also a computer and the comupter hasn't already taken its turn */
-export function shouldComputerPlayerTakeItsTurn(game: Game, localId: string, canComputerPlayerMove: boolean): boolean {
-    return game.currentPlayer.localId === localId && game.currentPlayer.type === PlayerType.COMPUTER && canComputerPlayerMove
+export function shouldComputerPlayerTakeItsTurn(game: Game, isInDialogueUiState: boolean, localId: string, canComputerPlayerMove: boolean): boolean {
+    return !isInDialogueUiState && game.currentPlayer.localId === localId && game.currentPlayer.type === PlayerType.COMPUTER && canComputerPlayerMove
 }
 
 export function takeComputerPlayerTurn(
     game: Game,
     onRoundOver: (game: Game) => void,
     communicator: Communicator,
-    checkIfTargetDistanceReached: (targetTeam: Team) => void
+    checkIfTargetDistanceReached: (targetTeam: Team, shouldCallExtention: () => boolean) => void
 ) {
     const currentPlayer = game.currentPlayer;
 
@@ -33,7 +33,7 @@ export function takeComputerPlayerTurn(
         (card, targetTeam) => canCardBePlayed(card, game, targetTeam),
         (card, targetTeam) => {
             playCard(card, game, targetTeam, onRoundOver);
-            checkIfTargetDistanceReached(currentPlayerTeam);
+            checkIfTargetDistanceReached(currentPlayerTeam, () => callExtention);
             communicator.playCard(card, targetTeam, callExtention);
         },
         gameIsExtended
