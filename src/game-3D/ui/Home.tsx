@@ -1,5 +1,6 @@
 import { useState } from "react";
 import HomeButton from "../../ui/HomeButton";
+import Game3D from "./Game3D";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
@@ -7,12 +8,13 @@ interface HomeProps {
 
 interface UiState { }
 class MenuUiState implements UiState { }
+class Game3DState implements UiState { }
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
     const [uiState, setUiState] = useState<UiState>(new MenuUiState());
 
     const onSailboatClick = () => {
-        window.alert('Work in progress!');
+        setUiState(new Game3DState());
     }
 
     return Ui(uiState, onHomeButtonClicked, onSailboatClick);
@@ -21,6 +23,8 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
 function Ui(uiState: UiState, onHomeButtonClicked: () => void, onSailboatClick: () => void) {
     if (uiState instanceof MenuUiState) {
         return MenuUi(onHomeButtonClicked, onSailboatClick);
+    } else if (uiState instanceof Game3DState) {
+        return <Game3D />;
     } else {
         throw new Error('UiState not supported: ' + uiState);
     }
