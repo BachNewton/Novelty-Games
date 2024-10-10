@@ -123,6 +123,7 @@ function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTr
         <button style={buttonStyle} onClick={onMilleBornesClick}>Mille Bornes 🏎️</button>
         <button style={buttonStyle} onClick={onCarnivalClick}>Carnival 🎠</button>
         <button style={buttonStyle} onClick={onWigglersClick}>Wigglers 👹</button>
+        <button style={buttonStyle} onClick={() => window.alert('Work in progress!')}>For The Stats 2 👑</button>
     </div>;
 }
 
