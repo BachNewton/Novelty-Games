@@ -41,7 +41,7 @@ enum VersionState {
 }
 
 const Home: React.FC<HomeProps> = ({ updateListener }) => {
-    const [state, setState] = useState<State>(new Game3DState());
+    const [state, setState] = useState<State>(new HomeState());
     const [versionState, setVersionSate] = useState(VersionState.CHECKING);
 
     useEffect(() => {
