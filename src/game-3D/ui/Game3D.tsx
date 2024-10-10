@@ -92,7 +92,7 @@ const Game3D: React.FC = () => {
 
         const loader = new GLTFLoader();
 
-        loader.load('https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/game-3D/models/sailboat/scene.gltf', (gltf) => {
+        loader.load('https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/main/models/sailboat/scene.gltf', (gltf) => {
             sailboat = gltf.scene;
 
             sailboat.scale.multiplyScalar(0.01);
