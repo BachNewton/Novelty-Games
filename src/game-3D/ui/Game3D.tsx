@@ -1,10 +1,8 @@
 import { useEffect, useRef } from "react";
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Sky } from 'three/examples/jsm/objects/Sky';
-import { Water } from 'three/examples/jsm/objects/Water';
 import Stats from 'three/examples/jsm/libs/stats.module';
-import SeaWorld from "./worlds/sea/SeaWorld";
+import SeaWorld from "../worlds/sea/SeaWorld";
 
 let hasGameBeenSetup = false;
 
