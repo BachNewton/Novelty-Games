@@ -30,11 +30,15 @@ function setupGame(containerElement: HTMLDivElement) {
 
     const seaWorld = new SeaWorld(scene, new THREE.PMREMGenerator(renderer));
 
-    // addLights(objects => scene.add(objects));
     setControls(camera, renderer.domElement);
 
-    const animate = () => {
-        seaWorld.update();
+    let previousTime = performance.now();
+
+    const animate = (timeNow: DOMHighResTimeStamp) => {
+        const deltaTime = timeNow - previousTime;
+        previousTime = timeNow;
+
+        seaWorld.update(deltaTime);
         renderer.render(scene, camera);
         stats.update();
     };
@@ -46,7 +50,8 @@ function createCamera(): THREE.PerspectiveCamera {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
     camera.position.z = 25;
-    camera.position.y = 10;
+    camera.position.y = 15;
+    camera.position.x = 10;
 
     return camera;
 }
@@ -75,15 +80,6 @@ function createStats(containerElement: HTMLDivElement): Stats {
     containerElement.appendChild(stats.dom);
 
     return stats;
-}
-
-function addLights(addToScene: (...objects: THREE.Object3D[]) => void) {
-    const ambientLight = new THREE.AmbientLight();
-
-    const directionalLight = new THREE.DirectionalLight(0xffd700);
-    directionalLight.position.set(1, 1, -1);
-
-    addToScene(ambientLight, directionalLight);
 }
 
 function onWindowResize(camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer) {

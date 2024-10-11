@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Sky } from 'three/examples/jsm/objects/Sky';
 import { Water } from 'three/examples/jsm/objects/Water';
+import WaterNormalsTexture from './textures/waternormals.jpg';
 
 const SAILBOAT_MODEL_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/main/models/sailboat/scene.gltf';
 
@@ -29,6 +30,7 @@ export default class SeaWorld {
         this.sun = new THREE.Vector3();
         this.sky = this.createSky();
         this.water = this.createWater();
+        this.scene.add(this.sky, this.water);
 
         this.testingCube = this.createTestingCube();
         this.scene.add(this.testingCube);
@@ -38,7 +40,6 @@ export default class SeaWorld {
             this.sailboat = gltf.scene;
 
             this.sailboat.scale.multiplyScalar(0.01);
-            this.sailboat.rotateY(2 * Math.PI / 3);
 
             this.scene.add(this.sailboat);
         }).catch(error => {
@@ -46,17 +47,13 @@ export default class SeaWorld {
         });
     }
 
-    update() {
-        const time = performance.now() * 0.001;
-
+    update(deltaTime: number) {
         this.updateSun();
 
-        this.water.material.uniforms['time'].value += 1 / 60;
+        this.water.material.uniforms['time'].value += deltaTime * 0.0002;
 
-        this.testingCube.rotateX(0.01);
-        this.testingCube.rotateY(0.01);
-
-        this.sailboat?.rotateY(0.0005);
+        this.testingCube.rotateX(deltaTime * 0.001);
+        this.testingCube.rotateY(deltaTime * 0.001);
     }
 
     private createTestingCube(): THREE.Object3D {
@@ -65,6 +62,7 @@ export default class SeaWorld {
         const cube = new THREE.Mesh(geometry, material);
 
         cube.translateX(10);
+        cube.translateY(1);
 
         return cube;
     }
@@ -77,7 +75,7 @@ export default class SeaWorld {
             {
                 textureWidth: 512,
                 textureHeight: 512,
-                waterNormals: new THREE.TextureLoader().load('textures/waternormals.jpg', texture => {
+                waterNormals: new THREE.TextureLoader().load(WaterNormalsTexture, texture => {
                     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
                 }),
                 sunDirection: new THREE.Vector3(),
