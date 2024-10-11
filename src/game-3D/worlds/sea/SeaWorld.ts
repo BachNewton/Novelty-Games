@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Sky } from 'three/examples/jsm/objects/Sky';
 import { Water } from 'three/examples/jsm/objects/Water';
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 import WaterNormalsTexture from './textures/waternormals.jpg';
 
 const SAILBOAT_MODEL_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/main/models/sailboat/scene.gltf';
@@ -19,6 +20,10 @@ export default class SeaWorld {
     skyParameters = {
         elevation: 2,
         azimuth: 180
+    };
+    date = {
+        hour: 8,
+        day: 150
     };
     water: Water;
 
@@ -45,6 +50,10 @@ export default class SeaWorld {
         }).catch(error => {
             console.error(error);
         });
+
+        const gui = new GUI();
+        gui.add(this.date, 'day', 1, 365, 1).onChange(() => this.calculateSunPosition());
+        gui.add(this.date, 'hour', 0, 23.5, 0.5).onChange(() => this.calculateSunPosition());
     }
 
     update(deltaTime: number) {
@@ -132,5 +141,65 @@ export default class SeaWorld {
         this.scene.add(this.sky);
 
         this.scene.environment = this.renderTarget.texture;
+    }
+
+    private temp() {
+        // Hour Angle (H) = (Time - 12) * 15
+        // Declination (D) = 23.45 * sin(360 * (day - 80) / 365)
+        // Elevation (E) = arcsin(sin(latitude) * sin(D) + cos(latitude) * cos(D) * cos(H))
+        // Azimuth (A) = arctan(sin(H) / (cos(H) * sin(latitude) - tan(D) * cos(latitude)))
+
+        const time = this.date.hour; // 6 pm
+        const day = this.date.day; // May 28th
+        const latitude = 60.17; // Helsinki
+
+        const hourAngle = (time - 12) * 15;
+        const declination = 23.45 * Math.sin(360 * (day - 80) / 365);
+        const elevation = Math.asin(Math.sin(latitude) * Math.sin(declination) + Math.cos(latitude) * Math.cos(declination) * Math.cos(hourAngle));
+        const azimuth = Math.atan2(Math.sin(hourAngle), Math.cos(hourAngle) * Math.sin(latitude) - Math.tan(declination) * Math.cos(latitude));
+
+        this.skyParameters.elevation = elevation * 180 / Math.PI;
+        this.skyParameters.azimuth = azimuth * 180 / Math.PI;
+    }
+
+    private calculateSunPosition() {
+        const dayOfYear = this.date.day;
+        const hourOfDay = this.date.hour;
+        const latitude = 60.17; // Helsinki
+
+        // Convert day of year to radians
+        const n = dayOfYear - 80;
+        const theta = (n * Math.PI) / 182.5;
+
+        // Calculate the equation of time
+        const E = 229.18 * (0.000075 + 0.001868 * Math.cos(theta) - 0.032047 * Math.sin(theta) - 0.014754 * Math.cos(2 * theta) - 0.000578 * Math.sin(2 * theta));
+
+        // Calculate the true solar time
+        const trueSolarTime = hourOfDay + E / 4;
+
+        // Convert true solar time to radians
+        const h = (trueSolarTime * Math.PI) / 12;
+
+        // Calculate the declination
+        const delta = 0.409 * Math.sin(theta);
+
+        // Calculate the hour angle
+        const H = (hourOfDay - 0) * Math.PI / 12;
+
+        // Calculate the elevation
+        const elevation = Math.asin(Math.sin(latitude) * Math.sin(delta) + Math.cos(latitude) * Math.cos(delta) * Math.cos(H)) * 180 / Math.PI;
+
+        // Calculate the azimuth
+        let azimuth = Math.atan2(-Math.sin(H), Math.cos(H) * Math.sin(latitude) - Math.tan(delta) * Math.cos(latitude)) * 180 / Math.PI;
+
+        // Adjust azimuth to be in the range 0-360 degrees
+        if (azimuth < 0) {
+            azimuth += 360;
+        } else if (azimuth > 180) {
+            azimuth += 180;
+        }
+
+        this.skyParameters.elevation = elevation;
+        this.skyParameters.azimuth = azimuth;
     }
 }
