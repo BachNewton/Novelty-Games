@@ -14,31 +14,35 @@ const Game3D: React.FC = () => {
         if (hasGameBeenSetup) return;
         hasGameBeenSetup = true;
 
-        const scene = new THREE.Scene();
-        const camera = createCamera();
-        const renderer = createRenderer(containerElement?.current!);
-        const stats = createStats(containerElement?.current!);
-
-        onWindowResize(camera, renderer);
-        window.addEventListener('resize', () => onWindowResize(camera, renderer));
-
-        const seaWorld = new SeaWorld(object => scene.add(object));
-
-        addLights(objects => scene.add(objects));
-        setControls(camera, renderer.domElement);
-        extraStuff(object => scene.add(object));
-
-        const animate = () => {
-            seaWorld.update();
-            renderer.render(scene, camera);
-            stats.update();
-        };
-
-        renderer.setAnimationLoop(animate);
+        setupGame(containerElement?.current!);
     }, []);
 
     return <div style={{ overflow: 'hidden', height: '100vh' }} ref={containerElement}></div>;
 };
+
+function setupGame(containerElement: HTMLDivElement) {
+    const scene = new THREE.Scene();
+    const camera = createCamera();
+    const renderer = createRenderer(containerElement);
+    const stats = createStats(containerElement);
+
+    onWindowResize(camera, renderer);
+    window.addEventListener('resize', () => onWindowResize(camera, renderer));
+
+    const seaWorld = new SeaWorld(object => scene.add(object));
+
+    addLights(objects => scene.add(objects));
+    setControls(camera, renderer.domElement);
+    extraStuff(object => scene.add(object));
+
+    const animate = () => {
+        seaWorld.update();
+        renderer.render(scene, camera);
+        stats.update();
+    };
+
+    renderer.setAnimationLoop(animate);
+}
 
 function createCamera(): THREE.PerspectiveCamera {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
