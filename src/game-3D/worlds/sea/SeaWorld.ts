@@ -12,7 +12,7 @@ export default class SeaWorld {
     sceneEnv = new THREE.Scene();
     renderTarget: THREE.WebGLRenderTarget;
 
-    testingCube: THREE.Object3D;
+    testingCubes: THREE.Object3D[];
     sailboat: THREE.Group | null;
     sun: THREE.Vector3;
     sky: Sky;
@@ -32,8 +32,8 @@ export default class SeaWorld {
         this.water = this.createWater();
         this.scene.add(this.sky, this.water);
 
-        this.testingCube = this.createTestingCube();
-        this.scene.add(this.testingCube);
+        this.testingCubes = this.createTestingCubes();
+        this.scene.add(...this.testingCubes);
 
         this.sailboat = null;
         new GLTFLoader().loadAsync(SAILBOAT_MODEL_URL).then(gltf => {
@@ -52,19 +52,30 @@ export default class SeaWorld {
 
         this.water.material.uniforms['time'].value += deltaTime * 0.0002;
 
-        this.testingCube.rotateX(deltaTime * 0.001);
-        this.testingCube.rotateY(deltaTime * 0.001);
+        this.testingCubes.forEach(testingCube => {
+            testingCube.rotateX(deltaTime * 0.001);
+            testingCube.rotateY(deltaTime * 0.001);
+        });
     }
 
-    private createTestingCube(): THREE.Object3D {
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const cube = new THREE.Mesh(geometry, material);
+    private createTestingCubes(): THREE.Object3D[] {
+        return [0xff0000, 0x00ff00, 0x0000ff].map((color, index) => {
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshStandardMaterial({ color: color });
+            const cube = new THREE.Mesh(geometry, material);
 
-        cube.translateX(10);
-        cube.translateY(1);
+            cube.translateY(1);
 
-        return cube;
+            if (index === 0) {
+                cube.translateX(10);
+            } else if (index === 1) {
+                cube.translateX(-10);
+            } else {
+                cube.translateZ(-10);
+            }
+
+            return cube;
+        });
     }
 
     private createWater(): Water {
