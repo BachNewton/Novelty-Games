@@ -1,111 +1,120 @@
 import { useEffect, useRef } from "react";
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Sky } from 'three/examples/jsm/objects/Sky';
 import Stats from 'three/examples/jsm/libs/stats.module';
+import SeaWorld from "./worlds/sea/SeaWorld";
 
-let hasGameBeenSet = false;
+let hasGameBeenSetup = false;
 
 const Game3D: React.FC = () => {
     const containerElement = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (hasGameBeenSet) return;
-        hasGameBeenSet = true;
+        if (hasGameBeenSetup) return;
+        hasGameBeenSetup = true;
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = createCamera();
+        const renderer = createRenderer(containerElement?.current!);
+        const stats = createStats(containerElement?.current!);
 
-        const renderer = new THREE.WebGLRenderer();
+        onWindowResize(camera, renderer);
+        window.addEventListener('resize', () => onWindowResize(camera, renderer));
 
-        const resize = () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.render(scene, camera);
-        }
-        resize();
+        const seaWorld = new SeaWorld(object => scene.add(object));
 
-        window.addEventListener('resize', resize);
-
-        let sailboat: THREE.Group | null = null;
-
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const cube = new THREE.Mesh(geometry, material);
-        cube.translateX(10);
-        scene.add(cube);
-
-        const sun = new THREE.Vector3();
-
-        const sky = new Sky();
-        sky.scale.setScalar(10000);
-        scene.add(sky);
-
-        const skyUniforms = sky.material.uniforms;
-        skyUniforms['turbidity'].value = 10;
-        skyUniforms['rayleigh'].value = 2;
-        skyUniforms['mieCoefficient'].value = 0.005;
-        skyUniforms['mieDirectionalG'].value = 0.8;
-
-        const parameters = {
-            elevation: 2,
-            azimuth: 180
-        };
-
-        const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
-        const theta = THREE.MathUtils.degToRad(parameters.azimuth);
-
-        sun.setFromSphericalCoords(1, phi, theta);
-
-        sky.material.uniforms['sunPosition'].value.copy(sun);
-
-        const ambientLight = new THREE.AmbientLight();
-        const directionalLight = new THREE.DirectionalLight(0xffd700);
-        directionalLight.position.set(1, 1, -1);
-        scene.add(ambientLight, directionalLight);
-
-        camera.position.z = 25;
-        camera.position.y = 10;
-
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.update();
-
-        const stats = new Stats();
-        containerElement?.current?.appendChild(stats.dom);
+        addLights(objects => scene.add(objects));
+        setControls(camera, renderer.domElement);
+        extraStuff(object => scene.add(object));
 
         const animate = () => {
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-
-            sailboat?.rotateY(0.001);
-
+            seaWorld.update();
             renderer.render(scene, camera);
-
             stats.update();
         };
 
         renderer.setAnimationLoop(animate);
-        containerElement?.current?.appendChild(renderer.domElement);
-
-        const loader = new GLTFLoader();
-
-        loader.load('https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/main/models/sailboat/scene.gltf', (gltf) => {
-            sailboat = gltf.scene;
-
-            sailboat.scale.multiplyScalar(0.01);
-            sailboat.rotateY(2 * Math.PI / 3);
-            scene.add(sailboat);
-        }, (xhr) => {
-            console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-        }, (error) => {
-            console.error(error);
-        });
     }, []);
 
     return <div style={{ overflow: 'hidden', height: '100vh' }} ref={containerElement}></div>;
 };
+
+function createCamera(): THREE.PerspectiveCamera {
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+    camera.position.z = 25;
+    camera.position.y = 10;
+
+    return camera;
+}
+
+function createRenderer(containerElement: HTMLDivElement): THREE.WebGLRenderer {
+    const renderer = new THREE.WebGLRenderer();
+
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.5;
+
+    containerElement?.appendChild(renderer.domElement);
+
+    return renderer;
+}
+
+function setControls(camera: THREE.PerspectiveCamera, rendererDomElement: HTMLCanvasElement) {
+    const controls = new OrbitControls(camera, rendererDomElement);
+
+    controls.update();
+}
+
+function createStats(containerElement: HTMLDivElement): Stats {
+    const stats = new Stats();
+
+    containerElement.appendChild(stats.dom);
+
+    return stats;
+}
+
+function addLights(addToScene: (...objects: THREE.Object3D[]) => void) {
+    const ambientLight = new THREE.AmbientLight();
+
+    const directionalLight = new THREE.DirectionalLight(0xffd700);
+    directionalLight.position.set(1, 1, -1);
+
+    addToScene(ambientLight, directionalLight);
+}
+
+function onWindowResize(camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer) {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function extraStuff(addToScene: (object: THREE.Object3D) => void) {
+    const sun = new THREE.Vector3();
+
+    const sky = new Sky();
+    sky.scale.setScalar(10000);
+    addToScene(sky);
+
+    const skyUniforms = sky.material.uniforms;
+    skyUniforms['turbidity'].value = 10;
+    skyUniforms['rayleigh'].value = 2;
+    skyUniforms['mieCoefficient'].value = 0.005;
+    skyUniforms['mieDirectionalG'].value = 0.8;
+
+    const parameters = {
+        elevation: 2,
+        azimuth: 180
+    };
+
+    const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
+    const theta = THREE.MathUtils.degToRad(parameters.azimuth);
+
+    sun.setFromSphericalCoords(1, phi, theta);
+
+    sky.material.uniforms['sunPosition'].value.copy(sun);
+}
 
 export default Game3D;
