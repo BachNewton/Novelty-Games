@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { Sky } from 'three/examples/jsm/objects/Sky';
+import { Water } from 'three/examples/jsm/objects/Water';
 import Stats from 'three/examples/jsm/libs/stats.module';
 import SeaWorld from "./worlds/sea/SeaWorld";
 
@@ -29,11 +30,10 @@ function setupGame(containerElement: HTMLDivElement) {
     onWindowResize(camera, renderer);
     window.addEventListener('resize', () => onWindowResize(camera, renderer));
 
-    const seaWorld = new SeaWorld(object => scene.add(object));
+    const seaWorld = new SeaWorld(scene, new THREE.PMREMGenerator(renderer));
 
-    addLights(objects => scene.add(objects));
+    // addLights(objects => scene.add(objects));
     setControls(camera, renderer.domElement);
-    extraStuff(object => scene.add(object));
 
     const animate = () => {
         seaWorld.update();
@@ -93,32 +93,6 @@ function onWindowResize(camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRe
     camera.updateProjectionMatrix();
 
     renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-function extraStuff(addToScene: (object: THREE.Object3D) => void) {
-    const sun = new THREE.Vector3();
-
-    const sky = new Sky();
-    sky.scale.setScalar(10000);
-    addToScene(sky);
-
-    const skyUniforms = sky.material.uniforms;
-    skyUniforms['turbidity'].value = 10;
-    skyUniforms['rayleigh'].value = 2;
-    skyUniforms['mieCoefficient'].value = 0.005;
-    skyUniforms['mieDirectionalG'].value = 0.8;
-
-    const parameters = {
-        elevation: 2,
-        azimuth: 180
-    };
-
-    const phi = THREE.MathUtils.degToRad(90 - parameters.elevation);
-    const theta = THREE.MathUtils.degToRad(parameters.azimuth);
-
-    sun.setFromSphericalCoords(1, phi, theta);
-
-    sky.material.uniforms['sunPosition'].value.copy(sun);
 }
 
 export default Game3D;
