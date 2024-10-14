@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 import { Sky } from 'three/examples/jsm/objects/Sky';
 import { Water } from 'three/examples/jsm/objects/Water';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
@@ -7,6 +8,7 @@ import WaterNormalsTexture from './textures/waternormals.jpg';
 import SunCalc from 'suncalc';
 
 const SAILBOAT_MODEL_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/main/models/sailboat/scene.gltf';
+const CAT_MODEL_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/game-3D/models/cat/Models/cat.fbx';
 
 export default class SeaWorld {
     scene: THREE.Scene;
@@ -50,6 +52,12 @@ export default class SeaWorld {
             this.sailboat.scale.multiplyScalar(0.01);
 
             this.scene.add(this.sailboat);
+        }).catch(error => {
+            console.error(error);
+        });
+
+        new FBXLoader().loadAsync(CAT_MODEL_URL).then(ftx => {
+            this.scene.add(ftx);
         }).catch(error => {
             console.error(error);
         });
