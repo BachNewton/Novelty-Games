@@ -57,6 +57,14 @@ export default class SeaWorld {
         });
 
         new FBXLoader().loadAsync(CAT_MODEL_URL).then(ftx => {
+            const mesh = ftx.children[0] as THREE.SkinnedMesh;
+            const oldMaterial = mesh.material as THREE.MeshPhongMaterial;
+            const newMaterial = new THREE.MeshStandardMaterial({
+                map: oldMaterial.map,
+                color: oldMaterial.color
+            });
+            mesh.material = newMaterial;
+
             this.scene.add(ftx);
         }).catch(error => {
             console.error(error);
