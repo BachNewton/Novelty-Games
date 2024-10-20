@@ -17,7 +17,7 @@ export default class SeaWorld {
     renderTarget: THREE.WebGLRenderTarget;
 
     testingCubes: THREE.Object3D[];
-    sailboat: THREE.Group | null;
+    sailboat: THREE.Object3D;
     sun: THREE.Vector3;
     sky: Sky;
     skyParameters = {
@@ -45,16 +45,8 @@ export default class SeaWorld {
         this.testingCubes = this.createTestingCubes();
         this.scene.add(...this.testingCubes);
 
-        this.sailboat = null;
-        new GLTFLoader().loadAsync(SAILBOAT_MODEL_URL).then(gltf => {
-            this.sailboat = gltf.scene;
-
-            this.sailboat.scale.multiplyScalar(0.01);
-
-            this.scene.add(this.sailboat);
-        }).catch(error => {
-            console.error(error);
-        });
+        this.sailboat = this.createSailboat();
+        this.scene.add(this.sailboat);
 
         new FBXLoader().loadAsync(CAT_MODEL_URL).then(ftx => {
             const mesh = ftx.children[0] as THREE.SkinnedMesh;
@@ -86,6 +78,22 @@ export default class SeaWorld {
             testingCube.rotateX(deltaTime * 0.001);
             testingCube.rotateY(deltaTime * 0.001);
         });
+    }
+
+    private createSailboat(): THREE.Object3D {
+        const sailboat = new THREE.Object3D();
+
+        new GLTFLoader().loadAsync(SAILBOAT_MODEL_URL).then(gltf => {
+            const loadedSailboat = gltf.scene.children[0];
+
+            loadedSailboat.scale.multiplyScalar(0.01);
+
+            sailboat.add(loadedSailboat);
+        }).catch(error => {
+            console.error(error);
+        });
+
+        return sailboat;
     }
 
     private createTestingCubes(): THREE.Object3D[] {
