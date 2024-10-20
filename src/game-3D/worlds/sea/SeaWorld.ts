@@ -1,14 +1,13 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 import { Sky } from 'three/examples/jsm/objects/Sky';
 import { Water } from 'three/examples/jsm/objects/Water';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 import WaterNormalsTexture from './textures/waternormals.jpg';
 import SunCalc from 'suncalc';
+import Cat from './Cat';
 
 const SAILBOAT_MODEL_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/main/models/sailboat/scene.gltf';
-const CAT_MODEL_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/game-3D/models/cat/Models/cat.fbx';
 
 export default class SeaWorld {
     scene: THREE.Scene;
@@ -18,6 +17,7 @@ export default class SeaWorld {
 
     testingCubes: THREE.Object3D[];
     sailboat: THREE.Object3D;
+    cat: Cat;
     sun: THREE.Vector3;
     sky: Sky;
     skyParameters = {
@@ -32,6 +32,9 @@ export default class SeaWorld {
         timeScale: 500
     };
     water: Water;
+    catAnimation = {
+        catAnimation: 0
+    };
 
     constructor(scene: THREE.Scene, pmremGenerator: THREE.PMREMGenerator) {
         this.scene = scene;
@@ -49,25 +52,17 @@ export default class SeaWorld {
         this.sailboat = this.createSailboat();
         this.scene.add(this.sailboat);
 
-        new FBXLoader().loadAsync(CAT_MODEL_URL).then(ftx => {
-            const mesh = ftx.children[0] as THREE.SkinnedMesh;
-            const oldMaterial = mesh.material as THREE.MeshPhongMaterial;
-            const newMaterial = new THREE.MeshStandardMaterial({
-                map: oldMaterial.map,
-                color: oldMaterial.color
-            });
-            mesh.material = newMaterial;
-
-            this.scene.add(ftx);
-        }).catch(error => {
-            console.error(error);
-        });
+        this.cat = new Cat(this.scene);
 
         const gui = new GUI();
         gui.add(this.dateProps, 'month', 1, 12, 1).onChange(() => this.calculateSunPosition());
         gui.add(this.dateProps, 'date', 1, 31, 1).onChange(() => this.calculateSunPosition());
         gui.add(this.dateProps, 'hour', 0, 24, 1).onChange(() => this.calculateSunPosition());
         gui.add(this.dateProps, 'timeScale', 1, 3000, 5);
+        gui.add(this.catAnimation, 'catAnimation', 0, 7, 1).onChange(() => {
+            this.cat.animationMixer.stopAllAction();
+            this.cat.animationActions[this.catAnimation.catAnimation].play();
+        });
         this.calculateSunPosition();
     }
 
@@ -83,6 +78,8 @@ export default class SeaWorld {
 
         this.date.setTime(this.date.getTime() + deltaTime * this.dateProps.timeScale);
         this.updateSkyParameters();
+
+        this.cat.update(deltaTime);
     }
 
     private createSailboat(): THREE.Object3D {
