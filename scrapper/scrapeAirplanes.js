@@ -2,7 +2,7 @@ import fs from 'fs';
 import puppeteer from 'puppeteer';
 
 const LOOPS = 25;
-const BASE_URL = 'https://www.airport-data.com/aircraft/random_photos.html';
+const BASE_URL = 'https://airport-data.com/aircraft/random_photos.html';
 
 async function getAirplanes(page) {
     const airplanes = await page.$$eval('tr', els => els.map(el => {
@@ -24,7 +24,7 @@ async function getAirplanes(page) {
     for (const airplane of airplanes) {
         await page.goto(airplane.url);
 
-        const imageUrl = await page.$eval('#ad-photo', el => el.src);
+        const imageUrl = await page.$$eval('img', els => els.map(el => el.src).find(url => url.indexOf('image.airport-data.com') !== -1));
         airplane.imageUrl = imageUrl;
 
         delete airplane.url;
