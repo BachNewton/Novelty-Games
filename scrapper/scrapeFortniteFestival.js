@@ -72,3 +72,17 @@ async function getSampleMp3(page) {
 
     await browser.close();
 })();
+
+(async () => {
+    const response = await fetch(BASE_URL);
+    console.log(response);
+    const text = await response.text();
+    console.log(text);
+
+    const scriptContentRegex = /<script id=\"__NEXT_DATA__\".+>(.+)<\/script>/g;
+    const matches = text.matchAll(scriptContentRegex);
+    const json = matches.next().value[1];
+    const object = JSON.parse(json);
+    const temp = object.props.pageProps.data;
+    console.log(temp);
+});
