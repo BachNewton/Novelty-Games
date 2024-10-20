@@ -1,9 +1,8 @@
 import * as THREE from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 const CAT_MODEL_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/game-3D/models/cat/Models/cat.fbx';
-const CAT_MODEL_URL_2 = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/game-3D/models/cat2/cat_rigged';
+// const CAT_MODEL_URL_2 = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/game-3D/models/cat2/cat_rigged.fbx';
 
 export default class Cat {
     private object: THREE.Object3D;
@@ -15,7 +14,7 @@ export default class Cat {
         this.object = new THREE.Object3D();
         this.animationMixer = new THREE.AnimationMixer(this.object);
 
-        new FBXLoader().loadAsync(CAT_MODEL_URL_2).then(ftx => {
+        new FBXLoader().loadAsync(CAT_MODEL_URL).then(ftx => {
             const mesh = ftx.children[0] as THREE.SkinnedMesh;
             const oldMaterial = mesh.material as THREE.MeshPhongMaterial;
             const newMaterial = new THREE.MeshStandardMaterial({
