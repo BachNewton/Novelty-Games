@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 const CAT_MODEL_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/game-3D/models/cat/Models/cat.fbx';
+const CAT_MODEL_URL_2 = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/game-3D/models/cat2/cat.gltf';
 
 export default class Cat {
     private object: THREE.Object3D;
@@ -22,15 +24,23 @@ export default class Cat {
             });
             mesh.material = newMaterial;
 
-            const helper = new THREE.SkeletonHelper(ftx);
-            scene.add(helper);
+            // const helper = new THREE.SkeletonHelper(ftx);
+            // scene.add(helper);
 
             this.animationMixer = new THREE.AnimationMixer(ftx);
             this.animationActions = ftx.animations.map(animation => this.animationMixer.clipAction(animation));
 
             ftx.scale.multiplyScalar(0.02);
 
-            this.object.add(ftx);
+            // this.object.add(ftx);
+        }).catch(error => {
+            console.error(error);
+        });
+
+        new GLTFLoader().loadAsync(CAT_MODEL_URL_2).then(gltf => {
+            const loadedCat = gltf.scene.children[0];
+
+            scene.add(loadedCat);
         }).catch(error => {
             console.error(error);
         });
