@@ -28,7 +28,8 @@ export default class SeaWorld {
     dateProps = {
         month: this.date.getMonth(),
         date: this.date.getDate(),
-        hour: this.date.getHours()
+        hour: this.date.getHours(),
+        timeScale: 500
     };
     water: Water;
 
@@ -63,9 +64,10 @@ export default class SeaWorld {
         });
 
         const gui = new GUI();
-        gui.add(this.dateProps, 'month', 0, 11, 1).onChange(() => this.calculateSunPosition());
+        gui.add(this.dateProps, 'month', 1, 12, 1).onChange(() => this.calculateSunPosition());
         gui.add(this.dateProps, 'date', 1, 31, 1).onChange(() => this.calculateSunPosition());
         gui.add(this.dateProps, 'hour', 0, 24, 1).onChange(() => this.calculateSunPosition());
+        gui.add(this.dateProps, 'timeScale', 1, 3000, 5);
         this.calculateSunPosition();
     }
 
@@ -78,6 +80,9 @@ export default class SeaWorld {
             testingCube.rotateX(deltaTime * 0.001);
             testingCube.rotateY(deltaTime * 0.001);
         });
+
+        this.date.setTime(this.date.getTime() + deltaTime * this.dateProps.timeScale);
+        this.updateSkyParameters();
     }
 
     private createSailboat(): THREE.Object3D {
@@ -173,10 +178,14 @@ export default class SeaWorld {
     }
 
     private calculateSunPosition() {
-        this.date.setMonth(this.dateProps.month);
+        this.date.setMonth(this.dateProps.month - 1);
         this.date.setDate(this.dateProps.date);
         this.date.setHours(this.dateProps.hour);
 
+        this.updateSkyParameters();
+    }
+
+    private updateSkyParameters() {
         const latitude = 60.17; // Helsinki
         const longitude = 24.93545; // Helsinki
 
