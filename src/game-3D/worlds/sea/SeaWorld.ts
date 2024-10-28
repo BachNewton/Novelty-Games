@@ -1,11 +1,8 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { Sky } from 'three/examples/jsm/objects/Sky';
-import { Water } from 'three/examples/jsm/objects/Water';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 import WaterNormalsTexture from './textures/waternormals.jpg';
 import SunCalc from 'suncalc';
-import { AmmoPhysics } from 'three/examples/jsm/physics/AmmoPhysics';
+import { AmmoPhysics, Water, Sky } from 'three/examples/jsm/Addons'
 
 const CITIES = {
     helsinki: {
@@ -14,8 +11,6 @@ const CITIES = {
     }
 };
 
-const SAILBOAT_MODEL_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/main/models/sailboat/scene.gltf';
-
 export default class SeaWorld {
     scene: THREE.Scene;
     pmremGenerator: THREE.PMREMGenerator;
@@ -23,7 +18,6 @@ export default class SeaWorld {
     renderTarget: THREE.WebGLRenderTarget;
 
     testingCubes: THREE.Object3D[];
-    sailboat: THREE.Object3D;
     sun: THREE.Vector3;
     sky: Sky;
     skyParameters = {
@@ -52,14 +46,38 @@ export default class SeaWorld {
         this.testingCubes = this.createTestingCubes();
         this.scene.add(...this.testingCubes);
 
-        this.sailboat = this.createSailboat();
-        this.scene.add(this.sailboat);
-
         this.addGUI();
 
         this.calculateSunPosition();
 
-        AmmoPhysics().then(value => console.log(value));
+        AmmoPhysics().then(ammoPhysicsObject => {
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshStandardMaterial({ color: 'magenta' });
+            const cube = new THREE.Mesh(geometry, material);
+
+            cube.translateY(15);
+
+            this.scene.add(cube);
+            ammoPhysicsObject.addMesh(cube, 1);
+
+            setInterval(() => {
+                const geometry = new THREE.SphereGeometry(0.5);
+                const material = new THREE.MeshStandardMaterial({ color: 'yellow' });
+                const sphere = new THREE.Mesh(geometry, material);
+
+                sphere.translateY(15);
+
+                this.scene.add(sphere);
+                ammoPhysicsObject.addMesh(sphere, 1);
+            }, 750);
+
+            const geometry2 = new THREE.BoxGeometry(15, 1, 15);
+            const material2 = new THREE.MeshStandardMaterial({ color: 'white' });
+            const floor = new THREE.Mesh(geometry2, material2);
+
+            this.scene.add(floor);
+            ammoPhysicsObject.addMesh(floor, 0);
+        });
     }
 
     update(deltaTime: number) {
@@ -84,22 +102,6 @@ export default class SeaWorld {
         dateAndTimeFolder.add(this.dateProps, 'Date', 1, 31, 1).onChange(() => this.calculateSunPosition());
         dateAndTimeFolder.add(this.dateProps, 'Hour', 0, 23, 1).onChange(() => this.calculateSunPosition());
         dateAndTimeFolder.add(this.dateProps, 'Time Scale', 1, 3000, 5);
-    }
-
-    private createSailboat(): THREE.Object3D {
-        const sailboat = new THREE.Object3D();
-
-        new GLTFLoader().loadAsync(SAILBOAT_MODEL_URL).then(gltf => {
-            const loadedSailboat = gltf.scene.children[0];
-
-            loadedSailboat.scale.multiplyScalar(0.01);
-
-            sailboat.add(loadedSailboat);
-        }).catch(error => {
-            console.error(error);
-        });
-
-        return sailboat;
     }
 
     private createTestingCubes(): THREE.Object3D[] {
