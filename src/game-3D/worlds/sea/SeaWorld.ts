@@ -5,7 +5,13 @@ import { Water } from 'three/examples/jsm/objects/Water';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 import WaterNormalsTexture from './textures/waternormals.jpg';
 import SunCalc from 'suncalc';
-import Cat from './Cat';
+
+const CITIES = {
+    helsinki: {
+        latitude: 60.17,
+        longitude: 24.93545
+    }
+};
 
 const SAILBOAT_MODEL_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/main/models/sailboat/scene.gltf';
 
@@ -17,7 +23,6 @@ export default class SeaWorld {
 
     testingCubes: THREE.Object3D[];
     sailboat: THREE.Object3D;
-    cat: Cat;
     sun: THREE.Vector3;
     sky: Sky;
     skyParameters = {
@@ -26,15 +31,12 @@ export default class SeaWorld {
     };
     date = new Date();
     dateProps = {
-        month: this.date.getMonth(),
-        date: this.date.getDate(),
-        hour: this.date.getHours(),
-        timeScale: 500
+        Month: this.date.getMonth(),
+        Date: this.date.getDate(),
+        Hour: this.date.getHours(),
+        'Time Scale': 500
     };
     water: Water;
-    catAnimation = {
-        catAnimation: 0
-    };
 
     constructor(scene: THREE.Scene, pmremGenerator: THREE.PMREMGenerator) {
         this.scene = scene;
@@ -52,17 +54,8 @@ export default class SeaWorld {
         this.sailboat = this.createSailboat();
         this.scene.add(this.sailboat);
 
-        this.cat = new Cat(this.scene);
+        this.addGUI();
 
-        const gui = new GUI();
-        gui.add(this.dateProps, 'month', 1, 12, 1).onChange(() => this.calculateSunPosition());
-        gui.add(this.dateProps, 'date', 1, 31, 1).onChange(() => this.calculateSunPosition());
-        gui.add(this.dateProps, 'hour', 0, 24, 1).onChange(() => this.calculateSunPosition());
-        gui.add(this.dateProps, 'timeScale', 1, 3000, 5);
-        gui.add(this.catAnimation, 'catAnimation', 0, 7, 1).onChange(() => {
-            this.cat.animationMixer.stopAllAction();
-            this.cat.animationActions[this.catAnimation.catAnimation].play();
-        });
         this.calculateSunPosition();
     }
 
@@ -71,15 +64,23 @@ export default class SeaWorld {
 
         this.water.material.uniforms['time'].value += deltaTime * 0.0002;
 
-        this.testingCubes.forEach(testingCube => {
+        for (const testingCube of this.testingCubes) {
             testingCube.rotateX(deltaTime * 0.001);
             testingCube.rotateY(deltaTime * 0.001);
-        });
+        }
 
-        this.date.setTime(this.date.getTime() + deltaTime * this.dateProps.timeScale);
+        this.date.setTime(this.date.getTime() + deltaTime * this.dateProps['Time Scale']);
         this.updateSkyParameters();
+    }
 
-        this.cat.update(deltaTime);
+    private addGUI() {
+        const gui = new GUI();
+
+        const dateAndTimeFolder = gui.addFolder('Date & Time');
+        dateAndTimeFolder.add(this.dateProps, 'Month', 1, 12, 1).onChange(() => this.calculateSunPosition());
+        dateAndTimeFolder.add(this.dateProps, 'Date', 1, 31, 1).onChange(() => this.calculateSunPosition());
+        dateAndTimeFolder.add(this.dateProps, 'Hour', 0, 23, 1).onChange(() => this.calculateSunPosition());
+        dateAndTimeFolder.add(this.dateProps, 'Time Scale', 1, 3000, 5);
     }
 
     private createSailboat(): THREE.Object3D {
@@ -175,16 +176,16 @@ export default class SeaWorld {
     }
 
     private calculateSunPosition() {
-        this.date.setMonth(this.dateProps.month - 1);
-        this.date.setDate(this.dateProps.date);
-        this.date.setHours(this.dateProps.hour);
+        this.date.setMonth(this.dateProps.Month - 1);
+        this.date.setDate(this.dateProps.Date);
+        this.date.setHours(this.dateProps.Hour);
 
         this.updateSkyParameters();
     }
 
     private updateSkyParameters() {
-        const latitude = 60.17; // Helsinki
-        const longitude = 24.93545; // Helsinki
+        const latitude = CITIES.helsinki.latitude;
+        const longitude = CITIES.helsinki.longitude;
 
         const position = SunCalc.getPosition(this.date, latitude, longitude);
 
