@@ -5,6 +5,7 @@ import { Water } from 'three/examples/jsm/objects/Water';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 import WaterNormalsTexture from './textures/waternormals.jpg';
 import SunCalc from 'suncalc';
+import { AmmoPhysics } from 'three/examples/jsm/physics/AmmoPhysics';
 
 const CITIES = {
     helsinki: {
@@ -57,6 +58,8 @@ export default class SeaWorld {
         this.addGUI();
 
         this.calculateSunPosition();
+
+        AmmoPhysics().then(value => console.log(value));
     }
 
     update(deltaTime: number) {
