@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
 import SeaWorld from "../worlds/sea/SeaWorld";
+import { GameWorld } from "../worlds/GameWorld";
 
 let hasGameBeenSetup = false;
 
@@ -28,7 +29,7 @@ function setupGame(containerElement: HTMLDivElement) {
     onWindowResize(camera, renderer);
     window.addEventListener('resize', () => onWindowResize(camera, renderer));
 
-    const seaWorld = new SeaWorld(scene, new THREE.PMREMGenerator(renderer));
+    const gameWorld: GameWorld = new SeaWorld(scene, new THREE.PMREMGenerator(renderer));
 
     setControls(camera, renderer.domElement);
 
@@ -38,7 +39,7 @@ function setupGame(containerElement: HTMLDivElement) {
         const deltaTime = timeNow - previousTime;
         previousTime = timeNow;
 
-        seaWorld.update(deltaTime);
+        gameWorld.update(deltaTime);
         renderer.render(scene, camera);
         stats.update();
     };

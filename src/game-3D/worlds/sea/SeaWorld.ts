@@ -3,6 +3,7 @@ import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 import WaterNormalsTexture from './textures/waternormals.jpg';
 import SunCalc from 'suncalc';
 import { AmmoPhysics, Water, Sky } from 'three/examples/jsm/Addons'
+import { GameWorld } from '../GameWorld';
 
 const CITIES = {
     helsinki: {
@@ -11,7 +12,7 @@ const CITIES = {
     }
 };
 
-export default class SeaWorld {
+export default class SeaWorld implements GameWorld {
     scene: THREE.Scene;
     pmremGenerator: THREE.PMREMGenerator;
     sceneEnv = new THREE.Scene();
