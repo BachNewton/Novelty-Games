@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
 import * as THREE from 'three';
+import * as CANNON from 'cannon-es';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
-import SeaWorld from "../worlds/sea/SeaWorld";
 import { GameWorld } from "../worlds/GameWorld";
+import MarbleWorld from "../worlds/marble/MarbleWorld";
 
 let hasGameBeenSetup = false;
 
@@ -26,10 +27,14 @@ function setupGame(containerElement: HTMLDivElement) {
     const renderer = createRenderer(containerElement);
     const stats = createStats(containerElement);
 
+    const world = new CANNON.World({
+        gravity: new CANNON.Vec3(0, -9.82, 0)
+    });
+
     onWindowResize(camera, renderer);
     window.addEventListener('resize', () => onWindowResize(camera, renderer));
 
-    const gameWorld: GameWorld = new SeaWorld(scene, new THREE.PMREMGenerator(renderer));
+    const gameWorld: GameWorld = MarbleWorld.create(scene, world);
 
     setControls(camera, renderer.domElement);
 
@@ -39,6 +44,7 @@ function setupGame(containerElement: HTMLDivElement) {
         const deltaTime = timeNow - previousTime;
         previousTime = timeNow;
 
+        world.step(deltaTime);
         gameWorld.update(deltaTime);
         renderer.render(scene, camera);
         stats.update();
@@ -58,13 +64,15 @@ function createCamera(): THREE.PerspectiveCamera {
 }
 
 function createRenderer(containerElement: HTMLDivElement): THREE.WebGLRenderer {
-    const renderer = new THREE.WebGLRenderer();
+    const renderer = new THREE.WebGLRenderer({
+        antialias: true
+    });
 
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.5;
 
-    containerElement?.appendChild(renderer.domElement);
+    containerElement.appendChild(renderer.domElement);
 
     return renderer;
 }
