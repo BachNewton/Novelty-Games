@@ -28,7 +28,7 @@ function setupGame(containerElement: HTMLDivElement) {
     const stats = createStats(containerElement);
 
     const world = new CANNON.World({
-        gravity: new CANNON.Vec3(0, -9.82, 0)
+        gravity: new CANNON.Vec3(0, -9.80665, 0)
     });
 
     onWindowResize(camera, renderer);
@@ -44,7 +44,7 @@ function setupGame(containerElement: HTMLDivElement) {
         const deltaTime = timeNow - previousTime;
         previousTime = timeNow;
 
-        world.step(deltaTime);
+        world.step(deltaTime / 1000);
         gameWorld.update(deltaTime);
         renderer.render(scene, camera);
         stats.update();
@@ -71,6 +71,7 @@ function createRenderer(containerElement: HTMLDivElement): THREE.WebGLRenderer {
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.5;
+    renderer.shadowMap.enabled = true;
 
     containerElement.appendChild(renderer.domElement);
 
