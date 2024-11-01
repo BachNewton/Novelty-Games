@@ -34,9 +34,9 @@ function setupGame(containerElement: HTMLDivElement) {
     onWindowResize(camera, renderer);
     window.addEventListener('resize', () => onWindowResize(camera, renderer));
 
-    const gameWorld: GameWorld = MarbleWorld.create(scene, camera, world);
+    const orbitControls = createOrbitControls(camera, renderer.domElement);
 
-    setControls(camera, renderer.domElement);
+    const gameWorld: GameWorld = MarbleWorld.create(scene, camera, world, orbitControls);
 
     let previousTime = performance.now();
 
@@ -78,10 +78,13 @@ function createRenderer(containerElement: HTMLDivElement): THREE.WebGLRenderer {
     return renderer;
 }
 
-function setControls(camera: THREE.PerspectiveCamera, rendererDomElement: HTMLCanvasElement) {
+function createOrbitControls(camera: THREE.PerspectiveCamera, rendererDomElement: HTMLCanvasElement): OrbitControls {
     const controls = new OrbitControls(camera, rendererDomElement);
-
+    controls.minDistance = 5;
+    controls.maxDistance = 10;
+    controls.enablePan = false;
     controls.update();
+    return controls;
 }
 
 function createStats(containerElement: HTMLDivElement): Stats {

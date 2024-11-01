@@ -13,7 +13,7 @@ const STEEPNESS_THRESHOLD = 0.7;
 const JUMP_COOLDOWN = 200;
 
 const MarbleWorld: GameWorldCreator = {
-    create: (scene, camera, world) => {
+    create: (scene, camera, world, orbitControls) => {
         addLight(scene);
 
         const gameWorldObjects: GameWorldObject[] = [];
@@ -176,6 +176,9 @@ const MarbleWorld: GameWorldCreator = {
                         playerCanJump = steepness > STEEPNESS_THRESHOLD && performance.now() - lastJumpTime > JUMP_COOLDOWN;
                     }
                 }
+
+                orbitControls.target = player.mesh.position;
+                orbitControls.update();
             }
         };
     }
