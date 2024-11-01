@@ -5,15 +5,12 @@ import { GameWorldObject, GameWorldObjectCreator } from "../GameWorldObject";
 import { randomNum } from "../../../util/Randomizer";
 import PlayerTexture from './textures/player.png';
 import { KeyboardInputCreator } from "../../input/Keyboard";
-import { XboxControllerCreator } from "../../input/XboxController";
+import { Button, XboxControllerCreator } from "../../input/XboxController";
 
-const PLAYER_SPEED = 0.5;
+const PLAYER_SPEED = 0.25;
 
 const MarbleWorld: GameWorldCreator = {
     create: (scene, camera, world) => {
-        const keyboardInput = KeyboardInputCreator.create();
-        const xboxController = XboxControllerCreator.create(_ => console.log(xboxController));
-
         addLight(scene);
 
         const gameWorldObjects: GameWorldObject[] = [];
@@ -49,6 +46,7 @@ const MarbleWorld: GameWorldCreator = {
         });
 
         player.body.position.y = 2;
+        const playerBodyIntendedDirection = new CANNON.Vec3();
         const playerTorque = new CANNON.Vec3();
 
         const cameraForward = new THREE.Vector3();
@@ -86,7 +84,17 @@ const MarbleWorld: GameWorldCreator = {
             world.addBody(ball.body);
             gameWorldObjects.push(ball);
 
-        }, 750);
+        }, 4000);
+
+        const keyboardInput = KeyboardInputCreator.create();
+        const xboxController = XboxControllerCreator.create(button => {
+            console.log('Button pressed:', button);
+
+            if (button === Button.VIEW) {
+                player.body.position.set(0, 2, 0);
+                player.body.velocity.setZero();
+            }
+        });
 
         return {
             update: (deltaTime) => {
@@ -99,6 +107,11 @@ const MarbleWorld: GameWorldCreator = {
                 playerIntendedDirection.set(0, 0, 0);
                 playerIntendedDirection.addScaledVector(cameraForward, -xboxController.leftAxis.y);
                 playerIntendedDirection.addScaledVector(cameraLeft, -xboxController.leftAxis.x);
+
+                playerBodyIntendedDirection.set(playerIntendedDirection.x, 0, playerIntendedDirection.z);
+                playerBodyIntendedDirection.cross(world.gravity, playerTorque);
+                playerTorque.scale(deltaTime * PLAYER_SPEED);
+                player.body.applyTorque(playerTorque);
 
                 cameraForwardHelper.setDirection(cameraForward);
                 cameraLeftHelper.setDirection(cameraLeft);

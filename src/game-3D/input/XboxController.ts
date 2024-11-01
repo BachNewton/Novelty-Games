@@ -12,14 +12,15 @@ interface Axis {
 
 interface Buttons {
     a: boolean;
+    view: boolean;
 }
 
 interface XboxControllerCreator {
     create(onButtonPressed: (button: Button) => void): XboxController;
 }
 
-enum Button {
-    A
+export enum Button {
+    A = 'A', VIEW = 'VIEW'
 }
 
 export const XboxControllerCreator: XboxControllerCreator = {
@@ -29,7 +30,7 @@ export const XboxControllerCreator: XboxControllerCreator = {
 
         const leftAxis: Axis = { x: 0, y: 0 };
         const rightAxis: Axis = { x: 0, y: 0 };
-        const pressed: Buttons = { a: false };
+        const pressed: Buttons = { a: false, view: false };
 
         return {
             leftAxis: leftAxis,
@@ -49,6 +50,14 @@ export const XboxControllerCreator: XboxControllerCreator = {
 
                     if (pressed.a) {
                         onButtonPressed(Button.A);
+                    }
+                }
+
+                if (gamepad.buttons[8].pressed !== pressed.view) {
+                    pressed.view = gamepad.buttons[8].pressed;
+
+                    if (pressed.view) {
+                        onButtonPressed(Button.VIEW);
                     }
                 }
             }
