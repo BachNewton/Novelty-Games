@@ -24,6 +24,9 @@ enum Button {
 
 export const XboxControllerCreator: XboxControllerCreator = {
     create: (onButtonPressed) => {
+        window.addEventListener('gamepadconnected', e => console.log('Gamepad connected - id:', e.gamepad.id, 'index:', e.gamepad.index));
+        window.addEventListener('gamepaddisconnected', e => console.log('Gamepad disconnected - id:', e.gamepad.id, 'index:', e.gamepad.index));
+
         const leftAxis: Axis = { x: 0, y: 0 };
         const rightAxis: Axis = { x: 0, y: 0 };
         const pressed: Buttons = { a: false };

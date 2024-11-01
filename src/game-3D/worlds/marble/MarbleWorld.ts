@@ -50,6 +50,16 @@ const MarbleWorld: GameWorldCreator = {
 
         player.body.position.y = 2;
         const playerTorque = new CANNON.Vec3();
+
+        const cameraForward = new THREE.Vector3();
+        const cameraLeft = new THREE.Vector3();
+        const playerIntendedDirection = new THREE.Vector3();
+
+        const cameraForwardHelper = new THREE.ArrowHelper(cameraForward, new THREE.Vector3(0, 2, 0));
+        const cameraLeftHelper = new THREE.ArrowHelper(cameraLeft, new THREE.Vector3(0, 2, 0));
+        const playerIntendedDirectionHelper = new THREE.ArrowHelper(cameraLeft, new THREE.Vector3(0, 2.5, 0), 2, 'magenta');
+        scene.add(cameraForwardHelper, cameraLeftHelper, playerIntendedDirectionHelper);
+
         const cameraDirection = new THREE.Vector3();
         const cameraDirectionRight = new THREE.Vector3();
 
@@ -81,6 +91,19 @@ const MarbleWorld: GameWorldCreator = {
         return {
             update: (deltaTime) => {
                 xboxController.update();
+
+                camera.getWorldDirection(cameraForward);
+                cameraForward.setY(0).normalize();
+                cameraLeft.crossVectors(camera.up, cameraForward);
+
+                playerIntendedDirection.set(0, 0, 0);
+                playerIntendedDirection.addScaledVector(cameraForward, -xboxController.leftAxis.y);
+                playerIntendedDirection.addScaledVector(cameraLeft, -xboxController.leftAxis.x);
+
+                cameraForwardHelper.setDirection(cameraForward);
+                cameraLeftHelper.setDirection(cameraLeft);
+                playerIntendedDirectionHelper.setDirection(playerIntendedDirection);
+                playerIntendedDirectionHelper.setLength(3 * Math.hypot(xboxController.leftAxis.x, xboxController.leftAxis.y));
 
                 if (keyboardInput.held.KeyW || keyboardInput.held.KeyA || keyboardInput.held.KeyS || keyboardInput.held.KeyD) {
                     camera.getWorldDirection(cameraDirection);
