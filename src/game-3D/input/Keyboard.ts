@@ -1,17 +1,22 @@
-export interface KeyboardInput extends EventTarget {
+export interface KeyboardInput {
     held: Keys;
 }
 
 interface Keys {
-    KeyW: boolean;
-    KeyA: boolean;
-    KeyS: boolean;
-    KeyD: boolean;
-    Space: boolean;
+    w: boolean;
+    a: boolean;
+    s: boolean;
+    d: boolean;
+    space: boolean;
+    tab: boolean;
 }
 
 interface KeyboardInputCreator {
-    create(): KeyboardInput;
+    create(onKeyPressed: (key: Key) => void): KeyboardInput;
+}
+
+export enum Key {
+    SPACE = 'SPACE', TAB = 'TAB'
 }
 
 enum KeyEventType {
@@ -19,39 +24,50 @@ enum KeyEventType {
 }
 
 export const KeyboardInputCreator: KeyboardInputCreator = {
-    create: () => {
+    create: (onKeyPressed) => {
         const held: Keys = {
-            KeyW: false,
-            KeyA: false,
-            KeyS: false,
-            KeyD: false,
-            Space: false
+            w: false,
+            a: false,
+            s: false,
+            d: false,
+            space: false,
+            tab: false
         };
 
-        const handleKeyEvent = (code: string, type: KeyEventType) => {
+        const handleKeyEvent = (e: KeyboardEvent, type: KeyEventType) => {
+            const code = e.code;
+
+            if (code === 'Tab') {
+                e.preventDefault();
+            }
+
+            if (type === KeyEventType.DOWN) {
+                if (code === 'Space' && !held.space) onKeyPressed(Key.SPACE);
+                if (code === 'Tab' && !held.tab) onKeyPressed(Key.TAB);
+            }
+
             const updatedValue = type === KeyEventType.DOWN ? true : false;
 
             if (code === 'KeyW') {
-                held.KeyW = updatedValue;
+                held.w = updatedValue;
             } else if (code === 'KeyA') {
-                held.KeyA = updatedValue;
+                held.a = updatedValue;
             } else if (code === 'KeyS') {
-                held.KeyS = updatedValue;
+                held.s = updatedValue;
             } else if (code === 'KeyD') {
-                held.KeyD = updatedValue;
+                held.d = updatedValue;
             } else if (code === 'Space') {
-                held.Space = updatedValue;
+                held.space = updatedValue;
+            } else if (code === 'Tab') {
+                held.tab = updatedValue;
             }
         };
 
-        window.addEventListener('keydown', e => handleKeyEvent(e.code, KeyEventType.DOWN));
-        window.addEventListener('keyup', e => handleKeyEvent(e.code, KeyEventType.UP));
+        window.addEventListener('keydown', e => handleKeyEvent(e, KeyEventType.DOWN));
+        window.addEventListener('keyup', e => handleKeyEvent(e, KeyEventType.UP));
 
         return {
-            held: held,
-            addEventListener: () => { },
-            removeEventListener: () => { },
-            dispatchEvent
+            held: held
         };
     }
 };

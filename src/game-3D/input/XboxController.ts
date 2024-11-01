@@ -1,22 +1,7 @@
-export interface XboxController {
-    leftAxis: Axis;
-    rightAxis: Axis;
-    pressed: Buttons;
-    update(): void;
-}
-
-interface Axis {
-    x: number;
-    y: number;
-}
-
-interface Buttons {
-    a: boolean;
-    view: boolean;
-}
+import { Axis, Buttons, Controller } from "./Controller";
 
 interface XboxControllerCreator {
-    create(onButtonPressed: (button: Button) => void): XboxController;
+    create(onButtonPressed: (button: Button) => void): Controller;
 }
 
 export enum Button {

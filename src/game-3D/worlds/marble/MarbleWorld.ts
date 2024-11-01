@@ -4,8 +4,8 @@ import * as CANNON from 'cannon-es';
 import { GameWorldObject, GameWorldObjectCreator } from "../GameWorldObject";
 import { randomNum } from "../../../util/Randomizer";
 import PlayerTexture from './textures/player.png';
-import { KeyboardInputCreator } from "../../input/Keyboard";
-import { Button, XboxControllerCreator } from "../../input/XboxController";
+import { Button } from "../../input/XboxController";
+import { GenericControllerCreator } from "../../input/GenericController";
 
 const PLAYER_SPEED = 0.25;
 
@@ -58,9 +58,6 @@ const MarbleWorld: GameWorldCreator = {
         const playerIntendedDirectionHelper = new THREE.ArrowHelper(cameraLeft, new THREE.Vector3(0, 2.5, 0), 2, 'magenta');
         scene.add(cameraForwardHelper, cameraLeftHelper, playerIntendedDirectionHelper);
 
-        const cameraDirection = new THREE.Vector3();
-        const cameraDirectionRight = new THREE.Vector3();
-
         scene.add(player.mesh);
         world.addBody(player.body);
         gameWorldObjects.push(player);
@@ -86,8 +83,7 @@ const MarbleWorld: GameWorldCreator = {
 
         }, 4000);
 
-        const keyboardInput = KeyboardInputCreator.create();
-        const xboxController = XboxControllerCreator.create(button => {
+        const controller = GenericControllerCreator.create(button => {
             console.log('Button pressed:', button);
 
             if (button === Button.VIEW) {
@@ -98,15 +94,15 @@ const MarbleWorld: GameWorldCreator = {
 
         return {
             update: (deltaTime) => {
-                xboxController.update();
+                controller.update();
 
                 camera.getWorldDirection(cameraForward);
                 cameraForward.setY(0).normalize();
                 cameraLeft.crossVectors(camera.up, cameraForward);
 
                 playerIntendedDirection.set(0, 0, 0);
-                playerIntendedDirection.addScaledVector(cameraForward, -xboxController.leftAxis.y);
-                playerIntendedDirection.addScaledVector(cameraLeft, -xboxController.leftAxis.x);
+                playerIntendedDirection.addScaledVector(cameraForward, -controller.leftAxis.y);
+                playerIntendedDirection.addScaledVector(cameraLeft, -controller.leftAxis.x);
 
                 playerBodyIntendedDirection.set(playerIntendedDirection.x, 0, playerIntendedDirection.z);
                 playerBodyIntendedDirection.cross(world.gravity, playerTorque);
@@ -116,33 +112,7 @@ const MarbleWorld: GameWorldCreator = {
                 cameraForwardHelper.setDirection(cameraForward);
                 cameraLeftHelper.setDirection(cameraLeft);
                 playerIntendedDirectionHelper.setDirection(playerIntendedDirection);
-                playerIntendedDirectionHelper.setLength(3 * Math.hypot(xboxController.leftAxis.x, xboxController.leftAxis.y));
-
-                if (keyboardInput.held.KeyW || keyboardInput.held.KeyA || keyboardInput.held.KeyS || keyboardInput.held.KeyD) {
-                    camera.getWorldDirection(cameraDirection);
-                    cameraDirection.setY(0).normalize();
-                    cameraDirectionRight.crossVectors(camera.up, cameraDirection);
-
-                    if (keyboardInput.held.KeyW) {
-                        playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(cameraDirection.z, 0, -cameraDirection.x));
-                        player.body.applyTorque(playerTorque);
-                    }
-
-                    if (keyboardInput.held.KeyS) {
-                        playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(-cameraDirection.z, 0, cameraDirection.x));
-                        player.body.applyTorque(playerTorque);
-                    }
-
-                    if (keyboardInput.held.KeyD) {
-                        playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(-cameraDirectionRight.z, 0, cameraDirectionRight.x));
-                        player.body.applyTorque(playerTorque);
-                    }
-
-                    if (keyboardInput.held.KeyA) {
-                        playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(cameraDirectionRight.z, 0, -cameraDirectionRight.x));
-                        player.body.applyTorque(playerTorque);
-                    }
-                }
+                playerIntendedDirectionHelper.setLength(3 * Math.hypot(controller.leftAxis.x, controller.leftAxis.y));
 
                 for (const gameWorldObject of gameWorldObjects) {
                     gameWorldObject.update();
