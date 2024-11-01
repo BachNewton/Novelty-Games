@@ -1,6 +1,7 @@
 import { GameWorldCreator } from "../GameWorld";
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import { GameWorldObject, GameWorldObjectCreator } from "../GameWorldObject";
 import { randomNum } from "../../../util/Randomizer";
 import PlayerTexture from './textures/player.png';
@@ -128,8 +129,7 @@ const MarbleWorld: GameWorldCreator = {
             scene.add(ball.mesh);
             world.addBody(ball.body);
             gameWorldObjects.push(ball);
-
-        }, 4000);
+        }, 5000);
 
         const controller = GenericControllerCreator.create(button => {
             console.log('Button pressed:', button);
@@ -147,6 +147,29 @@ const MarbleWorld: GameWorldCreator = {
                 }
             }
         });
+
+        const tester = GameWorldObjectCreator.create({
+            dimensions: {
+                type: 'box',
+                width: 1,
+                height: 1,
+                depth: 1
+            },
+            material: {
+                type: 'color',
+                color: 'orange'
+            },
+            mass: 0
+        });
+        tester.mesh.position.y = 5;
+
+        scene.add(tester.mesh);
+
+        const transformControls = new TransformControls(camera, orbitControls.domElement!);
+        transformControls.addEventListener('dragging-changed', e => orbitControls.enabled = !e.value);
+        transformControls.attach(tester.mesh);
+        scene.add(transformControls.getHelper());
+
 
         return {
             update: (deltaTime) => {
