@@ -8,6 +8,9 @@ import { Button } from "../../input/XboxController";
 import { GenericControllerCreator } from "../../input/GenericController";
 
 const PLAYER_SPEED = 0.25;
+const WORLD_DOWN = new CANNON.Vec3(0, -1, 0);
+const STEEPNESS_THRESHOLD = 0.7;
+const JUMP_COOLDOWN = 200;
 
 const MarbleWorld: GameWorldCreator = {
     create: (scene, camera, world) => {
@@ -33,6 +36,46 @@ const MarbleWorld: GameWorldCreator = {
         world.addBody(floor.body);
         gameWorldObjects.push(floor);
 
+        const ramp = GameWorldObjectCreator.create({
+            dimensions: {
+                type: 'box',
+                width: 5,
+                height: 0.5,
+                depth: 5
+            },
+            material: {
+                type: 'color',
+                color: 'lightgreen'
+            },
+            mass: 0
+        });
+        ramp.body.position.set(0, 3, -7);
+        ramp.body.quaternion.setFromEuler(Math.PI / 4, 0, 0);
+
+        scene.add(ramp.mesh);
+        world.addBody(ramp.body);
+        gameWorldObjects.push(ramp);
+
+        const steepRamp = GameWorldObjectCreator.create({
+            dimensions: {
+                type: 'box',
+                width: 5,
+                height: 0.5,
+                depth: 5
+            },
+            material: {
+                type: 'color',
+                color: 'pink'
+            },
+            mass: 0
+        });
+        steepRamp.body.position.set(-7, 3, 0);
+        steepRamp.body.quaternion.setFromEuler(0, 0, -Math.PI / 3);
+
+        scene.add(steepRamp.mesh);
+        world.addBody(steepRamp.body);
+        gameWorldObjects.push(steepRamp);
+
         const player = GameWorldObjectCreator.create({
             dimensions: {
                 type: 'sphere',
@@ -45,6 +88,8 @@ const MarbleWorld: GameWorldCreator = {
             mass: 1
         });
 
+        let playerCanJump = false;
+        let lastJumpTime = 0;
         player.body.position.y = 2;
         const playerBodyIntendedDirection = new CANNON.Vec3();
         const playerTorque = new CANNON.Vec3();
@@ -89,6 +134,13 @@ const MarbleWorld: GameWorldCreator = {
             if (button === Button.VIEW) {
                 player.body.position.set(0, 2, 0);
                 player.body.velocity.setZero();
+                player.body.angularVelocity.setZero();
+            } else if (button === Button.A) {
+                if (playerCanJump) {
+                    playerCanJump = false;
+                    lastJumpTime = performance.now();
+                    player.body.velocity.y = 7.5;
+                }
             }
         });
 
@@ -116,6 +168,13 @@ const MarbleWorld: GameWorldCreator = {
 
                 for (const gameWorldObject of gameWorldObjects) {
                     gameWorldObject.update();
+                }
+
+                for (const contact of world.contacts) {
+                    if (contact.bi.id === player.body.id) {
+                        const steepness = contact.ni.dot(WORLD_DOWN);
+                        playerCanJump = steepness > STEEPNESS_THRESHOLD && performance.now() - lastJumpTime > JUMP_COOLDOWN;
+                    }
                 }
             }
         };
