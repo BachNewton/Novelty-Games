@@ -1,0 +1,54 @@
+export interface XboxController {
+    leftAxis: Axis;
+    rightAxis: Axis;
+    pressed: Buttons;
+    update(): void;
+}
+
+interface Axis {
+    x: number;
+    y: number;
+}
+
+interface Buttons {
+    a: boolean;
+}
+
+interface XboxControllerCreator {
+    create(onButtonPressed: (button: Button) => void): XboxController;
+}
+
+enum Button {
+    A
+}
+
+export const XboxControllerCreator: XboxControllerCreator = {
+    create: (onButtonPressed) => {
+        const leftAxis: Axis = { x: 0, y: 0 };
+        const rightAxis: Axis = { x: 0, y: 0 };
+        const pressed: Buttons = { a: false };
+
+        return {
+            leftAxis: leftAxis,
+            rightAxis: rightAxis,
+            pressed: pressed,
+            update: () => {
+                const gamepad = navigator.getGamepads()[0];
+                if (!gamepad) return;
+
+                leftAxis.x = gamepad.axes[0];
+                leftAxis.y = gamepad.axes[1];
+                rightAxis.x = gamepad.axes[2];
+                rightAxis.y = gamepad.axes[3];
+
+                if (gamepad.buttons[0].pressed !== pressed.a) {
+                    pressed.a = gamepad.buttons[0].pressed;
+
+                    if (pressed.a) {
+                        onButtonPressed(Button.A);
+                    }
+                }
+            }
+        };
+    }
+};

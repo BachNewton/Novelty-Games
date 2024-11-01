@@ -4,11 +4,16 @@ import * as CANNON from 'cannon-es';
 import { GameWorldObject, GameWorldObjectCreator } from "../GameWorldObject";
 import { randomNum } from "../../../util/Randomizer";
 import PlayerTexture from './textures/player.png';
+import { KeyboardInputCreator } from "../../input/Keyboard";
+import { XboxControllerCreator } from "../../input/XboxController";
 
 const PLAYER_SPEED = 0.5;
 
 const MarbleWorld: GameWorldCreator = {
-    create: (scene, camera, world, keyboardInput) => {
+    create: (scene, camera, world) => {
+        const keyboardInput = KeyboardInputCreator.create();
+        const xboxController = XboxControllerCreator.create(_ => console.log(xboxController));
+
         addLight(scene);
 
         const gameWorldObjects: GameWorldObject[] = [];
@@ -75,6 +80,8 @@ const MarbleWorld: GameWorldCreator = {
 
         return {
             update: (deltaTime) => {
+                xboxController.update();
+
                 if (keyboardInput.held.KeyW || keyboardInput.held.KeyA || keyboardInput.held.KeyS || keyboardInput.held.KeyD) {
                     camera.getWorldDirection(cameraDirection);
                     cameraDirection.setY(0).normalize();

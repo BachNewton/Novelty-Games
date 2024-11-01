@@ -5,7 +5,6 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
 import { GameWorld } from "../worlds/GameWorld";
 import MarbleWorld from "../worlds/marble/MarbleWorld";
-import { KeyboardInputCreator } from "../input/Keyboard";
 
 let hasGameBeenSetup = false;
 
@@ -35,12 +34,7 @@ function setupGame(containerElement: HTMLDivElement) {
     onWindowResize(camera, renderer);
     window.addEventListener('resize', () => onWindowResize(camera, renderer));
 
-    const gameWorld: GameWorld = MarbleWorld.create(
-        scene,
-        camera,
-        world,
-        KeyboardInputCreator.create()
-    );
+    const gameWorld: GameWorld = MarbleWorld.create(scene, camera, world);
 
     setControls(camera, renderer.domElement);
 
