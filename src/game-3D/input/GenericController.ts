@@ -38,6 +38,9 @@ export const GenericControllerCreator: GenericControllerCreator = {
 
                 if (Math.abs(xboxController.leftAxis.x) > DEADZONE) leftAxis.x = xboxController.leftAxis.x;
                 if (Math.abs(xboxController.leftAxis.y) > DEADZONE) leftAxis.y = xboxController.leftAxis.y;
+
+                rightAxis.x = Math.abs(xboxController.rightAxis.x) > DEADZONE ? xboxController.rightAxis.x : 0;
+                rightAxis.y = Math.abs(xboxController.rightAxis.y) > DEADZONE ? xboxController.rightAxis.y : 0;
             }
         };
     }

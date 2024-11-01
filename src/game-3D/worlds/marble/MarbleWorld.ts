@@ -11,6 +11,7 @@ const PLAYER_SPEED = 0.25;
 const WORLD_DOWN = new CANNON.Vec3(0, -1, 0);
 const STEEPNESS_THRESHOLD = 0.7;
 const JUMP_COOLDOWN = 200;
+const CAMERA_ROTATE_SPEED = 0.003;
 
 const MarbleWorld: GameWorldCreator = {
     create: (scene, camera, world, orbitControls) => {
@@ -88,6 +89,8 @@ const MarbleWorld: GameWorldCreator = {
             mass: 1
         });
 
+        orbitControls.target = player.mesh.position;
+
         let playerCanJump = false;
         let lastJumpTime = 0;
         player.body.position.y = 2;
@@ -135,6 +138,7 @@ const MarbleWorld: GameWorldCreator = {
                 player.body.position.set(0, 2, 0);
                 player.body.velocity.setZero();
                 player.body.angularVelocity.setZero();
+                orbitControls.reset();
             } else if (button === Button.A) {
                 if (playerCanJump) {
                     playerCanJump = false;
@@ -177,7 +181,8 @@ const MarbleWorld: GameWorldCreator = {
                     }
                 }
 
-                orbitControls.target = player.mesh.position;
+                (orbitControls as any)._rotateLeft(deltaTime * CAMERA_ROTATE_SPEED * controller.rightAxis.x);
+                (orbitControls as any)._rotateUp(deltaTime * CAMERA_ROTATE_SPEED * controller.rightAxis.y);
                 orbitControls.update();
             }
         };
