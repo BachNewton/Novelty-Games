@@ -1,11 +1,14 @@
 import { GameWorldCreator } from "../GameWorld";
 import * as THREE from 'three';
+import * as CANNON from 'cannon-es';
 import { GameWorldObject, GameWorldObjectCreator } from "../GameWorldObject";
 import { randomNum } from "../../../util/Randomizer";
 import PlayerTexture from './textures/player.png';
 
+const PLAYER_SPEED = 0.5;
+
 const MarbleWorld: GameWorldCreator = {
-    create: (scene, world) => {
+    create: (scene, world, keyboardInput) => {
         addLight(scene);
 
         const gameWorldObjects: GameWorldObject[] = [];
@@ -41,6 +44,7 @@ const MarbleWorld: GameWorldCreator = {
         });
 
         player.body.position.y = 2;
+        const playerTorque = new CANNON.Vec3();
 
         scene.add(player.mesh);
         world.addBody(player.body);
@@ -69,6 +73,26 @@ const MarbleWorld: GameWorldCreator = {
 
         return {
             update: (deltaTime) => {
+                if (keyboardInput.held.KeyW) {
+                    playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(-1, 0, 0));
+                    player.body.applyTorque(playerTorque);
+                }
+
+                if (keyboardInput.held.KeyS) {
+                    playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(1, 0, 0));
+                    player.body.applyTorque(playerTorque);
+                }
+
+                if (keyboardInput.held.KeyA) {
+                    playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(0, 0, 1));
+                    player.body.applyTorque(playerTorque);
+                }
+
+                if (keyboardInput.held.KeyD) {
+                    playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(0, 0, -1));
+                    player.body.applyTorque(playerTorque);
+                }
+
                 for (const gameWorldObject of gameWorldObjects) {
                     gameWorldObject.update();
                 }
