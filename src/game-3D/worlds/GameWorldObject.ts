@@ -26,9 +26,25 @@ interface SphereDimensions extends Shape {
 
 type Dimensions = BoxDimensions | SphereDimensions;
 
+interface MaterialType {
+    type: 'color' | 'texture';
+}
+
+interface ColorMaterial extends MaterialType {
+    type: 'color';
+    color: string;
+}
+
+interface TextureMaterial extends MaterialType {
+    type: 'texture';
+    texturePath: string;
+}
+
+type Material = ColorMaterial | TextureMaterial;
+
 interface GameWorldObjectOptions {
     dimensions: Dimensions;
-    color: string;
+    material: Material;
     mass: number;
 }
 
@@ -49,9 +65,20 @@ export const GameWorldObjectCreator: GameWorldObjectCreator = {
             }
         };
 
-        const geometry = createGeometry();
-        const material = new THREE.MeshStandardMaterial({ color: options.color });
-        const mesh = new THREE.Mesh(geometry, material);
+        const createMaterial = () => {
+            const material = options.material;
+
+            switch (material.type) {
+                case 'color':
+                    return new THREE.MeshStandardMaterial({ color: material.color });
+                case 'texture':
+                    const loader = new THREE.TextureLoader();
+                    const texture = loader.load(material.texturePath);
+                    return new THREE.MeshStandardMaterial({ map: texture });
+            }
+        };
+
+        const mesh = new THREE.Mesh(createGeometry(), createMaterial());
         mesh.castShadow = true;
         mesh.receiveShadow = true;
 

@@ -2,6 +2,7 @@ import { GameWorldCreator } from "../GameWorld";
 import * as THREE from 'three';
 import { GameWorldObject, GameWorldObjectCreator } from "../GameWorldObject";
 import { randomNum } from "../../../util/Randomizer";
+import PlayerTexture from './textures/player.png';
 
 const MarbleWorld: GameWorldCreator = {
     create: (scene, world) => {
@@ -16,7 +17,10 @@ const MarbleWorld: GameWorldCreator = {
                 height: 1,
                 depth: 15
             },
-            color: 'white',
+            material: {
+                type: 'color',
+                color: 'lightblue'
+            },
             mass: 0
         });
 
@@ -24,13 +28,34 @@ const MarbleWorld: GameWorldCreator = {
         world.addBody(floor.body);
         gameWorldObjects.push(floor);
 
+        const player = GameWorldObjectCreator.create({
+            dimensions: {
+                type: 'sphere',
+                radius: 0.5
+            },
+            material: {
+                type: 'texture',
+                texturePath: PlayerTexture
+            },
+            mass: 1
+        });
+
+        player.body.position.y = 2;
+
+        scene.add(player.mesh);
+        world.addBody(player.body);
+        gameWorldObjects.push(player);
+
         setInterval(() => {
             const ball = GameWorldObjectCreator.create({
                 dimensions: {
                     type: 'sphere',
                     radius: 0.5
                 },
-                color: 'yellow',
+                material: {
+                    type: 'color',
+                    color: 'yellow'
+                },
                 mass: 1
             });
 
