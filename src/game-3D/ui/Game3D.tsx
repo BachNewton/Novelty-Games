@@ -35,7 +35,12 @@ function setupGame(containerElement: HTMLDivElement) {
     onWindowResize(camera, renderer);
     window.addEventListener('resize', () => onWindowResize(camera, renderer));
 
-    const gameWorld: GameWorld = MarbleWorld.create(scene, world, KeyboardInputCreator.create());
+    const gameWorld: GameWorld = MarbleWorld.create(
+        scene,
+        camera,
+        world,
+        KeyboardInputCreator.create()
+    );
 
     setControls(camera, renderer.domElement);
 
@@ -57,9 +62,9 @@ function setupGame(containerElement: HTMLDivElement) {
 function createCamera(): THREE.PerspectiveCamera {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-    camera.position.z = 25;
-    camera.position.y = 15;
-    camera.position.x = 10;
+    camera.position.z = 10;
+    camera.position.y = 8;
+    camera.position.x = 8;
 
     return camera;
 }

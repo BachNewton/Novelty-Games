@@ -8,7 +8,7 @@ import PlayerTexture from './textures/player.png';
 const PLAYER_SPEED = 0.5;
 
 const MarbleWorld: GameWorldCreator = {
-    create: (scene, world, keyboardInput) => {
+    create: (scene, camera, world, keyboardInput) => {
         addLight(scene);
 
         const gameWorldObjects: GameWorldObject[] = [];
@@ -16,9 +16,9 @@ const MarbleWorld: GameWorldCreator = {
         const floor = GameWorldObjectCreator.create({
             dimensions: {
                 type: 'box',
-                width: 15,
+                width: 20,
                 height: 1,
-                depth: 15
+                depth: 20
             },
             material: {
                 type: 'color',
@@ -45,6 +45,8 @@ const MarbleWorld: GameWorldCreator = {
 
         player.body.position.y = 2;
         const playerTorque = new CANNON.Vec3();
+        const cameraDirection = new THREE.Vector3();
+        const cameraDirectionRight = new THREE.Vector3();
 
         scene.add(player.mesh);
         world.addBody(player.body);
@@ -73,24 +75,30 @@ const MarbleWorld: GameWorldCreator = {
 
         return {
             update: (deltaTime) => {
-                if (keyboardInput.held.KeyW) {
-                    playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(-1, 0, 0));
-                    player.body.applyTorque(playerTorque);
-                }
+                if (keyboardInput.held.KeyW || keyboardInput.held.KeyA || keyboardInput.held.KeyS || keyboardInput.held.KeyD) {
+                    camera.getWorldDirection(cameraDirection);
+                    cameraDirection.setY(0).normalize();
+                    cameraDirectionRight.crossVectors(camera.up, cameraDirection);
 
-                if (keyboardInput.held.KeyS) {
-                    playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(1, 0, 0));
-                    player.body.applyTorque(playerTorque);
-                }
+                    if (keyboardInput.held.KeyW) {
+                        playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(cameraDirection.z, 0, -cameraDirection.x));
+                        player.body.applyTorque(playerTorque);
+                    }
 
-                if (keyboardInput.held.KeyA) {
-                    playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(0, 0, 1));
-                    player.body.applyTorque(playerTorque);
-                }
+                    if (keyboardInput.held.KeyS) {
+                        playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(-cameraDirection.z, 0, cameraDirection.x));
+                        player.body.applyTorque(playerTorque);
+                    }
 
-                if (keyboardInput.held.KeyD) {
-                    playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(0, 0, -1));
-                    player.body.applyTorque(playerTorque);
+                    if (keyboardInput.held.KeyD) {
+                        playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(-cameraDirectionRight.z, 0, cameraDirectionRight.x));
+                        player.body.applyTorque(playerTorque);
+                    }
+
+                    if (keyboardInput.held.KeyA) {
+                        playerTorque.scale(deltaTime * PLAYER_SPEED, playerTorque.set(cameraDirectionRight.z, 0, -cameraDirectionRight.x));
+                        player.body.applyTorque(playerTorque);
+                    }
                 }
 
                 for (const gameWorldObject of gameWorldObjects) {
@@ -106,13 +114,14 @@ function addLight(scene: THREE.Scene) {
 
     const directionalLight = new THREE.DirectionalLight();
     directionalLight.castShadow = true;
-    directionalLight.position.set(50, 50, 50);
-    directionalLight.shadow.camera.left = -10;
-    directionalLight.shadow.camera.right = 10;
-    directionalLight.shadow.camera.top = 10;
-    directionalLight.shadow.camera.bottom = -10;
-    directionalLight.shadow.mapSize.width = 1024;
-    directionalLight.shadow.mapSize.height = 1024;
+    const size = 25;
+    directionalLight.position.set(size, size, size);
+    directionalLight.shadow.camera.left = -size;
+    directionalLight.shadow.camera.right = size;
+    directionalLight.shadow.camera.top = size;
+    directionalLight.shadow.camera.bottom = -size;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
 
     scene.add(ambientLight);
     scene.add(directionalLight);

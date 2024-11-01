@@ -7,5 +7,5 @@ export interface GameWorld {
 }
 
 export interface GameWorldCreator {
-    create(scene: THREE.Scene, world: CANNON.World, keyboardInput: KeyboardInput): GameWorld;
+    create(scene: THREE.Scene, camera: THREE.PerspectiveCamera, world: CANNON.World, keyboardInput: KeyboardInput): GameWorld;
 }
