@@ -16,6 +16,8 @@ export const GenericControllerCreator: GenericControllerCreator = {
                 onButtonPressed(Button.A);
             } else if (key === Key.TAB) {
                 onButtonPressed(Button.VIEW);
+            } else if (key === Key.X) {
+                onButtonPressed(Button.RIGHT_STICK_IN);
             }
         });
 

@@ -9,6 +9,7 @@ interface Keys {
     d: boolean;
     space: boolean;
     tab: boolean;
+    x: boolean;
 }
 
 interface KeyboardInputCreator {
@@ -16,7 +17,7 @@ interface KeyboardInputCreator {
 }
 
 export enum Key {
-    SPACE = 'SPACE', TAB = 'TAB'
+    SPACE = 'SPACE', TAB = 'TAB', X = 'X'
 }
 
 enum KeyEventType {
@@ -31,7 +32,8 @@ export const KeyboardInputCreator: KeyboardInputCreator = {
             s: false,
             d: false,
             space: false,
-            tab: false
+            tab: false,
+            x: false
         };
 
         const handleKeyEvent = (e: KeyboardEvent, type: KeyEventType) => {
@@ -44,6 +46,7 @@ export const KeyboardInputCreator: KeyboardInputCreator = {
             if (type === KeyEventType.DOWN) {
                 if (code === 'Space' && !held.space) onKeyPressed(Key.SPACE);
                 if (code === 'Tab' && !held.tab) onKeyPressed(Key.TAB);
+                if (code === 'KeyX' && !held.x) onKeyPressed(Key.X);
             }
 
             const updatedValue = type === KeyEventType.DOWN ? true : false;
@@ -60,6 +63,8 @@ export const KeyboardInputCreator: KeyboardInputCreator = {
                 held.space = updatedValue;
             } else if (code === 'Tab') {
                 held.tab = updatedValue;
+            } else if (code === 'KeyX') {
+                held.x = updatedValue;
             }
         };
 
