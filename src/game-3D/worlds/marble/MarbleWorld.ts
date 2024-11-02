@@ -8,6 +8,7 @@ import { randomNum } from "../../../util/Randomizer";
 import PlayerTexture from './textures/player.png';
 import { Button } from "../../input/XboxController";
 import { GenericControllerCreator } from "../../input/GenericController";
+import { createPlaygroundGameWorldObjects } from "./PlaygroundLevel";
 
 const PLAYER_SPEED = 0.25;
 const WORLD_DOWN = new CANNON.Vec3(0, -1, 0);
@@ -21,63 +22,11 @@ const MarbleWorld: GameWorldCreator = {
 
         const gameWorldObjects: GameWorldObject[] = [];
 
-        const floor = GameWorldObjectCreator.create({
-            dimensions: {
-                type: 'box',
-                width: 20,
-                height: 1,
-                depth: 20
-            },
-            material: {
-                type: 'color',
-                color: 'lightblue'
-            },
-            mass: 0
-        });
-
-        scene.add(floor.mesh);
-        world.addBody(floor.body);
-        gameWorldObjects.push(floor);
-
-        const ramp = GameWorldObjectCreator.create({
-            dimensions: {
-                type: 'box',
-                width: 5,
-                height: 0.5,
-                depth: 5
-            },
-            material: {
-                type: 'color',
-                color: 'lightgreen'
-            },
-            mass: 0
-        });
-        ramp.body.position.set(0, 3, -7);
-        ramp.body.quaternion.setFromEuler(Math.PI / 4, 0, 0);
-
-        scene.add(ramp.mesh);
-        world.addBody(ramp.body);
-        gameWorldObjects.push(ramp);
-
-        const steepRamp = GameWorldObjectCreator.create({
-            dimensions: {
-                type: 'box',
-                width: 5,
-                height: 0.5,
-                depth: 5
-            },
-            material: {
-                type: 'color',
-                color: 'pink'
-            },
-            mass: 0
-        });
-        steepRamp.body.position.set(-7, 3, 0);
-        steepRamp.body.quaternion.setFromEuler(0, 0, -Math.PI / 3);
-
-        scene.add(steepRamp.mesh);
-        world.addBody(steepRamp.body);
-        gameWorldObjects.push(steepRamp);
+        for (const object of createPlaygroundGameWorldObjects()) {
+            scene.add(object.mesh);
+            world.addBody(object.body);
+            object.update();
+        }
 
         const player = GameWorldObjectCreator.create({
             dimensions: {
