@@ -51,6 +51,7 @@ export const PlayerCreator: PlayerCreator = {
                 torque.scale(deltaTime * PLAYER_SPEED, torque);
                 player.body.applyTorque(torque);
 
+                playerCanJump = false;
                 for (const contact of contacts) {
                     if (contact.bi.id === player.body.id) {
                         const steepness = contact.ni.dot(WORLD_DOWN);
