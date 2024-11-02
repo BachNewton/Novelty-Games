@@ -162,7 +162,7 @@ const MarbleWorld: GameWorldCreator = {
 
         guiEditMode.add({ 'Enter Player Mode': enterPlayMode }, 'Enter Player Mode');
         guiEditMode.add({ 'Add Box': addBox }, 'Add Box');
-        guiEditMode.add({ "'W' Translate": () => transformControls.mode = 'translate' }, "'W' Translate");
+        guiEditMode.add({ "'Q' Translate": () => transformControls.mode = 'translate' }, "'Q' Translate");
         guiEditMode.add({ "'E' Rotate": () => transformControls.mode = 'rotate' }, "'E' Rotate");
         guiEditMode.add({ "'R' Scale": () => transformControls.mode = 'scale' }, "'R' Scale");
         guiEditMode.add({ "'X' Recenter": () => orbitControls.target.copy(transformControls.object.position) }, "'X' Recenter");
