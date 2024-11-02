@@ -16,8 +16,14 @@ const STEEPNESS_THRESHOLD = 0.7;
 const JUMP_COOLDOWN = 200;
 const CAMERA_ROTATE_SPEED = 0.003;
 
+enum State {
+    PLAY, EDIT
+}
+
 const MarbleWorld: GameWorldCreator = {
     create: (scene, camera, world, orbitControls) => {
+        let state = State.PLAY;
+
         addLight(scene);
 
         const gameWorldObjects: GameWorldObject[] = [];
@@ -102,7 +108,10 @@ const MarbleWorld: GameWorldCreator = {
         transformControls.addEventListener('dragging-changed', e => orbitControls.enabled = !e.value);
         scene.add(transformControls.getHelper());
 
-        const gui = new GUI();
+        const guiPlayMode = new GUI();
+        const guiEditMode = new GUI();
+        guiEditMode.hide();
+
         const addBox = () => {
             const tester = GameWorldObjectCreator.create({
                 dimensions: {
@@ -117,11 +126,35 @@ const MarbleWorld: GameWorldCreator = {
                 },
                 mass: 0
             });
-            tester.mesh.position.y = 5;
+            tester.mesh.position.copy(orbitControls.target);
             scene.add(tester.mesh);
             transformControls.attach(tester.mesh);
         };
-        gui.add({ 'Add Box': addBox }, 'Add Box');
+
+        const enterEditMode = () => {
+            state = State.EDIT;
+            orbitControls.target = new THREE.Vector3();
+            orbitControls.enablePan = true;
+            guiPlayMode.hide();
+            guiEditMode.show();
+        };
+        enterEditMode();
+
+        const enterPlayMode = () => {
+            state = State.PLAY;
+            orbitControls.target = player.mesh.position;
+            orbitControls.enablePan = false;
+            guiPlayMode.show();
+            guiEditMode.hide();
+        };
+
+        guiPlayMode.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
+
+        guiEditMode.add({ 'Enter Player Mode': enterPlayMode }, 'Enter Player Mode');
+        guiEditMode.add({ 'Add Box': addBox }, 'Add Box');
+        guiEditMode.add({ "'W' Translate": () => transformControls.mode = 'translate' }, "'W' Translate");
+        guiEditMode.add({ "'E' Rotate": () => transformControls.mode = 'rotate' }, "'E' Rotate");
+        guiEditMode.add({ "'R' Scale": () => transformControls.mode = 'scale' }, "'R' Scale");
 
         return {
             update: (deltaTime) => {
