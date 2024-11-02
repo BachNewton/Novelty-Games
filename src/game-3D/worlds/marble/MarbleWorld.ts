@@ -158,6 +158,12 @@ const MarbleWorld: GameWorldCreator = {
             }
         };
 
+        const recenter = () => {
+            if (state !== State.EDIT) return;
+            if (transformControls.object === undefined) return;
+            orbitControls.target.copy(transformControls.object.position);
+        };
+
         guiPlayMode.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
 
         guiEditMode.add({ 'Enter Player Mode': enterPlayMode }, 'Enter Player Mode');
@@ -165,7 +171,7 @@ const MarbleWorld: GameWorldCreator = {
         guiEditMode.add({ "'Q' Translate": () => transformControls.mode = 'translate' }, "'Q' Translate");
         guiEditMode.add({ "'E' Rotate": () => transformControls.mode = 'rotate' }, "'E' Rotate");
         guiEditMode.add({ "'R' Scale": () => transformControls.mode = 'scale' }, "'R' Scale");
-        guiEditMode.add({ "'X' Recenter": () => orbitControls.target.copy(transformControls.object.position) }, "'X' Recenter");
+        guiEditMode.add({ "'X' Recenter": recenter }, "'X' Recenter");
 
         const raycaster = new THREE.Raycaster();
         const mouseCoordinates = new THREE.Vector2();
@@ -186,9 +192,7 @@ const MarbleWorld: GameWorldCreator = {
             } else if (button === Button.A) {
                 player.jump();
             } else if (button === Button.RIGHT_STICK_IN) {
-                if (state !== State.EDIT) return;
-                if (transformControls.object === undefined) return;
-                orbitControls.target.copy(transformControls.object.position);
+                recenter();
             }
         });
 
