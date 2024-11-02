@@ -21,7 +21,7 @@ export const GenericControllerCreator: GenericControllerCreator = {
 
         const leftAxis: Axis = { x: 0, y: 0 };
         const rightAxis: Axis = { x: 0, y: 0 };
-        const pressed: Buttons = { a: false, view: false };
+        const pressed: Buttons = { a: false, view: false, rightStickIn: false };
 
         return {
             leftAxis: leftAxis,

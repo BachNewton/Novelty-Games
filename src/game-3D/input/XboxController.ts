@@ -5,8 +5,10 @@ interface XboxControllerCreator {
 }
 
 export enum Button {
-    A = 'A', VIEW = 'VIEW'
+    A = 'A', VIEW = 'VIEW', RIGHT_STICK_IN = 'RIGHT_STICK_IN'
 }
+
+type ButtonLookup = [number, Button, keyof Buttons];
 
 export const XboxControllerCreator: XboxControllerCreator = {
     create: (onButtonPressed) => {
@@ -15,7 +17,31 @@ export const XboxControllerCreator: XboxControllerCreator = {
 
         const leftAxis: Axis = { x: 0, y: 0 };
         const rightAxis: Axis = { x: 0, y: 0 };
-        const pressed: Buttons = { a: false, view: false };
+        const pressed: Buttons = { a: false, view: false, rightStickIn: false };
+
+        const buttonLookups: ButtonLookup[] = [
+            [0, Button.A, 'a'],
+            [8, Button.VIEW, 'view'],
+            [11, Button.RIGHT_STICK_IN, 'rightStickIn']
+        ];
+
+        const updateButtons = (gamepad: Gamepad) => {
+            for (const buttonLookup of buttonLookups) {
+                const index = buttonLookup[0];
+                const button = buttonLookup[1];
+                const buttonKey = buttonLookup[2];
+
+                const gamepadPressed = gamepad.buttons[index].pressed;
+
+                if (gamepadPressed !== pressed[buttonKey]) {
+                    pressed[buttonKey] = gamepadPressed;
+
+                    if (pressed[buttonKey]) {
+                        onButtonPressed(button);
+                    }
+                }
+            }
+        };
 
         return {
             leftAxis: leftAxis,
@@ -30,21 +56,7 @@ export const XboxControllerCreator: XboxControllerCreator = {
                 rightAxis.x = gamepad.axes[2];
                 rightAxis.y = gamepad.axes[3];
 
-                if (gamepad.buttons[0].pressed !== pressed.a) {
-                    pressed.a = gamepad.buttons[0].pressed;
-
-                    if (pressed.a) {
-                        onButtonPressed(Button.A);
-                    }
-                }
-
-                if (gamepad.buttons[8].pressed !== pressed.view) {
-                    pressed.view = gamepad.buttons[8].pressed;
-
-                    if (pressed.view) {
-                        onButtonPressed(Button.VIEW);
-                    }
-                }
+                updateButtons(gamepad);
             }
         };
     }

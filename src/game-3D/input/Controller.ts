@@ -13,4 +13,5 @@ export interface Axis {
 export interface Buttons {
     a: boolean;
     view: boolean;
+    rightStickIn: boolean;
 }
