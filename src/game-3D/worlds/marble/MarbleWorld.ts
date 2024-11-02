@@ -15,6 +15,7 @@ const WORLD_DOWN = new CANNON.Vec3(0, -1, 0);
 const STEEPNESS_THRESHOLD = 0.7;
 const JUMP_COOLDOWN = 200;
 const CAMERA_ROTATE_SPEED = 0.003;
+const CAMERA_EDIT_SPEED = 0.02;
 
 enum State {
     PLAY, EDIT
@@ -167,6 +168,11 @@ const MarbleWorld: GameWorldCreator = {
                 playerIntendedDirection.set(0, 0, 0);
                 playerIntendedDirection.addScaledVector(cameraForward, -controller.leftAxis.y);
                 playerIntendedDirection.addScaledVector(cameraLeft, -controller.leftAxis.x);
+
+                if (state === State.EDIT) {
+                    const panOffset = (orbitControls as any)._panOffset as THREE.Vector3;
+                    panOffset.addScaledVector(playerIntendedDirection, deltaTime * CAMERA_EDIT_SPEED);
+                }
 
                 playerBodyIntendedDirection.set(playerIntendedDirection.x, 0, playerIntendedDirection.z);
                 playerBodyIntendedDirection.cross(world.gravity, playerTorque);
