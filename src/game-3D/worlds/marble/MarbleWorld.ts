@@ -65,16 +65,6 @@ const MarbleWorld: GameWorldCreator = {
             balls.push(ball);
         }, 5000);
 
-        const controller = GenericControllerCreator.create(button => {
-            console.log('Button pressed:', button);
-
-            if (button === Button.VIEW) {
-                player.reset(orbitControls);
-            } else if (button === Button.A) {
-                player.jump();
-            }
-        });
-
         const transformControls = new TransformControls(camera, orbitControls.domElement!);
         transformControls.addEventListener('dragging-changed', e => orbitControls.enabled = !e.value);
         scene.add(transformControls.getHelper());
@@ -125,6 +115,7 @@ const MarbleWorld: GameWorldCreator = {
         guiEditMode.add({ "'W' Translate": () => transformControls.mode = 'translate' }, "'W' Translate");
         guiEditMode.add({ "'E' Rotate": () => transformControls.mode = 'rotate' }, "'E' Rotate");
         guiEditMode.add({ "'R' Scale": () => transformControls.mode = 'scale' }, "'R' Scale");
+        guiEditMode.add({ "'X' Recenter": () => orbitControls.target.copy(transformControls.object.position) }, "'X' Recenter");
 
         const raycaster = new THREE.Raycaster();
         const mouseCoordinates = new THREE.Vector2();
@@ -134,6 +125,18 @@ const MarbleWorld: GameWorldCreator = {
             const object = findObjectUnderPointer(pointer, mouseCoordinates, raycaster, camera, editableObjects);
             if (object === null) return;
             transformControls.attach(object);
+        });
+
+        const controller = GenericControllerCreator.create(button => {
+            console.log('Button pressed:', button);
+
+            if (button === Button.VIEW) {
+                player.reset(orbitControls);
+            } else if (button === Button.A) {
+                player.jump();
+            } else if (button === Button.RIGHT_STICK_IN) {
+                orbitControls.target.copy(transformControls.object.position);
+            }
         });
 
         return {
