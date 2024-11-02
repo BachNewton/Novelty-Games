@@ -75,10 +75,11 @@ const MarbleWorld: GameWorldCreator = {
 
         const editableObjects: THREE.Mesh[] = [];
         const editableGameWorldObjects: GameWorldObject[] = [];
+        let editableObjectColor = 0xFFA500;
         const addBox = () => {
             const editableObject = new THREE.Mesh(
                 new THREE.BoxGeometry(1, 1, 1),
-                new THREE.MeshStandardMaterial({ color: 'orange' })
+                new THREE.MeshStandardMaterial({ color: editableObjectColor })
             );
 
             editableObject.castShadow = true;
@@ -131,7 +132,7 @@ const MarbleWorld: GameWorldCreator = {
                     },
                     material: {
                         type: 'color',
-                        color: 'orange'
+                        color: (editableObject.material as THREE.MeshStandardMaterial).color
                     },
                     mass: 0
                 });
@@ -168,6 +169,7 @@ const MarbleWorld: GameWorldCreator = {
 
         guiEditMode.add({ 'Enter Player Mode': enterPlayMode }, 'Enter Player Mode');
         guiEditMode.add({ 'Add Box': addBox }, 'Add Box');
+        guiEditMode.addColor({ 'Color': 0xFFA500 }, 'Color').onChange(color => editableObjectColor = color);
         guiEditMode.add({ "'Q' Translate": () => transformControls.mode = 'translate' }, "'Q' Translate");
         guiEditMode.add({ "'E' Rotate": () => transformControls.mode = 'rotate' }, "'E' Rotate");
         guiEditMode.add({ "'R' Scale": () => transformControls.mode = 'scale' }, "'R' Scale");
@@ -220,7 +222,7 @@ const MarbleWorld: GameWorldCreator = {
                     const object = findObjectUnderPointer(mouseInput.pointer, mouseCoordinates, raycaster, camera, editableObjects);
                     if (object !== null && object !== transformControls.object) {
                         const material = object.material as THREE.MeshStandardMaterial;
-                        material.emissive.setColorName('yellow');
+                        material.emissive.setHex(0xFFFFFF);
                     }
                 }
 
@@ -262,9 +264,9 @@ function findObjectUnderPointer(
 }
 
 function addLight(scene: THREE.Scene) {
-    const ambientLight = new THREE.AmbientLight();
+    const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1.25);
 
-    const directionalLight = new THREE.DirectionalLight();
+    const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1.5);
     directionalLight.castShadow = true;
     const size = 25;
     directionalLight.position.set(size, size, size);

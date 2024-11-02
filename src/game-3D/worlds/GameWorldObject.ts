@@ -32,7 +32,7 @@ interface MaterialType {
 
 interface ColorMaterial extends MaterialType {
     type: 'color';
-    color: string;
+    color: THREE.ColorRepresentation;
 }
 
 interface TextureMaterial extends MaterialType {
