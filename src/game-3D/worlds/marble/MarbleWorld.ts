@@ -1,19 +1,14 @@
 import { GameWorldCreator } from "../GameWorld";
 import * as THREE from 'three';
-import * as CANNON from 'cannon-es';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 import { GameWorldObject, GameWorldObjectCreator } from "../GameWorldObject";
 import { randomNum } from "../../../util/Randomizer";
-import PlayerTexture from './textures/player.png';
 import { Button } from "../../input/XboxController";
 import { GenericControllerCreator } from "../../input/GenericController";
 import { createPlaygroundGameWorldObjects } from "./PlaygroundLevel";
+import { PlayerCreator } from "./Player";
 
-const PLAYER_SPEED = 0.25;
-const WORLD_DOWN = new CANNON.Vec3(0, -1, 0);
-const STEEPNESS_THRESHOLD = 0.7;
-const JUMP_COOLDOWN = 200;
 const CAMERA_ROTATE_SPEED = 0.003;
 const CAMERA_EDIT_SPEED = 0.02;
 
@@ -35,38 +30,19 @@ const MarbleWorld: GameWorldCreator = {
             object.update();
         }
 
-        const player = GameWorldObjectCreator.create({
-            dimensions: {
-                type: 'sphere',
-                radius: 0.5
-            },
-            material: {
-                type: 'texture',
-                texturePath: PlayerTexture
-            },
-            mass: 1
-        });
+        const controllerDirection = new THREE.Vector3();
 
-        orbitControls.target = player.mesh.position;
-
-        let playerCanJump = false;
-        let lastJumpTime = 0;
-        player.body.position.y = 2;
-        const playerBodyIntendedDirection = new CANNON.Vec3();
-        const playerTorque = new CANNON.Vec3();
+        const player = PlayerCreator.create(controllerDirection);
+        player.add(scene, world);
+        player.updateOrbitControls(orbitControls);
 
         const cameraForward = new THREE.Vector3();
         const cameraLeft = new THREE.Vector3();
-        const playerIntendedDirection = new THREE.Vector3();
 
         const cameraForwardHelper = new THREE.ArrowHelper(cameraForward, new THREE.Vector3(0, 2, 0));
         const cameraLeftHelper = new THREE.ArrowHelper(cameraLeft, new THREE.Vector3(0, 2, 0));
-        const playerIntendedDirectionHelper = new THREE.ArrowHelper(cameraLeft, new THREE.Vector3(0, 2.5, 0), 2, 'magenta');
-        scene.add(cameraForwardHelper, cameraLeftHelper, playerIntendedDirectionHelper);
-
-        scene.add(player.mesh);
-        world.addBody(player.body);
-        gameWorldObjects.push(player);
+        const controllerDirectionHelper = new THREE.ArrowHelper(cameraLeft, new THREE.Vector3(0, 2.5, 0), 2, 'magenta');
+        scene.add(cameraForwardHelper, cameraLeftHelper, controllerDirectionHelper);
 
         setInterval(() => {
             const ball = GameWorldObjectCreator.create({
@@ -92,16 +68,9 @@ const MarbleWorld: GameWorldCreator = {
             console.log('Button pressed:', button);
 
             if (button === Button.VIEW) {
-                player.body.position.set(0, 2, 0);
-                player.body.velocity.setZero();
-                player.body.angularVelocity.setZero();
-                orbitControls.reset();
+                player.reset(orbitControls);
             } else if (button === Button.A) {
-                if (playerCanJump) {
-                    playerCanJump = false;
-                    lastJumpTime = performance.now();
-                    player.body.velocity.y = 7.5;
-                }
+                player.jump();
             }
         });
 
@@ -143,7 +112,7 @@ const MarbleWorld: GameWorldCreator = {
 
         const enterPlayMode = () => {
             state = State.PLAY;
-            orbitControls.target = player.mesh.position;
+            player.updateOrbitControls(orbitControls);
             orbitControls.enablePan = false;
             guiPlayMode.show();
             guiEditMode.hide();
@@ -165,39 +134,29 @@ const MarbleWorld: GameWorldCreator = {
                 cameraForward.setY(0).normalize();
                 cameraLeft.crossVectors(camera.up, cameraForward);
 
-                playerIntendedDirection.set(0, 0, 0);
-                playerIntendedDirection.addScaledVector(cameraForward, -controller.leftAxis.y);
-                playerIntendedDirection.addScaledVector(cameraLeft, -controller.leftAxis.x);
+                controllerDirection.set(0, 0, 0);
+                controllerDirection.addScaledVector(cameraForward, -controller.leftAxis.y);
+                controllerDirection.addScaledVector(cameraLeft, -controller.leftAxis.x);
 
                 if (state === State.EDIT) {
                     const panOffset = (orbitControls as any)._panOffset as THREE.Vector3;
-                    panOffset.addScaledVector(playerIntendedDirection, deltaTime * CAMERA_EDIT_SPEED);
+                    panOffset.addScaledVector(controllerDirection, deltaTime * CAMERA_EDIT_SPEED);
                 }
-
-                playerBodyIntendedDirection.set(playerIntendedDirection.x, 0, playerIntendedDirection.z);
-                playerBodyIntendedDirection.cross(world.gravity, playerTorque);
-                playerTorque.scale(deltaTime * PLAYER_SPEED);
-                player.body.applyTorque(playerTorque);
-
-                cameraForwardHelper.setDirection(cameraForward);
-                cameraLeftHelper.setDirection(cameraLeft);
-                playerIntendedDirectionHelper.setDirection(playerIntendedDirection);
-                playerIntendedDirectionHelper.setLength(3 * Math.hypot(controller.leftAxis.x, controller.leftAxis.y));
 
                 for (const gameWorldObject of gameWorldObjects) {
                     gameWorldObject.update();
                 }
 
-                for (const contact of world.contacts) {
-                    if (contact.bi.id === player.body.id) {
-                        const steepness = contact.ni.dot(WORLD_DOWN);
-                        playerCanJump = steepness > STEEPNESS_THRESHOLD && performance.now() - lastJumpTime > JUMP_COOLDOWN;
-                    }
-                }
+                player.update(deltaTime, world.contacts);
 
                 (orbitControls as any)._rotateLeft(deltaTime * CAMERA_ROTATE_SPEED * controller.rightAxis.x);
                 (orbitControls as any)._rotateUp(deltaTime * CAMERA_ROTATE_SPEED * controller.rightAxis.y);
                 orbitControls.update();
+
+                cameraForwardHelper.setDirection(cameraForward);
+                cameraLeftHelper.setDirection(cameraLeft);
+                controllerDirectionHelper.setDirection(controllerDirection);
+                controllerDirectionHelper.setLength(3 * Math.hypot(controller.leftAxis.x, controller.leftAxis.y));
             }
         };
     }
