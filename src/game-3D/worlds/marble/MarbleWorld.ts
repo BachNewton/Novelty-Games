@@ -8,7 +8,8 @@ import { Button } from "../../input/XboxController";
 import { GenericControllerCreator } from "../../input/GenericController";
 import { createPlaygroundGameWorldObjects } from "./PlaygroundLevel";
 import { PlayerCreator } from "./Player";
-import { MouseInput, MouseInputCreator, Pointer } from "../../input/Mouse";
+import { MouseInputCreator, Pointer } from "../../input/Mouse";
+import SkyboxPath from './textures/skybox.jpg';
 
 const CAMERA_ROTATE_SPEED = 0.003;
 const CAMERA_EDIT_SPEED = 0.02;
@@ -22,6 +23,7 @@ const MarbleWorld: GameWorldCreator = {
         let state = State.PLAY;
 
         addLight(scene);
+        addSkybox(scene);
 
         const balls: GameWorldObject[] = [];
 
@@ -282,6 +284,18 @@ function addLight(scene: THREE.Scene) {
 
     // scene.add(new THREE.DirectionalLightHelper(directionalLight));
     // scene.add(new THREE.CameraHelper(directionalLight.shadow.camera));
+}
+
+function addSkybox(scene: THREE.Scene) {
+    const loader = new THREE.TextureLoader();
+    const texture = loader.load(SkyboxPath);
+
+    const skybox = new THREE.Mesh(
+        new THREE.SphereGeometry(1000),
+        new THREE.MeshStandardMaterial({ map: texture, side: THREE.BackSide })
+    );
+
+    scene.add(skybox);
 }
 
 export default MarbleWorld;
