@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { GameWorldObjectCreator } from "../GameWorldObject";
 import PlayerTexture from './textures/player.png';
+import PlayerNormalMap from './textures/player-normal-map.png';
 import { OrbitControls } from 'three/examples/jsm/Addons';
 
 const WORLD_DOWN = new CANNON.Vec3(0, -1, 0);
@@ -31,7 +32,8 @@ export const PlayerCreator: PlayerCreator = {
             },
             material: {
                 type: 'texture',
-                texturePath: PlayerTexture
+                texturePath: PlayerTexture,
+                normalMapPath: PlayerNormalMap
             },
             mass: 1
         });

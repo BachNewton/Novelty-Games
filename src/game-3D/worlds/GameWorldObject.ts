@@ -38,6 +38,7 @@ interface ColorMaterial extends MaterialType {
 interface TextureMaterial extends MaterialType {
     type: 'texture';
     texturePath: string;
+    normalMapPath?: string;
 }
 
 type Material = ColorMaterial | TextureMaterial;
@@ -74,7 +75,8 @@ export const GameWorldObjectCreator: GameWorldObjectCreator = {
                 case 'texture':
                     const loader = new THREE.TextureLoader();
                     const texture = loader.load(material.texturePath);
-                    return new THREE.MeshStandardMaterial({ map: texture });
+                    const normalMap = material.normalMapPath ? loader.load(material.normalMapPath) : undefined;
+                    return new THREE.MeshStandardMaterial({ map: texture, normalMap: normalMap });
             }
         };
 
