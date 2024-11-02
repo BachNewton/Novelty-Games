@@ -170,6 +170,7 @@ const MarbleWorld: GameWorldCreator = {
         const mouseCoordinates = new THREE.Vector2();
 
         const mouseInput = MouseInputCreator.create((pointer) => {
+            if (state !== State.EDIT) return;
             if (transformControls.dragging) return;
             const object = findObjectUnderPointer(pointer, mouseCoordinates, raycaster, camera, editableObjects);
             if (object === null) return;
@@ -203,6 +204,17 @@ const MarbleWorld: GameWorldCreator = {
                 if (state === State.EDIT) {
                     const panOffset = (orbitControls as any)._panOffset as THREE.Vector3;
                     panOffset.addScaledVector(controllerDirection, deltaTime * CAMERA_EDIT_SPEED);
+
+                    for (const editableObject of editableObjects) {
+                        const material = editableObject.material as THREE.MeshStandardMaterial;
+                        material.emissive.setHex(0x000000);
+                    }
+
+                    const object = findObjectUnderPointer(mouseInput.pointer, mouseCoordinates, raycaster, camera, editableObjects);
+                    if (object !== null && object !== transformControls.object) {
+                        const material = object.material as THREE.MeshStandardMaterial;
+                        material.emissive.setColorName('yellow');
+                    }
                 }
 
                 for (const ball of balls) {
@@ -214,16 +226,6 @@ const MarbleWorld: GameWorldCreator = {
                 (orbitControls as any)._rotateLeft(deltaTime * CAMERA_ROTATE_SPEED * controller.rightAxis.x);
                 (orbitControls as any)._rotateUp(deltaTime * CAMERA_ROTATE_SPEED * controller.rightAxis.y);
                 orbitControls.update();
-
-                for (const editableObject of editableObjects) {
-                    const material = editableObject.material as THREE.MeshStandardMaterial;
-                    material.emissive.setHex(0x000000);
-                }
-                const object = findObjectUnderPointer(mouseInput.pointer, mouseCoordinates, raycaster, camera, editableObjects);
-                if (object !== null && object !== transformControls.object) {
-                    const material = object.material as THREE.MeshStandardMaterial;
-                    material.emissive.setColorName('yellow');
-                }
 
                 cameraForwardHelper.setDirection(cameraForward);
                 cameraLeftHelper.setDirection(cameraLeft);
