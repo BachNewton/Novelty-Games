@@ -81,7 +81,8 @@ const MarbleWorld: GameWorldCreator = {
                 new THREE.MeshStandardMaterial({ color: 'orange' })
             );
 
-            editableObject.userData.isEditable = true;
+            editableObject.castShadow = true;
+            editableObject.receiveShadow = true;
 
             editableObject.position.copy(orbitControls.target);
 
@@ -185,6 +186,8 @@ const MarbleWorld: GameWorldCreator = {
             } else if (button === Button.A) {
                 player.jump();
             } else if (button === Button.RIGHT_STICK_IN) {
+                if (state !== State.EDIT) return;
+                if (transformControls.object === undefined) return;
                 orbitControls.target.copy(transformControls.object.position);
             }
         });
