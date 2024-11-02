@@ -57,7 +57,11 @@ export const PlayerCreator: PlayerCreator = {
                 for (const contact of contacts) {
                     if (contact.bi.id === player.body.id) {
                         const steepness = contact.ni.dot(WORLD_DOWN);
-                        playerCanJump = steepness > STEEPNESS_THRESHOLD && performance.now() - lastJumpTime > JUMP_COOLDOWN;
+
+                        if (steepness > STEEPNESS_THRESHOLD && performance.now() - lastJumpTime > JUMP_COOLDOWN) {
+                            playerCanJump = true;
+                            break;
+                        }
                     }
                 }
 

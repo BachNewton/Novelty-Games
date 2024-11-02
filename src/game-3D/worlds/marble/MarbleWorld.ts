@@ -74,6 +74,7 @@ const MarbleWorld: GameWorldCreator = {
         guiEditMode.hide();
 
         const editableObjects: THREE.Mesh[] = [];
+        const editableGameWorldObjects: GameWorldObject[] = [];
         const addBox = () => {
             const editableObject = new THREE.Mesh(
                 new THREE.BoxGeometry(1, 1, 1),
@@ -97,6 +98,15 @@ const MarbleWorld: GameWorldCreator = {
             orbitControls.enablePan = true;
             guiPlayMode.hide();
             guiEditMode.show();
+
+            for (const editableGameWorldObject of editableGameWorldObjects) {
+                scene.remove(editableGameWorldObject.mesh);
+                world.removeBody(editableGameWorldObject.body);
+            }
+
+            for (const editableObject of editableObjects) {
+                scene.add(editableObject);
+            }
         };
         enterEditMode();
 
@@ -106,6 +116,45 @@ const MarbleWorld: GameWorldCreator = {
             orbitControls.enablePan = false;
             guiPlayMode.show();
             guiEditMode.hide();
+            transformControls.detach();
+
+            for (const editableObject of editableObjects) {
+                scene.remove(editableObject);
+
+                const object = GameWorldObjectCreator.create({
+                    dimensions: {
+                        type: 'box',
+                        width: editableObject.scale.x,
+                        height: editableObject.scale.y,
+                        depth: editableObject.scale.z
+                    },
+                    material: {
+                        type: 'color',
+                        color: 'orange'
+                    },
+                    mass: 0
+                });
+
+                object.body.position.set(
+                    editableObject.position.x,
+                    editableObject.position.y,
+                    editableObject.position.z
+                );
+
+                object.body.quaternion.set(
+                    editableObject.quaternion.x,
+                    editableObject.quaternion.y,
+                    editableObject.quaternion.z,
+                    editableObject.quaternion.w
+                );
+
+                object.update();
+
+                scene.add(object.mesh);
+                world.addBody(object.body);
+
+                editableGameWorldObjects.push(object);
+            }
         };
 
         guiPlayMode.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
