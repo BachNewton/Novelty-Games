@@ -8,6 +8,7 @@ import { Button } from "../../input/XboxController";
 import { GenericControllerCreator } from "../../input/GenericController";
 import { createPlaygroundGameWorldObjects } from "./PlaygroundLevel";
 import { PlayerCreator } from "./Player";
+import { MouseInput, MouseInputCreator, Pointer } from "../../input/Mouse";
 
 const CAMERA_ROTATE_SPEED = 0.003;
 const CAMERA_EDIT_SPEED = 0.02;
@@ -22,7 +23,7 @@ const MarbleWorld: GameWorldCreator = {
 
         addLight(scene);
 
-        const gameWorldObjects: GameWorldObject[] = [];
+        const balls: GameWorldObject[] = [];
 
         for (const object of createPlaygroundGameWorldObjects()) {
             scene.add(object.mesh);
@@ -61,7 +62,7 @@ const MarbleWorld: GameWorldCreator = {
 
             scene.add(ball.mesh);
             world.addBody(ball.body);
-            gameWorldObjects.push(ball);
+            balls.push(ball);
         }, 5000);
 
         const controller = GenericControllerCreator.create(button => {
@@ -82,23 +83,22 @@ const MarbleWorld: GameWorldCreator = {
         const guiEditMode = new GUI();
         guiEditMode.hide();
 
+        const editableObjects: THREE.Mesh[] = [];
         const addBox = () => {
-            const tester = GameWorldObjectCreator.create({
-                dimensions: {
-                    type: 'box',
-                    width: 1,
-                    height: 1,
-                    depth: 1
-                },
-                material: {
-                    type: 'color',
-                    color: 'orange'
-                },
-                mass: 0
-            });
-            tester.mesh.position.copy(orbitControls.target);
-            scene.add(tester.mesh);
-            transformControls.attach(tester.mesh);
+            const editableObject = new THREE.Mesh(
+                new THREE.BoxGeometry(1, 1, 1),
+                new THREE.MeshStandardMaterial({ color: 'orange' })
+            );
+
+            editableObject.userData.isEditable = true;
+
+            editableObject.position.copy(orbitControls.target);
+
+            scene.add(editableObject);
+
+            transformControls.attach(editableObject);
+
+            editableObjects.push(editableObject);
         };
 
         const enterEditMode = () => {
@@ -126,6 +126,16 @@ const MarbleWorld: GameWorldCreator = {
         guiEditMode.add({ "'E' Rotate": () => transformControls.mode = 'rotate' }, "'E' Rotate");
         guiEditMode.add({ "'R' Scale": () => transformControls.mode = 'scale' }, "'R' Scale");
 
+        const raycaster = new THREE.Raycaster();
+        const mouseCoordinates = new THREE.Vector2();
+
+        const mouseInput = MouseInputCreator.create((pointer) => {
+            if (transformControls.dragging) return;
+            const object = findObjectUnderPointer(pointer, mouseCoordinates, raycaster, camera, editableObjects);
+            if (object === null) return;
+            transformControls.attach(object);
+        });
+
         return {
             update: (deltaTime) => {
                 controller.update();
@@ -143,8 +153,8 @@ const MarbleWorld: GameWorldCreator = {
                     panOffset.addScaledVector(controllerDirection, deltaTime * CAMERA_EDIT_SPEED);
                 }
 
-                for (const gameWorldObject of gameWorldObjects) {
-                    gameWorldObject.update();
+                for (const ball of balls) {
+                    ball.update();
                 }
 
                 player.update(deltaTime, world.contacts);
@@ -152,6 +162,16 @@ const MarbleWorld: GameWorldCreator = {
                 (orbitControls as any)._rotateLeft(deltaTime * CAMERA_ROTATE_SPEED * controller.rightAxis.x);
                 (orbitControls as any)._rotateUp(deltaTime * CAMERA_ROTATE_SPEED * controller.rightAxis.y);
                 orbitControls.update();
+
+                for (const editableObject of editableObjects) {
+                    const material = editableObject.material as THREE.MeshStandardMaterial;
+                    material.emissive.setHex(0x000000);
+                }
+                const object = findObjectUnderPointer(mouseInput.pointer, mouseCoordinates, raycaster, camera, editableObjects);
+                if (object !== null && object !== transformControls.object) {
+                    const material = object.material as THREE.MeshStandardMaterial;
+                    material.emissive.setColorName('yellow');
+                }
 
                 cameraForwardHelper.setDirection(cameraForward);
                 cameraLeftHelper.setDirection(cameraLeft);
@@ -161,6 +181,24 @@ const MarbleWorld: GameWorldCreator = {
         };
     }
 };
+
+function findObjectUnderPointer(
+    pointer: Pointer,
+    mouseCoordinates: THREE.Vector2,
+    raycaster: THREE.Raycaster,
+    camera: THREE.Camera,
+    objects: THREE.Mesh[]
+): THREE.Mesh | null {
+    mouseCoordinates.x = (pointer.x / window.innerWidth) * 2 - 1;
+    mouseCoordinates.y = - (pointer.y / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouseCoordinates, camera);
+    const intersects = raycaster.intersectObjects(objects, false);
+
+    if (intersects.length === 0) return null;
+
+    return intersects[0].object as THREE.Mesh;
+}
 
 function addLight(scene: THREE.Scene) {
     const ambientLight = new THREE.AmbientLight();
