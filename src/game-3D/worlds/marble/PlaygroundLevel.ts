@@ -14,6 +14,7 @@ export function createPlaygroundGameWorldObjects(): GameWorldObject[] {
         },
         mass: 0
     });
+    floor.body.position.y = -2;
 
     const ramp = GameWorldObjectCreator.create({
         dimensions: {
@@ -28,7 +29,7 @@ export function createPlaygroundGameWorldObjects(): GameWorldObject[] {
         },
         mass: 0
     });
-    ramp.body.position.set(0, 3, -7);
+    ramp.body.position.set(0, 1, -7);
     ramp.body.quaternion.setFromEuler(Math.PI / 4, 0, 0);
 
     const steepRamp = GameWorldObjectCreator.create({
@@ -44,7 +45,7 @@ export function createPlaygroundGameWorldObjects(): GameWorldObject[] {
         },
         mass: 0
     });
-    steepRamp.body.position.set(-7, 3, 0);
+    steepRamp.body.position.set(-7, 1, 0);
     steepRamp.body.quaternion.setFromEuler(0, 0, -Math.PI / 3);
 
     const longRamp = GameWorldObjectCreator.create({
@@ -60,7 +61,7 @@ export function createPlaygroundGameWorldObjects(): GameWorldObject[] {
         },
         mass: 0
     });
-    longRamp.body.position.set(20, 1, 0);
+    longRamp.body.position.set(20, -1, 0);
     longRamp.body.quaternion.setFromEuler(0, 0, Math.PI / 10);
 
     return [floor, ramp, steepRamp, longRamp];

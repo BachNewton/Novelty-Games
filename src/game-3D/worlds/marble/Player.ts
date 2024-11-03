@@ -38,8 +38,6 @@ export const PlayerCreator: PlayerCreator = {
             mass: 1
         });
 
-        player.body.position.y = 2;
-
         let playerCanJump = false;
         let lastJumpTime = 0;
 
@@ -75,7 +73,7 @@ export const PlayerCreator: PlayerCreator = {
                 world.addBody(player.body);
             },
             reset: (orbitControls) => {
-                player.body.position.set(0, 2, 0);
+                player.body.position.setZero();
                 player.body.velocity.setZero();
                 player.body.angularVelocity.setZero();
                 orbitControls.reset();

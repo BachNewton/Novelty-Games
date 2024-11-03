@@ -10,6 +10,7 @@ import { createPlaygroundGameWorldObjects } from "./PlaygroundLevel";
 import { PlayerCreator } from "./Player";
 import { MouseInputCreator, Pointer } from "../../input/Mouse";
 import SkyboxPath from './textures/skybox.jpg';
+import PlayerTexture from './textures/player.png';
 
 const CAMERA_ROTATE_SPEED = 0.003;
 const CAMERA_EDIT_SPEED = 0.02;
@@ -78,6 +79,15 @@ const MarbleWorld: GameWorldCreator = {
         const editableObjects: THREE.Mesh[] = [];
         const editableGameWorldObjects: GameWorldObject[] = [];
         let editableObjectColor = 0xFFA500;
+
+        const startingPlace = new THREE.Mesh(
+            new THREE.SphereGeometry(0.5, 16, 8),
+            new THREE.MeshStandardMaterial({ map: new THREE.TextureLoader().load(PlayerTexture) })
+        );
+        startingPlace.material.wireframe = true;
+        editableObjects.push(startingPlace);
+        scene.add(startingPlace);
+
         const addBox = () => {
             const editableObject = new THREE.Mesh(
                 new THREE.BoxGeometry(1, 1, 1),
@@ -217,8 +227,9 @@ const MarbleWorld: GameWorldCreator = {
                     panOffset.addScaledVector(controllerDirection, deltaTime * CAMERA_EDIT_SPEED);
 
                     for (const editableObject of editableObjects) {
-                        const material = editableObject.material as THREE.MeshStandardMaterial;
-                        material.emissive.setHex(0x000000);
+                        if (editableObject.material instanceof THREE.MeshStandardMaterial) {
+                            editableObject.material.emissive.setHex(0x000000);
+                        }
                     }
 
                     const object = findObjectUnderPointer(mouseInput.pointer, mouseCoordinates, raycaster, camera, editableObjects);
