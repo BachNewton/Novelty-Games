@@ -67,3 +67,17 @@ export function createLevel(
             })
     };
 }
+
+export function saveLevel(level: Level) {
+    const json = JSON.stringify(level);
+    console.log(json);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'level';
+    a.click();
+
+    URL.revokeObjectURL(url);
+}

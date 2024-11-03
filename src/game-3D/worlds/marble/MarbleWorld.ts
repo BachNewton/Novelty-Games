@@ -12,7 +12,7 @@ import { MouseInputCreator, Pointer } from "../../input/Mouse";
 import SkyboxPath from './textures/skybox.jpg';
 import PlayerTexture from './textures/player.png';
 import Checkered from './textures/checkered.jpg';
-import { createLevel, Level } from "./Level";
+import { createLevel, Level, saveLevel } from "./Level";
 
 const CAMERA_ROTATE_SPEED = 0.003;
 const CAMERA_EDIT_SPEED = 0.02;
@@ -220,6 +220,7 @@ const MarbleWorld: GameWorldCreator = {
             'Save': () => {
                 const level = createLevel(editableStartingObject, editableFinishingObject, editableObjects);
                 console.log(level);
+                saveLevel(level);
             }
         }, 'Save');
 
