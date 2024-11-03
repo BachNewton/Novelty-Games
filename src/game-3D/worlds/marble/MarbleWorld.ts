@@ -11,6 +11,7 @@ import { PlayerCreator } from "./Player";
 import { MouseInputCreator, Pointer } from "../../input/Mouse";
 import SkyboxPath from './textures/skybox.jpg';
 import PlayerTexture from './textures/player.png';
+import Checkered from './textures/checkered.jpg';
 
 const CAMERA_ROTATE_SPEED = 0.003;
 const CAMERA_EDIT_SPEED = 0.02;
@@ -43,9 +44,9 @@ const MarbleWorld: GameWorldCreator = {
         const cameraForward = new THREE.Vector3();
         const cameraLeft = new THREE.Vector3();
 
-        const cameraForwardHelper = new THREE.ArrowHelper(cameraForward, new THREE.Vector3(0, 2, 0));
-        const cameraLeftHelper = new THREE.ArrowHelper(cameraLeft, new THREE.Vector3(0, 2, 0));
-        const controllerDirectionHelper = new THREE.ArrowHelper(cameraLeft, new THREE.Vector3(0, 2.5, 0), 2, 'magenta');
+        const cameraForwardHelper = new THREE.ArrowHelper(cameraForward, new THREE.Vector3(0, 1, 0));
+        const cameraLeftHelper = new THREE.ArrowHelper(cameraLeft, new THREE.Vector3(0, 1, 0));
+        const controllerDirectionHelper = new THREE.ArrowHelper(cameraLeft, new THREE.Vector3(0, 1.5, 0), 2, 'magenta');
         scene.add(cameraForwardHelper, cameraLeftHelper, controllerDirectionHelper);
 
         setInterval(() => {
@@ -82,11 +83,17 @@ const MarbleWorld: GameWorldCreator = {
 
         const startingPlace = new THREE.Mesh(
             new THREE.SphereGeometry(0.5, 16, 8),
-            new THREE.MeshStandardMaterial({ map: new THREE.TextureLoader().load(PlayerTexture) })
+            new THREE.MeshStandardMaterial({ map: new THREE.TextureLoader().load(PlayerTexture), wireframe: true })
         );
-        startingPlace.material.wireframe = true;
         editableObjects.push(startingPlace);
         scene.add(startingPlace);
+
+        const endingPlace = new THREE.Mesh(
+            new THREE.BoxGeometry(3, 3, 3),
+            new THREE.MeshStandardMaterial({ map: new THREE.TextureLoader().load(Checkered), transparent: true, opacity: 0.6 })
+        );
+        editableObjects.push(endingPlace);
+        scene.add(endingPlace);
 
         const addBox = () => {
             const editableObject = new THREE.Mesh(
