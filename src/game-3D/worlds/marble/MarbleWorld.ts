@@ -12,6 +12,7 @@ import { MouseInputCreator, Pointer } from "../../input/Mouse";
 import SkyboxPath from './textures/skybox.jpg';
 import PlayerTexture from './textures/player.png';
 import Checkered from './textures/checkered.jpg';
+import { createLevel, Level } from "./Level";
 
 const CAMERA_ROTATE_SPEED = 0.003;
 const CAMERA_EDIT_SPEED = 0.02;
@@ -215,6 +216,12 @@ const MarbleWorld: GameWorldCreator = {
         guiEditMode.add({ "'E' Rotate": () => transformControls.mode = 'rotate' }, "'E' Rotate");
         guiEditMode.add({ "'R' Scale": () => transformControls.mode = 'scale' }, "'R' Scale");
         guiEditMode.add({ "'X' Recenter": recenter }, "'X' Recenter");
+        guiEditMode.add({
+            'Save': () => {
+                const level = createLevel(editableStartingObject, editableFinishingObject, editableObjects);
+                console.log(level);
+            }
+        }, 'Save');
 
         const raycaster = new THREE.Raycaster();
         const mouseCoordinates = new THREE.Vector2();
