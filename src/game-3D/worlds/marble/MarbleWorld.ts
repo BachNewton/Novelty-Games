@@ -95,6 +95,10 @@ const MarbleWorld: GameWorldCreator = {
         editableObjects.push(endingPlace);
         scene.add(endingPlace);
 
+        const forceIntoTranslateMode = () => {
+            transformControls.mode = 'translate';
+        }
+
         const addBox = () => {
             const editableObject = new THREE.Mesh(
                 new THREE.BoxGeometry(1, 1, 1),
@@ -108,6 +112,7 @@ const MarbleWorld: GameWorldCreator = {
 
             scene.add(editableObject);
 
+            transformControls.removeEventListener('mode-changed', forceIntoTranslateMode);
             transformControls.attach(editableObject);
 
             editableObjects.push(editableObject);
@@ -202,6 +207,14 @@ const MarbleWorld: GameWorldCreator = {
             if (transformControls.dragging) return;
             const object = findObjectUnderPointer(pointer, mouseCoordinates, raycaster, camera, editableObjects);
             if (object === null) return;
+
+            if (object === startingPlace || object === endingPlace) {
+                transformControls.mode = 'translate';
+                transformControls.addEventListener('mode-changed', forceIntoTranslateMode);
+            } else {
+                transformControls.removeEventListener('mode-changed', forceIntoTranslateMode);
+            }
+
             transformControls.attach(object);
         });
 
