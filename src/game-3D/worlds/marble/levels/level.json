@@ -1,0 +1,33 @@
+{
+    "startingPosition": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+    },
+    "finishingPosition": {
+        "x": 0,
+        "y": -1,
+        "z": 5
+    },
+    "obstacles": [
+        {
+            "position": {
+                "x": 0,
+                "y": -3,
+                "z": 0
+            },
+            "quaternion": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "w": 1
+            },
+            "scale": {
+                "x": 22,
+                "y": 1,
+                "z": 22
+            },
+            "color": 16753920
+        }
+    ]
+}

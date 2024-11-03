@@ -6,13 +6,12 @@ import { GameWorldObject, GameWorldObjectCreator } from "../GameWorldObject";
 import { randomNum } from "../../../util/Randomizer";
 import { Button } from "../../input/XboxController";
 import { GenericControllerCreator } from "../../input/GenericController";
-import { createPlaygroundGameWorldObjects } from "./PlaygroundLevel";
 import { PlayerCreator } from "./Player";
 import { MouseInputCreator, Pointer } from "../../input/Mouse";
 import SkyboxPath from './textures/skybox.jpg';
 import PlayerTexture from './textures/player.png';
 import Checkered from './textures/checkered.jpg';
-import { createLevel, Level, saveLevel } from "./Level";
+import { createLevel, loadLevel, saveLevel } from "./Level";
 
 const CAMERA_ROTATE_SPEED = 0.003;
 const CAMERA_EDIT_SPEED = 0.02;
@@ -30,17 +29,11 @@ const MarbleWorld: GameWorldCreator = {
 
         const balls: GameWorldObject[] = [];
 
-        for (const object of createPlaygroundGameWorldObjects()) {
-            scene.add(object.mesh);
-            world.addBody(object.body);
-            object.update();
-        }
-
         const controllerDirection = new THREE.Vector3();
 
         const player = PlayerCreator.create(controllerDirection);
         player.add(scene, world);
-        player.updateOrbitControls(orbitControls);
+        player.reset(new THREE.Vector3(), orbitControls);
 
         const cameraForward = new THREE.Vector3();
         const cameraLeft = new THREE.Vector3();
@@ -86,30 +79,33 @@ const MarbleWorld: GameWorldCreator = {
             new THREE.SphereGeometry(0.5, 16, 8),
             new THREE.MeshStandardMaterial({ map: new THREE.TextureLoader().load(PlayerTexture), wireframe: true })
         );
-        editableObjects.push(editableStartingObject);
-        scene.add(editableStartingObject);
+        editableStartingObject.castShadow = true;
 
         const editableFinishingObject = new THREE.Mesh(
             new THREE.BoxGeometry(1, 1, 1),
             new THREE.MeshStandardMaterial({ map: new THREE.TextureLoader().load(Checkered), transparent: true, opacity: 0.6 })
         );
         editableFinishingObject.scale.set(3, 3, 3);
-        editableFinishingObject.position.z = 5;
-        editableObjects.push(editableFinishingObject);
-        scene.add(editableFinishingObject);
+        editableFinishingObject.castShadow = true;
 
         const forceIntoTranslateMode = () => {
             transformControls.mode = 'translate';
         }
 
-        const addBox = () => {
+        const createEditableObject: (color: number) => THREE.Mesh = (color) => {
             const editableObject = new THREE.Mesh(
                 new THREE.BoxGeometry(1, 1, 1),
-                new THREE.MeshStandardMaterial({ color: editableObjectColor })
+                new THREE.MeshStandardMaterial({ color: color })
             );
 
             editableObject.castShadow = true;
             editableObject.receiveShadow = true;
+
+            return editableObject;
+        };
+
+        const addBox = () => {
+            const editableObject = createEditableObject(editableObjectColor);
 
             editableObject.position.copy(orbitControls.target);
 
@@ -139,15 +135,9 @@ const MarbleWorld: GameWorldCreator = {
                 scene.add(editableObject);
             }
         };
-        enterEditMode();
 
-        const enterPlayMode = () => {
-            state = State.PLAY;
-            player.updateOrbitControls(orbitControls);
-            orbitControls.enablePan = false;
-            guiPlayMode.show();
-            guiEditMode.hide();
-            transformControls.detach();
+        const addEditableObjectsToGameWorld = () => {
+            editableGameWorldObjects.splice(0);
 
             for (const editableObject of editableObjects) {
                 scene.remove(editableObject);
@@ -201,14 +191,68 @@ const MarbleWorld: GameWorldCreator = {
             }
         };
 
+        const enterPlayMode = () => {
+            state = State.PLAY;
+            player.reset(editableStartingObject.position, orbitControls);
+            orbitControls.enablePan = false;
+            guiPlayMode.show();
+            guiEditMode.hide();
+            transformControls.detach();
+
+            addEditableObjectsToGameWorld();
+        };
+
         const recenter = () => {
             if (state !== State.EDIT) return;
             if (transformControls.object === undefined) return;
             orbitControls.target.copy(transformControls.object.position);
         };
 
-        guiPlayMode.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
+        const loadLevel1 = () => {
+            const level = loadLevel();
 
+            editableStartingObject.position.set(level.startingPosition.x, level.startingPosition.y, level.startingPosition.z);
+            editableFinishingObject.position.set(level.finishingPosition.x, level.finishingPosition.y, level.finishingPosition.z);
+
+            const loadedEditableObjects: THREE.Mesh[] = level.obstacles.map(obstacle => {
+                const editableObject = createEditableObject(obstacle.color);
+
+                editableObject.scale.set(
+                    obstacle.scale.x,
+                    obstacle.scale.y,
+                    obstacle.scale.z
+                );
+
+                editableObject.position.set(
+                    obstacle.position.x,
+                    obstacle.position.y,
+                    obstacle.position.z
+                );
+
+                editableObject.quaternion.set(
+                    obstacle.quaternion.x,
+                    obstacle.quaternion.y,
+                    obstacle.quaternion.z,
+                    obstacle.quaternion.w
+                );
+
+                return editableObject;
+            });
+
+            loadedEditableObjects.push(editableStartingObject, editableFinishingObject);
+
+            editableObjects.splice(0);
+            editableObjects.push(...loadedEditableObjects);
+
+            if (state === State.PLAY) {
+                addEditableObjectsToGameWorld();
+                player.reset(editableStartingObject.position, orbitControls);
+            }
+        };
+        loadLevel1();
+
+        guiPlayMode.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
+        guiPlayMode.add({ 'Level 1': loadLevel1 }, 'Level 1');
         guiEditMode.add({ 'Enter Play Mode': enterPlayMode }, 'Enter Play Mode');
         guiEditMode.add({ 'Add Box': addBox }, 'Add Box');
         guiEditMode.addColor({ 'Color': 0xFFA500 }, 'Color').onChange(color => editableObjectColor = color);

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import SavedLevel from './levels/level.json';
 
 export interface Level {
     startingPosition: Position;
@@ -80,4 +81,8 @@ export function saveLevel(level: Level) {
     a.click();
 
     URL.revokeObjectURL(url);
+}
+
+export function loadLevel(): Level {
+    return SavedLevel;
 }

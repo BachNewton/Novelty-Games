@@ -16,7 +16,6 @@ interface Player {
     reset(position: THREE.Vector3, orbitControls: OrbitControls): void;
     add(scene: THREE.Scene, world: CANNON.World): void;
     update(deltaTime: number, contacts: CANNON.ContactEquation[]): void;
-    updateOrbitControls(orbitControls: OrbitControls): void;
 }
 
 interface PlayerCreator {
@@ -64,9 +63,6 @@ export const PlayerCreator: PlayerCreator = {
                 }
 
                 player.update();
-            },
-            updateOrbitControls: (orbitControls) => {
-                orbitControls.target = player.mesh.position;
             },
             add: (scene, world) => {
                 scene.add(player.mesh);
