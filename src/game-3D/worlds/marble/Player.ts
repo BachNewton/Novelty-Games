@@ -31,7 +31,7 @@ export const PlayerCreator: PlayerCreator = {
                 radius: 0.5
             },
             material: {
-                type: 'texture',
+                type: 'texturePath',
                 texturePath: PlayerTexture,
                 normalMapPath: PlayerNormalMap
             },
