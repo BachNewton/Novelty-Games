@@ -81,19 +81,19 @@ const MarbleWorld: GameWorldCreator = {
         const editableGameWorldObjects: GameWorldObject[] = [];
         let editableObjectColor = 0xFFA500;
 
-        const startingPlace = new THREE.Mesh(
+        const editableStartingObject = new THREE.Mesh(
             new THREE.SphereGeometry(0.5, 16, 8),
             new THREE.MeshStandardMaterial({ map: new THREE.TextureLoader().load(PlayerTexture), wireframe: true })
         );
-        editableObjects.push(startingPlace);
-        scene.add(startingPlace);
+        editableObjects.push(editableStartingObject);
+        scene.add(editableStartingObject);
 
-        const endingPlace = new THREE.Mesh(
+        const editableFinishingObject = new THREE.Mesh(
             new THREE.BoxGeometry(3, 3, 3),
             new THREE.MeshStandardMaterial({ map: new THREE.TextureLoader().load(Checkered), transparent: true, opacity: 0.6 })
         );
-        editableObjects.push(endingPlace);
-        scene.add(endingPlace);
+        editableObjects.push(editableFinishingObject);
+        scene.add(editableFinishingObject);
 
         const forceIntoTranslateMode = () => {
             transformControls.mode = 'translate';
@@ -208,7 +208,7 @@ const MarbleWorld: GameWorldCreator = {
             const object = findObjectUnderPointer(pointer, mouseCoordinates, raycaster, camera, editableObjects);
             if (object === null) return;
 
-            if (object === startingPlace || object === endingPlace) {
+            if (object === editableStartingObject || object === editableFinishingObject) {
                 transformControls.mode = 'translate';
                 transformControls.addEventListener('mode-changed', forceIntoTranslateMode);
             } else {
@@ -222,7 +222,7 @@ const MarbleWorld: GameWorldCreator = {
             console.log('Button pressed:', button);
 
             if (button === Button.VIEW) {
-                player.reset(orbitControls);
+                player.reset(editableStartingObject.position, orbitControls);
             } else if (button === Button.A) {
                 player.jump();
             } else if (button === Button.RIGHT_STICK_IN) {

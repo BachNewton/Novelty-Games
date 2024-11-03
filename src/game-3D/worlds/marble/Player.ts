@@ -13,7 +13,7 @@ const JUMP_COOLDOWN = 200;
 
 interface Player {
     jump(): void;
-    reset(orbitControls: OrbitControls): void;
+    reset(position: THREE.Vector3, orbitControls: OrbitControls): void;
     add(scene: THREE.Scene, world: CANNON.World): void;
     update(deltaTime: number, contacts: CANNON.ContactEquation[]): void;
     updateOrbitControls(orbitControls: OrbitControls): void;
@@ -72,11 +72,11 @@ export const PlayerCreator: PlayerCreator = {
                 scene.add(player.mesh);
                 world.addBody(player.body);
             },
-            reset: (orbitControls) => {
-                player.body.position.setZero();
+            reset: (position, orbitControls) => {
+                player.body.position.set(position.x, position.y, position.z);
                 player.body.velocity.setZero();
                 player.body.angularVelocity.setZero();
-                orbitControls.reset();
+                orbitControls.target = player.mesh.position;
             },
             jump: () => {
                 if (!playerCanJump) return;
