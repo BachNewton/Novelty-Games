@@ -10,7 +10,8 @@ import { MouseInputCreator } from "../../input/Mouse";
 import SkyboxPath from './textures/skybox.jpg';
 import { Level, loadLevelFile } from "./Level";
 import { DEFAULT_COLOR, EditorCreator } from "./Editor";
-import Level1 from './levels/level.json';
+import EmptyLevel from './levels/empty_level.json';
+import Level1 from './levels/level1.json';
 
 const CAMERA_ROTATE_SPEED = 0.003;
 
@@ -140,6 +141,7 @@ const MarbleWorld: GameWorldCreator = {
         const guiEditModeFileFolder = guiEditMode.addFolder('File');
         guiEditModeFileFolder.add({ 'Save': editor.save }, 'Save');
         guiEditModeFileFolder.add({ 'Load': () => loadLevelFile().then(level => loadLevel(level)) }, 'Load');
+        guiEditModeFileFolder.add({ 'Empty Level': () => { if (window.confirm('Are you sure you want to empty the level?\nThis will erase all your progress!')) loadLevel(EmptyLevel) } }, 'Empty Level');
         const guiEditModePlayerFolder = guiEditMode.addFolder('Player');
         guiEditModePlayerFolder.add({ 'Enter Play Mode': enterPlayMode }, 'Enter Play Mode');
 
@@ -224,6 +226,8 @@ function createOrbitControls(camera: THREE.PerspectiveCamera, rendererDomElement
     controls.minDistance = 4;
     controls.maxDistance = 11;
     controls.enablePan = false;
+
+    controls.saveState();
 
     controls.update();
 

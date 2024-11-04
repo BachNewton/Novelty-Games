@@ -73,6 +73,7 @@ export const PlayerCreator: PlayerCreator = {
                 player.body.velocity.setZero();
                 player.body.angularVelocity.setZero();
                 orbitControls.target = player.mesh.position;
+                orbitControls.reset();
             },
             jump: () => {
                 if (!playerCanJump) return;
