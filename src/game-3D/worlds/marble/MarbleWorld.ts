@@ -1,8 +1,7 @@
 import { GameWorldCreator } from "../GameWorld";
 import * as THREE from 'three';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
-import { GameWorldObject, GameWorldObjectCreator } from "../GameWorldObject";
-import { randomNum } from "../../../util/Randomizer";
+import { GameWorldObject } from "../GameWorldObject";
 import { Button } from "../../input/XboxController";
 import { GenericControllerCreator } from "../../input/GenericController";
 import { PlayerCreator } from "./Player";
@@ -24,8 +23,6 @@ const MarbleWorld: GameWorldCreator = {
         addLight(scene);
         addSkybox(scene);
 
-        const balls: GameWorldObject[] = [];
-
         const controllerDirection = new THREE.Vector3();
 
         const player = PlayerCreator.create(controllerDirection);
@@ -39,26 +36,6 @@ const MarbleWorld: GameWorldCreator = {
         // const cameraLeftHelper = new THREE.ArrowHelper(cameraLeft, new THREE.Vector3(0, 1, 0));
         // const controllerDirectionHelper = new THREE.ArrowHelper(cameraLeft, new THREE.Vector3(0, 1.5, 0), 2, 'magenta');
         // scene.add(cameraForwardHelper, cameraLeftHelper, controllerDirectionHelper);
-
-        setInterval(() => {
-            const ball = GameWorldObjectCreator.create({
-                dimensions: {
-                    type: 'sphere',
-                    radius: 0.5
-                },
-                material: {
-                    type: 'color',
-                    color: 'yellow'
-                },
-                mass: 1
-            });
-
-            ball.body.position.set(randomNum(-7, 7), 10, randomNum(-7, 7));
-
-            scene.add(ball.mesh);
-            world.addBody(ball.body);
-            balls.push(ball);
-        }, 5000);
 
         const editor = EditorCreator.create(scene, camera, orbitControls);
 
@@ -121,7 +98,7 @@ const MarbleWorld: GameWorldCreator = {
             }
         };
 
-        loadLevel1(); // TODO: Kyle, remove this later
+        loadLevel1();
 
         guiPlayMode.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
         guiPlayMode.add({ 'Level 1': loadLevel1 }, 'Level 1');
@@ -169,10 +146,6 @@ const MarbleWorld: GameWorldCreator = {
 
                 if (state === State.EDIT) {
                     editor.update(deltaTime, controllerDirection, mouseInput.pointer);
-                }
-
-                for (const ball of balls) {
-                    ball.update();
                 }
 
                 player.update(deltaTime, world.contacts);
