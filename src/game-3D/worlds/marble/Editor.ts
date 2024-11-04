@@ -13,7 +13,7 @@ const CAMERA_EDIT_SPEED = 0.02;
 interface Editor {
     enterEditMode: () => void;
     leaveEditMode: () => void;
-    createGameWorldObjects(): GameWorldObject[];
+    createGameWorldObjects(onCollideWithFinish: () => void): GameWorldObject[];
     getStartingPosition: () => THREE.Vector3;
     recenter: () => void;
     save: () => void;
@@ -77,13 +77,13 @@ function createEditor(
         leaveEditMode: () => {
             transformControls.detach();
         },
-        createGameWorldObjects: () => {
+        createGameWorldObjects: (onCollideWithFinish) => {
             editableObjects.forEach(object => scene.remove(object));
 
             return editableObjects
                 // The editable starting object should not be added to the game world
                 .filter(object => object !== editableStartingObject)
-                .map(object => createGameWorldObject(object, editableFinishingObject));
+                .map(object => createGameWorldObject(object, editableFinishingObject, onCollideWithFinish));
         },
         getStartingPosition: () => {
             return editableStartingObject.position;
@@ -206,7 +206,8 @@ function createEditableObject(color: number): THREE.Mesh<THREE.BufferGeometry, T
 
 function createGameWorldObject(
     editableObject: THREE.Mesh,
-    editableFinishingObject: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>
+    editableFinishingObject: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>,
+    onCollideWithFinish: () => void
 ): GameWorldObject {
     const object = GameWorldObjectCreator.create({
         dimensions: {
@@ -229,7 +230,7 @@ function createGameWorldObject(
     });
 
     if (editableObject === editableFinishingObject) {
-        object.body.addEventListener('collide', (e: any) => console.log('Something has hit the finish!'));
+        object.body.addEventListener('collide', onCollideWithFinish);
     }
 
     object.body.position.set(

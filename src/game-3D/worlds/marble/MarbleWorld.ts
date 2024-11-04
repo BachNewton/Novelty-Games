@@ -22,6 +22,7 @@ const MarbleWorld: GameWorldCreator = {
     create: (scene, camera, world, domElement, updateHUD) => {
         let state = State.PLAY;
         let startTime = performance.now();
+        let playerFinished = false;
 
         addLight(scene);
         addSkybox(scene);
@@ -32,7 +33,12 @@ const MarbleWorld: GameWorldCreator = {
 
         const player = PlayerCreator.create(controllerDirection);
         player.add(scene, world);
-        player.reset(new THREE.Vector3(), orbitControls);
+
+        const resetPlayer = (startingPosition: THREE.Vector3) => {
+            player.reset(startingPosition, orbitControls);
+            startTime = performance.now();
+            playerFinished = false;
+        };
 
         const cameraForward = new THREE.Vector3();
         const cameraLeft = new THREE.Vector3();
@@ -44,8 +50,8 @@ const MarbleWorld: GameWorldCreator = {
 
         const editor = EditorCreator.create(scene, camera, orbitControls);
 
-        const guiPlayMode = new GUI();
-        const guiEditMode = new GUI();
+        const guiPlayMode = new GUI({ title: 'Play Mode' });
+        const guiEditMode = new GUI({ title: 'Edit Mode' });
         guiEditMode.hide();
 
         const editableGameWorldObjects: GameWorldObject[] = [];
@@ -69,7 +75,11 @@ const MarbleWorld: GameWorldCreator = {
         const addEditableObjectsToGameWorld = () => {
             editableGameWorldObjects.splice(0);
 
-            for (const object of editor.createGameWorldObjects()) {
+            const gameWorldObjects = editor.createGameWorldObjects(() => {
+                playerFinished = true;
+            });
+
+            for (const object of gameWorldObjects) {
                 scene.add(object.mesh);
                 world.addBody(object.body);
 
@@ -80,7 +90,7 @@ const MarbleWorld: GameWorldCreator = {
         const enterPlayMode = () => {
             state = State.PLAY;
 
-            player.reset(editor.getStartingPosition(), orbitControls);
+            resetPlayer(editor.getStartingPosition());
 
             orbitControls.enablePan = false;
 
@@ -103,14 +113,20 @@ const MarbleWorld: GameWorldCreator = {
 
                 addEditableObjectsToGameWorld();
 
-                player.reset(editor.getStartingPosition(), orbitControls);
+                resetPlayer(editor.getStartingPosition());
             }
         };
 
         loadLevel(Level1);
 
-        guiPlayMode.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
-        guiPlayMode.add({ 'Level 1': () => loadLevel(Level1) }, 'Level 1');
+        guiPlayMode.add({ "'Tab' Reset": () => resetPlayer(editor.getStartingPosition()) }, "'Tab' Reset");
+        const guiPlayModeLevelsFolder = guiPlayMode.addFolder('Levels');
+        guiPlayModeLevelsFolder.add({ 'Level 1': () => loadLevel(Level1) }, 'Level 1');
+        guiPlayModeLevelsFolder.add({ 'Level 2': () => loadLevel(Level1) }, 'Level 2');
+        guiPlayModeLevelsFolder.add({ 'Level 3': () => loadLevel(Level1) }, 'Level 3');
+        const guiPlayModeEditorFolder = guiPlayMode.addFolder('Editor');
+        guiPlayModeEditorFolder.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
+
         guiEditMode.add({ 'Enter Play Mode': enterPlayMode }, 'Enter Play Mode');
         guiEditMode.add({ 'Add Box': editor.addBox }, 'Add Box');
         guiEditMode.addColor({ 'Color': 0xFFA500 }, 'Color').onChange(color => editor.changeColor(color));
@@ -133,7 +149,7 @@ const MarbleWorld: GameWorldCreator = {
 
             if (button === Button.VIEW) {
                 if (state === State.EDIT) return;
-                player.reset(editor.getStartingPosition(), orbitControls);
+                resetPlayer(editor.getStartingPosition())
             } else if (button === Button.A) {
                 if (state === State.EDIT) return;
                 player.jump();
@@ -165,7 +181,13 @@ const MarbleWorld: GameWorldCreator = {
                 (orbitControls as any)._rotateUp(deltaTime * CAMERA_ROTATE_SPEED * controller.rightAxis.y);
                 orbitControls.update();
 
-                updateHUD(getHUDText(startTime));
+                if (state === State.EDIT) {
+                    updateHUD('');
+                } else if (state === State.PLAY) {
+                    if (!playerFinished) {
+                        updateHUD(getHUDText(startTime));
+                    }
+                }
 
                 // cameraForwardHelper.setDirection(cameraForward);
                 // cameraLeftHelper.setDirection(cameraLeft);
