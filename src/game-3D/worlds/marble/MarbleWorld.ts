@@ -1,6 +1,7 @@
 import { GameWorldCreator } from "../GameWorld";
 import * as THREE from 'three';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GameWorldObject } from "../GameWorldObject";
 import { Button } from "../../input/XboxController";
 import { GenericControllerCreator } from "../../input/GenericController";
@@ -18,13 +19,15 @@ export enum State {
 }
 
 const MarbleWorld: GameWorldCreator = {
-    create: (scene, camera, world, orbitControls) => {
+    create: (scene, camera, world, domElement) => {
         let state = State.PLAY;
 
         addLight(scene);
         addSkybox(scene);
 
         const controllerDirection = new THREE.Vector3();
+
+        const orbitControls = createOrbitControls(camera, domElement);
 
         const player = PlayerCreator.create(controllerDirection);
         player.add(scene, world);
@@ -169,6 +172,20 @@ const MarbleWorld: GameWorldCreator = {
         };
     }
 };
+
+function createOrbitControls(camera: THREE.PerspectiveCamera, rendererDomElement: HTMLCanvasElement): OrbitControls {
+    const controls = new OrbitControls(camera, rendererDomElement);
+
+    controls.object.position.set(0, 3, -8);
+
+    controls.minDistance = 4;
+    controls.maxDistance = 11;
+    controls.enablePan = false;
+
+    controls.update();
+
+    return controls;
+}
 
 function addLight(scene: THREE.Scene) {
     const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1.25);

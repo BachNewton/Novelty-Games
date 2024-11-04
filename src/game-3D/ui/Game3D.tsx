@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
 import { GameWorld } from "../worlds/GameWorld";
 import MarbleWorld from "../worlds/marble/MarbleWorld";
@@ -34,9 +33,7 @@ function setupGame(containerElement: HTMLDivElement) {
     onWindowResize(camera, renderer);
     window.addEventListener('resize', () => onWindowResize(camera, renderer));
 
-    const orbitControls = createOrbitControls(camera, renderer.domElement);
-
-    const gameWorld: GameWorld = MarbleWorld.create(scene, camera, world, orbitControls);
+    const gameWorld: GameWorld = MarbleWorld.create(scene, camera, world, renderer.domElement);
 
     let previousTime = performance.now();
 
@@ -76,15 +73,6 @@ function createRenderer(containerElement: HTMLDivElement): THREE.WebGLRenderer {
     containerElement.appendChild(renderer.domElement);
 
     return renderer;
-}
-
-function createOrbitControls(camera: THREE.PerspectiveCamera, rendererDomElement: HTMLCanvasElement): OrbitControls {
-    const controls = new OrbitControls(camera, rendererDomElement);
-    controls.minDistance = 5;
-    controls.maxDistance = 10;
-    controls.enablePan = false;
-    controls.update();
-    return controls;
 }
 
 function createStats(containerElement: HTMLDivElement): Stats {
