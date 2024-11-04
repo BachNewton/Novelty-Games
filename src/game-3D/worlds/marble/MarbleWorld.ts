@@ -127,16 +127,19 @@ const MarbleWorld: GameWorldCreator = {
         const guiPlayModeEditorFolder = guiPlayMode.addFolder('Editor');
         guiPlayModeEditorFolder.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
 
-        guiEditMode.add({ 'Enter Play Mode': enterPlayMode }, 'Enter Play Mode');
-        guiEditMode.add({ 'Add Box': editor.addBox }, 'Add Box');
-        guiEditMode.addColor({ 'Color': DEFAULT_COLOR }, 'Color').onChange(color => editor.changeColor(color));
-        guiEditMode.add({ "'Q' Translate": editor.changeToTranslateMode }, "'Q' Translate");
-        guiEditMode.add({ "'E' Rotate": editor.changeToRotateMode }, "'E' Rotate");
-        guiEditMode.add({ "'R' Scale": editor.changeToScaleMode }, "'R' Scale");
-        guiEditMode.add({ "'X' Recenter": editor.recenter }, "'X' Recenter");
+        const guiEditModeCreateFolder = guiEditMode.addFolder('Create');
+        guiEditModeCreateFolder.add({ 'Add Box': editor.addBox }, 'Add Box');
+        guiEditModeCreateFolder.addColor({ 'Color': DEFAULT_COLOR }, 'Color').onChange(color => editor.changeColor(color));
+        const guiEditModeControlsFolder = guiEditMode.addFolder('Controls');
+        guiEditModeControlsFolder.add({ "'Q' Translate": editor.changeToTranslateMode }, "'Q' Translate");
+        guiEditModeControlsFolder.add({ "'E' Rotate": editor.changeToRotateMode }, "'E' Rotate");
+        guiEditModeControlsFolder.add({ "'R' Scale": editor.changeToScaleMode }, "'R' Scale");
+        guiEditModeControlsFolder.add({ "'X' Recenter": editor.recenter }, "'X' Recenter");
         const guiEditModeFileFolder = guiEditMode.addFolder('File');
         guiEditModeFileFolder.add({ 'Save': editor.save }, 'Save');
         guiEditModeFileFolder.add({ 'Load': () => loadLevelFile().then(level => loadLevel(level)) }, 'Load');
+        const guiEditModePlayerFolder = guiEditMode.addFolder('Player');
+        guiEditModePlayerFolder.add({ 'Enter Play Mode': enterPlayMode }, 'Enter Play Mode');
 
         const mouseInput = MouseInputCreator.create((pointer) => {
             if (state !== State.EDIT) return;
