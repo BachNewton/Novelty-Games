@@ -20,7 +20,7 @@ interface Quaternion extends Vector3 {
     w: number;
 }
 
-interface Obstacle {
+export interface Obstacle {
     position: Position;
     quaternion: Quaternion;
     scale: Scale;
@@ -69,9 +69,11 @@ export function createLevel(
     };
 }
 
-export function saveLevel(level: Level) {
+export function createLevelFile(level: Level) {
     const json = JSON.stringify(level);
-    console.log(json);
+
+    console.log('Saved Level JSON:', json);
+
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 
