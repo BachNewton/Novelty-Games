@@ -113,9 +113,9 @@ const MarbleWorld: GameWorldCreator = {
         guiEditMode.add({ 'Enter Play Mode': enterPlayMode }, 'Enter Play Mode');
         guiEditMode.add({ 'Add Box': editor.addBox }, 'Add Box');
         guiEditMode.addColor({ 'Color': 0xFFA500 }, 'Color').onChange(color => editor.changeColor(color));
-        guiEditMode.add({ "'Q' Translate": () => editor.changeToTranslateMode }, "'Q' Translate");
-        guiEditMode.add({ "'E' Rotate": () => editor.changeToRotateMode }, "'E' Rotate");
-        guiEditMode.add({ "'R' Scale": () => editor.changeToScaleMode }, "'R' Scale");
+        guiEditMode.add({ "'Q' Translate": editor.changeToTranslateMode }, "'Q' Translate");
+        guiEditMode.add({ "'E' Rotate": editor.changeToRotateMode }, "'E' Rotate");
+        guiEditMode.add({ "'R' Scale": editor.changeToScaleMode }, "'R' Scale");
         guiEditMode.add({ "'X' Recenter": editor.recenter }, "'X' Recenter");
         const guiEditModeFileFolder = guiEditMode.addFolder('File');
         guiEditModeFileFolder.add({ 'Save': editor.save }, 'Save');
