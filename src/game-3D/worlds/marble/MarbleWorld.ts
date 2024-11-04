@@ -9,7 +9,7 @@ import { PlayerCreator } from "./Player";
 import { MouseInputCreator } from "../../input/Mouse";
 import SkyboxPath from './textures/skybox.jpg';
 import { Level, loadLevelFile } from "./Level";
-import { EditorCreator } from "./Editor";
+import { DEFAULT_COLOR, EditorCreator } from "./Editor";
 import Level1 from './levels/level.json';
 
 const CAMERA_ROTATE_SPEED = 0.003;
@@ -129,7 +129,7 @@ const MarbleWorld: GameWorldCreator = {
 
         guiEditMode.add({ 'Enter Play Mode': enterPlayMode }, 'Enter Play Mode');
         guiEditMode.add({ 'Add Box': editor.addBox }, 'Add Box');
-        guiEditMode.addColor({ 'Color': 0xFFA500 }, 'Color').onChange(color => editor.changeColor(color));
+        guiEditMode.addColor({ 'Color': DEFAULT_COLOR }, 'Color').onChange(color => editor.changeColor(color));
         guiEditMode.add({ "'Q' Translate": editor.changeToTranslateMode }, "'Q' Translate");
         guiEditMode.add({ "'E' Rotate": editor.changeToRotateMode }, "'E' Rotate");
         guiEditMode.add({ "'R' Scale": editor.changeToScaleMode }, "'R' Scale");

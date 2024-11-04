@@ -9,6 +9,7 @@ import { Pointer } from '../../input/Mouse';
 import { State } from './MarbleWorld';
 
 const CAMERA_EDIT_SPEED = 0.02;
+export const DEFAULT_COLOR = 0xCED3D4;
 
 interface Editor {
     enterEditMode: () => void;
@@ -48,7 +49,7 @@ function createEditor(
     const editableStartingObject = createEditableStartingObject();
     const editableFinishingObject = createEditableFinishingObject();
     const editableObjects: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>[] = [];
-    let editableObjectColor = 0xFFA500;
+    let editableObjectColor = DEFAULT_COLOR;
     const raycaster = new THREE.Raycaster();
     const mouseCoordinates = new THREE.Vector2();
 
