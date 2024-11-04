@@ -7,12 +7,13 @@ import { GenericControllerCreator } from "../../input/GenericController";
 import { PlayerCreator } from "./Player";
 import { MouseInputCreator } from "../../input/Mouse";
 import SkyboxPath from './textures/skybox.jpg';
-import { loadLevel } from "./Level";
+import { Level, loadLevelFile } from "./Level";
 import { EditorCreator } from "./Editor";
+import Level1 from './levels/level.json';
 
 const CAMERA_ROTATE_SPEED = 0.003;
 
-enum State {
+export enum State {
     PLAY, EDIT
 }
 
@@ -87,21 +88,25 @@ const MarbleWorld: GameWorldCreator = {
             addEditableObjectsToGameWorld();
         };
 
-        const loadLevel1 = () => {
-            const level = loadLevel();
-
-            editor.loadLevel(level);
+        const loadLevel = (level: Level) => {
+            editor.load(level, state);
 
             if (state === State.PLAY) {
+                editableGameWorldObjects.forEach(object => {
+                    scene.remove(object.mesh);
+                    world.removeBody(object.body);
+                });
+
                 addEditableObjectsToGameWorld();
+
                 player.reset(editor.getStartingPosition(), orbitControls);
             }
         };
 
-        loadLevel1();
+        loadLevel(Level1);
 
         guiPlayMode.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
-        guiPlayMode.add({ 'Level 1': loadLevel1 }, 'Level 1');
+        guiPlayMode.add({ 'Level 1': () => loadLevel(Level1) }, 'Level 1');
         guiEditMode.add({ 'Enter Play Mode': enterPlayMode }, 'Enter Play Mode');
         guiEditMode.add({ 'Add Box': editor.addBox }, 'Add Box');
         guiEditMode.addColor({ 'Color': 0xFFA500 }, 'Color').onChange(color => editor.changeColor(color));
@@ -109,7 +114,9 @@ const MarbleWorld: GameWorldCreator = {
         guiEditMode.add({ "'E' Rotate": () => editor.changeToRotateMode }, "'E' Rotate");
         guiEditMode.add({ "'R' Scale": () => editor.changeToScaleMode }, "'R' Scale");
         guiEditMode.add({ "'X' Recenter": editor.recenter }, "'X' Recenter");
-        guiEditMode.add({ 'Save': editor.save }, 'Save');
+        const guiEditModeFileFolder = guiEditMode.addFolder('File');
+        guiEditModeFileFolder.add({ 'Save': editor.save }, 'Save');
+        guiEditModeFileFolder.add({ 'Load': () => loadLevelFile().then(level => loadLevel(level)) }, 'Load');
 
         const mouseInput = MouseInputCreator.create((pointer) => {
             if (state !== State.EDIT) return;

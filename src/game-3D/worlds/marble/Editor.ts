@@ -6,6 +6,7 @@ import PlayerTexture from './textures/player.png';
 import CheckeredTexture from './textures/checkered.jpg';
 import { createLevel, Level, Obstacle, createLevelFile } from './Level';
 import { Pointer } from '../../input/Mouse';
+import { State } from './MarbleWorld';
 
 const CAMERA_EDIT_SPEED = 0.02;
 
@@ -15,13 +16,13 @@ interface Editor {
     createGameWorldObjects(): GameWorldObject[];
     getStartingPosition: () => THREE.Vector3;
     recenter: () => void;
-    loadLevel: (level: Level) => void;
+    save: () => void;
+    load: (level: Level, worldState: State) => void;
     addBox: () => void;
     changeColor: (color: number) => void;
     changeToTranslateMode: () => void;
     changeToRotateMode: () => void;
     changeToScaleMode: () => void;
-    save: () => void;
     onClick: (pointer: Pointer) => void;
     update: (deltaTime: number, controllerDirection: THREE.Vector3, mousePointer: Pointer) => void;
 }
@@ -92,7 +93,16 @@ function createEditor(
 
             orbitControls.target.copy(transformControls.object.position);
         },
-        loadLevel: (level) => {
+        save: () => {
+            const level = createLevel(editableStartingObject, editableFinishingObject, editableObjects);
+
+            console.log('Saved Level:', level);
+
+            createLevelFile(level);
+        },
+        load: (level, worldState) => {
+            scene.remove(...editableObjects);
+
             editableStartingObject.position.set(level.startingPosition.x, level.startingPosition.y, level.startingPosition.z);
             editableFinishingObject.position.set(level.finishingPosition.x, level.finishingPosition.y, level.finishingPosition.z);
 
@@ -105,19 +115,17 @@ function createEditor(
                 editableFinishingObject,
                 ...loadedObjects
             );
+
+            if (worldState === State.EDIT) {
+                transformControls.detach();
+                scene.add(...editableObjects);
+            }
         },
         addBox: () => addBox(),
         changeColor: (color) => editableObjectColor = color,
         changeToTranslateMode: () => transformControls.mode = 'translate',
         changeToRotateMode: () => transformControls.mode = 'rotate',
         changeToScaleMode: () => transformControls.mode = 'scale',
-        save: () => {
-            const level = createLevel(editableStartingObject, editableFinishingObject, editableObjects);
-
-            console.log('Saved Level:', level);
-
-            createLevelFile(level);
-        },
         onClick: (pointer) => {
             // Don't select a new object if we're actively transform some other object
             if (transformControls.dragging) return;
