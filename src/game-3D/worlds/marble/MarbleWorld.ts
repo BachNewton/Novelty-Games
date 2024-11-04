@@ -130,6 +130,8 @@ const MarbleWorld: GameWorldCreator = {
         const guiEditModeCreateFolder = guiEditMode.addFolder('Create');
         guiEditModeCreateFolder.add({ 'Add Box': editor.addBox }, 'Add Box');
         guiEditModeCreateFolder.addColor({ 'Color': DEFAULT_COLOR }, 'Color').onChange(color => editor.changeColor(color));
+        guiEditModeCreateFolder.add({ 'Delete': editor.delete }, 'Delete');
+        guiEditModeCreateFolder.add({ 'Clone': editor.clone }, 'Clone');
         const guiEditModeControlsFolder = guiEditMode.addFolder('Controls');
         guiEditModeControlsFolder.add({ "'Q' Translate": editor.changeToTranslateMode }, "'Q' Translate");
         guiEditModeControlsFolder.add({ "'E' Rotate": editor.changeToRotateMode }, "'E' Rotate");

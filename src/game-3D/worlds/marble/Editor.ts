@@ -20,6 +20,8 @@ interface Editor {
     save: () => void;
     load: (level: Level, worldState: State) => void;
     addBox: () => void;
+    delete: () => void;
+    clone: () => void;
     changeColor: (color: number) => void;
     changeToTranslateMode: () => void;
     changeToRotateMode: () => void;
@@ -123,6 +125,22 @@ function createEditor(
             }
         },
         addBox: () => addBox(),
+        delete: () => {
+            const object = transformControls.object;
+
+            if (object === undefined) return;
+            if (object === editableStartingObject || object === editableFinishingObject) return;
+
+            scene.remove(object);
+
+            const objectIndex = editableObjects.indexOf(object as THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>);
+            editableObjects.splice(objectIndex, 1);
+
+            transformControls.detach();
+        },
+        clone: () => {
+            //
+        },
         changeColor: (color) => editableObjectColor = color,
         changeToTranslateMode: () => transformControls.mode = 'translate',
         changeToRotateMode: () => transformControls.mode = 'rotate',
