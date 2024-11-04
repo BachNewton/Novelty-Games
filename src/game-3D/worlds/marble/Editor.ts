@@ -139,7 +139,18 @@ function createEditor(
             transformControls.detach();
         },
         clone: () => {
-            //
+            const object = transformControls.object;
+
+            if (object === undefined) return;
+            if (object === editableStartingObject || object === editableFinishingObject) return;
+
+            const source = object as THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
+            const clone = source.clone();
+            clone.material = source.material.clone();
+
+            scene.add(clone);
+            editableObjects.push(clone);
+            transformControls.attach(clone);
         },
         changeColor: (color) => editableObjectColor = color,
         changeToTranslateMode: () => transformControls.mode = 'translate',
