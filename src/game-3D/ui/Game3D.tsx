@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import Stats from 'three/examples/jsm/libs/stats.module';
@@ -9,18 +9,23 @@ let hasGameBeenSetup = false;
 
 const Game3D: React.FC = () => {
     const containerElement = useRef<HTMLDivElement>(null);
+    const [HUDText, setHUDText] = useState('');
 
     useEffect(() => {
         if (hasGameBeenSetup) return;
         hasGameBeenSetup = true;
 
-        setupGame(containerElement?.current!);
+        setupGame(containerElement?.current!, setHUDText);
     }, []);
 
-    return <div style={{ overflow: 'hidden', height: '100vh' }} ref={containerElement}></div>;
+    return <div style={{ overflow: 'hidden', height: '100vh' }} ref={containerElement}>
+        <div style={{ position: 'absolute', width: '100%', color: 'white', 'fontSize': '2em', marginTop: '25px', textAlign: 'center', userSelect: 'none' }}>
+            {HUDText}
+        </div>
+    </div>;
 };
 
-function setupGame(containerElement: HTMLDivElement) {
+function setupGame(containerElement: HTMLDivElement, updateHUD: (text: string) => void) {
     const scene = new THREE.Scene();
     const camera = createCamera();
     const renderer = createRenderer(containerElement);
@@ -33,7 +38,7 @@ function setupGame(containerElement: HTMLDivElement) {
     onWindowResize(camera, renderer);
     window.addEventListener('resize', () => onWindowResize(camera, renderer));
 
-    const gameWorld: GameWorld = MarbleWorld.create(scene, camera, world, renderer.domElement);
+    const gameWorld: GameWorld = MarbleWorld.create(scene, camera, world, renderer.domElement, updateHUD);
 
     let previousTime = performance.now();
 

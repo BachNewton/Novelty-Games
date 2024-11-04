@@ -6,5 +6,5 @@ export interface GameWorld {
 }
 
 export interface GameWorldCreator {
-    create(scene: THREE.Scene, camera: THREE.PerspectiveCamera, world: CANNON.World, domElement: HTMLCanvasElement): GameWorld;
+    create(scene: THREE.Scene, camera: THREE.PerspectiveCamera, world: CANNON.World, domElement: HTMLCanvasElement, updateHUD: (text: string) => void): GameWorld;
 }

@@ -19,8 +19,9 @@ export enum State {
 }
 
 const MarbleWorld: GameWorldCreator = {
-    create: (scene, camera, world, domElement) => {
+    create: (scene, camera, world, domElement, updateHUD) => {
         let state = State.PLAY;
+        let startTime = performance.now();
 
         addLight(scene);
         addSkybox(scene);
@@ -164,6 +165,8 @@ const MarbleWorld: GameWorldCreator = {
                 (orbitControls as any)._rotateUp(deltaTime * CAMERA_ROTATE_SPEED * controller.rightAxis.y);
                 orbitControls.update();
 
+                updateHUD(getHUDText(startTime));
+
                 // cameraForwardHelper.setDirection(cameraForward);
                 // cameraLeftHelper.setDirection(cameraLeft);
                 // controllerDirectionHelper.setDirection(controllerDirection);
@@ -172,6 +175,13 @@ const MarbleWorld: GameWorldCreator = {
         };
     }
 };
+
+function getHUDText(startTime: number): string {
+    const stopwatchMs = performance.now() - startTime;
+    const stopwtach = stopwatchMs / 1000;
+
+    return stopwtach.toFixed(1).toString();
+}
 
 function createOrbitControls(camera: THREE.PerspectiveCamera, rendererDomElement: HTMLCanvasElement): OrbitControls {
     const controls = new OrbitControls(camera, rendererDomElement);
