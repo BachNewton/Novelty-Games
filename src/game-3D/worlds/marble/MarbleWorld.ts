@@ -161,6 +161,12 @@ const MarbleWorld: GameWorldCreator = {
             } else if (button === Button.RIGHT_STICK_IN) {
                 if (state === State.PLAY) return;
                 editor.recenter();
+            } else if (button === Button.LEFT_D_STICK) {
+                if (state === State.PLAY) return;
+                editor.delete();
+            } else if (button === Button.RIGHT_D_STICK) {
+                if (state === State.PLAY) return;
+                editor.clone();
             }
         });
 

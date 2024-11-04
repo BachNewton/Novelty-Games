@@ -18,12 +18,16 @@ export const GenericControllerCreator: GenericControllerCreator = {
                 onButtonPressed(Button.VIEW);
             } else if (key === Key.X) {
                 onButtonPressed(Button.RIGHT_STICK_IN);
+            } else if (key === Key.BACKSPACE) {
+                onButtonPressed(Button.LEFT_D_STICK);
+            } else if (key === Key.C) {
+                onButtonPressed(Button.RIGHT_D_STICK);
             }
         });
 
         const leftAxis: Axis = { x: 0, y: 0 };
         const rightAxis: Axis = { x: 0, y: 0 };
-        const pressed: Buttons = { a: false, view: false, rightStickIn: false };
+        const pressed: Buttons = { a: false, view: false, rightStickIn: false, leftDStick: false, rightDStick: false };
 
         return {
             leftAxis: leftAxis,
