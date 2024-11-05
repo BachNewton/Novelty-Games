@@ -26,6 +26,8 @@ enum KeyEventType {
     DOWN, UP
 }
 
+type KeyLookup = [string, keyof Keys, Key | null];
+
 export const KeyboardInputCreator: KeyboardInputCreator = {
     create: (onKeyPressed) => {
         const held: Keys = {
@@ -40,6 +42,18 @@ export const KeyboardInputCreator: KeyboardInputCreator = {
             c: false
         };
 
+        const keyLookups: KeyLookup[] = [
+            ['Space', 'space', Key.SPACE],
+            ['Tab', 'tab', Key.TAB],
+            ['KeyX', 'x', Key.X],
+            ['Backspace', 'backspace', Key.BACKSPACE],
+            ['KeyC', 'c', Key.C],
+            ['KeyW', 'w', null],
+            ['KeyA', 'a', null],
+            ['KeyS', 's', null],
+            ['KeyD', 'd', null]
+        ];
+
         const handleKeyEvent = (e: KeyboardEvent, type: KeyEventType) => {
             const code = e.code;
 
@@ -47,34 +61,20 @@ export const KeyboardInputCreator: KeyboardInputCreator = {
                 e.preventDefault();
             }
 
-            if (type === KeyEventType.DOWN) {
-                if (code === 'Space' && !held.space) onKeyPressed(Key.SPACE);
-                if (code === 'Tab' && !held.tab) onKeyPressed(Key.TAB);
-                if (code === 'KeyX' && !held.x) onKeyPressed(Key.X);
-                if (code === 'Backspace' && !held.backspace) onKeyPressed(Key.BACKSPACE);
-                if (code === 'KeyC' && !held.c) onKeyPressed(Key.C);
-            }
-
             const updatedValue = type === KeyEventType.DOWN ? true : false;
 
-            if (code === 'KeyW') {
-                held.w = updatedValue;
-            } else if (code === 'KeyA') {
-                held.a = updatedValue;
-            } else if (code === 'KeyS') {
-                held.s = updatedValue;
-            } else if (code === 'KeyD') {
-                held.d = updatedValue;
-            } else if (code === 'Space') {
-                held.space = updatedValue;
-            } else if (code === 'Tab') {
-                held.tab = updatedValue;
-            } else if (code === 'KeyX') {
-                held.x = updatedValue;
-            } else if (code === 'Backspace') {
-                held.backspace = updatedValue;
-            } else if (code === 'KeyC') {
-                held.c = updatedValue;
+            for (const keyLookup of keyLookups) {
+                const lookupCode = keyLookup[0];
+                const lookupHeldKey = keyLookup[1];
+                const lookupKey = keyLookup[2];
+
+                if (updatedValue && lookupKey !== null && code === lookupCode && !held[lookupHeldKey]) {
+                    onKeyPressed(lookupKey);
+                }
+
+                if (code === lookupCode) {
+                    held[lookupHeldKey] = updatedValue;
+                }
             }
         };
 
