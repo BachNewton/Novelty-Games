@@ -1,36 +1,44 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import * as CANNON from 'cannon-es';
 import Stats from 'three/examples/jsm/libs/stats.module';
-import SeaWorld from "../worlds/sea/SeaWorld";
+import { GameWorld } from "../worlds/GameWorld";
+import MarbleWorld from "../worlds/marble/MarbleWorld";
 
 let hasGameBeenSetup = false;
 
 const Game3D: React.FC = () => {
     const containerElement = useRef<HTMLDivElement>(null);
+    const [HUDText, setHUDText] = useState('');
 
     useEffect(() => {
         if (hasGameBeenSetup) return;
         hasGameBeenSetup = true;
 
-        setupGame(containerElement?.current!);
+        setupGame(containerElement?.current!, setHUDText);
     }, []);
 
-    return <div style={{ overflow: 'hidden', height: '100vh' }} ref={containerElement}></div>;
+    return <div style={{ overflow: 'hidden', height: '100vh' }} ref={containerElement}>
+        <div style={{ position: 'absolute', width: '100%', color: 'white', 'fontSize': '2em', marginTop: '25px', textAlign: 'center', userSelect: 'none' }}>
+            {HUDText}
+        </div>
+    </div>;
 };
 
-function setupGame(containerElement: HTMLDivElement) {
+function setupGame(containerElement: HTMLDivElement, updateHUD: (text: string) => void) {
     const scene = new THREE.Scene();
     const camera = createCamera();
     const renderer = createRenderer(containerElement);
     const stats = createStats(containerElement);
 
+    const world = new CANNON.World({
+        gravity: new CANNON.Vec3(0, -9.80665, 0)
+    });
+
     onWindowResize(camera, renderer);
     window.addEventListener('resize', () => onWindowResize(camera, renderer));
 
-    const seaWorld = new SeaWorld(scene, new THREE.PMREMGenerator(renderer));
-
-    setControls(camera, renderer.domElement);
+    const gameWorld: GameWorld = MarbleWorld.create(scene, camera, world, renderer.domElement, updateHUD);
 
     let previousTime = performance.now();
 
@@ -38,7 +46,8 @@ function setupGame(containerElement: HTMLDivElement) {
         const deltaTime = timeNow - previousTime;
         previousTime = timeNow;
 
-        seaWorld.update(deltaTime);
+        world.step(deltaTime / 1000);
+        gameWorld.update(deltaTime);
         renderer.render(scene, camera);
         stats.update();
     };
@@ -47,31 +56,28 @@ function setupGame(containerElement: HTMLDivElement) {
 }
 
 function createCamera(): THREE.PerspectiveCamera {
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
 
-    camera.position.z = 25;
-    camera.position.y = 15;
-    camera.position.x = 10;
+    camera.position.z = 10;
+    camera.position.y = 8;
+    camera.position.x = 8;
 
     return camera;
 }
 
 function createRenderer(containerElement: HTMLDivElement): THREE.WebGLRenderer {
-    const renderer = new THREE.WebGLRenderer();
+    const renderer = new THREE.WebGLRenderer({
+        antialias: true
+    });
 
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.5;
+    renderer.shadowMap.enabled = true;
 
-    containerElement?.appendChild(renderer.domElement);
+    containerElement.appendChild(renderer.domElement);
 
     return renderer;
-}
-
-function setControls(camera: THREE.PerspectiveCamera, rendererDomElement: HTMLCanvasElement) {
-    const controls = new OrbitControls(camera, rendererDomElement);
-
-    controls.update();
 }
 
 function createStats(containerElement: HTMLDivElement): Stats {

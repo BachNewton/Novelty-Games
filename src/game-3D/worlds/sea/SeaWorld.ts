@@ -1,12 +1,15 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { Sky } from 'three/examples/jsm/objects/Sky';
-import { Water } from 'three/examples/jsm/objects/Water';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 import WaterNormalsTexture from './textures/waternormals.jpg';
 import SunCalc from 'suncalc';
+import { AmmoPhysics, Water, Sky } from 'three/examples/jsm/Addons';
 
-const SAILBOAT_MODEL_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/main/models/sailboat/scene.gltf';
+const CITIES = {
+    helsinki: {
+        latitude: 60.17,
+        longitude: 24.93545
+    }
+};
 
 export default class SeaWorld {
     scene: THREE.Scene;
@@ -15,7 +18,6 @@ export default class SeaWorld {
     renderTarget: THREE.WebGLRenderTarget;
 
     testingCubes: THREE.Object3D[];
-    sailboat: THREE.Group | null;
     sun: THREE.Vector3;
     sky: Sky;
     skyParameters = {
@@ -24,9 +26,10 @@ export default class SeaWorld {
     };
     date = new Date();
     dateProps = {
-        month: this.date.getMonth(),
-        date: this.date.getDate(),
-        hour: this.date.getHours()
+        Month: this.date.getMonth(),
+        Date: this.date.getDate(),
+        Hour: this.date.getHours(),
+        'Time Scale': 500
     };
     water: Water;
 
@@ -43,22 +46,38 @@ export default class SeaWorld {
         this.testingCubes = this.createTestingCubes();
         this.scene.add(...this.testingCubes);
 
-        this.sailboat = null;
-        new GLTFLoader().loadAsync(SAILBOAT_MODEL_URL).then(gltf => {
-            this.sailboat = gltf.scene;
+        this.addGUI();
 
-            this.sailboat.scale.multiplyScalar(0.01);
-
-            this.scene.add(this.sailboat);
-        }).catch(error => {
-            console.error(error);
-        });
-
-        const gui = new GUI();
-        gui.add(this.dateProps, 'month', 0, 11, 1).onChange(() => this.calculateSunPosition());
-        gui.add(this.dateProps, 'date', 1, 31, 1).onChange(() => this.calculateSunPosition());
-        gui.add(this.dateProps, 'hour', 0, 24, 1).onChange(() => this.calculateSunPosition());
         this.calculateSunPosition();
+
+        AmmoPhysics().then(ammoPhysicsObject => {
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshStandardMaterial({ color: 'magenta' });
+            const cube = new THREE.Mesh(geometry, material);
+
+            cube.translateY(15);
+
+            this.scene.add(cube);
+            ammoPhysicsObject.addMesh(cube, 1);
+
+            setInterval(() => {
+                const geometry = new THREE.SphereGeometry(0.5);
+                const material = new THREE.MeshStandardMaterial({ color: 'yellow' });
+                const sphere = new THREE.Mesh(geometry, material);
+
+                sphere.translateY(15);
+
+                this.scene.add(sphere);
+                ammoPhysicsObject.addMesh(sphere, 1);
+            }, 750);
+
+            const geometry2 = new THREE.BoxGeometry(15, 1, 15);
+            const material2 = new THREE.MeshStandardMaterial({ color: 'white' });
+            const floor = new THREE.Mesh(geometry2, material2);
+
+            this.scene.add(floor);
+            ammoPhysicsObject.addMesh(floor, 0);
+        });
     }
 
     update(deltaTime: number) {
@@ -66,10 +85,23 @@ export default class SeaWorld {
 
         this.water.material.uniforms['time'].value += deltaTime * 0.0002;
 
-        this.testingCubes.forEach(testingCube => {
+        for (const testingCube of this.testingCubes) {
             testingCube.rotateX(deltaTime * 0.001);
             testingCube.rotateY(deltaTime * 0.001);
-        });
+        }
+
+        this.date.setTime(this.date.getTime() + deltaTime * this.dateProps['Time Scale']);
+        this.updateSkyParameters();
+    }
+
+    private addGUI() {
+        const gui = new GUI();
+
+        const dateAndTimeFolder = gui.addFolder('Date & Time');
+        dateAndTimeFolder.add(this.dateProps, 'Month', 1, 12, 1).onChange(() => this.calculateSunPosition());
+        dateAndTimeFolder.add(this.dateProps, 'Date', 1, 31, 1).onChange(() => this.calculateSunPosition());
+        dateAndTimeFolder.add(this.dateProps, 'Hour', 0, 23, 1).onChange(() => this.calculateSunPosition());
+        dateAndTimeFolder.add(this.dateProps, 'Time Scale', 1, 3000, 5);
     }
 
     private createTestingCubes(): THREE.Object3D[] {
@@ -149,12 +181,16 @@ export default class SeaWorld {
     }
 
     private calculateSunPosition() {
-        this.date.setMonth(this.dateProps.month);
-        this.date.setDate(this.dateProps.date);
-        this.date.setHours(this.dateProps.hour);
+        this.date.setMonth(this.dateProps.Month - 1);
+        this.date.setDate(this.dateProps.Date);
+        this.date.setHours(this.dateProps.Hour);
 
-        const latitude = 60.17; // Helsinki
-        const longitude = 24.93545; // Helsinki
+        this.updateSkyParameters();
+    }
+
+    private updateSkyParameters() {
+        const latitude = CITIES.helsinki.latitude;
+        const longitude = CITIES.helsinki.longitude;
 
         const position = SunCalc.getPosition(this.date, latitude, longitude);
 
