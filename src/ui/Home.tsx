@@ -7,7 +7,7 @@ import Games2DHome from '../game-2D/ui/Home';
 import Games3DHome from '../game-3D/ui/Home';
 import ToolsHome from '../tools/ui/Home';
 
-const APP_VERSION = 'v2.2.1';
+const APP_VERSION = 'v2.3.0';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -41,7 +41,7 @@ enum VersionState {
 }
 
 const Home: React.FC<HomeProps> = ({ updateListener }) => {
-    const [state, setState] = useState<State>(new Game3DState());
+    const [state, setState] = useState<State>(new HomeState());
     const [versionState, setVersionSate] = useState(VersionState.CHECKING);
 
     useEffect(() => {

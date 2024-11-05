@@ -11,7 +11,7 @@ class MenuUiState implements UiState { }
 class Game3DState implements UiState { }
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
-    const [uiState, setUiState] = useState<UiState>(new Game3DState());
+    const [uiState, setUiState] = useState<UiState>(new MenuUiState());
 
     const onMarbleClick = () => {
         setUiState(new Game3DState());
