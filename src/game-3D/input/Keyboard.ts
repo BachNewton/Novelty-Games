@@ -12,6 +12,9 @@ interface Keys {
     x: boolean;
     backspace: boolean;
     c: boolean;
+    q: boolean;
+    e: boolean;
+    r: boolean;
 }
 
 interface KeyboardInputCreator {
@@ -19,7 +22,14 @@ interface KeyboardInputCreator {
 }
 
 export enum Key {
-    SPACE = 'SPACE', TAB = 'TAB', X = 'X', BACKSPACE = 'BACKSPACE', C = 'C'
+    SPACE = 'SPACE',
+    TAB = 'TAB',
+    X = 'X',
+    BACKSPACE = 'BACKSPACE',
+    C = 'C',
+    Q = 'Q',
+    E = 'E',
+    R = 'R'
 }
 
 enum KeyEventType {
@@ -39,7 +49,10 @@ export const KeyboardInputCreator: KeyboardInputCreator = {
             tab: false,
             x: false,
             backspace: false,
-            c: false
+            c: false,
+            q: false,
+            e: false,
+            r: false
         };
 
         const keyLookups: KeyLookup[] = [
@@ -48,6 +61,9 @@ export const KeyboardInputCreator: KeyboardInputCreator = {
             ['KeyX', 'x', Key.X],
             ['Backspace', 'backspace', Key.BACKSPACE],
             ['KeyC', 'c', Key.C],
+            ['KeyQ', 'q', Key.Q],
+            ['KeyE', 'e', Key.E],
+            ['KeyR', 'r', Key.R],
             ['KeyW', 'w', null],
             ['KeyA', 'a', null],
             ['KeyS', 's', null],

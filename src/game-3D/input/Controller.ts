@@ -12,6 +12,9 @@ export interface Axis {
 
 export interface Buttons {
     a: boolean;
+    x: boolean;
+    y: boolean;
+    b: boolean;
     view: boolean;
     rightStickIn: boolean;
     leftDStick: boolean;

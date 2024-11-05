@@ -22,12 +22,27 @@ export const GenericControllerCreator: GenericControllerCreator = {
                 onButtonPressed(Button.LEFT_D_STICK);
             } else if (key === Key.C) {
                 onButtonPressed(Button.RIGHT_D_STICK);
+            } else if (key === Key.Q) {
+                onButtonPressed(Button.X);
+            } else if (key === Key.E) {
+                onButtonPressed(Button.Y);
+            } else if (key === Key.R) {
+                onButtonPressed(Button.B);
             }
         });
 
         const leftAxis: Axis = { x: 0, y: 0 };
         const rightAxis: Axis = { x: 0, y: 0 };
-        const pressed: Buttons = { a: false, view: false, rightStickIn: false, leftDStick: false, rightDStick: false };
+        const pressed: Buttons = {
+            a: false,
+            x: false,
+            y: false,
+            b: false,
+            view: false,
+            rightStickIn: false,
+            leftDStick: false,
+            rightDStick: false
+        };
 
         return {
             leftAxis: leftAxis,

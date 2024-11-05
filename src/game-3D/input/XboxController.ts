@@ -6,6 +6,9 @@ interface XboxControllerCreator {
 
 export enum Button {
     A = 'A',
+    X = 'X',
+    Y = 'Y',
+    B = 'B',
     VIEW = 'VIEW',
     RIGHT_STICK_IN = 'RIGHT_STICK_IN',
     LEFT_D_STICK = 'LEFT_D_STICK',
@@ -21,7 +24,16 @@ export const XboxControllerCreator: XboxControllerCreator = {
 
         const leftAxis: Axis = { x: 0, y: 0 };
         const rightAxis: Axis = { x: 0, y: 0 };
-        const pressed: Buttons = { a: false, view: false, rightStickIn: false, leftDStick: false, rightDStick: false };
+        const pressed: Buttons = {
+            a: false,
+            x: false,
+            y: false,
+            b: false,
+            view: false,
+            rightStickIn: false,
+            leftDStick: false,
+            rightDStick: false
+        };
 
         const buttonLookups: ButtonLookup[] = [
             [0, Button.A, 'a'],
