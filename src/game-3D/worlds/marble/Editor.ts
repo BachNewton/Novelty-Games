@@ -6,7 +6,7 @@ import PlayerTexture from './textures/player.png';
 import CheckeredTexture from './textures/checkered.jpg';
 import { createLevel, Level, Obstacle, createLevelFile } from './Level';
 import { Pointer } from '../../input/Mouse';
-import { State } from './MarbleWorld';
+import { State, temporaryObjectMaterial, temporaryPlayerMaterial } from './MarbleWorld';
 
 const CAMERA_EDIT_SPEED = 0.02;
 export const DEFAULT_COLOR = 0xCED3D4;
@@ -86,7 +86,7 @@ function createEditor(
             return editableObjects
                 // The editable starting object should not be added to the game world
                 .filter(object => object !== editableStartingObject)
-                .map(object => createGameWorldObject(object, editableFinishingObject, onCollideWithFinish));
+                .map(object => createGameWorldObject(object, editableFinishingObject, editableStartingObject, onCollideWithFinish));
         },
         getStartingPosition: () => {
             return editableStartingObject.position;
@@ -237,6 +237,7 @@ function createEditableObject(color: number): THREE.Mesh<THREE.BufferGeometry, T
 function createGameWorldObject(
     editableObject: THREE.Mesh,
     editableFinishingObject: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>,
+    editableStartingObject: THREE.Mesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>,
     onCollideWithFinish: () => void
 ): GameWorldObject {
     const object = GameWorldObjectCreator.create({
@@ -246,7 +247,7 @@ function createGameWorldObject(
             height: editableObject.scale.y,
             depth: editableObject.scale.z
         },
-        material: editableObject === editableFinishingObject
+        visualMaterial: editableObject === editableFinishingObject
             ? {
                 type: 'texture',
                 texture: editableFinishingObject.material.map!,
@@ -256,6 +257,7 @@ function createGameWorldObject(
                 type: 'color',
                 color: (editableObject.material as THREE.MeshStandardMaterial).color
             },
+        physicalMaterial: temporaryObjectMaterial,
         mass: 0
     });
 

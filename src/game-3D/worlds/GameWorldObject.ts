@@ -47,11 +47,12 @@ interface TextureMaterial extends MaterialType {
     opacity: number;
 }
 
-type Material = ColorMaterial | TexturePathMaterial | TextureMaterial;
+type VisualMaterial = ColorMaterial | TexturePathMaterial | TextureMaterial;
 
 interface GameWorldObjectOptions {
     dimensions: Dimensions;
-    material: Material;
+    visualMaterial: VisualMaterial;
+    physicalMaterial?: CANNON.Material;
     mass: number;
 }
 
@@ -73,7 +74,7 @@ export const GameWorldObjectCreator: GameWorldObjectCreator = {
         };
 
         const createMaterial = () => {
-            const material = options.material;
+            const material = options.visualMaterial;
 
             switch (material.type) {
                 case 'color':
@@ -95,7 +96,8 @@ export const GameWorldObjectCreator: GameWorldObjectCreator = {
         const results = threeToCannon(mesh)!;
         const body = new CANNON.Body({
             shape: results.shape,
-            mass: options.mass
+            mass: options.mass,
+            material: options.physicalMaterial
         });
 
         return {

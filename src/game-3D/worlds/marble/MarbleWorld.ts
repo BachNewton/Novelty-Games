@@ -1,5 +1,6 @@
 import { GameWorldCreator } from "../GameWorld";
 import * as THREE from 'three';
+import * as CANNON from 'cannon-es';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GameWorldObject } from "../GameWorldObject";
@@ -17,8 +18,21 @@ import Level3 from './levels/level3.json';
 
 export const temporaryExperimentalProperties = {
     playerAirSpeed: 0,
-    jumpHeight: 7.5
+    jumpHeight: 7.5,
+    slipperiness: 0.3,
+    bounciness: 0
 };
+
+export const temporaryPlayerMaterial = new CANNON.Material('player');
+export const temporaryObjectMaterial = new CANNON.Material('object');
+const temporaryContactMaterial = new CANNON.ContactMaterial(
+    temporaryPlayerMaterial,
+    temporaryObjectMaterial,
+    {
+        friction: temporaryExperimentalProperties.slipperiness,
+        restitution: temporaryExperimentalProperties.bounciness
+    }
+);
 
 const CAMERA_ROTATE_SPEED = 0.003;
 
@@ -34,6 +48,8 @@ const MarbleWorld: GameWorldCreator = {
 
         addLight(scene);
         addSkybox(scene);
+
+        world.addContactMaterial(temporaryContactMaterial);
 
         const controllerDirection = new THREE.Vector3();
 
@@ -135,8 +151,11 @@ const MarbleWorld: GameWorldCreator = {
         const guiPlayModeEditorFolder = guiPlayMode.addFolder('Editor');
         guiPlayModeEditorFolder.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
         const guiPlayModeExperimentalFolder = guiPlayMode.addFolder('Experimental');
-        guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'playerAirSpeed', 0, 0.05);
+        guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'playerAirSpeed', 0, 0.03);
         guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'jumpHeight', 0, 10);
+        guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'slipperiness', 0, 1).onChange(slipperiness => temporaryContactMaterial.friction = 1 - slipperiness);
+        guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'bounciness', 0, 2).onChange(bounciness => temporaryContactMaterial.restitution = bounciness);
+        guiPlayModeExperimentalFolder.close();
 
         const guiEditModeCreateFolder = guiEditMode.addFolder('Create');
         guiEditModeCreateFolder.add({ 'Add Box': editor.addBox }, 'Add Box');
