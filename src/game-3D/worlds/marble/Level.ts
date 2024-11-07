@@ -29,7 +29,7 @@ export interface Obstacle {
 export function createLevel(
     startingObject: THREE.Mesh,
     finishingObject: THREE.Mesh,
-    objects: THREE.Mesh[]
+    objects: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>[]
 ): Level {
     return {
         startingPosition: {
@@ -62,7 +62,7 @@ export function createLevel(
                         y: object.scale.y,
                         z: object.scale.z
                     },
-                    color: (object.material as THREE.MeshStandardMaterial).color.getHex()
+                    color: object.material.color.getHex()
                 };
             })
     };
