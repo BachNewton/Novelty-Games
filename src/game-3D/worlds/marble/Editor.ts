@@ -70,6 +70,19 @@ function createEditor(
         editableObjects.push(editableObject);
     };
 
+    const transformControlsObject = (
+        excludeSpecialObjects: boolean,
+        provideObject: (object: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>) => void
+    ) => {
+        if (transformControls.object === undefined) return;
+
+        const object = transformControls.object as THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
+
+        if (excludeSpecialObjects && (object === editableStartingObject || object === editableFinishingObject)) return;
+
+        provideObject(object);
+    };
+
     return {
         enterEditMode: () => {
             orbitControls.target = new THREE.Vector3();
@@ -91,11 +104,7 @@ function createEditor(
         getStartingPosition: () => {
             return editableStartingObject.position;
         },
-        recenter: () => {
-            if (transformControls.object === undefined) return;
-
-            orbitControls.target.copy(transformControls.object.position);
-        },
+        recenter: () => transformControlsObject(false, object => orbitControls.target.copy(object.position)),
         save: () => {
             const level = createLevel(editableStartingObject, editableFinishingObject, editableObjects);
 
@@ -125,33 +134,22 @@ function createEditor(
             }
         },
         addBox: () => addBox(),
-        delete: () => {
-            const object = transformControls.object;
-
-            if (object === undefined) return;
-            if (object === editableStartingObject || object === editableFinishingObject) return;
-
+        delete: () => transformControlsObject(true, object => {
             scene.remove(object);
 
-            const objectIndex = editableObjects.indexOf(object as THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>);
+            const objectIndex = editableObjects.indexOf(object);
             editableObjects.splice(objectIndex, 1);
 
             transformControls.detach();
-        },
-        clone: () => {
-            const object = transformControls.object;
-
-            if (object === undefined) return;
-            if (object === editableStartingObject || object === editableFinishingObject) return;
-
-            const source = object as THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
-            const clone = source.clone();
-            clone.material = source.material.clone();
+        }),
+        clone: () => transformControlsObject(true, object => {
+            const clone = object.clone();
+            clone.material = object.material.clone();
 
             scene.add(clone);
             editableObjects.push(clone);
             transformControls.attach(clone);
-        },
+        }),
         changeColor: (color) => editableObjectColor = color,
         changeToTranslateMode: () => transformControls.mode = 'translate',
         changeToRotateMode: () => transformControls.mode = 'rotate',
