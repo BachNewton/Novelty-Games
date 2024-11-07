@@ -174,8 +174,9 @@ const MarbleWorld: GameWorldCreator = {
         const guiEditModePlayerFolder = guiEditMode.addFolder('Player');
         guiEditModePlayerFolder.add({ 'Enter Play Mode': enterPlayMode }, 'Enter Play Mode');
 
-        const mouseInput = MouseInputCreator.create((pointer) => {
+        const mouseInput = MouseInputCreator.create((pointer, target) => {
             if (state !== State.EDIT) return;
+            if (domElement !== target) return;
 
             editor.onClick(pointer);
         });
