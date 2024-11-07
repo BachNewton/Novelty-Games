@@ -150,7 +150,10 @@ function createEditor(
             editableObjects.push(clone);
             transformControls.attach(clone);
         }),
-        changeColor: (color) => editableObjectColor = color,
+        changeColor: (color) => {
+            editableObjectColor = color;
+            transformControlsObject(true, object => object.material.color.set(color));
+        },
         changeToTranslateMode: () => transformControls.mode = 'translate',
         changeToRotateMode: () => transformControls.mode = 'rotate',
         changeToScaleMode: () => transformControls.mode = 'scale',
