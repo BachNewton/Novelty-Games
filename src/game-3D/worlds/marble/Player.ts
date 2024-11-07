@@ -4,10 +4,11 @@ import { GameWorldObjectCreator } from "../GameWorldObject";
 import PlayerTexture from './textures/player.png';
 import PlayerNormalMap from './textures/player-normal-map.png';
 import { OrbitControls } from 'three/examples/jsm/Addons';
+import { temporaryExperimentalProperties, temporaryPlayerMaterial } from './MarbleWorld';
 
 const WORLD_DOWN = new CANNON.Vec3(0, -1, 0);
 const PLAYER_SPEED = 0.7;
-const JUMP_VELOCITY = 7.5;
+// const JUMP_VELOCITY = 7.5;
 const STEEPNESS_THRESHOLD = 0.7;
 const JUMP_COOLDOWN = 200;
 
@@ -15,7 +16,7 @@ interface Player {
     jump(): void;
     reset(position: THREE.Vector3, orbitControls: OrbitControls): void;
     add(scene: THREE.Scene, world: CANNON.World): void;
-    update(deltaTime: number, contacts: CANNON.ContactEquation[]): void;
+    update(deltaTime: number, contacts: CANNON.ContactEquation[], isJumpButtonHeld: boolean): void;
 }
 
 interface PlayerCreator {
@@ -29,11 +30,12 @@ export const PlayerCreator: PlayerCreator = {
                 type: 'sphere',
                 radius: 0.5
             },
-            material: {
+            visualMaterial: {
                 type: 'texturePath',
                 texturePath: PlayerTexture,
                 normalMapPath: PlayerNormalMap
             },
+            physicalMaterial: temporaryPlayerMaterial,
             mass: 1
         });
 
@@ -43,8 +45,16 @@ export const PlayerCreator: PlayerCreator = {
         const bodyIntendedDirection = new CANNON.Vec3();
         const torque = new CANNON.Vec3();
 
+        const jump = () => {
+            if (!playerCanJump) return;
+
+            playerCanJump = false;
+            lastJumpTime = performance.now();
+            player.body.velocity.y += temporaryExperimentalProperties.jumpHeight;
+        };
+
         return {
-            update: (deltaTime, contacts) => {
+            update: (deltaTime, contacts, isJumpButtonHeld) => {
                 bodyIntendedDirection.set(intendedDirection.x, 0, intendedDirection.z);
                 bodyIntendedDirection.cross(WORLD_DOWN, torque);
                 torque.scale(deltaTime * PLAYER_SPEED, torque);
@@ -62,6 +72,18 @@ export const PlayerCreator: PlayerCreator = {
                     }
                 }
 
+                if (playerCanJump) {
+                    if (isJumpButtonHeld) {
+                        jump();
+                    }
+                } else {
+                    player.body.velocity.addScaledVector(
+                        deltaTime * temporaryExperimentalProperties.playerAirSpeed,
+                        bodyIntendedDirection,
+                        player.body.velocity
+                    );
+                }
+
                 player.update();
             },
             add: (scene, world) => {
@@ -75,13 +97,7 @@ export const PlayerCreator: PlayerCreator = {
                 orbitControls.target = player.mesh.position;
                 orbitControls.reset();
             },
-            jump: () => {
-                if (!playerCanJump) return;
-
-                playerCanJump = false;
-                lastJumpTime = performance.now();
-                player.body.velocity.y = JUMP_VELOCITY;
-            }
+            jump: jump
         };
     }
 };

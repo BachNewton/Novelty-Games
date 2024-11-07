@@ -62,6 +62,12 @@ export const GenericControllerCreator: GenericControllerCreator = {
 
                 rightAxis.x = Math.abs(xboxController.rightAxis.x) > DEADZONE ? xboxController.rightAxis.x : 0;
                 rightAxis.y = Math.abs(xboxController.rightAxis.y) > DEADZONE ? xboxController.rightAxis.y : 0;
+
+                pressed.a = keyboardInput.held.space;
+
+                if (xboxController.pressed.a) {
+                    pressed.a = true;
+                }
             }
         };
     }
