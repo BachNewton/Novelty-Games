@@ -72,6 +72,19 @@ export const XboxControllerCreator: XboxControllerCreator = {
                 rightAxis.x = gamepad.axes[2];
                 rightAxis.y = gamepad.axes[3];
 
+                const leftAxisMagnitude = Math.hypot(leftAxis.x, leftAxis.y);
+                const rightAxisMagnitude = Math.hypot(rightAxis.x, rightAxis.y);
+
+                if (leftAxisMagnitude > 1) {
+                    leftAxis.x /= leftAxisMagnitude;
+                    leftAxis.y /= leftAxisMagnitude;
+                }
+
+                if (rightAxisMagnitude > 1) {
+                    rightAxis.x /= rightAxisMagnitude;
+                    rightAxis.y /= rightAxisMagnitude;
+                }
+
                 updateButtons(gamepad);
             }
         };

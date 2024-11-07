@@ -15,6 +15,11 @@ import Level1 from './levels/level1.json';
 import Level2 from './levels/level2.json';
 import Level3 from './levels/level3.json';
 
+export const temporaryExperimentalProperties = {
+    playerAirSpeed: 0,
+    jumpHeight: 7.5
+};
+
 const CAMERA_ROTATE_SPEED = 0.003;
 
 export enum State {
@@ -129,6 +134,9 @@ const MarbleWorld: GameWorldCreator = {
         guiPlayModeLevelsFolder.add({ 'Level 3': () => loadLevel(Level3) }, 'Level 3');
         const guiPlayModeEditorFolder = guiPlayMode.addFolder('Editor');
         guiPlayModeEditorFolder.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
+        const guiPlayModeExperimentalFolder = guiPlayMode.addFolder('Experimental');
+        guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'playerAirSpeed', 0, 0.05);
+        guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'jumpHeight', 0, 10);
 
         const guiEditModeCreateFolder = guiEditMode.addFolder('Create');
         guiEditModeCreateFolder.add({ 'Add Box': editor.addBox }, 'Add Box');
@@ -199,7 +207,7 @@ const MarbleWorld: GameWorldCreator = {
                     editor.update(deltaTime, controllerDirection, mouseInput.pointer);
                 }
 
-                player.update(deltaTime, world.contacts);
+                player.update(deltaTime, world.contacts, controller.pressed.a);
 
                 (orbitControls as any)._rotateLeft(deltaTime * CAMERA_ROTATE_SPEED * controller.rightAxis.x);
                 (orbitControls as any)._rotateUp(deltaTime * CAMERA_ROTATE_SPEED * controller.rightAxis.y);
