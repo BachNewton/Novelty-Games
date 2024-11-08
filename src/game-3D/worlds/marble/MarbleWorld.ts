@@ -17,7 +17,6 @@ import Level2 from './levels/level2.json';
 import Level3 from './levels/level3.json';
 
 export const temporaryExperimentalProperties = {
-    playerAirSpeed: 0,
     jumpHeight: 7.5,
     slipperiness: 0.3,
     bounciness: 0
@@ -151,7 +150,6 @@ const MarbleWorld: GameWorldCreator = {
         const guiPlayModeEditorFolder = guiPlayMode.addFolder('Editor');
         guiPlayModeEditorFolder.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
         const guiPlayModeExperimentalFolder = guiPlayMode.addFolder('Experimental');
-        guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'playerAirSpeed', 0, 0.03);
         guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'jumpHeight', 0, 10);
         guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'slipperiness', 0, 1).onChange(slipperiness => temporaryContactMaterial.friction = 1 - slipperiness);
         guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'bounciness', 0, 2).onChange(bounciness => temporaryContactMaterial.restitution = bounciness);

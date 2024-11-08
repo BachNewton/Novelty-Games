@@ -9,6 +9,7 @@ import { temporaryExperimentalProperties, temporaryPlayerMaterial } from './Marb
 const WORLD_DOWN = new CANNON.Vec3(0, -1, 0);
 const PLAYER_SPEED = 0.7;
 // const JUMP_VELOCITY = 7.5;
+const PLAYER_AIR_SPEED = 0.0027;
 const STEEPNESS_THRESHOLD = 0.7;
 const JUMP_COOLDOWN = 200;
 
@@ -78,7 +79,7 @@ export const PlayerCreator: PlayerCreator = {
                     }
                 } else {
                     player.body.velocity.addScaledVector(
-                        deltaTime * temporaryExperimentalProperties.playerAirSpeed,
+                        deltaTime * PLAYER_AIR_SPEED,
                         bodyIntendedDirection,
                         player.body.velocity
                     );
