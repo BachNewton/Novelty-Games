@@ -10,11 +10,12 @@ import { PlayerCreator } from "./Player";
 import { MouseInputCreator } from "../../input/Mouse";
 import SkyboxPath from './textures/skybox.jpg';
 import { Level, loadLevelFile } from "./Level";
-import { DEFAULT_COLOR, EditorCreator } from "./Editor";
+import { DEFAULT_COLOR, DEFAULT_MATERIAL, EditorCreator } from "./Editor";
 import EmptyLevel from './levels/empty_level.json';
 import Level1 from './levels/level1.json';
 import Level2 from './levels/level2.json';
 import Level3 from './levels/level3.json';
+import { GameMaterial, gameMaterialToString, stringToGameMaterial } from "./GameMaterial";
 
 export const temporaryExperimentalProperties = {
     jumpHeight: 7.5,
@@ -158,6 +159,11 @@ const MarbleWorld: GameWorldCreator = {
         const guiEditModeCreateFolder = guiEditMode.addFolder('Create');
         guiEditModeCreateFolder.add({ 'Add Box': editor.addBox }, 'Add Box');
         guiEditModeCreateFolder.addColor({ 'Color': DEFAULT_COLOR }, 'Color').onChange(color => editor.changeColor(color));
+        guiEditModeCreateFolder.add(
+            { 'Material': gameMaterialToString(DEFAULT_MATERIAL) },
+            'Material',
+            [gameMaterialToString(GameMaterial.NORMAL), gameMaterialToString(GameMaterial.SLIPPERY), gameMaterialToString(GameMaterial.BOUNCY)]
+        ).onChange(material => editor.changeMaterial(stringToGameMaterial(material)));
         guiEditModeCreateFolder.add({ "'Backspace' Delete": editor.delete }, "'Backspace' Delete");
         guiEditModeCreateFolder.add({ "'C' Clone": editor.clone }, "'C' Clone");
         const guiEditModeControlsFolder = guiEditMode.addFolder('Controls');
