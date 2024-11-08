@@ -9,6 +9,7 @@ import { temporaryExperimentalProperties, temporaryPlayerMaterial } from './Marb
 const WORLD_DOWN = new CANNON.Vec3(0, -1, 0);
 const PLAYER_SPEED = 0.7;
 // const JUMP_VELOCITY = 7.5;
+const PLAYER_AIR_SPEED = 0.0027;
 const STEEPNESS_THRESHOLD = 0.7;
 const JUMP_COOLDOWN = 200;
 
@@ -39,6 +40,8 @@ export const PlayerCreator: PlayerCreator = {
             mass: 1
         });
 
+        const contactNormal = new CANNON.Vec3();
+
         let playerCanJump = false;
         let lastJumpTime = 0;
 
@@ -50,7 +53,12 @@ export const PlayerCreator: PlayerCreator = {
 
             playerCanJump = false;
             lastJumpTime = performance.now();
-            player.body.velocity.y += temporaryExperimentalProperties.jumpHeight;
+
+            player.body.velocity.addScaledVector(
+                temporaryExperimentalProperties.jumpHeight,
+                contactNormal,
+                player.body.velocity
+            );
         };
 
         return {
@@ -67,6 +75,7 @@ export const PlayerCreator: PlayerCreator = {
 
                         if (steepness > STEEPNESS_THRESHOLD && performance.now() - lastJumpTime > JUMP_COOLDOWN) {
                             playerCanJump = true;
+                            contact.ni.negate(contactNormal);
                             break;
                         }
                     }
@@ -78,7 +87,7 @@ export const PlayerCreator: PlayerCreator = {
                     }
                 } else {
                     player.body.velocity.addScaledVector(
-                        deltaTime * temporaryExperimentalProperties.playerAirSpeed,
+                        deltaTime * PLAYER_AIR_SPEED,
                         bodyIntendedDirection,
                         player.body.velocity
                     );

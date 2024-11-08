@@ -8,7 +8,7 @@ export interface Pointer {
 }
 
 interface MouseInputCreator {
-    create(onClick: (pointer: Pointer) => void): MouseInput;
+    create(onClick: (pointer: Pointer, target: EventTarget | null) => void): MouseInput;
 }
 
 export const MouseInputCreator: MouseInputCreator = {
@@ -24,7 +24,7 @@ export const MouseInputCreator: MouseInputCreator = {
         });
 
         window.addEventListener('mousedown', e => {
-            onClick({ x: e.clientX, y: e.clientY });
+            onClick({ x: e.clientX, y: e.clientY }, e.target);
         });
 
         return {
