@@ -33,6 +33,8 @@ interface MaterialType {
 interface ColorMaterial extends MaterialType {
     type: 'color';
     color: THREE.ColorRepresentation;
+    metalness?: number;
+    roughness?: number;
 }
 
 interface TexturePathMaterial extends MaterialType {
@@ -78,7 +80,14 @@ export const GameWorldObjectCreator: GameWorldObjectCreator = {
 
             switch (material.type) {
                 case 'color':
-                    return new THREE.MeshStandardMaterial({ color: material.color });
+                    material.metalness = material.metalness ?? 0;
+                    material.roughness = material.roughness ?? 1;
+
+                    return new THREE.MeshStandardMaterial({
+                        color: material.color,
+                        metalness: material.metalness,
+                        roughness: material.roughness
+                    });
                 case 'texturePath':
                     const loader = new THREE.TextureLoader();
                     const texture = loader.load(material.texturePath);

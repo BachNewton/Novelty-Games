@@ -276,9 +276,9 @@ function createOrbitControls(camera: THREE.PerspectiveCamera, rendererDomElement
 }
 
 function addLight(scene: THREE.Scene) {
-    const ambientLight = new THREE.AmbientLight(0xFFFFFF, 1.25);
+    const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.5);
 
-    const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1.5);
+    const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1.2);
     directionalLight.castShadow = true;
     const size = 25;
     directionalLight.position.set(size, size, size);
@@ -298,7 +298,10 @@ function addLight(scene: THREE.Scene) {
 
 function addSkybox(scene: THREE.Scene) {
     const loader = new THREE.TextureLoader();
-    const texture = loader.load(SkyboxPath);
+    const texture = loader.load(SkyboxPath, data => {
+        data.mapping = THREE.EquirectangularReflectionMapping;
+        scene.environment = data;
+    });
 
     const skybox = new THREE.Mesh(
         new THREE.SphereGeometry(1000),
