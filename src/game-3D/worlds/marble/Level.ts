@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GameMaterial } from './GameMaterial';
 
 export interface Level {
     startingPosition: Position;
@@ -24,6 +25,7 @@ export interface Obstacle {
     quaternion: Quaternion;
     scale: Scale;
     color: number;
+    material: GameMaterial;
 }
 
 export function createLevel(
@@ -62,7 +64,8 @@ export function createLevel(
                         y: object.scale.y,
                         z: object.scale.z
                     },
-                    color: object.material.color.getHex()
+                    color: object.material.color.getHex(),
+                    material: object.userData.gameMaterial
                 };
             })
     };

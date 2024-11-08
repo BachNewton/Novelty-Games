@@ -1,15 +1,17 @@
 import * as THREE from 'three';
-import { TransformControls, OrbitControls, TextGeometry, FontLoader } from 'three/examples/jsm/Addons';
+import { TransformControls, OrbitControls, TextGeometry, FontLoader, RoundedBoxGeometry } from 'three/examples/jsm/Addons';
 import FontData from 'three/examples/fonts/helvetiker_regular.typeface.json';
 import { Dimensions, GameWorldObject, GameWorldObjectCreator } from '../GameWorldObject';
 import PlayerTexture from './textures/player.png';
 import CheckeredTexture from './textures/checkered.jpg';
 import { createLevel, Level, Obstacle, createLevelFile } from './Level';
 import { Pointer } from '../../input/Mouse';
-import { State, temporaryObjectMaterial, temporaryPlayerMaterial } from './MarbleWorld';
+import { State, temporaryObjectMaterial } from './MarbleWorld';
+import { GameMaterial } from './GameMaterial';
 
 const CAMERA_EDIT_SPEED = 0.02;
 export const DEFAULT_COLOR = 0xCED3D4;
+export const DEFAULT_MATERIAL = GameMaterial.NORMAL;
 
 interface Editor {
     enterEditMode: () => void;
@@ -23,6 +25,7 @@ interface Editor {
     delete: () => void;
     clone: () => void;
     changeColor: (color: number) => void;
+    changeMaterial: (material: GameMaterial) => void;
     changeToTranslateMode: () => void;
     changeToRotateMode: () => void;
     changeToScaleMode: () => void;
@@ -56,13 +59,14 @@ function createEditor(
 
     const editableObjects: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>[] = [];
     let editableObjectColor = DEFAULT_COLOR;
+    let editableObjectMaterial = DEFAULT_MATERIAL;
     const raycaster = new THREE.Raycaster();
     const mouseCoordinates = new THREE.Vector2();
 
     const forceIntoTranslateMode = () => transformControls.mode = 'translate';
 
     const addBox = () => {
-        const editableObject = createEditableObject(editableObjectColor);
+        const editableObject = createEditableObject(editableObjectColor, editableObjectMaterial);
 
         editableObject.position.copy(orbitControls.target);
 
@@ -157,6 +161,15 @@ function createEditor(
         changeColor: (color) => {
             editableObjectColor = color;
             transformControlsObject(true, object => object.material.color.set(color));
+        },
+        changeMaterial: (material) => {
+            editableObjectMaterial = material;
+
+            transformControlsObject(true, object => {
+                applyMeterial(object, material);
+                object.geometry.dispose();
+                object.geometry = createEditableObjectGeometry(material);
+            });
         },
         changeToTranslateMode: () => transformControls.mode = 'translate',
         changeToRotateMode: () => transformControls.mode = 'rotate',
@@ -258,20 +271,41 @@ function createFinishingObjectSign(): THREE.Mesh {
     return sign;
 }
 
-function createEditableObject(color: number): THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial> {
+function applyMeterial(object: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>, material: GameMaterial) {
+    object.userData.gameMaterial = material;
+
+    if (material === GameMaterial.NORMAL) {
+        object.material.roughness = 1;
+        object.material.metalness = 0;
+    } else if (material === GameMaterial.SLIPPERY) {
+        object.material.roughness = 0;
+        object.material.metalness = 1;
+    } else if (material === GameMaterial.BOUNCY) {
+        object.material.roughness = 0;
+        object.material.metalness = 0;
+    }
+}
+
+function createEditableObjectGeometry(material: GameMaterial): THREE.BufferGeometry {
+    return new RoundedBoxGeometry(1, 1, 1, undefined, material === GameMaterial.BOUNCY ? Math.PI / 32 : 0);
+}
+
+function createEditableObject(color: number, material: GameMaterial): THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial> {
     const editableObject = new THREE.Mesh(
-        new THREE.BoxGeometry(1, 1, 1),
+        createEditableObjectGeometry(material),
         new THREE.MeshStandardMaterial({ color: color })
     );
 
     editableObject.castShadow = true;
     editableObject.receiveShadow = true;
 
+    applyMeterial(editableObject, material);
+
     return editableObject;
 }
 
 function createGameWorldObject(
-    editableObject: THREE.Mesh,
+    editableObject: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>,
     editableFinishingObject: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>,
     cameraPosition: THREE.Vector3,
     onCollideWithFinish: () => void
@@ -287,7 +321,8 @@ function createGameWorldObject(
             type: 'box',
             width: editableObject.scale.x,
             height: editableObject.scale.y,
-            depth: editableObject.scale.z
+            depth: editableObject.scale.z,
+            radius: editableObject.userData.gameMaterial === GameMaterial.BOUNCY ? Math.PI : 0
         };
 
     const object = GameWorldObjectCreator.create({
@@ -300,7 +335,7 @@ function createGameWorldObject(
             }
             : {
                 type: 'color',
-                color: (editableObject.material as THREE.MeshStandardMaterial).color
+                color: editableObject.material.color
             },
         physicalMaterial: temporaryObjectMaterial,
         mass: 0
@@ -327,6 +362,8 @@ function createGameWorldObject(
         const finishingObjectSign = createFinishingObjectSign();
         object.mesh.add(finishingObjectSign);
         object.update = () => finishingObjectSign.lookAt(cameraPosition);
+    } else {
+        applyMeterial(object.mesh, editableObject.userData.gameMaterial);
     }
 
     return object;
@@ -334,7 +371,7 @@ function createGameWorldObject(
 
 function loadEditableObjects(obstacles: Obstacle[]): THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>[] {
     return obstacles.map(obstacle => {
-        const object = createEditableObject(obstacle.color);
+        const object = createEditableObject(obstacle.color, obstacle.material);
 
         object.scale.set(
             obstacle.scale.x,

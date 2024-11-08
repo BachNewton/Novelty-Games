@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
+import { RoundedBoxGeometry } from 'three/examples/jsm/Addons';
 import { threeToCannon } from 'three-to-cannon';
 
 export interface GameWorldObject {
-    mesh: THREE.Mesh;
+    mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
     body: CANNON.Body;
     update(): void;
 }
@@ -17,6 +18,7 @@ interface BoxDimensions extends Shape {
     width: number;
     height: number;
     depth: number;
+    radius?: number;
 }
 
 interface SphereDimensions extends Shape {
@@ -67,7 +69,7 @@ export const GameWorldObjectCreator: GameWorldObjectCreator = {
 
             switch (dimensions.type) {
                 case 'box':
-                    return new THREE.BoxGeometry(dimensions.width, dimensions.height, dimensions.depth);
+                    return new RoundedBoxGeometry(dimensions.width, dimensions.height, dimensions.depth, undefined, dimensions.radius ?? 0);
                 case 'sphere':
                     return new THREE.SphereGeometry(dimensions.radius);
             }
