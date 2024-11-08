@@ -40,6 +40,8 @@ export const PlayerCreator: PlayerCreator = {
             mass: 1
         });
 
+        const contactNormal = new CANNON.Vec3();
+
         let playerCanJump = false;
         let lastJumpTime = 0;
 
@@ -51,7 +53,12 @@ export const PlayerCreator: PlayerCreator = {
 
             playerCanJump = false;
             lastJumpTime = performance.now();
-            player.body.velocity.y += temporaryExperimentalProperties.jumpHeight;
+
+            player.body.velocity.addScaledVector(
+                temporaryExperimentalProperties.jumpHeight,
+                contactNormal,
+                player.body.velocity
+            );
         };
 
         return {
@@ -68,6 +75,7 @@ export const PlayerCreator: PlayerCreator = {
 
                         if (steepness > STEEPNESS_THRESHOLD && performance.now() - lastJumpTime > JUMP_COOLDOWN) {
                             playerCanJump = true;
+                            contact.ni.negate(contactNormal);
                             break;
                         }
                     }
