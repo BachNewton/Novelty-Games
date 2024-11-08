@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { GameWorldObject, GameWorldObjectCreator } from '../GameWorldObject';
+import { TransformControls, OrbitControls, TextGeometry, FontLoader } from 'three/examples/jsm/Addons';
+import FontData from 'three/examples/fonts/helvetiker_regular.typeface.json';
+import { Dimensions, GameWorldObject, GameWorldObjectCreator } from '../GameWorldObject';
 import PlayerTexture from './textures/player.png';
 import CheckeredTexture from './textures/checkered.jpg';
 import { createLevel, Level, Obstacle, createLevelFile } from './Level';
@@ -49,7 +49,11 @@ function createEditor(
 ): Editor {
     const transformControls = createTransformControls(scene, camera, orbitControls);
     const editableStartingObject = createEditableStartingObject();
+
     const editableFinishingObject = createEditableFinishingObject();
+    const finishingObjectSign = createFinishingObjectSign();
+    editableFinishingObject.add(finishingObjectSign);
+
     const editableObjects: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>[] = [];
     let editableObjectColor = DEFAULT_COLOR;
     const raycaster = new THREE.Raycaster();
@@ -99,7 +103,7 @@ function createEditor(
             return editableObjects
                 // The editable starting object should not be added to the game world
                 .filter(object => object !== editableStartingObject)
-                .map(object => createGameWorldObject(object, editableFinishingObject, editableStartingObject, onCollideWithFinish));
+                .map(object => createGameWorldObject(object, editableFinishingObject, camera.position, onCollideWithFinish));
         },
         getStartingPosition: () => {
             return editableStartingObject.position;
@@ -186,6 +190,8 @@ function createEditor(
             if (object !== null && object !== transformControls.object) {
                 object.material.emissive.setHex(0xFFFFFF);
             }
+
+            finishingObjectSign.lookAt(camera.position);
         }
     };
 }
@@ -213,14 +219,43 @@ function createEditableStartingObject(): THREE.Mesh<THREE.SphereGeometry, THREE.
 
 function createEditableFinishingObject(): THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial> {
     const editableFinishingObject = new THREE.Mesh(
-        new THREE.BoxGeometry(1, 1, 1),
+        new THREE.BoxGeometry(3, 3, 3),
         new THREE.MeshStandardMaterial({ map: new THREE.TextureLoader().load(CheckeredTexture), transparent: true, opacity: 0.6 })
     );
 
-    editableFinishingObject.scale.set(3, 3, 3);
     editableFinishingObject.castShadow = true;
 
     return editableFinishingObject;
+}
+
+function createFinishingObjectSign(): THREE.Mesh {
+    const text = 'Goal';
+    const size = 1.8;
+    const depth = 0.3;
+
+    const sign = new THREE.Mesh(
+        new TextGeometry(text, {
+            font: new FontLoader().parse(FontData),
+            size: size,
+            depth: depth
+        }),
+        new THREE.MeshBasicMaterial()
+    );
+
+    sign.geometry.computeBoundingBox();
+
+    const boundingBox = sign.geometry.boundingBox;
+    if (boundingBox !== null) {
+        const centerX = (boundingBox.max.x + boundingBox.min.x) / 2;
+        const centerY = (boundingBox.max.y + boundingBox.min.y) / 2;
+        const centerZ = (boundingBox.max.z + boundingBox.min.z) / 2;
+
+        sign.geometry.translate(-centerX, -centerY, -centerZ)
+    }
+
+    sign.translateY(3);
+
+    return sign;
 }
 
 function createEditableObject(color: number): THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial> {
@@ -238,16 +273,25 @@ function createEditableObject(color: number): THREE.Mesh<THREE.BufferGeometry, T
 function createGameWorldObject(
     editableObject: THREE.Mesh,
     editableFinishingObject: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>,
-    editableStartingObject: THREE.Mesh<THREE.SphereGeometry, THREE.MeshStandardMaterial>,
+    cameraPosition: THREE.Vector3,
     onCollideWithFinish: () => void
 ): GameWorldObject {
-    const object = GameWorldObjectCreator.create({
-        dimensions: {
+    const dimensions: Dimensions = editableObject === editableFinishingObject
+        ? {
+            type: 'box',
+            width: editableFinishingObject.geometry.parameters.width,
+            height: editableFinishingObject.geometry.parameters.height,
+            depth: editableFinishingObject.geometry.parameters.depth
+        }
+        : {
             type: 'box',
             width: editableObject.scale.x,
             height: editableObject.scale.y,
             depth: editableObject.scale.z
-        },
+        };
+
+    const object = GameWorldObjectCreator.create({
+        dimensions: dimensions,
         visualMaterial: editableObject === editableFinishingObject
             ? {
                 type: 'texture',
@@ -261,10 +305,6 @@ function createGameWorldObject(
         physicalMaterial: temporaryObjectMaterial,
         mass: 0
     });
-
-    if (editableObject === editableFinishingObject) {
-        object.body.addEventListener('collide', onCollideWithFinish);
-    }
 
     object.body.position.set(
         editableObject.position.x,
@@ -280,6 +320,14 @@ function createGameWorldObject(
     );
 
     object.update();
+
+    if (editableObject === editableFinishingObject) {
+        object.body.addEventListener('collide', onCollideWithFinish);
+
+        const finishingObjectSign = createFinishingObjectSign();
+        object.mesh.add(finishingObjectSign);
+        object.update = () => finishingObjectSign.lookAt(cameraPosition);
+    }
 
     return object;
 }

@@ -225,6 +225,10 @@ const MarbleWorld: GameWorldCreator = {
 
                 if (state === State.EDIT) {
                     editor.update(deltaTime, controllerDirection, mouseInput.pointer);
+                } else if (state === State.PLAY) {
+                    for (const editableGameWorldObject of editableGameWorldObjects) {
+                        editableGameWorldObject.update();
+                    }
                 }
 
                 player.update(deltaTime, world.contacts, controller.pressed.a);

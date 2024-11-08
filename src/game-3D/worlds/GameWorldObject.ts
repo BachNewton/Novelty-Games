@@ -24,7 +24,7 @@ interface SphereDimensions extends Shape {
     radius: number;
 }
 
-type Dimensions = BoxDimensions | SphereDimensions;
+export type Dimensions = BoxDimensions | SphereDimensions;
 
 interface MaterialType {
     type: 'color' | 'texturePath' | 'texture';
