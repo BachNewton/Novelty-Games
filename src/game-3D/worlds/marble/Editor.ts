@@ -230,8 +230,8 @@ function createEditableFinishingObject(): THREE.Mesh<THREE.BoxGeometry, THREE.Me
 
 function createFinishingObjectSign(): THREE.Mesh {
     const text = 'Goal';
-    const size = 1.8;
-    const depth = 0.3;
+    const size = 2.5;
+    const depth = 0.1;
 
     const sign = new THREE.Mesh(
         new TextGeometry(text, {
@@ -253,7 +253,7 @@ function createFinishingObjectSign(): THREE.Mesh {
         sign.geometry.translate(-centerX, -centerY, -centerZ)
     }
 
-    sign.translateY(3);
+    sign.translateY(4);
 
     return sign;
 }
