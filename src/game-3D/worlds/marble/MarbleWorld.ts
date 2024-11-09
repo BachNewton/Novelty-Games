@@ -19,20 +19,9 @@ import { GameMaterial, gameMaterialToString, stringToGameMaterial } from "./Game
 
 export const temporaryExperimentalProperties = {
     jumpHeight: 7.5,
-    slipperiness: 0.3,
-    bounciness: 0
+    slipperiness: 0.99,
+    bounciness: 1.05
 };
-
-export const temporaryPlayerMaterial = new CANNON.Material('player');
-export const temporaryObjectMaterial = new CANNON.Material('object');
-const temporaryContactMaterial = new CANNON.ContactMaterial(
-    temporaryPlayerMaterial,
-    temporaryObjectMaterial,
-    {
-        friction: temporaryExperimentalProperties.slipperiness,
-        restitution: temporaryExperimentalProperties.bounciness
-    }
-);
 
 const CAMERA_ROTATE_SPEED = 0.003;
 
@@ -49,13 +38,36 @@ const MarbleWorld: GameWorldCreator = {
         addLight(scene);
         addSkybox(scene);
 
-        world.addContactMaterial(temporaryContactMaterial);
+        const playerMaterial = new CANNON.Material('player');
+        const objectBouncyMaterial = new CANNON.Material('bouncy');
+        const objectSlipperyMaterial = new CANNON.Material('slippery');
+
+        const bouncyContactMaterial = new CANNON.ContactMaterial(
+            playerMaterial,
+            objectBouncyMaterial,
+            {
+                friction: world.defaultContactMaterial.friction,
+                restitution: temporaryExperimentalProperties.bounciness
+            }
+        );
+
+        const slipperyContactMaterial = new CANNON.ContactMaterial(
+            playerMaterial,
+            objectSlipperyMaterial,
+            {
+                friction: 1 - temporaryExperimentalProperties.slipperiness,
+                restitution: world.defaultContactMaterial.restitution
+            }
+        );
+
+        world.addContactMaterial(bouncyContactMaterial);
+        world.addContactMaterial(slipperyContactMaterial);
 
         const controllerDirection = new THREE.Vector3();
 
         const orbitControls = createOrbitControls(camera, domElement);
 
-        const player = PlayerCreator.create(controllerDirection);
+        const player = PlayerCreator.create(controllerDirection, playerMaterial);
         player.add(scene, world);
 
         const resetPlayer = (startingPosition: THREE.Vector3) => {
@@ -72,7 +84,7 @@ const MarbleWorld: GameWorldCreator = {
         // const controllerDirectionHelper = new THREE.ArrowHelper(cameraLeft, new THREE.Vector3(0, 1.5, 0), 2, 'magenta');
         // scene.add(cameraForwardHelper, cameraLeftHelper, controllerDirectionHelper);
 
-        const editor = EditorCreator.create(scene, camera, orbitControls);
+        const editor = EditorCreator.create(scene, camera, orbitControls, objectBouncyMaterial, objectSlipperyMaterial);
 
         const guiPlayMode = new GUI({ title: 'Play Mode' });
         const guiEditMode = new GUI({ title: 'Edit Mode' });
@@ -152,8 +164,8 @@ const MarbleWorld: GameWorldCreator = {
         guiPlayModeEditorFolder.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
         const guiPlayModeExperimentalFolder = guiPlayMode.addFolder('Experimental');
         guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'jumpHeight', 0, 10);
-        guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'slipperiness', 0, 1).onChange(slipperiness => temporaryContactMaterial.friction = 1 - slipperiness);
-        guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'bounciness', 0, 2).onChange(bounciness => temporaryContactMaterial.restitution = bounciness);
+        guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'slipperiness', 0, 1).onChange(slipperiness => slipperyContactMaterial.friction = 1 - slipperiness);
+        guiPlayModeExperimentalFolder.add(temporaryExperimentalProperties, 'bounciness', 0, 2).onChange(bounciness => bouncyContactMaterial.restitution = bounciness);
         guiPlayModeExperimentalFolder.close();
 
         const guiEditModeCreateFolder = guiEditMode.addFolder('Create');

@@ -4,7 +4,7 @@ import { GameWorldObjectCreator } from "../GameWorldObject";
 import PlayerTexture from './textures/player.png';
 import PlayerNormalMap from './textures/player-normal-map.png';
 import { OrbitControls } from 'three/examples/jsm/Addons';
-import { temporaryExperimentalProperties, temporaryPlayerMaterial } from './MarbleWorld';
+import { temporaryExperimentalProperties } from './MarbleWorld';
 
 const WORLD_DOWN = new CANNON.Vec3(0, -1, 0);
 const PLAYER_SPEED = 0.7;
@@ -21,11 +21,11 @@ interface Player {
 }
 
 interface PlayerCreator {
-    create(intendedDirection: THREE.Vector3): Player;
+    create(intendedDirection: THREE.Vector3, physicalMaterial: CANNON.Material): Player;
 }
 
 export const PlayerCreator: PlayerCreator = {
-    create: (intendedDirection) => {
+    create: (intendedDirection, physicalMaterial) => {
         const player = GameWorldObjectCreator.create({
             dimensions: {
                 type: 'sphere',
@@ -36,7 +36,7 @@ export const PlayerCreator: PlayerCreator = {
                 texturePath: PlayerTexture,
                 normalMapPath: PlayerNormalMap
             },
-            physicalMaterial: temporaryPlayerMaterial,
+            physicalMaterial: physicalMaterial,
             mass: 1
         });
 

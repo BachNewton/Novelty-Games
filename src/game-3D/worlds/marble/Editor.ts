@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import * as CANNON from 'cannon-es';
 import { TransformControls, OrbitControls, TextGeometry, FontLoader, RoundedBoxGeometry } from 'three/examples/jsm/Addons';
 import FontData from 'three/examples/fonts/helvetiker_regular.typeface.json';
 import { Dimensions, GameWorldObject, GameWorldObjectCreator } from '../GameWorldObject';
@@ -6,7 +7,7 @@ import PlayerTexture from './textures/player.png';
 import CheckeredTexture from './textures/checkered.jpg';
 import { createLevel, Level, Obstacle, createLevelFile } from './Level';
 import { Pointer } from '../../input/Mouse';
-import { State, temporaryObjectMaterial } from './MarbleWorld';
+import { State } from './MarbleWorld';
 import { GameMaterial } from './GameMaterial';
 
 const CAMERA_EDIT_SPEED = 0.02;
@@ -37,18 +38,22 @@ interface EditorCreator {
     create: (
         scene: THREE.Scene,
         camera: THREE.Camera,
-        orbitControls: OrbitControls
+        orbitControls: OrbitControls,
+        bouncyMaterial: CANNON.Material,
+        slipperyMaterial: CANNON.Material
     ) => Editor;
 }
 
 export const EditorCreator: EditorCreator = {
-    create: (scene, camera, orbitControls) => createEditor(scene, camera, orbitControls)
+    create: (scene, camera, orbitControls, bouncyMaterial, slipperyMaterial) => createEditor(scene, camera, orbitControls, bouncyMaterial, slipperyMaterial)
 };
 
 function createEditor(
     scene: THREE.Scene,
     camera: THREE.Camera,
-    orbitControls: OrbitControls
+    orbitControls: OrbitControls,
+    bouncyMaterial: CANNON.Material,
+    slipperyMaterial: CANNON.Material
 ): Editor {
     const transformControls = createTransformControls(scene, camera, orbitControls);
     const editableStartingObject = createEditableStartingObject();
@@ -91,6 +96,17 @@ function createEditor(
         provideObject(object);
     };
 
+    const getPhysicalMeterial: (material: GameMaterial) => CANNON.Material | undefined = (material) => {
+        switch (material) {
+            case GameMaterial.BOUNCY:
+                return bouncyMaterial;
+            case GameMaterial.SLIPPERY:
+                return slipperyMaterial;
+            default:
+                return undefined;
+        }
+    };
+
     return {
         enterEditMode: () => {
             orbitControls.target = new THREE.Vector3();
@@ -107,7 +123,13 @@ function createEditor(
             return editableObjects
                 // The editable starting object should not be added to the game world
                 .filter(object => object !== editableStartingObject)
-                .map(object => createGameWorldObject(object, editableFinishingObject, camera.position, onCollideWithFinish));
+                .map(object => createGameWorldObject(
+                    object,
+                    editableFinishingObject,
+                    camera.position,
+                    onCollideWithFinish,
+                    getPhysicalMeterial(object.userData.gameMaterial)
+                ));
         },
         getStartingPosition: () => {
             return editableStartingObject.position;
@@ -166,7 +188,7 @@ function createEditor(
             editableObjectMaterial = material;
 
             transformControlsObject(true, object => {
-                applyMeterial(object, material);
+                applyVisualMeterial(object, material);
                 object.geometry.dispose();
                 object.geometry = createEditableObjectGeometry(material);
             });
@@ -271,7 +293,7 @@ function createFinishingObjectSign(): THREE.Mesh {
     return sign;
 }
 
-function applyMeterial(object: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>, material: GameMaterial) {
+function applyVisualMeterial(object: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>, material: GameMaterial) {
     object.userData.gameMaterial = material;
 
     if (material === GameMaterial.NORMAL) {
@@ -299,7 +321,7 @@ function createEditableObject(color: number, material: GameMaterial): THREE.Mesh
     editableObject.castShadow = true;
     editableObject.receiveShadow = true;
 
-    applyMeterial(editableObject, material);
+    applyVisualMeterial(editableObject, material);
 
     return editableObject;
 }
@@ -308,7 +330,8 @@ function createGameWorldObject(
     editableObject: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>,
     editableFinishingObject: THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>,
     cameraPosition: THREE.Vector3,
-    onCollideWithFinish: () => void
+    onCollideWithFinish: () => void,
+    physicalMaterial: CANNON.Material | undefined
 ): GameWorldObject {
     const dimensions: Dimensions = editableObject === editableFinishingObject
         ? {
@@ -337,7 +360,7 @@ function createGameWorldObject(
                 type: 'color',
                 color: editableObject.material.color
             },
-        physicalMaterial: temporaryObjectMaterial,
+        physicalMaterial: physicalMaterial,
         mass: 0
     });
 
@@ -363,7 +386,7 @@ function createGameWorldObject(
         object.mesh.add(finishingObjectSign);
         object.update = () => finishingObjectSign.lookAt(cameraPosition);
     } else {
-        applyMeterial(object.mesh, editableObject.userData.gameMaterial);
+        applyVisualMeterial(object.mesh, editableObject.userData.gameMaterial);
     }
 
     return object;
