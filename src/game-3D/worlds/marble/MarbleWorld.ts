@@ -15,6 +15,8 @@ import EmptyLevel from './levels/empty_level.json';
 import Level1 from './levels/level1.json';
 import Level2 from './levels/level2.json';
 import Level3 from './levels/level3.json';
+import Level4 from './levels/level4.json';
+import Level5 from './levels/level5.json';
 import { GameMaterial, gameMaterialToString, stringToGameMaterial } from "./GameMaterial";
 
 export const temporaryExperimentalProperties = {
@@ -160,6 +162,8 @@ const MarbleWorld: GameWorldCreator = {
         guiPlayModeLevelsFolder.add({ 'Level 1': () => loadLevel(Level1) }, 'Level 1');
         guiPlayModeLevelsFolder.add({ 'Level 2': () => loadLevel(Level2) }, 'Level 2');
         guiPlayModeLevelsFolder.add({ 'Level 3': () => loadLevel(Level3) }, 'Level 3');
+        guiPlayModeLevelsFolder.add({ 'Level 4': () => loadLevel(Level4) }, 'Level 4');
+        guiPlayModeLevelsFolder.add({ 'Level 5': () => loadLevel(Level5) }, 'Level 5');
         const guiPlayModeEditorFolder = guiPlayMode.addFolder('Editor');
         guiPlayModeEditorFolder.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
         const guiPlayModeExperimentalFolder = guiPlayMode.addFolder('Experimental');

@@ -294,6 +294,8 @@ function createFinishingObjectSign(): THREE.Mesh {
 }
 
 function applyVisualMeterial(object: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>, material: GameMaterial) {
+    if (material === undefined) throw new Error('GameMaterial is undefined');
+
     object.userData.gameMaterial = material;
 
     if (material === GameMaterial.NORMAL) {
