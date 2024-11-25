@@ -40,8 +40,6 @@ export const PlayerCreator: PlayerCreator = {
             mass: 1
         });
 
-        player.mesh.add(new THREE.PointLight());
-
         const contactNormal = new CANNON.Vec3();
 
         let playerCanJump = false;
