@@ -64,7 +64,7 @@ export const XboxControllerCreator: XboxControllerCreator = {
             rightAxis: rightAxis,
             pressed: pressed,
             update: () => {
-                const gamepad = navigator.getGamepads()[0];
+                const gamepad = getGamepad();
                 if (!gamepad) return;
 
                 leftAxis.x = gamepad.axes[0];
@@ -90,3 +90,13 @@ export const XboxControllerCreator: XboxControllerCreator = {
         };
     }
 };
+
+function getGamepad(): Gamepad | null {
+    for (const gamepad of navigator.getGamepads()) {
+        if (gamepad !== null) {
+            return gamepad;
+        }
+    }
+
+    return null;
+}
