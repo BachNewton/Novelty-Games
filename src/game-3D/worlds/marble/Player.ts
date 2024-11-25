@@ -9,7 +9,7 @@ import { temporaryExperimentalProperties } from './MarbleWorld';
 const WORLD_DOWN = new CANNON.Vec3(0, -1, 0);
 const PLAYER_SPEED = 0.7;
 // const JUMP_VELOCITY = 7.5;
-const PLAYER_AIR_SPEED = 0.0027;
+const PLAYER_AIR_SPEED = 0.0025;
 const STEEPNESS_THRESHOLD = 0.7;
 const JUMP_COOLDOWN = 200;
 
