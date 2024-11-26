@@ -5,3 +5,5 @@
 - Start loading the next image so there is less wait time
 - Move puppeteer to dev deps
 - Move server deps into their own package.json
+
+Testing git on new computer
