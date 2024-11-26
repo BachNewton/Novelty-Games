@@ -6,7 +6,7 @@ import { threeToCannon } from 'three-to-cannon';
 export interface GameWorldObject {
     mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
     body: CANNON.Body;
-    update(): void;
+    update(deltaTime?: number): void;
 }
 
 interface Shape {

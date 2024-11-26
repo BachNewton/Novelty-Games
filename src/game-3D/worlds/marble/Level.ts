@@ -5,6 +5,7 @@ export interface Level {
     startingPosition: Position;
     finishingPosition: Position;
     obstacles: Obstacle[];
+    collectibles: Position[];
 }
 
 interface Vector3 {
@@ -31,7 +32,8 @@ export interface Obstacle {
 export function createLevel(
     startingObject: THREE.Mesh,
     finishingObject: THREE.Mesh,
-    objects: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>[]
+    objects: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>[],
+    collectibles: Set<THREE.Mesh>
 ): Level {
     return {
         startingPosition: {
@@ -45,7 +47,7 @@ export function createLevel(
             z: finishingObject.position.z
         },
         obstacles: objects
-            .filter(object => object !== startingObject && object !== finishingObject)
+            .filter(object => object !== startingObject && object !== finishingObject && !collectibles.has(object))
             .map(object => {
                 return {
                     position: {
@@ -67,7 +69,14 @@ export function createLevel(
                     color: object.material.color.getHex(),
                     material: object.userData.gameMaterial
                 };
-            })
+            }),
+        collectibles: Array.from(collectibles).map(collectible => {
+            return {
+                x: collectible.position.x,
+                y: collectible.position.y,
+                z: collectible.position.z
+            }
+        })
     };
 }
 

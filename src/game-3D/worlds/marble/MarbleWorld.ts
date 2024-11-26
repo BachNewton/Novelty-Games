@@ -18,6 +18,8 @@ import Level3 from './levels/level3.json';
 import Level4 from './levels/level4.json';
 import Level5 from './levels/level5.json';
 import { GameMaterial, gameMaterialToString, stringToGameMaterial } from "./GameMaterial";
+import FinishSound from './sounds/finish.wav';
+import CollectSound from './sounds/collect.wav';
 
 export const temporaryExperimentalProperties = {
     jumpHeight: 7.5,
@@ -73,6 +75,9 @@ const MarbleWorld: GameWorldCreator = {
         player.add(scene, world);
 
         const resetPlayer = (startingPosition: THREE.Vector3) => {
+            collectiblesCollected.forEach(collectible => scene.add(collectible.mesh));
+            collectiblesCollected.clear();
+
             player.reset(startingPosition, orbitControls);
             startTime = performance.now();
             playerFinished = false;
@@ -93,6 +98,8 @@ const MarbleWorld: GameWorldCreator = {
         guiEditMode.hide();
 
         const editableGameWorldObjects: GameWorldObject[] = [];
+        const collectiblesCollected = new Set<GameWorldObject>();
+        let totalCollectibles = 0;
 
         const enterEditMode = () => {
             state = State.EDIT;
@@ -114,8 +121,20 @@ const MarbleWorld: GameWorldCreator = {
             editableGameWorldObjects.splice(0);
 
             const gameWorldObjects = editor.createGameWorldObjects(() => {
-                playerFinished = true;
-            });
+                if (collectiblesCollected.size === totalCollectibles) {
+                    if (!playerFinished) {
+                        new Audio(FinishSound).play();
+                    }
+
+                    playerFinished = true;
+                }
+            }, collectible => {
+                if (collectiblesCollected.has(collectible)) return;
+                console.log('Collectible collided:', collectible);
+                scene.remove(collectible.mesh);
+                collectiblesCollected.add(collectible);
+                new Audio(CollectSound).play();
+            }, updatedTotalCollectibles => totalCollectibles = updatedTotalCollectibles);
 
             for (const object of gameWorldObjects) {
                 scene.add(object.mesh);
@@ -180,6 +199,7 @@ const MarbleWorld: GameWorldCreator = {
             'Material',
             [gameMaterialToString(GameMaterial.NORMAL), gameMaterialToString(GameMaterial.SLIPPERY), gameMaterialToString(GameMaterial.BOUNCY)]
         ).onChange(material => editor.changeMaterial(stringToGameMaterial(material)));
+        guiEditModeCreateFolder.add({ 'Add Collectible': editor.addCollectible }, 'Add Collectible');
         guiEditModeCreateFolder.add({ "'Backspace' Delete": editor.delete }, "'Backspace' Delete");
         guiEditModeCreateFolder.add({ "'C' Clone": editor.clone }, "'C' Clone");
         const guiEditModeControlsFolder = guiEditMode.addFolder('Controls');
@@ -247,7 +267,7 @@ const MarbleWorld: GameWorldCreator = {
                     editor.update(deltaTime, controllerDirection, mouseInput.pointer);
                 } else if (state === State.PLAY) {
                     for (const editableGameWorldObject of editableGameWorldObjects) {
-                        editableGameWorldObject.update();
+                        editableGameWorldObject.update(deltaTime);
                     }
                 }
 
@@ -261,7 +281,7 @@ const MarbleWorld: GameWorldCreator = {
                     updateHUD('');
                 } else if (state === State.PLAY) {
                     if (!playerFinished) {
-                        updateHUD(getHUDText(startTime));
+                        updateHUD(getHUDText(startTime, collectiblesCollected.size, totalCollectibles));
                     }
                 }
 
@@ -274,11 +294,13 @@ const MarbleWorld: GameWorldCreator = {
     }
 };
 
-function getHUDText(startTime: number): string {
+function getHUDText(startTime: number, collectiblesCollected: number, totalCollectibles: number): string {
     const stopwatchMs = performance.now() - startTime;
     const stopwtach = stopwatchMs / 1000;
 
-    return stopwtach.toFixed(1).toString();
+    const collectibleText = totalCollectibles === 0 ? '' : ` - (${collectiblesCollected}/${totalCollectibles})`;
+
+    return stopwtach.toFixed(1).toString() + collectibleText;
 }
 
 function createOrbitControls(camera: THREE.PerspectiveCamera, rendererDomElement: HTMLCanvasElement): OrbitControls {
