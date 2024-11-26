@@ -5,7 +5,7 @@ export interface Level {
     startingPosition: Position;
     finishingPosition: Position;
     obstacles: Obstacle[];
-    collectibles?: Position[];
+    collectibles: Position[];
 }
 
 interface Vector3 {

@@ -151,16 +151,14 @@ function createEditor(
 
             const loadedObjects = loadEditableObjects(level.obstacles);
 
-            const loadedCollectibles = level.collectibles === undefined
-                ? []
-                : level.collectibles.map(position => {
-                    const collectible = createCollectible();
+            const loadedCollectibles = level.collectibles.map(position => {
+                const collectible = createCollectible();
 
-                    collectible.body.position.set(position.x, position.y, position.z);
-                    collectible.update();
+                collectible.body.position.set(position.x, position.y, position.z);
+                collectible.update();
 
-                    return collectible.mesh;
-                });
+                return collectible.mesh;
+            });
 
             editableObjects.splice(0);
             collectibles.clear();
