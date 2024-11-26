@@ -11,7 +11,7 @@ export function createCollectible(): GameWorldObject {
         new THREE.MeshStandardMaterial({ color: 'magenta', roughness: 0.25, metalness: 0.75 })
     );
 
-    mesh.add(new THREE.PointLight(undefined, 2));
+    mesh.add(new THREE.PointLight(undefined, 3));
 
     const body = new CANNON.Body({
         shape: new CANNON.Sphere(RADIUS),

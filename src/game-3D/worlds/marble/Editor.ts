@@ -80,13 +80,15 @@ function createEditor(
 
     const transformControlsObject = (
         excludeSpecialObjects: boolean,
+        excludeCollectibles: boolean,
         provideObject: (object: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>) => void
     ) => {
         if (transformControls.object === undefined) return;
 
         const object = transformControls.object as THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
 
-        if (excludeSpecialObjects && (object === editableStartingObject || object === editableFinishingObject || collectibles.has(object))) return;
+        if (excludeSpecialObjects && (object === editableStartingObject || object === editableFinishingObject)) return;
+        if (excludeCollectibles && collectibles.has(object)) return;
 
         provideObject(object);
     };
@@ -133,9 +135,9 @@ function createEditor(
         getStartingPosition: () => {
             return editableStartingObject.position;
         },
-        recenter: () => transformControlsObject(false, object => orbitControls.target.copy(object.position)),
+        recenter: () => transformControlsObject(false, false, object => orbitControls.target.copy(object.position)),
         save: () => {
-            const level = createLevel(editableStartingObject, editableFinishingObject, editableObjects);
+            const level = createLevel(editableStartingObject, editableFinishingObject, editableObjects, collectibles);
 
             console.log('Saved Level:', level);
 
@@ -149,13 +151,28 @@ function createEditor(
 
             const loadedObjects = loadEditableObjects(level.obstacles);
 
+            const loadedCollectibles = level.collectibles === undefined
+                ? []
+                : level.collectibles.map(position => {
+                    const collectible = createCollectible();
+
+                    collectible.body.position.set(position.x, position.y, position.z);
+                    collectible.update();
+
+                    return collectible.mesh;
+                });
+
             editableObjects.splice(0);
+            collectibles.clear();
 
             editableObjects.push(
                 editableStartingObject,
                 editableFinishingObject,
+                ...loadedCollectibles,
                 ...loadedObjects
             );
+
+            loadedCollectibles.forEach(collectible => collectibles.add(collectible));
 
             if (worldState === State.EDIT) {
                 transformControls.detach();
@@ -191,7 +208,7 @@ function createEditor(
             editableObjects.push(collectible);
 
         },
-        delete: () => transformControlsObject(true, object => {
+        delete: () => transformControlsObject(true, false, object => {
             scene.remove(object);
 
             const objectIndex = editableObjects.indexOf(object);
@@ -201,7 +218,7 @@ function createEditor(
 
             transformControls.detach();
         }),
-        clone: () => transformControlsObject(true, object => {
+        clone: () => transformControlsObject(true, false, object => {
             const clone = object.clone();
             clone.material = object.material.clone();
 
@@ -216,12 +233,12 @@ function createEditor(
         }),
         changeColor: (color) => {
             editableObjectColor = color;
-            transformControlsObject(true, object => object.material.color.set(color));
+            transformControlsObject(true, true, object => object.material.color.set(color));
         },
         changeMaterial: (material) => {
             editableObjectMaterial = material;
 
-            transformControlsObject(true, object => {
+            transformControlsObject(true, true, object => {
                 applyVisualMeterial(object, material);
                 object.geometry.dispose();
                 object.geometry = createEditableObjectGeometry(material);
