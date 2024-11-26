@@ -298,7 +298,9 @@ function getHUDText(startTime: number, collectiblesCollected: number, totalColle
     const stopwatchMs = performance.now() - startTime;
     const stopwtach = stopwatchMs / 1000;
 
-    return stopwtach.toFixed(1).toString() + ` - (${collectiblesCollected}/${totalCollectibles})`;
+    const collectibleText = totalCollectibles === 0 ? '' : ` - (${collectiblesCollected}/${totalCollectibles})`;
+
+    return stopwtach.toFixed(1).toString() + collectibleText;
 }
 
 function createOrbitControls(camera: THREE.PerspectiveCamera, rendererDomElement: HTMLCanvasElement): OrbitControls {
