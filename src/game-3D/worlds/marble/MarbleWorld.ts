@@ -20,6 +20,7 @@ import Level5 from './levels/level5.json';
 import { GameMaterial, gameMaterialToString, stringToGameMaterial } from "./GameMaterial";
 import FinishSound from './sounds/finish.wav';
 import CollectSound from './sounds/collect.wav';
+import { Sounds } from "./sounds/Sounds";
 
 export const temporaryExperimentalProperties = {
     jumpHeight: 7.5,
@@ -41,6 +42,7 @@ const MarbleWorld: GameWorldCreator = {
 
         addLight(scene);
         addSkybox(scene);
+        const sounds = createSounds();
 
         const playerMaterial = new CANNON.Material('player');
         const objectBouncyMaterial = new CANNON.Material('bouncy');
@@ -123,17 +125,18 @@ const MarbleWorld: GameWorldCreator = {
             const gameWorldObjects = editor.createGameWorldObjects(() => {
                 if (collectiblesCollected.size === totalCollectibles) {
                     if (!playerFinished) {
-                        new Audio(FinishSound).play();
+                        sounds.finish.play();
                     }
 
                     playerFinished = true;
                 }
             }, collectible => {
                 if (collectiblesCollected.has(collectible)) return;
+
                 console.log('Collectible collided:', collectible);
                 scene.remove(collectible.mesh);
                 collectiblesCollected.add(collectible);
-                new Audio(CollectSound).play();
+                sounds.collect.play();
             }, updatedTotalCollectibles => totalCollectibles = updatedTotalCollectibles);
 
             for (const object of gameWorldObjects) {
@@ -353,6 +356,19 @@ function addSkybox(scene: THREE.Scene) {
     );
 
     scene.add(skybox);
+}
+
+function createSounds(): Sounds {
+    const collect = new Audio(CollectSound);
+    collect.load();
+
+    const finish = new Audio(FinishSound);
+    finish.load();
+
+    return {
+        collect: collect,
+        finish: finish
+    };
 }
 
 export default MarbleWorld;
