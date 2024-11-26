@@ -126,6 +126,7 @@ const MarbleWorld: GameWorldCreator = {
                 if (collectiblesCollected.size === totalCollectibles) {
                     if (!playerFinished) {
                         sounds.finish.play();
+                        collectiblesCollected.clear();
                     }
 
                     playerFinished = true;
