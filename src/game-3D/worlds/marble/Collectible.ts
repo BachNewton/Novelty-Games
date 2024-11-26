@@ -2,19 +2,21 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { GameWorldObject } from "../GameWorldObject";
 
-const RADIUS = 1;
+const HIT_BOX_RADIUS = 1.6;
+const VISUAL_RADIUS = 0.9;
 const ROTATIONAL_SPEED = 0.001;
 
 export function createCollectible(): GameWorldObject {
     const mesh = new THREE.Mesh(
-        new THREE.TorusKnotGeometry(RADIUS - 0.1, 0.2, 128, 16, 1, 4),
+        new THREE.TorusKnotGeometry(VISUAL_RADIUS, 0.2, 128, 16, 1, 4),
         new THREE.MeshStandardMaterial({ color: 'magenta', roughness: 0.25, metalness: 0.75 })
     );
 
     mesh.add(new THREE.PointLight(undefined, 3));
+    // mesh.add(new THREE.Mesh(new THREE.SphereGeometry(HIT_BOX_RADIUS), new THREE.MeshBasicMaterial({ color: 'white', opacity: 0.5, transparent: true })));
 
     const body = new CANNON.Body({
-        shape: new CANNON.Sphere(RADIUS),
+        shape: new CANNON.Sphere(HIT_BOX_RADIUS),
         collisionResponse: false,
         mass: 0
     });
