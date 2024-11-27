@@ -5,6 +5,8 @@ import Stats from 'three/examples/jsm/libs/stats.module';
 import { GameWorld } from "../worlds/GameWorld";
 import MarbleWorld from "../worlds/marble/MarbleWorld";
 
+const MINIUM_FRAME_RATE = 1000 / 25;
+
 let hasGameBeenSetup = false;
 
 const Game3D: React.FC = () => {
@@ -43,7 +45,7 @@ function setupGame(containerElement: HTMLDivElement, updateHUD: (text: string) =
     let previousTime = performance.now();
 
     const animate = (timeNow: DOMHighResTimeStamp) => {
-        const deltaTime = timeNow - previousTime;
+        const deltaTime = Math.min(timeNow - previousTime, MINIUM_FRAME_RATE);
         previousTime = timeNow;
 
         world.step(deltaTime / 1000);
@@ -56,13 +58,7 @@ function setupGame(containerElement: HTMLDivElement, updateHUD: (text: string) =
 }
 
 function createCamera(): THREE.PerspectiveCamera {
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
-
-    camera.position.z = 10;
-    camera.position.y = 8;
-    camera.position.x = 8;
-
-    return camera;
+    return new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
 }
 
 function createRenderer(containerElement: HTMLDivElement): THREE.WebGLRenderer {

@@ -123,14 +123,11 @@ const MarbleWorld: GameWorldCreator = {
             editableGameWorldObjects.splice(0);
 
             const gameWorldObjects = editor.createGameWorldObjects(() => {
-                if (collectiblesCollected.size === totalCollectibles) {
-                    if (!playerFinished) {
-                        sounds.finish.play();
-                        collectiblesCollected.clear();
-                    }
+                if (collectiblesCollected.size !== totalCollectibles) return;
+                if (playerFinished) return;
 
-                    playerFinished = true;
-                }
+                playerFinished = true;
+                sounds.finish.play();
             }, collectible => {
                 if (collectiblesCollected.has(collectible)) return;
 
@@ -164,6 +161,8 @@ const MarbleWorld: GameWorldCreator = {
         };
 
         const loadLevel = (level: Level) => {
+            collectiblesCollected.clear();
+
             editor.load(level, state);
 
             if (state === State.PLAY) {

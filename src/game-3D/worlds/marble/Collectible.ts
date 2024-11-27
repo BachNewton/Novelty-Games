@@ -12,7 +12,10 @@ export function createCollectible(): GameWorldObject {
         new THREE.MeshStandardMaterial({ color: 'magenta', roughness: 0.25, metalness: 0.75 })
     );
 
-    mesh.add(new THREE.PointLight(undefined, 3));
+    // Removed the light because has been causing performance issues
+    // mesh.add(new THREE.PointLight(undefined, 3));
+
+    // Helpful for debugging. Renders the hit box sphere of the collectible.
     // mesh.add(new THREE.Mesh(new THREE.SphereGeometry(HIT_BOX_RADIUS), new THREE.MeshBasicMaterial({ color: 'white', opacity: 0.5, transparent: true })));
 
     const body = new CANNON.Body({
