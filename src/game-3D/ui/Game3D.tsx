@@ -56,13 +56,7 @@ function setupGame(containerElement: HTMLDivElement, updateHUD: (text: string) =
 }
 
 function createCamera(): THREE.PerspectiveCamera {
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
-
-    camera.position.z = 10;
-    camera.position.y = 8;
-    camera.position.x = 8;
-
-    return camera;
+    return new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
 }
 
 function createRenderer(containerElement: HTMLDivElement): THREE.WebGLRenderer {
