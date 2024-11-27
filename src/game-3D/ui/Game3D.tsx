@@ -5,6 +5,8 @@ import Stats from 'three/examples/jsm/libs/stats.module';
 import { GameWorld } from "../worlds/GameWorld";
 import MarbleWorld from "../worlds/marble/MarbleWorld";
 
+const MINIUM_FRAME_RATE = 1000 / 25;
+
 let hasGameBeenSetup = false;
 
 const Game3D: React.FC = () => {
@@ -43,7 +45,7 @@ function setupGame(containerElement: HTMLDivElement, updateHUD: (text: string) =
     let previousTime = performance.now();
 
     const animate = (timeNow: DOMHighResTimeStamp) => {
-        const deltaTime = timeNow - previousTime;
+        const deltaTime = Math.min(timeNow - previousTime, MINIUM_FRAME_RATE);
         previousTime = timeNow;
 
         world.step(deltaTime / 1000);
