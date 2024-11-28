@@ -1,5 +1,5 @@
-import FinishSound from './finish.wav';
-import CollectSound from './collect.wav';
+import FinishSound from '../sounds/finish.wav';
+import CollectSound from '../sounds/collect.wav';
 
 export interface Sounds {
     collect: HTMLAudioElement;

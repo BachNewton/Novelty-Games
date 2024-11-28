@@ -18,7 +18,7 @@ import Level3 from '../levels/level3.json';
 import Level4 from '../levels/level4.json';
 import Level5 from '../levels/level5.json';
 import { GameMaterial, gameMaterialToString, stringToGameMaterial } from "./GameMaterial";
-import { createSounds } from "../sounds/Sounds";
+import { createSounds } from "./Sounds";
 
 export const temporaryExperimentalProperties = {
     jumpHeight: 7.5,
