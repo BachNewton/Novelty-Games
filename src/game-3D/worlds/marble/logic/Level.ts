@@ -6,6 +6,7 @@ export interface Level {
     finishingPosition: Position;
     obstacles: Obstacle[];
     collectibles: Position[];
+    metadata: LevelMetadata;
 }
 
 interface Vector3 {
@@ -29,11 +30,20 @@ export interface Obstacle {
     material: GameMaterial;
 }
 
+export interface LevelMetadata {
+    'Level Name': string;
+    'Bronze Time': number,
+    'Silver Time': number,
+    'Gold Time': number,
+    'Diamond Time': number
+}
+
 export function createLevel(
     startingObject: THREE.Mesh,
     finishingObject: THREE.Mesh,
     objects: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>[],
-    collectibles: Set<THREE.Mesh>
+    collectibles: Set<THREE.Mesh>,
+    levelMetadata: LevelMetadata
 ): Level {
     return {
         startingPosition: {
@@ -76,7 +86,8 @@ export function createLevel(
                 y: collectible.position.y,
                 z: collectible.position.z
             }
-        })
+        }),
+        metadata: levelMetadata
     };
 }
 
@@ -88,9 +99,10 @@ export function createLevelFile(level: Level) {
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 
+    const levelName = level.metadata['Level Name']
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'level';
+    a.download = levelName === '' ? 'level' : levelName;
     a.click();
 
     URL.revokeObjectURL(url);
