@@ -7,7 +7,7 @@ import Games2DHome from '../game-2D/ui/Home';
 import Games3DHome from '../game-3D/ui/Home';
 import ToolsHome from '../tools/ui/Home';
 
-const APP_VERSION = 'v2.4.3';
+const APP_VERSION = 'v2.5.0';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
