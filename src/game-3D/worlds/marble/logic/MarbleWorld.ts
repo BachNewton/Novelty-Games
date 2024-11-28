@@ -1,26 +1,25 @@
-import { GameWorldCreator } from "../GameWorld";
+import { GameWorldCreator } from "../../GameWorld";
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
-import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
+import { GUI, NumberController, StringController } from 'three/examples/jsm/libs/lil-gui.module.min';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { GameWorldObject } from "../GameWorldObject";
-import { Button } from "../../input/XboxController";
-import { GenericControllerCreator } from "../../input/GenericController";
+import { GameWorldObject } from "../../GameWorldObject";
+import { Button } from "../../../input/XboxController";
+import { GenericControllerCreator } from "../../../input/GenericController";
 import { PlayerCreator } from "./Player";
-import { MouseInputCreator } from "../../input/Mouse";
-import SkyboxPath from './textures/skybox.jpg';
-import { Level, loadLevelFile } from "./Level";
+import { MouseInputCreator } from "../../../input/Mouse";
+import SkyboxPath from '../textures/skybox.jpg';
+import { Level, LevelMetadata, loadLevelFile } from "./Level";
 import { DEFAULT_COLOR, DEFAULT_MATERIAL, EditorCreator } from "./Editor";
-import EmptyLevel from './levels/empty_level.json';
-import Level1 from './levels/level1.json';
-import Level2 from './levels/level2.json';
-import Level3 from './levels/level3.json';
-import Level4 from './levels/level4.json';
-import Level5 from './levels/level5.json';
+import EmptyLevel from '../levels/empty_level.json';
+import Level1 from '../levels/level1.json';
+import Level2 from '../levels/level2.json';
+import Level3 from '../levels/level3.json';
+import Level4 from '../levels/level4.json';
+import Level5 from '../levels/level5.json';
 import { GameMaterial, gameMaterialToString, stringToGameMaterial } from "./GameMaterial";
-import FinishSound from './sounds/finish.wav';
-import CollectSound from './sounds/collect.wav';
-import { Sounds } from "./sounds/Sounds";
+import { createSounds } from "./Sounds";
+import { clearSummary, createSummary } from "../ui/Summary";
 
 export const temporaryExperimentalProperties = {
     jumpHeight: 7.5,
@@ -35,7 +34,7 @@ export enum State {
 }
 
 const MarbleWorld: GameWorldCreator = {
-    create: (scene, camera, world, domElement, updateHUD) => {
+    create: (scene, camera, world, domElement, updateHUD, updateSummary) => {
         let state = State.PLAY;
         let startTime = performance.now();
         let playerFinished = false;
@@ -81,6 +80,7 @@ const MarbleWorld: GameWorldCreator = {
             collectiblesCollected.clear();
 
             player.reset(startingPosition, orbitControls);
+            updateSummary(clearSummary());
             startTime = performance.now();
             playerFinished = false;
         };
@@ -128,6 +128,15 @@ const MarbleWorld: GameWorldCreator = {
 
                 playerFinished = true;
                 sounds.finish.play();
+                updateHUD('');
+                updateSummary(createSummary({
+                    levelName: levelMetadata["Level Name"],
+                    yourTime: (performance.now() - startTime) / 1000,
+                    bronzeTime: levelMetadata["Bronze Time"],
+                    silverTime: levelMetadata["Silver Time"],
+                    goldTime: levelMetadata["Gold Time"],
+                    diamondTime: levelMetadata["Diamond Time"]
+                }));
             }, collectible => {
                 if (collectiblesCollected.has(collectible)) return;
 
@@ -160,8 +169,30 @@ const MarbleWorld: GameWorldCreator = {
             addEditableObjectsToGameWorld();
         };
 
+        const levelMetadata: LevelMetadata = {
+            'Level Name': 'level',
+            'Bronze Time': 30,
+            'Silver Time': 20,
+            'Gold Time': 10,
+            'Diamond Time': 5
+        };
+
+        const levelMetadataControllers = {
+            name: null as StringController<LevelMetadata, 'Level Name'> | null,
+            bronzeTime: null as NumberController<LevelMetadata, 'Bronze Time'> | null,
+            silverTime: null as NumberController<LevelMetadata, 'Silver Time'> | null,
+            goldTime: null as NumberController<LevelMetadata, 'Gold Time'> | null,
+            diamondTime: null as NumberController<LevelMetadata, 'Diamond Time'> | null,
+        };
+
         const loadLevel = (level: Level) => {
             collectiblesCollected.clear();
+
+            levelMetadataControllers.name?.setValue(level.metadata['Level Name']);
+            levelMetadataControllers.bronzeTime?.setValue(level.metadata['Bronze Time']);
+            levelMetadataControllers.silverTime?.setValue(level.metadata['Silver Time']);
+            levelMetadataControllers.goldTime?.setValue(level.metadata['Gold Time']);
+            levelMetadataControllers.diamondTime?.setValue(level.metadata['Diamond Time']);
 
             editor.load(level, state);
 
@@ -176,8 +207,6 @@ const MarbleWorld: GameWorldCreator = {
                 resetPlayer(editor.getStartingPosition());
             }
         };
-
-        loadLevel(Level1);
 
         guiPlayMode.add({ "'Tab' Reset": () => resetPlayer(editor.getStartingPosition()) }, "'Tab' Reset");
         const guiPlayModeLevelsFolder = guiPlayMode.addFolder('Levels');
@@ -210,12 +239,20 @@ const MarbleWorld: GameWorldCreator = {
         guiEditModeControlsFolder.add({ "'E' Rotate": editor.changeToRotateMode }, "'E' Rotate");
         guiEditModeControlsFolder.add({ "'R' Scale": editor.changeToScaleMode }, "'R' Scale");
         guiEditModeControlsFolder.add({ "'X' Recenter": editor.recenter }, "'X' Recenter");
+        const guiEditMetadataFolder = guiEditMode.addFolder('Metadata');
+        levelMetadataControllers.name = guiEditMetadataFolder.add(levelMetadata, 'Level Name');
+        levelMetadataControllers.bronzeTime = guiEditMetadataFolder.add(levelMetadata, 'Bronze Time', 0, undefined, undefined);
+        levelMetadataControllers.silverTime = guiEditMetadataFolder.add(levelMetadata, 'Silver Time', 0, undefined, undefined);
+        levelMetadataControllers.goldTime = guiEditMetadataFolder.add(levelMetadata, 'Gold Time', 0, undefined, undefined);
+        levelMetadataControllers.diamondTime = guiEditMetadataFolder.add(levelMetadata, 'Diamond Time', 0, undefined, undefined);
         const guiEditModeFileFolder = guiEditMode.addFolder('File');
-        guiEditModeFileFolder.add({ 'Save': editor.save }, 'Save');
+        guiEditModeFileFolder.add({ 'Save': () => editor.save(levelMetadata) }, 'Save');
         guiEditModeFileFolder.add({ 'Load': () => loadLevelFile().then(level => loadLevel(level)) }, 'Load');
         guiEditModeFileFolder.add({ 'Empty Level': () => { if (window.confirm('Are you sure you want to empty the level?\nThis will erase all your progress!')) loadLevel(EmptyLevel) } }, 'Empty Level');
         const guiEditModePlayerFolder = guiEditMode.addFolder('Player');
         guiEditModePlayerFolder.add({ 'Enter Play Mode': enterPlayMode }, 'Enter Play Mode');
+
+        loadLevel(Level1);
 
         const mouseInput = MouseInputCreator.create((pointer, target) => {
             if (state !== State.EDIT) return;
@@ -356,19 +393,6 @@ function addSkybox(scene: THREE.Scene) {
     );
 
     scene.add(skybox);
-}
-
-function createSounds(): Sounds {
-    const collect = new Audio(CollectSound);
-    collect.load();
-
-    const finish = new Audio(FinishSound);
-    finish.load();
-
-    return {
-        collect: collect,
-        finish: finish
-    };
 }
 
 export default MarbleWorld;

@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { TransformControls, OrbitControls, TextGeometry, FontLoader, RoundedBoxGeometry } from 'three/examples/jsm/Addons';
 import FontData from 'three/examples/fonts/helvetiker_regular.typeface.json';
-import { Dimensions, GameWorldObject, GameWorldObjectCreator } from '../GameWorldObject';
-import PlayerTexture from './textures/player.png';
-import CheckeredTexture from './textures/checkered.jpg';
-import { createLevel, Level, Obstacle, createLevelFile } from './Level';
-import { Pointer } from '../../input/Mouse';
+import { Dimensions, GameWorldObject, GameWorldObjectCreator } from '../../GameWorldObject';
+import PlayerTexture from '../textures/player.png';
+import CheckeredTexture from '../textures/checkered.jpg';
+import { createLevel, Level, Obstacle, createLevelFile, LevelMetadata } from './Level';
+import { Pointer } from '../../../input/Mouse';
 import { State } from './MarbleWorld';
 import { GameMaterial } from './GameMaterial';
 import { createCollectible } from './Collectible';
@@ -25,7 +25,7 @@ interface Editor {
     ): GameWorldObject[];
     getStartingPosition: () => THREE.Vector3;
     recenter: () => void;
-    save: () => void;
+    save: (levelMetadata: LevelMetadata) => void;
     load: (level: Level, worldState: State) => void;
     addBox: () => void;
     addCollectible: () => void;
@@ -136,8 +136,8 @@ function createEditor(
             return editableStartingObject.position;
         },
         recenter: () => transformControlsObject(false, false, object => orbitControls.target.copy(object.position)),
-        save: () => {
-            const level = createLevel(editableStartingObject, editableFinishingObject, editableObjects, collectibles);
+        save: (levelMetadata) => {
+            const level = createLevel(editableStartingObject, editableFinishingObject, editableObjects, collectibles, levelMetadata);
 
             console.log('Saved Level:', level);
 

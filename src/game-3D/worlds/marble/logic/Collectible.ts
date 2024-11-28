@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
-import { GameWorldObject } from "../GameWorldObject";
+import { GameWorldObject } from "../../GameWorldObject";
 
 const HIT_BOX_RADIUS = 1.6;
 const VISUAL_RADIUS = 0.9;
