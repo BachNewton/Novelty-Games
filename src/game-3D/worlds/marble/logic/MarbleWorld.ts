@@ -19,6 +19,7 @@ import Level4 from '../levels/level4.json';
 import Level5 from '../levels/level5.json';
 import { GameMaterial, gameMaterialToString, stringToGameMaterial } from "./GameMaterial";
 import { createSounds } from "./Sounds";
+import { clearSummary, createSummary } from "../ui/Summary";
 
 export const temporaryExperimentalProperties = {
     jumpHeight: 7.5,
@@ -33,7 +34,7 @@ export enum State {
 }
 
 const MarbleWorld: GameWorldCreator = {
-    create: (scene, camera, world, domElement, updateHUD) => {
+    create: (scene, camera, world, domElement, updateHUD, updateSummary) => {
         let state = State.PLAY;
         let startTime = performance.now();
         let playerFinished = false;
@@ -79,6 +80,7 @@ const MarbleWorld: GameWorldCreator = {
             collectiblesCollected.clear();
 
             player.reset(startingPosition, orbitControls);
+            updateSummary(clearSummary());
             startTime = performance.now();
             playerFinished = false;
         };
@@ -126,6 +128,15 @@ const MarbleWorld: GameWorldCreator = {
 
                 playerFinished = true;
                 sounds.finish.play();
+                updateHUD('');
+                updateSummary(createSummary({
+                    levelName: 'Placeholder Summary',
+                    yourTime: (performance.now() - startTime) / 1000,
+                    bronzeTime: 30,
+                    silverTime: 20,
+                    goldTime: 10,
+                    diamondTime: 5
+                }));
             }, collectible => {
                 if (collectiblesCollected.has(collectible)) return;
 

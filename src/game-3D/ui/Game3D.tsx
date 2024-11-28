@@ -12,22 +12,46 @@ let hasGameBeenSetup = false;
 const Game3D: React.FC = () => {
     const containerElement = useRef<HTMLDivElement>(null);
     const [HUDText, setHUDText] = useState('');
+    const [summary, setSummary] = useState(<></>);
 
     useEffect(() => {
         if (hasGameBeenSetup) return;
         hasGameBeenSetup = true;
 
-        setupGame(containerElement?.current!, setHUDText);
+        setupGame(containerElement?.current!, setHUDText, setSummary);
     }, []);
 
     return <div style={{ overflow: 'hidden', height: '100vh' }} ref={containerElement}>
-        <div style={{ position: 'absolute', width: '100%', color: 'white', 'fontSize': '2em', marginTop: '25px', textAlign: 'center', userSelect: 'none' }}>
+        <div style={{
+            position: 'absolute',
+            width: '100%',
+            color: 'white',
+            'fontSize': '2em',
+            marginTop: '25px',
+            textAlign: 'center',
+            userSelect: 'none',
+            pointerEvents: 'none'
+        }}>
             {HUDText}
+        </div>
+
+        <div style={{
+            position: 'absolute',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            height: '100%',
+            color: 'white',
+            userSelect: 'none',
+            pointerEvents: 'none'
+        }}>
+            {summary}
         </div>
     </div>;
 };
 
-function setupGame(containerElement: HTMLDivElement, updateHUD: (text: string) => void) {
+function setupGame(containerElement: HTMLDivElement, updateHUD: (text: string) => void, updateSummary: (element: JSX.Element) => void) {
     const scene = new THREE.Scene();
     const camera = createCamera();
     const renderer = createRenderer(containerElement);
@@ -40,7 +64,7 @@ function setupGame(containerElement: HTMLDivElement, updateHUD: (text: string) =
     onWindowResize(camera, renderer);
     window.addEventListener('resize', () => onWindowResize(camera, renderer));
 
-    const gameWorld: GameWorld = MarbleWorld.create(scene, camera, world, renderer.domElement, updateHUD);
+    const gameWorld: GameWorld = MarbleWorld.create(scene, camera, world, renderer.domElement, updateHUD, updateSummary);
 
     let previousTime = performance.now();
 
