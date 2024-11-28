@@ -1,24 +1,24 @@
-import { GameWorldCreator } from "../GameWorld";
+import { GameWorldCreator } from "../../GameWorld";
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { GameWorldObject } from "../GameWorldObject";
-import { Button } from "../../input/XboxController";
-import { GenericControllerCreator } from "../../input/GenericController";
+import { GameWorldObject } from "../../GameWorldObject";
+import { Button } from "../../../input/XboxController";
+import { GenericControllerCreator } from "../../../input/GenericController";
 import { PlayerCreator } from "./Player";
-import { MouseInputCreator } from "../../input/Mouse";
-import SkyboxPath from './textures/skybox.jpg';
+import { MouseInputCreator } from "../../../input/Mouse";
+import SkyboxPath from '../textures/skybox.jpg';
 import { Level, loadLevelFile } from "./Level";
 import { DEFAULT_COLOR, DEFAULT_MATERIAL, EditorCreator } from "./Editor";
-import EmptyLevel from './levels/empty_level.json';
-import Level1 from './levels/level1.json';
-import Level2 from './levels/level2.json';
-import Level3 from './levels/level3.json';
-import Level4 from './levels/level4.json';
-import Level5 from './levels/level5.json';
+import EmptyLevel from '../levels/empty_level.json';
+import Level1 from '../levels/level1.json';
+import Level2 from '../levels/level2.json';
+import Level3 from '../levels/level3.json';
+import Level4 from '../levels/level4.json';
+import Level5 from '../levels/level5.json';
 import { GameMaterial, gameMaterialToString, stringToGameMaterial } from "./GameMaterial";
-import { createSounds, Sounds } from "./sounds/Sounds";
+import { createSounds } from "../sounds/Sounds";
 
 export const temporaryExperimentalProperties = {
     jumpHeight: 7.5,

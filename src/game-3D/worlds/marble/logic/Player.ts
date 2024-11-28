@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
-import { GameWorldObjectCreator } from "../GameWorldObject";
-import PlayerTexture from './textures/player.png';
-import PlayerNormalMap from './textures/player-normal-map.png';
+import { GameWorldObjectCreator } from "../../GameWorldObject";
+import PlayerTexture from '../textures/player.png';
+import PlayerNormalMap from '../textures/player-normal-map.png';
 import { OrbitControls } from 'three/examples/jsm/Addons';
 import { temporaryExperimentalProperties } from './MarbleWorld';
 

@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import Stats from 'three/examples/jsm/libs/stats.module';
 import { GameWorld } from "../worlds/GameWorld";
-import MarbleWorld from "../worlds/marble/MarbleWorld";
+import MarbleWorld from "../worlds/marble/logic/MarbleWorld";
 
 const MINIUM_FRAME_RATE = 1000 / 25;
 
