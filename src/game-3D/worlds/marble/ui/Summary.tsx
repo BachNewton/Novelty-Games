@@ -27,25 +27,25 @@ const Summary: React.FC<SummaryProps> = ({ levelName, yourTime, bronzeTime, silv
                 Bronze 🥉
             </div>
             <div>
-                {bronzeTime} seconds {getAchievedIcon(achievedBronze)}
+                {bronzeTime.toFixed(1)} seconds {getAchievedIcon(achievedBronze)}
             </div>
             <div>
                 Silver 🥈
             </div>
             <div>
-                {silverTime} seconds {getAchievedIcon(achievedSilver)}
+                {silverTime.toFixed(1)} seconds {getAchievedIcon(achievedSilver)}
             </div>
             <div>
                 Gold 🥇
             </div>
             <div>
-                {goldTime} seconds {getAchievedIcon(achievedGold)}
+                {goldTime.toFixed(1)} seconds {getAchievedIcon(achievedGold)}
             </div>
             <div>
                 Diamond 💎
             </div>
             <div>
-                {diamondTime} seconds {getAchievedIcon(achievedDiamond)}
+                {diamondTime.toFixed(1)} seconds {getAchievedIcon(achievedDiamond)}
             </div>
         </div>
         <br />
