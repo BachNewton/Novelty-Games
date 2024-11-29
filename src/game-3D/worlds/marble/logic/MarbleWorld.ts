@@ -19,6 +19,8 @@ import Level4 from '../levels/level4.json';
 import Level5 from '../levels/level5.json';
 import Level6 from '../levels/level6.json';
 import LevelRainbowRush from '../levels/rainbowRush.json';
+import LevelSlalmon from '../levels/slalom.json';
+import LevelLoopingCoaster from '../levels/loopingCoaster.json';
 import { GameMaterial, gameMaterialToString, stringToGameMaterial } from "./GameMaterial";
 import { createSounds } from "./Sounds";
 import { clearSummary, createSummary } from "../ui/Summary";
@@ -219,6 +221,8 @@ const MarbleWorld: GameWorldCreator = {
         guiPlayModeLevelsFolder.add({ 'Level 5': () => loadLevel(Level5) }, 'Level 5');
         guiPlayModeLevelsFolder.add({ 'Level 6': () => loadLevel(Level6) }, 'Level 6');
         guiPlayModeLevelsFolder.add({ 'Rainbow Rush': () => loadLevel(LevelRainbowRush) }, 'Rainbow Rush');
+        guiPlayModeLevelsFolder.add({ 'Slalom Madness': () => loadLevel(LevelSlalmon) }, 'Slalom Madness');
+        guiPlayModeLevelsFolder.add({ 'Looping Coaster 1': () => loadLevel(LevelLoopingCoaster) }, 'Looping Coaster 1');
         const guiPlayModeEditorFolder = guiPlayMode.addFolder('Editor');
         guiPlayModeEditorFolder.add({ 'Enter Level Editor': enterEditMode }, 'Enter Level Editor');
         const guiPlayModeExperimentalFolder = guiPlayMode.addFolder('Experimental');
