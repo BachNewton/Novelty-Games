@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { GameWorldObject } from "../../GameWorldObject";
 
-const HIT_BOX_RADIUS = 1.6;
+const HIT_BOX_RADIUS = 2.1;
 const VISUAL_RADIUS = 0.9;
 const ROTATIONAL_SPEED = 0.001;
 
