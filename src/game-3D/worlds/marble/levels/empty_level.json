@@ -34,9 +34,9 @@
     "collectibles": [],
     "metadata": {
         "Level Name": "level",
-        "Bronze Time": 30,
-        "Silver Time": 20,
-        "Gold Time": 10,
-        "Diamond Time": 5
+        "Bronze Time": 90,
+        "Silver Time": 50,
+        "Gold Time": 30,
+        "Diamond Time": 20
     }
 }
