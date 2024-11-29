@@ -2,7 +2,7 @@ import { Axis, Buttons, Controller } from "./Controller";
 import { Key, KeyboardInputCreator } from "./Keyboard";
 import { Button, XboxControllerCreator } from "./XboxController";
 
-const DEADZONE = 0.1;
+const DEADZONE = 0.13;
 
 interface GenericControllerCreator {
     create(onButtonPressed: (button: Button) => void): Controller;
