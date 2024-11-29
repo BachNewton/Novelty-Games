@@ -175,10 +175,10 @@ const MarbleWorld: GameWorldCreator = {
 
         const levelMetadata: LevelMetadata = {
             'Level Name': 'level',
-            'Bronze Time': 30,
-            'Silver Time': 20,
-            'Gold Time': 10,
-            'Diamond Time': 5
+            'Bronze Time': -1,
+            'Silver Time': -1,
+            'Gold Time': -1,
+            'Diamond Time': -1
         };
 
         const levelMetadataControllers = {
