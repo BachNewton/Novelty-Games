@@ -16,6 +16,7 @@ export interface Buttons {
     y: boolean;
     b: boolean;
     view: boolean;
+    leftStickIn: boolean;
     rightStickIn: boolean;
     leftDStick: boolean;
     rightDStick: boolean;
