@@ -216,16 +216,16 @@ const MarbleWorld: GameWorldCreator = {
             }
         };
 
-        const switchToLocalSpace = () => {
-            editor.setToLocalSpace();
-            transformSpaceControllers.local?.hide();
-            transformSpaceControllers.world?.show();
-        };
+        const toggleEditorSpace = () => {
+            editor.toggleSpace();
 
-        const switchToWorldSpace = () => {
-            editor.setToWorldSpace();
-            transformSpaceControllers.world?.hide();
-            transformSpaceControllers.local?.show();
+            if (transformSpaceControllers?.local?._hidden) {
+                transformSpaceControllers.world?.hide();
+                transformSpaceControllers.local?.show();
+            } else if (transformSpaceControllers?.world?._hidden) {
+                transformSpaceControllers.local?.hide();
+                transformSpaceControllers.world?.show();
+            }
         };
 
         guiPlayMode.add({ "'Tab' Reset": () => resetPlayer(editor.getStartingPosition()) }, "'Tab' Reset");
@@ -263,8 +263,8 @@ const MarbleWorld: GameWorldCreator = {
         guiEditModeControlsFolder.add({ "'E' Rotate": editor.changeToRotateMode }, "'E' Rotate");
         guiEditModeControlsFolder.add({ "'R' Scale": editor.changeToScaleMode }, "'R' Scale");
         guiEditModeControlsFolder.add({ "'X' Recenter": editor.recenter }, "'X' Recenter");
-        transformSpaceControllers.local = guiEditModeControlsFolder.add({ "'F' Switch to Local Space": switchToLocalSpace }, "'F' Switch to Local Space");
-        transformSpaceControllers.world = guiEditModeControlsFolder.add({ "'F' Switch to World Space": switchToWorldSpace }, "'F' Switch to World Space").hide();
+        transformSpaceControllers.local = guiEditModeControlsFolder.add({ "'F' Switch to Local Space": toggleEditorSpace }, "'F' Switch to Local Space");
+        transformSpaceControllers.world = guiEditModeControlsFolder.add({ "'F' Switch to World Space": toggleEditorSpace }, "'F' Switch to World Space").hide();
         const guiEditMetadataFolder = guiEditMode.addFolder('Metadata');
         levelMetadataControllers.name = guiEditMetadataFolder.add(levelMetadata, 'Level Name');
         levelMetadataControllers.bronzeTime = guiEditMetadataFolder.add(levelMetadata, 'Bronze Time', 0, undefined, undefined);
@@ -296,6 +296,9 @@ const MarbleWorld: GameWorldCreator = {
             } else if (button === Button.A) {
                 if (state === State.EDIT) return;
                 player.jump();
+            } else if (button === Button.LEFT_STICK_IN) {
+                if (state === State.PLAY) return;
+                toggleEditorSpace();
             } else if (button === Button.RIGHT_STICK_IN) {
                 if (state === State.PLAY) return;
                 editor.recenter();

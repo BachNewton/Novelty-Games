@@ -16,6 +16,8 @@ export const GenericControllerCreator: GenericControllerCreator = {
                 onButtonPressed(Button.A);
             } else if (key === Key.TAB) {
                 onButtonPressed(Button.VIEW);
+            } else if (key === Key.F) {
+                onButtonPressed(Button.LEFT_STICK_IN);
             } else if (key === Key.X) {
                 onButtonPressed(Button.RIGHT_STICK_IN);
             } else if (key === Key.BACKSPACE) {
@@ -39,6 +41,7 @@ export const GenericControllerCreator: GenericControllerCreator = {
             y: false,
             b: false,
             view: false,
+            leftStickIn: false,
             rightStickIn: false,
             leftDStick: false,
             rightDStick: false

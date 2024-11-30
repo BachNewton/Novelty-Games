@@ -10,6 +10,7 @@ export enum Button {
     Y = 'Y',
     B = 'B',
     VIEW = 'VIEW',
+    LEFT_STICK_IN = 'LEFT_STICK_IN',
     RIGHT_STICK_IN = 'RIGHT_STICK_IN',
     LEFT_D_STICK = 'LEFT_D_STICK',
     RIGHT_D_STICK = 'RIGHT_D_STICK'
@@ -30,6 +31,7 @@ export const XboxControllerCreator: XboxControllerCreator = {
             y: false,
             b: false,
             view: false,
+            leftStickIn: false,
             rightStickIn: false,
             leftDStick: false,
             rightDStick: false
@@ -38,6 +40,7 @@ export const XboxControllerCreator: XboxControllerCreator = {
         const buttonLookups: ButtonLookup[] = [
             [0, Button.A, 'a'],
             [8, Button.VIEW, 'view'],
+            [10, Button.LEFT_STICK_IN, 'leftStickIn'],
             [11, Button.RIGHT_STICK_IN, 'rightStickIn']
         ];
 

@@ -15,6 +15,7 @@ interface Keys {
     q: boolean;
     e: boolean;
     r: boolean;
+    f: boolean;
 }
 
 interface KeyboardInputCreator {
@@ -29,7 +30,8 @@ export enum Key {
     C = 'C',
     Q = 'Q',
     E = 'E',
-    R = 'R'
+    R = 'R',
+    F = 'F'
 }
 
 enum KeyEventType {
@@ -52,7 +54,8 @@ export const KeyboardInputCreator: KeyboardInputCreator = {
             c: false,
             q: false,
             e: false,
-            r: false
+            r: false,
+            f: false
         };
 
         const keyLookups: KeyLookup[] = [
@@ -64,6 +67,7 @@ export const KeyboardInputCreator: KeyboardInputCreator = {
             ['KeyQ', 'q', Key.Q],
             ['KeyE', 'e', Key.E],
             ['KeyR', 'r', Key.R],
+            ['KeyF', 'f', Key.F],
             ['KeyW', 'w', null],
             ['KeyA', 'a', null],
             ['KeyS', 's', null],
