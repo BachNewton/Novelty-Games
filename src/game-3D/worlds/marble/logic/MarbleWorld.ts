@@ -1,7 +1,7 @@
 import { GameWorldCreator } from "../../GameWorld";
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
-import { GUI, NumberController, StringController } from 'three/examples/jsm/libs/lil-gui.module.min';
+import { FunctionController, GUI, NumberController, StringController } from 'three/examples/jsm/libs/lil-gui.module.min';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GameWorldObject } from "../../GameWorldObject";
 import { Button } from "../../../input/XboxController";
@@ -100,8 +100,7 @@ const MarbleWorld: GameWorldCreator = {
         const editor = EditorCreator.create(scene, camera, orbitControls, objectBouncyMaterial, objectSlipperyMaterial);
 
         const guiPlayMode = new GUI({ title: 'Play Mode' });
-        const guiEditMode = new GUI({ title: 'Edit Mode' });
-        guiEditMode.hide();
+        const guiEditMode = new GUI({ title: 'Edit Mode' }).hide();
 
         const editableGameWorldObjects: GameWorldObject[] = [];
         const collectiblesCollected = new Set<GameWorldObject>();
@@ -189,6 +188,11 @@ const MarbleWorld: GameWorldCreator = {
             diamondTime: null as NumberController<LevelMetadata, 'Diamond Time'> | null,
         };
 
+        const transformSpaceControllers = {
+            local: null as FunctionController<{ "'F' Switch to Local Space": () => void }, "'F' Switch to Local Space"> | null,
+            world: null as FunctionController<{ "'F' Switch to World Space": () => void }, "'F' Switch to World Space"> | null
+        };
+
         const loadLevel = (level: Level) => {
             collectiblesCollected.clear();
 
@@ -210,6 +214,18 @@ const MarbleWorld: GameWorldCreator = {
 
                 resetPlayer(editor.getStartingPosition());
             }
+        };
+
+        const switchToLocalSpace = () => {
+            editor.setToLocalSpace();
+            transformSpaceControllers.local?.hide();
+            transformSpaceControllers.world?.show();
+        };
+
+        const switchToWorldSpace = () => {
+            editor.setToWorldSpace();
+            transformSpaceControllers.world?.hide();
+            transformSpaceControllers.local?.show();
         };
 
         guiPlayMode.add({ "'Tab' Reset": () => resetPlayer(editor.getStartingPosition()) }, "'Tab' Reset");
@@ -247,6 +263,8 @@ const MarbleWorld: GameWorldCreator = {
         guiEditModeControlsFolder.add({ "'E' Rotate": editor.changeToRotateMode }, "'E' Rotate");
         guiEditModeControlsFolder.add({ "'R' Scale": editor.changeToScaleMode }, "'R' Scale");
         guiEditModeControlsFolder.add({ "'X' Recenter": editor.recenter }, "'X' Recenter");
+        transformSpaceControllers.local = guiEditModeControlsFolder.add({ "'F' Switch to Local Space": switchToLocalSpace }, "'F' Switch to Local Space");
+        transformSpaceControllers.world = guiEditModeControlsFolder.add({ "'F' Switch to World Space": switchToWorldSpace }, "'F' Switch to World Space").hide();
         const guiEditMetadataFolder = guiEditMode.addFolder('Metadata');
         levelMetadataControllers.name = guiEditMetadataFolder.add(levelMetadata, 'Level Name');
         levelMetadataControllers.bronzeTime = guiEditMetadataFolder.add(levelMetadata, 'Bronze Time', 0, undefined, undefined);

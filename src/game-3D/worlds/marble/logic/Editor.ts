@@ -36,6 +36,8 @@ interface Editor {
     changeToTranslateMode: () => void;
     changeToRotateMode: () => void;
     changeToScaleMode: () => void;
+    setToLocalSpace: () => void;
+    setToWorldSpace: () => void;
     onClick: (pointer: Pointer) => void;
     update: (deltaTime: number, controllerDirection: THREE.Vector3, mousePointer: Pointer) => void;
 }
@@ -245,6 +247,8 @@ function createEditor(
         changeToTranslateMode: () => transformControls.mode = 'translate',
         changeToRotateMode: () => transformControls.mode = 'rotate',
         changeToScaleMode: () => transformControls.mode = 'scale',
+        setToLocalSpace: () => transformControls.setSpace('local'),
+        setToWorldSpace: () => transformControls.setSpace('world'),
         onClick: (pointer) => {
             // Don't select a new object if we're actively transform some other object
             if (transformControls.dragging) return;
