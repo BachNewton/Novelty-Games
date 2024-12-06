@@ -9,8 +9,8 @@ import { GenericControllerCreator } from "../../../input/GenericController";
 import { PlayerCreator } from "./Player";
 import { MouseInputCreator } from "../../../input/Mouse";
 import SkyboxPath from '../textures/skybox.jpg';
-import { Level, LevelMetadata, loadLevelFile } from "./Level";
-import { DEFAULT_COLOR, DEFAULT_MATERIAL, EditorCreator } from "./Editor";
+import { createLevelFile, Level, LevelMetadata, loadLevelFile } from "./Level";
+import { DEFAULT_COLOR, DEFAULT_MATERIAL, Editor, EditorCreator } from "./Editor";
 import EmptyLevel from '../levels/empty_level.json';
 import Level1 from '../levels/level1.json';
 import Level2 from '../levels/level2.json';
@@ -26,6 +26,7 @@ import LevelSpider from '../levels/spider.json';
 import { GameMaterial, gameMaterialToString, stringToGameMaterial } from "./GameMaterial";
 import { createSounds } from "./Sounds";
 import { clearSummary, createSummary } from "../ui/Summary";
+import { createStorer, StorageKey, Storer } from "../../../../util/Storage";
 
 export const temporaryExperimentalProperties = {
     jumpHeight: 7.5,
@@ -34,6 +35,7 @@ export const temporaryExperimentalProperties = {
 };
 
 const CAMERA_ROTATE_SPEED = 0.003;
+const AUTOSAVE_FREQUENCY = 45000; // 45 seconds
 
 export enum State {
     PLAY, EDIT
@@ -100,6 +102,10 @@ const MarbleWorld: GameWorldCreator = {
         // scene.add(cameraForwardHelper, cameraLeftHelper, controllerDirectionHelper);
 
         const editor = EditorCreator.create(scene, camera, orbitControls, objectBouncyMaterial, objectSlipperyMaterial);
+
+        const levelStorer = createStorer<Level>();
+
+        let lastAutosave = performance.now();
 
         const guiPlayMode = new GUI({ title: 'Play Mode' });
         const guiEditMode = new GUI({ title: 'Edit Mode' }).hide();
@@ -276,9 +282,34 @@ const MarbleWorld: GameWorldCreator = {
         levelMetadataControllers.goldTime = guiEditMetadataFolder.add(levelMetadata, 'Gold Time', 0, undefined, undefined);
         levelMetadataControllers.diamondTime = guiEditMetadataFolder.add(levelMetadata, 'Diamond Time', 0, undefined, undefined);
         const guiEditModeFileFolder = guiEditMode.addFolder('File');
-        guiEditModeFileFolder.add({ 'Save': () => editor.save(levelMetadata) }, 'Save');
-        guiEditModeFileFolder.add({ 'Load': () => loadLevelFile().then(level => loadLevel(level)) }, 'Load');
-        guiEditModeFileFolder.add({ 'Empty Level': () => { if (window.confirm('Are you sure you want to empty the level?\nThis will erase all your progress!')) loadLevel(EmptyLevel) } }, 'Empty Level');
+        guiEditModeFileFolder.add({
+            'Save to File': () => {
+                const level = editor.save(levelMetadata);
+                console.log('Saved Level:', level);
+                createLevelFile(level);
+            }
+        }, 'Save to File');
+        guiEditModeFileFolder.add({ "'Tab' Quicksave": () => quicksave(editor, levelMetadata, levelStorer) }, "'Tab' Quicksave");
+        guiEditModeFileFolder.add({ 'Load from File': () => loadLevelFile().then(level => loadLevel(level)) }, 'Load from File');
+        guiEditModeFileFolder.add({
+            'Load Quicksave': () => {
+                levelStorer.load(StorageKey.MARBLE_QUICK_SAVE).then(level => {
+                    loadLevel(level);
+                }).catch(() => {
+                    window.alert('There is nothing quicksaved.');
+                });
+            }
+        }, 'Load Quicksave');
+        guiEditModeFileFolder.add({
+            'Load Autosave': () => {
+                levelStorer.load(StorageKey.MARBLE_AUTO_SAVE).then(level => {
+                    loadLevel(level);
+                }).catch(() => {
+                    window.alert('There is nothing autosaved.');
+                });
+            }
+        }, 'Load Autosave');
+        guiEditModeFileFolder.add({ 'Load Empty Level': () => { if (window.confirm('Are you sure you want to empty the level?\nThis will erase all your progress!')) loadLevel(EmptyLevel) } }, 'Load Empty Level');
         const guiEditModePlayerFolder = guiEditMode.addFolder('Player');
         guiEditModePlayerFolder.add({ 'Enter Play Mode': enterPlayMode }, 'Enter Play Mode');
 
@@ -295,8 +326,11 @@ const MarbleWorld: GameWorldCreator = {
             console.log('Button pressed:', button);
 
             if (button === Button.VIEW) {
-                if (state === State.EDIT) return;
-                resetPlayer(editor.getStartingPosition())
+                if (state === State.EDIT) {
+                    quicksave(editor, levelMetadata, levelStorer);
+                } else if (state === State.PLAY) {
+                    resetPlayer(editor.getStartingPosition());
+                }
             } else if (button === Button.A) {
                 if (state === State.EDIT) return;
                 player.jump();
@@ -358,6 +392,14 @@ const MarbleWorld: GameWorldCreator = {
                     }
                 }
 
+                if (state === State.EDIT && performance.now() - lastAutosave > AUTOSAVE_FREQUENCY) {
+                    console.log('Creating autosave');
+                    const level = editor.save(levelMetadata);
+                    levelStorer.save(StorageKey.MARBLE_AUTO_SAVE, level);
+                    console.log('Autosaved level:', level);
+                    lastAutosave = performance.now();
+                }
+
                 // cameraForwardHelper.setDirection(cameraForward);
                 // cameraLeftHelper.setDirection(cameraLeft);
                 // controllerDirectionHelper.setDirection(controllerDirection);
@@ -366,6 +408,12 @@ const MarbleWorld: GameWorldCreator = {
         };
     }
 };
+
+function quicksave(editor: Editor, levelMetadata: LevelMetadata, levelStorer: Storer<Level>) {
+    const level = editor.save(levelMetadata);
+    console.log('Quicksaved Level:', level);
+    levelStorer.save(StorageKey.MARBLE_QUICK_SAVE, level);
+}
 
 function getHUDText(startTime: number, collectiblesCollected: number, totalCollectibles: number): string {
     const stopwatchMs = performance.now() - startTime;
