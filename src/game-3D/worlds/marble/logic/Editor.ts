@@ -5,7 +5,7 @@ import FontData from 'three/examples/fonts/helvetiker_regular.typeface.json';
 import { Dimensions, GameWorldObject, GameWorldObjectCreator } from '../../GameWorldObject';
 import PlayerTexture from '../textures/player.png';
 import CheckeredTexture from '../textures/checkered.jpg';
-import { createLevel, Level, Obstacle, createLevelFile, LevelMetadata } from './Level';
+import { createLevel, Level, Obstacle, LevelMetadata } from './Level';
 import { Pointer } from '../../../input/Mouse';
 import { State } from './MarbleWorld';
 import { GameMaterial } from './GameMaterial';
@@ -15,7 +15,7 @@ const CAMERA_EDIT_SPEED = 0.02;
 export const DEFAULT_COLOR = 0xCED3D4;
 export const DEFAULT_MATERIAL = GameMaterial.NORMAL;
 
-interface Editor {
+export interface Editor {
     enterEditMode: () => void;
     leaveEditMode: () => void;
     createGameWorldObjects(
@@ -25,7 +25,7 @@ interface Editor {
     ): GameWorldObject[];
     getStartingPosition: () => THREE.Vector3;
     recenter: () => void;
-    save: (levelMetadata: LevelMetadata) => void;
+    save: (levelMetadata: LevelMetadata) => Level;
     load: (level: Level, worldState: State) => void;
     addBox: () => void;
     addCollectible: () => void;
@@ -137,13 +137,7 @@ function createEditor(
             return editableStartingObject.position;
         },
         recenter: () => transformControlsObject(false, false, object => orbitControls.target.copy(object.position)),
-        save: (levelMetadata) => {
-            const level = createLevel(editableStartingObject, editableFinishingObject, editableObjects, collectibles, levelMetadata);
-
-            console.log('Saved Level:', level);
-
-            createLevelFile(level);
-        },
+        save: (levelMetadata) => createLevel(editableStartingObject, editableFinishingObject, editableObjects, collectibles, levelMetadata),
         load: (level, worldState) => {
             scene.remove(...editableObjects);
 
