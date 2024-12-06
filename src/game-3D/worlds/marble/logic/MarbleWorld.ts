@@ -109,6 +109,8 @@ function createMarbleWorld(
     const enterEditMode = () => {
         state = State.EDIT;
 
+        lastAutosave = performance.now();
+
         for (const editableGameWorldObject of editableGameWorldObjects) {
             scene.remove(editableGameWorldObject.mesh);
             world.removeBody(editableGameWorldObject.body);
