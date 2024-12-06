@@ -126,6 +126,8 @@ function createMarbleWorldGui(editor: Editor, levelStorer: Storer<Level>, callba
     guiEditModeFileFolder.add({ 'Load from File': () => loadLevelFile().then(level => onLoadLevel(level)) }, 'Load from File');
     guiEditModeFileFolder.add({
         'Load Quicksave': () => {
+            if (!window.confirm('Are you sure you want to load the quicksave?\nThis will erase all your progress!')) return;
+
             levelStorer.load(StorageKey.MARBLE_QUICK_SAVE).then(level => {
                 onLoadLevel(level);
             }).catch(() => {
@@ -142,7 +144,13 @@ function createMarbleWorldGui(editor: Editor, levelStorer: Storer<Level>, callba
             });
         }
     }, 'Load Autosave');
-    guiEditModeFileFolder.add({ 'Load Empty Level': () => { if (window.confirm('Are you sure you want to empty the level?\nThis will erase all your progress!')) onLoadLevel(EmptyLevel) } }, 'Load Empty Level');
+    guiEditModeFileFolder.add({
+        'Load Empty Level': () => {
+            if (!window.confirm('Are you sure you want to load an empty level?\nThis will erase all your progress!')) return;
+
+            onLoadLevel(EmptyLevel)
+        }
+    }, 'Load Empty Level');
     const guiEditModePlayerFolder = guiEditMode.addFolder('Player');
     guiEditModePlayerFolder.add({
         'Enter Play Mode': () => {
