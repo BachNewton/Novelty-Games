@@ -14,12 +14,13 @@ import LevelPlinko from '../levels/plinko.json';
 import LevelSpider from '../levels/spider.json';
 import { DEFAULT_COLOR, DEFAULT_MATERIAL, Editor } from './Editor';
 import { GameMaterial, gameMaterialToString, stringToGameMaterial } from './GameMaterial';
-import { quicksave } from './MarbleWorld';
-import { StorageKey, Storer } from '../../../../util/Storage';
+import { createStorer, StorageKey, Storer } from '../../../../util/Storage';
 
 interface MarbleWorldGui {
     getLevelMetadata(): LevelMetadata;
     toggleEditorSpace(): void;
+    quicksave(): void;
+    autosave(): void;
 }
 
 interface MarbleWorldGuiCallbacks {
@@ -32,18 +33,20 @@ interface MarbleWorldGuiCallbacks {
 interface MarbleWorldGuiCreator {
     create(
         editor: Editor,
-        levelStorer: Storer<Level>,
         callbacks: MarbleWorldGuiCallbacks
     ): MarbleWorldGui;
 }
 
 export const marbleWorldGuiCreator: MarbleWorldGuiCreator = {
-    create: (editor, levelStorer, callbacks) => createMarbleWorldGui(editor, levelStorer, callbacks)
+    create: (editor, callbacks) => createMarbleWorldGui(editor, callbacks)
 };
 
-function createMarbleWorldGui(editor: Editor, levelStorer: Storer<Level>, callbacks: MarbleWorldGuiCallbacks): MarbleWorldGui {
+function createMarbleWorldGui(editor: Editor, callbacks: MarbleWorldGuiCallbacks): MarbleWorldGui {
+    const levelStorer = createStorer<Level>();
+
     const transformSpaceControllers = createTransformSpaceControllers();
     const levelMetadataControllers = createLevelMetadataControllers();
+    const loadControllers = createLoadControllers();
     const levelMetadata = createLevelMetadata();
 
     const onResetPlayer = callbacks.onResetPlayer;
@@ -122,9 +125,9 @@ function createMarbleWorldGui(editor: Editor, levelStorer: Storer<Level>, callba
             createLevelFile(level);
         }
     }, 'Save to File');
-    guiEditModeFileFolder.add({ "'Tab' Quicksave": () => quicksave(editor, levelMetadata, levelStorer) }, "'Tab' Quicksave");
+    guiEditModeFileFolder.add({ "'Tab' Quicksave": () => quicksave(editor, levelMetadata, levelStorer, loadControllers) }, "'Tab' Quicksave");
     guiEditModeFileFolder.add({ 'Load from File': () => loadLevelFile().then(level => onLoadLevel(level)) }, 'Load from File');
-    guiEditModeFileFolder.add({
+    loadControllers.quicksave = guiEditModeFileFolder.add({
         'Load Quicksave': () => {
             if (!window.confirm('Are you sure you want to load the quicksave?\nThis will erase all your progress!')) return;
 
@@ -135,7 +138,7 @@ function createMarbleWorldGui(editor: Editor, levelStorer: Storer<Level>, callba
             });
         }
     }, 'Load Quicksave');
-    guiEditModeFileFolder.add({
+    loadControllers.autosave = guiEditModeFileFolder.add({
         'Load Autosave': () => {
             levelStorer.load(StorageKey.MARBLE_AUTO_SAVE).then(level => {
                 onLoadLevel(level);
@@ -163,7 +166,9 @@ function createMarbleWorldGui(editor: Editor, levelStorer: Storer<Level>, callba
 
     return {
         getLevelMetadata: () => levelMetadata,
-        toggleEditorSpace: () => toggleEditorSpace(editor, transformSpaceControllers)
+        toggleEditorSpace: () => toggleEditorSpace(editor, transformSpaceControllers),
+        quicksave: () => quicksave(editor, levelMetadata, levelStorer, loadControllers),
+        autosave: () => autosave(editor, levelMetadata, levelStorer, loadControllers)
     };
 }
 
@@ -178,7 +183,44 @@ interface LevelMetadataControllers {
     silverTime: NumberController<LevelMetadata, 'Silver Time'> | null;
     goldTime: NumberController<LevelMetadata, 'Gold Time'> | null;
     diamondTime: NumberController<LevelMetadata, 'Diamond Time'> | null;
-};
+}
+
+interface LoadControllers {
+    quicksave: FunctionController<{ 'Load Quicksave': () => void; }, 'Load Quicksave'> | null;
+    autosave: FunctionController<{ 'Load Autosave': () => void; }, 'Load Autosave'> | null;
+}
+
+function quicksave(
+    editor: Editor,
+    levelMetadata: LevelMetadata,
+    levelStorer: Storer<Level>,
+    loadControllers: LoadControllers
+) {
+    console.log('Creating quicksave');
+    const level = editor.save(levelMetadata);
+    levelStorer.save(StorageKey.MARBLE_QUICK_SAVE, level);
+    console.log('Quicksaved Level:', level);
+
+    loadControllers.quicksave?.name(`Load Quicksave - ${new Date().toLocaleTimeString()}`);
+}
+
+function autosave(
+    editor: Editor,
+    levelMetadata: LevelMetadata,
+    levelStorer: Storer<Level>,
+    loadControllers: LoadControllers
+) {
+    console.log('Creating autosave');
+    const level = editor.save(levelMetadata);
+    levelStorer.save(StorageKey.MARBLE_AUTO_SAVE, level);
+    console.log('Autosaved level:', level);
+
+    loadControllers.autosave?.name(`Load Autosave - ${new Date().toLocaleTimeString()}`);
+}
+
+function createLoadControllers(): LoadControllers {
+    return { quicksave: null, autosave: null };
+}
 
 function createTransformSpaceControllers(): TransformSpaceControllers {
     return { local: null, world: null };

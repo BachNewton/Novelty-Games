@@ -8,12 +8,11 @@ import { GenericControllerCreator } from "../../../input/GenericController";
 import { PlayerCreator } from "./Player";
 import { MouseInputCreator } from "../../../input/Mouse";
 import SkyboxPath from '../textures/skybox.jpg';
-import { Level, LevelMetadata } from "./Level";
-import { Editor, EditorCreator } from "./Editor";
+import { Level } from "./Level";
+import { EditorCreator } from "./Editor";
 import Level1 from '../levels/level1.json';
 import { createSounds } from "./Sounds";
 import { clearSummary, createSummary } from "../ui/Summary";
-import { createStorer, StorageKey, Storer } from "../../../../util/Storage";
 import { marbleWorldGuiCreator } from "./MarbleWorldGui";
 
 export const temporaryExperimentalProperties = {
@@ -101,8 +100,6 @@ function createMarbleWorld(
 
     const editor = EditorCreator.create(scene, camera, orbitControls, objectBouncyMaterial, objectSlipperyMaterial);
 
-    const levelStorer = createStorer<Level>();
-
     let lastAutosave = performance.now();
 
     const editableGameWorldObjects: GameWorldObject[] = [];
@@ -189,7 +186,6 @@ function createMarbleWorld(
 
     const gui = marbleWorldGuiCreator.create(
         editor,
-        levelStorer,
         {
             onResetPlayer: () => resetPlayer(editor.getStartingPosition()),
             onLoadLevel: (level) => loadLevel(level),
@@ -210,7 +206,7 @@ function createMarbleWorld(
 
         if (button === Button.VIEW) {
             if (state === State.EDIT) {
-                quicksave(editor, gui.getLevelMetadata(), levelStorer);
+                gui.quicksave();
             } else if (state === State.PLAY) {
                 resetPlayer(editor.getStartingPosition());
             }
@@ -278,10 +274,7 @@ function createMarbleWorld(
             }
 
             if (state === State.EDIT && performance.now() - lastAutosave > AUTOSAVE_FREQUENCY) {
-                console.log('Creating autosave');
-                const level = editor.save(gui.getLevelMetadata());
-                levelStorer.save(StorageKey.MARBLE_AUTO_SAVE, level);
-                console.log('Autosaved level:', level);
+                gui.autosave();
                 lastAutosave = performance.now();
             }
 
@@ -291,12 +284,6 @@ function createMarbleWorld(
             // controllerDirectionHelper.setLength(3 * Math.hypot(controller.leftAxis.x, controller.leftAxis.y));
         }
     };
-}
-
-export function quicksave(editor: Editor, levelMetadata: LevelMetadata, levelStorer: Storer<Level>) {
-    const level = editor.save(levelMetadata);
-    console.log('Quicksaved Level:', level);
-    levelStorer.save(StorageKey.MARBLE_QUICK_SAVE, level);
 }
 
 function getHUDText(startTime: number, collectiblesCollected: number, totalCollectibles: number): string {
