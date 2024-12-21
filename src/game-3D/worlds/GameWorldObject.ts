@@ -8,6 +8,7 @@ export interface GameWorldObject {
     body: CANNON.Body;
     update(deltaTime?: number): void;
     add(scene: THREE.Scene, world: CANNON.World): void;
+    remove(scene: THREE.Scene, world: CANNON.World): void;
 }
 
 interface Shape {
@@ -113,6 +114,10 @@ export const GameWorldObjectCreator: GameWorldObjectCreator = {
             add: (scene, world) => {
                 scene.add(mesh);
                 world.addBody(body);
+            },
+            remove: (scene, world) => {
+                scene.remove(mesh);
+                world.removeBody(body);
             }
         };
     }

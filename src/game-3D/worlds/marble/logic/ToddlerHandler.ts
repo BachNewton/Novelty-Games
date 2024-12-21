@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { createNetworkService, NetworkedApplication } from "../../../../util/NetworkService";
-import { Color, Shape, ToddlerServerData } from "../../../toddler/ToddlerServerData";
+import { Color, Shape, ToddlerServerData, ToddlerServerObjectData } from "../../../toddler/ToddlerServerData";
 import { GameWorldObject, GameWorldObjectCreator } from "../../GameWorldObject";
 import { Player } from './Player';
 
@@ -13,9 +13,9 @@ export function handleToddler(
 ) {
     const networkService = createNetworkService<ToddlerServerData>(NetworkedApplication.MARBLE);
 
-    networkService.setNetworkEventListener(data => {
+    const handleObjectDataType = (shape: Shape, color: Color) => {
         const object = GameWorldObjectCreator.create({
-            dimensions: data.shape === Shape.SPHERE
+            dimensions: shape === Shape.SPHERE
                 ? {
                     type: 'sphere',
                     radius: 0.75
@@ -28,7 +28,7 @@ export function handleToddler(
                 },
             visualMaterial: {
                 type: 'color',
-                color: getColor(data.color)
+                color: getColor(color)
             },
             mass: 1
         });
@@ -37,12 +37,22 @@ export function handleToddler(
         const playerVelocity = player.getVelocity();
 
         object.body.position.copy(playerPosition);
-        object.body.position.y += 2;
+        object.body.position.y += 3;
         object.body.velocity.copy(playerVelocity)
 
         object.add(scene, world);
 
         toddlerObjects.push(object);
+    };
+
+    networkService.setNetworkEventListener(data => {
+        if (data.type === 'clear') {
+            toddlerObjects.forEach(object => object.remove(scene, world));
+            toddlerObjects.splice(0);
+        } else if (data.type === 'object') {
+            const objectData = data as ToddlerServerObjectData;
+            handleObjectDataType(objectData.shape, objectData.color);
+        }
     });
 }
 
