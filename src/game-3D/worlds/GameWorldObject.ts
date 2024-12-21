@@ -7,6 +7,7 @@ export interface GameWorldObject {
     mesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
     body: CANNON.Body;
     update(deltaTime?: number): void;
+    add(scene: THREE.Scene, world: CANNON.World): void;
 }
 
 interface Shape {
@@ -108,6 +109,10 @@ export const GameWorldObjectCreator: GameWorldObjectCreator = {
             update: () => {
                 mesh.position.copy(body.position);
                 mesh.quaternion.copy(body.quaternion);
+            },
+            add: (scene, world) => {
+                scene.add(mesh);
+                world.addBody(body);
             }
         };
     }

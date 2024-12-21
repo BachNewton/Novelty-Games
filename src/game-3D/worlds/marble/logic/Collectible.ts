@@ -46,6 +46,7 @@ export function createCollectible(): GameWorldObject {
 
             mesh.position.copy(body.position);
             mesh.quaternion.copy(body.quaternion);
-        }
+        },
+        add: () => { } // Not used, but should be used.
     }
 }

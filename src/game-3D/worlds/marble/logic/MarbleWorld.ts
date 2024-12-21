@@ -2,7 +2,7 @@ import { GameWorld, GameWorldCreator } from "../../GameWorld";
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { GameWorldObject } from "../../GameWorldObject";
+import { GameWorldObject, GameWorldObjectCreator } from "../../GameWorldObject";
 import { Button } from "../../../input/XboxController";
 import { GenericControllerCreator } from "../../../input/GenericController";
 import { PlayerCreator } from "./Player";
@@ -14,6 +14,8 @@ import Level1 from '../levels/level1.json';
 import { createSounds } from "./Sounds";
 import { clearSummary, createSummary } from "../ui/Summary";
 import { marbleWorldGuiCreator } from "./MarbleWorldGui";
+import { createNetworkService, NetworkedApplication } from "../../../../util/NetworkService";
+import { Color, Shape, ToddlerServerData } from "../../../toddler/ToddlerServerData";
 
 export const temporaryExperimentalProperties = {
     jumpHeight: 7.5,
@@ -43,6 +45,7 @@ function createMarbleWorld(
     let state = State.PLAY;
     let startTime = performance.now();
     let playerFinished = false;
+    const toddlerObjects: GameWorldObject[] = [];
 
     addLight(scene);
     addSkybox(scene);
@@ -193,7 +196,41 @@ function createMarbleWorld(
             onLoadLevel: (level) => loadLevel(level),
             onEnterEditMode: () => enterEditMode(),
             onEnterPlayMode: () => enterPlayMode(),
-            updateToddlerCompanion: (enabled) => console.log(enabled)
+            updateToddlerCompanion: () => {
+                const networkService = createNetworkService<ToddlerServerData>(NetworkedApplication.MARBLE);
+
+                networkService.setNetworkEventListener(data => {
+                    const object = GameWorldObjectCreator.create({
+                        dimensions: data.shape === Shape.SPHERE
+                            ? {
+                                type: 'sphere',
+                                radius: 0.75
+                            }
+                            : {
+                                type: 'box',
+                                width: 1,
+                                height: 1,
+                                depth: 1
+                            },
+                        visualMaterial: {
+                            type: 'color',
+                            color: data.color === Color.RED ? 'red' : data.color === Color.BLUE ? 'blue' : 'green'
+                        },
+                        mass: 1
+                    });
+
+                    const playerPosition = player.getPosition();
+                    const playerVelocity = player.getVelocity();
+
+                    object.body.position.copy(playerPosition);
+                    object.body.position.y += 2;
+                    object.body.velocity.copy(playerVelocity)
+
+                    object.add(scene, world);
+
+                    toddlerObjects.push(object);
+                });
+            }
         }
     );
 
@@ -263,6 +300,10 @@ function createMarbleWorld(
             }
 
             player.update(deltaTime, world.contacts, controller.pressed.a);
+
+            for (const toddlerObject of toddlerObjects) {
+                toddlerObject.update();
+            }
 
             (orbitControls as any)._rotateLeft(deltaTime * CAMERA_ROTATE_SPEED * controller.rightAxis.x);
             (orbitControls as any)._rotateUp(deltaTime * CAMERA_ROTATE_SPEED * controller.rightAxis.y);

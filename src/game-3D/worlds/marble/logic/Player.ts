@@ -18,6 +18,8 @@ interface Player {
     reset(position: THREE.Vector3, orbitControls: OrbitControls): void;
     add(scene: THREE.Scene, world: CANNON.World): void;
     update(deltaTime: number, contacts: CANNON.ContactEquation[], isJumpButtonHeld: boolean): void;
+    getPosition(): CANNON.Vec3;
+    getVelocity(): CANNON.Vec3;
 }
 
 interface PlayerCreator {
@@ -106,7 +108,9 @@ export const PlayerCreator: PlayerCreator = {
                 orbitControls.target = player.mesh.position;
                 orbitControls.reset();
             },
-            jump: jump
+            jump: jump,
+            getPosition: () => player.body.position,
+            getVelocity: () => player.body.velocity
         };
     }
 };
