@@ -8,5 +8,5 @@ export enum Shape {
 }
 
 export enum Color {
-    RED, BLUE, GREEN
+    RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE
 }

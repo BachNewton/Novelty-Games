@@ -13,7 +13,7 @@ const PLAYER_AIR_SPEED = 0.0025;
 const STEEPNESS_THRESHOLD = 0.7;
 const JUMP_COOLDOWN = 200;
 
-interface Player {
+export interface Player {
     jump(): void;
     reset(position: THREE.Vector3, orbitControls: OrbitControls): void;
     add(scene: THREE.Scene, world: CANNON.World): void;

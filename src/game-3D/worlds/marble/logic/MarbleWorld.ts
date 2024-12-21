@@ -14,8 +14,7 @@ import Level1 from '../levels/level1.json';
 import { createSounds } from "./Sounds";
 import { clearSummary, createSummary } from "../ui/Summary";
 import { marbleWorldGuiCreator } from "./MarbleWorldGui";
-import { createNetworkService, NetworkedApplication } from "../../../../util/NetworkService";
-import { Color, Shape, ToddlerServerData } from "../../../toddler/ToddlerServerData";
+import { handleToddler } from "./ToddlerHandler";
 
 export const temporaryExperimentalProperties = {
     jumpHeight: 7.5,
@@ -196,41 +195,7 @@ function createMarbleWorld(
             onLoadLevel: (level) => loadLevel(level),
             onEnterEditMode: () => enterEditMode(),
             onEnterPlayMode: () => enterPlayMode(),
-            updateToddlerCompanion: () => {
-                const networkService = createNetworkService<ToddlerServerData>(NetworkedApplication.MARBLE);
-
-                networkService.setNetworkEventListener(data => {
-                    const object = GameWorldObjectCreator.create({
-                        dimensions: data.shape === Shape.SPHERE
-                            ? {
-                                type: 'sphere',
-                                radius: 0.75
-                            }
-                            : {
-                                type: 'box',
-                                width: 1,
-                                height: 1,
-                                depth: 1
-                            },
-                        visualMaterial: {
-                            type: 'color',
-                            color: data.color === Color.RED ? 'red' : data.color === Color.BLUE ? 'blue' : 'green'
-                        },
-                        mass: 1
-                    });
-
-                    const playerPosition = player.getPosition();
-                    const playerVelocity = player.getVelocity();
-
-                    object.body.position.copy(playerPosition);
-                    object.body.position.y += 2;
-                    object.body.velocity.copy(playerVelocity)
-
-                    object.add(scene, world);
-
-                    toddlerObjects.push(object);
-                });
-            }
+            updateToddlerCompanion: () => handleToddler(scene, world, player, toddlerObjects)
         }
     );
 

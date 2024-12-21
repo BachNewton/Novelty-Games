@@ -19,11 +19,17 @@ const ToddlerCompanionApp: React.FC = () => {
                 <button style={buttonStyle} onClick={() => broadcastAction(Shape.SPHERE, Color.RED)}>🔴</button>
                 <button style={buttonStyle} onClick={() => broadcastAction(Shape.SPHERE, Color.BLUE)}>🔵</button>
                 <button style={buttonStyle} onClick={() => broadcastAction(Shape.SPHERE, Color.GREEN)}>🟢</button>
+                <button style={buttonStyle} onClick={() => broadcastAction(Shape.SPHERE, Color.YELLOW)}>🟡</button>
+                <button style={buttonStyle} onClick={() => broadcastAction(Shape.SPHERE, Color.PURPLE)}>🟣</button>
+                <button style={buttonStyle} onClick={() => broadcastAction(Shape.SPHERE, Color.ORANGE)}>🟠</button>
             </div>
             <div style={{ display: 'grid' }}>
                 <button style={buttonStyle} onClick={() => broadcastAction(Shape.BOX, Color.RED)}>🟥</button>
                 <button style={buttonStyle} onClick={() => broadcastAction(Shape.BOX, Color.BLUE)}>🟦</button>
                 <button style={buttonStyle} onClick={() => broadcastAction(Shape.BOX, Color.GREEN)}>🟩</button>
+                <button style={buttonStyle} onClick={() => broadcastAction(Shape.BOX, Color.YELLOW)}>🟨</button>
+                <button style={buttonStyle} onClick={() => broadcastAction(Shape.BOX, Color.PURPLE)}>🟪</button>
+                <button style={buttonStyle} onClick={() => broadcastAction(Shape.BOX, Color.ORANGE)}>🟧</button>
             </div>
         </div>
     </div>;
