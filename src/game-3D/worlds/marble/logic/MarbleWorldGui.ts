@@ -81,7 +81,7 @@ function createMarbleWorldGui(editor: Editor, callbacks: MarbleWorldGuiCallbacks
     guiPlayModeLevelsFolder.add({ 'Plinko': () => onLoadLevel(LevelPlinko) }, 'Plinko');
     guiPlayModeLevelsFolder.add({ 'Jumping Spider': () => onLoadLevel(LevelSpider) }, 'Jumping Spider');
     const guiPlayModeOnlineFolder = guiPlayMode.addFolder('Online').close();
-    guiPlayModeOnlineFolder.add({ 'Toddler Companion': false }, 'Toddler Companion').onChange(updateToddlerCompanion);
+    guiPlayModeOnlineFolder.add({ 'Toddler Companion App': false }, 'Toddler Companion App').onChange(updateToddlerCompanion);
     const guiPlayModeEditorFolder = guiPlayMode.addFolder('Editor');
     guiPlayModeEditorFolder.add({
         'Enter Level Editor': () => {
