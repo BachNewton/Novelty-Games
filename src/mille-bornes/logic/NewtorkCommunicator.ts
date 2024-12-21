@@ -1,10 +1,8 @@
 import { LobbyTeam } from "../ui/Lobby";
-import io from 'socket.io-client';
 import { Game, Team, createTeam } from "./Data";
 import { Card, createCard } from "./Card";
 import { Communicator } from "./Communicator";
-
-const SERVER_URL = 'https://novelty-games.mooo.com/';
+import { createNetworkService, NetworkedApplication } from "../../util/NetworkService";
 
 export class LobbyEvent extends Event {
     static TYPE = 'LOBBY';
@@ -75,13 +73,13 @@ interface PlayCardData extends ServerData {
 }
 
 export class NewtorkCommunicator extends EventTarget implements Communicator {
-    private socket = io(SERVER_URL);
+    private networkService = createNetworkService<ServerData>(NetworkedApplication.MILLE_BORNES);
     private existingEventListeners = new Map<string, EventListenerOrEventListenerObject>();
 
     constructor() {
         super();
 
-        this.socket.on('broadcast', (data: ServerData) => {
+        this.networkService.setNetworkEventListener(data => {
             console.log('Received data from server:', data);
 
             if (data.type === ServerDataType.LOBBY) {
@@ -141,6 +139,6 @@ export class NewtorkCommunicator extends EventTarget implements Communicator {
     private broadcast(data: ServerData) {
         console.log('Sending data to server:', data);
 
-        this.socket.emit('broadcast', data);
+        this.networkService.broadcast(data);
     }
 }

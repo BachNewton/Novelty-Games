@@ -192,7 +192,8 @@ function createMarbleWorld(
             onResetPlayer: () => resetPlayer(editor.getStartingPosition()),
             onLoadLevel: (level) => loadLevel(level),
             onEnterEditMode: () => enterEditMode(),
-            onEnterPlayMode: () => enterPlayMode()
+            onEnterPlayMode: () => enterPlayMode(),
+            updateToddlerCompanion: (enabled) => console.log(enabled)
         }
     );
 

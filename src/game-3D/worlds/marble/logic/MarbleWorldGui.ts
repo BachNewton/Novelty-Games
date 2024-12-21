@@ -27,7 +27,8 @@ interface MarbleWorldGuiCallbacks {
     onResetPlayer: () => void,
     onLoadLevel: (level: Level) => void,
     onEnterEditMode: () => void,
-    onEnterPlayMode: () => void
+    onEnterPlayMode: () => void,
+    updateToddlerCompanion: (enabled: boolean) => void
 }
 
 interface MarbleWorldGuiCreator {
@@ -61,6 +62,7 @@ function createMarbleWorldGui(editor: Editor, callbacks: MarbleWorldGuiCallbacks
     };
     const onEnterEditMode = callbacks.onEnterEditMode;
     const onEnterPlayMode = callbacks.onEnterPlayMode;
+    const updateToddlerCompanion = callbacks.updateToddlerCompanion;
 
     const guiPlayMode = new GUI({ title: 'Play Mode' });
     const guiEditMode = new GUI({ title: 'Edit Mode' }).hide();
@@ -78,6 +80,8 @@ function createMarbleWorldGui(editor: Editor, callbacks: MarbleWorldGuiCallbacks
     guiPlayModeLevelsFolder.add({ 'Looping Coaster 1': () => onLoadLevel(LevelLoopingCoaster) }, 'Looping Coaster 1');
     guiPlayModeLevelsFolder.add({ 'Plinko': () => onLoadLevel(LevelPlinko) }, 'Plinko');
     guiPlayModeLevelsFolder.add({ 'Jumping Spider': () => onLoadLevel(LevelSpider) }, 'Jumping Spider');
+    const guiPlayModeOnlineFolder = guiPlayMode.addFolder('Online').close();
+    guiPlayModeOnlineFolder.add({ 'Toddler Companion': false }, 'Toddler Companion').onChange(updateToddlerCompanion);
     const guiPlayModeEditorFolder = guiPlayMode.addFolder('Editor');
     guiPlayModeEditorFolder.add({
         'Enter Level Editor': () => {
