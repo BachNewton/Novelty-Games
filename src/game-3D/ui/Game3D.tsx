@@ -2,14 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import Stats from 'three/examples/jsm/libs/stats.module';
-import { GameWorld } from "../worlds/GameWorld";
+import { GameWorld, GameWorldCreator } from "../worlds/GameWorld";
 import MarbleWorld from "../worlds/marble/logic/MarbleWorld";
+import { KnightWorld } from "../worlds/knight/KnightWorld";
+import { Game } from "./Home";
 
 const MINIUM_FRAME_RATE = 1000 / 25;
 
 let hasGameBeenSetup = false;
 
-const Game3D: React.FC = () => {
+interface Game3DProps {
+    game: Game;
+}
+
+const Game3D: React.FC<Game3DProps> = ({ game }) => {
     const containerElement = useRef<HTMLDivElement>(null);
     const [HUDText, setHUDText] = useState('');
     const [summary, setSummary] = useState(<></>);
@@ -18,7 +24,7 @@ const Game3D: React.FC = () => {
         if (hasGameBeenSetup) return;
         hasGameBeenSetup = true;
 
-        setupGame(containerElement?.current!, setHUDText, setSummary);
+        setupGame(game, containerElement?.current!, setHUDText, setSummary);
     }, []);
 
     return <div style={{ overflow: 'hidden', height: '100vh' }} ref={containerElement}>
@@ -51,7 +57,7 @@ const Game3D: React.FC = () => {
     </div>;
 };
 
-function setupGame(containerElement: HTMLDivElement, updateHUD: (text: string) => void, updateSummary: (element: JSX.Element) => void) {
+function setupGame(game: Game, containerElement: HTMLDivElement, updateHUD: (text: string) => void, updateSummary: (element: JSX.Element) => void) {
     const scene = new THREE.Scene();
     const camera = createCamera();
     const renderer = createRenderer(containerElement);
@@ -64,7 +70,7 @@ function setupGame(containerElement: HTMLDivElement, updateHUD: (text: string) =
     onWindowResize(camera, renderer);
     window.addEventListener('resize', () => onWindowResize(camera, renderer));
 
-    const gameWorld: GameWorld = MarbleWorld.create(scene, camera, world, renderer.domElement, updateHUD, updateSummary);
+    const gameWorld: GameWorld = getGameWorldCreator(game).create(scene, camera, world, renderer.domElement, updateHUD, updateSummary);
 
     let previousTime = performance.now();
 
@@ -81,6 +87,15 @@ function setupGame(containerElement: HTMLDivElement, updateHUD: (text: string) =
     renderer.setAnimationLoop(animate);
 }
 
+function getGameWorldCreator(game: Game): GameWorldCreator {
+    switch (game) {
+        case Game.MARBLE:
+            return MarbleWorld;
+        case Game.KNIGHT:
+            return KnightWorld;
+    }
+}
+
 function createCamera(): THREE.PerspectiveCamera {
     return new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
 }
@@ -91,8 +106,6 @@ function createRenderer(containerElement: HTMLDivElement): THREE.WebGLRenderer {
     });
 
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.5;
     renderer.shadowMap.enabled = true;
 
     containerElement.appendChild(renderer.domElement);

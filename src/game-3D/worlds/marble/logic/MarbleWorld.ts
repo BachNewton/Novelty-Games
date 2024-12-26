@@ -2,7 +2,7 @@ import { GameWorld, GameWorldCreator } from "../../GameWorld";
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { GameWorldObject, GameWorldObjectCreator } from "../../GameWorldObject";
+import { GameWorldObject } from "../../GameWorldObject";
 import { Button } from "../../../input/XboxController";
 import { GenericControllerCreator } from "../../../input/GenericController";
 import { PlayerCreator } from "./Player";
@@ -321,9 +321,7 @@ function createOrbitControls(camera: THREE.PerspectiveCamera, rendererDomElement
 }
 
 function addLight(scene: THREE.Scene) {
-    const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.5);
-
-    const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1.2);
+    const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.75);
     directionalLight.castShadow = true;
     const size = 25;
     directionalLight.position.set(size, size, size);
@@ -334,7 +332,6 @@ function addLight(scene: THREE.Scene) {
     directionalLight.shadow.mapSize.width = 2048;
     directionalLight.shadow.mapSize.height = 2048;
 
-    scene.add(ambientLight);
     scene.add(directionalLight);
 
     // scene.add(new THREE.DirectionalLightHelper(directionalLight));

@@ -12,8 +12,12 @@ class MenuUiState implements UiState { }
 class Game3DState implements UiState { }
 class ToddlerState implements UiState { }
 
+export enum Game {
+    MARBLE, KNIGHT
+}
+
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
-    const [uiState, setUiState] = useState<UiState>(new MenuUiState());
+    const [uiState, setUiState] = useState<UiState>(new Game3DState());
 
     const onMarbleClick = () => {
         setUiState(new Game3DState());
@@ -30,7 +34,7 @@ function Ui(uiState: UiState, onHomeButtonClicked: () => void, onMarbleClick: ()
     if (uiState instanceof MenuUiState) {
         return MenuUi(onHomeButtonClicked, onMarbleClick, onToddlerClick);
     } else if (uiState instanceof Game3DState) {
-        return <Game3D />;
+        return <Game3D game={Game.MARBLE} />;
     } else if (uiState instanceof ToddlerState) {
         return <ToddlerCompanionApp />;
     } else {
