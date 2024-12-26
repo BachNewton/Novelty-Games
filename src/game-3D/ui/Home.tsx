@@ -9,32 +9,42 @@ interface HomeProps {
 
 interface UiState { }
 class MenuUiState implements UiState { }
-class Game3DState implements UiState { }
 class ToddlerState implements UiState { }
+class Game3DState implements UiState {
+    game: Game;
+
+    constructor(game: Game) {
+        this.game = game;
+    }
+}
 
 export enum Game {
     MARBLE, KNIGHT
 }
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
-    const [uiState, setUiState] = useState<UiState>(new Game3DState());
+    const [uiState, setUiState] = useState<UiState>(new MenuUiState());
 
     const onMarbleClick = () => {
-        setUiState(new Game3DState());
+        setUiState(new Game3DState(Game.MARBLE));
+    };
+
+    const onKnightClick = () => {
+        setUiState(new Game3DState(Game.KNIGHT));
     };
 
     const onToddlerClick = () => {
         setUiState(new ToddlerState());
     };
 
-    return Ui(uiState, onHomeButtonClicked, onMarbleClick, onToddlerClick);
+    return Ui(uiState, onHomeButtonClicked, onMarbleClick, onToddlerClick, onKnightClick);
 };
 
-function Ui(uiState: UiState, onHomeButtonClicked: () => void, onMarbleClick: () => void, onToddlerClick: () => void) {
+function Ui(uiState: UiState, onHomeButtonClicked: () => void, onMarbleClick: () => void, onToddlerClick: () => void, onKnightClick: () => void) {
     if (uiState instanceof MenuUiState) {
-        return MenuUi(onHomeButtonClicked, onMarbleClick, onToddlerClick);
+        return MenuUi(onHomeButtonClicked, onMarbleClick, onToddlerClick, onKnightClick);
     } else if (uiState instanceof Game3DState) {
-        return <Game3D game={Game.MARBLE} />;
+        return <Game3D game={uiState.game} />;
     } else if (uiState instanceof ToddlerState) {
         return <ToddlerCompanionApp />;
     } else {
@@ -42,7 +52,7 @@ function Ui(uiState: UiState, onHomeButtonClicked: () => void, onMarbleClick: ()
     }
 }
 
-function MenuUi(onHomeButtonClicked: () => void, onMarbleClick: () => void, onToddlerClick: () => void) {
+function MenuUi(onHomeButtonClicked: () => void, onMarbleClick: () => void, onToddlerClick: () => void, onKnightClick: () => void) {
     const containerStyle: React.CSSProperties = {
         color: 'white',
         display: 'flex',
@@ -64,6 +74,7 @@ function MenuUi(onHomeButtonClicked: () => void, onMarbleClick: () => void, onTo
         <div style={{ fontSize: '1.75em', marginBottom: '1em' }}>🎮 3D Games 🧊</div>
         <button style={buttonStyle} onClick={onMarbleClick}>Marble 🌐</button>
         <button style={buttonStyle} onClick={onToddlerClick}>Toddler Companion App 👶</button>
+        <button style={buttonStyle} onClick={onKnightClick}>Knight ⚔️</button>
     </div>;
 }
 

@@ -20,9 +20,6 @@ function createKnightWorld(
 
     createOrbitControls(camera, domElement);
 
-    camera.position.z = 3;
-    camera.position.y = 1;
-
     const loader = new FBXLoader();
     loader.load(KnightModelFbx, data => {
         data.scale.multiplyScalar(0.01);
@@ -55,7 +52,7 @@ function createKnightWorld(
 }
 
 function addLight(scene: THREE.Scene) {
-    const ambientLight = new THREE.AmbientLight(0xFFFFFF, 3);
+    const ambientLight = new THREE.AmbientLight(0xFFFFFF, 5);
 
     const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 5);
     directionalLight.position.set(1, 1, 1);
@@ -66,6 +63,9 @@ function addLight(scene: THREE.Scene) {
 
 function createOrbitControls(camera: THREE.PerspectiveCamera, rendererDomElement: HTMLCanvasElement): OrbitControls {
     const controls = new OrbitControls(camera, rendererDomElement);
+
+    controls.object.position.set(0, 1, 3);
+    controls.update();
 
     return controls;
 }
