@@ -8,7 +8,7 @@ import Games3DHome from '../game-3D/ui/Home';
 import ToolsHome from '../tools/ui/Home';
 import { getRoute, MARBLE_GAME_ROUTE } from './Routing';
 
-const APP_VERSION = 'v2.9.1';
+const APP_VERSION = 'v2.10.0';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
