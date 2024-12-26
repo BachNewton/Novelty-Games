@@ -6,6 +6,7 @@ import { NewtorkCommunicator } from '../mille-bornes/logic/NewtorkCommunicator';
 import Games2DHome from '../game-2D/ui/Home';
 import Games3DHome from '../game-3D/ui/Home';
 import ToolsHome from '../tools/ui/Home';
+import { getRoute, MARBLE_GAME_ROUTE } from './Routing';
 
 const APP_VERSION = 'v2.9.1';
 
@@ -41,7 +42,7 @@ enum VersionState {
 }
 
 const Home: React.FC<HomeProps> = ({ updateListener }) => {
-    const [state, setState] = useState<State>(new HomeState());
+    const [state, setState] = useState<State>(getInitialState());
     const [versionState, setVersionSate] = useState(VersionState.CHECKING);
 
     useEffect(() => {
@@ -147,6 +148,17 @@ function VersionStateUi(versionState: VersionState) {
             return <button onClick={() => { window.location.reload() }}>🔄 Update App</button>;
         case VersionState.UNKNOWN:
             return <>✖️ Offline</>;
+    }
+}
+
+function getInitialState(): State {
+    const route = getRoute();
+
+    switch (route) {
+        case MARBLE_GAME_ROUTE:
+            return new Game3DState();
+        default:
+            return new HomeState();
     }
 }
 

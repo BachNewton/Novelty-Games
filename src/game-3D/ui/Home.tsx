@@ -2,6 +2,7 @@ import { useState } from "react";
 import HomeButton from "../../ui/HomeButton";
 import Game3D from "./Game3D";
 import ToddlerCompanionApp from "../toddler/ToddlerCompanionApp";
+import { getRoute, MARBLE_GAME_ROUTE } from "../../ui/Routing";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
@@ -23,7 +24,7 @@ export enum Game {
 }
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
-    const [uiState, setUiState] = useState<UiState>(new MenuUiState());
+    const [uiState, setUiState] = useState<UiState>(getInitialUiState());
 
     const onMarbleClick = () => {
         setUiState(new Game3DState(Game.MARBLE));
@@ -76,6 +77,17 @@ function MenuUi(onHomeButtonClicked: () => void, onMarbleClick: () => void, onTo
         <button style={buttonStyle} onClick={onToddlerClick}>Toddler Companion App 👶</button>
         <button style={buttonStyle} onClick={onKnightClick}>Knight ⚔️</button>
     </div>;
+}
+
+function getInitialUiState(): UiState {
+    const route = getRoute();
+
+    switch (route) {
+        case MARBLE_GAME_ROUTE:
+            return new Game3DState(Game.MARBLE);
+        default:
+            return new MenuUiState();
+    }
 }
 
 export default Home;
