@@ -23,7 +23,7 @@ export enum Game {
 }
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
-    const [uiState, setUiState] = useState<UiState>(new MenuUiState());
+    const [uiState, setUiState] = useState<UiState>(new Game3DState(Game.KNIGHT));
 
     const onMarbleClick = () => {
         setUiState(new Game3DState(Game.MARBLE));

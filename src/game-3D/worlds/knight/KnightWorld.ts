@@ -3,6 +3,7 @@ import * as CANNON from 'cannon-es';
 import { GameWorld, GameWorldCreator } from "../GameWorld";
 import { FBXLoader, OrbitControls } from 'three/examples/jsm/Addons';
 import KnightModelFbx from './models/Lite Sword and Shield Pack/Paladin WProp J Nordstrom.fbx'
+import SkyboxPath from './textures/skybox.jpeg';
 
 export const KnightWorld: GameWorldCreator = {
     create: (scene, camera, world, domElement, updateHUD, updateSummary) => createKnightWorld(scene, camera, world, domElement, updateHUD, updateSummary)
@@ -17,8 +18,15 @@ function createKnightWorld(
     updateSummary: (element: JSX.Element) => void
 ): GameWorld {
     addLight(scene);
-
+    addSkybox(scene);
     createOrbitControls(camera, domElement);
+
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshPhongMaterial({ color: 0x999999 }));
+    ground.rotation.x = - Math.PI / 2;
+    scene.add(ground);
+
+    const grid = new THREE.GridHelper(50, 50);
+    scene.add(grid);
 
     const loader = new FBXLoader();
     loader.load(KnightModelFbx, data => {
@@ -34,13 +42,13 @@ function createKnightWorld(
         new THREE.BoxGeometry(),
         new THREE.MeshStandardMaterial({ color: 'red' })
     );
-    testBox1.position.x = -1;
+    testBox1.position.set(-1.5, 0.5, 0);
 
     const testBox2 = new THREE.Mesh(
         new THREE.BoxGeometry(),
         new THREE.MeshStandardMaterial({ color: 'green' })
     );
-    testBox2.position.x = 1;
+    testBox2.position.set(1.5, 0.5, 0);
 
     scene.add(testBox1, testBox2);
 
@@ -64,8 +72,13 @@ function addLight(scene: THREE.Scene) {
 function createOrbitControls(camera: THREE.PerspectiveCamera, rendererDomElement: HTMLCanvasElement): OrbitControls {
     const controls = new OrbitControls(camera, rendererDomElement);
 
-    controls.object.position.set(0, 1, 3);
+    controls.object.position.set(0, 1.5, 3);
     controls.update();
 
     return controls;
+}
+
+
+function addSkybox(scene: THREE.Scene) {
+    scene.background = new THREE.Color('skyblue');
 }
