@@ -17,7 +17,7 @@ function createKnightWorld(
     updateHUD: (text: string) => void,
     updateSummary: (element: JSX.Element) => void
 ): GameWorld {
-    updateRoute(ROUTES.MARBLE_GAME);
+    updateRoute(ROUTES.KNIGHT_GAME);
 
     addLight(scene);
     addSkybox(scene);
