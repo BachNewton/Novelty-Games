@@ -6,7 +6,7 @@ import { NewtorkCommunicator } from '../mille-bornes/logic/NewtorkCommunicator';
 import Games2DHome from '../game-2D/ui/Home';
 import Games3DHome from '../game-3D/ui/Home';
 import ToolsHome from '../tools/ui/Home';
-import { getRoute, MARBLE_GAME_ROUTE } from './Routing';
+import { getRoute, ROUTES } from './Routing';
 
 const APP_VERSION = 'v2.9.1';
 
@@ -155,7 +155,7 @@ function getInitialState(): State {
     const route = getRoute();
 
     switch (route) {
-        case MARBLE_GAME_ROUTE:
+        case ROUTES.MARBLE_GAME:
             return new Game3DState();
         default:
             return new HomeState();

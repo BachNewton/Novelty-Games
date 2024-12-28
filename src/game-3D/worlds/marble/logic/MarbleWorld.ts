@@ -15,7 +15,7 @@ import { createSounds } from "./Sounds";
 import { clearSummary, createSummary } from "../ui/Summary";
 import { marbleWorldGuiCreator } from "./MarbleWorldGui";
 import { handleToddler } from "./ToddlerHandler";
-import { MARBLE_GAME_ROUTE, updateRoute } from "../../../../ui/Routing";
+import { ROUTES, updateRoute } from "../../../../ui/Routing";
 
 export const temporaryExperimentalProperties = {
     jumpHeight: 7.5,
@@ -42,7 +42,7 @@ function createMarbleWorld(
     updateHUD: (text: string) => void,
     updateSummary: (element: JSX.Element) => void
 ): GameWorld {
-    updateRoute(MARBLE_GAME_ROUTE);
+    updateRoute(ROUTES.MARBLE_GAME);
 
     let state = State.PLAY;
     let startTime = performance.now();

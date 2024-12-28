@@ -1,4 +1,6 @@
-export const MARBLE_GAME_ROUTE = 'Marble';
+export const ROUTES = {
+    MARBLE_GAME: 'Marble'
+};
 
 export function getRoute(): string | null {
     const pathNames = window.location.pathname.split('/');
