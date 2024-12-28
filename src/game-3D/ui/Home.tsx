@@ -85,6 +85,8 @@ function getInitialUiState(): UiState {
     switch (route) {
         case ROUTES.MARBLE_GAME:
             return new Game3DState(Game.MARBLE);
+        case ROUTES.KNIGHT_GAME:
+            return new Game3DState(Game.KNIGHT);
         default:
             return new MenuUiState();
     }

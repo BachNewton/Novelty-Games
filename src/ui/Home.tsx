@@ -156,6 +156,7 @@ function getInitialState(): State {
 
     switch (route) {
         case ROUTES.MARBLE_GAME:
+        case ROUTES.KNIGHT_GAME:
             return new Game3DState();
         default:
             return new HomeState();

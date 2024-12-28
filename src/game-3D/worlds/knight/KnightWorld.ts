@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { GameWorld, GameWorldCreator } from "../GameWorld";
 import { FBXLoader, OrbitControls } from 'three/examples/jsm/Addons';
-import KnightModelFbx from './models/Lite Sword and Shield Pack/Paladin WProp J Nordstrom.fbx'
-import SkyboxPath from './textures/skybox.jpeg';
+import KnightModelFbx from './models/Lite Sword and Shield Pack/Paladin WProp J Nordstrom.fbx';
+import { updateRoute, ROUTES } from '../../../ui/Routing';
 
 export const KnightWorld: GameWorldCreator = {
     create: (scene, camera, world, domElement, updateHUD, updateSummary) => createKnightWorld(scene, camera, world, domElement, updateHUD, updateSummary)
@@ -17,6 +17,9 @@ function createKnightWorld(
     updateHUD: (text: string) => void,
     updateSummary: (element: JSX.Element) => void
 ): GameWorld {
+    updateRoute(ROUTES.MARBLE_GAME);
+
+
     addLight(scene);
     addSkybox(scene);
     createOrbitControls(camera, domElement);
