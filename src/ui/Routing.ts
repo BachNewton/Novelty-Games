@@ -1,5 +1,6 @@
 export const ROUTES = {
-    MARBLE_GAME: 'Marble'
+    MARBLE_GAME: 'Marble',
+    KNIGHT_GAME: 'Knight'
 };
 
 export function getRoute(): string | null {
