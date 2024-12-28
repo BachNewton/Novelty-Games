@@ -19,7 +19,6 @@ function createKnightWorld(
 ): GameWorld {
     updateRoute(ROUTES.MARBLE_GAME);
 
-
     addLight(scene);
     addSkybox(scene);
     createOrbitControls(camera, domElement);
