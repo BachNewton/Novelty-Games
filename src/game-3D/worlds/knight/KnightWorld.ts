@@ -3,6 +3,7 @@ import * as CANNON from 'cannon-es';
 import { GameWorld, GameWorldCreator } from "../GameWorld";
 import { FBXLoader, OrbitControls } from 'three/examples/jsm/Addons';
 import KnightModelFbx from './models/Lite Sword and Shield Pack/Paladin WProp J Nordstrom.fbx';
+import KnightRunAnimationFbx from './models/Lite Sword and Shield Pack/sword and shield run.fbx';
 import { updateRoute, ROUTES } from '../../../ui/Routing';
 
 export const KnightWorld: GameWorldCreator = {
@@ -30,14 +31,31 @@ function createKnightWorld(
     const grid = new THREE.GridHelper(50, 50);
     scene.add(grid);
 
+    let mixer: THREE.AnimationMixer | null = null;
+    let bone: THREE.Bone | null = null;
+    let knight: THREE.Group | null = null;
+
     const loader = new FBXLoader();
     loader.load(KnightModelFbx, data => {
+        knight = data;
+        console.log(data);
+
         data.scale.multiplyScalar(0.01);
 
         const helmentMesh = data.children[1] as THREE.SkinnedMesh;
         const knightMesh = data.children[2] as THREE.SkinnedMesh;
+        bone = data.children[0] as THREE.Bone;
+
+        mixer = new THREE.AnimationMixer(data);
+
+        loader.load(KnightRunAnimationFbx, data => {
+            const clip = data.animations[0];
+            const action = mixer?.clipAction(clip);
+            action?.play();
+        });
 
         scene.add(data);
+        scene.add(new THREE.SkeletonHelper(data));
     });
 
     const testBox1 = new THREE.Mesh(
@@ -56,7 +74,11 @@ function createKnightWorld(
 
     return {
         update: (deltaTime) => {
-            //
+            mixer?.update(deltaTime / 1000);
+
+            if (bone && knight) {
+                knight.position.z = -bone?.position.z * 0.01;
+            }
         }
     };
 }
