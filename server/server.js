@@ -26,7 +26,10 @@ function startServer() {
     });
 
     io.on('connection', async (socket) => {
-        if (await isCountryBlocked(getIP(socket))) return;
+        if (await isCountryBlocked(getIP(socket))) {
+            socket.disconnect();
+            return;
+        }
 
         console.log('Connection - ID:', socket.id);
         socket.broadcast.emit('connection', socket.id);
