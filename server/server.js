@@ -27,7 +27,7 @@ function startServer() {
 
     io.on('connection', async (socket) => {
         console.log('IP:', socket.conn.remoteAddress);
-        const response = await fetch(`https://ipinfo.io/${socket.conn.remoteAddress}`);
+        const response = await fetch(`https://ipinfo.io/${socket.conn.remoteAddress}`, { headers: { accept: 'application/json' } });
         const json = await response.json();
 
         console.log(json);
