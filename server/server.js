@@ -26,7 +26,7 @@ function startServer() {
     });
 
     io.on('connection', async (socket) => {
-        const response = await fecth(`ipinfo.io/${socket.handshake.address}`);
+        const response = await fetch(`ipinfo.io/${socket.handshake.address}`);
         const json = await response.json();
 
         console.log(json);
