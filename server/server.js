@@ -26,8 +26,15 @@ function startServer() {
     });
 
     io.on('connection', async (socket) => {
-        console.log('IP:', socket.conn.remoteAddress);
-        const response = await fetch(`https://ipinfo.io/${socket.conn.remoteAddress}`, { headers: { accept: 'application/json' } });
+        const remoteAddress = socket.conn.remoteAddress;
+        console.log('Connection - remoteAddress:', remoteAddress);
+
+        const ip = remoteAddress.charAt('.') === -1
+            ? remoteAddress
+            : remoteAddress.replace('::ffff:', '');
+        console.log('Connection - ip:', ip);
+
+        const response = await fetch(`https://ipinfo.io/${ip}`, { headers: { accept: 'application/json' } });
         const json = await response.json();
 
         console.log(json);
@@ -37,11 +44,11 @@ function startServer() {
 
         if (!isUS || !isFinland) return;
 
-        console.log('Connection:', socket.id);
+        console.log('Connection - ID:', socket.id);
         socket.broadcast.emit('connection', socket.id);
 
         socket.on('disconnect', () => {
-            console.log('Disconnect:', socket.id);
+            console.log('Disconnect - ID:', socket.id);
             socket.broadcast.emit('disconnected', socket.id);
         });
 
