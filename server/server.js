@@ -26,23 +26,7 @@ function startServer() {
     });
 
     io.on('connection', async (socket) => {
-        const remoteAddress = socket.conn.remoteAddress;
-        console.log('Connection - remoteAddress:', remoteAddress);
-
-        const ip = remoteAddress.charAt('.') === -1
-            ? remoteAddress
-            : remoteAddress.replace('::ffff:', '');
-        console.log('Connection - ip:', ip);
-
-        const response = await fetch(`https://ipinfo.io/${ip}`, { headers: { accept: 'application/json' } });
-        const json = await response.json();
-
-        console.log(json);
-
-        const isUS = json.country === 'US';
-        const isFinland = json.country === 'Finland';
-
-        if (!isUS || !isFinland) return;
+        if (await isCountryBlocked(getIP(socket))) return;
 
         console.log('Connection - ID:', socket.id);
         socket.broadcast.emit('connection', socket.id);
@@ -63,6 +47,30 @@ function startServer() {
     });
 
     return server;
+}
+
+function getIP(socket) {
+    const remoteAddress = socket.conn.remoteAddress;
+    console.log('remoteAddress:', remoteAddress);
+
+    const ip = remoteAddress.charAt('.') === -1
+        ? remoteAddress
+        : remoteAddress.replace('::ffff:', '');
+    console.log('ip:', ip);
+
+    return ip;
+}
+
+async function isCountryBlocked(ip) {
+    const response = await fetch(`https://ipinfo.io/${ip}`, { headers: { accept: 'application/json' } });
+    const json = await response.json();
+
+    console.log('json.country:', json.country);
+
+    const isUS = json.country === 'US';
+    const isFinland = json.country === 'FI';
+
+    return !isUS && !isFinland;
 }
 
 (async () => {
