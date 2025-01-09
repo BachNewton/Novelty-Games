@@ -25,7 +25,17 @@ function startServer() {
         res.send('<h1>Novelty Games Server</h1>');
     });
 
-    io.on('connection', (socket) => {
+    io.on('connection', async (socket) => {
+        const response = await fecth(`ipinfo.io/${socket.handshake.address}`);
+        const json = await response.json();
+
+        console.log(json);
+
+        const isUS = json.country === 'US';
+        const isFinland = json.country === 'Finland';
+
+        if (!isUS || !isFinland) return;
+
         console.log('Connection:', socket.id);
         socket.broadcast.emit('connection', socket.id);
 
