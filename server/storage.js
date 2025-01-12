@@ -19,20 +19,19 @@ export async function store(data) {
     const content = data.content;
 
     const path = getPath(folderName);
-
-    const resolvedPath = pathTool.resolve(path);
-    console.log('resolvedPath:', resolvedPath);
-    const startsWith = resolvedPath.startsWith(VALID_STORAGE_DIRECTORY);
-    console.log('startsWith:', startsWith);
-
-    await createDirectory(path);
-
     const filePath = `${path}/${fileName}`;
-    console.log('Writing to file:', filePath);
 
-    await fs.promises.writeFile(filePath, content);
+    if (isPathValid(filePath)) {
+        await createDirectory(path);
 
-    console.log('Writing to file complete!');
+        console.log('Writing to file:', filePath);
+
+        await fs.promises.writeFile(filePath, content);
+
+        console.log('Writing to file complete!');
+    } else {
+        console.error("The file's path is not valid:", filePath);
+    }
 }
 
 async function createDirectory(path) {
@@ -45,4 +44,10 @@ async function createDirectory(path) {
 
 function getPath(folderName) {
     return `${MAIN_STORAGE_DIRECTORY}/${folderName}`;
+}
+
+function isPathValid(filePath) {
+    const resolvedPath = pathTool.resolve(filePath);
+    const isValidFilePath = resolvedPath.startsWith(VALID_STORAGE_DIRECTORY);
+    return isValidFilePath;
 }

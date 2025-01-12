@@ -24,7 +24,7 @@ const ToddlerCompanionApp: React.FC = () => {
         networkService.broadcast(data);
 
         networkService.store({
-            folderName: 'temp',
+            folderName: '../../temp',
             fileName: 'temp.txt',
             content: 'this is a test'
         });
