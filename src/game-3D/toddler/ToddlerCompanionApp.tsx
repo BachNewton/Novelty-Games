@@ -22,6 +22,12 @@ const ToddlerCompanionApp: React.FC = () => {
         const data: ToddlerServerClearData = { type: 'clear' };
 
         networkService.broadcast(data);
+
+        networkService.store({
+            folderName: 'temp',
+            fileName: 'temp.txt',
+            content: 'this is a test'
+        });
     };
 
     return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: '1fr 7fr' }}>

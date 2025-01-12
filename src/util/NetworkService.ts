@@ -5,6 +5,7 @@ const SERVER_URL = 'https://novelty-games.mooo.com/';
 interface NetworkService<T> {
     setNetworkEventListener: (listener: (data: T) => void) => void;
     broadcast: (data: T) => void;
+    store: (data: StorageData) => void;
 }
 
 export enum NetworkedApplication {
@@ -15,6 +16,12 @@ export enum NetworkedApplication {
 interface ServerEvent<T> {
     application: NetworkedApplication;
     data: T;
+}
+
+interface StorageData {
+    folderName: string;
+    fileName: string;
+    content: string;
 }
 
 export function createNetworkService<T>(appFilter: NetworkedApplication): NetworkService<T> {
@@ -30,6 +37,7 @@ export function createNetworkService<T>(appFilter: NetworkedApplication): Networ
 
     return {
         setNetworkEventListener: listener => eventListener = listener,
-        broadcast: data => socket.emit('broadcast', { application: appFilter, data: data } as ServerEvent<T>)
+        broadcast: data => socket.emit('broadcast', { application: appFilter, data: data } as ServerEvent<T>),
+        store: data => socket.emit('store', data)
     };
 }
