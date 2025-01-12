@@ -13,14 +13,19 @@ const MAIN_STORAGE_DIRECTORY = 'storage';
 /** @param {StorageData} data */
 export async function store(data) {
     const folderName = data.folderName;
-    const fileName = data.folderName;
+    const fileName = data.fileName;
     const content = data.content;
 
     const path = getPath(folderName);
 
     await createDirectory(path);
 
-    await fs.promises.writeFile(`${path}/${fileName}`, content);
+    const filePath = `${path}/${fileName}`;
+    console.log('Writing to file:', filePath);
+
+    await fs.promises.writeFile(filePath, content);
+
+    console.log('Writing to file complete!');
 }
 
 async function createDirectory(path) {
