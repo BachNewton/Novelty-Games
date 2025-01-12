@@ -9,7 +9,7 @@ import ToolsHome from '../tools/ui/Home';
 import { getRoute, Route } from './Routing';
 import FreeMarket from '../free-market/FreeMarket';
 
-const APP_VERSION = 'v2.10.1';
+const APP_VERSION = 'v2.11.0';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
