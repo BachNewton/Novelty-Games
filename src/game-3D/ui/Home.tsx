@@ -2,7 +2,7 @@ import { useState } from "react";
 import HomeButton from "../../ui/HomeButton";
 import Game3D from "./Game3D";
 import ToddlerCompanionApp from "../toddler/ToddlerCompanionApp";
-import { getRoute, ROUTES } from "../../ui/Routing";
+import { getRoute, Route } from "../../ui/Routing";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
@@ -83,9 +83,9 @@ function getInitialUiState(): UiState {
     const route = getRoute();
 
     switch (route) {
-        case ROUTES.MARBLE_GAME:
+        case Route.MARBLE_GAME:
             return new Game3DState(Game.MARBLE);
-        case ROUTES.KNIGHT_GAME:
+        case Route.KNIGHT_GAME:
             return new Game3DState(Game.KNIGHT);
         default:
             return new MenuUiState();

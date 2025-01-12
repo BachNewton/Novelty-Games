@@ -4,7 +4,7 @@ import { GameWorld, GameWorldCreator } from "../GameWorld";
 import { FBXLoader, OrbitControls } from 'three/examples/jsm/Addons';
 import KnightModelFbx from './models/Lite Sword and Shield Pack/Paladin WProp J Nordstrom.fbx';
 import KnightRunAnimationFbx from './models/Lite Sword and Shield Pack/sword and shield run.fbx';
-import { updateRoute, ROUTES } from '../../../ui/Routing';
+import { updateRoute, Route } from '../../../ui/Routing';
 
 export const KnightWorld: GameWorldCreator = {
     create: (scene, camera, world, domElement, updateHUD, updateSummary) => createKnightWorld(scene, camera, world, domElement, updateHUD, updateSummary)
@@ -18,7 +18,7 @@ function createKnightWorld(
     updateHUD: (text: string) => void,
     updateSummary: (element: JSX.Element) => void
 ): GameWorld {
-    updateRoute(ROUTES.KNIGHT_GAME);
+    updateRoute(Route.KNIGHT_GAME);
 
     addLight(scene);
     addSkybox(scene);

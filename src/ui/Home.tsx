@@ -6,7 +6,7 @@ import { NewtorkCommunicator } from '../mille-bornes/logic/NewtorkCommunicator';
 import Games2DHome from '../game-2D/ui/Home';
 import Games3DHome from '../game-3D/ui/Home';
 import ToolsHome from '../tools/ui/Home';
-import { getRoute, ROUTES } from './Routing';
+import { getRoute, Route } from './Routing';
 
 const APP_VERSION = 'v2.10.1';
 
@@ -120,7 +120,7 @@ function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTr
     const buttonStyle: React.CSSProperties = {
         width: '75%',
         fontSize: '1.5em',
-        margin: '0.75em',
+        margin: '0.5em',
         padding: '0.5em'
     };
 
@@ -135,6 +135,7 @@ function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTr
         <button style={buttonStyle} onClick={on2DGamesClick}>2D Games 🟦</button>
         <button style={buttonStyle} onClick={on3DGamesClick}>3D Games 🧊</button>
         <button style={buttonStyle} onClick={onToolsClick}>Tools 🔨</button>
+        <button style={buttonStyle} onClick={() => window.alert('Work in progress!')}>Free Market 💸</button>
     </div>;
 }
 
@@ -155,8 +156,8 @@ function getInitialState(): State {
     const route = getRoute();
 
     switch (route) {
-        case ROUTES.MARBLE_GAME:
-        case ROUTES.KNIGHT_GAME:
+        case Route.MARBLE_GAME:
+        case Route.KNIGHT_GAME:
             return new Game3DState();
         default:
             return new HomeState();
