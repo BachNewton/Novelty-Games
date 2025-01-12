@@ -49,5 +49,6 @@ function getPath(folderName) {
 function isPathValid(filePath) {
     const resolvedPath = pathTool.resolve(filePath);
     const isValidFilePath = resolvedPath.startsWith(VALID_STORAGE_DIRECTORY);
+
     return isValidFilePath;
 }
