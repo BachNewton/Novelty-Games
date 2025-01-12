@@ -2,6 +2,7 @@ import fs from 'fs';
 import pathTool from 'path';
 
 const MAIN_STORAGE_DIRECTORY = 'storage';
+const VALID_STORAGE_DIRECTORY = `/home/kyle1235/Novelty-Games/${MAIN_STORAGE_DIRECTORY}/`;
 
 /**
  * @typedef {Object} StorageData
@@ -19,9 +20,9 @@ export async function store(data) {
 
     const path = getPath(folderName);
 
-    const resolvedPath = pathTool.resolve(MAIN_STORAGE_DIRECTORY, path);
+    const resolvedPath = pathTool.resolve(path);
     console.log('resolvedPath:', resolvedPath);
-    const startsWith = resolvedPath.startsWith(MAIN_STORAGE_DIRECTORY);
+    const startsWith = resolvedPath.startsWith(VALID_STORAGE_DIRECTORY);
     console.log('startsWith:', startsWith);
 
     await createDirectory(path);
