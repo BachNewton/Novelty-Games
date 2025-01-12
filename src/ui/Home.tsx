@@ -7,6 +7,7 @@ import Games2DHome from '../game-2D/ui/Home';
 import Games3DHome from '../game-3D/ui/Home';
 import ToolsHome from '../tools/ui/Home';
 import { getRoute, Route } from './Routing';
+import FreeMarket from '../free-market/FreeMarket';
 
 const APP_VERSION = 'v2.10.1';
 
@@ -33,6 +34,8 @@ class Game2DState implements State { }
 class Game3DState implements State { }
 
 class ToolsState implements State { }
+
+class FreeMarketState implements State { }
 
 enum VersionState {
     CURRENT,
@@ -97,6 +100,8 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         return <Games3DHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else if (state instanceof ToolsState) {
         return <ToolsHome onHomeButtonClicked={onHomeButtonClicked} />;
+    } else if (state instanceof FreeMarketState) {
+        return <FreeMarket />;
     } else {
         return HomeUi(versionState, onMilleBornesClick, onTriviaClick, on2DGamesClick, on3DGamesClick, onToolsClick);
     }
@@ -159,6 +164,8 @@ function getInitialState(): State {
         case Route.MARBLE_GAME:
         case Route.KNIGHT_GAME:
             return new Game3DState();
+        case Route.FREE_MARKET:
+            return new FreeMarketState();
         default:
             return new HomeState();
     }
