@@ -14,35 +14,9 @@ const FreeMarket: React.FC = () => {
     return <div style={{ color: 'white', fontSize: '1.333em' }}>
         <Tabs currentTab={tab} onClick={selectedTab => setTab(selectedTab)} />
 
-        <div style={{ margin: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontSize: '1.25em', fontWeight: 'bold' }}>
-                <div>
-                    Inventor: Kyle
-                </div>
-                <div>
-                    Money: $1,234
-                </div>
-            </div>
-            <div>
-                <button style={{ fontSize: '1em', display: 'block', width: '100%' }}>Labor</button>
-                <div style={{ height: '10px' }}></div>
-                <button style={{ fontSize: '1em', display: 'block', width: '100%' }}>Invent</button>
-            </div>
-        </div>
+        {profileUi()}
 
-        <HorizontalLine />
-
-        <div style={{ margin: '15px' }}>
-            <div style={{ fontWeight: 'bold' }}>Inventory</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-                <div>🔥 Fire x 4</div>
-                <div>💧 Water x 1</div>
-                <div>🪵 Wood x 7</div>
-                <div>⛏️ Metal x 3</div>
-            </div>
-        </div>
-
-        <HorizontalLine />
+        {/* <HorizontalLine />
 
         <div style={{ margin: '15px' }}>
             <div style={{ fontWeight: 'bold' }}>Raw Materials</div>
@@ -54,7 +28,7 @@ const FreeMarket: React.FC = () => {
         <div style={{ margin: '15px' }}>
             <div style={{ fontWeight: 'bold' }}>The Market</div>
             {marketItemsUi}
-        </div>
+        </div> */}
     </div>;
 };
 
@@ -73,6 +47,34 @@ function createCards(names: string[], isRaw: boolean): JSX.Element[] {
         {name}
         <button style={{ fontSize: '1em' }}>{buttonText}</button>
     </div>);
+}
+
+function profileUi(): JSX.Element {
+    const inventoryItemStyle: React.CSSProperties = {
+        border: '2px solid white'
+    };
+
+    return <div style={{ margin: '10px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', fontSize: '1.5em', fontWeight: 'bold' }}>
+            <div>Inventor:</div>
+            <div style={{ textAlign: 'right' }}>Kyle</div>
+            <div>Money:</div>
+            <div style={{ textAlign: 'right' }}>$1,234</div>
+        </div>
+
+        <HorizontalLine />
+
+        <div style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '1.25em', textAlign: 'center' }}>Inventory</div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(8em, 1fr))' }}>
+            <div style={inventoryItemStyle}>🔥 Fire x 4</div>
+            <div style={inventoryItemStyle}>💧 Water x 1</div>
+            <div style={inventoryItemStyle}>🪵 Wood x 7</div>
+            <div style={inventoryItemStyle}>🪨 Stone x 1</div>
+            <div style={inventoryItemStyle}>⛏️ Metal x 3</div>
+            <div style={inventoryItemStyle}>⚡ Electricity x 12</div>
+        </div>
+    </div>;
 }
 
 export default FreeMarket;
