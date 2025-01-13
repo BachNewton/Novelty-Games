@@ -8,26 +8,28 @@ interface TabsProps {
 }
 
 const Tabs: React.FC<TabsProps> = ({ currentTab, onClick }) => {
-    const border = '2px solid grey';
+    const borderGrey = '2px solid grey';
+    const borderWhite = '2px solid white';
 
     const tabs = ['Profile', 'Extract', 'Market', 'Invent'].map((tabName, tabIndex) => {
         const tabStyle: React.CSSProperties = {
-            borderTop: border,
-            borderLeft: border,
-            borderRight: border,
+            borderTop: borderWhite,
+            borderLeft: borderWhite,
+            borderRight: borderWhite,
             textAlign: 'center'
         };
 
         if (tabIndex !== currentTab) {
             tabStyle.background = 'grey';
-            tabStyle.borderBottom = border;
+            tabStyle.borderBottom = borderGrey;
+            tabStyle.borderTop = borderGrey
             tabStyle.cursor = 'pointer';
         }
 
         return <div style={tabStyle} onClick={() => onClick(tabIndex)}>{tabName}</div>;
     });
 
-    return <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', margin: '1px' }}>
+    return <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', margin: '0px 1px' }}>
         {tabs}
     </div>;
 };
