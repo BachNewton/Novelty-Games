@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Tabs, { Tab } from "./Tabs";
+import HorizontalLine from "./HorizontalLine";
 
 const FreeMarket: React.FC = () => {
     const [tab, setTab] = useState(Tab.PROFILE);
@@ -29,7 +30,7 @@ const FreeMarket: React.FC = () => {
             </div>
         </div>
 
-        {createLine()}
+        <HorizontalLine />
 
         <div style={{ margin: '15px' }}>
             <div style={{ fontWeight: 'bold' }}>Inventory</div>
@@ -41,14 +42,14 @@ const FreeMarket: React.FC = () => {
             </div>
         </div>
 
-        {createLine()}
+        <HorizontalLine />
 
         <div style={{ margin: '15px' }}>
             <div style={{ fontWeight: 'bold' }}>Raw Materials</div>
             {rawMaterialsUi}
         </div>
 
-        {createLine()}
+        <HorizontalLine />
 
         <div style={{ margin: '15px' }}>
             <div style={{ fontWeight: 'bold' }}>The Market</div>
@@ -72,10 +73,6 @@ function createCards(names: string[], isRaw: boolean): JSX.Element[] {
         {name}
         <button style={{ fontSize: '1em' }}>{buttonText}</button>
     </div>);
-}
-
-function createLine(): JSX.Element {
-    return <div style={{ borderTop: '2px solid white' }}></div>;
 }
 
 export default FreeMarket;
