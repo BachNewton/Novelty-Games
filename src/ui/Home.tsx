@@ -9,7 +9,7 @@ import ToolsHome from '../tools/ui/Home';
 import { getRoute, Route } from './Routing';
 import FreeMarket from '../free-market/FreeMarket';
 
-const APP_VERSION = 'v2.11.1';
+const APP_VERSION = 'v2.11.2';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -44,6 +44,15 @@ enum VersionState {
     CHECKING
 }
 
+interface OnClickHandlers {
+    onMilleBornesClick: () => void;
+    onTriviaClick: () => void;
+    on2DGamesClick: () => void;
+    on3DGamesClick: () => void;
+    onToolsClick: () => void;
+    onFreeMarketClick: () => void;
+}
+
 const Home: React.FC<HomeProps> = ({ updateListener }) => {
     const [state, setState] = useState<State>(getInitialState());
     const [versionState, setVersionSate] = useState(VersionState.CHECKING);
@@ -69,25 +78,26 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         setState(new HomeState());
     };
 
-    const onMilleBornesClick = () => {
-        const communicator = new NewtorkCommunicator();
-        setState(new MilleBornesState(communicator));
-    };
-
-    const onTriviaClick = () => {
-        setState(new TriviaState());
-    };
-
-    const on2DGamesClick = () => {
-        setState(new Game2DState());
-    };
-
-    const on3DGamesClick = () => {
-        setState(new Game3DState());
-    };
-
-    const onToolsClick = () => {
-        setState(new ToolsState());
+    const onClickHandlers: OnClickHandlers = {
+        onMilleBornesClick: () => {
+            const communicator = new NewtorkCommunicator();
+            setState(new MilleBornesState(communicator));
+        },
+        onTriviaClick: () => {
+            setState(new TriviaState());
+        },
+        on2DGamesClick: () => {
+            setState(new Game2DState());
+        },
+        on3DGamesClick: () => {
+            setState(new Game3DState());
+        },
+        onToolsClick: () => {
+            setState(new ToolsState());
+        },
+        onFreeMarketClick: () => {
+            setState(new FreeMarketState());
+        }
     };
 
     if (state instanceof MilleBornesState) {
@@ -103,11 +113,11 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
     } else if (state instanceof FreeMarketState) {
         return <FreeMarket />;
     } else {
-        return HomeUi(versionState, onMilleBornesClick, onTriviaClick, on2DGamesClick, on3DGamesClick, onToolsClick);
+        return HomeUi(versionState, onClickHandlers);
     }
 };
 
-function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTriviaClick: () => void, on2DGamesClick: () => void, on3DGamesClick: () => void, onToolsClick: () => void) {
+function HomeUi(versionState: VersionState, onClickHandlers: OnClickHandlers) {
     const versionStateStyle: React.CSSProperties = {
         position: 'fixed',
         top: '0.25em',
@@ -135,12 +145,12 @@ function HomeUi(versionState: VersionState, onMilleBornesClick: () => void, onTr
         <h1>🃏 Novelty Games 🕹️</h1>
         <div>Created by: Kyle Hutchinson</div>
         <div><br /></div>
-        <button style={buttonStyle} onClick={onTriviaClick}>Trivia 🤔</button>
-        <button style={buttonStyle} onClick={onMilleBornesClick}>Mille Bornes 🏎️</button>
-        <button style={buttonStyle} onClick={on2DGamesClick}>2D Games 🟦</button>
-        <button style={buttonStyle} onClick={on3DGamesClick}>3D Games 🧊</button>
-        <button style={buttonStyle} onClick={onToolsClick}>Tools 🔨</button>
-        <button style={buttonStyle} onClick={() => window.alert('Work in progress!')}>Free Market 💸</button>
+        <button style={buttonStyle} onClick={onClickHandlers.onTriviaClick}>Trivia 🤔</button>
+        <button style={buttonStyle} onClick={onClickHandlers.onMilleBornesClick}>Mille Bornes 🏎️</button>
+        <button style={buttonStyle} onClick={onClickHandlers.on2DGamesClick}>2D Games 🟦</button>
+        <button style={buttonStyle} onClick={onClickHandlers.on3DGamesClick}>3D Games 🧊</button>
+        <button style={buttonStyle} onClick={onClickHandlers.onToolsClick}>Tools 🔨</button>
+        <button style={buttonStyle} onClick={onClickHandlers.onFreeMarketClick}>Free Market 💸</button>
     </div>;
 }
 

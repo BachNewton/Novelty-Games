@@ -1,9 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Tabs, { Tab } from "./Tabs";
 import HorizontalLine from "./HorizontalLine";
+import { Route, updateRoute } from "../ui/Routing";
 
 const FreeMarket: React.FC = () => {
     const [tab, setTab] = useState(Tab.PROFILE);
+
+    useEffect(() => {
+        updateRoute(Route.FREE_MARKET);
+    }, []);
 
     return <div style={{ color: 'white', fontSize: '1.333em' }}>
         <Tabs currentTab={tab} onClick={selectedTab => setTab(selectedTab)} />
