@@ -1,4 +1,9 @@
+import { useState } from "react";
+import Tabs, { Tab } from "./Tabs";
+
 const FreeMarket: React.FC = () => {
+    const [tab, setTab] = useState(Tab.PROFILE);
+
     const rawMaterials = ['🔥 Fire', '💧 Water', '🪵 Wood', '🪨 Stone', '⛏️ Metal', '⚡ Electricity'];
     const rawMaterialsUi = createCards(rawMaterials, true);
 
@@ -6,6 +11,8 @@ const FreeMarket: React.FC = () => {
     const marketItemsUi = createCards(marketItems, false);
 
     return <div style={{ color: 'white', fontSize: '1.333em' }}>
+        <Tabs currentTab={tab} onClick={selectedTab => setTab(selectedTab)} />
+
         <div style={{ margin: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ fontSize: '1.25em', fontWeight: 'bold' }}>
                 <div>
