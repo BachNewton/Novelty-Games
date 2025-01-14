@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Tabs, { Tab } from "./Tabs";
 import HorizontalLine from "./HorizontalLine";
 import { Route, updateRoute } from "../ui/Routing";
+import Invent from "./Invent";
 
 const FreeMarket: React.FC = () => {
     const [tab, setTab] = useState(Tab.PROFILE);
@@ -28,7 +29,7 @@ function tabContentUi(tab: Tab): JSX.Element {
         case Tab.MARKET:
             return marketUi();
         case Tab.INVENT:
-            return <div>// TODO</div>
+            return <Invent />;
     }
 }
 
