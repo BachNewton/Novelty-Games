@@ -26,7 +26,7 @@ const Tabs: React.FC<TabsProps> = ({ currentTab, onClick }) => {
             tabStyle.cursor = 'pointer';
         }
 
-        return <div style={tabStyle} onClick={() => onClick(tabIndex)}>{tabName}</div>;
+        return <div key={tabIndex} style={tabStyle} onClick={() => onClick(tabIndex)}>{tabName}</div>;
     });
 
     return <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', margin: '0px 1px' }}>

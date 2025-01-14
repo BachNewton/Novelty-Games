@@ -7,9 +7,9 @@ import Games2DHome from '../game-2D/ui/Home';
 import Games3DHome from '../game-3D/ui/Home';
 import ToolsHome from '../tools/ui/Home';
 import { getRoute, Route } from './Routing';
-import FreeMarket from '../free-market/FreeMarket';
+import FreeMarket from '../free-market/ui/FreeMarket';
 
-const APP_VERSION = 'v2.11.2';
+const APP_VERSION = 'v2.11.3';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };

@@ -1,0 +1,34 @@
+interface DialogProps {
+    isOpen: boolean;
+    content: JSX.Element;
+}
+
+const Dialog: React.FC<DialogProps> = ({ isOpen, content }) => {
+    const overlayStyle: React.CSSProperties = {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        display: isOpen ? 'flex' : 'none',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.75)'
+    };
+
+    const containerStyle: React.CSSProperties = {
+        backgroundColor: 'grey',
+        padding: '15px',
+        margin: '15px',
+        borderRadius: '15px',
+        border: '2px solid white'
+    };
+
+    return <div style={overlayStyle}>
+        <div style={containerStyle}>
+            {content}
+        </div>
+    </div>;
+};
+
+export default Dialog;
