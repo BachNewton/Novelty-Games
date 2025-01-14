@@ -38,10 +38,30 @@ const Invent: React.FC = () => {
 
     const dateText = dated === null ? '(click to date)' : dated.toLocaleDateString();
 
+    const componentStyle: React.CSSProperties = {
+        border: '1px solid white',
+        padding: '5px',
+        cursor: 'pointer'
+    };
+
     return <div>
         <div style={{ display: 'flex' }}>
             <div style={{ marginRight: '15px', fontWeight: 'bold', fontSize: '1.25em' }}>Invention Name:</div>
             <input style={{ fontSize: '1.25em', width: '100%', padding: '10px' }} placeholder='Widget' />
+        </div>
+
+        <HorizontalLine />
+
+        <div style={{ fontSize: '1.25em', textAlign: 'center', fontWeight: 'bold' }}>Components</div>
+        <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+            <div>
+                <div style={{ textAlign: 'center' }}>Primary</div>
+                <div style={componentStyle}>(click to select)</div>
+            </div>
+            <div>
+                <div style={{ textAlign: 'center' }}>Secondary</div>
+                <div style={componentStyle}>(click to select)</div>
+            </div>
         </div>
 
         <HorizontalLine />
