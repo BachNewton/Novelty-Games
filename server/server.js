@@ -2,7 +2,7 @@ import express from 'express';
 import { Server } from 'socket.io';
 import { createServer } from 'node:https';
 import fs from 'fs';
-import { saveFile } from './storage.js';
+import { getFile, saveFile } from './storage.js';
 
 const PORT = 443;
 const PRIVATE_KEY_FILE_PATH = '/etc/letsencrypt/live/novelty-games.mooo.com/privkey.pem';
@@ -49,6 +49,11 @@ function startServer() {
         socket.on('saveFile', (event) => {
             console.log('Socket ID:', socket.id, 'SaveFileEvent:', event);
             saveFile(event, socket);
+        });
+
+        socket.on('getFile', (event) => {
+            console.log('Socket ID:', socket.id, 'GetFileEvent:', event);
+            getFile(event, socket);
         });
     });
 

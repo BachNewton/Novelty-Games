@@ -7,6 +7,7 @@ interface NetworkService<T> {
     setNetworkEventListener: (listener: (data: T) => void) => void;
     broadcast: (data: T) => void;
     saveFile: (data: SaveFileData) => Promise<SaveFileResponse>;
+    getFile: (date: GetFileData) => Promise<GetFileResponse>;
 }
 
 export enum NetworkedApplication {
@@ -37,10 +38,28 @@ export interface SaveFileResponse {
     isSuccessful: string;
 }
 
+interface GetFileEvent {
+    id: string;
+    application: NetworkedApplication;
+    data: GetFileData;
+}
+
+interface GetFileData {
+    folderName: string;
+    fileName: string;
+}
+
+export interface GetFileResponse {
+    id: string;
+    isSuccessful: string;
+    content: string | null;
+}
+
 export function createNetworkService<T>(appFilter: NetworkedApplication): NetworkService<T> {
     const socket = io(SERVER_URL);
 
-    const requests: Map<string, (saveFileResponse: SaveFileResponse) => void> = new Map();
+    const saveFileRequests: Map<string, (saveFileResponse: SaveFileResponse) => void> = new Map();
+    const getFileRequests: Map<string, (getFileResponse: GetFileResponse) => void> = new Map();
 
     let eventListener: (data: T) => void = () => { };
 
@@ -50,9 +69,14 @@ export function createNetworkService<T>(appFilter: NetworkedApplication): Networ
         eventListener(event.data);
     });
 
-    socket.on('saveFileResponse', (event: SaveFileResponse) => {
-        requests.get(event.id)?.(event);
-        requests.delete(event.id);
+    socket.on('saveFileResponse', (response: SaveFileResponse) => {
+        saveFileRequests.get(response.id)?.(response);
+        saveFileRequests.delete(response.id);
+    });
+
+    socket.on('getFileResponse', (response: GetFileResponse) => {
+        getFileRequests.get(response.id)?.(response);
+        getFileRequests.delete(response.id);
     });
 
     return {
@@ -63,7 +87,14 @@ export function createNetworkService<T>(appFilter: NetworkedApplication): Networ
 
             socket.emit('saveFile', { id: id, application: appFilter, data: data } as SaveFileEvent);
 
-            return new Promise(resolve => requests.set(id, resolve));
+            return new Promise(resolve => saveFileRequests.set(id, resolve));
+        },
+        getFile: data => {
+            const id = createID();
+
+            socket.emit('getFile', { id: id, application: appFilter, data: data } as GetFileEvent);
+
+            return new Promise(resolve => getFileRequests.set(id, resolve));
         }
     };
 }

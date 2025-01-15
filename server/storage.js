@@ -3,31 +3,9 @@ import pathTool from 'path';
 import { Socket } from 'socket.io';
 
 const SAVE_FILE_RESPONSE_EVENT = 'saveFileResponse';
+const GET_FILE_RESPONSE_EVENT = 'getFileResponse';
 const MAIN_STORAGE_DIRECTORY = 'storage';
 const VALID_STORAGE_DIRECTORY = `/home/kyle1235/Novelty-Games/${MAIN_STORAGE_DIRECTORY}/`;
-
-/**
- * @typedef {Object} SaveFileEvent
- * 
- * @property {string} id
- * @property {string} application
- * @property {SaveFileData} data
- */
-
-/**
- * @typedef {Object} SaveFileData
- * 
- * @property {string} folderName
- * @property {string} fileName
- * @property {string} content
- */
-
-/**
- * @typedef {Object} SaveFileResponse
- * 
- * @property {string} id
- * @property {boolean} isSuccessful
- */
 
 /**
  * @param {SaveFileEvent} event
@@ -61,6 +39,48 @@ export async function saveFile(event, socket) {
         /** @type {SaveFileResponse} */
         const saveFileResponse = { id: id, isSuccessful: false };
         socket.emit(SAVE_FILE_RESPONSE_EVENT, saveFileResponse);
+    }
+}
+
+/**
+ * @param {GetFileEvent} event
+ * @param {Socket} socket
+ */
+export async function getFile(event, socket) {
+    const id = event.id;
+    const applicationName = event.application;
+    const folderName = event.data.folderName;
+    const fileName = event.data.fileName;
+
+    const path = getPath(applicationName, folderName);
+    const filePath = `${path}/${fileName}`;
+
+    if (isPathValid(filePath)) {
+        console.log('Reading file:', filePath);
+
+        const content = await fs.promises.readFile(filePath, 'utf8').catch(() => null);
+
+        console.log('Read file - content:', content);
+
+        /** @type {GetFileResponse} */
+        const getFileResponse = {
+            id: id,
+            isSuccessful: content !== null,
+            content: content
+        };
+
+        socket.emit(GET_FILE_RESPONSE_EVENT, getFileResponse);
+    } else {
+        console.error("The file's path is not valid:", filePath);
+
+        /** @type {GetFileResponse} */
+        const getFileResponse = {
+            id: id,
+            isSuccessful: false,
+            content: null
+        };
+
+        socket.emit(GET_FILE_RESPONSE_EVENT, getFileResponse);
     }
 }
 

@@ -36,6 +36,21 @@ const ToddlerCompanionApp: React.FC = () => {
             fileName: 'temp.txt',
             content: 'this is a test'
         }).then(response => console.log(response.isSuccessful));
+
+        networkService.getFile({
+            folderName: '../../invalidPath',
+            fileName: 'temp.txt'
+        }).then(response => console.log(response.isSuccessful));
+
+        networkService.getFile({
+            folderName: 'validPath',
+            fileName: 'temp.txt'
+        }).then(response => console.log(response.content));
+
+        networkService.getFile({
+            folderName: 'validPath',
+            fileName: 'notFound.txt'
+        }).then(response => console.log(response.content));
     };
 
     return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: '1fr 7fr' }}>
