@@ -33,6 +33,8 @@ function tabContentUi(tab: Tab, communicator: FreeMarketCommunicator): JSX.Eleme
             return extractUi();
         case Tab.MARKET:
             return marketUi();
+        case Tab.PATENT:
+            return <div>TODO: Patent Office</div>
         case Tab.INVENT:
             return <Invent communicator={communicator} />;
     }
