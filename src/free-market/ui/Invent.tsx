@@ -159,7 +159,7 @@ const Invent: React.FC<InventProps> = ({ communicator }) => {
         <button style={{ fontSize: '1.5em', width: '100%' }} onClick={() => {
             if (isInventionValid(state)) {
                 console.log('Invention is good!');
-                communicator.saveInvention(createInvention(state)).then(response => {
+                communicator.addInvention(createInvention(state)).then(response => {
                     console.log('File save successful:', response.isSuccessful);
                 });
             } else {

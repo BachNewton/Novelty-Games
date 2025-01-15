@@ -35,7 +35,7 @@ interface SaveFileData {
 
 export interface SaveFileResponse {
     id: string;
-    isSuccessful: string;
+    isSuccessful: boolean;
 }
 
 interface GetFileEvent {
