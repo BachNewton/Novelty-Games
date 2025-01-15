@@ -23,6 +23,8 @@ const ToddlerCompanionApp: React.FC = () => {
 
         networkService.broadcast(data);
 
+        // TODO: Remove later - testing code for NetworkService saveFile function
+
         networkService.saveFile({
             folderName: '../../invalidPath',
             fileName: 'temp.txt',
