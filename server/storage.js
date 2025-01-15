@@ -5,20 +5,31 @@ const MAIN_STORAGE_DIRECTORY = 'storage';
 const VALID_STORAGE_DIRECTORY = `/home/kyle1235/Novelty-Games/${MAIN_STORAGE_DIRECTORY}/`;
 
 /**
- * @typedef {Object} StorageData
+ * @typedef {Object} SaveFileEvent
  * 
- * @property {string} folderName - The name of the folder to store into.
- * @property {string} fileName - The name of the file being saved.
- * @property {string} content - The content of the file being saved.
+ * @property {string} application
+ * @property {SaveFileData} data
  */
 
-/** @param {StorageData} data */
-export async function store(data) {
-    const folderName = data.folderName;
-    const fileName = data.fileName;
-    const content = data.content;
+/**
+ * @typedef {Object} SaveFileData
+ * 
+ * @property {string} folderName
+ * @property {string} fileName
+ * @property {string} content
+ */
 
-    const path = getPath(folderName);
+/** @param {SaveFileEvent} event */
+export async function saveFile(event) {
+    console.log(event.application);
+    console.log(event.data);
+
+    const applicationName = event.application;
+    const folderName = event.data.folderName;
+    const fileName = event.data.fileName;
+    const content = event.data.content;
+
+    const path = getPath(applicationName, folderName);
     const filePath = `${path}/${fileName}`;
 
     if (isPathValid(filePath)) {
@@ -42,8 +53,8 @@ async function createDirectory(path) {
     await fs.promises.mkdir(path, { recursive: true });
 }
 
-function getPath(folderName) {
-    return `${MAIN_STORAGE_DIRECTORY}/${folderName}`;
+function getPath(applicationName, folderName) {
+    return `${MAIN_STORAGE_DIRECTORY}/${applicationName}/${folderName}`;
 }
 
 function isPathValid(filePath) {

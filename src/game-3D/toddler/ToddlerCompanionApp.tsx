@@ -23,17 +23,17 @@ const ToddlerCompanionApp: React.FC = () => {
 
         networkService.broadcast(data);
 
-        // networkService.store({
-        //     folderName: '../../invalidPath',
-        //     fileName: 'temp.txt',
-        //     content: 'this is a test'
-        // });
+        networkService.saveFile({
+            folderName: '../../invalidPath',
+            fileName: 'temp.txt',
+            content: 'this is a test'
+        });
 
-        // networkService.store({
-        //     folderName: 'validPath',
-        //     fileName: 'temp.txt',
-        //     content: 'this is a test'
-        // });
+        networkService.saveFile({
+            folderName: 'validPath',
+            fileName: 'temp.txt',
+            content: 'this is a test'
+        });
     };
 
     return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: '1fr 7fr' }}>
