@@ -28,6 +28,7 @@ function startServer() {
 
     io.on('connection', async (socket) => {
         if (await isCountryBlocked(getIP(socket))) {
+            console.error('This country is blocked!');
             socket.disconnect();
             return;
         }
@@ -73,11 +74,12 @@ function getIP(socket) {
 async function isCountryBlocked(ip) {
     const response = await fetch(`https://ipinfo.io/${ip}`, { headers: { accept: 'application/json' } });
     const json = await response.json();
+    const country = json.country;
 
-    console.log('json.country:', json.country);
+    console.log('Connected Country:', country);
 
-    const isUS = json.country === 'US';
-    const isFinland = json.country === 'FI';
+    const isUS = country === 'US';
+    const isFinland = country === 'FI';
 
     return !isUS && !isFinland;
 }

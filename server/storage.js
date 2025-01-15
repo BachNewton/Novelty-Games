@@ -21,9 +21,6 @@ const VALID_STORAGE_DIRECTORY = `/home/kyle1235/Novelty-Games/${MAIN_STORAGE_DIR
 
 /** @param {SaveFileEvent} event */
 export async function saveFile(event) {
-    console.log(event.application);
-    console.log(event.data);
-
     const applicationName = event.application;
     const folderName = event.data.folderName;
     const fileName = event.data.fileName;
