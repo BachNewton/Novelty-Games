@@ -3,7 +3,7 @@ import { createID } from './ID';
 
 const SERVER_URL = 'https://novelty-games.mooo.com/';
 
-interface NetworkService<T> {
+export interface NetworkService<T> {
     setNetworkEventListener: (listener: (data: T) => void) => void;
     broadcast: (data: T) => void;
     saveFile: (data: SaveFileData) => Promise<SaveFileResponse>;
