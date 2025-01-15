@@ -20,12 +20,12 @@ const FreeMarket: React.FC<FreeMarketProps> = ({ communicator }) => {
         <Tabs currentTab={tab} onClick={selectedTab => setTab(selectedTab)} />
 
         <div style={{ margin: '10px' }}>
-            {tabContentUi(tab)}
+            {tabContentUi(tab, communicator)}
         </div>
     </div>;
 };
 
-function tabContentUi(tab: Tab): JSX.Element {
+function tabContentUi(tab: Tab, communicator: FreeMarketCommunicator): JSX.Element {
     switch (tab) {
         case Tab.PROFILE:
             return profileUi();
@@ -34,7 +34,7 @@ function tabContentUi(tab: Tab): JSX.Element {
         case Tab.MARKET:
             return marketUi();
         case Tab.INVENT:
-            return <Invent />;
+            return <Invent communicator={communicator} />;
     }
 }
 

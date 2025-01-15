@@ -32,7 +32,7 @@ interface SaveFileData {
     content: string;
 }
 
-interface SaveFileResponse {
+export interface SaveFileResponse {
     id: string;
     isSuccessful: string;
 }

@@ -5,29 +5,36 @@ export interface Component {
 
 interface RawMaterial extends Component { }
 
+export interface Invention extends Component {
+    primaryComponentId: string;
+    secondaryComponentId: string;
+    inventorId: string;
+    inventedDate: number;
+}
+
 export const RAW_MATERIALS: RawMaterial[] = [
     {
-        id: 'id1',
+        id: '0G2E-6P1J-Q8OC-KTYC',
         name: '🔥 Fire'
     },
     {
-        id: 'id2',
+        id: '7MIU-4HF2-XLJ9-8RBD',
         name: '💧 Water'
     },
     {
-        id: 'id3',
+        id: 'W8NQ-YMN1-BWHM-IZ69',
         name: '🪵 Wood'
     },
     {
-        id: 'id4',
+        id: 'VZXS-GDPA-CQE5-4Q8A',
         name: '🪨 Stone'
     },
     {
-        id: 'id5',
+        id: 'Z1Q2-3U2S-X731-1GB9',
         name: '⛏️ Metal'
     },
     {
-        id: 'id6',
+        id: 'PERW-BLIN-ATZK-8VFK',
         name: '⚡ Electricity'
     }
 ];

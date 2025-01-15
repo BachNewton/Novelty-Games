@@ -2,7 +2,14 @@ import { useState } from 'react';
 import '../font/font.css';
 import HorizontalLine from "./HorizontalLine";
 import Dialog from '../../util/ui/Dialog';
-import { Component, RAW_MATERIALS } from '../data/Component';
+import { Component, Invention, RAW_MATERIALS } from '../data/Component';
+import { FreeMarketCommunicator } from '../logic/FreeMarketCommunicator';
+import { createID } from '../../util/ID';
+import { response } from 'express';
+
+interface InventProps {
+    communicator: FreeMarketCommunicator;
+}
 
 interface State {
     name: string;
@@ -18,7 +25,7 @@ enum ComponentSelectionState {
     NONE, PRIMARY, SECONDARY
 }
 
-const Invent: React.FC = () => {
+const Invent: React.FC<InventProps> = ({ communicator }) => {
     const [state, setState] = useState<State>({
         name: '',
         primaryComponent: null,
@@ -152,6 +159,9 @@ const Invent: React.FC = () => {
         <button style={{ fontSize: '1.5em', width: '100%' }} onClick={() => {
             if (isInventionValid(state)) {
                 console.log('Invention is good!');
+                communicator.saveInvention(createInvention(state)).then(response => {
+                    console.log('File save successful:', response.isSuccessful);
+                });
             } else {
                 state.invalidInventionUi = invalidInventionUi(state, () => {
                     state.invalidInventionUi = null;
@@ -213,6 +223,17 @@ function invalidInventionUi(state: State, onClose: () => void): JSX.Element {
         </ul>
         <div style={{ textAlign: 'center' }}> <button style={{ fontSize: '1em' }} onClick={onClose}>Close</button></div>
     </div>
+}
+
+function createInvention(state: State): Invention {
+    return {
+        id: createID(),
+        name: state.name,
+        primaryComponentId: state.primaryComponent?.id!,
+        secondaryComponentId: state.secondaryComponent?.id!,
+        inventorId: '// TODO - inventorId',
+        inventedDate: state.dated?.getTime()!
+    }
 }
 
 export default Invent;
