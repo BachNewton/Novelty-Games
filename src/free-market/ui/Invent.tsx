@@ -5,9 +5,13 @@ import Dialog from '../../util/ui/Dialog';
 import { Component, RAW_MATERIALS } from '../data/Component';
 
 interface State {
+    name: string;
     primaryComponent: Component | null;
     secondaryComponent: Component | null;
     componentSelectionState: ComponentSelectionState;
+    signed: boolean;
+    dated: Date | null;
+    invalidInventionUi: JSX.Element | null;
 }
 
 enum ComponentSelectionState {
@@ -16,13 +20,14 @@ enum ComponentSelectionState {
 
 const Invent: React.FC = () => {
     const [state, setState] = useState<State>({
+        name: '',
         primaryComponent: null,
         secondaryComponent: null,
-        componentSelectionState: ComponentSelectionState.NONE
+        componentSelectionState: ComponentSelectionState.NONE,
+        signed: false,
+        dated: null,
+        invalidInventionUi: null
     });
-
-    const [signed, setSigned] = useState(false);
-    const [dated, setDate] = useState<Date | null>(null);
 
     const signatureStyle: React.CSSProperties = {
         border: '1px solid white',
@@ -33,13 +38,13 @@ const Invent: React.FC = () => {
         alignItems: 'center'
     };
 
-    if (signed) {
+    if (state.signed) {
         signatureStyle.fontFamily = 'Signature';
     } else {
         signatureStyle.cursor = 'pointer';
     }
 
-    const signedText = signed ? 'Landon Smith' : '(click to sign)';
+    const signedText = state.signed ? 'Landon Smith' : '(click to sign)';
 
     const dateStyle: React.CSSProperties = {
         border: '1px solid white',
@@ -50,11 +55,11 @@ const Invent: React.FC = () => {
         alignItems: 'center'
     };
 
-    if (dated === null) {
+    if (state.dated === null) {
         dateStyle.cursor = 'pointer';
     }
 
-    const dateText = dated === null ? '(click to date)' : dated.toLocaleDateString();
+    const dateText = state.dated === null ? '(click to date)' : state.dated.toLocaleDateString();
 
     const componentHeaderStyle: React.CSSProperties = {
         textAlign: 'center',
@@ -72,22 +77,42 @@ const Invent: React.FC = () => {
     const primaryComponentText = state.primaryComponent === null ? componentSelectText : state.primaryComponent.name;
     const seconfaryComponentText = state.secondaryComponent === null ? componentSelectText : state.secondaryComponent.name;
 
+    const updateComponentSelectionState = (selection: ComponentSelectionState) => {
+        state.componentSelectionState = selection;
+        setState({ ...state });
+    };
+
     return <div>
         <Dialog
             isOpen={state.componentSelectionState !== ComponentSelectionState.NONE}
             content={componentSelectUi(
                 state.componentSelectionState === ComponentSelectionState.PRIMARY ? 'Primary' : 'Secondary',
-                component => setState({
-                    primaryComponent: state.componentSelectionState === ComponentSelectionState.PRIMARY ? component : state.primaryComponent,
-                    secondaryComponent: state.componentSelectionState === ComponentSelectionState.SECONDARY ? component : state.secondaryComponent,
-                    componentSelectionState: ComponentSelectionState.NONE
-                })
+                component => {
+                    if (state.componentSelectionState === ComponentSelectionState.PRIMARY) {
+                        state.primaryComponent = component;
+                    } else if (state.componentSelectionState === ComponentSelectionState.SECONDARY) {
+                        state.secondaryComponent = component;
+                    }
+
+                    state.componentSelectionState = ComponentSelectionState.NONE;
+
+                    setState({ ...state });
+                }
             )}
         />
 
+        <Dialog isOpen={state.invalidInventionUi !== null} content={state.invalidInventionUi!} />
+
         <div style={{ display: 'flex' }}>
             <div style={{ marginRight: '15px', fontWeight: 'bold', fontSize: '1.25em' }}>Invention Name:</div>
-            <input style={{ fontSize: '1.25em', width: '100%', padding: '10px' }} placeholder='Widget' />
+            <input
+                style={{ fontSize: '1.25em', width: '100%', padding: '10px' }}
+                placeholder='Widget'
+                onChange={event => {
+                    state.name = event.target.value;
+                    setState({ ...state });
+                }}
+            />
         </div>
 
         <HorizontalLine />
@@ -96,19 +121,11 @@ const Invent: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'space-around' }}>
             <div>
                 <div style={componentHeaderStyle}>Primary</div>
-                <div style={componentStyle} onClick={() => setState({
-                    primaryComponent: state.primaryComponent,
-                    secondaryComponent: state.secondaryComponent,
-                    componentSelectionState: ComponentSelectionState.PRIMARY
-                })}>{primaryComponentText}</div>
+                <div style={componentStyle} onClick={() => updateComponentSelectionState(ComponentSelectionState.PRIMARY)}>{primaryComponentText}</div>
             </div>
             <div>
                 <div style={componentHeaderStyle}>Secondary</div>
-                <div style={componentStyle} onClick={() => setState({
-                    primaryComponent: state.primaryComponent,
-                    secondaryComponent: state.secondaryComponent,
-                    componentSelectionState: ComponentSelectionState.SECONDARY
-                })}>{seconfaryComponentText}</div>
+                <div style={componentStyle} onClick={() => updateComponentSelectionState(ComponentSelectionState.SECONDARY)}>{seconfaryComponentText}</div>
             </div>
         </div>
 
@@ -116,17 +133,33 @@ const Invent: React.FC = () => {
 
         <div style={{ display: 'flex' }}>
             <div style={{ marginRight: '15px', fontWeight: 'bold' }}>Inventor Signature:</div>
-            <div style={signatureStyle} onClick={() => setSigned(true)}>{signedText}</div>
+            <div style={signatureStyle} onClick={() => {
+                state.signed = true;
+                setState({ ...state });
+            }}>{signedText}</div>
         </div>
 
         <div style={{ display: 'flex', marginTop: '15px' }}>
             <div style={{ marginRight: '15px', fontWeight: 'bold' }}>Date Invented:</div>
-            <div style={dateStyle} onClick={() => setDate(new Date())}>{dateText}</div>
+            <div style={dateStyle} onClick={() => {
+                state.dated = new Date();
+                setState({ ...state });
+            }}>{dateText}</div>
         </div>
 
         <HorizontalLine />
 
-        <button style={{ fontSize: '1.5em', width: '100%' }}>Invent!</button>
+        <button style={{ fontSize: '1.5em', width: '100%' }} onClick={() => {
+            if (isInventionValid(state)) {
+                console.log('Invention is good!');
+            } else {
+                state.invalidInventionUi = invalidInventionUi(state, () => {
+                    state.invalidInventionUi = null;
+                    setState({ ...state });
+                });
+                setState({ ...state });
+            }
+        }}>Invent!</button>
     </div>;
 };
 
@@ -147,6 +180,39 @@ function componentSelectUi(header: string, onSelect: (component: Component) => v
 
         {rawMaterials}
     </div>;
+}
+
+function isInventionValid(state: State): boolean {
+    if (state.name === '') return false;
+    if (state.primaryComponent === null) return false;
+    if (state.secondaryComponent === null) return false;
+    if (state.primaryComponent === state.secondaryComponent) return false;
+    if (!state.signed) return false;
+    if (state.dated === null) return false;
+
+    return true;
+}
+
+function invalidInventionUi(state: State, onClose: () => void): JSX.Element {
+    const nameUi = state.name === '' ? <li>The invention must have a name</li> : <></>;
+    const primaryUi = state.primaryComponent === null ? <li>The invention must have a primary component</li> : <></>;
+    const secondaryUi = state.secondaryComponent === null ? <li>The invention must have a secondary component</li> : <></>;
+    const componentDifferentUi = state.primaryComponent === state.secondaryComponent ? <li>The primary and secondary components must be different</li> : <></>;
+    const signedUi = !state.signed ? <li>The invention must be signed</li> : <></>;
+    const datedUi = state.dated === null ? <li>The invention must be dated</li> : <></>;
+
+    return <div>
+        <div style={{ fontSize: '1.5em', fontWeight: 'bold', color: 'yellow', textAlign: 'center' }}>Invalid Invention</div>
+        <ul>
+            {nameUi}
+            {primaryUi}
+            {secondaryUi}
+            {componentDifferentUi}
+            {signedUi}
+            {datedUi}
+        </ul>
+        <div style={{ textAlign: 'center' }}> <button style={{ fontSize: '1em' }} onClick={onClose}>Close</button></div>
+    </div>
 }
 
 export default Invent;
