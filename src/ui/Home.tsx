@@ -10,7 +10,7 @@ import FreeMarket from '../free-market/ui/FreeMarket';
 import { NewtorkCommunicator as MilleBornesNetworkCommunicator } from '../mille-bornes/logic/NewtorkCommunicator';
 import { createFreeMarketCommunicator, FreeMarketCommunicator } from '../free-market/logic/FreeMarketCommunicator';
 
-const APP_VERSION = 'v2.11.4';
+const APP_VERSION = 'v2.11.5';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };

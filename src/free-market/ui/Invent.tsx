@@ -5,6 +5,7 @@ import Dialog from '../../util/ui/Dialog';
 import { Component, Invention, RAW_MATERIALS } from '../data/Component';
 import { FreeMarketCommunicator } from '../logic/FreeMarketCommunicator';
 import { createID } from '../../util/ID';
+import Loading from './Loading';
 
 interface InventProps {
     communicator: FreeMarketCommunicator;
@@ -18,6 +19,7 @@ interface State {
     signed: boolean;
     dated: Date | null;
     invalidInventionUi: JSX.Element | null;
+    submittingInventionUi: JSX.Element | null;
 }
 
 enum ComponentSelectionState {
@@ -25,15 +27,7 @@ enum ComponentSelectionState {
 }
 
 const Invent: React.FC<InventProps> = ({ communicator }) => {
-    const [state, setState] = useState<State>({
-        name: '',
-        primaryComponent: null,
-        secondaryComponent: null,
-        componentSelectionState: ComponentSelectionState.NONE,
-        signed: false,
-        dated: null,
-        invalidInventionUi: null
-    });
+    const [state, setState] = useState(createDefaultState());
 
     const signatureStyle: React.CSSProperties = {
         border: '1px solid white',
@@ -109,6 +103,8 @@ const Invent: React.FC<InventProps> = ({ communicator }) => {
 
         <Dialog isOpen={state.invalidInventionUi !== null} content={state.invalidInventionUi!} />
 
+        <Dialog isOpen={state.submittingInventionUi !== null} content={state.submittingInventionUi!} />
+
         <div style={{ display: 'flex' }}>
             <div style={{ marginRight: '15px', fontWeight: 'bold', fontSize: '1.25em' }}>Invention Name:</div>
             <input
@@ -118,6 +114,7 @@ const Invent: React.FC<InventProps> = ({ communicator }) => {
                     state.name = event.target.value;
                     setState({ ...state });
                 }}
+                value={state.name}
             />
         </div>
 
@@ -157,10 +154,17 @@ const Invent: React.FC<InventProps> = ({ communicator }) => {
 
         <button style={{ fontSize: '1.5em', width: '100%' }} onClick={() => {
             if (isInventionValid(state)) {
-                console.log('Invention is good!');
+                state.submittingInventionUi = submittingInventionUi(null);
+                setState({ ...state });
 
-                communicator.addInvention(createInvention(state)).then(() => {
-                    console.log('File save complete');
+                const invention = createInvention(state);
+
+                communicator.addInvention(invention).then(() => {
+                    state.submittingInventionUi = submittingInventionUi(invention, () => {
+                        setState(createDefaultState());
+                    });
+
+                    setState({ ...state });
                 });
             } else {
                 state.invalidInventionUi = invalidInventionUi(state, () => {
@@ -236,6 +240,35 @@ function createInvention(state: State): Invention {
         inventorId: '// TODO - inventorId',
         inventedDate: state.dated?.getTime()!
     }
+}
+
+function submittingInventionUi(submittedInvention: Invention | null, onClose?: () => void): JSX.Element {
+    if (submittedInvention === null) {
+        return <div>
+            <div style={{ textAlign: 'center', fontSize: '1.25em', fontWeight: 'bold' }}>Submitting Invention</div>
+            <br />
+            <Loading />
+        </div>;
+    } else {
+        return <div>
+            <div style={{ textAlign: 'center', fontSize: '1.25em', fontWeight: 'bold', color: 'lime' }}>Invention Submited!</div>
+            <br />
+            <button style={{ width: '100%', fontSize: '1em' }} onClick={onClose}>Close</button>
+        </div>;
+    }
+}
+
+function createDefaultState(): State {
+    return {
+        name: '',
+        primaryComponent: null,
+        secondaryComponent: null,
+        componentSelectionState: ComponentSelectionState.NONE,
+        signed: false,
+        dated: null,
+        invalidInventionUi: null,
+        submittingInventionUi: null
+    };
 }
 
 export default Invent;
