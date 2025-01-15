@@ -3,8 +3,13 @@ import HorizontalLine from "./HorizontalLine";
 import { Route, updateRoute } from "../../ui/Routing";
 import Tabs, { Tab } from "./Tabs";
 import Invent from "./Invent";
+import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
 
-const FreeMarket: React.FC = () => {
+interface FreeMarketProps {
+    communicator: FreeMarketCommunicator;
+}
+
+const FreeMarket: React.FC<FreeMarketProps> = ({ communicator }) => {
     const [tab, setTab] = useState(Tab.PROFILE);
 
     useEffect(() => {

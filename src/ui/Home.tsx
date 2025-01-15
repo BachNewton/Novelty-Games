@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import MilleBornesHome from '../mille-bornes/ui/Home';
 import TriviaHome from '../trivia/ui/Home';
-import { Communicator } from '../mille-bornes/logic/Communicator';
-import { NewtorkCommunicator } from '../mille-bornes/logic/NewtorkCommunicator';
+import { Communicator as MilleBornesCommunicator } from '../mille-bornes/logic/Communicator';
 import Games2DHome from '../game-2D/ui/Home';
 import Games3DHome from '../game-3D/ui/Home';
 import ToolsHome from '../tools/ui/Home';
 import { getRoute, Route } from './Routing';
 import FreeMarket from '../free-market/ui/FreeMarket';
+import { NewtorkCommunicator as MilleBornesNetworkCommunicator } from '../mille-bornes/logic/NewtorkCommunicator';
+import { createFreeMarketCommunicator, FreeMarketCommunicator } from '../free-market/logic/FreeMarketCommunicator';
 
 const APP_VERSION = 'v2.11.3';
 
@@ -22,9 +23,9 @@ class HomeState implements State { }
 class TriviaState implements State { }
 
 class MilleBornesState implements State {
-    communicator: Communicator;
+    communicator: MilleBornesCommunicator;
 
-    constructor(communicator: Communicator) {
+    constructor(communicator: MilleBornesCommunicator) {
         this.communicator = communicator;
     }
 }
@@ -35,7 +36,13 @@ class Game3DState implements State { }
 
 class ToolsState implements State { }
 
-class FreeMarketState implements State { }
+class FreeMarketState implements State {
+    communicator: FreeMarketCommunicator;
+
+    constructor(communicator: FreeMarketCommunicator) {
+        this.communicator = communicator;
+    }
+}
 
 enum VersionState {
     CURRENT,
@@ -80,7 +87,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
 
     const onClickHandlers: OnClickHandlers = {
         onMilleBornesClick: () => {
-            const communicator = new NewtorkCommunicator();
+            const communicator = new MilleBornesNetworkCommunicator();
             setState(new MilleBornesState(communicator));
         },
         onTriviaClick: () => {
@@ -96,7 +103,8 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
             setState(new ToolsState());
         },
         onFreeMarketClick: () => {
-            setState(new FreeMarketState());
+            const communicator = createFreeMarketCommunicator();
+            setState(new FreeMarketState(communicator));
         }
     };
 
@@ -111,7 +119,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
     } else if (state instanceof ToolsState) {
         return <ToolsHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else if (state instanceof FreeMarketState) {
-        return <FreeMarket />;
+        return <FreeMarket communicator={state.communicator} />;
     } else {
         return HomeUi(versionState, onClickHandlers);
     }
@@ -175,7 +183,7 @@ function getInitialState(): State {
         case Route.KNIGHT_GAME:
             return new Game3DState();
         case Route.FREE_MARKET:
-            return new FreeMarketState();
+            return new FreeMarketState(createFreeMarketCommunicator());
         default:
             return new HomeState();
     }
