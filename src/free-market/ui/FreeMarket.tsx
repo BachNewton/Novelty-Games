@@ -4,6 +4,7 @@ import { Route, updateRoute } from "../../ui/Routing";
 import Tabs, { Tab } from "./Tabs";
 import Invent from "./Invent";
 import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
+import Patent from "./Patent";
 
 interface FreeMarketProps {
     communicator: FreeMarketCommunicator;
@@ -34,7 +35,7 @@ function tabContentUi(tab: Tab, communicator: FreeMarketCommunicator): JSX.Eleme
         case Tab.MARKET:
             return marketUi();
         case Tab.PATENT:
-            return <div>TODO: Patent Office</div>
+            return <Patent communicator={communicator} />
         case Tab.INVENT:
             return <Invent communicator={communicator} />;
     }

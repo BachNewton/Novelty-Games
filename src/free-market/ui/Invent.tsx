@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import '../font/font.css';
+import '../css/font.css';
 import HorizontalLine from "./HorizontalLine";
 import Dialog from '../../util/ui/Dialog';
 import { Component, Invention, RAW_MATERIALS } from '../data/Component';
 import { FreeMarketCommunicator } from '../logic/FreeMarketCommunicator';
 import { createID } from '../../util/ID';
-import { response } from 'express';
 
 interface InventProps {
     communicator: FreeMarketCommunicator;
