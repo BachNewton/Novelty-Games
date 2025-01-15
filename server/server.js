@@ -48,8 +48,7 @@ function startServer() {
 
         socket.on('saveFile', (event) => {
             console.log('Socket ID:', socket.id, 'SaveFileEvent:', event);
-            saveFile(event);
-            // socket.emit('')
+            saveFile(event, socket);
         });
     });
 

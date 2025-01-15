@@ -27,13 +27,13 @@ const ToddlerCompanionApp: React.FC = () => {
             folderName: '../../invalidPath',
             fileName: 'temp.txt',
             content: 'this is a test'
-        });
+        }).then(response => console.log(response.isSuccessful));
 
         networkService.saveFile({
             folderName: 'validPath',
             fileName: 'temp.txt',
             content: 'this is a test'
-        });
+        }).then(response => console.log(response.isSuccessful));
     };
 
     return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: '1fr 7fr' }}>

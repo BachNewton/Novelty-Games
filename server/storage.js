@@ -1,12 +1,15 @@
 import fs from 'fs';
 import pathTool from 'path';
+import { Socket } from 'socket.io';
 
+const SAVE_FILE_RESPONSE_EVENT = 'saveFileResponse';
 const MAIN_STORAGE_DIRECTORY = 'storage';
 const VALID_STORAGE_DIRECTORY = `/home/kyle1235/Novelty-Games/${MAIN_STORAGE_DIRECTORY}/`;
 
 /**
  * @typedef {Object} SaveFileEvent
  * 
+ * @property {string} id
  * @property {string} application
  * @property {SaveFileData} data
  */
@@ -19,8 +22,19 @@ const VALID_STORAGE_DIRECTORY = `/home/kyle1235/Novelty-Games/${MAIN_STORAGE_DIR
  * @property {string} content
  */
 
-/** @param {SaveFileEvent} event */
-export async function saveFile(event) {
+/**
+ * @typedef {Object} SaveFileResponse
+ * 
+ * @property {string} id
+ * @property {boolean} isSuccessful
+ */
+
+/**
+ * @param {SaveFileEvent} event
+ * @param {Socket} socket
+ */
+export async function saveFile(event, socket) {
+    const id = event.id;
     const applicationName = event.application;
     const folderName = event.data.folderName;
     const fileName = event.data.fileName;
@@ -37,8 +51,16 @@ export async function saveFile(event) {
         await fs.promises.writeFile(filePath, content);
 
         console.log('Writing to file complete!');
+
+        /** @type {SaveFileResponse} */
+        const saveFileResponse = { id: id, isSuccessful: true };
+        socket.emit(SAVE_FILE_RESPONSE_EVENT, saveFileResponse);
     } else {
         console.error("The file's path is not valid:", filePath);
+
+        /** @type {SaveFileResponse} */
+        const saveFileResponse = { id: id, isSuccessful: false };
+        socket.emit(SAVE_FILE_RESPONSE_EVENT, saveFileResponse);
     }
 }
 
