@@ -19,6 +19,11 @@ export function removeRandomElement<T>(array: Array<T>): T {
     return array.splice(randomIndex, 1)[0];
 }
 
+export function getRandomElement<T>(array: Array<T>): T {
+    const randomIndex = getRandomIndex(array);
+    return array[randomIndex];
+}
+
 export function randomNum(inclusiveMin: number, exclusiveMax: number): number {
     const range = exclusiveMax - inclusiveMin;
     return range * Math.random() + inclusiveMin;
