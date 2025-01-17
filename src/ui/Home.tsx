@@ -9,6 +9,8 @@ import { getRoute, Route } from './Routing';
 import FreeMarket from '../free-market/ui/FreeMarket';
 import { NewtorkCommunicator as MilleBornesNetworkCommunicator } from '../mille-bornes/logic/NewtorkCommunicator';
 import { createFreeMarketCommunicator, FreeMarketCommunicator } from '../free-market/logic/FreeMarketCommunicator';
+import { createStorer, Storer } from '../util/Storage';
+import { FreeMarketSave } from '../free-market/logic/FreeMarketSave';
 
 const APP_VERSION = 'v2.11.5';
 
@@ -38,9 +40,11 @@ class ToolsState implements State { }
 
 class FreeMarketState implements State {
     communicator: FreeMarketCommunicator;
+    storer: Storer<FreeMarketSave>;
 
-    constructor(communicator: FreeMarketCommunicator) {
+    constructor(communicator: FreeMarketCommunicator, storer: Storer<FreeMarketSave>) {
         this.communicator = communicator;
+        this.storer = storer;
     }
 }
 
@@ -103,8 +107,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
             setState(new ToolsState());
         },
         onFreeMarketClick: () => {
-            const communicator = createFreeMarketCommunicator();
-            setState(new FreeMarketState(communicator));
+            setState(createFreeMarketState());
         }
     };
 
@@ -119,7 +122,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
     } else if (state instanceof ToolsState) {
         return <ToolsHome onHomeButtonClicked={onHomeButtonClicked} />;
     } else if (state instanceof FreeMarketState) {
-        return <FreeMarket communicator={state.communicator} />;
+        return <FreeMarket communicator={state.communicator} storer={state.storer} />;
     } else {
         return HomeUi(versionState, onClickHandlers);
     }
@@ -183,10 +186,17 @@ function getInitialState(): State {
         case Route.KNIGHT_GAME:
             return new Game3DState();
         case Route.FREE_MARKET:
-            return new FreeMarketState(createFreeMarketCommunicator());
+            return createFreeMarketState();
         default:
             return new HomeState();
     }
+}
+
+function createFreeMarketState(): FreeMarketState {
+    const communicator = createFreeMarketCommunicator();
+    const storer = createStorer<FreeMarketSave>();
+
+    return new FreeMarketState(communicator, storer);
 }
 
 export default Home;

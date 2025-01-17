@@ -27,7 +27,6 @@ const Patent: React.FC<PatentProps> = ({ communicator }) => {
     const [state, setState] = useState<State>(new LoadingState());
 
     useEffect(() => {
-        console.log('once');
         communicator.getInventions().then(inventions => {
             const components = ([] as Component[]).concat(inventions, RAW_MATERIALS);
             const componentsMapped = new Map(components.map(component => [component.id, component]));
