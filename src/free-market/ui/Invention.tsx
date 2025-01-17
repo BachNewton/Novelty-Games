@@ -14,9 +14,9 @@ const Invention: React.FC<InventionProps> = ({ data, componentsMapped, inventors
     const date = new Date(data.inventedDate).toLocaleDateString();
     const inventorName = inventorsMapped.get(data.inventorId)?.name ?? '(Unknown)';
 
-    return <div style={{ border: '2px solid darkorange', borderRadius: '15px', padding: '15px', margin: '15px', display: 'flex', alignItems: 'center', flexDirection: 'column', width: '14em' }}>
+    return <div style={{ border: '2px solid darkorange', borderRadius: '15px', padding: '15px', margin: '15px', display: 'flex', alignItems: 'center', flexDirection: 'column', width: '13em' }}>
         <div style={{ fontSize: '1.25em', fontWeight: 'bold' }}>{data.name}</div>
-        <div style={{ display: 'flex', width: '100%', justifyContent: 'space-evenly', margin: '10px 0px' }}>
+        <div style={{ display: 'grid', margin: '10px 0px', gridTemplateColumns: '1fr 1fr' }}>
             <ComponentUi data={primaryComponent} />
             <ComponentUi data={secondaryComponent} />
         </div>

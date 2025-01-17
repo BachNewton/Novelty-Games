@@ -95,7 +95,7 @@ function profileUi(save: FreeMarketSave): JSX.Element {
     };
 
     return <>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', fontSize: '1.5em', fontWeight: 'bold' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', fontSize: '1.25em', fontWeight: 'bold', alignItems: 'center' }}>
             <div>Inventor:</div>
             <div style={{ textAlign: 'right' }}>{save.inventor.name}</div>
             <div>Money:</div>

@@ -7,6 +7,8 @@ interface TabsProps {
     onClick: (selectedTab: Tab) => void;
 }
 
+const TAB_HEIGHT = '2em';
+
 const Tabs: React.FC<TabsProps> = ({ currentTab, onClick }) => {
     const borderGrey = '2px solid grey';
     const borderWhite = '2px solid white';
@@ -31,8 +33,22 @@ const Tabs: React.FC<TabsProps> = ({ currentTab, onClick }) => {
         return <div key={tabIndex} style={tabStyle} onClick={() => onClick(tabIndex)}>{tabName}</div>;
     });
 
-    return <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', margin: '0px 1px', height: '2em' }}>
-        {tabs}
+    return <div>
+        <div style={{ height: TAB_HEIGHT }} />
+
+        <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
+            height: TAB_HEIGHT,
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            width: '100%',
+            background: 'linear-gradient(0deg, grey, #3498db)',
+            boxShadow: '0px 10px 20px rgba(0, 0, 0, 1)'
+        }}>
+            {tabs}
+        </div>
     </div>;
 };
 
