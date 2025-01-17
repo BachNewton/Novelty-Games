@@ -79,6 +79,8 @@ function readyUi(tab: Tab, save: FreeMarketSave, communicator: FreeMarketCommuni
             return profileUi(save);
         case Tab.EXTRACT:
             return extractUi();
+        case Tab.CRAFT:
+            return <div>// TODO - Craft</div>;
         case Tab.MARKET:
             return marketUi();
         case Tab.PATENT:

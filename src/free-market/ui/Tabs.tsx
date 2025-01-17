@@ -1,5 +1,5 @@
 export enum Tab {
-    PROFILE, EXTRACT, MARKET, PATENT, INVENT
+    PROFILE, EXTRACT, CRAFT, MARKET, PATENT, INVENT
 }
 
 interface TabsProps {
@@ -13,7 +13,7 @@ const Tabs: React.FC<TabsProps> = ({ currentTab, onClick }) => {
     const borderGrey = '2px solid grey';
     const borderWhite = '2px solid white';
 
-    const tabs = ['Profile', 'Extract', 'Market', 'Patent', 'Invent'].map((tabName, tabIndex) => {
+    const tabs = ['👤', '⚒️', '🔧', '🏛️', '®️', '💡'].map((tabName, tabIndex) => {
         const tabStyle: React.CSSProperties = {
             borderTop: borderWhite,
             borderLeft: borderWhite,
@@ -38,7 +38,7 @@ const Tabs: React.FC<TabsProps> = ({ currentTab, onClick }) => {
 
         <div style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
+            gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr 1fr',
             height: TAB_HEIGHT,
             position: 'fixed',
             left: 0,
