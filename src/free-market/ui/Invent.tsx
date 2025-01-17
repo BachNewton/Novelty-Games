@@ -6,6 +6,7 @@ import { Component, Invention, RAW_MATERIALS } from '../data/Component';
 import { FreeMarketCommunicator } from '../logic/FreeMarketCommunicator';
 import { createID } from '../../util/ID';
 import Loading from './Loading';
+import ComponentUi from './Component';
 
 interface InventProps {
     communicator: FreeMarketCommunicator;
@@ -188,7 +189,7 @@ function componentSelectUi(header: string, onSelect: (component: Component) => v
     };
 
     const rawMaterials = RAW_MATERIALS.map((rawMaterial, index) => {
-        return <div key={index} style={rawMaterialStyle} onClick={() => onSelect(rawMaterial)}>{rawMaterial.name}</div>;
+        return <ComponentUi key={index} data={rawMaterial} onClick={() => onSelect(rawMaterial)} />
     });
 
     return <div style={{ maxHeight: '80vh', overflow: 'auto' }}>
