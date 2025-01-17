@@ -37,4 +37,5 @@ export const RAW_MATERIALS: RawMaterial[] = [
         id: 'PERW-BLIN-ATZK-8VFK',
         name: '⚡ Electricity'
     }
+    // Fabric
 ];

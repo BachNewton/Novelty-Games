@@ -62,12 +62,10 @@ function ui(state: State, onNameChange: (name: string) => void, onStart: () => v
 
 function editUi(onChange: (name: string) => void, onStart: () => void): JSX.Element {
     return <>
-        <div style={{ fontSize: '1.5em', fontWeight: 'bold', textAlign: 'center' }}>Welcome to the Free Market!</div>
-        <br />
+        <div style={{ fontSize: '1.5em', fontWeight: 'bold', textAlign: 'center', marginBottom: '15px' }}>Welcome to the Free Market!</div>
         <div>What is your name?</div>
         <input style={{ fontSize: '1em', textAlign: 'center' }} placeholder='Inventor' onChange={e => onChange(e.target.value)} />
-        <br />
-        <button style={{ fontSize: '1.25em', padding: '5px' }} onClick={onStart}>Start Inventing!</button>
+        <button style={{ fontSize: '1.25em', padding: '5px', marginTop: '30px' }} onClick={onStart}>Start Inventing!</button>
     </>;
 }
 
