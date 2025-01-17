@@ -7,9 +7,11 @@ import { FreeMarketCommunicator } from '../logic/FreeMarketCommunicator';
 import { createID } from '../../util/ID';
 import Loading from './Loading';
 import ComponentUi from './Component';
+import { Inventor } from '../data/Inventor';
 
 interface InventProps {
     communicator: FreeMarketCommunicator;
+    inventor: Inventor;
 }
 
 interface State {
@@ -27,7 +29,7 @@ enum ComponentSelectionState {
     NONE, PRIMARY, SECONDARY
 }
 
-const Invent: React.FC<InventProps> = ({ communicator }) => {
+const Invent: React.FC<InventProps> = ({ communicator, inventor }) => {
     const [state, setState] = useState(createDefaultState());
 
     const signatureStyle: React.CSSProperties = {
@@ -45,7 +47,7 @@ const Invent: React.FC<InventProps> = ({ communicator }) => {
         signatureStyle.cursor = 'pointer';
     }
 
-    const signedText = state.signed ? 'Landon Smith' : '(click to sign)';
+    const signedText = state.signed ? inventor.name : '(click to sign)';
 
     const dateStyle: React.CSSProperties = {
         border: '1px solid white',
@@ -158,7 +160,7 @@ const Invent: React.FC<InventProps> = ({ communicator }) => {
                 state.submittingInventionUi = submittingInventionUi(null);
                 setState({ ...state });
 
-                const invention = createInvention(state);
+                const invention = createInvention(state, inventor);
 
                 communicator.addInvention(invention).then(() => {
                     state.submittingInventionUi = submittingInventionUi(invention, () => {
@@ -232,13 +234,13 @@ function invalidInventionUi(state: State, onClose: () => void): JSX.Element {
     </div>
 }
 
-function createInvention(state: State): Invention {
+function createInvention(state: State, inventor: Inventor): Invention {
     return {
         id: createID(),
         name: state.name,
         primaryComponentId: state.primaryComponent?.id!,
         secondaryComponentId: state.secondaryComponent?.id!,
-        inventorId: '// TODO - inventorId',
+        inventorId: inventor.id,
         inventedDate: state.dated?.getTime()!
     }
 }

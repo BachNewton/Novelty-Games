@@ -4,6 +4,7 @@ import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
 import HorizontalLine from "./HorizontalLine";
 import Loading from "./Loading";
 import InventionUi from "./Invention";
+import { Inventor } from "../data/Inventor";
 
 interface PatentProps {
     communicator: FreeMarketCommunicator
@@ -16,10 +17,12 @@ class LoadingState implements State { }
 class ReadyState implements State {
     inventions: Invention[];
     componentsMapped: Map<string, Component>;
+    inventorsMapped: Map<string, Inventor>;
 
-    constructor(inventions: Invention[], componentsMapped: Map<string, Component>) {
+    constructor(inventions: Invention[], componentsMapped: Map<string, Component>, inventorsMapped: Map<string, Inventor>) {
         this.inventions = inventions;
         this.componentsMapped = componentsMapped;
+        this.inventorsMapped = inventorsMapped;
     }
 }
 
@@ -27,11 +30,19 @@ const Patent: React.FC<PatentProps> = ({ communicator }) => {
     const [state, setState] = useState<State>(new LoadingState());
 
     useEffect(() => {
-        communicator.getInventions().then(inventions => {
+        Promise.all([
+            communicator.getInventions(),
+            communicator.getInventors()
+        ]).then(response => {
+            const inventions = response[0];
+            const inventors = response[1];
+
             const components = ([] as Component[]).concat(inventions, RAW_MATERIALS);
             const componentsMapped = new Map(components.map(component => [component.id, component]));
 
-            setState(new ReadyState(inventions, componentsMapped));
+            const inventorsMapped = new Map(inventors.map(inventor => [inventor.id, inventor]));
+
+            setState(new ReadyState(inventions, componentsMapped, inventorsMapped));
         });
     }, []);
 
@@ -49,7 +60,12 @@ function inventionsUi(state: State): JSX.Element {
         const inventions = state.inventions.length === 0
             ? <div>No inventions found</div>
             : state.inventions.map((invention, index) => {
-                return <InventionUi key={index} data={invention} componentsMapped={state.componentsMapped} />;
+                return <InventionUi
+                    key={index}
+                    data={invention}
+                    componentsMapped={state.componentsMapped}
+                    inventorsMapped={state.inventorsMapped}
+                />;
             });
 
         return <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center' }}>{inventions}</div>;

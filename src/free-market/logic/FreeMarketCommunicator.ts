@@ -7,8 +7,9 @@ const INVENTORS_FILE = 'inventors.json';
 
 export interface FreeMarketCommunicator {
     addInvention: (invention: Invention) => Promise<void>;
-    getInventions: () => Promise<Invention[]>,
+    getInventions: () => Promise<Invention[]>;
     addInventor: (inventor: Inventor) => Promise<void>;
+    getInventors: () => Promise<Inventor[]>;
 }
 
 interface FreeMarketServerData { }
@@ -35,7 +36,8 @@ export function createFreeMarketCommunicator(): FreeMarketCommunicator {
                 fileName: INVENTORS_FILE,
                 content: JSON.stringify(inventors)
             });
-        })
+        }),
+        getInventors: () => getInventors(networkService)
     };
 }
 

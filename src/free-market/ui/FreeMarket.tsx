@@ -84,7 +84,7 @@ function readyUi(tab: Tab, save: FreeMarketSave, communicator: FreeMarketCommuni
         case Tab.PATENT:
             return <Patent communicator={communicator} />
         case Tab.INVENT:
-            return <Invent communicator={communicator} />;
+            return <Invent communicator={communicator} inventor={save.inventor} />;
     }
 }
 
@@ -125,7 +125,7 @@ function extractUi(): JSX.Element {
 
     return <div>
         <div style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '1.25em', textAlign: 'center' }}>Raw Materials</div>
-
+        <div>// Placeholder</div>
         {rawMaterialsUi}
     </div>;
 }
@@ -136,7 +136,7 @@ function marketUi(): JSX.Element {
 
     return <div>
         <div style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '1.25em', textAlign: 'center' }}>The Market</div>
-
+        <div>// Placeholder</div>
         {marketItemsUi}
     </div>;
 }
