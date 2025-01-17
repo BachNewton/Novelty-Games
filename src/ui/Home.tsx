@@ -12,7 +12,7 @@ import { createFreeMarketCommunicator, FreeMarketCommunicator } from '../free-ma
 import { createStorer, Storer } from '../util/Storage';
 import { FreeMarketSave } from '../free-market/data/FreeMarketSave';
 
-const APP_VERSION = 'v2.11.9';
+const APP_VERSION = 'v2.11.10';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };

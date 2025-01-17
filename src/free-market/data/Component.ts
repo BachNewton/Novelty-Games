@@ -26,16 +26,31 @@ export const RAW_MATERIALS: RawMaterial[] = [
         name: '🪵 Wood'
     },
     {
+        id: 'N4QN-NZ85-RWWX-XPLN',
+        name: '🪱 Dirt'
+    },
+    {
         id: 'VZXS-GDPA-CQE5-4Q8A',
         name: '🪨 Stone'
     },
     {
         id: 'Z1Q2-3U2S-X731-1GB9',
-        name: '⛏️ Metal'
+        name: '⛓️ Iron'
     },
     {
         id: 'PERW-BLIN-ATZK-8VFK',
-        name: '⚡ Electricity'
+        name: '⚡ Power'
+    },
+    {
+        id: '3XLB-MHJD-4Y2S-Y42B',
+        name: '🧵 Fabric'
+    },
+    {
+        id: 'R16B-27MZ-89A9-6FRW',
+        name: '🛢️ Oil'
+    },
+    {
+        id: '15Y9-WMJE-5JLN-CCDO',
+        name: '🛍️ Plastic'
     }
-    // Fabric
 ];
