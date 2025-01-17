@@ -14,15 +14,13 @@ const Invention: React.FC<InventionProps> = ({ data, componentsMapped, inventors
     const date = new Date(data.inventedDate).toLocaleDateString();
     const inventorName = inventorsMapped.get(data.inventorId)?.name ?? '(Unknown)';
 
-    return <div style={{ border: '2px solid white', borderRadius: '15px', padding: '15px', margin: '5px', display: 'flex', alignItems: 'center', flexDirection: 'column', maxWidth: '25em' }}>
+    return <div style={{ border: '2px solid darkorange', borderRadius: '15px', padding: '15px', margin: '15px', display: 'flex', alignItems: 'center', flexDirection: 'column', width: '14em' }}>
         <div style={{ fontSize: '1.25em', fontWeight: 'bold' }}>{data.name}</div>
-        {/* <br /> */}
         <div style={{ display: 'flex', width: '100%', justifyContent: 'space-evenly', margin: '10px 0px' }}>
             <ComponentUi data={primaryComponent} />
             <ComponentUi data={secondaryComponent} />
         </div>
-        {/* <br /> */}
-        <div>Invented by <b>{inventorName}</b> on <b>{date}</b></div>
+        <div style={{ textAlign: 'center' }}>Invented by <b>{inventorName}</b> on <b>{date}</b></div>
     </div >;
 };
 

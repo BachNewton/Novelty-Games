@@ -9,7 +9,7 @@ const Component: React.FC<ComponentProps> = ({ data, onClick }) => {
     const name = data?.name ?? '(Unknown)';
     const cursor = onClick === undefined ? 'default' : 'pointer';
 
-    return <div style={{ border: '2px solid #3498db', padding: '10px', margin: '10px', borderRadius: '15px', cursor: cursor }} onClick={onClick}>
+    return <div style={{ border: '2px solid #3498db', padding: '10px', margin: '10px', borderRadius: '15px', cursor: cursor, textAlign: 'center' }} onClick={onClick}>
         {name}
     </div>;
 };

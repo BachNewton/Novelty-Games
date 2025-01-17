@@ -68,7 +68,7 @@ function inventionsUi(state: State): JSX.Element {
                 />;
             });
 
-        return <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center' }}>{inventions}</div>;
+        return <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(16em, 1fr))', justifyItems: 'center' }}>{inventions}</div>;
     } else {
         return <Loading />;
     }
