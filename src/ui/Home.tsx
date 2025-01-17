@@ -10,7 +10,7 @@ import FreeMarket from '../free-market/ui/FreeMarket';
 import { NewtorkCommunicator as MilleBornesNetworkCommunicator } from '../mille-bornes/logic/NewtorkCommunicator';
 import { createFreeMarketCommunicator, FreeMarketCommunicator } from '../free-market/logic/FreeMarketCommunicator';
 import { createStorer, Storer } from '../util/Storage';
-import { FreeMarketSave } from '../free-market/logic/FreeMarketSave';
+import { FreeMarketSave } from '../free-market/data/FreeMarketSave';
 
 const APP_VERSION = 'v2.11.5';
 

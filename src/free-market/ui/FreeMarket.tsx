@@ -6,9 +6,10 @@ import Invent from "./Invent";
 import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
 import Patent from "./Patent";
 import { StorageKey, Storer } from "../../util/Storage";
-import { FreeMarketSave } from "../logic/FreeMarketSave";
+import { FreeMarketSave } from "../data/FreeMarketSave";
 import Loading from "./Loading";
 import Dialog from "../../util/ui/Dialog";
+import NewProfile from "./NewProfile";
 
 interface FreeMarketProps {
     communicator: FreeMarketCommunicator;
@@ -37,7 +38,7 @@ const FreeMarket: React.FC<FreeMarketProps> = ({ communicator, storer }) => {
         updateRoute(Route.FREE_MARKET);
 
         storer.load(StorageKey.FREE_MARKET)
-            .then(save => console.log(save))
+            .then(save => setState(new ReadyState(save)))
             .catch(() => setState(new NewProfileState()));
     }, []);
 
@@ -45,15 +46,37 @@ const FreeMarket: React.FC<FreeMarketProps> = ({ communicator, storer }) => {
         <Tabs currentTab={tab} onClick={selectedTab => setTab(selectedTab)} />
 
         <div style={{ margin: '15px' }}>
-            {tabContentUi(tab, state, communicator)}
+            {tabContentUi(tab, state, communicator, storer, readyState => setState(readyState))}
         </div>
     </div>;
 };
 
-function tabContentUi(tab: Tab, state: State, communicator: FreeMarketCommunicator): JSX.Element {
+function tabContentUi(
+    tab: Tab,
+    state: State,
+    communicator: FreeMarketCommunicator,
+    storer: Storer<FreeMarketSave>,
+    updateState: (readyState: ReadyState) => void
+): JSX.Element {
+    if (state instanceof NewProfileState) {
+        const content: JSX.Element = <NewProfile
+            communicator={communicator}
+            storer={storer}
+            onComplete={save => updateState(new ReadyState(save))}
+        />;
+
+        return <Dialog isOpen={true} content={content} />;
+    } else if (state instanceof ReadyState) {
+        return readyUi(tab, state.save, communicator);
+    } else {
+        return <Loading />;
+    }
+}
+
+function readyUi(tab: Tab, save: FreeMarketSave, communicator: FreeMarketCommunicator): JSX.Element {
     switch (tab) {
         case Tab.PROFILE:
-            return profileUi(state);
+            return profileUi(save);
         case Tab.EXTRACT:
             return extractUi();
         case Tab.MARKET:
@@ -65,21 +88,7 @@ function tabContentUi(tab: Tab, state: State, communicator: FreeMarketCommunicat
     }
 }
 
-function profileUi(state: State): JSX.Element {
-    if (state instanceof NewProfileState) {
-        return profileReadyUi(); // profileNewUi();
-    } else if (state instanceof ReadyState) {
-        return profileReadyUi();
-    } else {
-        return <Loading />;
-    }
-}
-
-function profileNewUi(): JSX.Element {
-    return <Dialog isOpen={true} content={<div>Test</div>} />;
-}
-
-function profileReadyUi(): JSX.Element {
+function profileUi(save: FreeMarketSave): JSX.Element {
     const inventoryItemStyle: React.CSSProperties = {
         border: '2px solid white',
         padding: '5px'
@@ -88,14 +97,16 @@ function profileReadyUi(): JSX.Element {
     return <>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', fontSize: '1.5em', fontWeight: 'bold' }}>
             <div>Inventor:</div>
-            <div style={{ textAlign: 'right' }}>Landon Smith</div>
+            <div style={{ textAlign: 'right' }}>{save.inventor.name}</div>
             <div>Money:</div>
-            <div style={{ textAlign: 'right' }}>$1,234</div>
+            <div style={{ textAlign: 'right' }}>${save.money}</div>
         </div>
 
         <HorizontalLine />
 
         <div style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '1.25em', textAlign: 'center' }}>Inventory</div>
+
+        <div>// Placeholder</div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(8.5em, 1fr))' }}>
             <div style={inventoryItemStyle}>🔥 Fire x 4</div>
