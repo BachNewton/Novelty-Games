@@ -1,3 +1,4 @@
+import '../css/animated-border.css';
 import { useEffect, useState } from "react";
 import HorizontalLine from "./HorizontalLine";
 import { Route, updateRoute } from "../../ui/Routing";
@@ -10,6 +11,7 @@ import { FreeMarketSave } from "../data/FreeMarketSave";
 import Loading from "./Loading";
 import Dialog from "../../util/ui/Dialog";
 import NewProfile from "./NewProfile";
+import { RAW_MATERIALS } from "../data/Component";
 
 interface FreeMarketProps {
     communicator: FreeMarketCommunicator;
@@ -122,12 +124,32 @@ function profileUi(save: FreeMarketSave): JSX.Element {
 }
 
 function extractUi(): JSX.Element {
-    const rawMaterials = ['🔥 Fire', '💧 Water', '🪵 Wood', '🪨 Stone', '⛏️ Metal', '⚡ Electricity'];
-    const rawMaterialsUi = createCards(rawMaterials, true);
+    const rawMaterialsUi = RAW_MATERIALS.map((material, index) => {
+        return <div key={index} style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            border: '2px solid white',
+            padding: '10px',
+            margin: '15px',
+            borderRadius: '15px',
+            backgroundImage: 'linear-gradient(125deg, grey 25%, #3498db 50%, rgba(0, 0, 0, 0.3) 75%)'
+        }}>
+            <div style={{ fontSize: '1.25em' }}>{material.name}</div>
+            <div style={{
+                border: '2px solid white',
+                borderRadius: '50%',
+                fontSize: '1.3em',
+                padding: '10px',
+                background: '#3498db',
+                boxShadow: 'darkorange 0px 0px 5px 5px',
+                cursor: 'pointer'
+            }}>⛏️</div>
+        </div>;
+    });
 
     return <div>
-        <div style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '1.25em', textAlign: 'center' }}>Raw Materials</div>
-        <div>// Placeholder</div>
+        <div style={{ fontWeight: 'bold', marginBottom: '15px', fontSize: '1.5em', textAlign: 'center' }}>Raw Materials</div>
         {rawMaterialsUi}
     </div>;
 }

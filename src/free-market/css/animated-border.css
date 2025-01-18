@@ -1,0 +1,31 @@
+.animated-border {
+    outline-width: 2px;
+    outline-color: white;
+    outline-style: solid;
+    animation: animateOutline 4s linear infinite;
+    margin: 45px;
+    padding: 15px;
+    border-radius: 15px;
+}
+
+@keyframes animateOutline {
+    0% {
+        outline-width: 2px;
+        outline-color: white;
+    }
+
+    20% {
+        outline-width: 4px;
+        outline-color: darkorange;
+    }
+
+    50% {
+        outline-width: 8px;
+        outline-color: #3498db;
+    }
+
+    80% {
+        outline-width: 4px;
+        outline-color: darkorange;
+    }
+}
