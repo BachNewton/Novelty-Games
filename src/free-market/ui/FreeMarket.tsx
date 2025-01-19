@@ -11,6 +11,7 @@ import Loading from "./Loading";
 import Dialog from "../../util/ui/Dialog";
 import NewProfile from "./NewProfile";
 import Extract from './Extract';
+import { format } from "../logic/NumberFormatter";
 
 interface FreeMarketProps {
     communicator: FreeMarketCommunicator;
@@ -102,7 +103,7 @@ function profileUi(save: FreeMarketSave): JSX.Element {
             <div>Inventor:</div>
             <div style={{ textAlign: 'right' }}>{save.inventor.name}</div>
             <div>Money:</div>
-            <div style={{ textAlign: 'right' }}>${save.money}</div>
+            <div style={{ textAlign: 'right' }}>${format(save.money)}</div>
         </div>
 
         <HorizontalLine />

@@ -3,6 +3,11 @@ export interface Component {
     name: string;
 }
 
+export interface ComponentQuantity {
+    componentId: string;
+    quantity: number;
+}
+
 interface RawMaterial extends Component { }
 
 export interface Invention extends Component {

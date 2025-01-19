@@ -1,11 +1,12 @@
 import '../css/animated-border.css';
 import '../css/animated-scale.css';
 import '../css/grey-out.css';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RAW_MATERIALS } from "../data/Component";
 import { ExtractionDetails, FreeMarketSave } from "../data/FreeMarketSave";
 import HorizontalLine from "./HorizontalLine";
 import { StorageKey, Storer } from "../../util/Storage";
+import { format } from '../logic/NumberFormatter';
 
 interface ExtractProps {
     save: FreeMarketSave;
@@ -13,7 +14,17 @@ interface ExtractProps {
 }
 
 const Extract: React.FC<ExtractProps> = ({ save, storer }) => {
+    const [time, setTime] = useState(new Date().getTime());
     const [details, setDetails] = useState(save.extractionDetails);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            setTime(new Date().getTime());
+        }, 1000);
+
+        // Cleanup the interval on component unmount
+        return () => clearInterval(intervalId);
+    }, []);
 
     const extractContainerStyle: React.CSSProperties = {
         display: 'flex',
@@ -51,6 +62,10 @@ const Extract: React.FC<ExtractProps> = ({ save, storer }) => {
     };
 
     const onExtractClick = (index: number) => {
+        if (details !== null) {
+            save.money += calculateExtractedMoney(details, time);
+        }
+
         const updatedDetials: ExtractionDetails | null = details?.index === index
             ? null
             : {
@@ -77,20 +92,33 @@ const Extract: React.FC<ExtractProps> = ({ save, storer }) => {
         </div>;
     });
 
+    const money = calculateExtractedMoney(details, time);
+
     return <div>
         <div style={headerStyle}>Extraction</div>
-        <div style={{ textAlign: 'center' }}>Here you can spend real time to extract raw materials or labor for money.</div>
+        <div style={{ fontSize: '0.8em' }}>
+            Here you can spend real-time to labor for money or extract raw materials. Select an extraction icon to start extracting. When you're finished, select the icon again to collect the resources.
+        </div>
         <HorizontalLine />
         <div style={subheaderStyle}>Labor</div>
         <div style={extractContainerStyle} className={animatedBorderClassNameForLabor}>
             <div style={{ fontSize: '1.25em', flexGrow: 1 }}>💲Money</div>
             <div style={extractIconStyle} className={animatedScaleClassNameForLabor} onClick={() => onExtractClick(-1)}>💸</div>
-            <div style={{ width: '3.5em', textAlign: 'right' }}>$12,345</div>
+            <div style={{ width: '3.5em', textAlign: 'right' }}>${format(money)}</div>
         </div>
         <HorizontalLine />
         <div style={subheaderStyle}>Raw Materials</div>
         {rawMaterialsUi}
     </div>;
 };
+
+function calculateExtractedMoney(details: ExtractionDetails | null, time: number): number {
+    if (details === null) return 0;
+    if (details.index !== -1) return 0;
+
+    const deltaTime = Math.max(time - details.startTime, 0);
+
+    return 0.001 * deltaTime;
+}
 
 export default Extract;
