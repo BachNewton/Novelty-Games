@@ -5,6 +5,7 @@ import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
 import { createID } from "../../util/ID";
 import { Inventor } from "../data/Inventor";
 import { StorageKey, Storer } from "../../util/Storage";
+import { RAW_MATERIALS } from "../data/Component";
 
 interface NewProfileProps {
     communicator: FreeMarketCommunicator;
@@ -30,12 +31,7 @@ const NewProfile: React.FC<NewProfileProps> = ({ communicator, storer, onComplet
             };
 
             communicator.addInventor(inventor).then(() => {
-                const save: FreeMarketSave = {
-                    inventor: inventor,
-                    money: 0,
-                    extractionDetails: null,
-                    inentory: []
-                };
+                const save = createNewSave(inventor);
 
                 storer.save(StorageKey.FREE_MARKET, save);
 
@@ -91,6 +87,20 @@ function submittingUi(): JSX.Element {
 
 function isValid(name: string): boolean {
     return name.length > 0;
+}
+
+function createNewSave(inventor: Inventor): FreeMarketSave {
+    return {
+        inventor: inventor,
+        money: 0,
+        extractionDetails: null,
+        inentory: RAW_MATERIALS.map(material => {
+            return {
+                componentId: material.id,
+                quantity: 0
+            };
+        })
+    };
 }
 
 export default NewProfile;

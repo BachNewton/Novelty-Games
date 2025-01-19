@@ -2,7 +2,7 @@ import '../css/animated-border.css';
 import '../css/animated-scale.css';
 import '../css/grey-out.css';
 import { useEffect, useState } from "react";
-import { RAW_MATERIALS } from "../data/Component";
+import { ComponentQuantity, RAW_MATERIALS } from "../data/Component";
 import { ExtractionDetails, FreeMarketSave } from "../data/FreeMarketSave";
 import HorizontalLine from "./HorizontalLine";
 import { StorageKey, Storer } from "../../util/Storage";
@@ -61,9 +61,15 @@ const Extract: React.FC<ExtractProps> = ({ save, storer }) => {
         textAlign: 'center'
     };
 
-    const onExtractClick = (index: number) => {
+    const onExtractClick = (index: number, id?: string) => {
         if (details !== null) {
             save.money += calculateExtractedMoney(details, time);
+
+            const componentQuantity = save.inentory.find(componentQuantity => componentQuantity.componentId === id);
+
+            if (componentQuantity !== undefined) {
+                componentQuantity.quantity += calculateExtractedMaterial(details, time, index);
+            }
         }
 
         const updatedDetials: ExtractionDetails | null = details?.index === index
@@ -84,11 +90,12 @@ const Extract: React.FC<ExtractProps> = ({ save, storer }) => {
     const rawMaterialsUi = RAW_MATERIALS.map((material, index) => {
         const animatedBorderClassName = details === null ? '' : details?.index === index ? 'animated-border' : 'grey-out';
         const animatedScaleClassName = details?.index === index ? 'animated-scale' : '';
+        const quantity = calculateExtractedMaterial(details, time, index);
 
         return <div key={index} style={extractContainerStyle} className={animatedBorderClassName}>
             <div style={{ fontSize: '1.25em', flexGrow: 1 }}>{material.name}</div>
-            <div style={extractIconStyle} className={animatedScaleClassName} onClick={() => onExtractClick(index)}>🏗️</div>
-            <div style={{ width: '3.5em', textAlign: 'right' }}>x12,345</div>
+            <div style={extractIconStyle} className={animatedScaleClassName} onClick={() => onExtractClick(index, material.id)}>🏗️</div>
+            <div style={{ width: '3.5em', textAlign: 'right' }}>x{format(quantity)}</div>
         </div>;
     });
 
@@ -115,6 +122,15 @@ const Extract: React.FC<ExtractProps> = ({ save, storer }) => {
 function calculateExtractedMoney(details: ExtractionDetails | null, time: number): number {
     if (details === null) return 0;
     if (details.index !== -1) return 0;
+
+    const deltaTime = Math.max(time - details.startTime, 0);
+
+    return 0.001 * deltaTime;
+}
+
+function calculateExtractedMaterial(details: ExtractionDetails | null, time: number, index: number): number {
+    if (details === null) return 0;
+    if (details.index !== index) return 0;
 
     const deltaTime = Math.max(time - details.startTime, 0);
 

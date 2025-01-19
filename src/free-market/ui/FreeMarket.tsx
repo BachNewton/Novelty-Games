@@ -12,6 +12,7 @@ import Dialog from "../../util/ui/Dialog";
 import NewProfile from "./NewProfile";
 import Extract from './Extract';
 import { format } from "../logic/NumberFormatter";
+import { ComponentQuantity } from "../data/Component";
 
 interface FreeMarketProps {
     communicator: FreeMarketCommunicator;
