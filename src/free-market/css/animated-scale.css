@@ -1,0 +1,13 @@
+.animated-scale {
+    animation: animateScale 2.5s linear infinite;
+}
+
+@keyframes animateScale {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+}

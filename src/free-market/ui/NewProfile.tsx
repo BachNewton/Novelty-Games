@@ -32,7 +32,8 @@ const NewProfile: React.FC<NewProfileProps> = ({ communicator, storer, onComplet
             communicator.addInventor(inventor).then(() => {
                 const save: FreeMarketSave = {
                     inventor: inventor,
-                    money: 0
+                    money: 0,
+                    extractionDetails: null
                 };
 
                 storer.save(StorageKey.FREE_MARKET, save);

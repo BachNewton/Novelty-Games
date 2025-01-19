@@ -1,4 +1,3 @@
-import '../css/animated-border.css';
 import { useEffect, useState } from "react";
 import HorizontalLine from "./HorizontalLine";
 import { Route, updateRoute } from "../../ui/Routing";
@@ -11,7 +10,7 @@ import { FreeMarketSave } from "../data/FreeMarketSave";
 import Loading from "./Loading";
 import Dialog from "../../util/ui/Dialog";
 import NewProfile from "./NewProfile";
-import { RAW_MATERIALS } from "../data/Component";
+import Extract from './Extract';
 
 interface FreeMarketProps {
     communicator: FreeMarketCommunicator;
@@ -69,18 +68,18 @@ function tabContentUi(
 
         return <Dialog isOpen={true} content={content} />;
     } else if (state instanceof ReadyState) {
-        return readyUi(tab, state.save, communicator);
+        return readyUi(tab, state.save, communicator, storer);
     } else {
         return <Loading />;
     }
 }
 
-function readyUi(tab: Tab, save: FreeMarketSave, communicator: FreeMarketCommunicator): JSX.Element {
+function readyUi(tab: Tab, save: FreeMarketSave, communicator: FreeMarketCommunicator, storer: Storer<FreeMarketSave>): JSX.Element {
     switch (tab) {
         case Tab.PROFILE:
             return profileUi(save);
         case Tab.EXTRACT:
-            return extractUi();
+            return <Extract save={save} storer={storer} />;
         case Tab.CRAFT:
             return <div>// TODO - Craft</div>;
         case Tab.MARKET:
@@ -121,51 +120,6 @@ function profileUi(save: FreeMarketSave): JSX.Element {
             <div style={inventoryItemStyle}>⚡ Electricity x 12</div>
         </div>
     </>;
-}
-
-function extractUi(): JSX.Element {
-    const extractContainerStyle: React.CSSProperties = {
-        display: 'flex',
-        alignItems: 'center',
-        border: '2px solid white',
-        padding: '10px',
-        margin: '15px',
-        borderRadius: '15px',
-        backgroundImage: 'linear-gradient(125deg, grey 20%, #3498db 50%, grey 80%)'
-    };
-
-    const extractIconStyle: React.CSSProperties = {
-        border: '2px solid white',
-        borderRadius: '50%',
-        fontSize: '1.3em',
-        padding: '10px',
-        marginRight: '15px',
-        background: '#3498db',
-        boxShadow: 'darkorange 0px 0px 5px 5px',
-        cursor: 'pointer'
-    };
-
-    const rawMaterialsUi = RAW_MATERIALS.map((material, index) => {
-        return <div key={index} style={extractContainerStyle}>
-            <div style={{ fontSize: '1.25em', flexGrow: 1 }}>{material.name}</div>
-            <div style={extractIconStyle}>🏗️</div>
-            <div style={{ width: '3.5em', textAlign: 'right' }}>x12,345</div>
-        </div>;
-    });
-
-    return <div>
-        <div style={{ fontWeight: 'bold', marginBottom: '15px', fontSize: '1.75em', textAlign: 'center' }}>Extraction</div>
-        <HorizontalLine />
-        <div style={{ fontWeight: 'bold', marginBottom: '15px', fontSize: '1.3em', textAlign: 'center' }}>Labor</div>
-        <div style={extractContainerStyle}>
-            <div style={{ fontSize: '1.25em', flexGrow: 1 }}>💲Money</div>
-            <div style={extractIconStyle}>💸</div>
-            <div style={{ width: '3.5em', textAlign: 'right' }}>$12,345</div>
-        </div>
-        <HorizontalLine />
-        <div style={{ fontWeight: 'bold', marginBottom: '15px', fontSize: '1.3em', textAlign: 'center' }}>Raw Materials</div>
-        {rawMaterialsUi}
-    </div>;
 }
 
 function marketUi(): JSX.Element {

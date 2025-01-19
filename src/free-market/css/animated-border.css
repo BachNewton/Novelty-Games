@@ -2,10 +2,7 @@
     outline-width: 2px;
     outline-color: white;
     outline-style: solid;
-    animation: animateOutline 4s linear infinite;
-    margin: 45px;
-    padding: 15px;
-    border-radius: 15px;
+    animation: animateOutline 2.5s linear infinite;
 }
 
 @keyframes animateOutline {
@@ -14,7 +11,7 @@
         outline-color: white;
     }
 
-    20% {
+    25% {
         outline-width: 4px;
         outline-color: darkorange;
     }
@@ -24,7 +21,7 @@
         outline-color: #3498db;
     }
 
-    80% {
+    75% {
         outline-width: 4px;
         outline-color: darkorange;
     }
