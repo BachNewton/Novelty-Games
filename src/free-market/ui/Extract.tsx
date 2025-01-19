@@ -2,7 +2,7 @@ import '../css/animated-border.css';
 import '../css/animated-scale.css';
 import '../css/grey-out.css';
 import { useEffect, useState } from "react";
-import { ComponentQuantity, RAW_MATERIALS } from "../data/Component";
+import { RAW_MATERIALS } from "../data/Component";
 import { ExtractionDetails, FreeMarketSave } from "../data/FreeMarketSave";
 import HorizontalLine from "./HorizontalLine";
 import { StorageKey, Storer } from "../../util/Storage";
@@ -61,22 +61,22 @@ const Extract: React.FC<ExtractProps> = ({ save, storer }) => {
         textAlign: 'center'
     };
 
-    const onExtractClick = (index: number, id?: string) => {
+    const onExtractClick = (id: string | null) => {
         if (details !== null) {
             save.money += calculateExtractedMoney(details, time);
 
-            const componentQuantity = save.inentory.find(componentQuantity => componentQuantity.componentId === id);
+            const componentQuantity = save.inentory.find(componentQuantity => componentQuantity.componentId === details.id);
 
             if (componentQuantity !== undefined) {
-                componentQuantity.quantity += calculateExtractedMaterial(details, time, index);
+                componentQuantity.quantity += calculateExtractedMaterial(details, time, details.id);
             }
         }
 
-        const updatedDetials: ExtractionDetails | null = details?.index === index
+        const updatedDetials: ExtractionDetails | null = details?.id === id
             ? null
             : {
                 startTime: new Date().getTime(),
-                index: index
+                id: id
             };
 
         setDetails(updatedDetials);
@@ -84,17 +84,17 @@ const Extract: React.FC<ExtractProps> = ({ save, storer }) => {
         storer.save(StorageKey.FREE_MARKET, save);
     };
 
-    const animatedBorderClassNameForLabor = details === null ? '' : details?.index === -1 ? 'animated-border' : 'grey-out';
-    const animatedScaleClassNameForLabor = details?.index === -1 ? 'animated-scale' : '';
+    const animatedBorderClassNameForLabor = details === null ? '' : details.id === null ? 'animated-border' : 'grey-out';
+    const animatedScaleClassNameForLabor = details?.id === null ? 'animated-scale' : '';
 
     const rawMaterialsUi = RAW_MATERIALS.map((material, index) => {
-        const animatedBorderClassName = details === null ? '' : details?.index === index ? 'animated-border' : 'grey-out';
-        const animatedScaleClassName = details?.index === index ? 'animated-scale' : '';
-        const quantity = calculateExtractedMaterial(details, time, index);
+        const animatedBorderClassName = details === null ? '' : details?.id === material.id ? 'animated-border' : 'grey-out';
+        const animatedScaleClassName = details?.id === material.id ? 'animated-scale' : '';
+        const quantity = calculateExtractedMaterial(details, time, material.id);
 
         return <div key={index} style={extractContainerStyle} className={animatedBorderClassName}>
             <div style={{ fontSize: '1.25em', flexGrow: 1 }}>{material.name}</div>
-            <div style={extractIconStyle} className={animatedScaleClassName} onClick={() => onExtractClick(index, material.id)}>🏗️</div>
+            <div style={extractIconStyle} className={animatedScaleClassName} onClick={() => onExtractClick(material.id)}>🏗️</div>
             <div style={{ width: '3.5em', textAlign: 'right' }}>x{format(quantity)}</div>
         </div>;
     });
@@ -110,7 +110,7 @@ const Extract: React.FC<ExtractProps> = ({ save, storer }) => {
         <div style={subheaderStyle}>Labor</div>
         <div style={extractContainerStyle} className={animatedBorderClassNameForLabor}>
             <div style={{ fontSize: '1.25em', flexGrow: 1 }}>💲Money</div>
-            <div style={extractIconStyle} className={animatedScaleClassNameForLabor} onClick={() => onExtractClick(-1)}>💸</div>
+            <div style={extractIconStyle} className={animatedScaleClassNameForLabor} onClick={() => onExtractClick(null)}>💸</div>
             <div style={{ width: '3.5em', textAlign: 'right' }}>${format(money)}</div>
         </div>
         <HorizontalLine />
@@ -121,16 +121,16 @@ const Extract: React.FC<ExtractProps> = ({ save, storer }) => {
 
 function calculateExtractedMoney(details: ExtractionDetails | null, time: number): number {
     if (details === null) return 0;
-    if (details.index !== -1) return 0;
+    if (details.id !== null) return 0;
 
     const deltaTime = Math.max(time - details.startTime, 0);
 
     return 0.001 * deltaTime;
 }
 
-function calculateExtractedMaterial(details: ExtractionDetails | null, time: number, index: number): number {
+function calculateExtractedMaterial(details: ExtractionDetails | null, time: number, id: string | null): number {
     if (details === null) return 0;
-    if (details.index !== index) return 0;
+    if (details.id !== id) return 0;
 
     const deltaTime = Math.max(time - details.startTime, 0);
 

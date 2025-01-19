@@ -10,5 +10,5 @@ export interface FreeMarketSave {
 
 export interface ExtractionDetails {
     startTime: number;
-    index: number;
+    id: string | null;
 }
