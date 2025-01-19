@@ -124,32 +124,46 @@ function profileUi(save: FreeMarketSave): JSX.Element {
 }
 
 function extractUi(): JSX.Element {
+    const extractContainerStyle: React.CSSProperties = {
+        display: 'flex',
+        alignItems: 'center',
+        border: '2px solid white',
+        padding: '10px',
+        margin: '15px',
+        borderRadius: '15px',
+        backgroundImage: 'linear-gradient(125deg, grey 20%, #3498db 50%, grey 80%)'
+    };
+
+    const extractIconStyle: React.CSSProperties = {
+        border: '2px solid white',
+        borderRadius: '50%',
+        fontSize: '1.3em',
+        padding: '10px',
+        marginRight: '15px',
+        background: '#3498db',
+        boxShadow: 'darkorange 0px 0px 5px 5px',
+        cursor: 'pointer'
+    };
+
     const rawMaterialsUi = RAW_MATERIALS.map((material, index) => {
-        return <div key={index} style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            border: '2px solid white',
-            padding: '10px',
-            margin: '15px',
-            borderRadius: '15px',
-            backgroundImage: 'linear-gradient(125deg, grey 25%, #3498db 50%, rgba(0, 0, 0, 0.3) 75%)'
-        }}>
-            <div style={{ fontSize: '1.25em' }}>{material.name}</div>
-            <div style={{
-                border: '2px solid white',
-                borderRadius: '50%',
-                fontSize: '1.3em',
-                padding: '10px',
-                background: '#3498db',
-                boxShadow: 'darkorange 0px 0px 5px 5px',
-                cursor: 'pointer'
-            }}>⛏️</div>
+        return <div key={index} style={extractContainerStyle}>
+            <div style={{ fontSize: '1.25em', flexGrow: 1 }}>{material.name}</div>
+            <div style={extractIconStyle}>🏗️</div>
+            <div style={{ width: '3.5em', textAlign: 'right' }}>x12,345</div>
         </div>;
     });
 
     return <div>
-        <div style={{ fontWeight: 'bold', marginBottom: '15px', fontSize: '1.5em', textAlign: 'center' }}>Raw Materials</div>
+        <div style={{ fontWeight: 'bold', marginBottom: '15px', fontSize: '1.75em', textAlign: 'center' }}>Extraction</div>
+        <HorizontalLine />
+        <div style={{ fontWeight: 'bold', marginBottom: '15px', fontSize: '1.3em', textAlign: 'center' }}>Labor</div>
+        <div style={extractContainerStyle}>
+            <div style={{ fontSize: '1.25em', flexGrow: 1 }}>💲Money</div>
+            <div style={extractIconStyle}>💸</div>
+            <div style={{ width: '3.5em', textAlign: 'right' }}>$12,345</div>
+        </div>
+        <HorizontalLine />
+        <div style={{ fontWeight: 'bold', marginBottom: '15px', fontSize: '1.3em', textAlign: 'center' }}>Raw Materials</div>
         {rawMaterialsUi}
     </div>;
 }
