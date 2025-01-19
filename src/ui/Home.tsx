@@ -172,7 +172,7 @@ function VersionStateUi(versionState: VersionState) {
         case VersionState.CURRENT:
             return <>✔️ Up-to-date</>;
         case VersionState.OUTDATED:
-            return <button onClick={() => { window.location.reload() }}>🔄 Update App</button>;
+            return <button style={{ fontSize: '1em' }} onClick={() => { window.location.reload() }}>🔄 Update App</button>;
         case VersionState.UNKNOWN:
             return <>✖️ Offline</>;
     }
