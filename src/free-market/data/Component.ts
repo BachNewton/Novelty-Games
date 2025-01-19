@@ -59,3 +59,5 @@ export const RAW_MATERIALS: RawMaterial[] = [
         name: '🛍️ Plastic'
     }
 ];
+
+export const RAW_MATERIALS_MAPPED = new Map(RAW_MATERIALS.map(material => [material.id, material]));

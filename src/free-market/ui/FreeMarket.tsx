@@ -12,7 +12,7 @@ import Dialog from "../../util/ui/Dialog";
 import NewProfile from "./NewProfile";
 import Extract from './Extract';
 import { format } from "../logic/NumberFormatter";
-import { ComponentQuantity } from "../data/Component";
+import { RAW_MATERIALS_MAPPED } from "../data/Component";
 
 interface FreeMarketProps {
     communicator: FreeMarketCommunicator;
@@ -95,9 +95,24 @@ function readyUi(tab: Tab, save: FreeMarketSave, communicator: FreeMarketCommuni
 
 function profileUi(save: FreeMarketSave): JSX.Element {
     const inventoryItemStyle: React.CSSProperties = {
-        border: '2px solid white',
-        padding: '5px'
+        display: 'flex',
+        justifyContent: 'space-between',
+        border: '2px solid #3498db',
+        padding: '5px',
+        margin: '5px',
+        borderRadius: '15px',
+        background: 'rgba(0, 0, 0, 0.3)'
     };
+
+    const inventoryUi = save.inentory.map((componentQuantity, index) => {
+        const rawMaterial = RAW_MATERIALS_MAPPED.get(componentQuantity.componentId);
+        const name = rawMaterial?.name ?? '(Unkown)';
+
+        return <div key={index} style={inventoryItemStyle}>
+            <div style={{ marginRight: '15px' }}>{name}</div>
+            <div>x{format(componentQuantity.quantity)}</div>
+        </div>;
+    });
 
     return <>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', fontSize: '1.25em', fontWeight: 'bold', alignItems: 'center' }}>
@@ -109,17 +124,10 @@ function profileUi(save: FreeMarketSave): JSX.Element {
 
         <HorizontalLine />
 
-        <div style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '1.25em', textAlign: 'center' }}>Inventory</div>
+        <div style={{ fontWeight: 'bold', marginBottom: '15px', fontSize: '1.5em', textAlign: 'center' }}>Inventory</div>
 
-        <div>// Placeholder</div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(8.5em, 1fr))' }}>
-            <div style={inventoryItemStyle}>🔥 Fire x 4</div>
-            <div style={inventoryItemStyle}>💧 Water x 1</div>
-            <div style={inventoryItemStyle}>🪵 Wood x 7</div>
-            <div style={inventoryItemStyle}>🪨 Stone x 1</div>
-            <div style={inventoryItemStyle}>⛏️ Metal x 3</div>
-            <div style={inventoryItemStyle}>⚡ Electricity x 12</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(9.5em, 1fr))' }}>
+            {inventoryUi}
         </div>
     </>;
 }

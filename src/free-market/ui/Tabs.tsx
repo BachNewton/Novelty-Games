@@ -45,7 +45,8 @@ const Tabs: React.FC<TabsProps> = ({ currentTab, onClick }) => {
             top: 0,
             width: '100%',
             background: 'linear-gradient(0deg, grey, #3498db)',
-            boxShadow: 'black 0px 10px 20px'
+            boxShadow: 'black 0px 10px 20px',
+            zIndex: 1
         }}>
             {tabs}
         </div>
