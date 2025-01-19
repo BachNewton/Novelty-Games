@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FreeMarketSave } from "../data/FreeMarketSave";
+import { FreeMarketSave, SAVE_VERSION } from "../data/FreeMarketSave";
 import Loading from "./Loading";
 import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
 import { createID } from "../../util/ID";
@@ -91,6 +91,7 @@ function isValid(name: string): boolean {
 
 function createNewSave(inventor: Inventor): FreeMarketSave {
     return {
+        version: SAVE_VERSION,
         inventor: inventor,
         money: 0,
         extractionDetails: null,

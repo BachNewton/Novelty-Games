@@ -6,7 +6,7 @@ import Invent from "./Invent";
 import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
 import Patent from "./Patent";
 import { StorageKey, Storer } from "../../util/Storage";
-import { FreeMarketSave } from "../data/FreeMarketSave";
+import { FreeMarketSave, SAVE_VERSION } from "../data/FreeMarketSave";
 import Loading from "./Loading";
 import Dialog from "../../util/ui/Dialog";
 import NewProfile from "./NewProfile";
@@ -41,7 +41,11 @@ const FreeMarket: React.FC<FreeMarketProps> = ({ communicator, storer }) => {
         updateRoute(Route.FREE_MARKET);
 
         storer.load(StorageKey.FREE_MARKET)
-            .then(save => setState(new ReadyState(save)))
+            .then(save => {
+                if (save.version !== SAVE_VERSION) throw new Error();
+
+                setState(new ReadyState(save));
+            })
             .catch(() => setState(new NewProfileState()));
     }, []);
 
