@@ -1,61 +1,22 @@
 import { useEffect, useState } from 'react';
 import MilleBornesHome from '../board-games/mille-bornes/ui/Home';
 import TriviaHome from '../trivia/ui/Home';
-import { Communicator as MilleBornesCommunicator } from '../board-games/mille-bornes/logic/Communicator';
 import Games2DHome from '../game-2D/ui/Home';
 import Games3DHome from '../game-3D/ui/Home';
 import ToolsHome from '../tools/ui/Home';
 import { getRoute, Route } from './Routing';
 import FreeMarket from '../free-market/ui/FreeMarket';
 import { NewtorkCommunicator as MilleBornesNetworkCommunicator } from '../board-games/mille-bornes/logic/NewtorkCommunicator';
-import { createFreeMarketCommunicator, FreeMarketCommunicator } from '../free-market/logic/FreeMarketCommunicator';
-import { createStorer, Storer } from '../util/Storage';
+import { createFreeMarketCommunicator } from '../free-market/logic/FreeMarketCommunicator';
+import { createStorer } from '../util/Storage';
 import { FreeMarketSave } from '../free-market/data/FreeMarketSave';
 import SubMenu from './SubMenu';
+import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState } from './State';
 
 const APP_VERSION = 'v2.11.13';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
-}
-
-interface State { }
-
-class HomeState implements State { }
-
-class TriviaState implements State { }
-
-class MilleBornesState implements State {
-    communicator: MilleBornesCommunicator;
-
-    constructor(communicator: MilleBornesCommunicator) {
-        this.communicator = communicator;
-    }
-}
-
-class Game2DState implements State { }
-
-class Game3DState implements State { }
-
-class ToolsState implements State { }
-
-class FreeMarketState implements State {
-    communicator: FreeMarketCommunicator;
-    storer: Storer<FreeMarketSave>;
-
-    constructor(communicator: FreeMarketCommunicator, storer: Storer<FreeMarketSave>) {
-        this.communicator = communicator;
-        this.storer = storer;
-    }
-}
-
-class BoardGamesState implements State { }
-
-enum VersionState {
-    CURRENT,
-    UNKNOWN,
-    OUTDATED,
-    CHECKING
 }
 
 interface OnClickHandlers {

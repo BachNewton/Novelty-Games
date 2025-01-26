@@ -1,0 +1,43 @@
+import { FreeMarketSave } from "../free-market/data/FreeMarketSave";
+import { FreeMarketCommunicator } from "../free-market/logic/FreeMarketCommunicator";
+import { Storer } from "../util/Storage";
+import { Communicator as MilleBornesCommunicator } from '../board-games/mille-bornes/logic/Communicator';
+
+export interface State { }
+
+export class HomeState implements State { }
+
+export class TriviaState implements State { }
+
+export class MilleBornesState implements State {
+    communicator: MilleBornesCommunicator;
+
+    constructor(communicator: MilleBornesCommunicator) {
+        this.communicator = communicator;
+    }
+}
+
+export class Game2DState implements State { }
+
+export class Game3DState implements State { }
+
+export class ToolsState implements State { }
+
+export class FreeMarketState implements State {
+    communicator: FreeMarketCommunicator;
+    storer: Storer<FreeMarketSave>;
+
+    constructor(communicator: FreeMarketCommunicator, storer: Storer<FreeMarketSave>) {
+        this.communicator = communicator;
+        this.storer = storer;
+    }
+}
+
+export class BoardGamesState implements State { }
+
+export enum VersionState {
+    CURRENT,
+    UNKNOWN,
+    OUTDATED,
+    CHECKING
+}
