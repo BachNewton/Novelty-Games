@@ -14,7 +14,7 @@ import SubMenu from './SubMenu';
 import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState } from './State';
 import Labyrinth from '../board-games/labyrinth/ui/Labyrinth';
 
-const APP_VERSION = 'v2.11.13';
+const APP_VERSION = 'v2.12.0';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -127,7 +127,7 @@ function HomeUi(versionState: VersionState, onClickHandlers: OnClickHandlers) {
     return <div style={{ color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
         <div style={versionStateStyle}>{VersionStateUi(versionState)}</div>
         <code style={versionLabelStyle}>{APP_VERSION}</code>
-        <h1>🎰 Novelty Games 🕹️</h1>
+        <div style={{ fontSize: '2em', fontWeight: 'bold', marginBottom: '2px' }}>🕹️ Novelty Games 🎰</div>
         <div>Created by: Kyle Hutchinson</div>
         <div><br /></div>
         <button style={buttonStyle} onClick={onClickHandlers.onTriviaClick}>Trivia 🤔</button>
