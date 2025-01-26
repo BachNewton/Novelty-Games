@@ -2,7 +2,7 @@ import { LobbyTeam } from "../ui/Lobby";
 import { Game, Team, createTeam } from "./Data";
 import { Card, createCard } from "./Card";
 import { Communicator } from "./Communicator";
-import { createNetworkService, NetworkedApplication } from "../../util/NetworkService";
+import { createNetworkService, NetworkedApplication } from "../../../util/NetworkService";
 
 export class LobbyEvent extends Event {
     static TYPE = 'LOBBY';

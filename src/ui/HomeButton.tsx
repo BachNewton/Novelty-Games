@@ -7,8 +7,8 @@ const HomeButton: React.FC<HomeButtonProps> = ({ onClick }) => {
         position: 'fixed',
         top: 0,
         left: 0,
-        marginTop: '0.3em',
-        marginLeft: '0.3em',
+        marginTop: '5px',
+        marginLeft: '5px',
         fontSize: '1em'
     };
 

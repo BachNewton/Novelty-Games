@@ -1,5 +1,5 @@
 import { screen, fireEvent } from "@testing-library/react";
-import { Player, PlayerType, Team, Game } from "../../mille-bornes/logic/Data";
+import { Player, PlayerType, Team, Game } from "../../board-games/mille-bornes/logic/Data";
 
 export const TESTIING_LOCAL_ID = 'TESTING_LOCAL_ID';
 

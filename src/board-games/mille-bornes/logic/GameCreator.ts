@@ -1,4 +1,4 @@
-import { shuffleArray } from '../../util/Randomizer';
+import { shuffleArray } from '../../../util/Randomizer';
 import { Game, Player, Team } from './Data';
 import { AceCard, Card, CrashCard, Distance100Card, Distance200Card, Distance25Card, Distance50Card, Distance75Card, EmergencyCard, EmptyCard, FlatCard, GasCard, LimitCard, RepairCard, RollCard, SealantCard, SpareCard, StopCard, TankerCard, UnlimitedCard } from './Card';
 import { LobbyTeam } from '../ui/Lobby';

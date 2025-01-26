@@ -1,7 +1,7 @@
-import { Card } from "../../mille-bornes/logic/Card";
-import { Communicator } from "../../mille-bornes/logic/Communicator";
-import { Game, Team } from "../../mille-bornes/logic/Data";
-import { LobbyTeam } from "../../mille-bornes/ui/Lobby";
+import { Card } from "../../board-games/mille-bornes/logic/Card";
+import { Communicator } from "../../board-games/mille-bornes/logic/Communicator";
+import { Game, Team } from "../../board-games/mille-bornes/logic/Data";
+import { LobbyTeam } from "../../board-games/mille-bornes/ui/Lobby";
 
 export class FakeCommunicator implements Communicator {
     private onPlayCard: (card: Card, targetTeam: Team | null, isExtentionCalled?: boolean | undefined) => void;

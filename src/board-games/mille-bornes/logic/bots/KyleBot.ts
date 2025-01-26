@@ -1,4 +1,4 @@
-import { removeRandomElement } from "../../../util/Randomizer";
+import { removeRandomElement } from "../../../../util/Randomizer";
 import { getTeamName } from "../../ui/UiUtil";
 import { AceCard, Card, DistanceCard, EmergencyCard, GasCard, HazardCard, LimitCard, RemedyCard, RepairCard, RollCard, SafetyCard, SealantCard, SpareCard, TankerCard, UnlimitedCard } from "../Card";
 import { Team } from "../Data";

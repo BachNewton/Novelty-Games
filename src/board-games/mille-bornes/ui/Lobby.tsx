@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Communicator } from "../logic/Communicator";
-import HomeButton from "../../ui/HomeButton";
+import HomeButton from "../../../ui/HomeButton";
 import { BotType, PlayerType } from "../logic/Data";
 import { LobbyEvent } from "../logic/NewtorkCommunicator";
 import Dialog from "./Dialog";

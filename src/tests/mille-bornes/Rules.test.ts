@@ -1,5 +1,5 @@
-import { AceCard, EmergencyCard, RollCard, SafetyCard, SealantCard, TankerCard } from "../../mille-bornes/logic/Card";
-import { canCardBePlayed, hasSafetyCard } from "../../mille-bornes/logic/Rules";
+import { AceCard, EmergencyCard, RollCard, SafetyCard, SealantCard, TankerCard } from "../../board-games/mille-bornes/logic/Card";
+import { canCardBePlayed, hasSafetyCard } from "../../board-games/mille-bornes/logic/Rules";
 import { createTestingGame } from "./TestingUtil";
 
 describe('canCardBePlayed function from Rules', () => {

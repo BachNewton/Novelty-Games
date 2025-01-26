@@ -1,9 +1,9 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import Board from "../../mille-bornes/ui/Board";
+import Board from "../../board-games/mille-bornes/ui/Board";
 import { TESTIING_LOCAL_ID, createTestingGame, doubleClickImage } from "./TestingUtil";
 import { FakeCommunicator } from "./FakeCommunicator";
-import { AceCard, Card, CrashCard, Distance100Card, Distance50Card, RollCard, StopCard, UnlimitedCard } from "../../mille-bornes/logic/Card";
-import { Game, Team } from "../../mille-bornes/logic/Data";
+import { AceCard, Card, CrashCard, Distance100Card, Distance50Card, RollCard, StopCard, UnlimitedCard } from "../../board-games/mille-bornes/logic/Card";
+import { Game, Team } from "../../board-games/mille-bornes/logic/Data";
 
 describe('Board UI', () => {
     it('should allow a player to play a crash card against another team', () => {

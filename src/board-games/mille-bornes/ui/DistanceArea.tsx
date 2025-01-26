@@ -1,5 +1,5 @@
 import { DistanceCard } from "../logic/Card";
-import CardUi from "../ui/Card";
+import CardUi from "./Card";
 
 interface DistanceAreaProps {
     distanceArea: Array<DistanceCard>;

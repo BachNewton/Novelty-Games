@@ -1,4 +1,4 @@
-import { removeRandomElement } from "../../../util/Randomizer";
+import { removeRandomElement } from "../../../../util/Randomizer";
 import { Card, HazardCard, LimitCard } from "../Card";
 import { Team } from "../Data";
 import { Bot } from "./Bot";
