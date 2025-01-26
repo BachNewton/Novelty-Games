@@ -9,14 +9,6 @@ export class HomeState implements State { }
 
 export class TriviaState implements State { }
 
-export class MilleBornesState implements State {
-    communicator: MilleBornesCommunicator;
-
-    constructor(communicator: MilleBornesCommunicator) {
-        this.communicator = communicator;
-    }
-}
-
 export class Game2DState implements State { }
 
 export class Game3DState implements State { }
@@ -34,6 +26,16 @@ export class FreeMarketState implements State {
 }
 
 export class BoardGamesState implements State { }
+
+export class MilleBornesState implements BoardGamesState {
+    communicator: MilleBornesCommunicator;
+
+    constructor(communicator: MilleBornesCommunicator) {
+        this.communicator = communicator;
+    }
+}
+
+export class LabyrinthState implements BoardGamesState { }
 
 export enum VersionState {
     CURRENT,

@@ -11,7 +11,7 @@ import { createFreeMarketCommunicator } from '../free-market/logic/FreeMarketCom
 import { createStorer } from '../util/Storage';
 import { FreeMarketSave } from '../free-market/data/FreeMarketSave';
 import SubMenu from './SubMenu';
-import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState } from './State';
+import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState } from './State';
 
 const APP_VERSION = 'v2.11.13';
 
@@ -20,6 +20,7 @@ interface HomeProps {
 }
 
 interface OnClickHandlers {
+    onHomeButtonClick: () => void;
     onMilleBornesClick: () => void;
     onTriviaClick: () => void;
     on2DGamesClick: () => void;
@@ -50,11 +51,10 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         }
     }, [state]);
 
-    const onHomeButtonClicked = () => {
-        setState(new HomeState());
-    };
-
     const onClickHandlers: OnClickHandlers = {
+        onHomeButtonClick: () => {
+            setState(new HomeState());
+        },
         onMilleBornesClick: () => {
             const communicator = new MilleBornesNetworkCommunicator();
             setState(new MilleBornesState(communicator));
@@ -79,27 +79,18 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         }
     };
 
-    if (state instanceof MilleBornesState) {
-        return <MilleBornesHome onHomeButtonClicked={onHomeButtonClicked} communicator={state.communicator} />;
-    } else if (state instanceof TriviaState) {
-        return <TriviaHome onHomeButtonClicked={onHomeButtonClicked} />;
+    if (state instanceof TriviaState) {
+        return <TriviaHome onHomeButtonClicked={onClickHandlers.onHomeButtonClick} />;
     } else if (state instanceof Game2DState) {
-        return <Games2DHome onHomeButtonClicked={onHomeButtonClicked} />;
+        return <Games2DHome onHomeButtonClicked={onClickHandlers.onHomeButtonClick} />;
     } else if (state instanceof Game3DState) {
-        return <Games3DHome onHomeButtonClicked={onHomeButtonClicked} />;
+        return <Games3DHome onHomeButtonClicked={onClickHandlers.onHomeButtonClick} />;
     } else if (state instanceof ToolsState) {
-        return <ToolsHome onHomeButtonClicked={onHomeButtonClicked} />;
+        return <ToolsHome onHomeButtonClicked={onClickHandlers.onHomeButtonClick} />;
     } else if (state instanceof FreeMarketState) {
         return <FreeMarket communicator={state.communicator} storer={state.storer} />;
     } else if (state instanceof BoardGamesState) {
-        return <SubMenu
-            onHomeButtonClicked={onHomeButtonClicked}
-            header='🃏 Board Games 🎲'
-            menuItems={[
-                { buttonText: 'Mille Bornes 🏎️', onClick: onClickHandlers.onMilleBornesClick },
-                { buttonText: 'Labyrinth 🧩', onClick: () => window.alert('Work in progress') }
-            ]}
-        />;
+        return boardGamesUi(state, onClickHandlers);
     } else {
         return HomeUi(versionState, onClickHandlers);
     }
@@ -153,6 +144,23 @@ function VersionStateUi(versionState: VersionState) {
         case VersionState.UNKNOWN:
             return <>✖️ Offline</>;
     }
+}
+
+function boardGamesUi(boardGamesState: BoardGamesState, onClickHandlers: OnClickHandlers): JSX.Element {
+    if (boardGamesState instanceof MilleBornesState) {
+        return <MilleBornesHome onHomeButtonClicked={onClickHandlers.onHomeButtonClick} communicator={boardGamesState.communicator} />;
+    } else if (boardGamesState instanceof LabyrinthState) {
+        //
+    }
+
+    return <SubMenu
+        onHomeButtonClicked={onClickHandlers.onHomeButtonClick}
+        header='🃏 Board Games 🎲'
+        menuItems={[
+            { buttonText: 'Mille Bornes 🏎️', onClick: onClickHandlers.onMilleBornesClick },
+            { buttonText: 'Labyrinth 🧩', onClick: () => window.alert('Work in progress') }
+        ]}
+    />;
 }
 
 function getInitialState(): State {
