@@ -12,6 +12,7 @@ import { createStorer } from '../util/Storage';
 import { FreeMarketSave } from '../free-market/data/FreeMarketSave';
 import SubMenu from './SubMenu';
 import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState } from './State';
+import Labyrinth from '../board-games/labyrinth/ui/Labyrinth';
 
 const APP_VERSION = 'v2.11.13';
 
@@ -28,6 +29,7 @@ interface OnClickHandlers {
     onToolsClick: () => void;
     onFreeMarketClick: () => void;
     onBoardGamesClick: () => void;
+    onLabyrinthClick: () => void;
 }
 
 const Home: React.FC<HomeProps> = ({ updateListener }) => {
@@ -76,6 +78,10 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         },
         onBoardGamesClick: () => {
             setState(new BoardGamesState());
+        },
+        onLabyrinthClick: () => {
+            console.log('click')
+            setState(new LabyrinthState());
         }
     };
 
@@ -150,7 +156,7 @@ function boardGamesUi(boardGamesState: BoardGamesState, onClickHandlers: OnClick
     if (boardGamesState instanceof MilleBornesState) {
         return <MilleBornesHome onHomeButtonClicked={onClickHandlers.onHomeButtonClick} communicator={boardGamesState.communicator} />;
     } else if (boardGamesState instanceof LabyrinthState) {
-        //
+        return <Labyrinth />;
     }
 
     return <SubMenu
@@ -158,7 +164,7 @@ function boardGamesUi(boardGamesState: BoardGamesState, onClickHandlers: OnClick
         header='🃏 Board Games 🎲'
         menuItems={[
             { buttonText: 'Mille Bornes 🏎️', onClick: onClickHandlers.onMilleBornesClick },
-            { buttonText: 'Labyrinth 🧩', onClick: () => window.alert('Work in progress') }
+            { buttonText: 'Labyrinth 🧩', onClick: onClickHandlers.onLabyrinthClick }
         ]}
     />;
 }

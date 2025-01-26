@@ -27,15 +27,17 @@ export class FreeMarketState implements State {
 
 export class BoardGamesState implements State { }
 
-export class MilleBornesState implements BoardGamesState {
+export class MilleBornesState extends BoardGamesState {
     communicator: MilleBornesCommunicator;
 
     constructor(communicator: MilleBornesCommunicator) {
+        super();
+
         this.communicator = communicator;
     }
 }
 
-export class LabyrinthState implements BoardGamesState { }
+export class LabyrinthState extends BoardGamesState { }
 
 export enum VersionState {
     CURRENT,
