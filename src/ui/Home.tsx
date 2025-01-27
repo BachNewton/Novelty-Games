@@ -54,35 +54,18 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
     }, [state]);
 
     const onClickHandlers: OnClickHandlers = {
-        onHomeButtonClick: () => {
-            setState(new HomeState());
-        },
+        onHomeButtonClick: () => setState(new HomeState()),
         onMilleBornesClick: () => {
             const communicator = new MilleBornesNetworkCommunicator();
             setState(new MilleBornesState(communicator));
         },
-        onTriviaClick: () => {
-            setState(new TriviaState());
-        },
-        on2DGamesClick: () => {
-            setState(new Game2DState());
-        },
-        on3DGamesClick: () => {
-            setState(new Game3DState());
-        },
-        onToolsClick: () => {
-            setState(new ToolsState());
-        },
-        onFreeMarketClick: () => {
-            setState(createFreeMarketState());
-        },
-        onBoardGamesClick: () => {
-            setState(new BoardGamesState());
-        },
-        onLabyrinthClick: () => {
-            console.log('click')
-            setState(new LabyrinthState());
-        }
+        onTriviaClick: () => setState(new TriviaState()),
+        on2DGamesClick: () => setState(new Game2DState()),
+        on3DGamesClick: () => setState(new Game3DState()),
+        onToolsClick: () => setState(new ToolsState()),
+        onFreeMarketClick: () => setState(createFreeMarketState()),
+        onBoardGamesClick: () => setState(new BoardGamesState()),
+        onLabyrinthClick: () => setState(new LabyrinthState())
     };
 
     if (state instanceof TriviaState) {
