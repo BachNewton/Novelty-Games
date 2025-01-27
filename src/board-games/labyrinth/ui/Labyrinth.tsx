@@ -3,24 +3,32 @@ import { Route, updateRoute } from "../../../ui/Routing";
 import { getRandomElement } from "../../../util/Randomizer";
 import BrickImage from '../images/brick.avif';
 
+enum PlayerColor {
+    RED, BLUE, YELLOW, GREEN
+}
+
 interface Piece {
     paths: number[];
     rotation: number;
+    startingColor: PlayerColor | null;
 }
 
 const STRAIGHT_PIECE: Piece = {
     paths: [0, Math.PI],
-    rotation: 0
+    rotation: 0,
+    startingColor: null
 };
 
 const CORNER_PIECE: Piece = {
     paths: [0, Math.PI / 2],
-    rotation: 0
+    rotation: 0,
+    startingColor: null
 };
 
 const T_PIECE: Piece = {
     paths: [0, Math.PI / 2, Math.PI],
-    rotation: 0
+    rotation: 0,
+    startingColor: null
 };
 
 const Labyrinth: React.FC = () => {
@@ -79,7 +87,7 @@ function pieceUi(piece: Piece, key: number): JSX.Element {
         {top}
         {brickUi()}
         {left}
-        <div></div>
+        {centerIcon(piece)}
         {right}
         {brickUi()}
         {bottom}
@@ -88,15 +96,47 @@ function pieceUi(piece: Piece, key: number): JSX.Element {
 }
 
 function startingPieces(): Piece[][] {
+    const startingRed = { ...CORNER_PIECE };
+    startingRed.startingColor = PlayerColor.RED;
+    startingRed.rotation -= Math.PI / 2;
+
+    const startingBlue = { ...CORNER_PIECE };
+    startingBlue.startingColor = PlayerColor.BLUE;
+    startingBlue.rotation += Math.PI;
+
+    const startingYellow = { ...CORNER_PIECE };
+    startingYellow.startingColor = PlayerColor.YELLOW;
+
+    const startingGreen = { ...CORNER_PIECE };
+    startingGreen.startingColor = PlayerColor.GREEN;
+    startingGreen.rotation += Math.PI / 2;
+
     return [
-        [{ ...CORNER_PIECE }, randomPiece(), { ...T_PIECE }, randomPiece(), { ...T_PIECE }, randomPiece(), { ...CORNER_PIECE }],
+        [startingRed, randomPiece(), { ...T_PIECE }, randomPiece(), { ...T_PIECE }, randomPiece(), startingBlue],
         [randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece()],
         [{ ...T_PIECE }, randomPiece(), { ...T_PIECE }, randomPiece(), { ...T_PIECE }, randomPiece(), { ...T_PIECE }],
         [randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece()],
         [{ ...T_PIECE }, randomPiece(), { ...T_PIECE }, randomPiece(), { ...T_PIECE }, randomPiece(), { ...T_PIECE }],
         [randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece()],
-        [{ ...CORNER_PIECE }, randomPiece(), { ...T_PIECE }, randomPiece(), { ...T_PIECE }, randomPiece(), { ...CORNER_PIECE }]
+        [startingYellow, randomPiece(), { ...T_PIECE }, randomPiece(), { ...T_PIECE }, randomPiece(), startingGreen]
     ];
+}
+
+function centerIcon(piece: Piece): JSX.Element {
+    const margin = '5px';
+
+    switch (piece.startingColor) {
+        case PlayerColor.RED:
+            return <div style={{ borderRadius: '100%', margin: margin, background: 'red' }} />;
+        case PlayerColor.BLUE:
+            return <div style={{ borderRadius: '100%', margin: margin, background: 'blue' }} />;
+        case PlayerColor.YELLOW:
+            return <div style={{ borderRadius: '100%', margin: margin, background: 'yellow' }} />;
+        case PlayerColor.GREEN:
+            return <div style={{ borderRadius: '100%', margin: margin, background: 'green' }} />;
+        case null:
+            return <div />;;
+    }
 }
 
 function randomPiece(): Piece {
