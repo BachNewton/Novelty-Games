@@ -135,7 +135,7 @@ function centerIcon(piece: Piece): JSX.Element {
         case PlayerColor.GREEN:
             return <div style={{ borderRadius: '100%', margin: margin, background: 'green' }} />;
         case null:
-            return <div />;;
+            return <div />;
     }
 }
 
