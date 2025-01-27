@@ -161,6 +161,8 @@ function getInitialState(): State {
             return new Game3DState();
         case Route.FREE_MARKET:
             return createFreeMarketState();
+        case Route.LABYRINTH:
+            return new LabyrinthState();
         default:
             return new HomeState();
     }
