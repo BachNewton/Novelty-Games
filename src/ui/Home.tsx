@@ -14,7 +14,7 @@ import SubMenu from './SubMenu';
 import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState } from './State';
 import Labyrinth from '../board-games/labyrinth/ui/Labyrinth';
 
-const APP_VERSION = 'v2.12.1';
+const APP_VERSION = 'v2.12.2';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
