@@ -16,7 +16,15 @@ const Labyrinth: React.FC = () => {
     });
 
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridTemplateRows: 'repeat(7, 1fr)', aspectRatio: 1, maxHeight: '100vh' }}>
+        <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            gridTemplateRows: 'repeat(7, 1fr)',
+            aspectRatio: 1,
+            maxHeight: '100vh',
+            boxSizing: 'border-box',
+            padding: '10px'
+        }}>
             {piecesUi}
         </div>
     </div>;

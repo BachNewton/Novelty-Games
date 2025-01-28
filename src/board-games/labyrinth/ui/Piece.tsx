@@ -3,23 +3,15 @@ import BrickImage from '../images/brick.avif';
 import TrophyImage from '../images/treasures/trophy.png';
 import DaggerImage from '../images/treasures/dagger.png';
 import MoneyBagImage from '../images/treasures/money-bag.png';
-
-const PIECE_STYLE: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-    gridTemplateRows: 'repeat(3, 1fr)',
-    margin: '1px',
-    border: '1px solid grey',
-    borderRadius: '15%',
-    overflow: 'hidden',
-    placeItems: 'stretch'
-};
+import { useState } from "react";
 
 interface PieceProps {
     data: PieceData
 }
 
 const Piece: React.FC<PieceProps> = ({ data }) => {
+    const [isHovered, setIsHovered] = useState(false);
+
     const coordinates = data.paths.map(path => {
         const x = Math.cos(path + data.rotation);
         const y = Math.sin(path + data.rotation);
@@ -43,7 +35,22 @@ const Piece: React.FC<PieceProps> = ({ data }) => {
         ? brickUi()
         : <div></div>;
 
-    return <div style={PIECE_STYLE}>
+    const style: React.CSSProperties = {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+        gridTemplateRows: 'repeat(3, 1fr)',
+        margin: '1px',
+        border: '1px solid grey',
+        borderRadius: '15%',
+        overflow: 'hidden',
+        placeItems: 'stretch'
+    };
+
+    if (isHovered) {
+        style.outline = '4px solid white';
+    }
+
+    return <div style={style} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
         {brickUi()}
         {top}
         {brickUi()}
