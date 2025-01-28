@@ -12,7 +12,7 @@ const Labyrinth: React.FC = () => {
     }, []);
 
     const piecesUi = pieces.flatMap(rowPieces => rowPieces).map((piece, index) => {
-        return <PieceUi key={index} data={piece} />;
+        return <PieceUi key={index} data={piece} onClick={() => temp(index, piece, pieces)} />;
     });
 
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -30,33 +30,43 @@ const Labyrinth: React.FC = () => {
     </div>;
 };
 
+function temp(index: number, piece: Piece, pieces: Piece[][]) {
+    const cols = pieces[0].length;
+    const x = Math.floor(index / cols);
+    const y = index % cols;
+
+    console.log(x, y);
+
+    //
+}
+
 function startingPieces(): Piece[][] {
     const startingRed = { ...CORNER_PIECE };
     startingRed.startingColor = PlayerColor.RED;
-    startingRed.rotation -= Math.PI / 2;
+    startingRed.rotate(-Math.PI / 2);
 
     const startingBlue = { ...CORNER_PIECE };
     startingBlue.startingColor = PlayerColor.BLUE;
-    startingBlue.rotation += Math.PI;
+    startingBlue.rotate(Math.PI);
 
     const startingYellow = { ...CORNER_PIECE };
     startingYellow.startingColor = PlayerColor.YELLOW;
 
     const startingGreen = { ...CORNER_PIECE };
     startingGreen.startingColor = PlayerColor.GREEN;
-    startingGreen.rotation += Math.PI / 2;
+    startingGreen.rotate(Math.PI / 2);
 
     const trophyTreasure = { ...T_PIECE };
     trophyTreasure.treasure = Treasure.TROPHY;
-    trophyTreasure.rotation += Math.PI;
+    trophyTreasure.rotate(Math.PI);
 
     const daggerTreasure = { ...T_PIECE };
     daggerTreasure.treasure = Treasure.DAGGER;
-    daggerTreasure.rotation += Math.PI;
+    daggerTreasure.rotate(Math.PI);
 
     const moneyBagTreasure = { ...T_PIECE };
     moneyBagTreasure.treasure = Treasure.MONEY_BAG;
-    moneyBagTreasure.rotation -= Math.PI / 2;
+    moneyBagTreasure.rotate(-Math.PI / 2);
 
     return [
         [startingRed, randomPiece(), trophyTreasure, randomPiece(), daggerTreasure, randomPiece(), startingBlue],
@@ -74,7 +84,7 @@ function randomPiece(): Piece {
     const rotations = [0, Math.PI / 2, Math.PI, -Math.PI / 2];
 
     const piece = getRandomElement(pieceTypes);
-    piece.rotation += getRandomElement(rotations);
+    piece.rotate(getRandomElement(rotations));
 
     return piece;
 }

@@ -6,34 +6,17 @@ import MoneyBagImage from '../images/treasures/money-bag.png';
 import { useState } from "react";
 
 interface PieceProps {
-    data: PieceData
+    data: PieceData,
+    onClick: () => void;
 }
 
-const Piece: React.FC<PieceProps> = ({ data }) => {
+const Piece: React.FC<PieceProps> = ({ data, onClick }) => {
     const [isHovered, setIsHovered] = useState(false);
 
-    const coordinates = data.paths.map(path => {
-        const x = Math.cos(path + data.rotation);
-        const y = Math.sin(path + data.rotation);
-
-        return { x: Math.round(x), y: Math.round(y) };
-    });
-
-    const top = coordinates.find(coordinate => coordinate.x === 0 && coordinate.y === 1) === undefined
-        ? brickUi()
-        : <div></div>;
-
-    const bottom = coordinates.find(coordinate => coordinate.x === 0 && coordinate.y === -1) === undefined
-        ? brickUi()
-        : <div></div>;
-
-    const left = coordinates.find(coordinate => coordinate.x === -1 && coordinate.y === 0) === undefined
-        ? brickUi()
-        : <div></div>;
-
-    const right = coordinates.find(coordinate => coordinate.x === 1 && coordinate.y === 0) === undefined
-        ? brickUi()
-        : <div></div>;
+    const top = data.hasTop() ? <div /> : brickUi();
+    const bottom = data.hasBottom() ? <div /> : brickUi();
+    const left = data.hasLeft() ? <div /> : brickUi();
+    const right = data.hasRight() ? <div /> : brickUi();
 
     const style: React.CSSProperties = {
         display: 'grid',
@@ -50,7 +33,7 @@ const Piece: React.FC<PieceProps> = ({ data }) => {
         style.outline = '4px solid white';
     }
 
-    return <div style={style} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+    return <div style={style} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} onClick={onClick}>
         {brickUi()}
         {top}
         {brickUi()}
