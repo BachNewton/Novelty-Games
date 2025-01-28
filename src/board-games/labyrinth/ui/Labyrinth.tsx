@@ -7,17 +7,26 @@ import PieceUi from "./Piece";
 const CORNER_PIECES_IN_PILE = 9;
 const STRAIGHT_PIECES_IN_PILE = 13;
 
+interface State {
+    pieces: Piece[][];
+    sparePiece: Piece;
+}
+
 const Labyrinth: React.FC = () => {
-    const [pieces, setPieces] = useState(() => startingPieces());
+    const [state, setState] = useState<State>(startingState());
 
     useEffect(() => {
         updateRoute(Route.LABYRINTH);
     }, []);
 
-    const piecesUi = pieces.flatMap(rowPieces => rowPieces).map((piece, index) => {
+    const piecesUi = state.pieces.flatMap(rowPieces => rowPieces).map((piece, index) => {
         return <PieceUi key={index} data={piece} onClick={() => {
-            highlightPaths(index, piece, pieces);
-            setPieces(pieces.map(row => [...row]));
+            highlightPaths(index, piece, state.pieces);
+
+            setState({
+                pieces: state.pieces.map(row => [...row]),
+                sparePiece: state.sparePiece
+            });
         }} />;
     });
 
@@ -63,7 +72,7 @@ function dfs(piece: Piece, visted: Set<Piece>, x: number, y: number, pieces: Pie
     if (piece.hasRight() && toRight?.hasLeft()) dfs(toRight, visted, x + 1, y, pieces);
 }
 
-function startingPieces(): Piece[][] {
+function startingState(): State {
     const startingRed = createPiece(PieceType.CORNER, -Math.PI / 2);
     startingRed.startingColor = PlayerColor.RED;
 
@@ -114,15 +123,18 @@ function startingPieces(): Piece[][] {
         pile.push(createPiece(PieceType.STRAIGHT, getRandomElement(rotations)));
     }
 
-    return [
-        [startingRed, removeRandomElement(pile), trophyTreasure, removeRandomElement(pile), daggerTreasure, removeRandomElement(pile), startingBlue],
-        [removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile)],
-        [moneyBagTreasure, removeRandomElement(pile), keyTreasure, removeRandomElement(pile), gemTreasure, removeRandomElement(pile), shieldTreasure],
-        [removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile)],
-        [bookTreasure, removeRandomElement(pile), crownTreasure, removeRandomElement(pile), toolboxTreasure, removeRandomElement(pile), candleTreasure],
-        [removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile)],
-        [startingYellow, removeRandomElement(pile), bottleTreasure, removeRandomElement(pile), ringTreasure, removeRandomElement(pile), startingGreen]
-    ];
+    return {
+        pieces: [
+            [startingRed, removeRandomElement(pile), trophyTreasure, removeRandomElement(pile), daggerTreasure, removeRandomElement(pile), startingBlue],
+            [removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile)],
+            [moneyBagTreasure, removeRandomElement(pile), keyTreasure, removeRandomElement(pile), gemTreasure, removeRandomElement(pile), shieldTreasure],
+            [removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile)],
+            [bookTreasure, removeRandomElement(pile), crownTreasure, removeRandomElement(pile), toolboxTreasure, removeRandomElement(pile), candleTreasure],
+            [removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile)],
+            [startingYellow, removeRandomElement(pile), bottleTreasure, removeRandomElement(pile), ringTreasure, removeRandomElement(pile), startingGreen]
+        ],
+        sparePiece: removeRandomElement(pile)
+    };
 }
 
 export default Labyrinth;
