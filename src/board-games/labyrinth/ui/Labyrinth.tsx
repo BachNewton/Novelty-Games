@@ -10,7 +10,17 @@ const STRAIGHT_PIECES_IN_PILE = 13;
 
 interface State {
     pieces: Piece[][];
-    sparePiece: Piece;
+    sparePiece: SparePiece;
+}
+
+interface SparePiece {
+    piece: Piece;
+    position: TrianglePosition;
+}
+
+interface TrianglePosition {
+    x: number;
+    y: number;
 }
 
 const Labyrinth: React.FC = () => {
@@ -31,6 +41,26 @@ const Labyrinth: React.FC = () => {
         }} />;
     });
 
+    const onTriangleClick = (x: number, y: number) => {
+        setState({
+            pieces: state.pieces,
+            sparePiece: {
+                piece: state.sparePiece.piece,
+                position: { x: x, y: y }
+            }
+        });
+    };
+
+    const triangles = [
+        [0, 0, 0],
+        [-90, 90],
+        [-90, 90],
+        [-90, 90],
+        [180, 180, 180],
+    ].map((row, y) => row.map((col, x) => <Triangle rotation={col} onClick={() => onTriangleClick(x, y)} />));
+
+    triangles[state.sparePiece.position.y][state.sparePiece.position.x] = <PieceUi data={state.sparePiece.piece} onClick={() => { }} />;
+
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <div style={{
             display: 'grid',
@@ -41,15 +71,15 @@ const Labyrinth: React.FC = () => {
             boxSizing: 'border-box',
             padding: '10px'
         }}>
-            <div /><div /><Triangle rotation={0} /><div /><Triangle rotation={0} /><div /><Triangle rotation={0} /><div /><div />
+            <div /><div />{triangles[0][0]}<div />{triangles[0][1]}<div />{triangles[0][2]}<div /><div />
             <div />{piecesUi.slice(7 * 0, 7 * 1)}<div />
-            <Triangle rotation={-90} />{piecesUi.slice(7 * 1, 7 * 2)}<Triangle rotation={90} />
+            {triangles[1][0]}{piecesUi.slice(7 * 1, 7 * 2)}{triangles[1][1]}
             <div />{piecesUi.slice(7 * 2, 7 * 3)}<div />
-            <Triangle rotation={-90} />{piecesUi.slice(7 * 3, 7 * 4)}<Triangle rotation={90} />
+            {triangles[2][0]}{piecesUi.slice(7 * 3, 7 * 4)}{triangles[2][1]}
             <div />{piecesUi.slice(7 * 4, 7 * 5)}<div />
-            <Triangle rotation={-90} />{piecesUi.slice(7 * 5, 7 * 6)}<Triangle rotation={90} />
+            {triangles[3][0]}{piecesUi.slice(7 * 5, 7 * 6)}{triangles[3][1]}
             <div />{piecesUi.slice(7 * 6, 7 * 7)}<div />
-            <div /><div /><Triangle rotation={180} /><div /><Triangle rotation={180} /><div /><Triangle rotation={180} /><div /><div />
+            <div /><div />{triangles[4][0]}<div />{triangles[4][1]}<div />{triangles[4][2]}<div /><div />
         </div>
     </div>;
 };
@@ -142,7 +172,10 @@ function startingState(): State {
             [removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile)],
             [startingYellow, removeRandomElement(pile), bottleTreasure, removeRandomElement(pile), ringTreasure, removeRandomElement(pile), startingGreen]
         ],
-        sparePiece: removeRandomElement(pile)
+        sparePiece: {
+            piece: removeRandomElement(pile),
+            position: { x: 0, y: 0 }
+        }
     };
 }
 

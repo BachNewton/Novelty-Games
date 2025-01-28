@@ -1,9 +1,23 @@
+import { useState } from "react";
+
 interface TriangleProps {
     rotation: number;
+    onClick: () => void;
 }
 
-const Triangle: React.FC<TriangleProps> = ({ rotation }) => {
-    return <div style={{ display: 'flex', transform: `rotate(${rotation}deg)` }}>
+const Triangle: React.FC<TriangleProps> = ({ rotation, onClick }) => {
+    const [isHovered, setIsHovered] = useState(false);
+
+    const style: React.CSSProperties = {
+        display: 'flex',
+        transform: `rotate(${rotation}deg)`
+    };
+
+    if (isHovered) {
+        style.outline = '4px solid white';
+    }
+
+    return <div style={style} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} onClick={onClick}>
         <div style={{
             backgroundImage: 'linear-gradient(60deg, transparent 50%, #3498db 50%)',
             width: '100%'
