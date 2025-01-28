@@ -94,11 +94,11 @@ function startingPieces(): Piece[][] {
 
     const gemTreasure = createPiece(PieceType.T);
     gemTreasure.treasure = Treasure.GEM;
-    gemTreasure.rotate(-Math.PI / 2);
+    gemTreasure.rotate(Math.PI);
 
     const shieldTreasure = createPiece(PieceType.T);
     shieldTreasure.treasure = Treasure.SHIELD;
-    shieldTreasure.rotate(-Math.PI / 2);
+    shieldTreasure.rotate(Math.PI / 2);
 
     const bookTreasure = createPiece(PieceType.T);
     bookTreasure.treasure = Treasure.BOOK;
@@ -106,23 +106,20 @@ function startingPieces(): Piece[][] {
 
     const crownTreasure = createPiece(PieceType.T);
     crownTreasure.treasure = Treasure.CROWN;
-    crownTreasure.rotate(-Math.PI / 2);
 
     const toolboxTreasure = createPiece(PieceType.T);
     toolboxTreasure.treasure = Treasure.TOOLBOX;
-    toolboxTreasure.rotate(-Math.PI / 2);
+    toolboxTreasure.rotate(Math.PI / 2);
 
     const candleTreasure = createPiece(PieceType.T);
     candleTreasure.treasure = Treasure.CANDLE;
-    candleTreasure.rotate(-Math.PI / 2);
+    candleTreasure.rotate(Math.PI / 2);
 
     const bottleTreasure = createPiece(PieceType.T);
     bottleTreasure.treasure = Treasure.BOTTLE;
-    bottleTreasure.rotate(-Math.PI / 2);
 
     const ringTreasure = createPiece(PieceType.T);
     ringTreasure.treasure = Treasure.RING;
-    ringTreasure.rotate(-Math.PI / 2);
 
     return [
         [startingRed, randomPiece(), trophyTreasure, randomPiece(), daggerTreasure, randomPiece(), startingBlue],
