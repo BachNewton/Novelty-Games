@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/Novelty-Games/static/css/main.1799ec44.css",
-    "main.js": "/Novelty-Games/static/js/main.9288421c.js",
+    "main.js": "/Novelty-Games/static/js/main.055e2f49.js",
     "static/js/453.ed3810f9.chunk.js": "/Novelty-Games/static/js/453.ed3810f9.chunk.js",
     "static/media/Paladin WProp J Nordstrom.fbx": "/Novelty-Games/static/media/Paladin WProp J Nordstrom.dff9b5b5278fd9b5a0b8.fbx",
     "static/media/skybox.jpg": "/Novelty-Games/static/media/skybox.abf8b9fe4fbb55e8b983.jpg",
@@ -10,9 +10,31 @@
     "static/media/sword and shield run.fbx": "/Novelty-Games/static/media/sword and shield run.2442ff268ff4d61367f9.fbx",
     "static/media/player.png": "/Novelty-Games/static/media/player.f318e1bc385e2ab4f957.png",
     "static/media/CedarvilleCursive-Regular.ttf": "/Novelty-Games/static/media/CedarvilleCursive-Regular.a669593f51bb81ad0cc1.ttf",
+    "static/media/troll.png": "/Novelty-Games/static/media/troll.f1981e0994f3c699bd50.png",
+    "static/media/lizard.png": "/Novelty-Games/static/media/lizard.734688b10ee2b6838ac8.png",
+    "static/media/butterfly.png": "/Novelty-Games/static/media/butterfly.5eaaf730513ea0f1da4e.png",
     "static/media/collect.wav": "/Novelty-Games/static/media/collect.a287fb90cd0a2aa2ceab.wav",
+    "static/media/mage.png": "/Novelty-Games/static/media/mage.051e4eefba52f6df8a9f.png",
+    "static/media/dragon.png": "/Novelty-Games/static/media/dragon.a780b4c2a7e58e1bb603.png",
     "service-worker.js": "/Novelty-Games/service-worker.js",
+    "static/media/candle.png": "/Novelty-Games/static/media/candle.c1bec1742c5c7010f0eb.png",
+    "static/media/owl.png": "/Novelty-Games/static/media/owl.594b0400fffc7dedb370.png",
+    "static/media/crown.png": "/Novelty-Games/static/media/crown.db83a534a5f45f2fc7d1.png",
+    "static/media/bat.png": "/Novelty-Games/static/media/bat.1357e2e303cadde932f1.png",
+    "static/media/unicorn.png": "/Novelty-Games/static/media/unicorn.c8916cc5d01391e5a8cc.png",
+    "static/media/shield.png": "/Novelty-Games/static/media/shield.fc96ec01e89908034cc2.png",
+    "static/media/trophy.png": "/Novelty-Games/static/media/trophy.f6b51f53759353e6eabf.png",
+    "static/media/ghost.png": "/Novelty-Games/static/media/ghost.b4a7d3098996ed26c3b7.png",
+    "static/media/spider.png": "/Novelty-Games/static/media/spider.52ef500dea1a2530fde7.png",
+    "static/media/bottle.png": "/Novelty-Games/static/media/bottle.d4d416c7b936717f9d90.png",
+    "static/media/dagger.png": "/Novelty-Games/static/media/dagger.aff430f40ec7959102f9.png",
+    "static/media/ring.png": "/Novelty-Games/static/media/ring.677c14f7b056ce70ab2b.png",
+    "static/media/money-bag.png": "/Novelty-Games/static/media/money-bag.8ee0115a3c1a1778a300.png",
     "static/media/brick.avif": "/Novelty-Games/static/media/brick.6e7f95f3a16fa65c961b.avif",
+    "static/media/mouse.png": "/Novelty-Games/static/media/mouse.65a334dd93b981da77a0.png",
+    "static/media/cat.png": "/Novelty-Games/static/media/cat.20e762cd89a2f1a1e832.png",
+    "static/media/gem.png": "/Novelty-Games/static/media/gem.0b2a5a6f8d22a90a3a37.png",
+    "static/media/key.png": "/Novelty-Games/static/media/key.26cc0bfa9d775904c09c.png",
     "static/media/checkered.jpg": "/Novelty-Games/static/media/checkered.b372d57b848b58425139.jpg",
     "static/media/MB-ace.svg": "/Novelty-Games/static/media/MB-ace.a8f8a88737891decb1997b8d24860914.svg",
     "static/media/MB-sealant.svg": "/Novelty-Games/static/media/MB-sealant.f888814173ac2b0bdd02cf336035e0b2.svg",
@@ -37,11 +59,11 @@
     "static/media/MB-outline.svg": "/Novelty-Games/static/media/MB-outline.9375dcb67c2602a348842bb92635c97b.svg",
     "static/media/MB-back.svg": "/Novelty-Games/static/media/MB-back.73af888104565973b102803815b53578.svg",
     "main.1799ec44.css.map": "/Novelty-Games/static/css/main.1799ec44.css.map",
-    "main.9288421c.js.map": "/Novelty-Games/static/js/main.9288421c.js.map",
+    "main.055e2f49.js.map": "/Novelty-Games/static/js/main.055e2f49.js.map",
     "453.ed3810f9.chunk.js.map": "/Novelty-Games/static/js/453.ed3810f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.1799ec44.css",
-    "static/js/main.9288421c.js"
+    "static/js/main.055e2f49.js"
   ]
 }
