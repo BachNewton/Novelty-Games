@@ -33,6 +33,10 @@ const Piece: React.FC<PieceProps> = ({ data, onClick }) => {
         style.outline = '4px solid white';
     }
 
+    if (data.isTraversable) {
+        style.background = 'gold';
+    }
+
     return <div style={style} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} onClick={onClick}>
         {brickUi()}
         {top}

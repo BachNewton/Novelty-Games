@@ -1,5 +1,4 @@
 export interface Piece {
-    paths: number[];
     startingColor: PlayerColor | null;
     treasure: Treasure | null;
     rotate: (angle: number) => void;
@@ -7,6 +6,11 @@ export interface Piece {
     hasBottom: () => boolean;
     hasLeft: () => boolean;
     hasRight: () => boolean;
+    isTraversable: boolean;
+}
+
+export enum PieceType {
+    CORNER, T, STRAIGHT
 }
 
 export enum PlayerColor {
@@ -17,7 +21,9 @@ export enum Treasure {
     TROPHY, DAGGER, MONEY_BAG
 }
 
-function createPiece(paths: number[]): Piece {
+export function createPiece(type: PieceType): Piece {
+    const paths = getPaths(type);
+
     let rotation = 0;
 
     let hasTop = false;
@@ -42,7 +48,6 @@ function createPiece(paths: number[]): Piece {
     update();
 
     return {
-        paths: paths,
         startingColor: null,
         treasure: null,
         hasTop: () => hasTop,
@@ -52,12 +57,18 @@ function createPiece(paths: number[]): Piece {
         rotate: (angle) => {
             rotation += angle;
             update();
-        }
+        },
+        isTraversable: false
     };
 }
 
-export const STRAIGHT_PIECE = createPiece([0, Math.PI]);
-
-export const CORNER_PIECE = createPiece([0, Math.PI / 2]);
-
-export const T_PIECE = createPiece([0, Math.PI / 2, Math.PI]);
+function getPaths(type: PieceType): number[] {
+    switch (type) {
+        case PieceType.CORNER:
+            return [0, Math.PI / 2];
+        case PieceType.STRAIGHT:
+            return [0, Math.PI];
+        case PieceType.T:
+            return [0, Math.PI / 2, Math.PI];
+    }
+}
