@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
-import { getRandomElement } from "../../../util/Randomizer";
+import { getRandomElement, removeRandomElement } from "../../../util/Randomizer";
 import { createPiece, Piece, PieceType, PlayerColor, Treasure } from "../data/Piece";
 import PieceUi from "./Piece";
+
+const CORNER_PIECES_IN_PILE = 9;
+const STRAIGHT_PIECES_IN_PILE = 13;
 
 const Labyrinth: React.FC = () => {
     const [pieces, setPieces] = useState(() => startingPieces());
@@ -61,85 +64,65 @@ function dfs(piece: Piece, visted: Set<Piece>, x: number, y: number, pieces: Pie
 }
 
 function startingPieces(): Piece[][] {
-    const startingRed = createPiece(PieceType.CORNER);
+    const startingRed = createPiece(PieceType.CORNER, -Math.PI / 2);
     startingRed.startingColor = PlayerColor.RED;
-    startingRed.rotate(-Math.PI / 2);
 
-    const startingBlue = createPiece(PieceType.CORNER);
+    const startingBlue = createPiece(PieceType.CORNER, Math.PI);
     startingBlue.startingColor = PlayerColor.BLUE;
-    startingBlue.rotate(Math.PI);
 
-    const startingYellow = createPiece(PieceType.CORNER);
+    const startingYellow = createPiece(PieceType.CORNER, 0);
     startingYellow.startingColor = PlayerColor.YELLOW;
 
-    const startingGreen = createPiece(PieceType.CORNER);
+    const startingGreen = createPiece(PieceType.CORNER, Math.PI / 2);
     startingGreen.startingColor = PlayerColor.GREEN;
-    startingGreen.rotate(Math.PI / 2);
 
-    const trophyTreasure = createPiece(PieceType.T);
-    trophyTreasure.treasure = Treasure.TROPHY;
-    trophyTreasure.rotate(Math.PI);
+    const trophyTreasure = createPiece(PieceType.T, Math.PI, Treasure.TROPHY);
+    const daggerTreasure = createPiece(PieceType.T, Math.PI, Treasure.DAGGER);
+    const moneyBagTreasure = createPiece(PieceType.T, -Math.PI / 2, Treasure.MONEY_BAG);
+    const keyTreasure = createPiece(PieceType.T, -Math.PI / 2, Treasure.KEY);
+    const gemTreasure = createPiece(PieceType.T, Math.PI, Treasure.GEM);
+    const shieldTreasure = createPiece(PieceType.T, Math.PI / 2, Treasure.SHIELD);
+    const bookTreasure = createPiece(PieceType.T, -Math.PI / 2, Treasure.BOOK);
+    const crownTreasure = createPiece(PieceType.T, 0, Treasure.CROWN);
+    const toolboxTreasure = createPiece(PieceType.T, Math.PI / 2, Treasure.TOOLBOX);
+    const candleTreasure = createPiece(PieceType.T, Math.PI / 2, Treasure.CANDLE);
+    const bottleTreasure = createPiece(PieceType.T, 0, Treasure.BOTTLE);
+    const ringTreasure = createPiece(PieceType.T, 0, Treasure.RING);
 
-    const daggerTreasure = createPiece(PieceType.T);
-    daggerTreasure.treasure = Treasure.DAGGER;
-    daggerTreasure.rotate(Math.PI);
-
-    const moneyBagTreasure = createPiece(PieceType.T);
-    moneyBagTreasure.treasure = Treasure.MONEY_BAG;
-    moneyBagTreasure.rotate(-Math.PI / 2);
-
-    const keyTreasure = createPiece(PieceType.T);
-    keyTreasure.treasure = Treasure.KEY;
-    keyTreasure.rotate(-Math.PI / 2);
-
-    const gemTreasure = createPiece(PieceType.T);
-    gemTreasure.treasure = Treasure.GEM;
-    gemTreasure.rotate(Math.PI);
-
-    const shieldTreasure = createPiece(PieceType.T);
-    shieldTreasure.treasure = Treasure.SHIELD;
-    shieldTreasure.rotate(Math.PI / 2);
-
-    const bookTreasure = createPiece(PieceType.T);
-    bookTreasure.treasure = Treasure.BOOK;
-    bookTreasure.rotate(-Math.PI / 2);
-
-    const crownTreasure = createPiece(PieceType.T);
-    crownTreasure.treasure = Treasure.CROWN;
-
-    const toolboxTreasure = createPiece(PieceType.T);
-    toolboxTreasure.treasure = Treasure.TOOLBOX;
-    toolboxTreasure.rotate(Math.PI / 2);
-
-    const candleTreasure = createPiece(PieceType.T);
-    candleTreasure.treasure = Treasure.CANDLE;
-    candleTreasure.rotate(Math.PI / 2);
-
-    const bottleTreasure = createPiece(PieceType.T);
-    bottleTreasure.treasure = Treasure.BOTTLE;
-
-    const ringTreasure = createPiece(PieceType.T);
-    ringTreasure.treasure = Treasure.RING;
-
-    return [
-        [startingRed, randomPiece(), trophyTreasure, randomPiece(), daggerTreasure, randomPiece(), startingBlue],
-        [randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece()],
-        [moneyBagTreasure, randomPiece(), keyTreasure, randomPiece(), gemTreasure, randomPiece(), shieldTreasure],
-        [randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece()],
-        [bookTreasure, randomPiece(), crownTreasure, randomPiece(), toolboxTreasure, randomPiece(), candleTreasure],
-        [randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece()],
-        [startingYellow, randomPiece(), bottleTreasure, randomPiece(), ringTreasure, randomPiece(), startingGreen]
-    ];
-}
-
-function randomPiece(): Piece {
-    const pieceTypes = [createPiece(PieceType.CORNER), createPiece(PieceType.T), createPiece(PieceType.STRAIGHT)];
     const rotations = [0, Math.PI / 2, Math.PI, -Math.PI / 2];
 
-    const piece = getRandomElement(pieceTypes);
-    piece.rotate(getRandomElement(rotations));
+    const pile = [
+        createPiece(PieceType.T, getRandomElement(rotations), Treasure.MAGE),
+        createPiece(PieceType.T, getRandomElement(rotations), Treasure.BAT),
+        createPiece(PieceType.T, getRandomElement(rotations), Treasure.TROLL),
+        createPiece(PieceType.T, getRandomElement(rotations), Treasure.DRAGON),
+        createPiece(PieceType.T, getRandomElement(rotations), Treasure.GHOST),
+        createPiece(PieceType.T, getRandomElement(rotations), Treasure.UNICORN),
+        createPiece(PieceType.CORNER, getRandomElement(rotations), Treasure.OWL),
+        createPiece(PieceType.CORNER, getRandomElement(rotations), Treasure.CAT),
+        createPiece(PieceType.CORNER, getRandomElement(rotations), Treasure.BUTTERFLY),
+        createPiece(PieceType.CORNER, getRandomElement(rotations), Treasure.MOUSE),
+        createPiece(PieceType.CORNER, getRandomElement(rotations), Treasure.LIZARD),
+        createPiece(PieceType.CORNER, getRandomElement(rotations), Treasure.SPIDER)
+    ];
 
-    return piece;
+    for (let i = 0; i < CORNER_PIECES_IN_PILE; i++) {
+        pile.push(createPiece(PieceType.CORNER, getRandomElement(rotations)));
+    }
+
+    for (let i = 0; i < STRAIGHT_PIECES_IN_PILE; i++) {
+        pile.push(createPiece(PieceType.STRAIGHT, getRandomElement(rotations)));
+    }
+
+    return [
+        [startingRed, removeRandomElement(pile), trophyTreasure, removeRandomElement(pile), daggerTreasure, removeRandomElement(pile), startingBlue],
+        [removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile)],
+        [moneyBagTreasure, removeRandomElement(pile), keyTreasure, removeRandomElement(pile), gemTreasure, removeRandomElement(pile), shieldTreasure],
+        [removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile)],
+        [bookTreasure, removeRandomElement(pile), crownTreasure, removeRandomElement(pile), toolboxTreasure, removeRandomElement(pile), candleTreasure],
+        [removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile), removeRandomElement(pile)],
+        [startingYellow, removeRandomElement(pile), bottleTreasure, removeRandomElement(pile), ringTreasure, removeRandomElement(pile), startingGreen]
+    ];
 }
 
 export default Labyrinth;

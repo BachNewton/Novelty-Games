@@ -12,6 +12,18 @@ import KeyImage from '../images/treasures/key.png';
 import RingImage from '../images/treasures/ring.png';
 import ShieldImage from '../images/treasures/shield.png';
 import ToolboxImage from '../images/treasures/toolbox.png';
+import BatImage from '../images/treasures/bat.png';
+import ButterflyImage from '../images/treasures/butterfly.png';
+import CatImage from '../images/treasures/cat.png';
+import DragonImage from '../images/treasures/dragon.png';
+import GhostImage from '../images/treasures/ghost.png';
+import LizardImage from '../images/treasures/lizard.png';
+import MageImage from '../images/treasures/mage.png';
+import MouseImage from '../images/treasures/mouse.png';
+import OwlImage from '../images/treasures/owl.png';
+import SpiderImage from '../images/treasures/spider.png';
+import TrollImage from '../images/treasures/troll.png';
+import UnicornImage from '../images/treasures/unicorn.png';
 import { useState } from "react";
 
 interface PieceProps {
@@ -98,6 +110,30 @@ function centerIcon(data: PieceData): JSX.Element {
             return <img src={ShieldImage} />;
         case Treasure.TOOLBOX:
             return <img src={ToolboxImage} />;
+        case Treasure.BAT:
+            return <img src={BatImage} />;
+        case Treasure.BUTTERFLY:
+            return <img src={ButterflyImage} />;
+        case Treasure.CAT:
+            return <img src={CatImage} />;
+        case Treasure.DRAGON:
+            return <img src={DragonImage} />;
+        case Treasure.GHOST:
+            return <img src={GhostImage} />;
+        case Treasure.LIZARD:
+            return <img src={LizardImage} />;
+        case Treasure.MAGE:
+            return <img src={MageImage} />;
+        case Treasure.MOUSE:
+            return <img src={MouseImage} />;
+        case Treasure.OWL:
+            return <img src={OwlImage} />;
+        case Treasure.SPIDER:
+            return <img src={SpiderImage} />;
+        case Treasure.TROLL:
+            return <img src={TrollImage} />;
+        case Treasure.UNICORN:
+            return <img src={UnicornImage} />;
     }
 
     return <div />;

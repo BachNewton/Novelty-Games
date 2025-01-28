@@ -29,13 +29,25 @@ export enum Treasure {
     KEY,
     RING,
     SHIELD,
-    TOOLBOX
+    TOOLBOX,
+    BAT,
+    BUTTERFLY,
+    CAT,
+    DRAGON,
+    GHOST,
+    LIZARD,
+    MAGE,
+    MOUSE,
+    OWL,
+    SPIDER,
+    TROLL,
+    UNICORN
 }
 
-export function createPiece(type: PieceType): Piece {
+export function createPiece(type: PieceType, srartingRotation: number, treasure?: Treasure): Piece {
     const paths = getPaths(type);
 
-    let rotation = 0;
+    let rotation = srartingRotation;
 
     let hasTop = false;
     let hasBottom = false;
@@ -60,7 +72,7 @@ export function createPiece(type: PieceType): Piece {
 
     return {
         startingColor: null,
-        treasure: null,
+        treasure: treasure ?? null,
         hasTop: () => hasTop,
         hasBottom: () => hasBottom,
         hasLeft: () => hasLeft,
