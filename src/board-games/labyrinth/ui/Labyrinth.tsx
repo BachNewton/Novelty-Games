@@ -3,6 +3,7 @@ import { Route, updateRoute } from "../../../ui/Routing";
 import { getRandomElement, removeRandomElement } from "../../../util/Randomizer";
 import { createPiece, Piece, PieceType, PlayerColor, Treasure } from "../data/Piece";
 import PieceUi from "./Piece";
+import Triangle from "./Triangle";
 
 const CORNER_PIECES_IN_PILE = 9;
 const STRAIGHT_PIECES_IN_PILE = 13;
@@ -33,14 +34,22 @@ const Labyrinth: React.FC = () => {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(7, 1fr)',
-            gridTemplateRows: 'repeat(7, 1fr)',
+            gridTemplateColumns: 'repeat(9, 1fr)',
+            gridTemplateRows: 'repeat(9, 1fr)',
             aspectRatio: 1,
             maxHeight: '100vh',
             boxSizing: 'border-box',
             padding: '10px'
         }}>
-            {piecesUi}
+            <div /><div /><Triangle rotation={0} /><div /><Triangle rotation={0} /><div /><Triangle rotation={0} /><div /><div />
+            <div />{piecesUi.slice(7 * 0, 7 * 1)}<div />
+            <Triangle rotation={-90} />{piecesUi.slice(7 * 1, 7 * 2)}<Triangle rotation={90} />
+            <div />{piecesUi.slice(7 * 2, 7 * 3)}<div />
+            <Triangle rotation={-90} />{piecesUi.slice(7 * 3, 7 * 4)}<Triangle rotation={90} />
+            <div />{piecesUi.slice(7 * 4, 7 * 5)}<div />
+            <Triangle rotation={-90} />{piecesUi.slice(7 * 5, 7 * 6)}<Triangle rotation={90} />
+            <div />{piecesUi.slice(7 * 6, 7 * 7)}<div />
+            <div /><div /><Triangle rotation={180} /><div /><Triangle rotation={180} /><div /><Triangle rotation={180} /><div /><div />
         </div>
     </div>;
 };
