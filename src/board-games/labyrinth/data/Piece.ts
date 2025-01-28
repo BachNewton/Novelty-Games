@@ -18,7 +18,18 @@ export enum PlayerColor {
 }
 
 export enum Treasure {
-    TROPHY, DAGGER, MONEY_BAG
+    TROPHY,
+    DAGGER,
+    MONEY_BAG,
+    BOOK,
+    BOTTLE,
+    CANDLE,
+    CROWN,
+    GEM,
+    KEY,
+    RING,
+    SHIELD,
+    TOOLBOX
 }
 
 export function createPiece(type: PieceType): Piece {

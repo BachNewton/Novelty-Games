@@ -40,9 +40,7 @@ function highlightPaths(index: number, piece: Piece, pieces: Piece[][]) {
 
     pieces.forEach(row => row.forEach(col => col.isTraversable = false));
 
-    const visited = new Set<Piece>();
-
-    dfs(piece, visited, x, y, pieces);
+    dfs(piece, new Set(), x, y, pieces);
 }
 
 function dfs(piece: Piece, visted: Set<Piece>, x: number, y: number, pieces: Piece[][]) {
@@ -90,14 +88,50 @@ function startingPieces(): Piece[][] {
     moneyBagTreasure.treasure = Treasure.MONEY_BAG;
     moneyBagTreasure.rotate(-Math.PI / 2);
 
+    const keyTreasure = createPiece(PieceType.T);
+    keyTreasure.treasure = Treasure.KEY;
+    keyTreasure.rotate(-Math.PI / 2);
+
+    const gemTreasure = createPiece(PieceType.T);
+    gemTreasure.treasure = Treasure.GEM;
+    gemTreasure.rotate(-Math.PI / 2);
+
+    const shieldTreasure = createPiece(PieceType.T);
+    shieldTreasure.treasure = Treasure.SHIELD;
+    shieldTreasure.rotate(-Math.PI / 2);
+
+    const bookTreasure = createPiece(PieceType.T);
+    bookTreasure.treasure = Treasure.BOOK;
+    bookTreasure.rotate(-Math.PI / 2);
+
+    const crownTreasure = createPiece(PieceType.T);
+    crownTreasure.treasure = Treasure.CROWN;
+    crownTreasure.rotate(-Math.PI / 2);
+
+    const toolboxTreasure = createPiece(PieceType.T);
+    toolboxTreasure.treasure = Treasure.TOOLBOX;
+    toolboxTreasure.rotate(-Math.PI / 2);
+
+    const candleTreasure = createPiece(PieceType.T);
+    candleTreasure.treasure = Treasure.CANDLE;
+    candleTreasure.rotate(-Math.PI / 2);
+
+    const bottleTreasure = createPiece(PieceType.T);
+    bottleTreasure.treasure = Treasure.BOTTLE;
+    bottleTreasure.rotate(-Math.PI / 2);
+
+    const ringTreasure = createPiece(PieceType.T);
+    ringTreasure.treasure = Treasure.RING;
+    ringTreasure.rotate(-Math.PI / 2);
+
     return [
         [startingRed, randomPiece(), trophyTreasure, randomPiece(), daggerTreasure, randomPiece(), startingBlue],
         [randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece()],
-        [moneyBagTreasure, randomPiece(), createPiece(PieceType.T), randomPiece(), createPiece(PieceType.T), randomPiece(), createPiece(PieceType.T)],
+        [moneyBagTreasure, randomPiece(), keyTreasure, randomPiece(), gemTreasure, randomPiece(), shieldTreasure],
         [randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece()],
-        [createPiece(PieceType.T), randomPiece(), createPiece(PieceType.T), randomPiece(), createPiece(PieceType.T), randomPiece(), createPiece(PieceType.T)],
+        [bookTreasure, randomPiece(), crownTreasure, randomPiece(), toolboxTreasure, randomPiece(), candleTreasure],
         [randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece(), randomPiece()],
-        [startingYellow, randomPiece(), createPiece(PieceType.T), randomPiece(), createPiece(PieceType.T), randomPiece(), startingGreen]
+        [startingYellow, randomPiece(), bottleTreasure, randomPiece(), ringTreasure, randomPiece(), startingGreen]
     ];
 }
 
