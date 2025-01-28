@@ -25,13 +25,16 @@ import SpiderImage from '../images/treasures/spider.png';
 import TrollImage from '../images/treasures/troll.png';
 import UnicornImage from '../images/treasures/unicorn.png';
 import { useState } from "react";
+import { DraggingDetails } from "./Labyrinth";
 
 interface PieceProps {
     data: PieceData,
     onClick: () => void;
+    onMouseDown?: (event: React.MouseEvent) => void;
+    draggingDetails?: DraggingDetails | null;
 }
 
-const Piece: React.FC<PieceProps> = ({ data, onClick }) => {
+const Piece: React.FC<PieceProps> = ({ data, onClick, onMouseDown, draggingDetails }) => {
     const [isHovered, setIsHovered] = useState(false);
 
     const top = data.hasTop() ? <div /> : brickUi();
@@ -47,8 +50,16 @@ const Piece: React.FC<PieceProps> = ({ data, onClick }) => {
         border: '1px solid grey',
         borderRadius: '15%',
         overflow: 'hidden',
-        placeItems: 'stretch'
+        placeItems: 'stretch',
+        userSelect: 'none'
     };
+
+    if (draggingDetails !== undefined && draggingDetails !== null) {
+        const x = draggingDetails.end.x - draggingDetails.start.x;
+        const y = draggingDetails.end.y - draggingDetails.start.y;
+
+        style.transform = `translate(${x}px, ${y}px)`;
+    }
 
     if (isHovered) {
         style.outline = '4px solid white';
@@ -58,7 +69,13 @@ const Piece: React.FC<PieceProps> = ({ data, onClick }) => {
         style.background = 'gold';
     }
 
-    return <div style={style} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} onClick={onClick}>
+    return <div
+        style={style}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={onClick}
+        onMouseDown={onMouseDown}
+    >
         {brickUi()}
         {top}
         {brickUi()}
@@ -87,60 +104,64 @@ function centerIcon(data: PieceData): JSX.Element {
 
     switch (data.treasure) {
         case Treasure.TROPHY:
-            return <img src={TrophyImage} />;
+            return image(TrophyImage);
         case Treasure.DAGGER:
-            return <img src={DaggerImage} />;
+            return image(DaggerImage);
         case Treasure.MONEY_BAG:
-            return <img src={MoneyBagImage} />;
+            return image(MoneyBagImage);
         case Treasure.BOOK:
-            return <img src={BookImage} />;
+            return image(BookImage);
         case Treasure.BOTTLE:
-            return <img src={BottleImage} />;
+            return image(BottleImage);
         case Treasure.CANDLE:
-            return <img src={CandleImage} />;
+            return image(CandleImage);
         case Treasure.CROWN:
-            return <img src={CrownImage} />;
+            return image(CrownImage);
         case Treasure.GEM:
-            return <img src={GemImage} />;
+            return image(GemImage);
         case Treasure.KEY:
-            return <img src={KeyImage} />;
+            return image(KeyImage);
         case Treasure.RING:
-            return <img src={RingImage} />;
+            return image(RingImage);
         case Treasure.SHIELD:
-            return <img src={ShieldImage} />;
+            return image(ShieldImage);
         case Treasure.TOOLBOX:
-            return <img src={ToolboxImage} />;
+            return image(ToolboxImage);
         case Treasure.BAT:
-            return <img src={BatImage} />;
+            return image(BatImage);
         case Treasure.BUTTERFLY:
-            return <img src={ButterflyImage} />;
+            return image(ButterflyImage);
         case Treasure.CAT:
-            return <img src={CatImage} />;
+            return image(CatImage);
         case Treasure.DRAGON:
-            return <img src={DragonImage} />;
+            return image(DragonImage);
         case Treasure.GHOST:
-            return <img src={GhostImage} />;
+            return image(GhostImage);
         case Treasure.LIZARD:
-            return <img src={LizardImage} />;
+            return image(LizardImage);
         case Treasure.MAGE:
-            return <img src={MageImage} />;
+            return image(MageImage);
         case Treasure.MOUSE:
-            return <img src={MouseImage} />;
+            return image(MouseImage);
         case Treasure.OWL:
-            return <img src={OwlImage} />;
+            return image(OwlImage);
         case Treasure.SPIDER:
-            return <img src={SpiderImage} />;
+            return image(SpiderImage);
         case Treasure.TROLL:
-            return <img src={TrollImage} />;
+            return image(TrollImage);
         case Treasure.UNICORN:
-            return <img src={UnicornImage} />;
+            return image(UnicornImage);
     }
 
     return <div />;
 }
 
 function brickUi(): JSX.Element {
-    return <img src={BrickImage} />
+    return image(BrickImage)
+}
+
+function image(src: string): JSX.Element {
+    return <img src={src} draggable='false' />;
 }
 
 export default Piece;

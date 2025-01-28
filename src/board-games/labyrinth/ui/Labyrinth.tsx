@@ -23,12 +23,39 @@ interface TrianglePosition {
     y: number;
 }
 
+export interface DraggingDetails {
+    start: MousePosition;
+    end: MousePosition;
+}
+
+interface MousePosition {
+    x: number;
+    y: number;
+}
+
 const Labyrinth: React.FC = () => {
     const [state, setState] = useState<State>(startingState());
+    const [draggingDetails, setDraggingDetails] = useState<DraggingDetails | null>(null);
+
+    useEffect(() => updateRoute(Route.LABYRINTH), []);
 
     useEffect(() => {
-        updateRoute(Route.LABYRINTH);
-    }, []);
+        const mouseMoveListener = (e: MouseEvent) => {
+            if (draggingDetails === null) return;
+
+            setDraggingDetails({ start: draggingDetails.start, end: { x: e.clientX, y: e.clientY } });
+        };
+
+        const mouseUpListener = () => setDraggingDetails(null);
+
+        window.addEventListener('mousemove', mouseMoveListener);
+        window.addEventListener('mouseup', mouseUpListener);
+
+        return () => {
+            window.removeEventListener('mousemove', mouseMoveListener);
+            window.removeEventListener('mouseup', mouseUpListener);
+        };
+    }, [draggingDetails]);
 
     const piecesUi = state.pieces.flatMap(rowPieces => rowPieces).map((piece, index) => {
         return <PieceUi key={index} data={piece} onClick={() => {
@@ -59,7 +86,12 @@ const Labyrinth: React.FC = () => {
         [180, 180, 180],
     ].map((row, y) => row.map((col, x) => <Triangle rotation={col} onClick={() => onTriangleClick(x, y)} />));
 
-    triangles[state.sparePiece.position.y][state.sparePiece.position.x] = <PieceUi data={state.sparePiece.piece} onClick={() => { }} />;
+    triangles[state.sparePiece.position.y][state.sparePiece.position.x] = <PieceUi
+        data={state.sparePiece.piece}
+        onClick={() => { }}
+        onMouseDown={e => setDraggingDetails({ start: { x: e.clientX, y: e.clientY }, end: { x: e.clientX, y: e.clientY } })}
+        draggingDetails={draggingDetails}
+    />;
 
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <div style={{
