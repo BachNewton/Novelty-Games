@@ -24,17 +24,20 @@ import OwlImage from '../images/treasures/owl.png';
 import SpiderImage from '../images/treasures/spider.png';
 import TrollImage from '../images/treasures/troll.png';
 import UnicornImage from '../images/treasures/unicorn.png';
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { DraggingDetails } from "./Labyrinth";
+import { coerceToRange } from "../../../util/Math";
 
 interface PieceProps {
     data: PieceData,
     onClick: () => void;
     onMouseDown?: (event: React.MouseEvent) => void;
-    draggingDetails?: DraggingDetails | null;
+    draggingDetails: DraggingDetails | null;
+    shouldBeDragged: () => boolean;
 }
 
-const Piece: React.FC<PieceProps> = ({ data, onClick, onMouseDown, draggingDetails }) => {
+const Piece: React.FC<PieceProps> = ({ data, onClick, onMouseDown, draggingDetails, shouldBeDragged }) => {
+    const ref = useRef<HTMLDivElement>(null);
     const [isHovered, setIsHovered] = useState(false);
 
     const top = data.hasTop() ? <div /> : brickUi();
@@ -51,14 +54,13 @@ const Piece: React.FC<PieceProps> = ({ data, onClick, onMouseDown, draggingDetai
         borderRadius: '15%',
         overflow: 'hidden',
         placeItems: 'stretch',
-        userSelect: 'none'
+        userSelect: 'none',
+        zIndex: 1,
+        background: '#282C34'
     };
 
-    if (draggingDetails !== undefined && draggingDetails !== null) {
-        const x = draggingDetails.end.x - draggingDetails.start.x;
-        const y = draggingDetails.end.y - draggingDetails.start.y;
-
-        style.transform = `translate(${x}px, ${y}px)`;
+    if (draggingDetails !== null && shouldBeDragged() && ref.current !== null) {
+        style.transform = calculateTranslation(draggingDetails, ref.current);
     }
 
     if (isHovered) {
@@ -70,6 +72,7 @@ const Piece: React.FC<PieceProps> = ({ data, onClick, onMouseDown, draggingDetai
     }
 
     return <div
+        ref={ref}
         style={style}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -87,6 +90,28 @@ const Piece: React.FC<PieceProps> = ({ data, onClick, onMouseDown, draggingDetai
         {brickUi()}
     </div>;
 };
+
+function calculateTranslation(draggingDetails: DraggingDetails, pieceComponent: HTMLDivElement): string {
+    const size = pieceComponent.getBoundingClientRect().width;
+
+    const xDiff = draggingDetails.position.y === 0 || draggingDetails.position.y === 4
+        ? 0
+        : draggingDetails.end.x - draggingDetails.start.x;
+
+    const yDiff = draggingDetails.position.y > 0 && draggingDetails.position.y < 4
+        ? 0
+        : draggingDetails.end.y - draggingDetails.start.y;
+
+    const x = draggingDetails.position.x === 0
+        ? coerceToRange(xDiff, 0, size)
+        : coerceToRange(xDiff, -size, 0);
+
+    const y = draggingDetails.position.y === 0
+        ? coerceToRange(yDiff, 0, size)
+        : coerceToRange(yDiff, -size, 0);
+
+    return `translate(${x}px, ${y}px)`;
+}
 
 function centerIcon(data: PieceData): JSX.Element {
     const margin = '5px';

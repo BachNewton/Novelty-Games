@@ -26,9 +26,15 @@ interface TrianglePosition {
 export interface DraggingDetails {
     start: MousePosition;
     end: MousePosition;
+    position: TrianglePosition;
 }
 
 interface MousePosition {
+    x: number;
+    y: number;
+}
+
+interface Array2DPosition {
     x: number;
     y: number;
 }
@@ -43,7 +49,7 @@ const Labyrinth: React.FC = () => {
         const mouseMoveListener = (e: MouseEvent) => {
             if (draggingDetails === null) return;
 
-            setDraggingDetails({ start: draggingDetails.start, end: { x: e.clientX, y: e.clientY } });
+            setDraggingDetails({ start: draggingDetails.start, end: { x: e.clientX, y: e.clientY }, position: state.sparePiece.position });
         };
 
         const mouseUpListener = () => setDraggingDetails(null);
@@ -58,14 +64,20 @@ const Labyrinth: React.FC = () => {
     }, [draggingDetails]);
 
     const piecesUi = state.pieces.flatMap(rowPieces => rowPieces).map((piece, index) => {
-        return <PieceUi key={index} data={piece} onClick={() => {
-            highlightPaths(index, piece, state.pieces);
+        return <PieceUi
+            key={index}
+            data={piece}
+            draggingDetails={draggingDetails}
+            shouldBeDragged={() => shouldBeDragged(index, state.pieces, draggingDetails)}
+            onClick={() => {
+                highlightPaths(index, piece, state.pieces);
 
-            setState({
-                pieces: state.pieces.map(row => [...row]),
-                sparePiece: state.sparePiece
-            });
-        }} />;
+                setState({
+                    pieces: state.pieces.map(row => [...row]),
+                    sparePiece: state.sparePiece
+                });
+            }}
+        />;
     });
 
     const onTriangleClick = (x: number, y: number) => {
@@ -89,8 +101,13 @@ const Labyrinth: React.FC = () => {
     triangles[state.sparePiece.position.y][state.sparePiece.position.x] = <PieceUi
         data={state.sparePiece.piece}
         onClick={() => { }}
-        onMouseDown={e => setDraggingDetails({ start: { x: e.clientX, y: e.clientY }, end: { x: e.clientX, y: e.clientY } })}
+        onMouseDown={e => setDraggingDetails({
+            start: { x: e.clientX, y: e.clientY },
+            end: { x: e.clientX, y: e.clientY },
+            position: state.sparePiece.position
+        })}
         draggingDetails={draggingDetails}
+        shouldBeDragged={() => true}
     />;
 
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -116,14 +133,35 @@ const Labyrinth: React.FC = () => {
     </div>;
 };
 
-function highlightPaths(index: number, piece: Piece, pieces: Piece[][]) {
+function shouldBeDragged(index: number, pieces: Piece[][], draggingDetails: DraggingDetails | null): boolean {
+    if (draggingDetails === null) return false;
+
+    const position = calculate2DArrayPosition(index, pieces);
+    const { x, y } = draggingDetails.position;
+
+    const xMappings: Record<number, number> = { 0: 1, 1: 3, 2: 5 };
+    const yMappings: Record<number, number> = { 1: 1, 2: 3, 3: 5 };
+
+    if ((y === 0 || y === 4) && xMappings[x] === position.x) return true;
+    if (yMappings[y] === position.y) return true;
+
+    return false;
+}
+
+function calculate2DArrayPosition(index: number, pieces: Piece[][]): Array2DPosition {
     const cols = pieces[0].length;
     const y = Math.floor(index / cols);
     const x = index % cols;
 
+    return { x: x, y: y };
+}
+
+function highlightPaths(index: number, piece: Piece, pieces: Piece[][]) {
     pieces.forEach(row => row.forEach(col => col.isTraversable = false));
 
-    dfs(piece, new Set(), x, y, pieces);
+    const position = calculate2DArrayPosition(index, pieces);
+
+    dfs(piece, new Set(), position.x, position.y, pieces);
 }
 
 function dfs(piece: Piece, visted: Set<Piece>, x: number, y: number, pieces: Piece[][]) {
