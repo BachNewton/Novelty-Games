@@ -4,6 +4,7 @@ import { getRandomElement, removeRandomElement } from "../../../util/Randomizer"
 import { createPiece, Piece, PieceType, PlayerColor, Treasure } from "../data/Piece";
 import PieceUi from "./Piece";
 import Triangle from "./Triangle";
+import Lobby from "./Lobby";
 
 const CORNER_PIECES_IN_PILE = 9;
 const STRAIGHT_PIECES_IN_PILE = 13;
@@ -42,6 +43,8 @@ interface Array2DPosition {
 const Labyrinth: React.FC = () => {
     const [state, setState] = useState<State>(startingState());
     const [draggingDetails, setDraggingDetails] = useState<DraggingDetails | null>(null);
+
+    // return <Lobby />;
 
     useEffect(() => updateRoute(Route.LABYRINTH), []);
 
