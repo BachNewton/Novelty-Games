@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import Game from "./Game";
-import Lobby from "./Lobby";
+import Lobby, { Player } from "./Lobby";
 
 interface State { }
 
 class LobbyState implements State { }
-class GameState implements State { }
+
+class GameState implements State {
+    players: Player[];
+
+    constructor(players: Player[]) {
+        this.players = players;
+    }
+}
 
 const Labyrinth: React.FC = () => {
     const [state, setState] = useState<State>(new LobbyState());
@@ -16,7 +23,7 @@ const Labyrinth: React.FC = () => {
     if (state instanceof GameState) {
         return <Game />;
     } else {
-        return <Lobby />;
+        return <Lobby onStart={players => setState(new GameState(players))} />;
     }
 }
 

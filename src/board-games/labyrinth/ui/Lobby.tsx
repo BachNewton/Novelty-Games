@@ -4,12 +4,16 @@ import TextInput, { InputHolder } from "../../../util/ui/TextInput";
 import { PlayerColor } from "../data/Piece";
 import { getColor } from "./Circle";
 
-interface Player {
+interface LobbyProps {
+    onStart: (players: Player[]) => void;
+}
+
+export interface Player {
     name: string;
     color: PlayerColor;
 }
 
-const Lobby: React.FC = () => {
+const Lobby: React.FC<LobbyProps> = ({ onStart }) => {
     const [players, setPlayers] = useState<Player[]>([]);
     const [isPlayerPromptOpen, setIsPlayerPromptOpen] = useState(false);
 
@@ -26,7 +30,7 @@ const Lobby: React.FC = () => {
 
         <div style={{ display: 'flex', flexDirection: 'column' }}>{playersUi}</div>
 
-        <button style={{ fontSize: '1em', marginTop: '25px' }} disabled={players.length < 1}>Start Game</button>
+        <button style={{ fontSize: '1em', marginTop: '25px' }} disabled={players.length < 1} onClick={() => onStart(players)}>Start Game</button>
 
         <Dialog isOpen={isPlayerPromptOpen} content={<PlayerPrompt onSubmit={name => {
             setIsPlayerPromptOpen(false);
