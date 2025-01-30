@@ -25,7 +25,7 @@ import SpiderImage from '../images/treasures/spider.png';
 import TrollImage from '../images/treasures/troll.png';
 import UnicornImage from '../images/treasures/unicorn.png';
 import { useRef, useState } from "react";
-import { DraggingDetails } from "./Labyrinth";
+import { DraggingDetails } from "./Game";
 import { coerceToRange } from "../../../util/Math";
 
 interface PieceProps {
