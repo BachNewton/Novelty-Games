@@ -9,7 +9,7 @@ class LobbyState implements State { }
 class GameState implements State { }
 
 const Labyrinth: React.FC = () => {
-    const [state, setState] = useState<State>(new GameState());
+    const [state, setState] = useState<State>(new LobbyState());
 
     useEffect(() => updateRoute(Route.LABYRINTH), []);
 

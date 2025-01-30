@@ -27,6 +27,7 @@ import UnicornImage from '../images/treasures/unicorn.png';
 import { useRef, useState } from "react";
 import { DraggingDetails } from "./Game";
 import { coerceToRange } from "../../../util/Math";
+import Circle from "./Circle";
 
 interface PieceProps {
     data: PieceData,
@@ -114,17 +115,8 @@ function calculateTranslation(draggingDetails: DraggingDetails, pieceComponent: 
 }
 
 function centerIcon(data: PieceData): JSX.Element {
-    const margin = '5px';
-
-    switch (data.startingColor) {
-        case PlayerColor.RED:
-            return <div style={{ borderRadius: '100%', margin: margin, background: 'red' }} />;
-        case PlayerColor.BLUE:
-            return <div style={{ borderRadius: '100%', margin: margin, background: 'blue' }} />;
-        case PlayerColor.YELLOW:
-            return <div style={{ borderRadius: '100%', margin: margin, background: 'yellow' }} />;
-        case PlayerColor.GREEN:
-            return <div style={{ borderRadius: '100%', margin: margin, background: 'green' }} />;
+    if (data.startingColor !== null) {
+        return <Circle color={data.startingColor} />
     }
 
     switch (data.treasure) {
