@@ -1,0 +1,16 @@
+{
+	"React Function Component": {
+		"prefix": "rfc",
+		"body": [
+			"interface ${1:Name}Props { }",
+			"",
+			"const ${1:Name}: React.FC<${1:Name}Props> = ({ }) => {",
+			"\treturn <div></div>;",
+			"};",
+			"",
+			"export default ${1:Name};",
+			""
+		],
+		"description": "Creates a React Function Component with TypeScript."
+	}
+}
