@@ -4,6 +4,7 @@ import PieceUi from "./Piece";
 import Triangle from "./Triangle";
 import { createStartingState } from "../logic/GameSetup";
 import { Player } from "../data/Player";
+import Treasure from "./Treasure";
 
 interface GameProps {
     players: Player[];
@@ -120,7 +121,12 @@ const Game: React.FC<GameProps> = ({ players }) => {
         shouldBeDragged={() => true}
     />;
 
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+    return <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh'
+    }}>
         <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(9, 1fr)',
@@ -140,6 +146,7 @@ const Game: React.FC<GameProps> = ({ players }) => {
             <div />{piecesUi.slice(7 * 6, 7 * 7)}<div />
             <div /><div />{triangles[4][0]}<div />{triangles[4][1]}<div />{triangles[4][2]}<div /><div />
         </div>
+        <Treasure cards={state.players[state.currentPlayerIndex].treasurePile} />
     </div>;
 };
 

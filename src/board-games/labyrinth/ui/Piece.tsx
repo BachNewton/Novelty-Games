@@ -1,34 +1,10 @@
 import { Piece as PieceData } from "../data/Piece";
 import BrickImage from '../images/brick.avif';
-import TrophyImage from '../images/treasures/trophy.png';
-import DaggerImage from '../images/treasures/dagger.png';
-import MoneyBagImage from '../images/treasures/money-bag.png';
-import BookImage from '../images/treasures/book.png';
-import BottleImage from '../images/treasures/bottle.png';
-import CandleImage from '../images/treasures/candle.png';
-import CrownImage from '../images/treasures/crown.png';
-import GemImage from '../images/treasures/gem.png';
-import KeyImage from '../images/treasures/key.png';
-import RingImage from '../images/treasures/ring.png';
-import ShieldImage from '../images/treasures/shield.png';
-import ToolboxImage from '../images/treasures/toolbox.png';
-import BatImage from '../images/treasures/bat.png';
-import ButterflyImage from '../images/treasures/butterfly.png';
-import CatImage from '../images/treasures/cat.png';
-import DragonImage from '../images/treasures/dragon.png';
-import GhostImage from '../images/treasures/ghost.png';
-import LizardImage from '../images/treasures/lizard.png';
-import MageImage from '../images/treasures/mage.png';
-import MouseImage from '../images/treasures/mouse.png';
-import OwlImage from '../images/treasures/owl.png';
-import SpiderImage from '../images/treasures/spider.png';
-import TrollImage from '../images/treasures/troll.png';
-import UnicornImage from '../images/treasures/unicorn.png';
 import { useRef, useState } from "react";
 import { DraggingDetails } from "./Game";
 import { coerceToRange } from "../../../util/Math";
 import { getColor, Player, PlayerColor } from "../data/Player";
-import { Treasure } from "../data/Treasure";
+import { getTreasureImage, Treasure } from "../data/Treasure";
 
 interface PieceProps {
     data: PieceData;
@@ -119,66 +95,15 @@ function calculateTranslation(draggingDetails: DraggingDetails, pieceComponent: 
 function centerIcon(data: PieceData, playerOnPiece: Player | null): JSX.Element {
     const playerStyle = playerOnPiece ? getPlayerStyle(playerOnPiece.color) : {};
 
-    const centerImage = (src: string) => {
-        return image(src, playerStyle);
-    }
-
-    switch (data.treasure) {
-        case Treasure.TROPHY:
-            return centerImage(TrophyImage);
-        case Treasure.DAGGER:
-            return centerImage(DaggerImage);
-        case Treasure.MONEY_BAG:
-            return centerImage(MoneyBagImage);
-        case Treasure.BOOK:
-            return centerImage(BookImage);
-        case Treasure.BOTTLE:
-            return centerImage(BottleImage);
-        case Treasure.CANDLE:
-            return centerImage(CandleImage);
-        case Treasure.CROWN:
-            return centerImage(CrownImage);
-        case Treasure.GEM:
-            return centerImage(GemImage);
-        case Treasure.KEY:
-            return centerImage(KeyImage);
-        case Treasure.RING:
-            return centerImage(RingImage);
-        case Treasure.SHIELD:
-            return centerImage(ShieldImage);
-        case Treasure.TOOLBOX:
-            return centerImage(ToolboxImage);
-        case Treasure.BAT:
-            return centerImage(BatImage);
-        case Treasure.BUTTERFLY:
-            return centerImage(ButterflyImage);
-        case Treasure.CAT:
-            return centerImage(CatImage);
-        case Treasure.DRAGON:
-            return centerImage(DragonImage);
-        case Treasure.GHOST:
-            return centerImage(GhostImage);
-        case Treasure.LIZARD:
-            return centerImage(LizardImage);
-        case Treasure.MAGE:
-            return centerImage(MageImage);
-        case Treasure.MOUSE:
-            return centerImage(MouseImage);
-        case Treasure.OWL:
-            return centerImage(OwlImage);
-        case Treasure.SPIDER:
-            return centerImage(SpiderImage);
-        case Treasure.TROLL:
-            return centerImage(TrollImage);
-        case Treasure.UNICORN:
-            return centerImage(UnicornImage);
+    if (data.treasure !== null) {
+        return image(getTreasureImage(data.treasure), playerStyle);
     }
 
     return <div style={playerStyle} />;
 }
 
 function brickUi(): JSX.Element {
-    return image(BrickImage)
+    return image(BrickImage);
 }
 
 function image(src: string, playerStyle?: React.CSSProperties): JSX.Element {
