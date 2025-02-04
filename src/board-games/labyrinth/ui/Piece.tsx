@@ -1,16 +1,16 @@
 import { Piece as PieceData } from "../data/Piece";
 import BrickImage from '../images/brick.avif';
 import { useRef, useState } from "react";
-import { DraggingDetails } from "./Game";
+import { DraggingDetails, MousePosition } from "./Game";
 import { coerceToRange } from "../../../util/Math";
 import { getColor, Player, PlayerColor } from "../data/Player";
-import { getTreasureImage, Treasure } from "../data/Treasure";
+import { getTreasureImage } from "../data/Treasure";
 
 interface PieceProps {
     data: PieceData;
     playerOnPiece: Player | null;
     onClick: () => void;
-    onMouseDown?: (event: React.MouseEvent) => void;
+    onMouseDown?: (position: MousePosition) => void;
     draggingDetails: DraggingDetails | null;
     shouldBeDragged: () => boolean;
 }
@@ -56,7 +56,8 @@ const Piece: React.FC<PieceProps> = ({ data, playerOnPiece, onClick, onMouseDown
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={onClick}
-        onMouseDown={onMouseDown}
+        onMouseDown={e => onMouseDown?.(handleMouseDown(e))}
+        onTouchStart={e => onMouseDown?.(handleTouchStart(e))}
     >
         {brickUi()}
         {top}
@@ -69,6 +70,16 @@ const Piece: React.FC<PieceProps> = ({ data, playerOnPiece, onClick, onMouseDown
         {brickUi()}
     </div>;
 };
+
+function handleMouseDown(e: React.MouseEvent): MousePosition {
+    return { x: e.clientX, y: e.clientY };
+}
+
+function handleTouchStart(e: React.TouchEvent): MousePosition {
+    const touch = e.touches[0];
+
+    return { x: touch.clientX, y: touch.clientY };
+}
 
 function calculateTranslation(draggingDetails: DraggingDetails, pieceComponent: HTMLDivElement): string {
     const size = pieceComponent.getBoundingClientRect().width;

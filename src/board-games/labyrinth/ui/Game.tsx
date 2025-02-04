@@ -33,7 +33,7 @@ export interface DraggingDetails {
     position: TrianglePosition;
 }
 
-interface MousePosition {
+export interface MousePosition {
     x: number;
     y: number;
 }
@@ -48,20 +48,27 @@ const Game: React.FC<GameProps> = ({ players }) => {
     const [draggingDetails, setDraggingDetails] = useState<DraggingDetails | null>(null);
 
     useEffect(() => {
-        const mouseMoveListener = (e: MouseEvent) => {
+        const handleMove = (x: number, y: number) => {
             if (draggingDetails === null) return;
 
-            setDraggingDetails({ start: draggingDetails.start, end: { x: e.clientX, y: e.clientY }, position: state.sparePiece.position });
+            setDraggingDetails({ start: draggingDetails.start, end: { x: x, y: y }, position: state.sparePiece.position });
         };
 
+        const mouseMoveListener = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
         const mouseUpListener = () => setDraggingDetails(null);
+        const touchMoveListener = (e: TouchEvent) => handleMove(e.touches[0].clientX, e.touches[0].clientY);
+        const touchEndListender = () => setDraggingDetails(null);
 
         window.addEventListener('mousemove', mouseMoveListener);
         window.addEventListener('mouseup', mouseUpListener);
+        window.addEventListener('touchmove', touchMoveListener);
+        window.addEventListener('touchend', touchEndListender);
 
         return () => {
             window.removeEventListener('mousemove', mouseMoveListener);
             window.removeEventListener('mouseup', mouseUpListener);
+            window.removeEventListener('touchmove', touchMoveListener);
+            window.removeEventListener('touchend', touchMoveListener);
         };
     }, [draggingDetails]);
 
@@ -112,9 +119,9 @@ const Game: React.FC<GameProps> = ({ players }) => {
         data={state.sparePiece.piece}
         playerOnPiece={null}
         onClick={() => { }}
-        onMouseDown={e => setDraggingDetails({
-            start: { x: e.clientX, y: e.clientY },
-            end: { x: e.clientX, y: e.clientY },
+        onMouseDown={position => setDraggingDetails({
+            start: { x: position.x, y: position.y },
+            end: { x: position.x, y: position.y },
             position: state.sparePiece.position
         })}
         draggingDetails={draggingDetails}
