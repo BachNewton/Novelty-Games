@@ -1,10 +1,16 @@
 export interface Player {
     name: string;
     color: PlayerColor;
+    position: PlayerPosition;
 }
 
 export enum PlayerColor {
     RED, BLUE, YELLOW, GREEN
+}
+
+export interface PlayerPosition {
+    x: number;
+    y: number;
 }
 
 export function getColor(color: PlayerColor): string {

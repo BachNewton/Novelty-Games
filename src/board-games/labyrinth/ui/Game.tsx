@@ -3,10 +3,17 @@ import { Piece } from "../data/Piece";
 import PieceUi from "./Piece";
 import Triangle from "./Triangle";
 import { createStartingState } from "../logic/GameSetup";
+import { Player } from "../data/Player";
+
+interface GameProps {
+    players: Player[];
+}
 
 export interface State {
     pieces: Piece[][];
     sparePiece: SparePiece;
+    players: Player[],
+    currentPlayerIndex: number;
 }
 
 interface SparePiece {
@@ -35,8 +42,8 @@ interface Array2DPosition {
     y: number;
 }
 
-const Game: React.FC = () => {
-    const [state, setState] = useState<State>(createStartingState());
+const Game: React.FC<GameProps> = ({ players }) => {
+    const [state, setState] = useState<State>(createStartingState(players));
     const [draggingDetails, setDraggingDetails] = useState<DraggingDetails | null>(null);
 
     useEffect(() => {
@@ -57,31 +64,39 @@ const Game: React.FC = () => {
         };
     }, [draggingDetails]);
 
+    const getPlayerOnPiece = (index: number): Player | null => {
+        const arrayPosition2D = calculate2DArrayPosition(index, state.pieces);
+
+        for (const player of state.players) {
+            if (player.position.x === arrayPosition2D.x && player.position.y === arrayPosition2D.y) {
+                return player;
+            }
+        }
+
+        return null;
+    };
+
     const piecesUi = state.pieces.flatMap(rowPieces => rowPieces).map((piece, index) => {
         return <PieceUi
             key={index}
             data={piece}
+            playerOnPiece={getPlayerOnPiece(index)}
             draggingDetails={draggingDetails}
             shouldBeDragged={() => shouldBeDragged(index, state.pieces, draggingDetails)}
             onClick={() => {
                 highlightPaths(index, piece, state.pieces);
 
-                setState({
-                    pieces: state.pieces.map(row => [...row]),
-                    sparePiece: state.sparePiece
-                });
+                state.pieces = state.pieces.map(row => [...row]);
+
+                setState({ ...state });
             }}
         />;
     });
 
     const onTriangleClick = (x: number, y: number) => {
-        setState({
-            pieces: state.pieces,
-            sparePiece: {
-                piece: state.sparePiece.piece,
-                position: { x: x, y: y }
-            }
-        });
+        state.sparePiece.position = { x: x, y: y };
+
+        setState({ ...state });
     };
 
     const triangles = [
@@ -94,6 +109,7 @@ const Game: React.FC = () => {
 
     triangles[state.sparePiece.position.y][state.sparePiece.position.x] = <PieceUi
         data={state.sparePiece.piece}
+        playerOnPiece={null}
         onClick={() => { }}
         onMouseDown={e => setDraggingDetails({
             start: { x: e.clientX, y: e.clientY },

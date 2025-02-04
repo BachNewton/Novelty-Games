@@ -1,6 +1,6 @@
 import { getColor, PlayerColor } from "../data/Player";
 
-const MARGIN = '5px';
+const MARGIN = '15%';
 
 interface CircleProps {
     color: PlayerColor;

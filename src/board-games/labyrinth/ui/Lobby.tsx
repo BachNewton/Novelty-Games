@@ -31,7 +31,8 @@ const Lobby: React.FC<LobbyProps> = ({ onStart }) => {
 
             const player: Player = {
                 name: name,
-                color: players.length as PlayerColor
+                color: players.length as PlayerColor,
+                position: { x: -1, y: -1 }
             };
 
             setPlayers(players.concat(player));

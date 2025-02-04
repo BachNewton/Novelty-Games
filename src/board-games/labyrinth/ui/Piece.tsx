@@ -28,16 +28,18 @@ import { useRef, useState } from "react";
 import { DraggingDetails } from "./Game";
 import { coerceToRange } from "../../../util/Math";
 import Circle from "./Circle";
+import { Player } from "../data/Player";
 
 interface PieceProps {
-    data: PieceData,
+    data: PieceData;
+    playerOnPiece: Player | null;
     onClick: () => void;
     onMouseDown?: (event: React.MouseEvent) => void;
     draggingDetails: DraggingDetails | null;
     shouldBeDragged: () => boolean;
 }
 
-const Piece: React.FC<PieceProps> = ({ data, onClick, onMouseDown, draggingDetails, shouldBeDragged }) => {
+const Piece: React.FC<PieceProps> = ({ data, playerOnPiece, onClick, onMouseDown, draggingDetails, shouldBeDragged }) => {
     const ref = useRef<HTMLDivElement>(null);
     const [isHovered, setIsHovered] = useState(false);
 
