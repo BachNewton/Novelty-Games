@@ -10,16 +10,12 @@ export function createStartingState(players: Player[]): State {
     setPlayersStartingPositions(players);
 
     const startingRed = createPiece(PieceType.CORNER, -Math.PI / 2);
-    startingRed.startingColor = PlayerColor.RED;
 
     const startingBlue = createPiece(PieceType.CORNER, Math.PI);
-    startingBlue.startingColor = PlayerColor.BLUE;
 
     const startingYellow = createPiece(PieceType.CORNER, 0);
-    startingYellow.startingColor = PlayerColor.YELLOW;
 
     const startingGreen = createPiece(PieceType.CORNER, Math.PI / 2);
-    startingGreen.startingColor = PlayerColor.GREEN;
 
     const trophyTreasure = createPiece(PieceType.T, Math.PI, Treasure.TROPHY);
     const daggerTreasure = createPiece(PieceType.T, Math.PI, Treasure.DAGGER);

@@ -1,7 +1,4 @@
-import { PlayerColor } from "./Player";
-
 export interface Piece {
-    startingColor: PlayerColor | null;
     treasure: Treasure | null;
     rotate: (angle: number) => void;
     hasTop: () => boolean;
@@ -69,7 +66,6 @@ export function createPiece(type: PieceType, srartingRotation: number, treasure?
     update();
 
     return {
-        startingColor: null,
         treasure: treasure ?? null,
         hasTop: () => hasTop,
         hasBottom: () => hasBottom,
