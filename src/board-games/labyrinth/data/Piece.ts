@@ -1,3 +1,5 @@
+import { PlayerColor } from "./Player";
+
 export interface Piece {
     startingColor: PlayerColor | null;
     treasure: Treasure | null;
@@ -11,10 +13,6 @@ export interface Piece {
 
 export enum PieceType {
     CORNER, T, STRAIGHT
-}
-
-export enum PlayerColor {
-    RED, BLUE, YELLOW, GREEN
 }
 
 export enum Treasure {

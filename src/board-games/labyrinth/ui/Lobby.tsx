@@ -1,16 +1,10 @@
 import { useState } from "react";
 import Dialog from "../../../util/ui/Dialog";
 import TextInput, { InputHolder } from "../../../util/ui/TextInput";
-import { PlayerColor } from "../data/Piece";
-import { getColor } from "./Circle";
+import { getColor, Player, PlayerColor } from "../data/Player";
 
 interface LobbyProps {
     onStart: (players: Player[]) => void;
-}
-
-export interface Player {
-    name: string;
-    color: PlayerColor;
 }
 
 const Lobby: React.FC<LobbyProps> = ({ onStart }) => {

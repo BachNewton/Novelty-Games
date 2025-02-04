@@ -1,4 +1,4 @@
-import { Piece as PieceData, PlayerColor, Treasure } from "../data/Piece";
+import { Piece as PieceData, Treasure } from "../data/Piece";
 import BrickImage from '../images/brick.avif';
 import TrophyImage from '../images/treasures/trophy.png';
 import DaggerImage from '../images/treasures/dagger.png';

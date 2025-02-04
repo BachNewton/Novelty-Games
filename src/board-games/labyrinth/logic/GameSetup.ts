@@ -1,5 +1,6 @@
 import { getRandomElement, removeRandomElement } from "../../../util/Randomizer";
-import { createPiece, PieceType, PlayerColor, Treasure } from "../data/Piece";
+import { createPiece, PieceType, Treasure } from "../data/Piece";
+import { PlayerColor } from "../data/Player";
 import { State } from "../ui/Game";
 
 const CORNER_PIECES_IN_PILE = 9;

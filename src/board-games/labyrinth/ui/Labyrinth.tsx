@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import Game from "./Game";
-import Lobby, { Player } from "./Lobby";
+import Lobby from "./Lobby";
+import { Player } from "../data/Player";
 
 interface State { }
 
