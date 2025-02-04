@@ -17,7 +17,12 @@ class GameState implements State {
 }
 
 const Labyrinth: React.FC = () => {
-    const [state, setState] = useState<State>(new GameState([{ name: 'Test', position: { x: -1, y: -1 }, color: PlayerColor.RED }]));
+    const [state, setState] = useState<State>(new GameState([
+        { name: 'Test 1', position: { x: -1, y: -1 }, color: PlayerColor.RED },
+        { name: 'Test 2', position: { x: -1, y: -1 }, color: PlayerColor.BLUE },
+        { name: 'Test 3', position: { x: -1, y: -1 }, color: PlayerColor.YELLOW },
+        { name: 'Test 4', position: { x: -1, y: -1 }, color: PlayerColor.GREEN }
+    ]));
 
     useEffect(() => updateRoute(Route.LABYRINTH), []);
 

@@ -27,8 +27,7 @@ import UnicornImage from '../images/treasures/unicorn.png';
 import { useRef, useState } from "react";
 import { DraggingDetails } from "./Game";
 import { coerceToRange } from "../../../util/Math";
-import Circle from "./Circle";
-import { Player } from "../data/Player";
+import { getColor, Player, PlayerColor } from "../data/Player";
 
 interface PieceProps {
     data: PieceData;
@@ -86,7 +85,7 @@ const Piece: React.FC<PieceProps> = ({ data, playerOnPiece, onClick, onMouseDown
         {top}
         {brickUi()}
         {left}
-        {centerIcon(data)}
+        {centerIcon(data, playerOnPiece)}
         {right}
         {brickUi()}
         {bottom}
@@ -116,71 +115,77 @@ function calculateTranslation(draggingDetails: DraggingDetails, pieceComponent: 
     return `translate(${x}px, ${y}px)`;
 }
 
-function centerIcon(data: PieceData): JSX.Element {
-    if (data.startingColor !== null) {
-        return <Circle color={data.startingColor} />
+function centerIcon(data: PieceData, playerOnPiece: Player | null): JSX.Element {
+    const playerStyle = playerOnPiece ? getPlayerStyle(playerOnPiece.color) : {};
+
+    const centerImage = (src: string) => {
+        return image(src, playerStyle);
     }
 
     switch (data.treasure) {
         case Treasure.TROPHY:
-            return image(TrophyImage);
+            return centerImage(TrophyImage);
         case Treasure.DAGGER:
-            return image(DaggerImage);
+            return centerImage(DaggerImage);
         case Treasure.MONEY_BAG:
-            return image(MoneyBagImage);
+            return centerImage(MoneyBagImage);
         case Treasure.BOOK:
-            return image(BookImage);
+            return centerImage(BookImage);
         case Treasure.BOTTLE:
-            return image(BottleImage);
+            return centerImage(BottleImage);
         case Treasure.CANDLE:
-            return image(CandleImage);
+            return centerImage(CandleImage);
         case Treasure.CROWN:
-            return image(CrownImage);
+            return centerImage(CrownImage);
         case Treasure.GEM:
-            return image(GemImage);
+            return centerImage(GemImage);
         case Treasure.KEY:
-            return image(KeyImage);
+            return centerImage(KeyImage);
         case Treasure.RING:
-            return image(RingImage);
+            return centerImage(RingImage);
         case Treasure.SHIELD:
-            return image(ShieldImage);
+            return centerImage(ShieldImage);
         case Treasure.TOOLBOX:
-            return image(ToolboxImage);
+            return centerImage(ToolboxImage);
         case Treasure.BAT:
-            return image(BatImage);
+            return centerImage(BatImage);
         case Treasure.BUTTERFLY:
-            return image(ButterflyImage);
+            return centerImage(ButterflyImage);
         case Treasure.CAT:
-            return image(CatImage);
+            return centerImage(CatImage);
         case Treasure.DRAGON:
-            return image(DragonImage);
+            return centerImage(DragonImage);
         case Treasure.GHOST:
-            return image(GhostImage);
+            return centerImage(GhostImage);
         case Treasure.LIZARD:
-            return image(LizardImage);
+            return centerImage(LizardImage);
         case Treasure.MAGE:
-            return image(MageImage);
+            return centerImage(MageImage);
         case Treasure.MOUSE:
-            return image(MouseImage);
+            return centerImage(MouseImage);
         case Treasure.OWL:
-            return image(OwlImage);
+            return centerImage(OwlImage);
         case Treasure.SPIDER:
-            return image(SpiderImage);
+            return centerImage(SpiderImage);
         case Treasure.TROLL:
-            return image(TrollImage);
+            return centerImage(TrollImage);
         case Treasure.UNICORN:
-            return image(UnicornImage);
+            return centerImage(UnicornImage);
     }
 
-    return <div />;
+    return <div style={playerStyle} />;
 }
 
 function brickUi(): JSX.Element {
     return image(BrickImage)
 }
 
-function image(src: string): JSX.Element {
-    return <img src={src} draggable='false' />;
+function image(src: string, playerStyle?: React.CSSProperties): JSX.Element {
+    return <img style={playerStyle} src={src} draggable='false' />;
+}
+
+function getPlayerStyle(color: PlayerColor): React.CSSProperties {
+    return { borderRadius: '100%', background: getColor(color) };
 }
 
 export default Piece;
