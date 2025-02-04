@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/Novelty-Games/static/css/main.1799ec44.css",
-    "main.js": "/Novelty-Games/static/js/main.9b3eddf4.js",
+    "main.js": "/Novelty-Games/static/js/main.cbb28e95.js",
     "static/js/453.ed3810f9.chunk.js": "/Novelty-Games/static/js/453.ed3810f9.chunk.js",
     "static/media/Paladin WProp J Nordstrom.fbx": "/Novelty-Games/static/media/Paladin WProp J Nordstrom.dff9b5b5278fd9b5a0b8.fbx",
     "static/media/skybox.jpg": "/Novelty-Games/static/media/skybox.abf8b9fe4fbb55e8b983.jpg",
@@ -36,6 +36,7 @@
     "static/media/gem.png": "/Novelty-Games/static/media/gem.0b2a5a6f8d22a90a3a37.png",
     "static/media/key.png": "/Novelty-Games/static/media/key.26cc0bfa9d775904c09c.png",
     "static/media/checkered.jpg": "/Novelty-Games/static/media/checkered.b372d57b848b58425139.jpg",
+    "static/media/question-mark.png": "/Novelty-Games/static/media/question-mark.35315957c6f5b0371a1a.png",
     "static/media/MB-ace.svg": "/Novelty-Games/static/media/MB-ace.a8f8a88737891decb1997b8d24860914.svg",
     "static/media/MB-sealant.svg": "/Novelty-Games/static/media/MB-sealant.f888814173ac2b0bdd02cf336035e0b2.svg",
     "static/media/MB-200.svg": "/Novelty-Games/static/media/MB-200.a7553133d1d97d2706b28bfe1b3bb353.svg",
@@ -59,11 +60,11 @@
     "static/media/MB-outline.svg": "/Novelty-Games/static/media/MB-outline.9375dcb67c2602a348842bb92635c97b.svg",
     "static/media/MB-back.svg": "/Novelty-Games/static/media/MB-back.73af888104565973b102803815b53578.svg",
     "main.1799ec44.css.map": "/Novelty-Games/static/css/main.1799ec44.css.map",
-    "main.9b3eddf4.js.map": "/Novelty-Games/static/js/main.9b3eddf4.js.map",
+    "main.cbb28e95.js.map": "/Novelty-Games/static/js/main.cbb28e95.js.map",
     "453.ed3810f9.chunk.js.map": "/Novelty-Games/static/js/453.ed3810f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.1799ec44.css",
-    "static/js/main.9b3eddf4.js"
+    "static/js/main.cbb28e95.js"
   ]
 }
