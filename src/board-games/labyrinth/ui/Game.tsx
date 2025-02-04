@@ -44,7 +44,7 @@ interface Array2DPosition {
 }
 
 const Game: React.FC<GameProps> = ({ players }) => {
-    const [state, setState] = useState<State>(createStartingState(players));
+    const [state, setState] = useState<State>(() => createStartingState(players));
     const [draggingDetails, setDraggingDetails] = useState<DraggingDetails | null>(null);
 
     useEffect(() => {
