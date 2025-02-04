@@ -146,7 +146,7 @@ const Game: React.FC<GameProps> = ({ players }) => {
             <div />{piecesUi.slice(7 * 6, 7 * 7)}<div />
             <div /><div />{triangles[4][0]}<div />{triangles[4][1]}<div />{triangles[4][2]}<div /><div />
         </div>
-        <Treasure cards={state.players[state.currentPlayerIndex].treasurePile} />
+        <Treasure details={state.players[state.currentPlayerIndex].treasureDetails} />
     </div>;
 };
 

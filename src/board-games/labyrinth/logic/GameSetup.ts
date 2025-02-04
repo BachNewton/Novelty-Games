@@ -82,7 +82,7 @@ function setupPlayers(players: Player[], treasurePile: Treasure[]) {
 
     for (const player of players) {
         player.position = getPlayerStartingPosition(player);
-        player.treasurePile = removeRandomElements(treasurePile, treasurePileLength / players.length);
+        player.treasureDetails.pile = removeRandomElements(treasurePile, treasurePileLength / players.length);
     }
 }
 

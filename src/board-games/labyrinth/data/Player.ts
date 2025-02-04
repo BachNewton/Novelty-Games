@@ -4,7 +4,12 @@ export interface Player {
     name: string;
     color: PlayerColor;
     position: PlayerPosition;
-    treasurePile: Treasure[];
+    treasureDetails: TreasureDetails;
+}
+
+export interface TreasureDetails {
+    pile: Treasure[];
+    targetIndex: number;
 }
 
 export enum PlayerColor {
@@ -16,7 +21,10 @@ export function createPlayer(name: string, color: PlayerColor): Player {
         name: name,
         color: color,
         position: { x: -1, y: -1 },
-        treasurePile: []
+        treasureDetails: {
+            pile: [],
+            targetIndex: 0
+        }
     };
 }
 
