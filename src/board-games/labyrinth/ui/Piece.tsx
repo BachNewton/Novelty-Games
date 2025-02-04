@@ -1,4 +1,4 @@
-import { Piece as PieceData, Treasure } from "../data/Piece";
+import { Piece as PieceData } from "../data/Piece";
 import BrickImage from '../images/brick.avif';
 import TrophyImage from '../images/treasures/trophy.png';
 import DaggerImage from '../images/treasures/dagger.png';
@@ -28,6 +28,7 @@ import { useRef, useState } from "react";
 import { DraggingDetails } from "./Game";
 import { coerceToRange } from "../../../util/Math";
 import { getColor, Player, PlayerColor } from "../data/Player";
+import { Treasure } from "../data/Treasure";
 
 interface PieceProps {
     data: PieceData;

@@ -1,13 +1,16 @@
-import { getRandomElement, removeRandomElement } from "../../../util/Randomizer";
-import { createPiece, PieceType, Treasure } from "../data/Piece";
+import { getRandomElement, removeRandomElement, removeRandomElements } from "../../../util/Randomizer";
+import { createPiece, PieceType } from "../data/Piece";
 import { Player, PlayerColor, PlayerPosition } from "../data/Player";
+import { TOTAL_TREASURE, Treasure } from "../data/Treasure";
 import { State } from "../ui/Game";
 
 const CORNER_PIECES_IN_PILE = 9;
 const STRAIGHT_PIECES_IN_PILE = 13;
 
 export function createStartingState(players: Player[]): State {
-    setPlayersStartingPositions(players);
+    const treasurePile: Treasure[] = Array.from({ length: TOTAL_TREASURE }, (_, index) => index);
+
+    setupPlayers(players, treasurePile);
 
     const startingRed = createPiece(PieceType.CORNER, -Math.PI / 2);
 
@@ -74,9 +77,12 @@ export function createStartingState(players: Player[]): State {
     };
 }
 
-function setPlayersStartingPositions(players: Player[]) {
+function setupPlayers(players: Player[], treasurePile: Treasure[]) {
+    const treasurePileLength = treasurePile.length;
+
     for (const player of players) {
         player.position = getPlayerStartingPosition(player);
+        player.treasurePile = removeRandomElements(treasurePile, treasurePileLength / players.length);
     }
 }
 

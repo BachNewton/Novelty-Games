@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import Game from "./Game";
 import Lobby from "./Lobby";
-import { Player, PlayerColor } from "../data/Player";
+import { createPlayer, Player, PlayerColor } from "../data/Player";
 
 interface State { }
 
@@ -18,10 +18,10 @@ class GameState implements State {
 
 const Labyrinth: React.FC = () => {
     const [state, setState] = useState<State>(new GameState([
-        { name: 'Test 1', position: { x: -1, y: -1 }, color: PlayerColor.RED },
-        { name: 'Test 2', position: { x: -1, y: -1 }, color: PlayerColor.BLUE },
-        { name: 'Test 3', position: { x: -1, y: -1 }, color: PlayerColor.YELLOW },
-        { name: 'Test 4', position: { x: -1, y: -1 }, color: PlayerColor.GREEN }
+        createPlayer('Test 1', PlayerColor.RED),
+        createPlayer('Test 2', PlayerColor.BLUE),
+        createPlayer('Test 3', PlayerColor.YELLOW),
+        createPlayer('Test 4', PlayerColor.GREEN)
     ]));
 
     useEffect(() => updateRoute(Route.LABYRINTH), []);

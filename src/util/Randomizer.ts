@@ -19,6 +19,10 @@ export function removeRandomElement<T>(array: Array<T>): T {
     return array.splice(randomIndex, 1)[0];
 }
 
+export function removeRandomElements<T>(array: Array<T>, count: number): T[] {
+    return Array.from({ length: count }, () => removeRandomElement(array));
+}
+
 export function getRandomElement<T>(array: Array<T>): T {
     const randomIndex = getRandomIndex(array);
     return array[randomIndex];

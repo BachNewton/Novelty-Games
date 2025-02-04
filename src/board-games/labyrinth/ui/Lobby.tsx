@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Dialog from "../../../util/ui/Dialog";
 import TextInput, { InputHolder } from "../../../util/ui/TextInput";
-import { getColor, Player, PlayerColor } from "../data/Player";
+import { createPlayer, getColor, Player, PlayerColor } from "../data/Player";
 
 interface LobbyProps {
     onStart: (players: Player[]) => void;
@@ -29,11 +29,7 @@ const Lobby: React.FC<LobbyProps> = ({ onStart }) => {
         <Dialog isOpen={isPlayerPromptOpen} content={<PlayerPrompt onSubmit={name => {
             setIsPlayerPromptOpen(false);
 
-            const player: Player = {
-                name: name,
-                color: players.length as PlayerColor,
-                position: { x: -1, y: -1 }
-            };
+            const player = createPlayer(name, players.length);
 
             setPlayers(players.concat(player));
         }} />} />

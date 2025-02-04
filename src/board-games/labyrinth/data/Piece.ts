@@ -1,3 +1,5 @@
+import { Treasure } from "./Treasure";
+
 export interface Piece {
     treasure: Treasure | null;
     rotate: (angle: number) => void;
@@ -10,33 +12,6 @@ export interface Piece {
 
 export enum PieceType {
     CORNER, T, STRAIGHT
-}
-
-export enum Treasure {
-    TROPHY,
-    DAGGER,
-    MONEY_BAG,
-    BOOK,
-    BOTTLE,
-    CANDLE,
-    CROWN,
-    GEM,
-    KEY,
-    RING,
-    SHIELD,
-    TOOLBOX,
-    BAT,
-    BUTTERFLY,
-    CAT,
-    DRAGON,
-    GHOST,
-    LIZARD,
-    MAGE,
-    MOUSE,
-    OWL,
-    SPIDER,
-    TROLL,
-    UNICORN
 }
 
 export function createPiece(type: PieceType, srartingRotation: number, treasure?: Treasure): Piece {
