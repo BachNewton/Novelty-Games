@@ -7,12 +7,12 @@ import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
 import Patent from "./Patent";
 import { StorageKey, Storer } from "../../util/Storage";
 import { FreeMarketSave, SAVE_VERSION } from "../data/FreeMarketSave";
-import Loading from "./Loading";
 import Dialog from "../../util/ui/Dialog";
 import NewProfile from "./NewProfile";
 import Extract from './Extract';
 import { format } from "../logic/NumberFormatter";
 import { RAW_MATERIALS_MAPPED } from "../data/Component";
+import Loading from "../../util/ui/Loading";
 
 interface FreeMarketProps {
     communicator: FreeMarketCommunicator;
@@ -66,13 +66,13 @@ function tabContentUi(
     updateState: (readyState: ReadyState) => void
 ): JSX.Element {
     if (state instanceof NewProfileState) {
-        const content: JSX.Element = <NewProfile
-            communicator={communicator}
-            storer={storer}
-            onComplete={save => updateState(new ReadyState(save))}
-        />;
-
-        return <Dialog isOpen={true} content={content} />;
+        return <Dialog isOpen={true}>
+            <NewProfile
+                communicator={communicator}
+                storer={storer}
+                onComplete={save => updateState(new ReadyState(save))}
+            />
+        </Dialog>;
     } else if (state instanceof ReadyState) {
         return readyUi(tab, state.save, communicator, storer);
     } else {

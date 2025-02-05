@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Component, Invention, RAW_MATERIALS } from "../data/Component";
 import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
 import HorizontalLine from "./HorizontalLine";
-import Loading from "./Loading";
 import InventionUi from "./Invention";
 import { Inventor } from "../data/Inventor";
+import Loading from "../../util/ui/Loading";
 
 interface PatentProps {
     communicator: FreeMarketCommunicator

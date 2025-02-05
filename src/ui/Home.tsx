@@ -13,8 +13,9 @@ import { FreeMarketSave } from '../free-market/data/FreeMarketSave';
 import SubMenu from './SubMenu';
 import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState } from './State';
 import Labyrinth from '../board-games/labyrinth/ui/Labyrinth';
+import ProfileUi from './Profile';
 
-const APP_VERSION = 'v2.12.4';
+const APP_VERSION = 'v3.0.0';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -94,10 +95,10 @@ function HomeUi(versionState: VersionState, onClickHandlers: OnClickHandlers) {
 
     const versionLabelStyle: React.CSSProperties = {
         position: 'fixed',
-        top: 0,
-        right: 0,
+        bottom: 0,
+        left: 0,
         color: 'grey',
-        fontSize: '10px'
+        fontSize: '12px'
     };
 
     const buttonStyle: React.CSSProperties = {
@@ -108,7 +109,8 @@ function HomeUi(versionState: VersionState, onClickHandlers: OnClickHandlers) {
     };
 
     return <div style={{ color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-        <div style={versionStateStyle}>{VersionStateUi(versionState)}</div>
+        <div style={versionStateStyle}>{versionStateUi(versionState)}</div>
+        <ProfileUi />
         <code style={versionLabelStyle}>{APP_VERSION}</code>
         <div style={{ fontSize: '2em', fontWeight: 'bold', marginBottom: '2px' }}>🕹️ Novelty Games 🎰</div>
         <div>Created by: Kyle Hutchinson</div>
@@ -122,7 +124,7 @@ function HomeUi(versionState: VersionState, onClickHandlers: OnClickHandlers) {
     </div>;
 }
 
-function VersionStateUi(versionState: VersionState) {
+function versionStateUi(versionState: VersionState) {
     switch (versionState) {
         case VersionState.CHECKING:
             return <>☁️ Checking for updates...</>;

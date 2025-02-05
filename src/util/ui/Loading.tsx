@@ -1,4 +1,4 @@
-import '../css/loading.css';
+import './css/loading.css';
 
 const Loading: React.FC = () => {
     return <div style={{ display: 'flex', justifyContent: 'center' }}>

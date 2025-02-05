@@ -5,9 +5,9 @@ import Dialog from '../../util/ui/Dialog';
 import { Component, Invention, RAW_MATERIALS } from '../data/Component';
 import { FreeMarketCommunicator } from '../logic/FreeMarketCommunicator';
 import { createID } from '../../util/ID';
-import Loading from './Loading';
 import ComponentUi from './Component';
 import { Inventor } from '../data/Inventor';
+import Loading from '../../util/ui/Loading';
 
 interface InventProps {
     communicator: FreeMarketCommunicator;
@@ -86,9 +86,8 @@ const Invent: React.FC<InventProps> = ({ communicator, inventor }) => {
     };
 
     return <div>
-        <Dialog
-            isOpen={state.componentSelectionState !== ComponentSelectionState.NONE}
-            content={componentSelectUi(
+        <Dialog isOpen={state.componentSelectionState !== ComponentSelectionState.NONE}>
+            {componentSelectUi(
                 state.componentSelectionState === ComponentSelectionState.PRIMARY ? 'Primary' : 'Secondary',
                 component => {
                     if (state.componentSelectionState === ComponentSelectionState.PRIMARY) {
@@ -102,11 +101,15 @@ const Invent: React.FC<InventProps> = ({ communicator, inventor }) => {
                     setState({ ...state });
                 }
             )}
-        />
+        </Dialog>
 
-        <Dialog isOpen={state.invalidInventionUi !== null} content={state.invalidInventionUi!} />
+        <Dialog isOpen={state.invalidInventionUi !== null}>
+            {state.invalidInventionUi}
+        </Dialog>
 
-        <Dialog isOpen={state.submittingInventionUi !== null} content={state.submittingInventionUi!} />
+        <Dialog isOpen={state.submittingInventionUi !== null}>
+            {state.submittingInventionUi}
+        </Dialog>
 
         <div style={{ display: 'flex' }}>
             <div style={{ marginRight: '15px', fontWeight: 'bold', fontSize: '1.25em' }}>Invention Name:</div>
@@ -183,13 +186,6 @@ const Invent: React.FC<InventProps> = ({ communicator, inventor }) => {
 };
 
 function componentSelectUi(header: string, onSelect: (component: Component) => void): JSX.Element {
-    const rawMaterialStyle: React.CSSProperties = {
-        border: '2px solid white',
-        margin: '10px',
-        padding: '10px',
-        cursor: 'pointer'
-    };
-
     const rawMaterials = RAW_MATERIALS.map((rawMaterial, index) => {
         return <ComponentUi key={index} data={rawMaterial} onClick={() => onSelect(rawMaterial)} />
     });

@@ -26,13 +26,15 @@ const Lobby: React.FC<LobbyProps> = ({ onStart }) => {
 
         <button style={{ fontSize: '1em', marginTop: '25px' }} disabled={players.length < 1} onClick={() => onStart(players)}>Start Game</button>
 
-        <Dialog isOpen={isPlayerPromptOpen} content={<PlayerPrompt onSubmit={name => {
-            setIsPlayerPromptOpen(false);
+        <Dialog isOpen={isPlayerPromptOpen}>
+            <PlayerPrompt onSubmit={name => {
+                setIsPlayerPromptOpen(false);
 
-            const player = createPlayer(name, players.length);
+                const player = createPlayer(name, players.length);
 
-            setPlayers(players.concat(player));
-        }} />} />
+                setPlayers(players.concat(player));
+            }} />
+        </Dialog>
     </div>;
 };
 

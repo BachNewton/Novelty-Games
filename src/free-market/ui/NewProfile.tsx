@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { FreeMarketSave, SAVE_VERSION } from "../data/FreeMarketSave";
-import Loading from "./Loading";
 import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
 import { createID } from "../../util/ID";
 import { Inventor } from "../data/Inventor";
 import { StorageKey, Storer } from "../../util/Storage";
 import { RAW_MATERIALS } from "../data/Component";
+import Loading from "../../util/ui/Loading";
 
 interface NewProfileProps {
     communicator: FreeMarketCommunicator;
