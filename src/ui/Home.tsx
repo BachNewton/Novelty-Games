@@ -14,6 +14,7 @@ import SubMenu from './SubMenu';
 import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState } from './State';
 import Labyrinth from '../board-games/labyrinth/ui/Labyrinth';
 import ProfileUi from './Profile';
+import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/LabyrinthCommunicator';
 
 const APP_VERSION = 'v3.0.0';
 
@@ -66,7 +67,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         onToolsClick: () => setState(new ToolsState()),
         onFreeMarketClick: () => setState(createFreeMarketState()),
         onBoardGamesClick: () => setState(new BoardGamesState()),
-        onLabyrinthClick: () => setState(new LabyrinthState())
+        onLabyrinthClick: () => setState(createLabyrinthState())
     };
 
     if (state instanceof TriviaState) {
@@ -141,7 +142,7 @@ function boardGamesUi(boardGamesState: BoardGamesState, onClickHandlers: OnClick
     if (boardGamesState instanceof MilleBornesState) {
         return <MilleBornesHome onHomeButtonClicked={onClickHandlers.onHomeButtonClick} communicator={boardGamesState.communicator} />;
     } else if (boardGamesState instanceof LabyrinthState) {
-        return <Labyrinth />;
+        return <Labyrinth communicator={boardGamesState.communicator} />;
     }
 
     return <SubMenu
@@ -164,7 +165,7 @@ function getInitialState(): State {
         case Route.FREE_MARKET:
             return createFreeMarketState();
         case Route.LABYRINTH:
-            return new LabyrinthState();
+            return createLabyrinthState();
         default:
             return new HomeState();
     }
@@ -175,6 +176,12 @@ function createFreeMarketState(): FreeMarketState {
     const storer = createStorer<FreeMarketSave>();
 
     return new FreeMarketState(communicator, storer);
+}
+
+function createLabyrinthState(): LabyrinthState {
+    const communicator = createLabyrinthCommunicator();
+
+    return new LabyrinthState(communicator);
 }
 
 export default Home;

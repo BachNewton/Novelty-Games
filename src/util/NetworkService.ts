@@ -13,7 +13,8 @@ export interface NetworkService<T> {
 export enum NetworkedApplication {
     MILLE_BORNES = 'mille-bornes',
     MARBLE = 'marble',
-    FREE_MARKET = 'free-market'
+    FREE_MARKET = 'free-market',
+    LABYRINTH = 'labyrinth'
 }
 
 interface ServerEvent<T> {

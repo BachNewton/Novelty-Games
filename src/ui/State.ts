@@ -2,6 +2,7 @@ import { FreeMarketSave } from "../free-market/data/FreeMarketSave";
 import { FreeMarketCommunicator } from "../free-market/logic/FreeMarketCommunicator";
 import { Storer } from "../util/Storage";
 import { Communicator as MilleBornesCommunicator } from '../board-games/mille-bornes/logic/Communicator';
+import { LabyrinthCommunicator } from "../board-games/labyrinth/logic/LabyrinthCommunicator";
 
 export interface State { }
 
@@ -37,7 +38,15 @@ export class MilleBornesState extends BoardGamesState {
     }
 }
 
-export class LabyrinthState extends BoardGamesState { }
+export class LabyrinthState extends BoardGamesState {
+    communicator: LabyrinthCommunicator;
+
+    constructor(communicator: LabyrinthCommunicator) {
+        super();
+
+        this.communicator = communicator;
+    }
+}
 
 export enum VersionState {
     CURRENT,

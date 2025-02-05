@@ -3,6 +3,11 @@ import { Route, updateRoute } from "../../../ui/Routing";
 import Game from "./Game";
 import Lobby from "./Lobby";
 import { createPlayer, Player, PlayerColor } from "../data/Player";
+import { LabyrinthCommunicator } from "../logic/LabyrinthCommunicator";
+
+interface LabyrinthProps {
+    communicator: LabyrinthCommunicator;
+}
 
 interface State { }
 
@@ -16,7 +21,7 @@ class GameState implements State {
     }
 }
 
-const Labyrinth: React.FC = () => {
+const Labyrinth: React.FC<LabyrinthProps> = ({ communicator }) => {
     const [state, setState] = useState<State>(new GameState([
         createPlayer('Test 1', PlayerColor.RED),
         createPlayer('Test 2', PlayerColor.BLUE),

@@ -7,6 +7,7 @@ export interface Piece {
     hasBottom: () => boolean;
     hasLeft: () => boolean;
     hasRight: () => boolean;
+    toJSON: () => any;
     isTraversable: boolean;
 }
 
@@ -49,6 +50,9 @@ export function createPiece(type: PieceType, srartingRotation: number, treasure?
         rotate: (angle) => {
             rotation += angle;
             update();
+        },
+        toJSON: () => {
+            // TODO
         },
         isTraversable: false
     };
