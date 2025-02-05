@@ -19,7 +19,7 @@ const Triangle: React.FC<TriangleProps> = ({ rotation, onClick }) => {
 
     return <div style={style} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)} onClick={onClick}>
         <div style={{
-            backgroundImage: 'linear-gradient(60deg, transparent 50%, #3498db 50%)',
+            backgroundImage: 'linear-gradient(60deg, transparent 50%, var(--novelty-blue) 50%)',
             width: '100%'
         }} />
         <div style={{

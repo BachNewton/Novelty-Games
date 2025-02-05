@@ -18,7 +18,7 @@
 
     50% {
         outline-width: 8px;
-        outline-color: #3498db;
+        outline-color: var(--novelty-blue);
     }
 
     75% {

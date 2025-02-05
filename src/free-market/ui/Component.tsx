@@ -10,7 +10,7 @@ const Component: React.FC<ComponentProps> = ({ data, onClick }) => {
     const cursor = onClick === undefined ? 'default' : 'pointer';
 
     return <div style={{
-        border: '2px solid #3498db',
+        border: '2px solid var(--novelty-blue)',
         padding: '10px',
         margin: '10px',
         borderRadius: '15px',

@@ -101,7 +101,7 @@ function profileUi(save: FreeMarketSave): JSX.Element {
     const inventoryItemStyle: React.CSSProperties = {
         display: 'flex',
         justifyContent: 'space-between',
-        border: '2px solid #3498db',
+        border: '2px solid var(--novelty-blue)',
         padding: '5px',
         margin: '5px',
         borderRadius: '15px',

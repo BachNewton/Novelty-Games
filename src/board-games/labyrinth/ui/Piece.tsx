@@ -35,7 +35,7 @@ const Piece: React.FC<PieceProps> = ({ data, playerOnPiece, onClick, onMouseDown
         placeItems: 'stretch',
         userSelect: 'none',
         zIndex: 1,
-        background: '#282C34'
+        background: 'var(--novelty-background)'
     };
 
     if (draggingDetails !== null && shouldBeDragged() && ref.current !== null) {

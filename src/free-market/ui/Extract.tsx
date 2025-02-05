@@ -33,7 +33,7 @@ const Extract: React.FC<ExtractProps> = ({ save, storer }) => {
         padding: '10px',
         margin: '15px',
         borderRadius: '15px',
-        backgroundImage: 'linear-gradient(125deg, grey 20%, #3498db 50%, grey 80%)'
+        backgroundImage: 'linear-gradient(125deg, grey 20%, var(--novelty-blue) 50%, grey 80%)'
     };
 
     const extractIconStyle: React.CSSProperties = {
@@ -42,7 +42,7 @@ const Extract: React.FC<ExtractProps> = ({ save, storer }) => {
         fontSize: '1.3em',
         padding: '10px',
         marginRight: '15px',
-        background: '#3498db',
+        background: 'var(--novelty-blue)',
         boxShadow: 'darkorange 0px 0px 5px 5px',
         cursor: 'pointer'
     };

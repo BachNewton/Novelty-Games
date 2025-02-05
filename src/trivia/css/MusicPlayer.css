@@ -1,4 +1,4 @@
 .blocker {
     position: absolute;
-    background-color: #282c34;
+    background-color: var(--novelty-background);
 }
