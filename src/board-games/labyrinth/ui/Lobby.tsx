@@ -1,15 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Dialog from "../../../util/ui/Dialog";
 import TextInput, { InputHolder } from "../../../util/ui/TextInput";
-import { createPlayer, getColor, Player, PlayerColor } from "../data/Player";
+import { createPlayer, getColor, Player } from "../data/Player";
+import { LabyrinthCommunicator } from "../logic/LabyrinthCommunicator";
 
 interface LobbyProps {
+    communicator: LabyrinthCommunicator;
     onStart: (players: Player[]) => void;
 }
 
-const Lobby: React.FC<LobbyProps> = ({ onStart }) => {
+const Lobby: React.FC<LobbyProps> = ({ communicator, onStart }) => {
     const [players, setPlayers] = useState<Player[]>([]);
     const [isPlayerPromptOpen, setIsPlayerPromptOpen] = useState(false);
+
+    useEffect(() => {
+        communicator.setLobbyUpdateListener(data => {
+            setPlayers(data.players);
+        });
+    }, []);
 
     const playersUi = players.map((player, index) => {
         return <div key={index} style={{ border: `2px solid ${getColor(player.color)}`, borderRadius: '15px', margin: '5px', padding: '7.5px' }}>
@@ -31,8 +39,11 @@ const Lobby: React.FC<LobbyProps> = ({ onStart }) => {
                 setIsPlayerPromptOpen(false);
 
                 const player = createPlayer(name, players.length);
+                const updatedPlayers = players.concat(player);
 
-                setPlayers(players.concat(player));
+                communicator.updateLobby({ type: 'lobby', players: updatedPlayers });
+
+                setPlayers(updatedPlayers);
             }} />
         </Dialog>
     </div>;

@@ -22,6 +22,8 @@ class GameState implements State {
 }
 
 const Labyrinth: React.FC<LabyrinthProps> = ({ communicator }) => {
+    // const [state, setState] = useState<State>(new LobbyState());
+
     const [state, setState] = useState<State>(new GameState([
         createPlayer('Test 1', PlayerColor.RED),
         createPlayer('Test 2', PlayerColor.BLUE),
@@ -34,7 +36,7 @@ const Labyrinth: React.FC<LabyrinthProps> = ({ communicator }) => {
     if (state instanceof GameState) {
         return <Game players={state.players} />;
     } else {
-        return <Lobby onStart={players => setState(new GameState(players))} />;
+        return <Lobby communicator={communicator} onStart={players => setState(new GameState(players))} />;
     }
 }
 
