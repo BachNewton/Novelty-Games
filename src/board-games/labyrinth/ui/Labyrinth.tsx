@@ -36,7 +36,7 @@ const Labyrinth: React.FC<LabyrinthProps> = ({ communicator }) => {
     if (state instanceof GameState) {
         return <Game players={state.players} />;
     } else {
-        return <Lobby communicator={communicator} onStart={players => setState(new GameState(players))} />;
+        return <Lobby communicator={communicator} />;
     }
 }
 
