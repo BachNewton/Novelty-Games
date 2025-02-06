@@ -126,7 +126,7 @@ function lobbyUi(lobby: LobbyData): JSX.Element {
     return <Dialog>
         <div style={{ color: 'white', fontSize: '2em', display: 'flex', flexDirection: 'column' }}>
             <div style={{ marginBottom: '25px', fontSize: '1.2em', fontWeight: 'bold' }}>{getGameName(lobby.players[0].name)}</div>
-            <div style={{ fontWeight: 'bold' }}>Players</div>
+            <div style={{ fontWeight: 'bold' }}>Players ({lobby.players.length}/4)</div>
             {players}
             {loadingUi}
             <button style={{ fontSize: '1em', marginTop: '25px' }}>Start Game</button>
