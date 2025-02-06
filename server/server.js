@@ -18,7 +18,7 @@ function startServer() {
     const server = createServer(credentials, app);
     const io = new Server(server, {
         cors: {
-            origin: ['https://bachnewton.github.io', 'http://localhost:3000']
+            origin: ['https://bachnewton.github.io', 'http://localhost:3000', 'http://127.0.0.1:3000']
         }
     });
 

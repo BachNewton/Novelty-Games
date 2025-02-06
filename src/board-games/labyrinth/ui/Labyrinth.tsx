@@ -22,14 +22,14 @@ class GameState implements State {
 }
 
 const Labyrinth: React.FC<LabyrinthProps> = ({ communicator }) => {
-    // const [state, setState] = useState<State>(new LobbyState());
+    const [state, setState] = useState<State>(new LobbyState());
 
-    const [state, setState] = useState<State>(new GameState([
-        createPlayer('Test 1', PlayerColor.RED),
-        createPlayer('Test 2', PlayerColor.BLUE),
-        createPlayer('Test 3', PlayerColor.YELLOW),
-        createPlayer('Test 4', PlayerColor.GREEN)
-    ]));
+    // const [state, setState] = useState<State>(new GameState([
+    //     createPlayer('Test 1', PlayerColor.RED),
+    //     createPlayer('Test 2', PlayerColor.BLUE),
+    //     createPlayer('Test 3', PlayerColor.YELLOW),
+    //     createPlayer('Test 4', PlayerColor.GREEN)
+    // ]));
 
     useEffect(() => updateRoute(Route.LABYRINTH), []);
 

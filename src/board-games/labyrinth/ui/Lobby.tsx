@@ -32,6 +32,8 @@ const Lobby: React.FC<LobbyProps> = ({ communicator }) => {
         return loadingState;
     });
 
+    const [lobby, setLobby] = useState<LobbyData | null | undefined>(undefined);
+
     useEffect(() => {
         getProfile().then(profile => {
             const mainState: MainState = {
@@ -42,7 +44,7 @@ const Lobby: React.FC<LobbyProps> = ({ communicator }) => {
             setState(mainState);
         });
 
-        communicator.getLobby().then(lobby => console.log(lobby));
+        communicator.getLobby().then(lobby => setLobby(lobby));
     }, []);
 
     const onCreateGame = (profile: Profile) => {
@@ -65,7 +67,7 @@ const Lobby: React.FC<LobbyProps> = ({ communicator }) => {
     };
 
     if (isMainState(state)) {
-        return mainUi(state, onCreateGame);
+        return mainUi(state, onCreateGame, lobby);
     } else if (isLobbyState(state)) {
         return lobbyUi(state);
     } else {
@@ -73,15 +75,27 @@ const Lobby: React.FC<LobbyProps> = ({ communicator }) => {
     }
 };
 
-function mainUi(state: MainState, onCreateGame: (profile: Profile) => void): JSX.Element {
+function mainUi(state: MainState, onCreateGame: (profile: Profile) => void, lobby: LobbyData | null | undefined): JSX.Element {
     return <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', color: 'white', fontSize: '1.5em', flexDirection: 'column' }}>
         <div style={{ fontSize: '1.5em', marginBottom: '25px', fontWeight: 'bold' }}>🧭 Labyrinth 🧩</div>
         <button style={{ fontSize: '1em' }} onClick={() => onCreateGame(state.profile)}>Create Game</button>
         <div style={{ fontWeight: 'bold', margin: '15px 0px', fontSize: '1.25em' }}>Lobby</div>
-        <div>(None)</div>
+        {lobbySectionUi(lobby)}
         <div style={{ fontWeight: 'bold', margin: '15px 0px', fontSize: '1.25em' }}>Games</div>
         <div>(None)</div>
     </div>;
+}
+
+function lobbySectionUi(lobby: LobbyData | null | undefined): JSX.Element {
+    if (lobby === undefined) {
+        return <Loading />;
+    } else if (lobby === null) {
+        return <div>(none)</div>
+    } else {
+        return <div style={{ border: '2px solid white', margin: '10px', padding: '10px', borderRadius: '10px' }}>
+            {getGameName(lobby.players[0].name)} <button style={{ fontSize: '1em' }}>Join</button>
+        </div>;
+    }
 }
 
 function lobbyUi(state: LobbyState): JSX.Element {
@@ -93,7 +107,7 @@ function lobbyUi(state: LobbyState): JSX.Element {
 
     return <Dialog>
         <div style={{ color: 'white', fontSize: '2em', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ marginBottom: '25px', fontSize: '1.2em', fontWeight: 'bold' }}><span style={{ color: 'var(--novelty-blue)' }}>{state.lobby.players[0].name}</span>'s Game</div>
+            <div style={{ marginBottom: '25px', fontSize: '1.2em', fontWeight: 'bold' }}>{getGameName(state.lobby.players[0].name)}</div>
             <div style={{ fontWeight: 'bold' }}>Players</div>
             {players}
             {loadingUi}
@@ -107,6 +121,10 @@ function loadingUi(): JSX.Element {
         <div style={{ color: 'white', fontSize: '2em', textAlign: 'center', marginBottom: '25px', fontWeight: 'bold' }}>Loading Profile</div>
         <Loading />
     </Dialog>;
+}
+
+function getGameName(name: string): JSX.Element {
+    return <><span style={{ color: 'var(--novelty-blue)' }}>{name}</span>'s Game</>;
 }
 
 function isMainState(state: State): state is MainState {
