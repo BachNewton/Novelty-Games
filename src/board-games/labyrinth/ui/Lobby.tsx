@@ -13,6 +13,7 @@ interface LobbyProps {
 interface State {
     type: StateType;
 }
+
 enum StateType { LOADING, MAIN, LOBBY }
 
 interface LoadingState extends State { }
@@ -21,9 +22,7 @@ interface MainState extends State {
     profile: Profile;
 }
 
-interface LobbyState extends State {
-    lobby: LobbyData;
-}
+interface LobbyState extends State { }
 
 const Lobby: React.FC<LobbyProps> = ({ communicator }) => {
     const [state, setState] = useState<State>(() => {
@@ -45,6 +44,8 @@ const Lobby: React.FC<LobbyProps> = ({ communicator }) => {
         });
 
         communicator.getLobby().then(lobby => setLobby(lobby));
+
+        communicator.setLobbyUpdateListener(() => communicator.getLobby().then(lobby => setLobby(lobby)));
     }, []);
 
     const onCreateGame = (profile: Profile) => {
@@ -58,56 +59,73 @@ const Lobby: React.FC<LobbyProps> = ({ communicator }) => {
 
         communicator.createLobby(lobbyData);
 
-        const lobbyState: LobbyState = {
-            type: StateType.LOBBY,
-            lobby: lobbyData
-        };
+        const lobbyState: LobbyState = { type: StateType.LOBBY };
 
+        setLobby(lobbyData);
+        setState(lobbyState);
+    };
+
+    const onJoinGame = (profile: Profile, lobby: LobbyData) => {
+        const notAlreadyInLobby = lobby.players.find(player => player.id === profile.id) === undefined;
+
+        if (notAlreadyInLobby) {
+            lobby.players.push({
+                name: profile.name,
+                id: profile.id
+            });
+
+            communicator.createLobby(lobby);
+        }
+
+        const lobbyState: LobbyState = { type: StateType.LOBBY };
+
+        setLobby(lobby);
         setState(lobbyState);
     };
 
     if (isMainState(state)) {
-        return mainUi(state, onCreateGame, lobby);
+        return mainUi(state, onCreateGame, lobby, lobby => onJoinGame(state.profile, lobby));
     } else if (isLobbyState(state)) {
-        return lobbyUi(state);
+        return lobbyUi(lobby!);
     } else {
         return loadingUi();
     }
 };
 
-function mainUi(state: MainState, onCreateGame: (profile: Profile) => void, lobby: LobbyData | null | undefined): JSX.Element {
+function mainUi(state: MainState, onCreateGame: (profile: Profile) => void, lobby: LobbyData | null | undefined, onJoinGame: (lobby: LobbyData) => void): JSX.Element {
     return <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', color: 'white', fontSize: '1.5em', flexDirection: 'column' }}>
         <div style={{ fontSize: '1.5em', marginBottom: '25px', fontWeight: 'bold' }}>🧭 Labyrinth 🧩</div>
-        <button style={{ fontSize: '1em' }} onClick={() => onCreateGame(state.profile)}>Create Game</button>
+        <div>Hello {getPlayerName(state.profile.name)}</div>
+        <button style={{ fontSize: '1em', marginTop: '15px' }} onClick={() => onCreateGame(state.profile)}>Create Game</button>
         <div style={{ fontWeight: 'bold', margin: '15px 0px', fontSize: '1.25em' }}>Lobby</div>
-        {lobbySectionUi(lobby)}
+        {lobbySectionUi(lobby, onJoinGame)}
         <div style={{ fontWeight: 'bold', margin: '15px 0px', fontSize: '1.25em' }}>Games</div>
         <div>(None)</div>
     </div>;
 }
 
-function lobbySectionUi(lobby: LobbyData | null | undefined): JSX.Element {
+function lobbySectionUi(lobby: LobbyData | null | undefined, onJoinGame: (lobby: LobbyData) => void): JSX.Element {
     if (lobby === undefined) {
         return <Loading />;
     } else if (lobby === null) {
         return <div>(none)</div>
     } else {
         return <div style={{ border: '2px solid white', margin: '10px', padding: '10px', borderRadius: '10px' }}>
-            {getGameName(lobby.players[0].name)} <button style={{ fontSize: '1em' }}>Join</button>
+            {getGameName(lobby.players[0].name)} ({lobby.players.length}/4) <button style={{ fontSize: '1em' }} onClick={() => onJoinGame(lobby)}>Join</button>
         </div>;
     }
 }
 
-function lobbyUi(state: LobbyState): JSX.Element {
-    const players = state.lobby.players.map((player, index) => {
+function lobbyUi(lobby: LobbyData): JSX.Element {
+    const players = lobby.players.map((player, index) => {
         return <div key={index} style={{ border: `2px solid ${getColor(index)}`, borderRadius: '15px', padding: '5px', margin: '5px' }}>{player.name}</div>;
     });
 
-    const loadingUi = state.lobby.players.length < 4 ? <Loading /> : <></>;
+    const loadingUi = lobby.players.length < 4 ? <Loading /> : <></>;
 
     return <Dialog>
         <div style={{ color: 'white', fontSize: '2em', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ marginBottom: '25px', fontSize: '1.2em', fontWeight: 'bold' }}>{getGameName(state.lobby.players[0].name)}</div>
+            <div style={{ marginBottom: '25px', fontSize: '1.2em', fontWeight: 'bold' }}>{getGameName(lobby.players[0].name)}</div>
             <div style={{ fontWeight: 'bold' }}>Players</div>
             {players}
             {loadingUi}
@@ -124,7 +142,11 @@ function loadingUi(): JSX.Element {
 }
 
 function getGameName(name: string): JSX.Element {
-    return <><span style={{ color: 'var(--novelty-blue)' }}>{name}</span>'s Game</>;
+    return <>{getPlayerName(name)}'s Game</>;
+}
+
+function getPlayerName(name: string): JSX.Element {
+    return <span style={{ color: 'var(--novelty-blue)' }}>{name}</span>;
 }
 
 function isMainState(state: State): state is MainState {

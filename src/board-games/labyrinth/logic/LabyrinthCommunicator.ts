@@ -1,33 +1,36 @@
-import { createNetworkService, NetworkedApplication } from "../../../util/NetworkService";
+import { createNetworkService, NetworkedApplication, NetworkService } from "../../../util/NetworkService";
 import { Lobby } from "../data/Lobby";
-import { Player } from "../data/Player";
 
 const LOBBY_FILE_NAME = 'lobby.json';
 
 export interface LabyrinthCommunicator {
+    setLobbyUpdateListener(listener: (lobby: Lobby) => void): void;
     createLobby: (lobby: Lobby) => void;
     getLobby: () => Promise<Lobby | null>;
-    updateLobby: (data: LobbyNetworkData) => void;
-    setLobbyUpdateListener: (listener: (data: LobbyNetworkData) => void) => void;
+}
+
+enum NetworkDataType {
+    LOBBY_UPDATE
 }
 
 interface LabyrinthNetworkData {
-    type: 'lobby';
+    type: NetworkDataType;
 }
 
-interface LobbyNetworkData extends LabyrinthNetworkData {
-    type: 'lobby';
-    players: Player[];
-}
+interface LobbyUpdateNetworkEvent extends LabyrinthNetworkData { }
 
 export function createLabyrinthCommunicator(): LabyrinthCommunicator {
     const networkService = createNetworkService<LabyrinthNetworkData>(NetworkedApplication.LABYRINTH);
 
-    let lobbyUpdateListener: (data: LobbyNetworkData) => void = () => { };
+    let lobbyUpdateListener: (lobby: Lobby) => void = () => { };
 
     networkService.setNetworkEventListener(data => {
-        if (isLobbyNetworkData(data)) {
-            lobbyUpdateListener(data);
+        if (isLobbyUpdateNetworkEvent(data)) {
+            getLobby(networkService).then(lobby => {
+                if (lobby === null) return;
+
+                lobbyUpdateListener(lobby);
+            });
         }
     });
 
@@ -36,16 +39,23 @@ export function createLabyrinthCommunicator(): LabyrinthCommunicator {
             fileName: LOBBY_FILE_NAME,
             folderName: '',
             content: JSON.stringify(lobby)
-        }),
-        getLobby: () => networkService.getFile({
-            fileName: LOBBY_FILE_NAME,
-            folderName: ''
-        }).then(response => response.isSuccessful ? JSON.parse(response.content!) : null),
-        updateLobby: (data) => networkService.broadcast(data),
+        }).then(() => networkService.broadcast({
+            type: NetworkDataType.LOBBY_UPDATE
+        })),
+        getLobby: () => getLobby(networkService),
         setLobbyUpdateListener: (listener) => lobbyUpdateListener = listener
     };
 }
 
-function isLobbyNetworkData(data: LabyrinthNetworkData): data is LobbyNetworkData {
-    return data.type === 'lobby';
+async function getLobby(networkService: NetworkService<LabyrinthNetworkData>): Promise<Lobby | null> {
+    const response = await networkService.getFile({
+        fileName: LOBBY_FILE_NAME,
+        folderName: ''
+    });
+
+    return response.isSuccessful ? JSON.parse(response.content!) : null;
+}
+
+function isLobbyUpdateNetworkEvent(data: LabyrinthNetworkData): data is LobbyUpdateNetworkEvent {
+    return data.type === NetworkDataType.LOBBY_UPDATE;
 }
