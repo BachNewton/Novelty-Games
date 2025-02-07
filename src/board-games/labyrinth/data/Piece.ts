@@ -16,7 +16,7 @@ export enum PieceType {
     CORNER, T, STRAIGHT
 }
 
-export function createPiece(type: PieceType, srartingRotation: number, treasure?: Treasure): Piece {
+export function createPiece(type: PieceType, srartingRotation: number, treasure?: Treasure | null): Piece {
     const paths = getPaths(type);
 
     let rotation = srartingRotation;
