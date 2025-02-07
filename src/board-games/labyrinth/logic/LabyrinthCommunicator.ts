@@ -8,6 +8,7 @@ const GAME_FILE_NAME = 'game.json';
 
 export interface LabyrinthCommunicator {
     setLobbyUpdateListener(listener: (lobby: Lobby) => void): void;
+    setGameUpdateListener(listener: (game: Game) => void): void;
     createLobby: (lobby: Lobby) => void;
     getLobby: () => Promise<Lobby | null>;
     createGame: (game: Game) => void;
@@ -31,12 +32,20 @@ export function createLabyrinthCommunicator(): LabyrinthCommunicator {
 
     let lobbyUpdateListener: (lobby: Lobby) => void = () => { };
 
+    let gameUpdateListener: (game: Game) => void = () => { };
+
     networkService.setNetworkEventListener(data => {
         if (isLobbyUpdateNetworkEvent(data)) {
             getLobby(networkService).then(lobby => {
                 if (lobby === null) return;
 
                 lobbyUpdateListener(lobby);
+            });
+        } else if (isGameUpdateNetworkEvent(data)) {
+            getGame(networkService).then(game => {
+                if (game === null) return;
+
+                gameUpdateListener(game);
             });
         }
     });
@@ -51,6 +60,7 @@ export function createLabyrinthCommunicator(): LabyrinthCommunicator {
         })),
         getLobby: () => getLobby(networkService),
         setLobbyUpdateListener: (listener) => lobbyUpdateListener = listener,
+        setGameUpdateListener: (listener) => gameUpdateListener = listener,
         createGame: (game) => networkService.saveFile({
             fileName: GAME_FILE_NAME, folderName: '', content: JSON.stringify(convertToNetworkGame(game))
         }).then(() => networkService.broadcast({
@@ -84,4 +94,8 @@ async function getGame(networkService: NetworkService<LabyrinthNetworkData>): Pr
 
 function isLobbyUpdateNetworkEvent(data: LabyrinthNetworkData): data is LobbyUpdateNetworkEvent {
     return data.type === NetworkDataType.LOBBY_UPDATE;
+}
+
+function isGameUpdateNetworkEvent(data: LabyrinthNetworkData): data is GameUpdateNetworkEvent {
+    return data.type === NetworkDataType.GAME_UPDATE;
 }
