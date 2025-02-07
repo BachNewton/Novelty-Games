@@ -2,29 +2,12 @@ import { useEffect, useState } from "react";
 import { Piece } from "../data/Piece";
 import PieceUi from "./Piece";
 import Triangle from "./Triangle";
-import { createStartingState } from "../logic/GameSetup";
 import { Player } from "../data/Player";
 import Treasure from "./Treasure";
+import { Game as GameData, TrianglePosition } from "../data/Game";
 
 interface GameProps {
-    players: Player[];
-}
-
-export interface State {
-    pieces: Piece[][];
-    sparePiece: SparePiece;
-    players: Player[],
-    currentPlayerIndex: number;
-}
-
-interface SparePiece {
-    piece: Piece;
-    position: TrianglePosition;
-}
-
-interface TrianglePosition {
-    x: number;
-    y: number;
+    game: GameData;
 }
 
 export interface DraggingDetails {
@@ -43,8 +26,8 @@ interface Array2DPosition {
     y: number;
 }
 
-const Game: React.FC<GameProps> = ({ players }) => {
-    const [state, setState] = useState<State>(() => createStartingState(players));
+const Game: React.FC<GameProps> = ({ game }) => {
+    const [state, setState] = useState(game);
     const [draggingDetails, setDraggingDetails] = useState<DraggingDetails | null>(null);
 
     useEffect(() => {

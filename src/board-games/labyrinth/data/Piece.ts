@@ -1,3 +1,4 @@
+import { NetworkPiece } from "./Network";
 import { Treasure } from "./Treasure";
 
 export interface Piece {
@@ -7,8 +8,8 @@ export interface Piece {
     hasBottom: () => boolean;
     hasLeft: () => boolean;
     hasRight: () => boolean;
-    toJSON: () => any;
     isTraversable: boolean;
+    asNetworkPiece: () => NetworkPiece;
 }
 
 export enum PieceType {
@@ -51,10 +52,14 @@ export function createPiece(type: PieceType, srartingRotation: number, treasure?
             rotation += angle;
             update();
         },
-        toJSON: () => {
-            // TODO
-        },
-        isTraversable: false
+        isTraversable: false,
+        asNetworkPiece: () => {
+            return {
+                treasure: treasure ?? null,
+                rotation: rotation,
+                type: type
+            };
+        }
     };
 }
 

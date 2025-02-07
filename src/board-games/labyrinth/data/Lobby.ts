@@ -3,7 +3,7 @@ export interface Lobby {
     players: LobbyPlayer[];
 }
 
-interface LobbyPlayer {
+export interface LobbyPlayer {
     name: string;
     id: string;
 }

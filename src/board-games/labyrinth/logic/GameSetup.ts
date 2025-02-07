@@ -1,16 +1,17 @@
 import { getRandomElement, removeRandomElement, removeRandomElements } from "../../../util/Randomizer";
+import { Game } from "../data/Game";
+import { Lobby, LobbyPlayer } from "../data/Lobby";
 import { createPiece, PieceType } from "../data/Piece";
 import { Player, PlayerColor, PlayerPosition } from "../data/Player";
 import { TOTAL_TREASURE, Treasure } from "../data/Treasure";
-import { State } from "../ui/Game";
 
 const CORNER_PIECES_IN_PILE = 9;
 const STRAIGHT_PIECES_IN_PILE = 13;
 
-export function createStartingState(players: Player[]): State {
+export function createStartingGame(lobby: Lobby): Game {
     const treasurePile: Treasure[] = Array.from({ length: TOTAL_TREASURE }, (_, index) => index);
 
-    setupPlayers(players, treasurePile);
+    const players = createPlayers(lobby.players, treasurePile);
 
     const startingRed = createPiece(PieceType.CORNER, -Math.PI / 2);
 
@@ -77,17 +78,25 @@ export function createStartingState(players: Player[]): State {
     };
 }
 
-function setupPlayers(players: Player[], treasurePile: Treasure[]) {
+function createPlayers(players: LobbyPlayer[], treasurePile: Treasure[]): Player[] {
     const treasurePileLength = treasurePile.length;
 
-    for (const player of players) {
-        player.position = getPlayerStartingPosition(player);
-        player.treasureDetails.pile = removeRandomElements(treasurePile, treasurePileLength / players.length);
-    }
+    return players.map((player, index) => {
+        return {
+            name: player.name,
+            id: player.id,
+            color: index,
+            position: getPlayerStartingPosition(index),
+            treasureDetails: {
+                pile: removeRandomElements(treasurePile, treasurePileLength / players.length),
+                targetIndex: 0
+            }
+        };
+    });
 }
 
-function getPlayerStartingPosition(player: Player): PlayerPosition {
-    switch (player.color) {
+function getPlayerStartingPosition(color: PlayerColor): PlayerPosition {
+    switch (color) {
         case PlayerColor.RED:
             return { x: 0, y: 0 };
         case PlayerColor.BLUE:

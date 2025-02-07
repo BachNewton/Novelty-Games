@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import Game from "./Game";
 import Lobby from "./Lobby";
-import { createPlayer, Player, PlayerColor } from "../data/Player";
 import { LabyrinthCommunicator } from "../logic/LabyrinthCommunicator";
+import { Lobby as LobbyData } from "../data/Lobby";
+import { Game as GameData } from "../data/Game";
+import { createStartingGame } from "../logic/GameSetup";
 
 interface LabyrinthProps {
     communicator: LabyrinthCommunicator;
@@ -14,29 +16,28 @@ interface State { }
 class LobbyState implements State { }
 
 class GameState implements State {
-    players: Player[];
+    game: GameData;
 
-    constructor(players: Player[]) {
-        this.players = players;
+    constructor(game: GameData) {
+        this.game = game;
     }
 }
 
 const Labyrinth: React.FC<LabyrinthProps> = ({ communicator }) => {
     const [state, setState] = useState<State>(new LobbyState());
 
-    // const [state, setState] = useState<State>(new GameState([
-    //     createPlayer('Test 1', PlayerColor.RED),
-    //     createPlayer('Test 2', PlayerColor.BLUE),
-    //     createPlayer('Test 3', PlayerColor.YELLOW),
-    //     createPlayer('Test 4', PlayerColor.GREEN)
-    // ]));
-
     useEffect(() => updateRoute(Route.LABYRINTH), []);
 
+    const onStartGame = (lobby: LobbyData) => {
+        const game = createStartingGame(lobby);
+
+        setState(new GameState(game));
+    };
+
     if (state instanceof GameState) {
-        return <Game players={state.players} />;
+        return <Game game={state.game} />;
     } else {
-        return <Lobby communicator={communicator} />;
+        return <Lobby communicator={communicator} onStartGame={onStartGame} />;
     }
 }
 

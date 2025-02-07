@@ -8,6 +8,7 @@ import { getColor } from "../data/Player";
 
 interface LobbyProps {
     communicator: LabyrinthCommunicator;
+    onStartGame: (lobby: LobbyData) => void;
 }
 
 interface State {
@@ -24,7 +25,7 @@ interface MainState extends State {
 
 interface LobbyState extends State { }
 
-const Lobby: React.FC<LobbyProps> = ({ communicator }) => {
+const Lobby: React.FC<LobbyProps> = ({ communicator, onStartGame }) => {
     const [state, setState] = useState<State>(() => {
         const loadingState: LoadingState = { type: StateType.LOADING };
 
@@ -86,7 +87,7 @@ const Lobby: React.FC<LobbyProps> = ({ communicator }) => {
     if (isMainState(state)) {
         return mainUi(state, onCreateGame, lobby, lobby => onJoinGame(state.profile, lobby));
     } else if (isLobbyState(state)) {
-        return lobbyUi(lobby!);
+        return lobbyUi(lobby!, onStartGame);
     } else {
         return loadingUi();
     }
@@ -116,7 +117,7 @@ function lobbySectionUi(lobby: LobbyData | null | undefined, onJoinGame: (lobby:
     }
 }
 
-function lobbyUi(lobby: LobbyData): JSX.Element {
+function lobbyUi(lobby: LobbyData, onStartGame: (lobby: LobbyData) => void): JSX.Element {
     const players = lobby.players.map((player, index) => {
         return <div key={index} style={{ border: `2px solid ${getColor(index)}`, borderRadius: '15px', padding: '5px', margin: '5px' }}>{player.name}</div>;
     });
@@ -129,7 +130,7 @@ function lobbyUi(lobby: LobbyData): JSX.Element {
             <div style={{ fontWeight: 'bold' }}>Players ({lobby.players.length}/4)</div>
             {players}
             {loadingUi}
-            <button style={{ fontSize: '1em', marginTop: '25px' }}>Start Game</button>
+            <button style={{ fontSize: '1em', marginTop: '25px' }} onClick={() => onStartGame(lobby)}>Start Game</button>
         </div>
     </Dialog>;
 }
