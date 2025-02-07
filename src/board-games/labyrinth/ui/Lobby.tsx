@@ -113,7 +113,7 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, onStartGame, onJoinGame }) 
     };
 
     if (isMainState(state)) {
-        return mainUi(state, onCreateGame, lobby, lobby => onJoinLobby(state.profile, lobby), game);
+        return mainUi(state, onCreateGame, lobby, lobby => onJoinLobby(state.profile, lobby), game, onJoinGame);
     } else if (isLobbyState(state)) {
         return lobbyUi(lobby!, onStartGame, state.profile);
     } else {
@@ -126,7 +126,8 @@ function mainUi(
     onCreateGame: (profile: Profile) => void,
     lobby: LobbyData | null | undefined,
     onJoinLobby: (lobby: LobbyData) => void,
-    game: Game | null | undefined
+    game: Game | null | undefined,
+    onJoinGame: (game: Game) => void
 ): JSX.Element {
     return <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', color: 'white', fontSize: '1.5em', flexDirection: 'column' }}>
         <div style={{ fontSize: '1.5em', marginBottom: '25px', fontWeight: 'bold' }}>🧭 Labyrinth 🧩</div>
@@ -135,7 +136,7 @@ function mainUi(
         <div style={{ fontWeight: 'bold', margin: '15px 0px', fontSize: '1.25em' }}>Lobby</div>
         {lobbySectionUi(lobby, onJoinLobby)}
         <div style={{ fontWeight: 'bold', margin: '15px 0px', fontSize: '1.25em' }}>Games</div>
-        {gameSectionUi(game)}
+        {gameSectionUi(game, onJoinGame)}
     </div>;
 }
 
@@ -151,14 +152,14 @@ function lobbySectionUi(lobby: LobbyData | null | undefined, onJoinLobby: (lobby
     }
 }
 
-function gameSectionUi(game: Game | null | undefined): JSX.Element {
+function gameSectionUi(game: Game | null | undefined, onJoinGame: (game: Game) => void): JSX.Element {
     if (game === undefined) {
         return <Loading />;
     } else if (game === null) {
         return <div>(none)</div>;
     } else {
         return <div style={{ border: '2px solid white', margin: '10px', padding: '10px', borderRadius: '10px' }}>
-            {getGameName(game.players[0].name)} ({game.players.length}/4) <button style={{ fontSize: '1em' }}>Join</button>
+            {getGameName(game.players[0].name)} ({game.players.length}/4) <button style={{ fontSize: '1em' }} onClick={() => onJoinGame(game)}>Join</button>
         </div>;
     }
 }
