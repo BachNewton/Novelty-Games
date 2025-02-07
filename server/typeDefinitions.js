@@ -24,6 +24,13 @@
  */
 
 /**
+ * @typedef {Object} DeleteFileData
+ * 
+ * @property {string} folderName
+ * @property {string} fileName
+ */
+
+/**
  * @typedef {Object} SaveFileResponse
  * 
  * @property {string} id
@@ -36,4 +43,11 @@
  * @property {string} id
  * @property {boolean} isSuccessful
  * @property {string | null} content
+ */
+
+/**
+ * @typedef {Object} DeleteFileResponse
+ * 
+ * @property {string} id
+ * @property {boolean} isSuccessful
  */

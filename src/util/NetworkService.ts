@@ -8,6 +8,7 @@ export interface NetworkService<T> {
     broadcast: (data: T) => void;
     saveFile: (data: SaveFileData) => Promise<SaveFileResponse>;
     getFile: (date: GetFileData) => Promise<GetFileResponse>;
+    deleteFile: (data: DeleteFileData) => Promise<DeleteFileResponse>;
 }
 
 export enum NetworkedApplication {
@@ -56,11 +57,28 @@ export interface GetFileResponse {
     content: string | null;
 }
 
+interface DeleteFileEvent {
+    id: string;
+    application: NetworkedApplication;
+    data: DeleteFileData;
+}
+
+interface DeleteFileData {
+    folderName: string;
+    fileName: string;
+}
+
+export interface DeleteFileResponse {
+    id: string;
+    isSuccessful: boolean;
+}
+
 export function createNetworkService<T>(appFilter: NetworkedApplication): NetworkService<T> {
     const socket = io(SERVER_URL);
 
     const saveFileRequests: Map<string, (saveFileResponse: SaveFileResponse) => void> = new Map();
     const getFileRequests: Map<string, (getFileResponse: GetFileResponse) => void> = new Map();
+    const deleteFileRequests: Map<string, (deleteFileResponse: DeleteFileResponse) => void> = new Map();
 
     let eventListener: (data: T) => void = () => { };
 
@@ -80,6 +98,11 @@ export function createNetworkService<T>(appFilter: NetworkedApplication): Networ
         getFileRequests.delete(response.id);
     });
 
+    socket.on('deleteFileResponse', (response: DeleteFileResponse) => {
+        deleteFileRequests.get(response.id)?.(response);
+        deleteFileRequests.delete(response.id);
+    });
+
     return {
         setNetworkEventListener: listener => eventListener = listener,
         broadcast: data => socket.emit('broadcast', { application: appFilter, data: data } as ServerEvent<T>),
@@ -96,6 +119,15 @@ export function createNetworkService<T>(appFilter: NetworkedApplication): Networ
             socket.emit('getFile', { id: id, application: appFilter, data: data } as GetFileEvent);
 
             return new Promise(resolve => getFileRequests.set(id, resolve));
+        },
+        deleteFile: data => {
+            const id = createID();
+
+            const deleteFileEvent: DeleteFileEvent = { id: id, application: appFilter, data: data };
+
+            socket.emit('deleteFile', deleteFileEvent);
+
+            return new Promise(resolve => deleteFileRequests.set(id, resolve));
         }
     };
 }

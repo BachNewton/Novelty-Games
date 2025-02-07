@@ -10,8 +10,9 @@ export interface LabyrinthCommunicator {
     setLobbyUpdateListener(listener: (lobby: Lobby) => void): void;
     setGameUpdateListener(listener: (game: Game) => void): void;
     createLobby: (lobby: Lobby) => void;
+    deleteLobby: () => void;
     getLobby: () => Promise<Lobby | null>;
-    createGame: (game: Game) => void;
+    createGame: (game: Game) => Promise<void>;
     getGame: () => Promise<Game | null>;
 }
 
@@ -55,6 +56,11 @@ export function createLabyrinthCommunicator(): LabyrinthCommunicator {
             fileName: LOBBY_FILE_NAME,
             folderName: '',
             content: JSON.stringify(lobby)
+        }).then(() => networkService.broadcast({
+            type: NetworkDataType.LOBBY_UPDATE
+        })),
+        deleteLobby: () => networkService.deleteFile({
+            fileName: LOBBY_FILE_NAME, folderName: ''
         }).then(() => networkService.broadcast({
             type: NetworkDataType.LOBBY_UPDATE
         })),

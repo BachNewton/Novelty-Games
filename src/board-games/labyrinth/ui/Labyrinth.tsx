@@ -31,7 +31,7 @@ const Labyrinth: React.FC<LabyrinthProps> = ({ communicator }) => {
     const onStartGame = (lobby: LobbyData) => {
         const game = createStartingGame(lobby);
 
-        communicator.createGame(game);
+        communicator.createGame(game).then(() => communicator.deleteLobby());
 
         setState(new GameState(game));
     };

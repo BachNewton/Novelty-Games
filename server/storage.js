@@ -4,6 +4,7 @@ import { Socket } from 'socket.io';
 
 const SAVE_FILE_RESPONSE_EVENT = 'saveFileResponse';
 const GET_FILE_RESPONSE_EVENT = 'getFileResponse';
+const DELETE_FILE_RESPONSE_EVENT = 'deleteFileResponse';
 const MAIN_STORAGE_DIRECTORY = 'storage';
 const VALID_STORAGE_DIRECTORY = `/home/kyle1235/Novelty-Games/${MAIN_STORAGE_DIRECTORY}/`;
 
@@ -81,6 +82,46 @@ export async function getFile(event, socket) {
         };
 
         socket.emit(GET_FILE_RESPONSE_EVENT, getFileResponse);
+    }
+}
+
+/**
+ * @param {DeleteFileData} event
+ * @param {Socket} socket
+ */
+export async function deleteFile(event, socket) {
+    const id = event.id;
+    const applicationName = event.application;
+    const folderName = event.data.folderName;
+    const fileName = event.data.fileName;
+
+    const path = getPath(applicationName, folderName);
+    const filePath = `${path}/${fileName}`;
+
+    if (isPathValid(filePath)) {
+        console.log('Deleting file:', filePath);
+
+        await fs.promises.unlink(filePath);
+
+        console.log('File deleted!');
+
+        /** @type {DeleteFileResponse} */
+        const deleteFileResponse = {
+            id: id,
+            isSuccessful: true,
+        };
+
+        socket.emit(DELETE_FILE_RESPONSE_EVENT, deleteFileResponse);
+    } else {
+        console.error("The file's path is not valid:", filePath);
+
+        /** @type {DeleteFileResponse} */
+        const deleteFileResponse = {
+            id: id,
+            isSuccessful: false,
+        };
+
+        socket.emit(DELETE_FILE_RESPONSE_EVENT, deleteFileResponse);
     }
 }
 

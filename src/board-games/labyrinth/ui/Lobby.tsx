@@ -52,6 +52,8 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, onStartGame }) => {
         communicator.getGame().then(game => setGame(game));
 
         communicator.setLobbyUpdateListener(() => communicator.getLobby().then(lobby => setLobby(lobby)));
+
+        communicator.setGameUpdateListener(() => communicator.getGame().then(game => setGame(game)));
     }, []);
 
     const onCreateGame = (profile: Profile) => {
