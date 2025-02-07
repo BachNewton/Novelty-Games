@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LabyrinthCommunicator } from "../logic/LabyrinthCommunicator";
 import { getProfile, Profile } from "../../../util/Profile";
 import Loading from "../../../util/ui/Loading";
@@ -10,6 +10,7 @@ import { Game } from "../data/Game";
 interface LobbyProps {
     communicator: LabyrinthCommunicator;
     onStartGame: (lobby: LobbyData) => void;
+    onJoinGame: (game: Game) => void;
 }
 
 interface State {
@@ -24,18 +25,26 @@ interface MainState extends State {
     profile: Profile;
 }
 
-interface LobbyState extends State { }
+interface LobbyState extends State {
+    profile: Profile;
+}
 
-const Lobby: React.FC<LobbyProps> = ({ communicator, onStartGame }) => {
+const Lobby: React.FC<LobbyProps> = ({ communicator, onStartGame, onJoinGame }) => {
     const [state, setState] = useState<State>(() => {
         const loadingState: LoadingState = { type: StateType.LOADING };
 
         return loadingState;
     });
 
+    const lastestState = useRef(state);
+
     const [lobby, setLobby] = useState<LobbyData | null | undefined>(undefined);
 
     const [game, setGame] = useState<Game | null | undefined>(undefined);
+
+    useEffect(() => {
+        lastestState.current = state;
+    }, [state]);
 
     useEffect(() => {
         getProfile().then(profile => {
@@ -53,7 +62,19 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, onStartGame }) => {
 
         communicator.setLobbyUpdateListener(() => communicator.getLobby().then(lobby => setLobby(lobby)));
 
-        communicator.setGameUpdateListener(() => communicator.getGame().then(game => setGame(game)));
+        communicator.setGameUpdateListener(() => communicator.getGame().then(game => {
+            setGame(game);
+
+            // If you're in lobby state and in this game, then join the game
+            if (game !== null && isLobbyState(lastestState.current)) {
+                const id = lastestState.current.profile.id;
+                const youAreInGame = game.players.find(player => player.id === id) !== undefined;
+
+                if (youAreInGame) {
+                    onJoinGame(game);
+                }
+            }
+        }));
     }, []);
 
     const onCreateGame = (profile: Profile) => {
@@ -67,13 +88,13 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, onStartGame }) => {
 
         communicator.createLobby(lobbyData);
 
-        const lobbyState: LobbyState = { type: StateType.LOBBY };
+        const lobbyState: LobbyState = { type: StateType.LOBBY, profile: profile };
 
         setLobby(lobbyData);
         setState(lobbyState);
     };
 
-    const onJoinGame = (profile: Profile, lobby: LobbyData) => {
+    const onJoinLobby = (profile: Profile, lobby: LobbyData) => {
         const notAlreadyInLobby = lobby.players.find(player => player.id === profile.id) === undefined;
 
         if (notAlreadyInLobby) {
@@ -85,14 +106,14 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, onStartGame }) => {
             communicator.createLobby(lobby);
         }
 
-        const lobbyState: LobbyState = { type: StateType.LOBBY };
+        const lobbyState: LobbyState = { type: StateType.LOBBY, profile: profile };
 
         setLobby(lobby);
         setState(lobbyState);
     };
 
     if (isMainState(state)) {
-        return mainUi(state, onCreateGame, lobby, lobby => onJoinGame(state.profile, lobby), game);
+        return mainUi(state, onCreateGame, lobby, lobby => onJoinLobby(state.profile, lobby), game);
     } else if (isLobbyState(state)) {
         return lobbyUi(lobby!, onStartGame);
     } else {
@@ -104,7 +125,7 @@ function mainUi(
     state: MainState,
     onCreateGame: (profile: Profile) => void,
     lobby: LobbyData | null | undefined,
-    onJoinGame: (lobby: LobbyData) => void,
+    onJoinLobby: (lobby: LobbyData) => void,
     game: Game | null | undefined
 ): JSX.Element {
     return <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', color: 'white', fontSize: '1.5em', flexDirection: 'column' }}>
@@ -112,20 +133,20 @@ function mainUi(
         <div>Hello {getPlayerName(state.profile.name)}</div>
         <button style={{ fontSize: '1em', marginTop: '15px' }} onClick={() => onCreateGame(state.profile)}>Create Game</button>
         <div style={{ fontWeight: 'bold', margin: '15px 0px', fontSize: '1.25em' }}>Lobby</div>
-        {lobbySectionUi(lobby, onJoinGame)}
+        {lobbySectionUi(lobby, onJoinLobby)}
         <div style={{ fontWeight: 'bold', margin: '15px 0px', fontSize: '1.25em' }}>Games</div>
         {gameSectionUi(game)}
     </div>;
 }
 
-function lobbySectionUi(lobby: LobbyData | null | undefined, onJoinGame: (lobby: LobbyData) => void): JSX.Element {
+function lobbySectionUi(lobby: LobbyData | null | undefined, onJoinLobby: (lobby: LobbyData) => void): JSX.Element {
     if (lobby === undefined) {
         return <Loading />;
     } else if (lobby === null) {
         return <div>(none)</div>
     } else {
         return <div style={{ border: '2px solid white', margin: '10px', padding: '10px', borderRadius: '10px' }}>
-            {getGameName(lobby.players[0].name)} ({lobby.players.length}/4) <button style={{ fontSize: '1em' }} onClick={() => onJoinGame(lobby)}>Join</button>
+            {getGameName(lobby.players[0].name)} ({lobby.players.length}/4) <button style={{ fontSize: '1em' }} onClick={() => onJoinLobby(lobby)}>Join</button>
         </div>;
     }
 }

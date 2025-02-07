@@ -36,10 +36,14 @@ const Labyrinth: React.FC<LabyrinthProps> = ({ communicator }) => {
         setState(new GameState(game));
     };
 
+    const onJoinGame = (game: GameData) => {
+        setState(new GameState(game));
+    };
+
     if (state instanceof GameState) {
         return <Game game={state.game} />;
     } else {
-        return <Lobby communicator={communicator} onStartGame={onStartGame} />;
+        return <Lobby communicator={communicator} onStartGame={onStartGame} onJoinGame={onJoinGame} />;
     }
 }
 
