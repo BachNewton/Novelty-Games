@@ -94,28 +94,28 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, onStartGame, onJoinGame }) 
         setState(lobbyState);
     };
 
-    const onJoinLobby = (profile: Profile, lobby: LobbyData) => {
-        const notAlreadyInLobby = lobby.players.find(player => player.id === profile.id) === undefined;
+    const onJoinLobby = (profile: Profile, lobbyData: LobbyData) => {
+        const notAlreadyInLobby = lobbyData.players.find(player => player.id === profile.id) === undefined;
 
         if (notAlreadyInLobby) {
-            lobby.players.push({
+            lobbyData.players.push({
                 name: profile.name,
                 id: profile.id
             });
 
-            communicator.createLobby(lobby);
+            communicator.createLobby(lobbyData);
         }
 
         const lobbyState: LobbyState = { type: StateType.LOBBY, profile: profile };
 
-        setLobby(lobby);
+        setLobby(lobbyData);
         setState(lobbyState);
     };
 
     if (isMainState(state)) {
         return mainUi(state, onCreateGame, lobby, lobby => onJoinLobby(state.profile, lobby), game);
     } else if (isLobbyState(state)) {
-        return lobbyUi(lobby!, onStartGame);
+        return lobbyUi(lobby!, onStartGame, state.profile);
     } else {
         return loadingUi();
     }
@@ -163,12 +163,16 @@ function gameSectionUi(game: Game | null | undefined): JSX.Element {
     }
 }
 
-function lobbyUi(lobby: LobbyData, onStartGame: (lobby: LobbyData) => void): JSX.Element {
+function lobbyUi(lobby: LobbyData, onStartGame: (lobby: LobbyData) => void, profile: Profile): JSX.Element {
     const players = lobby.players.map((player, index) => {
         return <div key={index} style={{ border: `2px solid ${getColor(index)}`, borderRadius: '15px', padding: '5px', margin: '5px' }}>{player.name}</div>;
     });
 
     const loadingUi = lobby.players.length < 4 ? <Loading /> : <></>;
+
+    const button = lobby.ownerId === profile.id
+        ? <button style={{ fontSize: '1em', marginTop: '25px' }} onClick={() => onStartGame(lobby)}>Start Game</button>
+        : <div style={{ fontSize: '1em', marginTop: '25px' }}>Waiting for Host</div>;
 
     return <Dialog>
         <div style={{ color: 'white', fontSize: '2em', display: 'flex', flexDirection: 'column' }}>
@@ -176,7 +180,7 @@ function lobbyUi(lobby: LobbyData, onStartGame: (lobby: LobbyData) => void): JSX
             <div style={{ fontWeight: 'bold' }}>Players ({lobby.players.length}/4)</div>
             {players}
             {loadingUi}
-            <button style={{ fontSize: '1em', marginTop: '25px' }} onClick={() => onStartGame(lobby)}>Start Game</button>
+            {button}
         </div>
     </Dialog>;
 }
