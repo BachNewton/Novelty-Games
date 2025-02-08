@@ -27,6 +27,8 @@ const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
         const resizeCanvas = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+
+            ctx.imageSmoothingEnabled = false;
         };
 
         resizeCanvas();
@@ -111,8 +113,8 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, ga
 
 function drawDebug(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, deltaTime: number) {
     ctx.fillStyle = 'grey';
-    const fontSize = canvas.height * 0.06;
-    ctx.font = `${fontSize / 3}px sans-serif`;
+    const fontSize = canvas.height * 0.02;
+    ctx.font = `${fontSize}px sans-serif`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
     ctx.fillText(`FPS: ${(1000 / deltaTime).toFixed(0)}`, 0, 0);
