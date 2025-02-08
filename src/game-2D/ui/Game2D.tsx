@@ -3,6 +3,7 @@ import { GameWorld } from "../worlds/GameWorld";
 import { CarnivalWorld } from "../worlds/carnival/CarnivalWorld";
 import { WigglerWorld } from "../worlds/wigglers/WigglerWorld";
 import { GameWorldType } from "../worlds/GameWorldType";
+import { createCatWorld } from "../worlds/cat/CatWorld";
 
 interface Game2DProps {
     goHome: () => void;
@@ -51,6 +52,8 @@ function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement
             });
         case GameWorldType.WIGGLERS:
             return new WigglerWorld(canvas, ctx);
+        case GameWorldType.CAT:
+            return createCatWorld(canvas, ctx);
         default:
             throw new Error(`GameWorldType not supported: ${gameWorldType}`);
     }

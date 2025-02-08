@@ -1,4 +1,5 @@
 export enum GameWorldType {
     CARNIVAL,
-    WIGGLERS
+    WIGGLERS,
+    CAT
 }
