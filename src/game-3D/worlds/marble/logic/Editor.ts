@@ -273,7 +273,7 @@ function createEditor(
 
             const object = findObjectUnderPointer(mousePointer, mouseCoordinates, raycaster, camera, editableObjects);
 
-            if (object !== null && object !== transformControls.object) {
+            if (object !== null && object !== transformControls.object && transformControls.axis === null) {
                 object.material.emissive.setHex(0xFFFFFF);
             }
 
