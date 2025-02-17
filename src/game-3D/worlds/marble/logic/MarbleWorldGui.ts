@@ -12,6 +12,8 @@ import LevelSlalmon from '../levels/slalom.json';
 import LevelLoopingCoaster from '../levels/loopingCoaster.json';
 import LevelPlinko from '../levels/plinko.json';
 import LevelSpider from '../levels/spider.json';
+import LevelCollectathon from '../levels/collectathon.json';
+import LevelCastle from '../levels/castle.json';
 import { DEFAULT_COLOR, DEFAULT_MATERIAL, Editor } from './Editor';
 import { GameMaterial, gameMaterialToString, stringToGameMaterial } from './GameMaterial';
 import { createStorer, StorageKey, Storer } from '../../../../util/Storage';
@@ -69,17 +71,25 @@ function createMarbleWorldGui(editor: Editor, callbacks: MarbleWorldGuiCallbacks
 
     guiPlayMode.add({ "'Tab' Reset": onResetPlayer }, "'Tab' Reset");
     const guiPlayModeLevelsFolder = guiPlayMode.addFolder('Levels');
-    guiPlayModeLevelsFolder.add({ 'Level 1': () => onLoadLevel(Level1) }, 'Level 1');
-    guiPlayModeLevelsFolder.add({ 'Level 2': () => onLoadLevel(Level2) }, 'Level 2');
-    guiPlayModeLevelsFolder.add({ 'Level 3': () => onLoadLevel(Level3) }, 'Level 3');
-    guiPlayModeLevelsFolder.add({ 'Level 4': () => onLoadLevel(Level4) }, 'Level 4');
-    guiPlayModeLevelsFolder.add({ 'Level 5': () => onLoadLevel(Level5) }, 'Level 5');
-    guiPlayModeLevelsFolder.add({ 'Level 6': () => onLoadLevel(Level6) }, 'Level 6');
-    guiPlayModeLevelsFolder.add({ 'Rainbow Rush': () => onLoadLevel(LevelRainbowRush) }, 'Rainbow Rush');
-    guiPlayModeLevelsFolder.add({ 'Slalom Madness': () => onLoadLevel(LevelSlalmon) }, 'Slalom Madness');
-    guiPlayModeLevelsFolder.add({ 'Looping Coaster 1': () => onLoadLevel(LevelLoopingCoaster) }, 'Looping Coaster 1');
-    guiPlayModeLevelsFolder.add({ 'Plinko': () => onLoadLevel(LevelPlinko) }, 'Plinko');
-    guiPlayModeLevelsFolder.add({ 'Jumping Spider': () => onLoadLevel(LevelSpider) }, 'Jumping Spider');
+
+    const levels: Array<[string, Level]> = [
+        ['Level 1', Level1],
+        ['Level 2', Level2],
+        ['Level 3', Level3],
+        ['Level 4', Level4],
+        ['Level 5', Level5],
+        ['Level 6', Level6],
+        ['Rainbow Rush', LevelRainbowRush],
+        ['Slalom Madness', LevelSlalmon],
+        ['Looping Coaster 1', LevelLoopingCoaster],
+        ['Plinko', LevelPlinko],
+        ['Jumping Spider', LevelSpider],
+        ['Collectathon', LevelCollectathon],
+        ['Storm the Castle', LevelCastle]
+    ];
+
+    levels.forEach(([name, level]) => guiPlayModeLevelsFolder.add({ [name]: () => onLoadLevel(level) }, name));
+
     const guiPlayModeOnlineFolder = guiPlayMode.addFolder('Online').close();
     guiPlayModeOnlineFolder.add({ 'Toddler Companion App': false }, 'Toddler Companion App').onChange(updateToddlerCompanion);
     const guiPlayModeEditorFolder = guiPlayMode.addFolder('Editor');
