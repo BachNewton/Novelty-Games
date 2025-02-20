@@ -310,6 +310,12 @@ function getHUDText(startTime: number, collectiblesCollected: number, totalColle
 function createOrbitControls(camera: THREE.PerspectiveCamera, rendererDomElement: HTMLCanvasElement): OrbitControls {
     const controls = new OrbitControls(camera, rendererDomElement);
 
+    controls.mouseButtons = {
+        LEFT: THREE.MOUSE.ROTATE,
+        MIDDLE: THREE.MOUSE.PAN,
+        RIGHT: THREE.MOUSE.PAN
+    };
+
     controls.object.position.set(0, 3, -8);
 
     controls.minDistance = 4;

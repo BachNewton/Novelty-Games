@@ -24,6 +24,8 @@ export const MouseInputCreator: MouseInputCreator = {
         });
 
         window.addEventListener('mousedown', e => {
+            if (e.button !== MouseButton.LEFT) return;
+
             onClick({ x: e.clientX, y: e.clientY }, e.target);
         });
 
@@ -32,3 +34,9 @@ export const MouseInputCreator: MouseInputCreator = {
         };
     }
 };
+
+enum MouseButton {
+    LEFT = 0,
+    MIDDLE = 1,
+    RIGHT = 2
+}
