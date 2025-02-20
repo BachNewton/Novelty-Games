@@ -22,14 +22,8 @@ function createKnightWorld(
 
     addLight(scene);
     addSkybox(scene);
+    addGround(scene);
     createOrbitControls(camera, domElement);
-
-    const ground = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshPhongMaterial({ color: 0x999999 }));
-    ground.rotation.x = - Math.PI / 2;
-    scene.add(ground);
-
-    const grid = new THREE.GridHelper(50, 50);
-    scene.add(grid);
 
     let mixer: THREE.AnimationMixer | null = null;
     let bone: THREE.Bone | null = null;
@@ -42,9 +36,19 @@ function createKnightWorld(
 
         data.scale.multiplyScalar(0.01);
 
-        const helmentMesh = data.children[1] as THREE.SkinnedMesh;
-        const knightMesh = data.children[2] as THREE.SkinnedMesh;
         bone = data.children[0] as THREE.Bone;
+
+        const helmentMesh = data.children[1] as THREE.SkinnedMesh;
+        helmentMesh.frustumCulled = false;
+
+        const knightMesh = data.children[2] as THREE.SkinnedMesh;
+        knightMesh.frustumCulled = false;
+
+        const sheildMesh = data.children[3] as THREE.SkinnedMesh;
+        sheildMesh.frustumCulled = false;
+
+        const swordMesh = data.children[4] as THREE.SkinnedMesh;
+        swordMesh.frustumCulled = false;
 
         mixer = new THREE.AnimationMixer(data);
 
@@ -77,10 +81,19 @@ function createKnightWorld(
             mixer?.update(deltaTime / 1000);
 
             if (bone && knight) {
-                knight.position.z = -bone?.position.z * 0.01;
+                knight.position.z = -bone.position.z * 0.01;
             }
         }
     };
+}
+
+function addGround(scene: THREE.Scene) {
+    const ground = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshPhongMaterial({ color: 0x999999 }));
+    ground.rotation.x = -Math.PI / 2;
+    scene.add(ground);
+
+    const grid = new THREE.GridHelper(50, 50);
+    scene.add(grid);
 }
 
 function addLight(scene: THREE.Scene) {
