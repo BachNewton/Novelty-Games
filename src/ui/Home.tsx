@@ -16,7 +16,7 @@ import Labyrinth from '../board-games/labyrinth/ui/Labyrinth';
 import ProfileUi from './Profile';
 import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/LabyrinthCommunicator';
 
-const APP_VERSION = 'v3.1.2';
+const APP_VERSION = 'v3.1.3';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
