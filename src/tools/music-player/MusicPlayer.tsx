@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import SongGuitar from './Beastie Boys - Sabotage/guitar.ogg';
 import SongBass from './Beastie Boys - Sabotage/rhythm.ogg';
 import SongVocals from './Beastie Boys - Sabotage/vocals.ogg';
@@ -16,9 +16,14 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ }) => {
     const [player, setPlayer] = useState<Player>(Player.PAUSE);
     const [seconds, setSeconds] = useState(0);
     const [tracks, setTracks] = useState<HTMLAudioElement[]>([]);
+    const tracksRef = useRef<HTMLAudioElement[]>([]);
 
     useEffect(() => {
         updateRoute(Route.MUSIC_PLAYER);
+
+        const updateSliderInterval = setInterval(() => {
+            setSeconds(tracksRef.current[0]?.currentTime ?? 0);
+        }, 1000);
 
         Promise.all([
             loadAudio(SongGuitar),
@@ -30,25 +35,46 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ }) => {
             loadAudio(SongBacking)
         ]).then(laodedTracks => {
             console.log(performance.now(), 'All audio loaded');
-
             setTracks(laodedTracks);
+            tracksRef.current = laodedTracks;
         });
+
+        return () => clearInterval(updateSliderInterval);
     }, []);
 
-    const buttonText = player === Player.PAUSE ? 'Play' : 'Pause';
-
-    return <div>
-        <button onClick={() => temp(
+    const onPlayButtonClick = () => {
+        playButtonClick(
             player,
             seconds,
             tracks,
             updatedPlayer => setPlayer(updatedPlayer),
             updatedSeconds => setSeconds(updatedSeconds)
-        )}>{buttonText}</button>
+        );
+    };
+
+    const buttonText = player === Player.PAUSE ? 'Play' : 'Pause';
+
+    return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '15px', gap: '10px' }}>
+        <button style={{ fontSize: '2em', width: '5em' }} onClick={onPlayButtonClick}>{buttonText}</button>
+        <input
+            type="range"
+            min={0}
+            max={tracks[0]?.duration ?? 0}
+            value={seconds}
+            onChange={e => {
+                const newSeconds = Number(e.target.value);
+                setSeconds(newSeconds);
+
+                for (const track of tracks) {
+                    track.currentTime = newSeconds;
+                }
+            }}
+            style={{ width: '350px' }}
+        />
     </div>;
 };
 
-function temp(
+function playButtonClick(
     player: Player,
     seconds: number,
     tracks: HTMLAudioElement[],
