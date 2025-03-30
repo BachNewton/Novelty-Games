@@ -16,6 +16,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ }) => {
     const [player, setPlayer] = useState<Player>(Player.PAUSE);
     const [seconds, setSeconds] = useState(0);
     const [tracks, setTracks] = useState<HTMLAudioElement[]>([]);
+    const [_, setForceRender] = useState(false);
     const tracksRef = useRef<HTMLAudioElement[]>([]);
 
     useEffect(() => {
@@ -23,7 +24,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ }) => {
 
         const updateSliderInterval = setInterval(() => {
             setSeconds(tracksRef.current[0]?.currentTime ?? 0);
-        }, 1000);
+        }, 200);
 
         Promise.all([
             loadAudio(SongGuitar),
@@ -52,6 +53,24 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ }) => {
         );
     };
 
+    const rerender = () => {
+        setForceRender(prev => !prev);
+    };
+
+    const soloTrack = (soloedtrack: HTMLAudioElement) => {
+        for (const track of tracks) {
+            track.muted = track !== soloedtrack;
+        }
+
+        rerender();
+    };
+
+    const trackCheckboxes = tracks.map((track, index) => {
+        const trackName = ['Guitar', 'Bass', 'Vocals', 'Drums 1', 'Drums 2', 'Drums 3', 'Backing'][index];
+
+        return trackCheckbox(index, track, trackName, () => soloTrack(track), rerender);
+    });
+
     const buttonText = player === Player.PAUSE ? 'Play' : 'Pause';
 
     return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '15px', gap: '10px', fontSize: '2em', color: 'white' }}>
@@ -59,45 +78,47 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ }) => {
             {buttonText}
         </button>
 
-        <input
-            type="range"
-            min={0}
-            max={tracks[0]?.duration ?? 0}
-            value={seconds}
-            onChange={e => {
-                const newSeconds = Number(e.target.value);
-                setSeconds(newSeconds);
+        {playerSlider(tracks, seconds, newSeconds => setSeconds(newSeconds))}
 
-                for (const track of tracks) {
-                    track.currentTime = newSeconds;
-                }
-            }}
-            style={{ width: '350px' }}
-        />
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {trackCheckbox(tracks[0], 'Guitar')}
-            {trackCheckbox(tracks[1], 'Bass')}
-            {trackCheckbox(tracks[2], 'Vocals')}
-            {trackCheckbox(tracks[3], 'Drums 1')}
-            {trackCheckbox(tracks[4], 'Drums 2')}
-            {trackCheckbox(tracks[5], 'Drums 3')}
-            {trackCheckbox(tracks[6], 'Backing')}
+            <button style={{ fontSize: '1em', marginBottom: '10px' }}>All</button>
+            {trackCheckboxes}
         </div>
 
     </div>;
 };
 
-function trackCheckbox(track: HTMLAudioElement, label: string): JSX.Element {
-    return <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+function playerSlider(tracks: HTMLAudioElement[], seconds: number, updateSeconds: (seconds: number) => void): JSX.Element {
+    return <input
+        type="range"
+        min={0}
+        max={tracks[0]?.duration ?? 0}
+        value={seconds}
+        onChange={e => {
+            const newSeconds = Number(e.target.value);
+            updateSeconds(newSeconds);
+
+            for (const track of tracks) {
+                track.currentTime = newSeconds;
+            }
+        }}
+        style={{ width: '350px' }}
+    />;
+}
+
+
+function trackCheckbox(index: number, track: HTMLAudioElement, label: string, onSolo: () => void, renender: () => void): JSX.Element {
+    return <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
         <input
             type='checkbox'
             onChange={e => {
                 track.muted = !e.target.checked;
+                renender();
             }}
-            defaultChecked={true}
+            checked={!track.muted}
             style={{ transform: 'scale(2.5)' }}
         />
-        <button style={{ width: '6em', fontSize: '1em' }}>{label}</button>
+        <button style={{ width: '6em', fontSize: '1em' }} onClick={onSolo}>{label}</button>
     </div>
 }
 
