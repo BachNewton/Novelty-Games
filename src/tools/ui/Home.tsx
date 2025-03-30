@@ -1,6 +1,6 @@
 import { useState } from "react";
 import HomeButton from "../../ui/HomeButton";
-import MusicPlayer from "../music-player/MusicPlayer";
+import MusicPlayerHome from "../music-player/ui/Home";
 import { getRoute, Route } from "../../ui/Routing";
 
 interface HomeProps {
@@ -29,7 +29,7 @@ function Ui(uiState: UiState, onHomeButtonClicked: () => void, onForTheStats2Cli
     if (uiState instanceof MenuUiState) {
         return MenuUi(onHomeButtonClicked, onForTheStats2Click, onMusicPlayerClick);
     } else if (uiState instanceof MusicPlayerUiState) {
-        return <MusicPlayer />;
+        return <MusicPlayerHome />;
     } else {
         throw new Error('UiState not supported: ' + uiState);
     }

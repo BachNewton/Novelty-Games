@@ -1,19 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
-import SongGuitar from './Beastie Boys - Sabotage/guitar.ogg';
-import SongBass from './Beastie Boys - Sabotage/rhythm.ogg';
-import SongVocals from './Beastie Boys - Sabotage/vocals.ogg';
-import SongDrums1 from './Beastie Boys - Sabotage/drums_1.ogg';
-import SongDrums2 from './Beastie Boys - Sabotage/drums_2.ogg';
-import SongDrums3 from './Beastie Boys - Sabotage/drums_3.ogg';
-import SongBacking from './Beastie Boys - Sabotage/song.ogg';
-import { Route, updateRoute } from '../../ui/Routing';
-import { selectFolder } from './Parser';
+import SongGuitar from '../Beastie Boys - Sabotage/guitar.ogg';
+import SongBass from '../Beastie Boys - Sabotage/rhythm.ogg';
+import SongVocals from '../Beastie Boys - Sabotage/vocals.ogg';
+import SongDrums1 from '../Beastie Boys - Sabotage/drums_1.ogg';
+import SongDrums2 from '../Beastie Boys - Sabotage/drums_2.ogg';
+import SongDrums3 from '../Beastie Boys - Sabotage/drums_3.ogg';
+import SongBacking from '../Beastie Boys - Sabotage/song.ogg';
+import { Route, updateRoute } from '../../../ui/Routing';
 
-interface MusicPlayerProps { }
+interface MusicPlayerProps {
+    onFolderSelect: () => void;
+}
 
 enum Player { PLAY, PAUSE }
 
-const MusicPlayer: React.FC<MusicPlayerProps> = ({ }) => {
+const MusicPlayer: React.FC<MusicPlayerProps> = ({ onFolderSelect }) => {
     const [player, setPlayer] = useState<Player>(Player.PAUSE);
     const [seconds, setSeconds] = useState(0);
     const [tracks, setTracks] = useState<HTMLAudioElement[]>([]);
@@ -84,7 +85,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ }) => {
 
     return <>
         <div style={{ position: 'fixed', right: '5px', top: '5px' }}>
-            <button onClick={selectFolder} style={{ fontSize: '1.25em' }}>📁</button>
+            <button onClick={onFolderSelect} style={{ fontSize: '1.25em' }}>📁</button>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '25px', gap: '10px', fontSize: '2em', color: 'white' }}>
