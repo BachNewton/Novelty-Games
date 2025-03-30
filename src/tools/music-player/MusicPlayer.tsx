@@ -54,8 +54,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ }) => {
 
     const buttonText = player === Player.PAUSE ? 'Play' : 'Pause';
 
-    return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '15px', gap: '10px' }}>
-        <button style={{ fontSize: '2em', width: '5em' }} onClick={onPlayButtonClick}>{buttonText}</button>
+    return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '15px', gap: '10px', fontSize: '2em', color: 'white' }}>
+        <button style={{ fontSize: '1.7em', width: '5em', borderRadius: '50px', padding: '5px' }} onClick={onPlayButtonClick}>
+            {buttonText}
+        </button>
+
         <input
             type="range"
             min={0}
@@ -71,8 +74,32 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ }) => {
             }}
             style={{ width: '350px' }}
         />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {trackCheckbox(tracks[0], 'Guitar')}
+            {trackCheckbox(tracks[1], 'Bass')}
+            {trackCheckbox(tracks[2], 'Vocals')}
+            {trackCheckbox(tracks[3], 'Drums 1')}
+            {trackCheckbox(tracks[4], 'Drums 2')}
+            {trackCheckbox(tracks[5], 'Drums 3')}
+            {trackCheckbox(tracks[6], 'Backing')}
+        </div>
+
     </div>;
 };
+
+function trackCheckbox(track: HTMLAudioElement, label: string): JSX.Element {
+    return <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <input
+            type='checkbox'
+            onChange={e => {
+                track.muted = !e.target.checked;
+            }}
+            defaultChecked={true}
+            style={{ transform: 'scale(2.5)' }}
+        />
+        <button style={{ width: '6em', fontSize: '1em' }}>{label}</button>
+    </div>
+}
 
 function playButtonClick(
     player: Player,
