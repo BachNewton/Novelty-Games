@@ -7,6 +7,7 @@ import SongDrums2 from './Beastie Boys - Sabotage/drums_2.ogg';
 import SongDrums3 from './Beastie Boys - Sabotage/drums_3.ogg';
 import SongBacking from './Beastie Boys - Sabotage/song.ogg';
 import { Route, updateRoute } from '../../ui/Routing';
+import { selectFolder } from './Parser';
 
 interface MusicPlayerProps { }
 
@@ -81,19 +82,25 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ }) => {
 
     const buttonText = player === Player.PAUSE ? 'Play' : 'Pause';
 
-    return <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '15px', gap: '10px', fontSize: '2em', color: 'white' }}>
-        <button style={{ fontSize: '1.7em', width: '5em', borderRadius: '50px', padding: '5px' }} onClick={onPlayButtonClick}>
-            {buttonText}
-        </button>
-
-        {playerSlider(tracks, seconds, newSeconds => setSeconds(newSeconds))}
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <button style={{ fontSize: '1em', marginBottom: '10px' }} onClick={allTracks}>All</button>
-            {trackCheckboxes}
+    return <>
+        <div style={{ position: 'fixed', right: '5px', top: '5px' }}>
+            <button onClick={selectFolder} style={{ fontSize: '1.25em' }}>📁</button>
         </div>
 
-    </div>;
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '25px', gap: '10px', fontSize: '2em', color: 'white' }}>
+            <button style={{ fontSize: '1.7em', width: '5em', borderRadius: '50px', padding: '5px' }} onClick={onPlayButtonClick}>
+                {buttonText}
+            </button>
+
+            {playerSlider(tracks, seconds, newSeconds => setSeconds(newSeconds))}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <button style={{ fontSize: '1em', marginBottom: '10px' }} onClick={allTracks}>All</button>
+                {trackCheckboxes}
+            </div>
+
+        </div>
+    </>;
 };
 
 function playerSlider(tracks: HTMLAudioElement[], seconds: number, updateSeconds: (seconds: number) => void): JSX.Element {
