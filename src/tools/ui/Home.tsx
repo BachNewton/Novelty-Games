@@ -1,5 +1,7 @@
 import { useState } from "react";
 import HomeButton from "../../ui/HomeButton";
+import MusicPlayer from "../music-player/MusicPlayer";
+import { getRoute, Route } from "../../ui/Routing";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
@@ -7,26 +9,33 @@ interface HomeProps {
 
 interface UiState { }
 class MenuUiState implements UiState { }
+class MusicPlayerUiState implements UiState { }
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
-    const [uiState, setUiState] = useState<UiState>(new MenuUiState());
+    const [uiState, setUiState] = useState<UiState>(getInitialState());
 
     const onForTheStats2Click = () => {
         window.alert('Work in progress!');
     }
 
-    return Ui(uiState, onHomeButtonClicked, onForTheStats2Click);
+    const onMusicPlayerClick = () => {
+        setUiState(new MusicPlayerUiState());
+    };
+
+    return Ui(uiState, onHomeButtonClicked, onForTheStats2Click, onMusicPlayerClick);
 };
 
-function Ui(uiState: UiState, onHomeButtonClicked: () => void, onForTheStats2Click: () => void) {
+function Ui(uiState: UiState, onHomeButtonClicked: () => void, onForTheStats2Click: () => void, onMusicPlayerClick: () => void) {
     if (uiState instanceof MenuUiState) {
-        return MenuUi(onHomeButtonClicked, onForTheStats2Click);
+        return MenuUi(onHomeButtonClicked, onForTheStats2Click, onMusicPlayerClick);
+    } else if (uiState instanceof MusicPlayerUiState) {
+        return <MusicPlayer />;
     } else {
         throw new Error('UiState not supported: ' + uiState);
     }
 }
 
-function MenuUi(onHomeButtonClicked: () => void, onForTheStats2Click: () => void) {
+function MenuUi(onHomeButtonClicked: () => void, onForTheStats2Click: () => void, onMusicPlayerClick: () => void) {
     const containerStyle: React.CSSProperties = {
         color: 'white',
         display: 'flex',
@@ -47,7 +56,19 @@ function MenuUi(onHomeButtonClicked: () => void, onForTheStats2Click: () => void
         <HomeButton onClick={onHomeButtonClicked} />
         <div style={{ fontSize: '1.75em', marginBottom: '1em' }}>🔧 Tools 🔨</div>
         <button style={buttonStyle} onClick={onForTheStats2Click}>For The Stats 2 👑</button>
+        <button style={buttonStyle} onClick={onMusicPlayerClick}>Music Player 🎶</button>
     </div>;
+}
+
+function getInitialState(): UiState {
+    const route = getRoute();
+
+    switch (route) {
+        case Route.MUSIC_PLAYER:
+            return new MusicPlayerUiState();
+        default:
+            return new MenuUiState();
+    }
 }
 
 export default Home;

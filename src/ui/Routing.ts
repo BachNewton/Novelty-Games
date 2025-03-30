@@ -3,7 +3,8 @@ export enum Route {
     KNIGHT_GAME = 'Knight',
     FREE_MARKET = 'Free-Market',
     LABYRINTH = 'Labyrinth',
-    CAT = 'Cat'
+    CAT = 'Cat',
+    MUSIC_PLAYER = 'Music-Player'
 }
 
 export function getRoute(): string | null {

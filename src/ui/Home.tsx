@@ -168,6 +168,8 @@ function getInitialState(): State {
             return createLabyrinthState();
         case Route.CAT:
             return new Game2DState();
+        case Route.MUSIC_PLAYER:
+            return new ToolsState();
         default:
             return new HomeState();
     }
