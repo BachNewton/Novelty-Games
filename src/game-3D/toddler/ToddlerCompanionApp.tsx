@@ -22,35 +22,6 @@ const ToddlerCompanionApp: React.FC = () => {
         const data: ToddlerServerClearData = { type: 'clear' };
 
         networkService.broadcast(data);
-
-        // TODO: Remove later - testing code for NetworkService saveFile function
-
-        // networkService.saveFile({
-        //     folderName: '../../invalidPath',
-        //     fileName: 'temp.txt',
-        //     content: 'this is a test'
-        // }).then(response => console.log(response.isSuccessful));
-
-        // networkService.saveFile({
-        //     folderName: 'validPath',
-        //     fileName: 'temp.txt',
-        //     content: 'this is a test'
-        // }).then(response => console.log(response.isSuccessful));
-
-        // networkService.getFile({
-        //     folderName: '../../invalidPath',
-        //     fileName: 'temp.txt'
-        // }).then(response => console.log(response.isSuccessful));
-
-        // networkService.getFile({
-        //     folderName: 'validPath',
-        //     fileName: 'temp.txt'
-        // }).then(response => console.log(response.content));
-
-        // networkService.getFile({
-        //     folderName: 'validPath',
-        //     fileName: 'notFound.txt'
-        // }).then(response => console.log(response.content));
     };
 
     return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: '1fr 7fr' }}>
