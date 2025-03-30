@@ -65,6 +65,14 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ }) => {
         rerender();
     };
 
+    const allTracks = () => {
+        for (const track of tracks) {
+            track.muted = false;
+        }
+
+        rerender();
+    };
+
     const trackCheckboxes = tracks.map((track, index) => {
         const trackName = ['Guitar', 'Bass', 'Vocals', 'Drums 1', 'Drums 2', 'Drums 3', 'Backing'][index];
 
@@ -81,7 +89,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ }) => {
         {playerSlider(tracks, seconds, newSeconds => setSeconds(newSeconds))}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <button style={{ fontSize: '1em', marginBottom: '10px' }}>All</button>
+            <button style={{ fontSize: '1em', marginBottom: '10px' }} onClick={allTracks}>All</button>
             {trackCheckboxes}
         </div>
 
