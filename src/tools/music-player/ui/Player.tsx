@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { SongPackage } from "../logic/MusicDatabase";
+import { fileToAudio } from "../logic/Parser";
 
-interface PlayerProps { }
-
-enum PlayerState {
-    PLAYING, PAUSED
+interface PlayerProps {
+    song: SongPackage | null;
 }
 
 interface Tracks {
@@ -18,13 +18,54 @@ interface Tracks {
     backing: HTMLAudioElement;
 }
 
-const Player: React.FC<PlayerProps> = ({ }) => {
+const Player: React.FC<PlayerProps> = ({ song }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [expanded, setExpanded] = useState(true);
+    const [seconds, setSeconds] = useState(0);
+    const [tracks, setTracks] = useState<Tracks | null>(null);
+
+    useEffect(() => {
+        if (song === null) return;
+
+        Promise.all([
+            fileToAudio(song.guitar),
+            fileToAudio(song.bass),
+            fileToAudio(song.vocals),
+            fileToAudio(song.drums),
+            fileToAudio(song.drums1),
+            fileToAudio(song.drums2),
+            fileToAudio(song.drums3),
+            fileToAudio(song.keys),
+            fileToAudio(song.backing)
+        ]).then(([guitar, bass, vocals, drums, drums1, drums2, drums3, keys, backing]) => {
+            console.log(performance.now(), 'Loaded: ' + song.folderName);
+
+            const loadedTracks: Tracks = {
+                guitar: guitar as HTMLAudioElement,
+                bass: bass as HTMLAudioElement,
+                vocals: vocals as HTMLAudioElement,
+                drums: drums as HTMLAudioElement,
+                drums1: drums1 as HTMLAudioElement,
+                drums2: drums2 as HTMLAudioElement,
+                drums3: drums3 as HTMLAudioElement,
+                keys: keys as HTMLAudioElement,
+                backing: backing as HTMLAudioElement
+            };
+
+            setTracks(loadedTracks);
+        });
+    }, [song]);
 
     const icon = isPlaying ? '⏸️' : '▶️';
 
     const handleExpansion = (e: React.MouseEvent) => { if (e.target === e.currentTarget) setExpanded(!expanded) };
+
+    const onPlayButtonClick = () => {
+        if (tracks === null) return;
+
+        setIsPlaying(!isPlaying);
+        playButtonClick(!isPlaying, 0, tracks);
+    };
 
     return <div style={{
         padding: '10px',
@@ -47,7 +88,7 @@ const Player: React.FC<PlayerProps> = ({ }) => {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', fontSize: '1.75em' }} onClick={handleExpansion}>
-            <div style={{ cursor: 'pointer' }} onClick={() => setIsPlaying(!isPlaying)}>
+            <div style={{ cursor: 'pointer' }} onClick={onPlayButtonClick}>
                 {icon}
             </div>
         </div>
@@ -79,6 +120,49 @@ function trackCheckbox(index: number, track: HTMLAudioElement, label: string, on
         />
         <button style={{ width: '6em', fontSize: '1em' }} onClick={onSolo}>{label}</button>
     </div>
+}
+
+function playButtonClick(
+    isPlaying: boolean,
+    seconds: number,
+    tracks: Tracks
+) {
+    const audioElements = [
+        tracks.guitar,
+        tracks.bass,
+        tracks.drums,
+        tracks.drums1,
+        tracks.drums2,
+        tracks.drums3,
+        tracks.keys,
+        tracks.backing
+    ];
+
+    if (isPlaying) {
+        // tracks.guitar.currentTime = seconds;
+        // tracks.bass.currentTime = seconds;
+        // tracks.vocals.currentTime = seconds;
+        // tracks.backing.currentTime = seconds;
+        // if (tracks.drums) tracks.drums.currentTime = seconds;
+        // if (tracks.drums1) tracks.drums1.currentTime = seconds;
+        // if (tracks.drums2) tracks.drums2.currentTime = seconds;
+        // if (tracks.drums3) tracks.drums3.currentTime = seconds;
+        // if (tracks.keys) tracks.keys.currentTime = seconds;
+
+        apply(audio => audio.play(), audioElements);
+
+        // setPlayer(Player.PLAY);
+    } else {
+        apply(audio => audio.pause(), audioElements);
+
+        // setPlayer(Player.PAUSE);
+    }
+}
+
+function apply(apply: (audioElement: HTMLAudioElement) => void, audioElements: (HTMLAudioElement | null)[]) {
+    for (const audioElement of audioElements) {
+        if (audioElement !== null) apply(audioElement);
+    }
 }
 
 export default Player;
