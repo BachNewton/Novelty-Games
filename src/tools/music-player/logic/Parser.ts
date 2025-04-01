@@ -1,5 +1,5 @@
 export interface SongPackage {
-    id: string;
+    folderName: string;
     ini: File,
     guitar: File,
     bass: File,
@@ -31,46 +31,62 @@ function createSongPackages(files: File[]): SongPackage[] {
 
     for (const file of files) {
         const path = file.webkitRelativePath.split('/');
-        const name = path[path.length - 2];
-        songFiles.get(name)?.push(file) ?? songFiles.set(name, [file]);
+        const folderName = path[path.length - 2];
+        songFiles.get(folderName)?.push(file) ?? songFiles.set(folderName, [file]);
     }
 
     const songPackages: SongPackage[] = [];
 
-    songFiles.forEach((files, name) => {
-        songPackages.push({
-            id: name,
-            ini: files.find(file => file.name === 'song.ini')!,
-            guitar: files.find(file => file.name === 'guitar.ogg')!,
-            bass: files.find(file => file.name === 'bass.ogg')!,
-            vocals: files.find(file => file.name === 'vocals.ogg')!,
-            drums1: files.find(file => file.name === 'drums1.ogg')!,
-            drums2: files.find(file => file.name === 'drums2.ogg')!,
-            drums3: files.find(file => file.name === 'drums3.ogg')!,
-            backing: files.find(file => file.name === 'backing.ogg')!
-        });
+    songFiles.forEach((files, folderName) => {
+        const songPackage = createSongPackage(files, folderName);
+
+        if (songPackage === null) return;
+
+        songPackages.push(songPackage);
     });
 
     return songPackages;
 }
 
-// export function parseSongsFiles(trackFiles: SongFile[]) {
-//     console.log('Selected files:', trackFiles);
+function createSongPackage(files: File[], folderName: string): SongPackage | null {
+    const iniFile = files.find(file => file.name === 'song.ini');
+    const guitarFile = files.find(file => file.name === 'guitar.ogg');
+    const bassFile = files.find(file => file.name === 'rhythm.ogg');
+    const vocalsFile = files.find(file => file.name === 'vocals.ogg');
+    const drums1File = files.find(file => file.name === 'drums_1.ogg');
+    const drums2File = files.find(file => file.name === 'drums_2.ogg');
+    const drums3File = files.find(file => file.name === 'drums_3.ogg');
+    const backingFile = files.find(file => file.name === 'song.ogg');
 
-//     const firstAudioTrack = trackFiles.find(trackFile => trackFile.path.endsWith('.ogg'));
-//     if (firstAudioTrack === undefined) return;
-//     const audioSrc = URL.createObjectURL(firstAudioTrack.file);
+    if (iniFile === undefined) console.error('No song.ini found in ' + folderName);
+    if (guitarFile === undefined) console.error('No guitar.ogg found in ' + folderName);
+    if (bassFile === undefined) console.error('No rhythm.ogg found in ' + folderName);
+    if (vocalsFile === undefined) console.error('No vocals.ogg found in ' + folderName);
+    if (drums1File === undefined) console.error('No drums_1.ogg found in ' + folderName);
+    if (drums2File === undefined) console.error('No drums_2.ogg found in ' + folderName);
+    if (drums3File === undefined) console.error('No drums_3.ogg found in ' + folderName);
+    if (backingFile === undefined) console.error('No song.ogg found in ' + folderName);
 
-//     console.log('Playing:', firstAudioTrack.path);
-//     new Audio(audioSrc).play();
-// }
+    if (iniFile === undefined || guitarFile === undefined || bassFile === undefined ||
+        vocalsFile === undefined || drums1File === undefined || drums2File === undefined ||
+        drums3File === undefined || backingFile === undefined) return null;
 
-// export async function getNameAndArtist(file: File): Promise<string> {
-//     const text = await file.text();
-//     const lines = text.split('\n');
-//     const nameLine = lines.find(line => line.startsWith('name = '));
-//     const artistLine = lines.find(line => line.startsWith('artist = '));
-//     const name = nameLine ? nameLine.split('=')[1].trim() : 'Unknown Name';
-//     const artist = artistLine ? artistLine.split('=')[1].trim() : 'Unknown Artist';
-//     return `${name} - ${artist}`;
-// }
+    return {
+        folderName: folderName,
+        ini: iniFile,
+        guitar: guitarFile,
+        bass: bassFile,
+        vocals: vocalsFile,
+        drums1: drums1File,
+        drums2: drums2File,
+        drums3: drums3File,
+        backing: backingFile
+    };
+}
+
+export function fileToAudio(file: File): Promise<HTMLAudioElement> {
+    return new Promise(resolve => {
+        const audio = new Audio(URL.createObjectURL(file));
+        audio.addEventListener('canplaythrough', () => resolve(audio));
+    });
+}

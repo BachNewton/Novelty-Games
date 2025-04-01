@@ -7,14 +7,16 @@ import SongDrums2 from '../Beastie Boys - Sabotage/drums_2.ogg';
 import SongDrums3 from '../Beastie Boys - Sabotage/drums_3.ogg';
 import SongBacking from '../Beastie Boys - Sabotage/song.ogg';
 import { Route, updateRoute } from '../../../ui/Routing';
+import { fileToAudio, SongPackage } from '../logic/Parser';
 
 interface MusicPlayerProps {
+    songPackage?: SongPackage;
     onFolderSelect: () => void;
 }
 
 enum Player { PLAY, PAUSE }
 
-const MusicPlayer: React.FC<MusicPlayerProps> = ({ onFolderSelect }) => {
+const MusicPlayer: React.FC<MusicPlayerProps> = ({ songPackage, onFolderSelect }) => {
     const [player, setPlayer] = useState<Player>(Player.PAUSE);
     const [seconds, setSeconds] = useState(0);
     const [tracks, setTracks] = useState<HTMLAudioElement[]>([]);
@@ -28,19 +30,35 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ onFolderSelect }) => {
             setSeconds(tracksRef.current[0]?.currentTime ?? 0);
         }, 200);
 
-        Promise.all([
-            loadAudio(SongGuitar),
-            loadAudio(SongBass),
-            loadAudio(SongVocals),
-            loadAudio(SongDrums1),
-            loadAudio(SongDrums2),
-            loadAudio(SongDrums3),
-            loadAudio(SongBacking)
-        ]).then(laodedTracks => {
-            console.log(performance.now(), 'All audio loaded');
-            setTracks(laodedTracks);
-            tracksRef.current = laodedTracks;
-        });
+        if (songPackage !== undefined) {
+            Promise.all([
+                fileToAudio(songPackage.guitar),
+                fileToAudio(songPackage.bass),
+                fileToAudio(songPackage.vocals),
+                fileToAudio(songPackage.drums1),
+                fileToAudio(songPackage.drums2),
+                fileToAudio(songPackage.drums3),
+                fileToAudio(songPackage.backing)
+            ]).then(laodedTracks => {
+                console.log(performance.now(), 'All audio loaded');
+                setTracks(laodedTracks);
+                tracksRef.current = laodedTracks;
+            });
+        } else {
+            Promise.all([
+                loadAudio(SongGuitar),
+                loadAudio(SongBass),
+                loadAudio(SongVocals),
+                loadAudio(SongDrums1),
+                loadAudio(SongDrums2),
+                loadAudio(SongDrums3),
+                loadAudio(SongBacking)
+            ]).then(laodedTracks => {
+                console.log(performance.now(), 'All audio loaded');
+                setTracks(laodedTracks);
+                tracksRef.current = laodedTracks;
+            });
+        }
 
         return () => clearInterval(updateSliderInterval);
     }, []);
@@ -89,6 +107,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ onFolderSelect }) => {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '25px', gap: '10px', fontSize: '2em', color: 'white' }}>
+            <div>{songPackage?.folderName}</div>
             <button style={{ fontSize: '1.7em', width: '5em', borderRadius: '50px', padding: '5px' }} onClick={onPlayButtonClick}>
                 {buttonText}
             </button>

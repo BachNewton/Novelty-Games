@@ -3,9 +3,10 @@ import { SongPackage } from "../logic/Parser";
 
 interface SongImporterProps {
     songPackages: SongPackage[];
+    onSongClicked: (songPackage: SongPackage) => void;
 }
 
-const SongImporter: React.FC<SongImporterProps> = ({ songPackages }) => {
+const SongImporter: React.FC<SongImporterProps> = ({ songPackages, onSongClicked }) => {
     const [buttonTexts, setButtonTexts] = useState<string[]>([]);
 
     // useEffect(() => {
@@ -16,11 +17,11 @@ const SongImporter: React.FC<SongImporterProps> = ({ songPackages }) => {
     //     });
     // }, []);
 
-    const onSongClicked = (index: number) => {
-        const selectedSong = songPackages[index];
-    };
-
-    const buttons = songPackages.map((songPackage, index) => <button key={index} style={{ fontSize: '1em', padding: '5px' }}>{songPackage.id}</button>);
+    const buttons = songPackages.map((songPackage, index) => <button
+        key={index}
+        onClick={() => onSongClicked(songPackage)}
+        style={{ fontSize: '1em', padding: '5px' }}
+    >{songPackage.folderName}</button>);
 
     return <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', margin: '15px' }}>
         {buttons}
