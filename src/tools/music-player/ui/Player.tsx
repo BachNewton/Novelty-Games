@@ -64,8 +64,8 @@ const Player: React.FC<PlayerProps> = ({ song }) => {
 
     return <div style={{
         padding: '10px',
-        borderTop: '2px solid var(--novelty-blue)',
-        boxShadow: 'black 0px -2px 25px'
+        borderTop: '3px solid var(--novelty-blue)',
+        boxShadow: 'black 0px -10px 20px'
     }}>
         {expandedUi(expanded, tracks, handleExpansion, forceRender)}
 

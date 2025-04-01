@@ -16,7 +16,7 @@ function contentUi(songPackages: SongPackage[] | null, onSongSelected: (song: So
     if (songPackages === null) {
         return <Loading />;
     } else if (songPackages.length === 0) {
-        return <div>You have no songs in your library</div>;
+        return <div>Your music library is empty</div>;
     } else {
         return songPackages.map((song, index) => <button
             key={index}

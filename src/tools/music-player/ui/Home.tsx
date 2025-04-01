@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import SongImporter from "./SongImporter";
 import { selectFolder } from "../logic/Parser";
-import NewMusicPlayer from "./NewMusicPlayer";
+import MusicPlayer from "./MusicPlayer";
 import { MusicDatabaseTables, SongPackage } from "../logic/MusicDatabase";
 import { Database } from "../../../util/Database";
 import { Route, updateRoute } from "../../../ui/Routing";
@@ -12,13 +12,7 @@ interface HomeProps {
 
 interface State { }
 
-class MusicPlayerState implements State {
-    songPackage?: SongPackage;
-
-    constructor(songPackage?: SongPackage) {
-        this.songPackage = songPackage;
-    }
-}
+class MusicPlayerState implements State { }
 
 class SongImporterState implements State {
     songPackages: SongPackage[];
@@ -42,7 +36,14 @@ const Home: React.FC<HomeProps> = ({ musicDatabase }) => {
     const importNewSongs = () => {
         selectFolder().then(songPackages => {
             console.log('Selected files:', songPackages);
-            setState(new SongImporterState(songPackages));
+
+            for (const songPackage of songPackages) {
+                musicDatabase.add('songs', songPackage);
+            }
+
+            updateSongsFromDb();
+            setState(new MusicPlayerState());
+            // setState(new SongImporterState(songPackages));
         });
     };
 
@@ -50,13 +51,13 @@ const Home: React.FC<HomeProps> = ({ musicDatabase }) => {
         console.log('Selected song:', songPackage);
         musicDatabase.add('songs', songPackage);
         updateSongsFromDb();
-        setState(new MusicPlayerState(songPackage));
+        setState(new MusicPlayerState());
     };
 
     if (state instanceof SongImporterState) {
         return <SongImporter songPackages={state.songPackages} onSongClicked={onSongClicked} />;
     } else if (state instanceof MusicPlayerState) {
-        return <NewMusicPlayer importNewSongs={importNewSongs} songPackages={songs} />;
+        return <MusicPlayer importNewSongs={importNewSongs} songPackages={songs} />;
     } else {
         return <></>;
     }

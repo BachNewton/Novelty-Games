@@ -7,16 +7,6 @@ interface SongImporterProps {
 }
 
 const SongImporter: React.FC<SongImporterProps> = ({ songPackages, onSongClicked }) => {
-    const [buttonTexts, setButtonTexts] = useState<string[]>([]);
-
-    // useEffect(() => {
-    //     const iniFiles = songPackages.filter(file => file.file.name === 'song.ini');
-
-    //     Promise.all(iniFiles.map(iniFile => getNameAndArtist(iniFile.file))).then(nameAndArtists => {
-    //         setButtonTexts(nameAndArtists);
-    //     });
-    // }, []);
-
     const buttons = songPackages.map((songPackage, index) => <button
         key={index}
         onClick={() => onSongClicked(songPackage)}
