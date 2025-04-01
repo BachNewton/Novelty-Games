@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { SongPackage } from "../logic/Parser";
+import { SongPackage } from "../logic/MusicDatabase";
 
 interface SongImporterProps {
     songPackages: SongPackage[];

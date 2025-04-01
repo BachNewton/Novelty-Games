@@ -1,4 +1,4 @@
-interface Database<Tables extends Record<string, any>> {
+export interface Database<Tables extends Record<string, any>> {
     add: <TableName extends keyof Tables>(tableName: TableName, data: Tables[TableName]) => void;
     get: <TableName extends keyof Tables>(tableName: TableName) => Promise<Tables[TableName][]>;
 }

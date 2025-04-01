@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Route, updateRoute } from '../../../ui/Routing';
-import { fileToAudio, SongPackage } from '../logic/Parser';
+import { fileToAudio } from '../logic/Parser';
+import { SongPackage } from '../logic/MusicDatabase';
 
 interface MusicPlayerProps {
     songPackage?: SongPackage;

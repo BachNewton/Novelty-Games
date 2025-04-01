@@ -1,41 +1,21 @@
-interface MusicDatabase {
-    add: () => void;
+import { createDatabase, Database } from "../../../util/Database";
+
+export interface SongPackage {
+    folderName: string;
+    ini: File,
+    guitar: File,
+    bass: File,
+    vocals: File,
+    drums: File | null,
+    drums1: File | null,
+    drums2: File | null,
+    drums3: File | null,
+    keys: File | null,
+    backing: File,
 }
 
-export function createMusicDatabase(): MusicDatabase {
-    return {
-        add: add
-    };
-}
+export type MusicDatabaseTables = { 'songs': SongPackage };
 
-function add() {
-    const request = indexedDB.open('music_database');
-
-    request.onupgradeneeded = e => {
-        console.log('onupgradeneeded');
-
-        const db = getDatabase(e);
-
-        const objectStore = db.createObjectStore('test', { autoIncrement: true });
-    };
-
-    request.onsuccess = e => {
-        console.log('onsuccess', e);
-
-        const db = getDatabase(e);
-        const transaction = db.transaction('test', 'readwrite');
-        const objectStore = transaction.objectStore('test');
-
-        objectStore.add({
-            a: '123',
-            b: '456',
-            file: '789'
-        });
-    };
-}
-
-function getDatabase(e: Event): IDBDatabase {
-    const request = e.target as IDBOpenDBRequest
-    const db = request.result;
-    return db;
+export function createMusicDatabase(): Database<MusicDatabaseTables> {
+    return createDatabase('music', ['songs']);
 }
