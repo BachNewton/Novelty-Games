@@ -23,6 +23,7 @@ const Player: React.FC<PlayerProps> = ({ song }) => {
     const [expanded, setExpanded] = useState(true);
     const [seconds, setSeconds] = useState(0);
     const [tracks, setTracks] = useState<Tracks | null>(null);
+    const [_, setForceRender] = useState(false);
     const tracksRef = useRef<Tracks | null>(null);
 
     useEffect(() => {
@@ -59,12 +60,16 @@ const Player: React.FC<PlayerProps> = ({ song }) => {
         playButtonClick(!isPlaying, tracks);
     };
 
+    const forceRender = () => setForceRender(prev => !prev);
+
     return <div style={{
         padding: '10px',
         borderTop: '2px solid var(--novelty-blue)',
         boxShadow: 'black 0px -2px 25px'
     }}>
-        {expandedUi(expanded, handleExpansion)}
+        {expandedUi(expanded, tracks, handleExpansion, forceRender)}
+
+        <div style={{ textAlign: 'center' }} onClick={handleExpansion}>{song?.folderName}</div>
 
         <div style={{ display: 'flex', justifyContent: 'center' }} onClick={handleExpansion}>
             {sliderUi(tracks, seconds, updatedSeconds => setSeconds(updatedSeconds))}
@@ -109,7 +114,6 @@ async function loadTracks(song: SongPackage): Promise<Tracks> {
 }
 
 function sliderUi(tracks: Tracks | null, seconds: number, updateSeconds: (seconds: number) => void): JSX.Element {
-    console.log(seconds);
     return <input
         type='range'
         min={0}
@@ -124,21 +128,54 @@ function sliderUi(tracks: Tracks | null, seconds: number, updateSeconds: (second
     />;
 }
 
-function expandedUi(expanded: boolean, handleExpansion: (e: React.MouseEvent) => void): JSX.Element {
-    if (!expanded) return <></>;
+function expandedUi(
+    expanded: boolean,
+    tracks: Tracks | null,
+    handleExpansion: (e: React.MouseEvent) => void,
+    forceRender: () => void
+): JSX.Element {
+    if (!expanded || tracks === null) return <></>;
 
-    return <div>
-        {trackCheckbox(0, new Audio(), 'Temp 1', () => { }, handleExpansion)}
-        {trackCheckbox(1, new Audio(), 'Temp 2', () => { }, handleExpansion)}
-        {trackCheckbox(2, new Audio(), 'Temp 3', () => { }, handleExpansion)}
-        {trackCheckbox(3, new Audio(), 'Temp 4', () => { }, handleExpansion)}
-        {trackCheckbox(4, new Audio(), 'Temp 5', () => { }, handleExpansion)}
-        {trackCheckbox(5, new Audio(), 'Temp 6', () => { }, handleExpansion)}
+    const onSolo = (track: HTMLAudioElement) => {
+        applyToTracks(audio => {
+            if (audio === track) audio.muted = false;
+            else audio.muted = true;
+        }, tracks);
+
+        forceRender();
+    };
+
+    const onAll = () => {
+        applyToTracks(audio => audio.muted = false, tracks);
+        forceRender();
+    };
+
+    const trackCheckboxFor = (track: HTMLAudioElement | null, name: string) => {
+        if (track === null) return;
+        return trackCheckbox(track, name, onSolo, handleExpansion);
+    };
+
+    return <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <button style={{ fontSize: '1em', textAlign: 'left' }} onClick={onAll}>All</button>
+        {trackCheckboxFor(tracks.guitar, 'Guitar')}
+        {trackCheckboxFor(tracks.bass, 'Bass')}
+        {trackCheckboxFor(tracks.vocals, 'Vocals')}
+        {trackCheckboxFor(tracks.drums, 'Drums')}
+        {trackCheckboxFor(tracks.drums1, 'Drums 1')}
+        {trackCheckboxFor(tracks.drums2, 'Drums 2')}
+        {trackCheckboxFor(tracks.drums3, 'Drums 3')}
+        {trackCheckboxFor(tracks.keys, 'Keys')}
+        {trackCheckboxFor(tracks.backing, 'Backing')}
     </div>;
 }
 
-function trackCheckbox(index: number, track: HTMLAudioElement, label: string, onSolo: () => void, handleExpansion: (e: React.MouseEvent) => void): JSX.Element {
-    return <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '4px' }} onClick={handleExpansion}>
+function trackCheckbox(
+    track: HTMLAudioElement,
+    label: string,
+    onSolo: (track: HTMLAudioElement) => void,
+    handleExpansion: (e: React.MouseEvent) => void
+): JSX.Element {
+    return <div style={{ display: 'flex', alignItems: 'center', gap: '15px', paddingLeft: '5px' }} onClick={handleExpansion}>
         <input
             type='checkbox'
             onChange={e => {
@@ -147,8 +184,8 @@ function trackCheckbox(index: number, track: HTMLAudioElement, label: string, on
             checked={!track.muted}
             style={{ transform: 'scale(2.5)' }}
         />
-        <button style={{ width: '6em', fontSize: '1em' }} onClick={onSolo}>{label}</button>
-    </div>
+        <button style={{ width: '6em', fontSize: '1em' }} onClick={() => onSolo(track)}>{label}</button>
+    </div>;
 }
 
 function playButtonClick(isPlaying: boolean, tracks: Tracks) {
