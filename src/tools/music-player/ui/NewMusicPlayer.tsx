@@ -1,11 +1,13 @@
+import { SongPackage } from "../logic/MusicDatabase";
 import Library from "./Library";
 import Player from "./Player";
 
 interface NewMusicPlayerProps {
     importNewSongs: () => void;
+    songPackages: SongPackage[] | null;
 }
 
-const NewMusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs }) => {
+const NewMusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, songPackages }) => {
     return <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -16,7 +18,7 @@ const NewMusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs }) => {
         <button onClick={importNewSongs} style={{ fontSize: '1em', width: '100%' }}>Import New Songs 📁</button>
 
         <div style={{ flexGrow: 1, overflow: 'auto' }}>
-            <Library />
+            <Library songPackages={songPackages} />
         </div>
 
         <Player />

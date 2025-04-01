@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import MusicPlayer from "./MusicPlayer";
 import SongImporter from "./SongImporter";
 import { selectFolder } from "../logic/Parser";
 import NewMusicPlayer from "./NewMusicPlayer";
-import { createMusicDatabase, MusicDatabaseTables, SongPackage } from "../logic/MusicDatabase";
+import { MusicDatabaseTables, SongPackage } from "../logic/MusicDatabase";
 import { Database } from "../../../util/Database";
 
 interface HomeProps {
@@ -30,10 +29,12 @@ class SongImporterState implements State {
 
 const Home: React.FC<HomeProps> = ({ musicDatabase }) => {
     const [state, setState] = useState<State>(new MusicPlayerState());
+    const [songs, setSongs] = useState<SongPackage[] | null>(null);
+
+    const updateSongsFromDb = () => musicDatabase.get('songs').then(songs => setSongs(songs));
 
     useEffect(() => {
-        const db = createMusicDatabase();
-        db.get('songs').then(data => console.log(data));
+        updateSongsFromDb();
     }, []);
 
     const importNewSongs = () => {
@@ -46,16 +47,16 @@ const Home: React.FC<HomeProps> = ({ musicDatabase }) => {
     const onSongClicked = (songPackage: SongPackage) => {
         console.log('Selected song:', songPackage);
         musicDatabase.add('songs', songPackage);
+        updateSongsFromDb();
         setState(new MusicPlayerState(songPackage));
     };
 
     if (state instanceof SongImporterState) {
         return <SongImporter songPackages={state.songPackages} onSongClicked={onSongClicked} />;
     } else if (state instanceof MusicPlayerState) {
-        return <NewMusicPlayer importNewSongs={importNewSongs} />;
-        // return <MusicPlayer songPackage={state.songPackage} onFolderSelect={onFolderSelect} />;
+        return <NewMusicPlayer importNewSongs={importNewSongs} songPackages={songs} />;
     } else {
-        throw new Error('State not supported: ' + state);
+        return <></>;
     }
 };
 
