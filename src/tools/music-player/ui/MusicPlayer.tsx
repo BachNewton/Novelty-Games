@@ -99,7 +99,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ onFolderSelect }) => {
                 <button style={{ fontSize: '1em', marginBottom: '10px' }} onClick={allTracks}>All</button>
                 {trackCheckboxes}
             </div>
-
         </div>
     </>;
 };
