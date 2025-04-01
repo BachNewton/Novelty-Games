@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SongPackage } from "../logic/MusicDatabase";
 import { fileToAudio } from "../logic/Parser";
 
@@ -23,40 +23,32 @@ const Player: React.FC<PlayerProps> = ({ song }) => {
     const [expanded, setExpanded] = useState(true);
     const [seconds, setSeconds] = useState(0);
     const [tracks, setTracks] = useState<Tracks | null>(null);
+    const tracksRef = useRef<Tracks | null>(null);
+
+    useEffect(() => {
+        const updateSliderInterval = setInterval(() => {
+            setSeconds(tracksRef?.current?.guitar?.currentTime ?? 0);
+        }, 200);
+
+        return () => clearInterval(updateSliderInterval);
+    }, []);
 
     useEffect(() => {
         if (song === null) return;
 
-        Promise.all([
-            fileToAudio(song.guitar),
-            fileToAudio(song.bass),
-            fileToAudio(song.vocals),
-            fileToAudio(song.drums),
-            fileToAudio(song.drums1),
-            fileToAudio(song.drums2),
-            fileToAudio(song.drums3),
-            fileToAudio(song.keys),
-            fileToAudio(song.backing)
-        ]).then(([guitar, bass, vocals, drums, drums1, drums2, drums3, keys, backing]) => {
-            console.log(performance.now(), 'Loaded: ' + song.folderName);
+        // Pause any previous tracks that might have been playing
+        applyToTracks(audio => audio.pause(), tracks);
+        setIsPlaying(false);
+        setTracks(null);
+        tracksRef.current = null;
 
-            const loadedTracks: Tracks = {
-                guitar: guitar as HTMLAudioElement,
-                bass: bass as HTMLAudioElement,
-                vocals: vocals as HTMLAudioElement,
-                drums: drums as HTMLAudioElement,
-                drums1: drums1 as HTMLAudioElement,
-                drums2: drums2 as HTMLAudioElement,
-                drums3: drums3 as HTMLAudioElement,
-                keys: keys as HTMLAudioElement,
-                backing: backing as HTMLAudioElement
-            };
-
+        loadTracks(song).then(loadedTracks => {
             setTracks(loadedTracks);
+            tracksRef.current = loadedTracks;
         });
     }, [song]);
 
-    const icon = isPlaying ? '⏸️' : '▶️';
+    const icon = tracks === null ? '⏯️' : isPlaying ? '⏸️' : '▶️';
 
     const handleExpansion = (e: React.MouseEvent) => { if (e.target === e.currentTarget) setExpanded(!expanded) };
 
@@ -64,7 +56,7 @@ const Player: React.FC<PlayerProps> = ({ song }) => {
         if (tracks === null) return;
 
         setIsPlaying(!isPlaying);
-        playButtonClick(!isPlaying, 0, tracks);
+        playButtonClick(!isPlaying, tracks);
     };
 
     return <div style={{
@@ -75,16 +67,7 @@ const Player: React.FC<PlayerProps> = ({ song }) => {
         {expandedUi(expanded, handleExpansion)}
 
         <div style={{ display: 'flex', justifyContent: 'center' }} onClick={handleExpansion}>
-            <input
-                type='range'
-                min={0}
-                max={100}
-                // value={seconds}
-                onChange={e => {
-                    console.log('Slider changed', e.target.value);
-                }}
-                style={{ width: '75%', cursor: 'pointer' }}
-            />
+            {sliderUi(tracks, seconds, updatedSeconds => setSeconds(updatedSeconds))}
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', fontSize: '1.75em' }} onClick={handleExpansion}>
@@ -94,6 +77,52 @@ const Player: React.FC<PlayerProps> = ({ song }) => {
         </div>
     </div>;
 };
+
+async function loadTracks(song: SongPackage): Promise<Tracks> {
+    const [guitar, bass, vocals, drums, drums1, drums2, drums3, keys, backing] = await Promise.all([
+        fileToAudio(song.guitar),
+        fileToAudio(song.bass),
+        fileToAudio(song.vocals),
+        fileToAudio(song.drums),
+        fileToAudio(song.drums1),
+        fileToAudio(song.drums2),
+        fileToAudio(song.drums3),
+        fileToAudio(song.keys),
+        fileToAudio(song.backing)
+    ]);
+
+    console.log(performance.now(), 'Loaded: ' + song.folderName);
+
+    const loadedTracks: Tracks = {
+        guitar: guitar as HTMLAudioElement,
+        bass: bass as HTMLAudioElement,
+        vocals: vocals as HTMLAudioElement,
+        drums: drums as HTMLAudioElement,
+        drums1: drums1 as HTMLAudioElement,
+        drums2: drums2 as HTMLAudioElement,
+        drums3: drums3 as HTMLAudioElement,
+        keys: keys as HTMLAudioElement,
+        backing: backing as HTMLAudioElement
+    };
+
+    return loadedTracks;
+}
+
+function sliderUi(tracks: Tracks | null, seconds: number, updateSeconds: (seconds: number) => void): JSX.Element {
+    console.log(seconds);
+    return <input
+        type='range'
+        min={0}
+        max={tracks?.guitar?.duration ?? 0}
+        value={seconds}
+        onChange={e => {
+            const newSeconds = Number(e.target.value);
+            applyToTracks(audio => audio.currentTime = newSeconds, tracks);
+            updateSeconds(newSeconds);
+        }}
+        style={{ width: '75%', cursor: 'pointer' }}
+    />;
+}
 
 function expandedUi(expanded: boolean, handleExpansion: (e: React.MouseEvent) => void): JSX.Element {
     if (!expanded) return <></>;
@@ -122,14 +151,21 @@ function trackCheckbox(index: number, track: HTMLAudioElement, label: string, on
     </div>
 }
 
-function playButtonClick(
-    isPlaying: boolean,
-    seconds: number,
-    tracks: Tracks
-) {
+function playButtonClick(isPlaying: boolean, tracks: Tracks) {
+    if (isPlaying) {
+        applyToTracks(audio => audio.play(), tracks);
+    } else {
+        applyToTracks(audio => audio.pause(), tracks);
+    }
+}
+
+function applyToTracks(apply: (audioElement: HTMLAudioElement) => void, tracks: Tracks | null) {
+    if (tracks === null) return;
+
     const audioElements = [
         tracks.guitar,
         tracks.bass,
+        tracks.vocals,
         tracks.drums,
         tracks.drums1,
         tracks.drums2,
@@ -138,28 +174,6 @@ function playButtonClick(
         tracks.backing
     ];
 
-    if (isPlaying) {
-        // tracks.guitar.currentTime = seconds;
-        // tracks.bass.currentTime = seconds;
-        // tracks.vocals.currentTime = seconds;
-        // tracks.backing.currentTime = seconds;
-        // if (tracks.drums) tracks.drums.currentTime = seconds;
-        // if (tracks.drums1) tracks.drums1.currentTime = seconds;
-        // if (tracks.drums2) tracks.drums2.currentTime = seconds;
-        // if (tracks.drums3) tracks.drums3.currentTime = seconds;
-        // if (tracks.keys) tracks.keys.currentTime = seconds;
-
-        apply(audio => audio.play(), audioElements);
-
-        // setPlayer(Player.PLAY);
-    } else {
-        apply(audio => audio.pause(), audioElements);
-
-        // setPlayer(Player.PAUSE);
-    }
-}
-
-function apply(apply: (audioElement: HTMLAudioElement) => void, audioElements: (HTMLAudioElement | null)[]) {
     for (const audioElement of audioElements) {
         if (audioElement !== null) apply(audioElement);
     }

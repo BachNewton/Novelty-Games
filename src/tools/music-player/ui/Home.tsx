@@ -4,6 +4,7 @@ import { selectFolder } from "../logic/Parser";
 import NewMusicPlayer from "./NewMusicPlayer";
 import { MusicDatabaseTables, SongPackage } from "../logic/MusicDatabase";
 import { Database } from "../../../util/Database";
+import { Route, updateRoute } from "../../../ui/Routing";
 
 interface HomeProps {
     musicDatabase: Database<MusicDatabaseTables>;
@@ -34,6 +35,7 @@ const Home: React.FC<HomeProps> = ({ musicDatabase }) => {
     const updateSongsFromDb = () => musicDatabase.get('songs').then(songs => setSongs(songs));
 
     useEffect(() => {
+        updateRoute(Route.MUSIC_PLAYER);
         updateSongsFromDb();
     }, []);
 
