@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MusicPlayer from "./MusicPlayer";
 import SongImporter from "./SongImporter";
 import { selectFolder, SongPackage } from "../logic/Parser";
 import NewMusicPlayer from "./NewMusicPlayer";
+import { createDatabase } from "../../../util/Database";
 
 interface HomeProps { }
 
@@ -24,8 +25,23 @@ class SongImporterState implements State {
     }
 }
 
+interface TempData {
+    temp: number;
+}
+
 const Home: React.FC<HomeProps> = ({ }) => {
     const [state, setState] = useState<State>(new MusicPlayerState());
+
+    useEffect(() => {
+        // createMusicDatabase().add();
+        // const tables: Record<string, any> = {
+        //     'tableName': typeof TempData
+        // };
+        const db = createDatabase<{ 'tableName': TempData }>('database_name', ['tableName']);
+        db.add('tableName', { temp: Math.random() });
+        db.get('tableName').then(data => console.log(data));
+        // const data = db.get('tableName');
+    }, []);
 
     const importNewSongs = () => {
         selectFolder().then(songPackages => {

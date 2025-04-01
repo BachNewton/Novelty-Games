@@ -59,11 +59,11 @@ function expandedUi(expanded: boolean, handleExpansion: (e: React.MouseEvent) =>
 
     return <div>
         {trackCheckbox(0, new Audio(), 'Temp 1', () => { }, handleExpansion)}
-        {trackCheckbox(0, new Audio(), 'Temp 2', () => { }, handleExpansion)}
-        {trackCheckbox(0, new Audio(), 'Temp 3', () => { }, handleExpansion)}
-        {trackCheckbox(0, new Audio(), 'Temp 4', () => { }, handleExpansion)}
-        {trackCheckbox(0, new Audio(), 'Temp 5', () => { }, handleExpansion)}
-        {trackCheckbox(0, new Audio(), 'Temp 6', () => { }, handleExpansion)}
+        {trackCheckbox(1, new Audio(), 'Temp 2', () => { }, handleExpansion)}
+        {trackCheckbox(2, new Audio(), 'Temp 3', () => { }, handleExpansion)}
+        {trackCheckbox(3, new Audio(), 'Temp 4', () => { }, handleExpansion)}
+        {trackCheckbox(4, new Audio(), 'Temp 5', () => { }, handleExpansion)}
+        {trackCheckbox(5, new Audio(), 'Temp 6', () => { }, handleExpansion)}
     </div>;
 }
 
