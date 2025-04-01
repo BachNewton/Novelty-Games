@@ -4,18 +4,20 @@ interface Database<Tables extends Record<string, any>> {
 }
 
 export function createDatabase<Tables extends Record<string, any>>(databaseName: string, tableNames: (keyof Tables)[]): Database<Tables> {
+    const getObjectStore = async (tableName: string, writeAccess: boolean): Promise<IDBObjectStore> => {
+        const db = await openDatabase(databaseName, tableNames);
+        const transaction = db.transaction(tableName, writeAccess ? 'readwrite' : 'readonly');
+        return transaction.objectStore(tableName);
+    };
+
     return {
         add: async <TableName extends keyof Tables>(tableName: TableName, data: Tables[TableName]) => {
-            const db = await openDatabase(databaseName, tableNames);
-            const transaction = db.transaction(tableName as string, 'readwrite');
-            const objectStore = transaction.objectStore(tableName as string);
+            const objectStore = await getObjectStore(tableName as string, true);
+
             objectStore.add(data);
-            db.close();
         },
         get: async <TableName extends keyof Tables>(tableName: TableName): Promise<Tables[TableName][]> => {
-            const db = await openDatabase(databaseName, tableNames);
-            const transaction = db.transaction(tableName as string, 'readonly');
-            const objectStore = transaction.objectStore(tableName as string);
+            const objectStore = await getObjectStore(tableName as string, false);
 
             return new Promise(resolve => {
                 objectStore.getAll().onsuccess = (e => {
