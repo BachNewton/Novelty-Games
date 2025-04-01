@@ -1,11 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import SongGuitar from '../Beastie Boys - Sabotage/guitar.ogg';
-import SongBass from '../Beastie Boys - Sabotage/rhythm.ogg';
-import SongVocals from '../Beastie Boys - Sabotage/vocals.ogg';
-import SongDrums1 from '../Beastie Boys - Sabotage/drums_1.ogg';
-import SongDrums2 from '../Beastie Boys - Sabotage/drums_2.ogg';
-import SongDrums3 from '../Beastie Boys - Sabotage/drums_3.ogg';
-import SongBacking from '../Beastie Boys - Sabotage/song.ogg';
 import { Route, updateRoute } from '../../../ui/Routing';
 import { fileToAudio, SongPackage } from '../logic/Parser';
 
@@ -14,20 +7,32 @@ interface MusicPlayerProps {
     onFolderSelect: () => void;
 }
 
+interface Tracks {
+    guitar: HTMLAudioElement;
+    bass: HTMLAudioElement;
+    vocals: HTMLAudioElement;
+    drums: HTMLAudioElement | null;
+    drums1: HTMLAudioElement | null;
+    drums2: HTMLAudioElement | null;
+    drums3: HTMLAudioElement | null;
+    keys: HTMLAudioElement | null;
+    backing: HTMLAudioElement;
+}
+
 enum Player { PLAY, PAUSE }
 
 const MusicPlayer: React.FC<MusicPlayerProps> = ({ songPackage, onFolderSelect }) => {
     const [player, setPlayer] = useState<Player>(Player.PAUSE);
     const [seconds, setSeconds] = useState(0);
-    const [tracks, setTracks] = useState<HTMLAudioElement[]>([]);
+    const [tracks, setTracks] = useState<Tracks | null>(null);
     const [_, setForceRender] = useState(false);
-    const tracksRef = useRef<HTMLAudioElement[]>([]);
+    const tracksRef = useRef<Tracks | null>(null);
 
     useEffect(() => {
         updateRoute(Route.MUSIC_PLAYER);
 
         const updateSliderInterval = setInterval(() => {
-            setSeconds(tracksRef.current[0]?.currentTime ?? 0);
+            setSeconds(tracks?.guitar?.currentTime ?? 0);
         }, 200);
 
         if (songPackage !== undefined) {
@@ -35,28 +40,29 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ songPackage, onFolderSelect }
                 fileToAudio(songPackage.guitar),
                 fileToAudio(songPackage.bass),
                 fileToAudio(songPackage.vocals),
+                fileToAudio(songPackage.drums),
                 fileToAudio(songPackage.drums1),
                 fileToAudio(songPackage.drums2),
                 fileToAudio(songPackage.drums3),
+                fileToAudio(songPackage.keys),
                 fileToAudio(songPackage.backing)
-            ]).then(laodedTracks => {
+            ]).then(([guitar, bass, vocals, drums, drums1, drums2, drums3, keys, backing]) => {
                 console.log(performance.now(), 'All audio loaded');
-                setTracks(laodedTracks);
-                tracksRef.current = laodedTracks;
-            });
-        } else {
-            Promise.all([
-                loadAudio(SongGuitar),
-                loadAudio(SongBass),
-                loadAudio(SongVocals),
-                loadAudio(SongDrums1),
-                loadAudio(SongDrums2),
-                loadAudio(SongDrums3),
-                loadAudio(SongBacking)
-            ]).then(laodedTracks => {
-                console.log(performance.now(), 'All audio loaded');
-                setTracks(laodedTracks);
-                tracksRef.current = laodedTracks;
+
+                const loadedTracks: Tracks = {
+                    guitar: guitar as HTMLAudioElement,
+                    bass: bass as HTMLAudioElement,
+                    vocals: vocals as HTMLAudioElement,
+                    drums: drums as HTMLAudioElement,
+                    drums1: drums1 as HTMLAudioElement,
+                    drums2: drums2 as HTMLAudioElement,
+                    drums3: drums3 as HTMLAudioElement,
+                    keys: keys as HTMLAudioElement,
+                    backing: backing as HTMLAudioElement
+                };
+
+                setTracks(loadedTracks);
+                tracksRef.current = loadedTracks;
             });
         }
 
@@ -78,26 +84,27 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ songPackage, onFolderSelect }
     };
 
     const soloTrack = (soloedtrack: HTMLAudioElement) => {
-        for (const track of tracks) {
-            track.muted = track !== soloedtrack;
-        }
+        // for (const track of tracks) {
+        //     track.muted = track !== soloedtrack;
+        // }
 
         rerender();
     };
 
     const allTracks = () => {
-        for (const track of tracks) {
-            track.muted = false;
-        }
+        // for (const track of tracks) {
+        //     track.muted = false;
+        // }
 
         rerender();
     };
 
-    const trackCheckboxes = tracks.map((track, index) => {
-        const trackName = ['Guitar', 'Bass', 'Vocals', 'Drums 1', 'Drums 2', 'Drums 3', 'Backing'][index];
+    const trackCheckboxes: JSX.Element[] = [];
+    // tracks.map((track, index) => {
+    //     const trackName = ['Guitar', 'Bass', 'Vocals', 'Drums 1', 'Drums 2', 'Drums 3', 'Backing'][index];
 
-        return trackCheckbox(index, track, trackName, () => soloTrack(track), rerender);
-    });
+    //     return trackCheckbox(index, track, trackName, () => soloTrack(track), rerender);
+    // });
 
     const buttonText = player === Player.PAUSE ? 'Play' : 'Pause';
 
@@ -112,7 +119,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ songPackage, onFolderSelect }
                 {buttonText}
             </button>
 
-            {playerSlider(tracks, seconds, newSeconds => setSeconds(newSeconds))}
+            {/* {playerSlider(tracks, seconds, newSeconds => setSeconds(newSeconds))} */}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <button style={{ fontSize: '1em', marginBottom: '10px' }} onClick={allTracks}>All</button>
@@ -159,24 +166,46 @@ function trackCheckbox(index: number, track: HTMLAudioElement, label: string, on
 function playButtonClick(
     player: Player,
     seconds: number,
-    tracks: HTMLAudioElement[],
+    tracks: Tracks | null,
     setPlayer: (player: Player) => void,
     setSeconds: (seconds: number) => void
 ) {
     console.log(performance.now(), 'Play button pressed');
 
+    if (tracks === null) return;
+
     if (player === Player.PAUSE) {
-        for (const track of tracks) {
-            track.currentTime = seconds;
-            track.play();
-        }
+        tracks.guitar.currentTime = seconds;
+        tracks.bass.currentTime = seconds;
+        tracks.vocals.currentTime = seconds;
+        tracks.backing.currentTime = seconds;
+        if (tracks.drums) tracks.drums.currentTime = seconds;
+        if (tracks.drums1) tracks.drums1.currentTime = seconds;
+        if (tracks.drums2) tracks.drums2.currentTime = seconds;
+        if (tracks.drums3) tracks.drums3.currentTime = seconds;
+        if (tracks.keys) tracks.keys.currentTime = seconds;
+
+        tracks.guitar.play();
+        tracks.bass.play();
+        tracks.vocals.play();
+        tracks.backing.play();
+        if (tracks.drums) tracks.drums.play();
+        if (tracks.drums1) tracks.drums1.play();
+        if (tracks.drums2) tracks.drums2.play();
+        if (tracks.drums3) tracks.drums3.play();
+        if (tracks.keys) tracks.keys.play();
 
         setPlayer(Player.PLAY);
     } else if (player === Player.PLAY) {
-        for (const track of tracks) {
-            track.pause();
-            setSeconds(track.currentTime);
-        }
+        tracks.guitar.pause();
+        tracks.bass.pause();
+        tracks.vocals.pause();
+        tracks.backing.pause();
+        if (tracks.drums) tracks.drums.pause();
+        if (tracks.drums1) tracks.drums1.pause();
+        if (tracks.drums2) tracks.drums2.pause();
+        if (tracks.drums3) tracks.drums3.pause();
+        if (tracks.keys) tracks.keys.pause();
 
         setPlayer(Player.PAUSE);
     }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import MusicPlayer from "./MusicPlayer";
 import SongImporter from "./SongImporter";
 import { selectFolder, SongPackage } from "../logic/Parser";
+import NewMusicPlayer from "./NewMusicPlayer";
 
 interface HomeProps { }
 
@@ -41,7 +42,8 @@ const Home: React.FC<HomeProps> = ({ }) => {
     if (state instanceof SongImporterState) {
         return <SongImporter songPackages={state.songPackages} onSongClicked={onSongClicked} />;
     } else if (state instanceof MusicPlayerState) {
-        return <MusicPlayer songPackage={state.songPackage} onFolderSelect={onFolderSelect} />;
+        return <NewMusicPlayer />;
+        // return <MusicPlayer songPackage={state.songPackage} onFolderSelect={onFolderSelect} />;
     } else {
         throw new Error('State not supported: ' + state);
     }

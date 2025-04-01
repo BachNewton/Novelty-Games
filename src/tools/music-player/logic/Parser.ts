@@ -4,10 +4,12 @@ export interface SongPackage {
     guitar: File,
     bass: File,
     vocals: File,
-    drums1: File,
-    drums2: File,
-    drums3: File,
-    backing: File
+    drums: File | null,
+    drums1: File | null,
+    drums2: File | null,
+    drums3: File | null,
+    keys: File | null,
+    backing: File,
 }
 
 export function selectFolder(): Promise<SongPackage[]> {
@@ -53,23 +55,21 @@ function createSongPackage(files: File[], folderName: string): SongPackage | nul
     const guitarFile = files.find(file => file.name === 'guitar.ogg');
     const bassFile = files.find(file => file.name === 'rhythm.ogg');
     const vocalsFile = files.find(file => file.name === 'vocals.ogg');
+    const drumsFile = files.find(file => file.name === 'drums.ogg');
     const drums1File = files.find(file => file.name === 'drums_1.ogg');
     const drums2File = files.find(file => file.name === 'drums_2.ogg');
     const drums3File = files.find(file => file.name === 'drums_3.ogg');
+    const keysFile = files.find(file => file.name === 'keys.ogg');
     const backingFile = files.find(file => file.name === 'song.ogg');
 
     if (iniFile === undefined) console.error('No song.ini found in ' + folderName);
     if (guitarFile === undefined) console.error('No guitar.ogg found in ' + folderName);
     if (bassFile === undefined) console.error('No rhythm.ogg found in ' + folderName);
     if (vocalsFile === undefined) console.error('No vocals.ogg found in ' + folderName);
-    if (drums1File === undefined) console.error('No drums_1.ogg found in ' + folderName);
-    if (drums2File === undefined) console.error('No drums_2.ogg found in ' + folderName);
-    if (drums3File === undefined) console.error('No drums_3.ogg found in ' + folderName);
     if (backingFile === undefined) console.error('No song.ogg found in ' + folderName);
 
     if (iniFile === undefined || guitarFile === undefined || bassFile === undefined ||
-        vocalsFile === undefined || drums1File === undefined || drums2File === undefined ||
-        drums3File === undefined || backingFile === undefined) return null;
+        vocalsFile === undefined || backingFile === undefined) return null;
 
     return {
         folderName: folderName,
@@ -77,16 +77,22 @@ function createSongPackage(files: File[], folderName: string): SongPackage | nul
         guitar: guitarFile,
         bass: bassFile,
         vocals: vocalsFile,
-        drums1: drums1File,
-        drums2: drums2File,
-        drums3: drums3File,
+        drums: drumsFile ?? null,
+        drums1: drums1File ?? null,
+        drums2: drums2File ?? null,
+        drums3: drums3File ?? null,
+        keys: keysFile ?? null,
         backing: backingFile
     };
 }
 
-export function fileToAudio(file: File): Promise<HTMLAudioElement> {
+export function fileToAudio(file: File | null): Promise<HTMLAudioElement | null> {
     return new Promise(resolve => {
-        const audio = new Audio(URL.createObjectURL(file));
-        audio.addEventListener('canplaythrough', () => resolve(audio));
+        if (file !== null) {
+            const audio = new Audio(URL.createObjectURL(file));
+            audio.addEventListener('canplaythrough', () => resolve(audio));
+        } else {
+            resolve(null);
+        }
     });
 }
