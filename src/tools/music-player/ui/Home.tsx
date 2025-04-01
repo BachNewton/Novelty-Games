@@ -27,7 +27,7 @@ class SongImporterState implements State {
 const Home: React.FC<HomeProps> = ({ }) => {
     const [state, setState] = useState<State>(new MusicPlayerState());
 
-    const onFolderSelect = () => {
+    const importNewSongs = () => {
         selectFolder().then(songPackages => {
             console.log('Selected files:', songPackages);
             setState(new SongImporterState(songPackages));
@@ -42,7 +42,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
     if (state instanceof SongImporterState) {
         return <SongImporter songPackages={state.songPackages} onSongClicked={onSongClicked} />;
     } else if (state instanceof MusicPlayerState) {
-        return <NewMusicPlayer />;
+        return <NewMusicPlayer importNewSongs={importNewSongs} />;
         // return <MusicPlayer songPackage={state.songPackage} onFolderSelect={onFolderSelect} />;
     } else {
         throw new Error('State not supported: ' + state);
