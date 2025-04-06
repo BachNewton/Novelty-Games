@@ -1,4 +1,4 @@
-import { createDatabase, Database } from "../../../util/Database";
+import { createDatabase, Database, DatabaseNames } from "../../../util/Database";
 
 export interface SongPackage {
     folderName: string;
@@ -16,6 +16,6 @@ export interface SongPackage {
 
 export type MusicDatabaseTables = { 'songs': SongPackage };
 
-export function createMusicDatabase(): Database<MusicDatabaseTables> {
-    return createDatabase('music', ['songs']);
+export function createMusicDatabase(): Database<DatabaseNames.MUSIC> {
+    return createDatabase(DatabaseNames.MUSIC, { 'songs': {} as SongPackage });
 }

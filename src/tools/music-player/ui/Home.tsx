@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import SongImporter from "./SongImporter";
 import { selectFolder } from "../logic/Parser";
 import MusicPlayer from "./MusicPlayer";
-import { MusicDatabaseTables, SongPackage } from "../logic/MusicDatabase";
-import { Database } from "../../../util/Database";
+import { SongPackage } from "../logic/MusicDatabase";
+import { Database, DatabaseNames } from "../../../util/Database";
 import { Route, updateRoute } from "../../../ui/Routing";
 
 interface HomeProps {
-    musicDatabase: Database<MusicDatabaseTables>;
+    musicDatabase: Database<DatabaseNames.MUSIC>;
 }
 
 interface State { }

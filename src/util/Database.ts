@@ -1,12 +1,30 @@
-export interface Database<Tables extends Record<string, any>> {
-    add: <TableName extends keyof Tables>(tableName: TableName, data: Tables[TableName]) => void;
-    get: <TableName extends keyof Tables>(tableName: TableName) => Promise<Tables[TableName][]>;
+import { MusicDatabaseTables } from "../tools/music-player/logic/MusicDatabase";
+
+export enum DatabaseNames {
+    MUSIC = 'music'
 }
 
-export function createDatabase<Tables extends Record<string, any>>(
-    databaseName: string,
-    tableNames: (keyof Tables)[]
-): Database<Tables> {
+interface DatabaseTables {
+    [DatabaseNames.MUSIC]: MusicDatabaseTables;
+}
+
+export interface Database<DatabaseName extends DatabaseNames> {
+    add: <TableName extends keyof DatabaseTables[DatabaseName]>(
+        tableName: TableName,
+        data: DatabaseTables[DatabaseName][TableName]
+    ) => void;
+
+    get: <TableName extends keyof DatabaseTables[DatabaseName]>(
+        tableName: TableName
+    ) => Promise<DatabaseTables[DatabaseName][TableName][]>;
+}
+
+export function createDatabase<DatabaseName extends DatabaseNames>(
+    databaseName: DatabaseName,
+    databaseTable: DatabaseTables[DatabaseName]
+): Database<DatabaseName> {
+    const tableNames = Object.keys(databaseTable);
+
     const getObjectStore = async (tableName: string, writeAccess: boolean): Promise<IDBObjectStore> => {
         const db = await openDatabase(databaseName, tableNames);
         const transaction = db.transaction(tableName, writeAccess ? 'readwrite' : 'readonly');
@@ -14,18 +32,18 @@ export function createDatabase<Tables extends Record<string, any>>(
     };
 
     return {
-        add: async <TableName extends keyof Tables>(tableName: TableName, data: Tables[TableName]) => {
+        add: async (tableName, data) => {
             const objectStore = await getObjectStore(tableName as string, true);
 
             objectStore.add(data);
         },
-        get: async <TableName extends keyof Tables>(tableName: TableName): Promise<Tables[TableName][]> => {
+        get: async (tableName) => {
             const objectStore = await getObjectStore(tableName as string, false);
 
             return new Promise(resolve => {
                 objectStore.getAll().onsuccess = (e => {
                     const target = e.target as IDBRequest;
-                    const data = target.result as Tables[TableName][];
+                    const data = target.result;
 
                     resolve(data);
                 });
@@ -34,7 +52,7 @@ export function createDatabase<Tables extends Record<string, any>>(
     };
 }
 
-function openDatabase<Tables>(databaseName: string, tableNames: (keyof Tables)[]): Promise<IDBDatabase> {
+function openDatabase(databaseName: string, tableNames: string[]): Promise<IDBDatabase> {
     return new Promise(resolve => {
         const request = indexedDB.open(databaseName);
 
@@ -42,7 +60,7 @@ function openDatabase<Tables>(databaseName: string, tableNames: (keyof Tables)[]
             const db = getDatabase(e);
 
             for (const tableName of tableNames) {
-                db.createObjectStore(tableName as string, { autoIncrement: true });
+                db.createObjectStore(tableName, { autoIncrement: true });
             }
         };
 
@@ -57,5 +75,6 @@ function openDatabase<Tables>(databaseName: string, tableNames: (keyof Tables)[]
 function getDatabase(e: Event): IDBDatabase {
     const request = e.target as IDBOpenDBRequest
     const db = request.result;
+
     return db;
 }
