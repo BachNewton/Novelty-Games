@@ -65,10 +65,20 @@ const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
         setState(new MusicPlayerState());
     };
 
+    const onDeleteAllSongs = async () => {
+        setSongs(null);
+        console.log('Deleting all songs...');
+        networkService.log('Deleting all songs...');
+        await musicDatabase.delete();
+        console.log('All songs deleted');
+        networkService.log('All songs deleted');
+        updateSongsFromDb();
+    };
+
     if (state instanceof SongImporterState) {
         return <SongImporter songPackages={state.songPackages} onSongClicked={onSongClicked} />;
     } else if (state instanceof MusicPlayerState) {
-        return <MusicPlayer importNewSongs={importNewSongs} songPackages={songs} />;
+        return <MusicPlayer importNewSongs={importNewSongs} deleteAllSongs={onDeleteAllSongs} songPackages={songs} />;
     } else {
         return <></>;
     }

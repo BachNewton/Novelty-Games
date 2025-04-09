@@ -5,11 +5,18 @@ import Player from "./Player";
 
 interface NewMusicPlayerProps {
     importNewSongs: () => void;
+    deleteAllSongs: () => void;
     songPackages: SongPackage[] | null;
 }
 
-const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, songPackages }) => {
+const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, deleteAllSongs, songPackages }) => {
     const [song, setSong] = useState<SongPackage | null>(null);
+
+    const promptDeleteAllSongs = () => {
+        if (window.confirm('Are you sure you want to delete all songs?')) {
+            deleteAllSongs();
+        }
+    };
 
     return <div style={{
         display: 'flex',
@@ -18,7 +25,10 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, songPackag
         fontSize: '1.5em',
         color: 'white'
     }}>
-        <button onClick={importNewSongs} style={{ fontSize: '1em', width: '100%', fontWeight: 'bold' }}>Import New Songs 📁</button>
+        <div style={{ display: 'flex' }}>
+            <button onClick={importNewSongs} style={{ fontSize: '1em', fontWeight: 'bold', flexGrow: 1 }}>Import New Songs 📁</button>
+            <button onClick={promptDeleteAllSongs} style={{ fontSize: '1em' }}>🗑️</button>
+        </div>
 
         <div style={{ flexGrow: 1, overflow: 'auto' }}>
             <Library songPackages={songPackages} onSongSelected={selectedSong => setSong(selectedSong)} />

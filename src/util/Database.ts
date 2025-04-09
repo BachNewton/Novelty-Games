@@ -17,6 +17,8 @@ export interface Database<DatabaseName extends DatabaseNames> {
     get: <TableName extends keyof DatabaseTables[DatabaseName]>(
         tableName: TableName
     ) => Promise<DatabaseTables[DatabaseName][TableName][]>;
+
+    delete: () => Promise<void>;
 }
 
 export function createDatabase<DatabaseName extends DatabaseNames>(
@@ -52,7 +54,8 @@ export function createDatabase<DatabaseName extends DatabaseNames>(
                     resolve(data);
                 });
             });
-        }
+        },
+        delete: () => new Promise(resolve => indexedDB.deleteDatabase(databaseName).onsuccess = () => resolve())
     };
 }
 
@@ -79,6 +82,11 @@ function openDatabase(databaseName: string, tableNames: string[]): Promise<IDBDa
 function getDatabase(e: Event): IDBDatabase {
     const request = e.target as IDBOpenDBRequest
     const db = request.result;
+
+    // db.addEventListener('versionchange', () => {
+    //     console.log('Closing', db.name);
+    //     db.close();
+    // });
 
     return db;
 }
