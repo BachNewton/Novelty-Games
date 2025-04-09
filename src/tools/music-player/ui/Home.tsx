@@ -37,9 +37,13 @@ const Home: React.FC<HomeProps> = ({ musicDatabase }) => {
         selectFolder().then(songPackages => {
             console.log('Selected files:', songPackages);
 
-            for (const songPackage of songPackages) {
-                musicDatabase.add('songs', songPackage);
-            }
+            const temp = musicDatabase.add('songs', ...songPackages);
+
+            temp.forEach(async promise => {
+                await promise;
+
+                console.log('Added song to database');
+            });
 
             updateSongsFromDb();
             setState(new MusicPlayerState());

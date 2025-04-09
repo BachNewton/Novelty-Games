@@ -11,8 +11,8 @@ interface DatabaseTables {
 export interface Database<DatabaseName extends DatabaseNames> {
     add: <TableName extends keyof DatabaseTables[DatabaseName]>(
         tableName: TableName,
-        data: DatabaseTables[DatabaseName][TableName]
-    ) => void;
+        ...data: DatabaseTables[DatabaseName][TableName][]
+    ) => Promise<void>[];
 
     get: <TableName extends keyof DatabaseTables[DatabaseName]>(
         tableName: TableName
@@ -32,10 +32,14 @@ export function createDatabase<DatabaseName extends DatabaseNames>(
     };
 
     return {
-        add: async (tableName, data) => {
-            const objectStore = await getObjectStore(tableName as string, true);
+        add: (tableName, ...data) => {
+            const objectStore = getObjectStore(tableName as string, true);
 
-            objectStore.add(data);
+            return data.map(async value => {
+                const addRequest = (await objectStore).add(value);
+
+                return await new Promise<void>(resolve => addRequest.onsuccess = () => resolve());
+            });
         },
         get: async (tableName) => {
             const objectStore = await getObjectStore(tableName as string, false);
