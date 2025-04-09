@@ -8,6 +8,9 @@ const PORT = 443;
 const PRIVATE_KEY_FILE_PATH = '/etc/letsencrypt/live/novelty-games.mooo.com/privkey.pem';
 const CERTIFICATE_FILE_PATH = '/etc/letsencrypt/live/novelty-games.mooo.com/fullchain.pem';
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const ANSI_COLSE = '\x1b[0m';
+const ANSI_YELLOW = '\x1b[93m';
+const ANSI_CYAN = '\x1b[96m';
 
 function startServer() {
     const privateKey = fs.readFileSync(PRIVATE_KEY_FILE_PATH, 'utf8');
@@ -33,31 +36,31 @@ function startServer() {
             return;
         }
 
-        console.log('Connection - ID:', socket.id);
+        console.log('Connection - ID:', displayId(socket.id));
         socket.broadcast.emit('connection', socket.id);
 
         socket.on('disconnect', () => {
-            console.log('Disconnect - ID:', socket.id);
+            console.log('Disconnect - ID:', displayId(socket.id));
             socket.broadcast.emit('disconnected', socket.id);
         });
 
         socket.on('broadcast', (data) => {
-            console.log('Socket ID:', socket.id, 'Broadcast data:', data);
+            console.log('Socket ID:', displayId(socket.id), 'Broadcast data:', data);
             socket.broadcast.emit('broadcast', data);
         });
 
         socket.on('saveFile', (event) => {
-            console.log('Socket ID:', socket.id, 'SaveFileEvent:', event);
+            console.log('Socket ID:', displayId(socket.id), 'SaveFileEvent:', event);
             saveFile(event, socket);
         });
 
         socket.on('getFile', (event) => {
-            console.log('Socket ID:', socket.id, 'GetFileEvent:', event);
+            console.log('Socket ID:', displayId(socket.id), 'GetFileEvent:', event);
             getFile(event, socket);
         });
 
         socket.on('deleteFile', (event) => {
-            console.log('Socket ID:', socket.id, 'DeleteFileEvent:', event);
+            console.log('Socket ID:', displayId(socket.id), 'DeleteFileEvent:', event);
             deleteFile(event, socket);
         });
 
@@ -65,7 +68,7 @@ function startServer() {
             /** @type {LogEvent} */
             const logEvent = e;
 
-            console.log('Socket ID:', socket.id, new Date().toISOString(), logEvent.application, logEvent.text);
+            console.log('Socket ID:', displayId(socket.id), displayTimestamp(), logEvent.application, logEvent.text);
         });
     });
 
@@ -74,6 +77,16 @@ function startServer() {
     });
 
     return server;
+}
+
+function displayId(id) {
+    return `${ANSI_YELLOW}${id}${ANSI_COLSE}`;
+}
+
+function displayTimestamp() {
+    const timestamp = new Date().toISOString();
+
+    return `${ANSI_CYAN}${timestamp}${ANSI_COLSE}`;
 }
 
 function getIP(socket) {
