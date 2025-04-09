@@ -51,3 +51,10 @@
  * @property {string} id
  * @property {boolean} isSuccessful
  */
+
+/**
+ * @typedef {Object} LogEvent
+ * 
+ * @property {string} application
+ * @property {string} text
+ */

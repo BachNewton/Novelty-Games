@@ -9,6 +9,7 @@ export interface NetworkService<T> {
     saveFile: (data: SaveFileData) => Promise<SaveFileResponse>;
     getFile: (date: GetFileData) => Promise<GetFileResponse>;
     deleteFile: (data: DeleteFileData) => Promise<DeleteFileResponse>;
+    log: (text: string) => void;
 }
 
 export enum NetworkedApplication {
@@ -18,7 +19,7 @@ export enum NetworkedApplication {
     LABYRINTH = 'labyrinth'
 }
 
-interface ServerEvent<T> {
+interface BroadcastEvent<T> {
     application: NetworkedApplication;
     data: T;
 }
@@ -73,6 +74,11 @@ export interface DeleteFileResponse {
     isSuccessful: boolean;
 }
 
+interface LogEvent {
+    application: NetworkedApplication;
+    text: string;
+}
+
 export function createNetworkService<T>(appFilter: NetworkedApplication): NetworkService<T> {
     const socket = io(SERVER_URL);
 
@@ -82,7 +88,7 @@ export function createNetworkService<T>(appFilter: NetworkedApplication): Networ
 
     let eventListener: (data: T) => void = () => { };
 
-    socket.on('broadcast', (event: ServerEvent<T>) => {
+    socket.on('broadcast', (event: BroadcastEvent<T>) => {
         if (event.application !== appFilter) return;
 
         eventListener(event.data);
@@ -105,7 +111,11 @@ export function createNetworkService<T>(appFilter: NetworkedApplication): Networ
 
     return {
         setNetworkEventListener: listener => eventListener = listener,
-        broadcast: data => socket.emit('broadcast', { application: appFilter, data: data } as ServerEvent<T>),
+        broadcast: data => {
+            const boradcastEvent: BroadcastEvent<T> = { application: appFilter, data: data };
+
+            socket.emit('broadcast', boradcastEvent);
+        },
         saveFile: data => {
             const id = createID();
 
@@ -128,6 +138,11 @@ export function createNetworkService<T>(appFilter: NetworkedApplication): Networ
             socket.emit('deleteFile', deleteFileEvent);
 
             return new Promise(resolve => deleteFileRequests.set(id, resolve));
+        },
+        log: text => {
+            const logEvent: LogEvent = { application: appFilter, text: text };
+
+            socket.emit('log', logEvent);
         }
     };
 }

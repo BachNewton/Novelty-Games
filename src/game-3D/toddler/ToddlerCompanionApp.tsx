@@ -16,6 +16,7 @@ const ToddlerCompanionApp: React.FC = () => {
         };
 
         networkService.broadcast(data);
+        networkService.log('This is a test');
     };
 
     const broadcastClear = () => {

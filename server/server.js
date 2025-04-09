@@ -60,6 +60,13 @@ function startServer() {
             console.log('Socket ID:', socket.id, 'DeleteFileEvent:', event);
             deleteFile(event, socket);
         });
+
+        socket.on('log', e => {
+            /** @type {LogEvent} */
+            const logEvent = e;
+
+            console.log('Socket ID:', socket.id, new Date().toISOString(), logEvent.application, logEvent.text);
+        });
     });
 
     server.listen(PORT, () => {
