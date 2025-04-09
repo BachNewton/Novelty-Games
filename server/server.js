@@ -11,6 +11,7 @@ const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 const ANSI_COLSE = '\x1b[0m';
 const ANSI_YELLOW = '\x1b[93m';
 const ANSI_CYAN = '\x1b[96m';
+const ANSI_GREEN = '\x1b[92m';
 
 function startServer() {
     const privateKey = fs.readFileSync(PRIVATE_KEY_FILE_PATH, 'utf8');
@@ -68,7 +69,13 @@ function startServer() {
             /** @type {LogEvent} */
             const logEvent = e;
 
-            console.log('Socket ID:', displayId(socket.id), displayTimestamp(), logEvent.application, logEvent.text);
+            console.log(
+                'Socket ID:',
+                displayId(socket.id),
+                displayTimestamp(),
+                displayApplication(logEvent.application),
+                logEvent.text
+            );
         });
     });
 
@@ -87,6 +94,10 @@ function displayTimestamp() {
     const timestamp = new Date().toISOString();
 
     return `${ANSI_CYAN}${timestamp}${ANSI_COLSE}`;
+}
+
+function displayApplication(application) {
+    return `${ANSI_GREEN}${application}${ANSI_COLSE}`;
 }
 
 function getIP(socket) {
