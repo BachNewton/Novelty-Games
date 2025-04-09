@@ -43,9 +43,11 @@ const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
     const importNewSongs = async () => {
         setSongs(null);
         console.log('Importing new songs...');
+        networkService.log('Importing new songs...');
 
         const songPackages = await selectFolder();
         console.log('Selected files:', songPackages);
+        networkService.log(`Selected ${songPackages.length} files`);
 
         const addRequests = musicDatabase.add('songs', ...songPackages);
         networkService.log('Adding songs to database...');

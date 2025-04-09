@@ -1,4 +1,5 @@
 import { MusicDatabaseTables } from "../tools/music-player/logic/MusicDatabase";
+import { createNetworkService, NetworkedApplication } from "./NetworkService";
 
 export enum DatabaseNames {
     MUSIC = 'music'
@@ -21,6 +22,8 @@ export interface Database<DatabaseName extends DatabaseNames> {
     delete: () => Promise<void>;
 }
 
+const tempNetworkService = createNetworkService<void>(NetworkedApplication.DATABASE);
+
 export function createDatabase<DatabaseName extends DatabaseNames>(
     databaseName: DatabaseName,
     databaseTable: DatabaseTables[DatabaseName]
@@ -30,6 +33,7 @@ export function createDatabase<DatabaseName extends DatabaseNames>(
     const getObjectStore = async (tableName: string, writeAccess: boolean): Promise<IDBObjectStore> => {
         const db = await openDatabase(databaseName, tableNames);
         const transaction = db.transaction(tableName, writeAccess ? 'readwrite' : 'readonly');
+        tempNetworkService.log(`Transaction ${writeAccess ? 'readwrite' : 'readonly'} on table named "${tableName}"`);
         return transaction.objectStore(tableName);
     };
 
@@ -60,10 +64,13 @@ export function createDatabase<DatabaseName extends DatabaseNames>(
 }
 
 function openDatabase(databaseName: string, tableNames: string[]): Promise<IDBDatabase> {
+    tempNetworkService.log(`Opening database ${databaseName}...`);
+
     return new Promise(resolve => {
         const request = indexedDB.open(databaseName);
 
         request.onupgradeneeded = e => {
+            tempNetworkService.log(`Upgrading database ${databaseName}`);
             const db = getDatabase(e);
 
             for (const tableName of tableNames) {
@@ -72,6 +79,7 @@ function openDatabase(databaseName: string, tableNames: string[]): Promise<IDBDa
         };
 
         request.onsuccess = e => {
+            tempNetworkService.log(`Opened database success ${databaseName}`);
             const db = getDatabase(e);
 
             resolve(db);

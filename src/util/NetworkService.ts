@@ -17,7 +17,8 @@ export enum NetworkedApplication {
     MARBLE = 'marble',
     FREE_MARKET = 'free-market',
     LABYRINTH = 'labyrinth',
-    MUSIC_PLAYER = 'music-player'
+    MUSIC_PLAYER = 'music-player',
+    DATABASE = 'database'
 }
 
 interface BroadcastEvent<T> {
