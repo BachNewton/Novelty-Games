@@ -59,7 +59,12 @@ export function createDatabase<DatabaseName extends DatabaseNames>(
                 });
             });
         },
-        delete: () => new Promise(resolve => indexedDB.deleteDatabase(databaseName).onsuccess = () => resolve())
+        delete: () => new Promise(resolve => {
+            const deleteRequest = indexedDB.deleteDatabase(databaseName);
+
+            deleteRequest.onblocked = () => tempNetworkService.log(`Delete request - Database ${databaseName} is blocked!`);
+            deleteRequest.onsuccess = () => resolve();
+        })
     };
 }
 
@@ -68,6 +73,8 @@ function openDatabase(databaseName: string, tableNames: string[]): Promise<IDBDa
 
     return new Promise(resolve => {
         const request = indexedDB.open(databaseName);
+
+        request.onblocked = () => tempNetworkService.log(`Database ${databaseName} is blocked!`);
 
         request.onupgradeneeded = e => {
             tempNetworkService.log(`Upgrading database ${databaseName}`);
