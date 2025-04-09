@@ -3,6 +3,7 @@ import HomeButton from "../../ui/HomeButton";
 import MusicPlayerHome from "../music-player/ui/Home";
 import { getRoute, Route } from "../../ui/Routing";
 import { createMusicDatabase } from "../music-player/logic/MusicDatabase";
+import { createNetworkService, NetworkedApplication } from "../../util/NetworkService";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
@@ -30,7 +31,7 @@ function Ui(uiState: UiState, onHomeButtonClicked: () => void, onForTheStats2Cli
     if (uiState instanceof MenuUiState) {
         return MenuUi(onHomeButtonClicked, onForTheStats2Click, onMusicPlayerClick);
     } else if (uiState instanceof MusicPlayerUiState) {
-        return <MusicPlayerHome musicDatabase={createMusicDatabase()} />;
+        return <MusicPlayerHome musicDatabase={createMusicDatabase()} networkService={createNetworkService<void>(NetworkedApplication.MUSIC_PLAYER)} />;
     } else {
         throw new Error('UiState not supported: ' + uiState);
     }

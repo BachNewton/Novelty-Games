@@ -5,9 +5,11 @@ import MusicPlayer from "./MusicPlayer";
 import { SongPackage } from "../logic/MusicDatabase";
 import { Database, DatabaseNames } from "../../../util/Database";
 import { Route, updateRoute } from "../../../ui/Routing";
+import { NetworkService } from "../../../util/NetworkService";
 
 interface HomeProps {
     musicDatabase: Database<DatabaseNames.MUSIC>;
+    networkService: NetworkService<void>;
 }
 
 interface State { }
@@ -22,11 +24,14 @@ class SongImporterState implements State {
     }
 }
 
-const Home: React.FC<HomeProps> = ({ musicDatabase }) => {
+const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
     const [state, setState] = useState<State>(new MusicPlayerState());
     const [songs, setSongs] = useState<SongPackage[] | null>(null);
 
-    const updateSongsFromDb = () => musicDatabase.get('songs').then(songs => setSongs(songs));
+    const updateSongsFromDb = () => musicDatabase.get('songs').then(songs => {
+        networkService.log(`Loaded ${songs.length} songs from database`);
+        setSongs(songs);
+    });
 
     useEffect(() => {
         updateRoute(Route.MUSIC_PLAYER);
@@ -39,12 +44,14 @@ const Home: React.FC<HomeProps> = ({ musicDatabase }) => {
 
             const temp = musicDatabase.add('songs', ...songPackages);
 
-            temp.forEach(async promise => {
+            temp.forEach(async (promise, index) => {
                 await promise;
 
                 console.log('Added song to database');
+                networkService.log(`Added song ${index + 1} of ${songPackages.length}`);
             });
 
+            networkService.log('Adding songs to database...');
             updateSongsFromDb();
             setState(new MusicPlayerState());
             // setState(new SongImporterState(songPackages));
