@@ -83,10 +83,5 @@ function getDatabase(e: Event): IDBDatabase {
     const request = e.target as IDBOpenDBRequest
     const db = request.result;
 
-    // db.addEventListener('versionchange', () => {
-    //     console.log('Closing', db.name);
-    //     db.close();
-    // });
-
     return db;
 }

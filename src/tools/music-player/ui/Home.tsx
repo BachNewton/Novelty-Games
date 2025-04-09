@@ -28,34 +28,42 @@ const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
     const [state, setState] = useState<State>(new MusicPlayerState());
     const [songs, setSongs] = useState<SongPackage[] | null>(null);
 
-    const updateSongsFromDb = () => musicDatabase.get('songs').then(songs => {
+    const updateSongsFromDb = async () => {
+        const songs = await musicDatabase.get('songs');
+        console.log('Loaded songs from database:', songs);
         networkService.log(`Loaded ${songs.length} songs from database`);
         setSongs(songs);
-    });
+    };
 
     useEffect(() => {
         updateRoute(Route.MUSIC_PLAYER);
         updateSongsFromDb();
     }, []);
 
-    const importNewSongs = () => {
-        selectFolder().then(songPackages => {
-            console.log('Selected files:', songPackages);
+    const importNewSongs = async () => {
+        setSongs(null);
+        console.log('Importing new songs...');
 
-            const temp = musicDatabase.add('songs', ...songPackages);
+        const songPackages = await selectFolder();
+        console.log('Selected files:', songPackages);
 
-            temp.forEach(async (promise, index) => {
-                await promise;
+        const addRequests = musicDatabase.add('songs', ...songPackages);
+        networkService.log('Adding songs to database...');
 
-                console.log('Added song to database');
-                networkService.log(`Added song ${index + 1} of ${songPackages.length}`);
-            });
+        addRequests.forEach(async (request, index) => {
+            await request;
 
-            networkService.log('Adding songs to database...');
-            updateSongsFromDb();
-            setState(new MusicPlayerState());
-            // setState(new SongImporterState(songPackages));
+            console.log(`Added song ${index + 1} of ${songPackages.length}`);
+            networkService.log(`Added song ${index + 1} of ${songPackages.length}`);
         });
+
+        await Promise.all(addRequests);
+
+        networkService.log('All songs added to database');
+        console.log('All songs added to database');
+        updateSongsFromDb();
+
+        setState(new MusicPlayerState());
     };
 
     const onSongClicked = (songPackage: SongPackage) => {
