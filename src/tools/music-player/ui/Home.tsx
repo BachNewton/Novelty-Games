@@ -79,7 +79,7 @@ const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
             setProgressState(new AddSongsToDatabaseState(index / addRequest.add.length));
         });
 
-        await Promise.all(addRequest.add);
+        await addRequest.transactionComplete;
 
         networkService.log('All songs added to database');
         console.log('All songs added to database');

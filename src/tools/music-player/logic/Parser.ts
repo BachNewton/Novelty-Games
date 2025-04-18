@@ -1,6 +1,15 @@
 import { SongPackage } from "./MusicDatabase";
 
-export function selectFolder(): Promise<SongPackage[]> {
+interface SongMetadata {
+    title: string;
+    artist: string;
+}
+
+interface ParsedSongPackage extends SongPackage {
+    metadata: SongMetadata;
+}
+
+export function selectFolder(): Promise<ParsedSongPackage[]> {
     const input = document.createElement('input');
     input.type = 'file';
     input.webkitdirectory = true;
@@ -9,14 +18,14 @@ export function selectFolder(): Promise<SongPackage[]> {
         input.addEventListener('change', () => {
             const files = Array.from(input.files ?? []);
 
-            resolve(createSongPackages(files));
+            resolve(createParsedSongPackages(files));
         });
 
         input.click();
     });
 }
 
-function createSongPackages(files: File[]): SongPackage[] {
+async function createParsedSongPackages(files: File[]): Promise<ParsedSongPackage[]> {
     const songFiles = new Map<string, File[]>();
 
     for (const file of files) {
@@ -25,20 +34,18 @@ function createSongPackages(files: File[]): SongPackage[] {
         songFiles.get(folderName)?.push(file) ?? songFiles.set(folderName, [file]);
     }
 
-    const songPackages: SongPackage[] = [];
+    const parsedSongPackages: Promise<ParsedSongPackage | null>[] = [];
 
     songFiles.forEach((files, folderName) => {
-        const songPackage = createSongPackage(files, folderName);
+        const songPackage = createParsedSongPackage(files, folderName);
 
-        if (songPackage === null) return;
-
-        songPackages.push(songPackage);
+        parsedSongPackages.push(songPackage);
     });
 
-    return songPackages;
+    return Promise.all(parsedSongPackages).then(songs => songs.filter(song => song !== null)) as Promise<ParsedSongPackage[]>;
 }
 
-function createSongPackage(files: File[], folderName: string): SongPackage | null {
+async function createParsedSongPackage(files: File[], folderName: string): Promise<ParsedSongPackage | null> {
     const iniFile = files.find(file => file.name === 'song.ini');
     const guitarFile = files.find(file => file.name === 'guitar.ogg');
     const bassFile = files.find(file => file.name === 'rhythm.ogg');
@@ -60,6 +67,7 @@ function createSongPackage(files: File[], folderName: string): SongPackage | nul
         vocalsFile === undefined || backingFile === undefined) return null;
 
     return {
+        metadata: await parseIniFile(iniFile),
         folderName: folderName,
         ini: iniFile,
         guitar: guitarFile,
@@ -72,6 +80,41 @@ function createSongPackage(files: File[], folderName: string): SongPackage | nul
         keys: keysFile ?? null,
         backing: backingFile
     };
+}
+
+export async function parseSongPackage(songPackage: SongPackage): Promise<ParsedSongPackage> {
+    return {
+        metadata: await parseIniFile(songPackage.ini),
+        ...songPackage
+    };
+}
+
+function parseIniFile(file: File): Promise<SongMetadata> {
+    return new Promise(resolve => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            const content = reader.result as string;
+            const lines = content.split('\n');
+            const metadata: SongMetadata = { title: '(Unkown)', artist: '(Unkown)' };
+
+            for (const line of lines) {
+                const [key, value] = line.split(' = ');
+                if (key === 'name') metadata.title = value.trim();
+                if (key === 'artist') metadata.artist = value.trim();
+            }
+
+            resolve(metadata);
+        };
+
+        reader.onerror = () => {
+            console.error('Error reading INI file:', file.name);
+            resolve({ title: '(Unkown)', artist: '(Unkown)' });
+        };
+
+
+        reader.readAsText(file);
+    });
 }
 
 export function fileToAudio(file: File | null): Promise<HTMLAudioElement | null> {
