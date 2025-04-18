@@ -14,6 +14,7 @@ interface NewMusicPlayerProps {
 
 const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, deleteAllSongs, songs, progressState }) => {
     const [song, setSong] = useState<SongPackage | null>(null);
+    const [searchText, setSearchText] = useState<string>('');
 
     const promptDeleteAllSongs = () => {
         if (window.confirm('Are you sure you want to delete all songs?')) {
@@ -33,8 +34,17 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, deleteAllS
             <button onClick={promptDeleteAllSongs} style={{ fontSize: '1em' }}>🗑️</button>
         </div>
 
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ fontSize: '1.2em' }}>🔎</div>
+            <input
+                style={{ fontSize: '0.8em', flexGrow: 1, borderRadius: '15px', padding: '5px', margin: '5px' }}
+                placeholder='Search'
+                onChange={e => setSearchText(e.target.value)}
+            />
+        </div>
+
         <div style={{ flexGrow: 1, overflow: 'auto' }}>
-            <Library songs={songs} onSongSelected={selectedSong => setSong(selectedSong)} />
+            <Library songs={filterBySearchText(songs, searchText)} onSongSelected={selectedSong => setSong(selectedSong)} />
         </div>
 
         {footerUi(song, progressState)}
@@ -50,6 +60,18 @@ function footerUi(song: SongPackage | null, progressState: ProgressState | null)
         <MusicPlayerProgressBar state={progressState} />
         <Player song={song} />
     </div>;
+}
+
+function filterBySearchText(songs: ParsedSongPackage[] | null, searchText: string): ParsedSongPackage[] | null {
+    if (searchText.length < 2 || songs === null) return songs;
+
+    return songs.filter(song => {
+        const search = searchText.toLowerCase();
+        const artist = song.metadata.artist.toLowerCase();
+        const title = song.metadata.title.toLowerCase();
+
+        return artist.includes(search) || title.includes(search);
+    });
 }
 
 export default MusicPlayer;
