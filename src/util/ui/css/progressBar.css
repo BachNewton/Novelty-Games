@@ -1,0 +1,37 @@
+.progress-bar-container {
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    transition: width 0.4s ease;
+    position: relative;
+}
+
+/* Striped pattern */
+.striped {
+    background-image: repeating-linear-gradient(45deg,
+            rgba(255, 255, 255, 0.2) 0,
+            rgba(255, 255, 255, 0.2) 10px,
+            transparent 10px,
+            transparent 20px);
+    background-size: 40px 40px;
+}
+
+/* Moving animation */
+.animated {
+    animation: moveStripes 1s linear infinite;
+}
+
+@keyframes moveStripes {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 40px 0;
+    }
+}
