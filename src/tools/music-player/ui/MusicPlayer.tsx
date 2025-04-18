@@ -2,16 +2,17 @@ import { useState } from "react";
 import { SongPackage } from "../logic/MusicDatabase";
 import Library from "./Library";
 import Player from "./Player";
-import MusicPlayerProgressBar, { AddSongsToDatabaseState, ProgressState } from "./MusicPlayerProgressBar";
+import MusicPlayerProgressBar, { ProgressState } from "./MusicPlayerProgressBar";
+import { ParsedSongPackage } from "../logic/Parser";
 
 interface NewMusicPlayerProps {
     importNewSongs: () => void;
     deleteAllSongs: () => void;
-    songPackages: SongPackage[] | null;
+    songs: ParsedSongPackage[] | null;
     progressState: ProgressState | null;
 }
 
-const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, deleteAllSongs, songPackages, progressState }) => {
+const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, deleteAllSongs, songs, progressState }) => {
     const [song, setSong] = useState<SongPackage | null>(null);
 
     const promptDeleteAllSongs = () => {
@@ -33,7 +34,7 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, deleteAllS
         </div>
 
         <div style={{ flexGrow: 1, overflow: 'auto' }}>
-            <Library songPackages={songPackages} onSongSelected={selectedSong => setSong(selectedSong)} />
+            <Library songs={songs} onSongSelected={selectedSong => setSong(selectedSong)} />
         </div>
 
         {footerUi(song, progressState)}

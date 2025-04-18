@@ -111,7 +111,7 @@ const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
         return <MusicPlayer
             importNewSongs={importNewSongs}
             deleteAllSongs={onDeleteAllSongs}
-            songPackages={songs}
+            songs={songs}
             progressState={progressState}
         />;
     } else {
