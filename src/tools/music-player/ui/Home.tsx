@@ -49,17 +49,27 @@ const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
         console.log('Selected files:', songPackages);
         networkService.log(`Selected ${songPackages.length} files`);
 
-        const addRequests = musicDatabase.add('songs', ...songPackages);
+        const addRequest = musicDatabase.add('songs', ...songPackages);
         networkService.log('Adding songs to database...');
 
-        addRequests.forEach(async (request, index) => {
+        addRequest.openDatabase.then(() => {
+            console.log('Database opened for adding songs');
+            networkService.log('Database opened for adding songs');
+        });
+
+        addRequest.transactionComplete.then(() => {
+            console.log('Transaction completed for adding songs');
+            networkService.log('Transaction completed for adding songs');
+        });
+
+        addRequest.add.forEach(async (request, index) => {
             await request;
 
             console.log(`Added song ${index + 1} of ${songPackages.length}`);
             networkService.log(`Added song ${index + 1} of ${songPackages.length}`);
         });
 
-        await Promise.all(addRequests);
+        await Promise.all(addRequest.add);
 
         networkService.log('All songs added to database');
         console.log('All songs added to database');

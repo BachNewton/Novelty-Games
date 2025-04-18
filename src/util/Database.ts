@@ -9,11 +9,17 @@ interface DatabaseTables {
     [DatabaseNames.MUSIC]: MusicDatabaseTables;
 }
 
+interface DatabaseAddRequest {
+    openDatabase: Promise<void>;
+    add: Promise<void>[];
+    transactionComplete: Promise<void>;
+}
+
 export interface Database<DatabaseName extends DatabaseNames> {
     add: <TableName extends keyof DatabaseTables[DatabaseName]>(
         tableName: TableName,
         ...data: DatabaseTables[DatabaseName][TableName][]
-    ) => Promise<void>[];
+    ) => DatabaseAddRequest;
 
     get: <TableName extends keyof DatabaseTables[DatabaseName]>(
         tableName: TableName
@@ -41,11 +47,17 @@ export function createDatabase<DatabaseName extends DatabaseNames>(
         add: (tableName, ...data) => {
             const objectStore = getObjectStore(tableName as string, true);
 
-            return data.map(async value => {
+            const addPromises = data.map(async value => {
                 const addRequest = (await objectStore).add(value);
 
                 return await new Promise<void>(resolve => addRequest.onsuccess = () => resolve());
             });
+
+            return {
+                openDatabase: objectStore.then(() => undefined),
+                add: addPromises,
+                transactionComplete: new Promise(async resolve => (await objectStore).transaction.oncomplete = () => resolve())
+            };
         },
         get: async (tableName) => {
             const objectStore = await getObjectStore(tableName as string, false);
@@ -97,6 +109,12 @@ function openDatabase(databaseName: string, tableNames: string[]): Promise<IDBDa
 function getDatabase(e: Event): IDBDatabase {
     const request = e.target as IDBOpenDBRequest
     const db = request.result;
+
+    db.addEventListener('versionchange', () => {
+        console.log('Version change on:', db.name);
+        db.close();
+        console.log('Database closed:', db.name);
+    });
 
     return db;
 }
