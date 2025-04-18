@@ -96,8 +96,6 @@ async function loadTracks(song: SongPackage): Promise<Tracks> {
         fileToAudio(song.backing)
     ]);
 
-    console.log(performance.now(), 'Loaded: ' + song.folderName);
-
     const loadedTracks: Tracks = {
         guitar: guitar as HTMLAudioElement,
         bass: bass as HTMLAudioElement,
