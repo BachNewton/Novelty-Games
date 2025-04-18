@@ -61,7 +61,10 @@ function artistSectionUi(artist: string, songs: ParsedSongPackage[], onSongSelec
             {artist}
         </div>
         <div>
-            {songs.map((song, index) => songUi(index, song, onSongSelected))}
+            {songs
+                .sort((a, b) => a.metadata.title.localeCompare(b.metadata.title))
+                .map((song, index) => songUi(index, song, onSongSelected))
+            }
         </div>
     </div>;
 }
