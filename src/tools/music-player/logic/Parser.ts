@@ -5,7 +5,7 @@ interface SongMetadata {
     artist: string;
 }
 
-interface ParsedSongPackage extends SongPackage {
+export interface ParsedSongPackage extends SongPackage {
     metadata: SongMetadata;
 }
 
@@ -82,11 +82,15 @@ async function createParsedSongPackage(files: File[], folderName: string): Promi
     };
 }
 
-export async function parseSongPackage(songPackage: SongPackage): Promise<ParsedSongPackage> {
-    return {
-        metadata: await parseIniFile(songPackage.ini),
-        ...songPackage
-    };
+export async function parseSongPackages(songPackages: SongPackage[]): Promise<ParsedSongPackage[]> {
+    const parsedSongPackages = songPackages.map(async songPackage => {
+        return {
+            ...songPackage,
+            metadata: await parseIniFile(songPackage.ini)
+        };
+    });
+
+    return Promise.all(parsedSongPackages);
 }
 
 function parseIniFile(file: File): Promise<SongMetadata> {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import SongImporter from "./SongImporter";
-import { selectFolder } from "../logic/Parser";
+import { ParsedSongPackage, parseSongPackages, selectFolder } from "../logic/Parser";
 import MusicPlayer from "./MusicPlayer";
 import { SongPackage } from "../logic/MusicDatabase";
 import { Database, DatabaseNames } from "../../../util/Database";
@@ -28,14 +28,14 @@ class SongImporterState implements State {
 
 const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
     const [state, setState] = useState<State>(new MusicPlayerState());
-    const [songs, setSongs] = useState<SongPackage[] | null>(null);
+    const [songs, setSongs] = useState<ParsedSongPackage[] | null>(null);
     const [progressState, setProgressState] = useState<ProgressState | null>(null);
 
     const updateSongsFromDb = async () => {
         const songs = await musicDatabase.get('songs');
         console.log('Loaded songs from database:', songs);
         networkService.log(`Loaded ${songs.length} songs from database`);
-        setSongs(songs);
+        setSongs(await parseSongPackages(songs));
     };
 
     useEffect(() => {
