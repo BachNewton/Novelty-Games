@@ -149,7 +149,7 @@ function expandedUi(
         return trackCheckbox(track, name, onSolo, handleExpansion);
     };
 
-    return <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    return <div style={{ display: 'flex', flexDirection: 'column' }}>
         <button style={{ fontSize: '1em', textAlign: 'left' }} onClick={onAll}>All</button>
         {trackCheckboxFor(tracks.guitar, 'Guitar')}
         {trackCheckboxFor(tracks.bass, 'Bass')}
@@ -169,7 +169,7 @@ function trackCheckbox(
     onSolo: (track: HTMLAudioElement) => void,
     handleExpansion: (e: React.MouseEvent) => void
 ): JSX.Element {
-    return <div style={{ display: 'flex', alignItems: 'center', gap: '15px', paddingLeft: '5px' }} onClick={handleExpansion}>
+    return <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '5px' }} onClick={handleExpansion}>
         <input
             type='checkbox'
             onChange={e => {
