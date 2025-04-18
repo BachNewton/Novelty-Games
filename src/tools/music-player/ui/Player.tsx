@@ -62,11 +62,7 @@ const Player: React.FC<PlayerProps> = ({ song }) => {
 
     const forceRender = () => setForceRender(prev => !prev);
 
-    return <div style={{
-        padding: '10px',
-        borderTop: '3px solid var(--novelty-blue)',
-        boxShadow: 'black 0px -10px 20px'
-    }}>
+    return <div>
         {expandedUi(expanded, tracks, handleExpansion, forceRender)}
 
         <div style={{ textAlign: 'center' }} onClick={handleExpansion}>{song?.folderName}</div>

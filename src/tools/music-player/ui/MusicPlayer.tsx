@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SongPackage } from "../logic/MusicDatabase";
 import Library from "./Library";
 import Player from "./Player";
+// import ProgressBar from "../../../util/ui/ProgressBar";
 
 interface NewMusicPlayerProps {
     importNewSongs: () => void;
@@ -34,8 +35,19 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, deleteAllS
             <Library songPackages={songPackages} onSongSelected={selectedSong => setSong(selectedSong)} />
         </div>
 
-        <Player song={song} />
+        {footerUi(song)}
     </div>;
 };
+
+function footerUi(song: SongPackage | null): JSX.Element {
+    return <div style={{
+        padding: '10px',
+        borderTop: '3px solid var(--novelty-blue)',
+        boxShadow: 'black 0px -10px 20px'
+    }}>
+        {/* <ProgressBar progress={55} /> */}
+        <Player song={song} />
+    </div>;
+}
 
 export default MusicPlayer;
