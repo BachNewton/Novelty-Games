@@ -2,7 +2,7 @@ import { useState } from "react";
 import { SongPackage } from "../logic/MusicDatabase";
 import Library from "./Library";
 import Player from "./Player";
-// import ProgressBar from "../../../util/ui/ProgressBar";
+import ProgressBar from "../../../util/ui/ProgressBar";
 
 interface NewMusicPlayerProps {
     importNewSongs: () => void;

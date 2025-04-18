@@ -1,31 +1,24 @@
 import React from "react";
 import "./css/progressBar.css";
 
-type ProgressBarProps = {
+const BACKGROUND_COLOR = "#e0e0e0";
+const HEIGHT = "16px";
+
+interface ProgressBarProps {
     progress: number; // 0 to 100
-    height?: string;
-    color?: string;
-    backgroundColor?: string;
-    animated?: boolean; // Controls the striped animation
 };
 
-const ProgressBar: React.FC<ProgressBarProps> = ({
-    progress,
-    height = "16px",
-    color = "#4caf50",
-    backgroundColor = "#e0e0e0",
-    animated = true,
-}) => {
+const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
     return (
         <div
             className="progress-bar-container"
-            style={{ backgroundColor, height }}
+            style={{ backgroundColor: BACKGROUND_COLOR, height: HEIGHT }}
         >
             <div
-                className={`progress-bar-fill ${animated ? "striped animated" : ""}`}
+                className={'progress-bar-fill striped animated'}
                 style={{
                     width: `${progress}%`,
-                    backgroundColor: color,
+                    backgroundColor: 'var(--novelty-blue)',
                     height: "100%",
                 }}
             />
