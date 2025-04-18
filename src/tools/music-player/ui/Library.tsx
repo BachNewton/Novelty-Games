@@ -19,7 +19,7 @@ function contentUi(songs: ParsedSongPackage[] | null, onSongSelected: (song: Son
             <Loading />
         </div>;
     } else if (songs.length === 0) {
-        return <div>Your music library is empty</div>;
+        return <div style={{ margin: '10px', textAlign: 'center' }}>Your music library is empty</div>;
     } else {
         return songsUi(songs, onSongSelected);
     }
