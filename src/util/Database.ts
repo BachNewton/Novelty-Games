@@ -1,5 +1,4 @@
 import { MusicDatabaseTables } from "../tools/music-player/logic/MusicDatabase";
-import { createNetworkService, NetworkedApplication } from "./networking/NetworkService";
 
 export enum DatabaseNames {
     MUSIC = 'music'
@@ -28,8 +27,6 @@ export interface Database<DatabaseName extends DatabaseNames> {
     delete: () => Promise<void>;
 }
 
-const tempNetworkService = createNetworkService<void>(NetworkedApplication.DATABASE);
-
 export function createDatabase<DatabaseName extends DatabaseNames>(
     databaseName: DatabaseName,
     databaseTable: DatabaseTables[DatabaseName]
@@ -39,7 +36,6 @@ export function createDatabase<DatabaseName extends DatabaseNames>(
     const getObjectStore = async (tableName: string, writeAccess: boolean): Promise<IDBObjectStore> => {
         const db = await openDatabase(databaseName, tableNames);
         const transaction = db.transaction(tableName, writeAccess ? 'readwrite' : 'readonly');
-        tempNetworkService.log(`Transaction ${writeAccess ? 'readwrite' : 'readonly'} on table named "${tableName}"`);
         return transaction.objectStore(tableName);
     };
 
@@ -74,22 +70,16 @@ export function createDatabase<DatabaseName extends DatabaseNames>(
         delete: () => new Promise(resolve => {
             const deleteRequest = indexedDB.deleteDatabase(databaseName);
 
-            deleteRequest.onblocked = () => tempNetworkService.log(`Delete request - Database ${databaseName} is blocked!`);
             deleteRequest.onsuccess = () => resolve();
         })
     };
 }
 
 function openDatabase(databaseName: string, tableNames: string[]): Promise<IDBDatabase> {
-    tempNetworkService.log(`Opening database ${databaseName}...`);
-
     return new Promise(resolve => {
         const request = indexedDB.open(databaseName);
 
-        request.onblocked = () => tempNetworkService.log(`Database ${databaseName} is blocked!`);
-
         request.onupgradeneeded = e => {
-            tempNetworkService.log(`Upgrading database ${databaseName}`);
             const db = getDatabase(e);
 
             for (const tableName of tableNames) {
@@ -98,7 +88,6 @@ function openDatabase(databaseName: string, tableNames: string[]): Promise<IDBDa
         };
 
         request.onsuccess = e => {
-            tempNetworkService.log(`Opened database success ${databaseName}`);
             const db = getDatabase(e);
 
             resolve(db);

@@ -48,7 +48,7 @@ function groupSongsByArtist(songs: ParsedSongPackage[]): { [artist: string]: Par
 }
 
 function artistSectionUi(artist: string, songs: ParsedSongPackage[], onSongSelected: (song: SongPackage) => void): JSX.Element {
-    return <div key={artist} style={{}}>
+    return <div key={artist}>
         <div
             style={{
                 position: 'sticky',
