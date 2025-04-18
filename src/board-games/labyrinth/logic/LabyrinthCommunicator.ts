@@ -1,4 +1,4 @@
-import { createNetworkService, NetworkedApplication, NetworkService } from "../../../util/NetworkService";
+import { createNetworkService, NetworkedApplication, NetworkService } from "../../../util/networking/NetworkService";
 import { Game } from "../data/Game";
 import { Lobby } from "../data/Lobby";
 import { convertToGame, convertToNetworkGame, NetworkGame } from "../data/Network";

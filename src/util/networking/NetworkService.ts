@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import { createID } from './ID';
+import { createID } from '../ID';
 
 const SERVER_URL = 'https://novelty-games.mooo.com/';
 

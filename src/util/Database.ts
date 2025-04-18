@@ -1,5 +1,5 @@
 import { MusicDatabaseTables } from "../tools/music-player/logic/MusicDatabase";
-import { createNetworkService, NetworkedApplication } from "./NetworkService";
+import { createNetworkService, NetworkedApplication } from "./networking/NetworkService";
 
 export enum DatabaseNames {
     MUSIC = 'music'

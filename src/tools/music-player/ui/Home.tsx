@@ -5,7 +5,7 @@ import MusicPlayer from "./MusicPlayer";
 import { SongPackage } from "../logic/MusicDatabase";
 import { Database, DatabaseNames } from "../../../util/Database";
 import { Route, updateRoute } from "../../../ui/Routing";
-import { NetworkService } from "../../../util/NetworkService";
+import { NetworkService } from "../../../util/networking/NetworkService";
 import { FolderSelectedState, DatabaseOpenedState, ProgressState, SelectingFolderState, AddSongsToDatabaseState, DatabaseTransactionCompleteState } from "./MusicPlayerProgressBar";
 import { wait } from "../../../util/Wait";
 

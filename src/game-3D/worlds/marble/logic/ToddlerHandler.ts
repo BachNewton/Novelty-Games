@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
-import { createNetworkService, NetworkedApplication } from "../../../../util/NetworkService";
+import { createNetworkService, NetworkedApplication } from "../../../../util/networking/NetworkService";
 import { Color, Shape, ToddlerServerData, ToddlerServerObjectData } from "../../../toddler/ToddlerServerData";
 import { GameWorldObject, GameWorldObjectCreator } from "../../GameWorldObject";
 import { Player } from './Player';

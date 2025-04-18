@@ -3,7 +3,7 @@ import HomeButton from "../../ui/HomeButton";
 import MusicPlayerHome from "../music-player/ui/Home";
 import { getRoute, Route } from "../../ui/Routing";
 import { createMusicDatabase } from "../music-player/logic/MusicDatabase";
-import { createNetworkService, NetworkedApplication } from "../../util/NetworkService";
+import { createNetworkService, NetworkedApplication } from "../../util/networking/NetworkService";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;

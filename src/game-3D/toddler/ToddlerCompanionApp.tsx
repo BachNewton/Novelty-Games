@@ -1,4 +1,4 @@
-import { createNetworkService, NetworkedApplication } from "../../util/NetworkService";
+import { createNetworkService, NetworkedApplication } from "../../util/networking/NetworkService";
 import { Color, Shape, ToddlerServerClearData, ToddlerServerData, ToddlerServerObjectData } from "./ToddlerServerData";
 
 const ToddlerCompanionApp: React.FC = () => {
