@@ -5,7 +5,7 @@ import MusicPlayer from "./MusicPlayer";
 import { SongPackage } from "../logic/MusicDatabase";
 import { Database, DatabaseNames } from "../../../util/Database";
 import { Route, updateRoute } from "../../../ui/Routing";
-import { FolderSelectedState, DatabaseOpenedState, ProgressState, SelectingFolderState, AddSongsToDatabaseState, DatabaseTransactionCompleteState } from "./MusicPlayerProgressBar";
+import { FolderSelectedState, DatabaseOpenedState, ProgressState, SelectingFolderState, AddSongsToDatabaseState, DatabaseTransactionCompleteState, AddingSongsState, CompleteState } from "./MusicPlayerProgressBar";
 import { wait } from "../../../util/Wait";
 
 interface HomeProps {
@@ -49,33 +49,46 @@ const Home: React.FC<HomeProps> = ({ musicDatabase }) => {
         console.log('Selected files:', songPackages);
         setProgressState(new FolderSelectedState());
 
-        const addRequest = musicDatabase.add('songs', ...songPackages);
+        // const addRequest = musicDatabase.add('songs', ...songPackages);
 
-        addRequest.openDatabase.then(() => {
-            console.log('Database opened for adding songs');
-            setProgressState(new DatabaseOpenedState());
-        });
+        // addRequest.openDatabase.then(() => {
+        //     console.log('Database opened for adding songs');
+        //     setProgressState(new DatabaseOpenedState());
+        // });
 
-        addRequest.transactionComplete.then(async () => {
-            console.log('Transaction completed for adding songs');
-            setProgressState(new DatabaseTransactionCompleteState());
-            await wait(2000);
-            setProgressState(null);
-        });
+        // addRequest.transactionComplete.then(async () => {
+        //     console.log('Transaction completed for adding songs');
+        //     setProgressState(new DatabaseTransactionCompleteState());
+        //     await wait(2000);
+        //     setProgressState(null);
+        // });
 
-        addRequest.add.forEach(async (request, index) => {
-            await request;
+        // addRequest.add.forEach(async (request, index) => {
+        //     await request;
 
-            console.log(`Added song ${index + 1} of ${songPackages.length}`);
-            setProgressState(new AddSongsToDatabaseState(index / addRequest.add.length));
-        });
+        //     console.log(`Added song ${index + 1} of ${songPackages.length}`);
+        //     setProgressState(new AddSongsToDatabaseState(index / addRequest.add.length));
+        // });
 
-        await addRequest.transactionComplete;
+        // await addRequest.transactionComplete;
+
+        setSongs(songPackages);
+        setState(new MusicPlayerState());
+
+        for (let i = 0; i < songPackages.length; i++) {
+            const song = songPackages[i];
+
+            setProgressState(new AddingSongsState(i + 1, songPackages.length));
+
+            await musicDatabase.add2('songs', song);
+        }
 
         console.log('All songs added to database');
-        updateSongsFromDb();
+        setProgressState(new CompleteState());
+        // updateSongsFromDb();
 
-        setState(new MusicPlayerState());
+        await wait(2000);
+        setProgressState(null);
     };
 
     const onSongClicked = (songPackage: SongPackage) => {
