@@ -6,6 +6,8 @@ import { SongPackage } from "../logic/MusicDatabase";
 import { Database, DatabaseNames } from "../../../util/Database";
 import { Route, updateRoute } from "../../../ui/Routing";
 import { NetworkService } from "../../../util/NetworkService";
+import { FolderSelectedState, DatabaseOpenedState, ProgressState, SelectingFolderState, AddSongsToDatabaseState, DatabaseTransactionCompleteState } from "./MusicPlayerProgressBar";
+import { wait } from "../../../util/Wait";
 
 interface HomeProps {
     musicDatabase: Database<DatabaseNames.MUSIC>;
@@ -27,6 +29,7 @@ class SongImporterState implements State {
 const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
     const [state, setState] = useState<State>(new MusicPlayerState());
     const [songs, setSongs] = useState<SongPackage[] | null>(null);
+    const [progressState, setProgressState] = useState<ProgressState | null>(null);
 
     const updateSongsFromDb = async () => {
         const songs = await musicDatabase.get('songs');
@@ -44,10 +47,12 @@ const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
         setSongs(null);
         console.log('Importing new songs...');
         networkService.log('Importing new songs...');
+        setProgressState(new SelectingFolderState());
 
         const songPackages = await selectFolder();
         console.log('Selected files:', songPackages);
         networkService.log(`Selected ${songPackages.length} files`);
+        setProgressState(new FolderSelectedState());
 
         const addRequest = musicDatabase.add('songs', ...songPackages);
         networkService.log('Adding songs to database...');
@@ -55,11 +60,15 @@ const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
         addRequest.openDatabase.then(() => {
             console.log('Database opened for adding songs');
             networkService.log('Database opened for adding songs');
+            setProgressState(new DatabaseOpenedState());
         });
 
-        addRequest.transactionComplete.then(() => {
+        addRequest.transactionComplete.then(async () => {
             console.log('Transaction completed for adding songs');
             networkService.log('Transaction completed for adding songs');
+            setProgressState(new DatabaseTransactionCompleteState());
+            await wait(2000);
+            setProgressState(null);
         });
 
         addRequest.add.forEach(async (request, index) => {
@@ -67,6 +76,7 @@ const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
 
             console.log(`Added song ${index + 1} of ${songPackages.length}`);
             networkService.log(`Added song ${index + 1} of ${songPackages.length}`);
+            setProgressState(new AddSongsToDatabaseState(index / addRequest.add.length));
         });
 
         await Promise.all(addRequest.add);
@@ -98,7 +108,12 @@ const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
     if (state instanceof SongImporterState) {
         return <SongImporter songPackages={state.songPackages} onSongClicked={onSongClicked} />;
     } else if (state instanceof MusicPlayerState) {
-        return <MusicPlayer importNewSongs={importNewSongs} deleteAllSongs={onDeleteAllSongs} songPackages={songs} />;
+        return <MusicPlayer
+            importNewSongs={importNewSongs}
+            deleteAllSongs={onDeleteAllSongs}
+            songPackages={songs}
+            progressState={progressState}
+        />;
     } else {
         return <></>;
     }

@@ -5,7 +5,7 @@ const BACKGROUND_COLOR = "#e0e0e0";
 const HEIGHT = "16px";
 
 interface ProgressBarProps {
-    progress: number; // 0 to 100
+    progress: number; // 0 to 1
 };
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
@@ -17,7 +17,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
             <div
                 className={'progress-bar-fill striped animated'}
                 style={{
-                    width: `${progress}%`,
+                    width: `${progress * 100}%`,
                     backgroundColor: 'var(--novelty-blue)',
                     height: "100%",
                 }}

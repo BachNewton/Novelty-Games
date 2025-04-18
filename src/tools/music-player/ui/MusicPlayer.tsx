@@ -2,15 +2,16 @@ import { useState } from "react";
 import { SongPackage } from "../logic/MusicDatabase";
 import Library from "./Library";
 import Player from "./Player";
-import ProgressBar from "../../../util/ui/ProgressBar";
+import MusicPlayerProgressBar, { AddSongsToDatabaseState, ProgressState } from "./MusicPlayerProgressBar";
 
 interface NewMusicPlayerProps {
     importNewSongs: () => void;
     deleteAllSongs: () => void;
     songPackages: SongPackage[] | null;
+    progressState: ProgressState | null;
 }
 
-const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, deleteAllSongs, songPackages }) => {
+const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, deleteAllSongs, songPackages, progressState }) => {
     const [song, setSong] = useState<SongPackage | null>(null);
 
     const promptDeleteAllSongs = () => {
@@ -35,17 +36,17 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, deleteAllS
             <Library songPackages={songPackages} onSongSelected={selectedSong => setSong(selectedSong)} />
         </div>
 
-        {footerUi(song)}
+        {footerUi(song, progressState)}
     </div>;
 };
 
-function footerUi(song: SongPackage | null): JSX.Element {
+function footerUi(song: SongPackage | null, progressState: ProgressState | null): JSX.Element {
     return <div style={{
         padding: '10px',
         borderTop: '3px solid var(--novelty-blue)',
         boxShadow: 'black 0px -10px 20px'
     }}>
-        {/* <ProgressBar progress={55} /> */}
+        <MusicPlayerProgressBar state={progressState} />
         <Player song={song} />
     </div>;
 }
