@@ -71,7 +71,7 @@ export interface GetFileResponse {
 
 interface DownloadFileResponse {
     id: string;
-    base64EncodedBuffer: string;
+    buffer: Buffer;
 }
 
 interface DeleteFileEvent {

@@ -25,7 +25,7 @@ export async function downloadFileFromGoogleDrive(event, socket) {
     /** @type {DownloadFileResponse} */
     const downloadFileResponse = {
         id: id,
-        base64EncodedBuffer: buffer.toString('base64')
+        buffer: buffer
     };
 
     socket.emit(DOWNLOAD_FILE_RESPONSE_EVENT, downloadFileResponse);
