@@ -8,12 +8,13 @@ const DOWNLOAD_FILE_RESPONSE_EVENT = 'downloadFileResponse';
  * @param {Socket} socket
  */
 export async function downloadFileFromGoogleDrive(event, socket) {
-    const id = event.data.id;
+    const id = event.id;
+    const fileId = event.data.id;
     const url = URL + id;
 
     console.log('Downloading file from Google Drive:', url);
 
-    const response = await fetch(URL + id);
+    const response = await fetch(URL + fileId);
 
     console.log('Response status:', response.status);
 
