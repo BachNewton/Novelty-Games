@@ -49,7 +49,7 @@
  * @typedef {Object} DownloadFileResponse
  * 
  * @property {string} id
- * @property {string} content
+ * @property {string} base64EncodedBuffer
  */
 
 /**
