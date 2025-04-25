@@ -7,9 +7,11 @@ import { Database, DatabaseNames } from "../../../util/Database";
 import { Route, updateRoute } from "../../../ui/Routing";
 import { FolderSelectedState, DatabaseOpenedState, ProgressState, SelectingFolderState, AddSongsToDatabaseState, DatabaseTransactionCompleteState, AddingSongsState, CompleteState } from "./MusicPlayerProgressBar";
 import { wait } from "../../../util/Wait";
+import { DownloadFileData, NetworkService } from "../../../util/networking/NetworkService";
 
 interface HomeProps {
     musicDatabase: Database<DatabaseNames.MUSIC>;
+    networkService: NetworkService<void>;
 }
 
 interface State { }
@@ -24,7 +26,7 @@ class SongImporterState implements State {
     }
 }
 
-const Home: React.FC<HomeProps> = ({ musicDatabase }) => {
+const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
     const [state, setState] = useState<State>(new MusicPlayerState());
     const [songs, setSongs] = useState<ParsedSongPackage[] | null>(null);
     const [progressState, setProgressState] = useState<ProgressState | null>(null);
@@ -41,6 +43,9 @@ const Home: React.FC<HomeProps> = ({ musicDatabase }) => {
     }, []);
 
     const importNewSongs = async () => {
+        const downloadFileData: DownloadFileData = { id: '1Kkl8NfhLlryI6SHmYD774RzaSr6Y00sG' };
+        networkService.downloadFile(downloadFileData);
+
         setSongs(null);
         console.log('Importing new songs...');
         setProgressState(new SelectingFolderState());

@@ -58,3 +58,17 @@
  * @property {string} application
  * @property {string} text
  */
+
+/**
+ * @typedef {Object} DownloadFileEvent
+ * 
+ * @property {string} id
+ * @property {string} application
+ * @property {DownloadFileData} data
+ */
+
+/**
+ * @typedef {Object} DownloadFileData
+ * 
+ * @property {string} id
+ */

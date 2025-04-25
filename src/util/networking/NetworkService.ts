@@ -9,13 +9,15 @@ export interface NetworkService<T> {
     getFile: (date: GetFileData) => Promise<GetFileResponse>;
     deleteFile: (data: DeleteFileData) => Promise<DeleteFileResponse>;
     log: (text: string) => void;
+    downloadFile: (data: DownloadFileData) => void;
 }
 
 export enum NetworkedApplication {
     MILLE_BORNES = 'mille-bornes',
     MARBLE = 'marble',
     FREE_MARKET = 'free-market',
-    LABYRINTH = 'labyrinth'
+    LABYRINTH = 'labyrinth',
+    MUSIC_PLAYER = 'music-player'
 }
 
 interface BroadcastEvent<T> {
@@ -33,6 +35,16 @@ interface SaveFileData {
     folderName: string;
     fileName: string;
     content: string;
+}
+
+interface DownloadFileEvent {
+    id: string;
+    application: NetworkedApplication;
+    data: DownloadFileData;
+}
+
+export interface DownloadFileData {
+    id: string;
 }
 
 export interface SaveFileResponse {
@@ -122,6 +134,12 @@ export function createNetworkService<T>(appFilter: NetworkedApplication): Networ
             networkCommunicator.send('saveFile', saveFileEvent);
 
             return new Promise(resolve => saveFileRequests.set(id, resolve));
+        },
+        downloadFile: data => {
+            const id = createID();
+            const downloadFileEvent: DownloadFileEvent = { id: id, application: appFilter, data: data };
+
+            networkCommunicator.send('downloadFile', downloadFileEvent);
         },
         getFile: data => {
             const id = createID();

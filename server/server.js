@@ -3,6 +3,7 @@ import { Server } from 'socket.io';
 import { createServer } from 'node:https';
 import fs from 'fs';
 import { getFile, saveFile, deleteFile } from './storage.js';
+import { downloadFileFromGoogleDrive } from './googleDrive.js';
 
 const PORT = 443;
 const PRIVATE_KEY_FILE_PATH = '/etc/letsencrypt/live/novelty-games.mooo.com/privkey.pem';
@@ -58,6 +59,11 @@ function startServer() {
         socket.on('getFile', (event) => {
             console.log('Socket ID:', displayId(socket.id), 'GetFileEvent:', event);
             getFile(event, socket);
+        });
+
+        socket.on('downloadFile', (event) => {
+            console.log('Socket ID:', displayId(socket.id), 'DownloadFileEvent:', event);
+            downloadFileFromGoogleDrive(event, socket);
         });
 
         socket.on('deleteFile', (event) => {
