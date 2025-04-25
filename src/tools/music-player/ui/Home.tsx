@@ -43,14 +43,14 @@ const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
     }, []);
 
     const importNewSongs = async () => {
-        const downloadFileData: DownloadFileData = { id: '1Kkl8NfhLlryI6SHmYD774RzaSr6Y00sG' };
-        networkService.downloadFile(downloadFileData).then(response => {
-            console.log('File downloaded:', response.buffer);
-            const blob = new Blob([response.buffer], { type: 'audio/ogg' });
-            const url = URL.createObjectURL(blob);
-            const audio = new Audio(url);
-            audio.play();
-        });
+        // const downloadFileData: DownloadFileData = { id: '1Kkl8NfhLlryI6SHmYD774RzaSr6Y00sG' };
+        // networkService.downloadFile(downloadFileData).then(response => {
+        //     console.log('File downloaded:', response.buffer);
+        //     const blob = new Blob([response.buffer], { type: 'audio/ogg' });
+        //     const url = URL.createObjectURL(blob);
+        //     const audio = new Audio(url);
+        //     audio.play();
+        // });
 
         setSongs(null);
         console.log('Importing new songs...');
