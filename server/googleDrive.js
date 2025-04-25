@@ -17,7 +17,7 @@ export async function downloadFileFromGoogleDrive(event, socket) {
 
     console.log('Response status:', response.status);
 
-    const buffer = await response.buffer();
+    const buffer = Buffer.from(await res.arrayBuffer());
 
     console.log('Buffer length:', buffer.length);
 
