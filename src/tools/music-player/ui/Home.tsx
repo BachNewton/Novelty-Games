@@ -44,7 +44,9 @@ const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
 
     const importNewSongs = async () => {
         const downloadFileData: DownloadFileData = { id: '1Kkl8NfhLlryI6SHmYD774RzaSr6Y00sG' };
-        networkService.downloadFile(downloadFileData);
+        networkService.downloadFile(downloadFileData).then(response => {
+            console.log('File downloaded:', response.content);
+        });
 
         setSongs(null);
         console.log('Importing new songs...');

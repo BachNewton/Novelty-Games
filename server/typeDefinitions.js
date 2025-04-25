@@ -46,6 +46,13 @@
  */
 
 /**
+ * @typedef {Object} DownloadFileResponse
+ * 
+ * @property {string} id
+ * @property {string} content
+ */
+
+/**
  * @typedef {Object} DeleteFileResponse
  * 
  * @property {string} id

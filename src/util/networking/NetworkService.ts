@@ -9,7 +9,7 @@ export interface NetworkService<T> {
     getFile: (date: GetFileData) => Promise<GetFileResponse>;
     deleteFile: (data: DeleteFileData) => Promise<DeleteFileResponse>;
     log: (text: string) => void;
-    downloadFile: (data: DownloadFileData) => void;
+    downloadFile: (data: DownloadFileData) => Promise<DownloadFileResponse>;
 }
 
 export enum NetworkedApplication {
@@ -69,6 +69,11 @@ export interface GetFileResponse {
     content: string | null;
 }
 
+interface DownloadFileResponse {
+    id: string;
+    content: string;
+}
+
 interface DeleteFileEvent {
     id: string;
     application: NetworkedApplication;
@@ -96,6 +101,7 @@ export function createNetworkService<T>(appFilter: NetworkedApplication): Networ
     const saveFileRequests: Map<string, (saveFileResponse: SaveFileResponse) => void> = new Map();
     const getFileRequests: Map<string, (getFileResponse: GetFileResponse) => void> = new Map();
     const deleteFileRequests: Map<string, (deleteFileResponse: DeleteFileResponse) => void> = new Map();
+    const downloadFileRequests: Map<string, (downloadFileResponse: DownloadFileResponse) => void> = new Map();
 
     let eventListener: (data: T) => void = () => { };
 
@@ -113,6 +119,11 @@ export function createNetworkService<T>(appFilter: NetworkedApplication): Networ
     networkCommunicator.receive('getFileResponse', (response: GetFileResponse) => {
         getFileRequests.get(response.id)?.(response);
         getFileRequests.delete(response.id);
+    });
+
+    networkCommunicator.receive('downloadFileResponse', (response: DownloadFileResponse) => {
+        downloadFileRequests.get(response.id)?.(response);
+        downloadFileRequests.delete(response.id);
     });
 
     networkCommunicator.receive('deleteFileResponse', (response: DeleteFileResponse) => {
@@ -140,6 +151,8 @@ export function createNetworkService<T>(appFilter: NetworkedApplication): Networ
             const downloadFileEvent: DownloadFileEvent = { id: id, application: appFilter, data: data };
 
             networkCommunicator.send('downloadFile', downloadFileEvent);
+
+            return new Promise(resolve => downloadFileRequests.set(id, resolve));
         },
         getFile: data => {
             const id = createID();
