@@ -39,7 +39,7 @@ const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
 
     useEffect(() => {
         updateRoute(Route.MUSIC_PLAYER);
-        updateSongsFromDb();
+        // updateSongsFromDb();
     }, []);
 
     const importNewSongs = async () => {
