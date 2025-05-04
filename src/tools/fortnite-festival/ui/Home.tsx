@@ -11,7 +11,7 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const [songs, setSongs] = useState<Array<FestivalSong> | null>(null);
-    const [difficultyScalar, setDifficultyScalar] = useState<string>('1.0');
+    const [difficultyScalar, setDifficultyScalar] = useState<string>('2.0');
 
     useEffect(() => {
         updateRoute(Route.FORTNITE_FESTIVAL);
@@ -35,7 +35,6 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
                 style={{ fontSize: '1em', width: '3em', marginLeft: '15px' }}
                 value={difficultyScalar}
                 onChange={e => setDifficultyScalar(e.target.value)}
-                disabled={true}
             />
         </div>
 
@@ -61,7 +60,7 @@ function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): J
         textAlign: 'center'
     };
 
-    const createCell = (text: string, fontSize?: string) => {
+    const createCell = (text: string) => {
         return <div style={cellStyle}>
             {text}
         </div>;
@@ -73,7 +72,7 @@ function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): J
             {createCell(song.artist)}
             {createCell(song.difficulties.proGuitar.toString())}
             {createCell(song.difficulties.drums.toString())}
-            {createCell(calculateBandDifficulty(song, difficultyScalar).toString())}
+            {createCell(calculateBandDifficulty(song, difficultyScalar).toFixed(1))}
         </React.Fragment>;
     });
 
@@ -94,9 +93,13 @@ function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): J
 }
 
 function calculateBandDifficulty(song: FestivalSong, difficultyScalar: string): number {
-    const totalDifficulty = song.difficulties.proGuitar + song.difficulties.drums;
+    const difficultyScalarValue = parseFloat(difficultyScalar);
+    const scalar = isNaN(difficultyScalarValue) ? 2 : difficultyScalarValue;
 
-    return totalDifficulty;
+    const meanPow = (song.difficulties.proGuitar ** scalar + song.difficulties.drums ** scalar) / 2;
+    const bandDifficulty = Math.pow(meanPow, 1 / scalar);
+
+    return bandDifficulty;
 }
 
 export async function getFestivalSongs(): Promise<Array<FestivalSong>> {
