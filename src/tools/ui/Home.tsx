@@ -1,10 +1,11 @@
 import { useState } from "react";
 import HomeButton from "../../ui/HomeButton";
 import MusicPlayerHome from "../music-player/ui/Home";
-import FortniteFestivalHome from "../fortnite-festival/ui/Home";
+import FortniteFestivalHome, { getFestivalSongs } from "../fortnite-festival/ui/Home";
 import { getRoute, Route } from "../../ui/Routing";
 import { createMusicDatabase } from "../music-player/logic/MusicDatabase";
 import { createNetworkService, NetworkedApplication } from "../../util/networking/NetworkService";
+import { FestivalSong } from "../../trivia/data/Data";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
@@ -13,7 +14,9 @@ interface HomeProps {
 interface UiState { }
 class MenuUiState implements UiState { }
 class MusicPlayerUiState implements UiState { }
-class FortniteFestivalUiState implements UiState { }
+class FortniteFestivalUiState implements UiState {
+    loadingSongs: Promise<Array<FestivalSong>> = getFestivalSongs();
+}
 
 interface OnClickHandlers {
     onHomeButtonClicked: () => void;
@@ -44,7 +47,7 @@ function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
             networkService={createNetworkService(NetworkedApplication.MUSIC_PLAYER)}
         />;
     } else if (uiState instanceof FortniteFestivalUiState) {
-        return <FortniteFestivalHome />;
+        return <FortniteFestivalHome loadingSongs={uiState.loadingSongs} />;
     } else {
         throw new Error('UiState not supported: ' + uiState);
     }
@@ -82,6 +85,8 @@ function getInitialState(): UiState {
     switch (route) {
         case Route.MUSIC_PLAYER:
             return new MusicPlayerUiState();
+        case Route.FORTNITE_FESTIVAL:
+            return new FortniteFestivalUiState();
         default:
             return new MenuUiState();
     }

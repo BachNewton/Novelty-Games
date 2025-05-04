@@ -43,6 +43,17 @@ export interface FestivalSong extends Data {
     length: string;
     sampleMp3: string | null;
     albumArt: string;
+    difficulties: FestivalSongDifficulty;
+}
+
+interface FestivalSongDifficulty {
+    bass: number;
+    drums: number;
+    guitar: number;
+    proBass: number;
+    proDrums: number;
+    proGuitar: number;
+    vocals: number;
 }
 
 export interface Flag extends Data {

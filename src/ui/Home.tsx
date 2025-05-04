@@ -169,6 +169,7 @@ function getInitialState(): State {
         case Route.CAT:
             return new Game2DState();
         case Route.MUSIC_PLAYER:
+        case Route.FORTNITE_FESTIVAL:
             return new ToolsState();
         default:
             return new HomeState();

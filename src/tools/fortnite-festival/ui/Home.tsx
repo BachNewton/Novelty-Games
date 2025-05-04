@@ -1,13 +1,21 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { get } from "../../../trivia/logic/Repository";
-import { DataType } from "../../../trivia/data/Data";
+import { DataType, FestivalSong } from "../../../trivia/data/Data";
+import Loading from "../../../util/ui/Loading";
+import { Route, updateRoute } from "../../../ui/Routing";
 
-interface HomeProps { }
+interface HomeProps {
+    loadingSongs: Promise<Array<FestivalSong>>;
+}
 
-const Home: React.FC<HomeProps> = ({ }) => {
+const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
+    const [songs, setSongs] = useState<Array<FestivalSong> | null>(null);
+
     useEffect(() => {
-        get(DataType.FORTNITE_FESTIVAL, { emit: () => { } }).then(data => {
-            console.log('Fortnite Festival data', data);
+        updateRoute(Route.FORTNITE_FESTIVAL);
+
+        loadingSongs.then(songs => {
+            setSongs(songs);
         });
     }, []);
 
@@ -24,7 +32,27 @@ const Home: React.FC<HomeProps> = ({ }) => {
         </div>
 
         <div style={{ borderTop: '3px solid var(--novelty-blue)', margin: '15px 0px' }} />
+
+        {songsUi(songs)}
     </div>;
 };
+
+function songsUi(songs: Array<FestivalSong> | null): JSX.Element {
+    if (songs === null) return <Loading />;
+
+    const elements = songs.map((song, index) => {
+        return <div key={index} style={{}}>
+            {song.name}
+        </div>
+    });
+
+    return <div style={{ margin: '15px' }}>{elements}</div>;
+}
+
+export async function getFestivalSongs(): Promise<Array<FestivalSong>> {
+    const data = await get(DataType.FORTNITE_FESTIVAL, { emit: () => { } });
+
+    return data as Array<FestivalSong>;
+}
 
 export default Home;
