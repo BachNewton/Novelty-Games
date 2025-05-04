@@ -68,6 +68,8 @@ function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): J
 
     const rows = sortedSongs.map((song, index) => {
         return <React.Fragment key={index}>
+            {createCell(`#${sortedSongs.length - index}`)}
+            <div style={cellStyle}><input type='checkbox' style={{ transform: 'scale(2)' }} disabled={true} /></div>
             {createCell(song.name)}
             {createCell(song.artist)}
             {createCell(song.difficulties.proGuitar.toString())}
@@ -83,11 +85,14 @@ function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): J
     };
 
     return <div style={{ margin: '15px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '8fr 3fr' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 10fr 3fr' }}>
+            {createHeaderCell('Meta')}
             {createHeaderCell('Song Details')}
             {createHeaderCell('Difficulty')}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '4fr 4fr 1fr 1fr 1fr' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 5fr 5fr 1fr 1fr 1fr' }}>
+            {createHeaderCell('Rank')}
+            {createHeaderCell('Owned')}
             {createHeaderCell('Title')}
             {createHeaderCell('Artist')}
             {createHeaderCell('Pro Guitar')}
