@@ -1,6 +1,7 @@
 import { useState } from "react";
 import HomeButton from "../../ui/HomeButton";
 import MusicPlayerHome from "../music-player/ui/Home";
+import FortniteFestivalHome from "../fortnite-festival/ui/Home";
 import { getRoute, Route } from "../../ui/Routing";
 import { createMusicDatabase } from "../music-player/logic/MusicDatabase";
 import { createNetworkService, NetworkedApplication } from "../../util/networking/NetworkService";
@@ -12,6 +13,7 @@ interface HomeProps {
 interface UiState { }
 class MenuUiState implements UiState { }
 class MusicPlayerUiState implements UiState { }
+class FortniteFestivalUiState implements UiState { }
 
 interface OnClickHandlers {
     onHomeButtonClicked: () => void;
@@ -27,7 +29,7 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
         onHomeButtonClicked: onHomeButtonClicked,
         onForTheStats2Click: () => window.alert('Work in progress!'),
         onMusicPlayerClick: () => setUiState(new MusicPlayerUiState()),
-        onFortniteFestivalClick: () => window.alert('Work in progress!')
+        onFortniteFestivalClick: () => setUiState(new FortniteFestivalUiState())
     };
 
     return Ui(uiState, onClickHandlers);
@@ -41,6 +43,8 @@ function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
             musicDatabase={createMusicDatabase()}
             networkService={createNetworkService(NetworkedApplication.MUSIC_PLAYER)}
         />;
+    } else if (uiState instanceof FortniteFestivalUiState) {
+        return <FortniteFestivalHome />;
     } else {
         throw new Error('UiState not supported: ' + uiState);
     }
