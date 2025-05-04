@@ -13,23 +13,29 @@ interface UiState { }
 class MenuUiState implements UiState { }
 class MusicPlayerUiState implements UiState { }
 
+interface OnClickHandlers {
+    onHomeButtonClicked: () => void;
+    onForTheStats2Click: () => void;
+    onMusicPlayerClick: () => void;
+    onFortniteFestivalClick: () => void;
+}
+
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
     const [uiState, setUiState] = useState<UiState>(getInitialState());
 
-    const onForTheStats2Click = () => {
-        window.alert('Work in progress!');
-    }
-
-    const onMusicPlayerClick = () => {
-        setUiState(new MusicPlayerUiState());
+    const onClickHandlers: OnClickHandlers = {
+        onHomeButtonClicked: onHomeButtonClicked,
+        onForTheStats2Click: () => window.alert('Work in progress!'),
+        onMusicPlayerClick: () => setUiState(new MusicPlayerUiState()),
+        onFortniteFestivalClick: () => window.alert('Work in progress!')
     };
 
-    return Ui(uiState, onHomeButtonClicked, onForTheStats2Click, onMusicPlayerClick);
+    return Ui(uiState, onClickHandlers);
 };
 
-function Ui(uiState: UiState, onHomeButtonClicked: () => void, onForTheStats2Click: () => void, onMusicPlayerClick: () => void) {
+function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
     if (uiState instanceof MenuUiState) {
-        return MenuUi(onHomeButtonClicked, onForTheStats2Click, onMusicPlayerClick);
+        return MenuUi(onClickHandlers);
     } else if (uiState instanceof MusicPlayerUiState) {
         return <MusicPlayerHome
             musicDatabase={createMusicDatabase()}
@@ -40,7 +46,7 @@ function Ui(uiState: UiState, onHomeButtonClicked: () => void, onForTheStats2Cli
     }
 }
 
-function MenuUi(onHomeButtonClicked: () => void, onForTheStats2Click: () => void, onMusicPlayerClick: () => void) {
+function MenuUi(onClickHandlers: OnClickHandlers) {
     const containerStyle: React.CSSProperties = {
         color: 'white',
         display: 'flex',
@@ -58,10 +64,11 @@ function MenuUi(onHomeButtonClicked: () => void, onForTheStats2Click: () => void
     };
 
     return <div style={containerStyle}>
-        <HomeButton onClick={onHomeButtonClicked} />
+        <HomeButton onClick={onClickHandlers.onHomeButtonClicked} />
         <div style={{ fontSize: '1.75em', marginBottom: '1em' }}>🔧 Tools 🔨</div>
-        <button style={buttonStyle} onClick={onForTheStats2Click}>For The Stats 2 👑</button>
-        <button style={buttonStyle} onClick={onMusicPlayerClick}>Music Player 🎶</button>
+        <button style={buttonStyle} onClick={onClickHandlers.onForTheStats2Click}>For The Stats 2 👑</button>
+        <button style={buttonStyle} onClick={onClickHandlers.onMusicPlayerClick}>Music Player 🎶</button>
+        <button style={buttonStyle} onClick={onClickHandlers.onFortniteFestivalClick}>Fortnite Festival Difficulty Ranking 🎛️</button>
     </div>;
 }
 
