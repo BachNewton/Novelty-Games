@@ -29,6 +29,8 @@ jobs:
       - name: Add new files
         run: git add .
       - name: Commit changes
-        run: git commit -a -m "Updated Fortnite Festival json file"
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          git commit --allow-empty -a -m "Updated Fortnite Festival json file at $TIMESTAMP"
       - name: Push changes
         run: git push
