@@ -82,13 +82,20 @@ function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): J
         </div>;
     };
 
-    return <div style={{ margin: '15px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr' }}>
-        {createHeaderCell('Song')}
-        {createHeaderCell('Artist')}
-        {createHeaderCell('Pro Guitar Difficulty')}
-        {createHeaderCell('Drums Difficulty')}
-        {createHeaderCell('Band Difficulty')}
-        {rows}
+    return <div style={{ margin: '15px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '8fr 3fr' }}>
+            {createHeaderCell('Song Details')}
+            {createHeaderCell('Difficulty')}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '4fr 4fr 1fr 1fr 1fr' }}>
+            {createHeaderCell('Title')}
+            {createHeaderCell('Artist')}
+            {createHeaderCell('Pro Guitar')}
+            {createHeaderCell('Drums')}
+            {createHeaderCell('Band')}
+            {rows}
+        </div>
+
     </div>;
 }
 
