@@ -19,7 +19,16 @@ const SCRIPT_CONTENT_REGEX = /<script id=\"__NEXT_DATA__\".+>(.+)<\/script>/g;
             albumArt: song.image,
             year: song.ry,
             length: song.dn,
-            sampleMp3: song.previewUrl
+            sampleMp3: song.previewUrl,
+            difficulties: {
+                bass: song.difficulties.ba,
+                drums: song.difficulties.ds,
+                guitar: song.difficulties.gr,
+                proBass: song.difficulties.pb,
+                proDrums: song.difficulties.pd,
+                proGuitar: song.difficulties.pg,
+                vocals: song.difficulties.vl,
+            }
         };
     });
     console.log('Songs:', songs);
