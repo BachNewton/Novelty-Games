@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import '../css/Home.css';
 import Game from './Game';
-import { DataType, Data, Rollercoaster } from '../data/Data';
+import { DataType, Data, Rollercoaster, FestivalSong } from '../data/Data';
 import { get as getFromRepo } from '../logic/Repository';
 import { ProgressUpdater } from '../logic/ProgressUpdater';
 import { deleteData as deleteDataFromDb, isDataStored as isDataStoredInDb } from '../logic/Database';
@@ -145,7 +145,13 @@ function HomeUi(
     ].map((dataType, index) => {
         const onGameClick = () => {
             const data = getFromRepo(getRepoBaseDataType(dataType), progressUpdater);
-            state.data = dataType === DataType.ROLLERCOASTERS ? filter(data as Promise<Array<Rollercoaster>>) : data;
+
+            if (dataType === DataType.ROLLERCOASTERS) {
+                state.data = filter(data as Promise<Array<Rollercoaster>>);
+            } else if (dataType === DataType.FORTNITE_FESTIVAL) {
+                state.data = (data as Promise<Array<FestivalSong>>).then(songs => songs.filter(song => song.artist !== 'Epic Games'));
+            }
+
             state.dataType = dataType;
             state.ui = UiState.GAME;
 
