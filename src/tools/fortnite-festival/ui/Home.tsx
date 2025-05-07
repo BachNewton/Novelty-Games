@@ -4,6 +4,7 @@ import { DataType, FestivalSong } from "../../../trivia/data/Data";
 import Loading from "../../../util/ui/Loading";
 import { Route, updateRoute } from "../../../ui/Routing";
 import React from "react";
+import Difficulty from "./Difficulty";
 
 interface HomeProps {
     loadingSongs: Promise<Array<FestivalSong>>;
@@ -53,6 +54,20 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
             <div style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
                 Fortnite Festival Band Difficulty Ranking
             </div>
+            <Difficulty level={0} />
+            <br />
+            <Difficulty level={1} />
+            <br />
+            <Difficulty level={2} />
+            <br />
+            <Difficulty level={3} />
+            <br />
+            <Difficulty level={4} />
+            <br />
+            <Difficulty level={5} />
+            <br />
+            <Difficulty level={6} />
+            <br />
             <label>Difficulty Scalar</label>
             <input
                 type='text'
@@ -136,12 +151,12 @@ function songsUi(
     };
 
     return <div style={{ margin: '15px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 10fr 5fr' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 8fr 5fr' }}>
             {createHeaderCell('Meta')}
             {createHeaderCell('Song Details')}
             {createHeaderCell('Difficulty')}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 5fr 5fr 1fr 1fr 1fr 1fr 1fr' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 4fr 4fr 1fr 1fr 1fr 1fr 1fr' }}>
             {createHeaderCell('Rank')}
             {createHeaderCell('Owned')}
             {createHeaderCell('Title')}
