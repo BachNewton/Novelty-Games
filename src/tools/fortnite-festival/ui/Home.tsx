@@ -5,6 +5,7 @@ import Loading from "../../../util/ui/Loading";
 import { Route, updateRoute } from "../../../ui/Routing";
 import React from "react";
 import Difficulty from "./Difficulty";
+import ToggleSwitch from "../../../util/ui/ToggleSwitch";
 
 interface HomeProps {
     loadingSongs: Promise<Array<FestivalSong>>;
@@ -54,6 +55,8 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
             <div style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
                 Fortnite Festival Band Difficulty Ranking
             </div>
+            <ToggleSwitch />
+            <br />
             <label>Difficulty Scalar</label>
             <input
                 type='text'
