@@ -27,6 +27,9 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
 
     return <div style={{ color: 'white' }}>
         <div style={{ margin: '15px', fontSize: '1.5em' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
+                Fortnite Festival Band Difficulty Ranking
+            </div>
             <label>Difficulty Scalar</label>
             <input
                 type='text'
@@ -82,7 +85,15 @@ function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): J
     });
 
     const createHeaderCell = (text: string) => {
-        return <div style={{ ...cellStyle, fontWeight: 'bold', fontSize: '1.5em' }}>
+        return <div style={{
+            ...cellStyle,
+            fontWeight: 'bold',
+            fontSize: '1.5em',
+            position: 'sticky',
+            top: 0,
+            backgroundColor: 'var(--novelty-background)',
+            zIndex: 1
+        }}>
             {text}
         </div>;
     };
