@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/Novelty-Games/static/css/main.0d44fbb3.css",
-    "main.js": "/Novelty-Games/static/js/main.d7d6ccdd.js",
+    "main.css": "/Novelty-Games/static/css/main.43f48038.css",
+    "main.js": "/Novelty-Games/static/js/main.c8311913.js",
     "static/js/453.ed3810f9.chunk.js": "/Novelty-Games/static/js/453.ed3810f9.chunk.js",
     "static/media/Paladin WProp J Nordstrom.fbx": "/Novelty-Games/static/media/Paladin WProp J Nordstrom.dff9b5b5278fd9b5a0b8.fbx",
     "static/media/skybox.jpg": "/Novelty-Games/static/media/skybox.abf8b9fe4fbb55e8b983.jpg",
@@ -60,12 +60,12 @@
     "static/media/MB-stop.svg": "/Novelty-Games/static/media/MB-stop.97d4ceaf2635b72345600bf0463e7d04.svg",
     "static/media/MB-outline.svg": "/Novelty-Games/static/media/MB-outline.9375dcb67c2602a348842bb92635c97b.svg",
     "static/media/MB-back.svg": "/Novelty-Games/static/media/MB-back.73af888104565973b102803815b53578.svg",
-    "main.0d44fbb3.css.map": "/Novelty-Games/static/css/main.0d44fbb3.css.map",
-    "main.d7d6ccdd.js.map": "/Novelty-Games/static/js/main.d7d6ccdd.js.map",
+    "main.43f48038.css.map": "/Novelty-Games/static/css/main.43f48038.css.map",
+    "main.c8311913.js.map": "/Novelty-Games/static/js/main.c8311913.js.map",
     "453.ed3810f9.chunk.js.map": "/Novelty-Games/static/js/453.ed3810f9.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.0d44fbb3.css",
-    "static/js/main.d7d6ccdd.js"
+    "static/css/main.43f48038.css",
+    "static/js/main.c8311913.js"
   ]
 }
