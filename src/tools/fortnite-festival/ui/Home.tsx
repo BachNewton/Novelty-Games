@@ -54,19 +54,33 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
             <div style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
                 Fortnite Festival Band Difficulty Ranking
             </div>
-            <Difficulty level={0} />
+            <Difficulty level={0} isSelected={true} />
             <br />
-            <Difficulty level={1} />
+            <Difficulty level={1} isSelected={true} />
             <br />
-            <Difficulty level={2} />
+            <Difficulty level={2} isSelected={true} />
             <br />
-            <Difficulty level={3} />
+            <Difficulty level={3} isSelected={true} />
             <br />
-            <Difficulty level={4} />
+            <Difficulty level={4} isSelected={true} />
             <br />
-            <Difficulty level={5} />
+            <Difficulty level={5} isSelected={true} />
             <br />
-            <Difficulty level={6} />
+            <Difficulty level={6} isSelected={true} />
+            <br />
+            <Difficulty level={0} isSelected={false} />
+            <br />
+            <Difficulty level={1} isSelected={false} />
+            <br />
+            <Difficulty level={2} isSelected={false} />
+            <br />
+            <Difficulty level={3} isSelected={false} />
+            <br />
+            <Difficulty level={4} isSelected={false} />
+            <br />
+            <Difficulty level={5} isSelected={false} />
+            <br />
+            <Difficulty level={6} isSelected={false} />
             <br />
             <label>Difficulty Scalar</label>
             <input
