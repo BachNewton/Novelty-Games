@@ -55,8 +55,11 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
             <div style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
                 Fortnite Festival Band Difficulty Ranking
             </div>
-            <div style={{ width: '150px' }}>
-                <ToggleSwitch />
+            <div>
+                <ToggleSwitch onChange={(checked) => console.log(checked)} />
+            </div>
+            <div>
+                <ToggleSwitch onChange={(checked) => console.log(checked)} size='small' />
             </div>
             <label>Difficulty Scalar</label>
             <input
