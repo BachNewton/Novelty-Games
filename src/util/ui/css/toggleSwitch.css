@@ -39,11 +39,11 @@
 }
 
 input:checked+.slider {
-    background-color: #2196F3;
+    background-color: var(--novelty-blue);
 }
 
 input:focus+.slider {
-    box-shadow: 0 0 1px #2196F3;
+    box-shadow: 0 0 1px var(--novelty-blue);
 }
 
 input:checked+.slider:before {
@@ -106,11 +106,11 @@ input:checked+.slider:before {
 }
 
 .switch-small input:checked+.slider-small {
-    background-color: #2196F3;
+    background-color: var(--novelty-blue);
 }
 
 .switch-small input:focus+.slider-small {
-    box-shadow: 0 0 1px #2196F3;
+    box-shadow: 0 0 1px var(--novelty-blue);
 }
 
 .switch-small input:checked+.slider-small:before {

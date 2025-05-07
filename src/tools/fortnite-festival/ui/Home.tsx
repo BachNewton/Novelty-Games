@@ -22,6 +22,7 @@ type Instrument = keyof SelectedInstruments;
 
 const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const [songs, setSongs] = useState<Array<FestivalSong> | null>(null);
+    const [filterEpicGamesSongs, setFilterEpicGamesSongs] = useState(false);
     const [difficultyScalar, setDifficultyScalar] = useState<string>('1.5');
     const [selectedInstruments, setSelectedInstruments] = useState<SelectedInstruments>({
         guitar: true,
@@ -50,29 +51,37 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         }
     };
 
+    const filteredSongs = songs?.filter(song => {
+        if (!filterEpicGamesSongs) return true;
+
+        return !song.artist.includes('Epic Games');
+    }) ?? null;
+
     return <div style={{ color: 'white' }}>
         <div style={{ margin: '15px', fontSize: '1.5em' }}>
             <div style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
                 Fortnite Festival Band Difficulty Ranking
             </div>
-            <div>
-                <ToggleSwitch onChange={(checked) => console.log(checked)} />
+            <div style={{ display: 'flex', justifyContent: 'space-evenly', marginTop: '15px' }}>
+                <div>
+                    <label>Difficulty Scalar</label>
+                    <input
+                        type='text'
+                        style={{ fontSize: '1em', width: '3em', marginLeft: '15px' }}
+                        value={difficultyScalar}
+                        onChange={e => setDifficultyScalar(e.target.value)}
+                    />
+                </div>
+                <div>
+                    <label style={{ marginRight: '15px' }}>Filter Epic Games Songs</label>
+                    <ToggleSwitch onChange={checked => setFilterEpicGamesSongs(checked)} />
+                </div>
             </div>
-            <div>
-                <ToggleSwitch onChange={(checked) => console.log(checked)} size='small' />
-            </div>
-            <label>Difficulty Scalar</label>
-            <input
-                type='text'
-                style={{ fontSize: '1em', width: '3em', marginLeft: '15px' }}
-                value={difficultyScalar}
-                onChange={e => setDifficultyScalar(e.target.value)}
-            />
         </div>
 
         <div style={{ borderTop: '3px solid var(--novelty-blue)', margin: '15px 0px' }} />
 
-        {songsUi(songs, difficultyScalar, selectedInstruments, onHeaderClick)}
+        {songsUi(filteredSongs, difficultyScalar, selectedInstruments, onHeaderClick)}
     </div>;
 };
 
