@@ -103,12 +103,13 @@ export function isDataStored(dataType: DataType): Promise<boolean> {
     });
 }
 
-export function deleteData(dataType: DataType) {
+export function deleteData(dataType: DataType): Promise<void> {
     const databaseName = getDatabaseName(dataType);
 
-    indexedDB.deleteDatabase(databaseName).onsuccess = _ => {
+    return new Promise(resolve => indexedDB.deleteDatabase(databaseName).onsuccess = _ => {
         console.log('Database deleted', databaseName);
-    };
+        resolve();
+    });
 }
 
 function closeOnVersionChange(db: IDBDatabase) {

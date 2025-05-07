@@ -6,6 +6,7 @@ import { Route, updateRoute } from "../../../ui/Routing";
 import React from "react";
 import Difficulty from "./Difficulty";
 import ToggleSwitch from "../../../util/ui/ToggleSwitch";
+import { deleteData } from "../../../trivia/logic/Database";
 
 interface HomeProps {
     loadingSongs: Promise<Array<FestivalSong>>;
@@ -76,6 +77,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
                     <label style={{ marginRight: '15px' }}>Filter Epic Games Songs</label>
                     <ToggleSwitch onChange={checked => setFilterEpicGamesSongs(checked)} />
                 </div>
+                <button style={{ fontSize: '1em', cursor: 'pointer' }} onClick={fetchLatestSongs}>Fetch Latest Songs</button>
             </div>
         </div>
 
@@ -207,6 +209,10 @@ export async function getFestivalSongs(): Promise<Array<FestivalSong>> {
     const data = await get(DataType.FORTNITE_FESTIVAL, { emit: () => { } });
 
     return data as Array<FestivalSong>;
+}
+
+function fetchLatestSongs() {
+    deleteData(DataType.FORTNITE_FESTIVAL).then(() => window.location.reload());
 }
 
 export default Home;
