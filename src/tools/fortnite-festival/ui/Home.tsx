@@ -21,7 +21,7 @@ type Instrument = keyof SelectedInstruments;
 
 const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const [songs, setSongs] = useState<Array<FestivalSong> | null>(null);
-    const [difficultyScalar, setDifficultyScalar] = useState<string>('2.0');
+    const [difficultyScalar, setDifficultyScalar] = useState<string>('1.5');
     const [selectedInstruments, setSelectedInstruments] = useState<SelectedInstruments>({
         guitar: true,
         drums: true,
@@ -54,34 +54,6 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
             <div style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
                 Fortnite Festival Band Difficulty Ranking
             </div>
-            <Difficulty level={0} isSelected={true} />
-            <br />
-            <Difficulty level={1} isSelected={true} />
-            <br />
-            <Difficulty level={2} isSelected={true} />
-            <br />
-            <Difficulty level={3} isSelected={true} />
-            <br />
-            <Difficulty level={4} isSelected={true} />
-            <br />
-            <Difficulty level={5} isSelected={true} />
-            <br />
-            <Difficulty level={6} isSelected={true} />
-            <br />
-            <Difficulty level={0} isSelected={false} />
-            <br />
-            <Difficulty level={1} isSelected={false} />
-            <br />
-            <Difficulty level={2} isSelected={false} />
-            <br />
-            <Difficulty level={3} isSelected={false} />
-            <br />
-            <Difficulty level={4} isSelected={false} />
-            <br />
-            <Difficulty level={5} isSelected={false} />
-            <br />
-            <Difficulty level={6} isSelected={false} />
-            <br />
             <label>Difficulty Scalar</label>
             <input
                 type='text'
@@ -121,29 +93,38 @@ function songsUi(
         textAlign: 'center'
     };
 
-    const createCell = (text: string, instrument?: Instrument) => {
+    const isGreyedOut = (instrument?: Instrument) => {
+        return instrument !== undefined && !selectedInstruments[instrument];
+    };
+
+    const createCell = (content: JSX.Element | string, instrument?: Instrument) => {
         const style: React.CSSProperties = { ...cellStyle };
 
-        if (instrument !== undefined && !selectedInstruments[instrument]) {
+        if (isGreyedOut(instrument)) {
             style.border = '1px solid grey';
             style.color = 'grey'
         }
 
         return <div style={style}>
-            {text}
+            {content}
         </div>;
     };
 
     const rows = sortedSongs.map((song, index) => {
+        const vocals = song.difficulties.vocals;
+        const guitar = song.difficulties.proGuitar;
+        const bass = song.difficulties.proBass;
+        const drums = song.difficulties.drums;
+
         return <React.Fragment key={index}>
             {createCell(`#${sortedSongs.length - index}`)}
             <div style={cellStyle}><input type='checkbox' style={{ transform: 'scale(2)' }} disabled={true} /></div>
             {createCell(song.name)}
             {createCell(song.artist)}
-            {createCell(song.difficulties.vocals.toString(), 'vocals')}
-            {createCell(song.difficulties.proGuitar.toString(), 'guitar')}
-            {createCell(song.difficulties.proBass.toString(), 'bass')}
-            {createCell(song.difficulties.drums.toString(), 'drums')}
+            {createCell(<Difficulty level={vocals} isSelected={!isGreyedOut('vocals')} />, 'vocals')}
+            {createCell(<Difficulty level={guitar} isSelected={!isGreyedOut('guitar')} />, 'guitar')}
+            {createCell(<Difficulty level={bass} isSelected={!isGreyedOut('bass')} />, 'bass')}
+            {createCell(<Difficulty level={drums} isSelected={!isGreyedOut('drums')} />, 'drums')}
             {createCell(calculateBandDifficulty(song, difficultyScalar, selectedInstruments).toFixed(1))}
         </React.Fragment>;
     });
@@ -165,12 +146,12 @@ function songsUi(
     };
 
     return <div style={{ margin: '15px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 8fr 5fr' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 6fr 5fr' }}>
             {createHeaderCell('Meta')}
             {createHeaderCell('Song Details')}
             {createHeaderCell('Difficulty')}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 4fr 4fr 1fr 1fr 1fr 1fr 1fr' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 3fr 3fr 1fr 1fr 1fr 1fr 1fr' }}>
             {createHeaderCell('Rank')}
             {createHeaderCell('Owned')}
             {createHeaderCell('Title')}
@@ -188,7 +169,7 @@ function songsUi(
 
 function calculateBandDifficulty(song: FestivalSong, difficultyScalar: string, selectedInstruments: SelectedInstruments): number {
     const difficultyScalarValue = parseFloat(difficultyScalar);
-    const scalar = isNaN(difficultyScalarValue) ? 2 : difficultyScalarValue;
+    const scalar = isNaN(difficultyScalarValue) ? 1.5 : difficultyScalarValue;
 
     const guitar = selectedInstruments.guitar ? song.difficulties.proGuitar ** scalar : 0;
     const bass = selectedInstruments.bass ? song.difficulties.proBass ** scalar : 0;
