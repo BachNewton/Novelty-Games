@@ -12,6 +12,10 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const [songs, setSongs] = useState<Array<FestivalSong> | null>(null);
     const [difficultyScalar, setDifficultyScalar] = useState<string>('2.0');
+    const [isGuitarSelected, setIsGuitarSelected] = useState(true);
+    const [isDrumsSelected, setIsDrumsSelected] = useState(true);
+    const [isBassSelected, setIsBassSelected] = useState(false);
+    const [isVocalsSelected, setIsVocalsSelected] = useState(false);
 
     useEffect(() => {
         updateRoute(Route.FORTNITE_FESTIVAL);
@@ -23,12 +27,6 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
 
     return <div style={{ color: 'white' }}>
         <div style={{ margin: '15px', fontSize: '1.5em' }}>
-            <input type='checkbox' style={{ transform: 'scale(2.5)', marginRight: '15px' }} checked={true} disabled={true} />
-            <label>Pro Guitar</label>
-            <br />
-            <input type='checkbox' style={{ transform: 'scale(2.5)', marginRight: '15px' }} checked={true} disabled={true} />
-            <label>Drums</label>
-            <br />
             <label>Difficulty Scalar</label>
             <input
                 type='text'
@@ -57,6 +55,9 @@ function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): J
     const cellStyle: React.CSSProperties = {
         padding: '5px',
         border: '1px solid var(--novelty-blue)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         textAlign: 'center'
     };
 
@@ -72,7 +73,9 @@ function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): J
             <div style={cellStyle}><input type='checkbox' style={{ transform: 'scale(2)' }} disabled={true} /></div>
             {createCell(song.name)}
             {createCell(song.artist)}
+            {createCell(song.difficulties.vocals.toString())}
             {createCell(song.difficulties.proGuitar.toString())}
+            {createCell(song.difficulties.proBass.toString())}
             {createCell(song.difficulties.drums.toString())}
             {createCell(calculateBandDifficulty(song, difficultyScalar).toFixed(1))}
         </React.Fragment>;
@@ -85,17 +88,19 @@ function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): J
     };
 
     return <div style={{ margin: '15px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 10fr 3fr' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 10fr 5fr' }}>
             {createHeaderCell('Meta')}
             {createHeaderCell('Song Details')}
             {createHeaderCell('Difficulty')}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 5fr 5fr 1fr 1fr 1fr' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 5fr 5fr 1fr 1fr 1fr 1fr 1fr' }}>
             {createHeaderCell('Rank')}
             {createHeaderCell('Owned')}
             {createHeaderCell('Title')}
             {createHeaderCell('Artist')}
+            {createHeaderCell('Vocals')}
             {createHeaderCell('Pro Guitar')}
+            {createHeaderCell('Pro Bass')}
             {createHeaderCell('Drums')}
             {createHeaderCell('Band')}
             {rows}
