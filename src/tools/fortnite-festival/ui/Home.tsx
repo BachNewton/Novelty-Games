@@ -77,8 +77,8 @@ function songsUi(
     if (songs === null) return <Loading />;
 
     const sortedSongs = songs.sort((a, b) => {
-        const aDifficulty = calculateBandDifficulty(a, difficultyScalar);
-        const bDifficulty = calculateBandDifficulty(b, difficultyScalar);
+        const aDifficulty = calculateBandDifficulty(a, difficultyScalar, selectedInstruments);
+        const bDifficulty = calculateBandDifficulty(b, difficultyScalar, selectedInstruments);
 
         return aDifficulty - bDifficulty;
     });
@@ -115,7 +115,7 @@ function songsUi(
             {createCell(song.difficulties.proGuitar.toString(), 'guitar')}
             {createCell(song.difficulties.proBass.toString(), 'bass')}
             {createCell(song.difficulties.drums.toString(), 'drums')}
-            {createCell(calculateBandDifficulty(song, difficultyScalar).toFixed(1))}
+            {createCell(calculateBandDifficulty(song, difficultyScalar, selectedInstruments).toFixed(1))}
         </React.Fragment>;
     });
 
@@ -157,11 +157,21 @@ function songsUi(
     </div>;
 }
 
-function calculateBandDifficulty(song: FestivalSong, difficultyScalar: string): number {
+function calculateBandDifficulty(song: FestivalSong, difficultyScalar: string, selectedInstruments: SelectedInstruments): number {
     const difficultyScalarValue = parseFloat(difficultyScalar);
     const scalar = isNaN(difficultyScalarValue) ? 2 : difficultyScalarValue;
 
-    const meanPow = (song.difficulties.proGuitar ** scalar + song.difficulties.drums ** scalar) / 2;
+    const guitar = selectedInstruments.guitar ? song.difficulties.proGuitar ** scalar : 0;
+    const bass = selectedInstruments.bass ? song.difficulties.proBass ** scalar : 0;
+    const drums = selectedInstruments.drums ? song.difficulties.drums ** scalar : 0;
+    const vocals = selectedInstruments.vocals ? song.difficulties.vocals ** scalar : 0;
+
+    const totalInstruments = (selectedInstruments.guitar ? 1 : 0) +
+        (selectedInstruments.bass ? 1 : 0) +
+        (selectedInstruments.drums ? 1 : 0) +
+        (selectedInstruments.vocals ? 1 : 0);
+
+    const meanPow = (guitar + bass + drums + vocals) / totalInstruments;
     const bandDifficulty = Math.pow(meanPow, 1 / scalar);
 
     return bandDifficulty;
