@@ -9,13 +9,24 @@ interface HomeProps {
     loadingSongs: Promise<Array<FestivalSong>>;
 }
 
+interface SelectedInstruments {
+    guitar: boolean;
+    drums: boolean;
+    bass: boolean;
+    vocals: boolean;
+}
+
+type Instrument = keyof SelectedInstruments;
+
 const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const [songs, setSongs] = useState<Array<FestivalSong> | null>(null);
     const [difficultyScalar, setDifficultyScalar] = useState<string>('2.0');
-    const [isGuitarSelected, setIsGuitarSelected] = useState(true);
-    const [isDrumsSelected, setIsDrumsSelected] = useState(true);
-    const [isBassSelected, setIsBassSelected] = useState(false);
-    const [isVocalsSelected, setIsVocalsSelected] = useState(false);
+    const [selectedInstruments, setSelectedInstruments] = useState<SelectedInstruments>({
+        guitar: true,
+        drums: true,
+        bass: false,
+        vocals: false
+    });
 
     useEffect(() => {
         updateRoute(Route.FORTNITE_FESTIVAL);
@@ -24,6 +35,18 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
             setSongs(songs);
         });
     }, []);
+
+    const onHeaderClick = (instrument: Instrument) => {
+        if (instrument === 'guitar') {
+            setSelectedInstruments(prev => ({ ...prev, guitar: !prev.guitar }));
+        } else if (instrument === 'drums') {
+            setSelectedInstruments(prev => ({ ...prev, drums: !prev.drums }));
+        } else if (instrument === 'bass') {
+            setSelectedInstruments(prev => ({ ...prev, bass: !prev.bass }));
+        } else if (instrument === 'vocals') {
+            setSelectedInstruments(prev => ({ ...prev, vocals: !prev.vocals }));
+        }
+    };
 
     return <div style={{ color: 'white' }}>
         <div style={{ margin: '15px', fontSize: '1.5em' }}>
@@ -41,11 +64,16 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
 
         <div style={{ borderTop: '3px solid var(--novelty-blue)', margin: '15px 0px' }} />
 
-        {songsUi(songs, difficultyScalar)}
+        {songsUi(songs, difficultyScalar, selectedInstruments, onHeaderClick)}
     </div>;
 };
 
-function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): JSX.Element {
+function songsUi(
+    songs: Array<FestivalSong> | null,
+    difficultyScalar: string,
+    selectedInstruments: SelectedInstruments,
+    onHeaderClick: (instrument: Instrument) => void
+): JSX.Element {
     if (songs === null) return <Loading />;
 
     const sortedSongs = songs.sort((a, b) => {
@@ -64,8 +92,15 @@ function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): J
         textAlign: 'center'
     };
 
-    const createCell = (text: string) => {
-        return <div style={cellStyle}>
+    const createCell = (text: string, instrument?: Instrument) => {
+        const style: React.CSSProperties = { ...cellStyle };
+
+        if (instrument !== undefined && !selectedInstruments[instrument]) {
+            style.border = '1px solid grey';
+            style.color = 'grey'
+        }
+
+        return <div style={style}>
             {text}
         </div>;
     };
@@ -76,15 +111,15 @@ function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): J
             <div style={cellStyle}><input type='checkbox' style={{ transform: 'scale(2)' }} disabled={true} /></div>
             {createCell(song.name)}
             {createCell(song.artist)}
-            {createCell(song.difficulties.vocals.toString())}
-            {createCell(song.difficulties.proGuitar.toString())}
-            {createCell(song.difficulties.proBass.toString())}
-            {createCell(song.difficulties.drums.toString())}
+            {createCell(song.difficulties.vocals.toString(), 'vocals')}
+            {createCell(song.difficulties.proGuitar.toString(), 'guitar')}
+            {createCell(song.difficulties.proBass.toString(), 'bass')}
+            {createCell(song.difficulties.drums.toString(), 'drums')}
             {createCell(calculateBandDifficulty(song, difficultyScalar).toFixed(1))}
         </React.Fragment>;
     });
 
-    const createHeaderCell = (text: string) => {
+    const createHeaderCell = (text: string, onClick?: () => void) => {
         return <div style={{
             ...cellStyle,
             fontWeight: 'bold',
@@ -92,8 +127,10 @@ function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): J
             position: 'sticky',
             top: 0,
             backgroundColor: 'var(--novelty-background)',
-            zIndex: 1
-        }}>
+            zIndex: 1,
+            cursor: onClick ? 'pointer' : 'default',
+        }}
+            onClick={onClick}>
             {text}
         </div>;
     };
@@ -109,10 +146,10 @@ function songsUi(songs: Array<FestivalSong> | null, difficultyScalar: string): J
             {createHeaderCell('Owned')}
             {createHeaderCell('Title')}
             {createHeaderCell('Artist')}
-            {createHeaderCell('Vocals')}
-            {createHeaderCell('Pro Guitar')}
-            {createHeaderCell('Pro Bass')}
-            {createHeaderCell('Drums')}
+            {createHeaderCell('Vocals', () => onHeaderClick('vocals'))}
+            {createHeaderCell('Pro Guitar', () => onHeaderClick('guitar'))}
+            {createHeaderCell('Pro Bass', () => onHeaderClick('bass'))}
+            {createHeaderCell('Drums', () => onHeaderClick('drums'))}
             {createHeaderCell('Band')}
             {rows}
         </div>
