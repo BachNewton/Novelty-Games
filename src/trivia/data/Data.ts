@@ -34,6 +34,9 @@ export interface Song extends Data {
     SongID: string;
     imageUrl: string;
     Spotify: string;
+    HarmoniesCount: number;
+    VocalsDifficulty: number;
+    VocalsRanking: number;
 }
 
 export interface FestivalSong extends Data {
