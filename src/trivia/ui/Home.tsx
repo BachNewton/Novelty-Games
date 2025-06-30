@@ -150,6 +150,8 @@ function HomeUi(
                 state.data = filter(data as Promise<Array<Rollercoaster>>);
             } else if (dataType === DataType.FORTNITE_FESTIVAL) {
                 state.data = (data as Promise<Array<FestivalSong>>).then(songs => songs.filter(song => song.artist !== 'Epic Games'));
+            } else {
+                state.data = data;
             }
 
             state.dataType = dataType;
