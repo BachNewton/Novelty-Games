@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GameMaterial } from './GameMaterial';
+import { createFile, FileType } from '../../../../util/File';
 
 export interface Level {
     startingPosition: Position;
@@ -96,16 +97,10 @@ export function createLevelFile(level: Level) {
 
     console.log('Saved Level JSON:', json);
 
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
     const levelName = level.metadata['Level Name'];
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = levelName === '' ? 'level' : levelName;
-    a.click();
+    const fileName = levelName === '' ? 'level' : levelName;
 
-    URL.revokeObjectURL(url);
+    createFile(FileType.JSON, fileName, json);
 }
 
 export function loadLevelFile(): Promise<Level> {
