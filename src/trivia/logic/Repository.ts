@@ -1,3 +1,4 @@
+import { createFile, FileType } from "../../util/File";
 import { DataType, Rollercoaster, Data, Song, Flag, FestivalSong, Airplane } from "../data/Data";
 import { NetworkPokemon, Pokemon, PokemonAll, PokemonType } from "../data/PokemonData";
 import { get as getFromDb, store as storeInDb } from "./Database";
@@ -83,7 +84,64 @@ function handleSongsJson(json: any): Array<Song> {
 
     songs.forEach(song => song.imageUrl = getSongImageUrl(song.SongID));
 
+    temp(songs);
+
     return songs;
+}
+
+async function getAccessToken(): Promise<string> {
+    const tokenResponse = await fetch("https://accounts.spotify.com/api/token", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            grant_type: 'client_credentials',
+            client_id: "",
+            client_secret: "",
+        }).toString(),
+    });
+
+    const json = await tokenResponse.json();
+
+    console.log('Token Response:', tokenResponse);
+    console.log('JSON Response:', json);
+
+    return json.access_token;
+}
+
+async function fetchSpotifySong(accessToken: string, songId: string): Promise<any> {
+    const url = `https://api.spotify.com/v1/tracks/${songId}`;
+    console.log('Fetching Spotify song data from:', url);
+    const apiResponse = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    const json = await apiResponse.json();
+
+    return json;
+}
+
+async function temp(songs: Song[]) {
+    const accessToken = await getAccessToken();
+
+    const harmonySongs = songs.filter(song => song.HarmoniesCount > 1);
+
+    const x = ['Name\tArtist\tYear\tPopularity'];
+
+    for (const song of harmonySongs) {
+        const json = await fetchSpotifySong(accessToken, song.Spotify);
+        const popularity = json.popularity;
+        x.push(`${song.Name}\t${song.Artist}\t${song.Year}\t${popularity}`);
+    }
+
+    console.log('Spotify Data:', x);
+
+    createFile(FileType.TEXT, 'songs.tsv', x.join('\n'));
 }
 
 function getSongImageUrl(songId: string): string {
