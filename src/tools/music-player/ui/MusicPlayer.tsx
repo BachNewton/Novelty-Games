@@ -2,10 +2,9 @@ import { useRef, useState } from "react";
 import Library from "./Library";
 import Player from "./Player";
 import MusicPlayerProgressBar, { ProgressState } from "./MusicPlayerProgressBar";
-import { ParsedSongPackage } from "../logic/Parser";
 import Scaffold from "../../../util/ui/Scaffold";
 import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
-import { DownloadFileResponse, NetworkService } from "../../../util/networking/NetworkService";
+import { NetworkService } from "../../../util/networking/NetworkService";
 import { SongParser } from "../logic/SongParser";
 
 interface NewMusicPlayerProps {
@@ -25,9 +24,11 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ networkService, progressSt
         console.log(parsedSong);
     };
 
+    const filteredSongs = filterBySearchText(songs.current, searchText);
+
     return <Scaffold
         header={headerUi(text => setSearchText(text))}
-        content={<Library songs={songs.current} onSongSelected={onSongSelected} />}
+        content={<Library songs={filteredSongs} onSongSelected={onSongSelected} />}
         footer={footerUi(song, progressState)}
         fontScale={1.5}
     />;
@@ -62,8 +63,8 @@ function footerUi(song: Song | null, progressState: ProgressState | null): JSX.E
     </div>;
 }
 
-function filterBySearchText(songs: ParsedSongPackage[] | null, searchText: string): ParsedSongPackage[] | null {
-    if (searchText.length < 2 || songs === null) return songs;
+function filterBySearchText(songs: Song[], searchText: string): Song[] {
+    if (searchText.length < 2) return songs;
 
     return songs.filter(song => {
         const search = searchText.toLowerCase();
