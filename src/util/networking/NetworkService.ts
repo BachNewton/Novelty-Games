@@ -69,7 +69,7 @@ export interface GetFileResponse {
     content: string | null;
 }
 
-interface DownloadFileResponse {
+export interface DownloadFileResponse {
     id: string;
     buffer: Buffer;
 }

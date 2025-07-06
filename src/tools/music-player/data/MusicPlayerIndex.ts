@@ -1,8 +1,7 @@
 import musicPlayerIndexJson from './music-player-index.json';
 
 export interface Song {
-    guitar?: string;
-    bass?: string;
+    ids: SongIds;
     metadata: SongMetadata;
 }
 
@@ -11,11 +10,20 @@ export interface SongMetadata {
     artist: string;
 }
 
+export interface SongIds {
+    guitar: string | null;
+    bass: string | null;
+    vocals: string | null;
+}
+
 export function getMusicPlayerSongs(): Song[] {
     return musicPlayerIndexJson.map(song => {
         return {
-            guitar: song?.['guitar.ogg'],
-            bass: song?.['rhythm.ogg'],
+            ids: {
+                guitar: song?.['guitar.ogg'] ?? null,
+                bass: song?.['rhythm.ogg'] ?? null,
+                vocals: song?.['vocals.ogg'] ?? null
+            },
             metadata: {
                 title: song.meta.title,
                 artist: song.meta.artist

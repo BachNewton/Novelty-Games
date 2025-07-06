@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { SongPackage } from "../logic/MusicDatabase";
 import { fileToAudio } from "../logic/Parser";
-import { Song } from "../data/MusicPlayerIndex";
+import { SongMetadata } from "../data/MusicPlayerIndex";
 
 interface PlayerProps {
-    song: Song | null;
+    songMetadata: SongMetadata | null;
 }
 
 interface Tracks {
@@ -19,7 +19,7 @@ interface Tracks {
     backing: HTMLAudioElement;
 }
 
-const Player: React.FC<PlayerProps> = ({ song }) => {
+const Player: React.FC<PlayerProps> = ({ songMetadata }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [expanded, setExpanded] = useState(true);
     const [seconds, setSeconds] = useState(0);
@@ -36,7 +36,7 @@ const Player: React.FC<PlayerProps> = ({ song }) => {
     }, []);
 
     useEffect(() => {
-        if (song === null) return;
+        if (songMetadata === null) return;
 
         // Pause any previous tracks that might have been playing
         applyToTracks(audio => audio.pause(), tracks);
@@ -48,7 +48,7 @@ const Player: React.FC<PlayerProps> = ({ song }) => {
         //     setTracks(loadedTracks);
         //     tracksRef.current = loadedTracks;
         // });
-    }, [song]);
+    }, [songMetadata]);
 
     const icon = tracks === null ? '⏯️' : isPlaying ? '⏸️' : '▶️';
 

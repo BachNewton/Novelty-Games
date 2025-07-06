@@ -5,30 +5,31 @@ import MusicPlayerProgressBar, { ProgressState } from "./MusicPlayerProgressBar"
 import { ParsedSongPackage } from "../logic/Parser";
 import Scaffold from "../../../util/ui/Scaffold";
 import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
-import { NetworkService } from "../../../util/networking/NetworkService";
+import { DownloadFileResponse, NetworkService } from "../../../util/networking/NetworkService";
+import { SongParser } from "../logic/Parser2";
 
 interface NewMusicPlayerProps {
     networkService: NetworkService<void>;
     progressState: ProgressState | null;
+    songParser: SongParser;
 }
 
-const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ networkService, progressState }) => {
+const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ networkService, progressState, songParser }) => {
     const songs = useRef(getMusicPlayerSongs());
     const [song, setSong] = useState<Song | null>(null);
     const [searchText, setSearchText] = useState<string>('');
 
     const onSongSelected = async (selectedSong: Song) => {
         console.log('Song selected:', selectedSong);
+        songParser.parse(selectedSong);
 
-        const guitar = selectedSong?.guitar;
-
-        if (guitar !== undefined) {
-            // const response = await networkService.downloadFile({ id: guitar });
-            // const blob = new Blob([response.buffer]);
-            // const url = URL.createObjectURL(blob);
-            // const audio = new Audio(url);
-            // audio.play();
-        }
+        // if (guitar !== null) {
+        //     const response = await networkService.downloadFile({ id: guitar });
+        //     const blob = new Blob([response.buffer]);
+        //     const url = URL.createObjectURL(blob);
+        //     const audio = new Audio(url);
+        //     audio.play();
+        // }
     };
 
     return <Scaffold
@@ -64,7 +65,7 @@ function footerUi(song: Song | null, progressState: ProgressState | null): JSX.E
         boxShadow: 'black 0px -10px 20px'
     }}>
         <MusicPlayerProgressBar state={progressState} />
-        <Player song={song} />
+        <Player songMetadata={song?.metadata ?? null} />
     </div>;
 }
 
