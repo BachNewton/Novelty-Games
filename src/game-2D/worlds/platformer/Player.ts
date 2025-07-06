@@ -3,7 +3,7 @@ import { Drawer } from "../Drawer";
 import { GameObject } from "../GameWorld";
 import { Box, Point } from "../Geometry";
 
-interface Player extends GameObject { }
+interface Player extends GameObject, Box { }
 
 export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Player {
     const position: Point = { x: 0, y: 0 };
@@ -34,6 +34,7 @@ export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Play
             if (keyboardInput.held.KeyD) {
                 position.x += speed * deltaTime;
             }
-        }
+        },
+        ...box
     };
 }
