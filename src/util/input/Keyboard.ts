@@ -1,6 +1,6 @@
 import { Axis } from "./Axis";
 
-enum Key {
+export enum Key {
     SPACE = 'Space',
     TAB = 'Tab',
     W = 'KeyW',
@@ -10,17 +10,19 @@ enum Key {
 }
 
 type HeldKeys = { [K in Key]: boolean };
+type KeyListener = (key: Key) => void;
 
 export interface KeyboardInput {
     held: HeldKeys;
     movementAxis: Axis;
+    addKeyListener: (listener: KeyListener) => void;
 }
 
 enum KeyEventType {
     DOWN, UP
 }
 
-export function createKeyboardInput(onKeyPressed: (key: Key) => void): KeyboardInput {
+export function createKeyboardInput(): KeyboardInput {
     const held = {
         [Key.SPACE]: false,
         [Key.TAB]: false,
@@ -29,6 +31,8 @@ export function createKeyboardInput(onKeyPressed: (key: Key) => void): KeyboardI
         [Key.S]: false,
         [Key.D]: false
     };
+
+    const keyListeners: KeyListener[] = [];
 
     const handleKeyEvent = (e: KeyboardEvent, type: KeyEventType) => {
         const key = e.code as Key;
@@ -43,7 +47,9 @@ export function createKeyboardInput(onKeyPressed: (key: Key) => void): KeyboardI
         }
 
         if (type === KeyEventType.DOWN && !held[key]) {
-            onKeyPressed(key);
+            for (const listener of keyListeners) {
+                listener(key);
+            }
         }
 
         held[key] = type === KeyEventType.DOWN ? true : false;
@@ -56,7 +62,8 @@ export function createKeyboardInput(onKeyPressed: (key: Key) => void): KeyboardI
         held: held,
         get movementAxis() {
             return getMovementAxis(held);
-        }
+        },
+        addKeyListener: (keyListener) => keyListeners.push(keyListener)
     };
 }
 

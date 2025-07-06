@@ -7,6 +7,7 @@ import { createCatWorld } from "../worlds/cat/CatWorld";
 import { createPlatformerWorld } from "../worlds/platformer/PlatformerWorld";
 import { createDrawer } from "../worlds/Drawer";
 import { createCamera } from "../worlds/Camera";
+import { createKeyboardInput } from "../../util/input/Keyboard";
 
 interface Game2DProps {
     goHome: () => void;
@@ -58,7 +59,11 @@ function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement
             return createCatWorld(canvas, ctx);
         case GameWorldType.PLATFORMER:
             const camera = createCamera();
-            return createPlatformerWorld(createDrawer(ctx, camera), camera);
+            return createPlatformerWorld(
+                createDrawer(ctx, camera),
+                camera,
+                createKeyboardInput()
+            );
         default:
             throw new Error(`GameWorldType not supported: ${gameWorldType}`);
     }

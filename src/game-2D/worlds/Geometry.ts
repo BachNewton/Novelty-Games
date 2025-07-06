@@ -1,13 +1,14 @@
-export interface Vector {
-    x: number;
-    y: number;
-}
+import { Vector } from "./Vector";
 
 export interface Box {
     position: Vector;
     width: number;
     height: number;
     color?: string | CanvasGradient | CanvasPattern
+}
+
+export interface MovingBox extends Box {
+    velocity: Vector;
 }
 
 export function isColliding(a: Box, b: Box): boolean {
@@ -19,7 +20,7 @@ export function isColliding(a: Box, b: Box): boolean {
     );
 }
 
-export function resolveCollision(a: Box, b: Box) {
+export function resolveCollision(a: MovingBox, b: Box) {
     const overlapX = Math.min(a.position.x + a.width - b.position.x, b.position.x + b.width - a.position.x);
     const overlapY = Math.min(a.position.y + a.height - b.position.y, b.position.y + b.height - a.position.y);
 
@@ -29,11 +30,15 @@ export function resolveCollision(a: Box, b: Box) {
         } else {
             a.position.x += overlapX;
         }
+
+        a.velocity.x = 0;
     } else {
         if (a.position.y < b.position.y) {
             a.position.y -= overlapY;
         } else {
             a.position.y += overlapY;
         }
+
+        a.velocity.y = 0;
     }
 }

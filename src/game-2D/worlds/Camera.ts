@@ -1,4 +1,5 @@
-import { Box, Vector } from "./Geometry";
+import { Box } from "./Geometry";
+import { createVector, Vector } from "./Vector";
 
 export interface Camera {
     position: Vector;
@@ -6,7 +7,7 @@ export interface Camera {
 }
 
 export function createCamera(): Camera {
-    const position: Vector = { x: 0, y: 0 };
+    const position = createVector(0, 0);
 
     return {
         position: position,

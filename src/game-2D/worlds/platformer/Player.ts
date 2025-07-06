@@ -1,41 +1,48 @@
-import { KeyboardInput } from "../../../util/input/Keyboard";
+import { Key, KeyboardInput } from "../../../util/input/Keyboard";
 import { Drawer } from "../Drawer";
 import { GameObject } from "../GameWorld";
-import { Box, Vector } from "../Geometry";
+import { MovingBox } from "../Geometry";
+import { createVector, Vector } from "../Vector";
 
-interface Player extends GameObject, Box { }
+interface Player extends GameObject, MovingBox {
+    applyAcceleration: (acceleration: Vector) => void;
+}
 
 export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Player {
-    const position: Vector = { x: 0, y: 0 };
-    const velocity: Vector = { x: 0, y: 0 };
+    const position = createVector(0, 0);
+    const velocity = createVector(0, 0);
 
-    const box: Box = {
+    const object: MovingBox = {
         position,
         width: 50,
         height: 50,
-        color: 'blue'
+        color: 'blue',
+        velocity: velocity
     };
 
-    let speed = 0.4;
+    let speed = 0.02;
+    const jumpSpeed = createVector(0, -0.75);
+
+    keyboardInput.addKeyListener((key) => {
+        if (key === Key.SPACE) {
+            velocity.add(jumpSpeed);
+        }
+    });
 
     return {
         draw: () => {
-            drawer.draw(box);
+            drawer.draw(object);
         },
         update: (deltaTime: number) => {
             const movementAxis = keyboardInput.movementAxis;
 
-            if (movementAxis.x !== 0 || movementAxis.y !== 0) {
-                velocity.x = movementAxis.x * speed * deltaTime;
-                velocity.y = movementAxis.y * speed * deltaTime;
-            } else {
-                velocity.x = 0;
-                velocity.y = 0;
+            if (movementAxis.x !== 0) {
+                velocity.x += movementAxis.x * speed;
             }
 
-            position.x += velocity.x;
-            position.y += velocity.y;
+            position.add(velocity, deltaTime);
         },
-        ...box
+        ...object,
+        applyAcceleration: (acceleration) => velocity.add(acceleration)
     };
 }
