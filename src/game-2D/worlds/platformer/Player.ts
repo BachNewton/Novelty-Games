@@ -4,13 +4,20 @@ import { GameObject } from "../GameWorld";
 import { MovingBox } from "../Geometry";
 import { createVector, Vector } from "../Vector";
 
+const SPEED = 0.02;
+const JUMP_SPEED = 0.75;
+const JUMP_CONTROL = 0.2;
+
 interface Player extends GameObject, MovingBox {
     applyAcceleration: (acceleration: Vector) => void;
+    updateIsOnGround: (isOnGround: boolean) => void;
 }
 
 export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Player {
     const position = createVector(0, 0);
     const velocity = createVector(0, 0);
+    const jumpSpeed = createVector(0, -JUMP_SPEED);
+    let isOnGround = false;
 
     const object: MovingBox = {
         position,
@@ -20,12 +27,10 @@ export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Play
         velocity: velocity
     };
 
-    let speed = 0.02;
-    const jumpSpeed = createVector(0, -0.75);
-
     keyboardInput.addKeyListener((key) => {
-        if (key === Key.SPACE) {
+        if (key === Key.SPACE && isOnGround) {
             velocity.add(jumpSpeed);
+            isOnGround = false;
         }
     });
 
@@ -37,12 +42,14 @@ export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Play
             const movementAxis = keyboardInput.movementAxis;
 
             if (movementAxis.x !== 0) {
+                const speed = isOnGround ? SPEED : SPEED * JUMP_CONTROL;
                 velocity.x += movementAxis.x * speed;
             }
 
             position.add(velocity, deltaTime);
         },
         ...object,
-        applyAcceleration: (acceleration) => velocity.add(acceleration)
+        applyAcceleration: (acceleration) => velocity.add(acceleration),
+        updateIsOnGround: (isOnGroundUpdate: boolean) => isOnGround = isOnGroundUpdate
     };
 }
