@@ -10,15 +10,10 @@ interface Game2DProps {
     gameWorldType: GameWorldType;
 }
 
-let hasCanvasContextBeenSet = false;
-
 const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
-        if (hasCanvasContextBeenSet) return;
-        hasCanvasContextBeenSet = true;
-
         const canvas = canvasRef.current;
         if (canvas === null) return;
         const ctx = canvas.getContext('2d');
@@ -37,7 +32,12 @@ const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
 
         const gameWorld = createGameWorld(gameWorldType, canvas, ctx, goHome);
 
-        initCanvas(canvas, ctx, gameWorld);
+        const cleanupAnimation = initCanvas(canvas, ctx, gameWorld);
+
+        return () => {
+            window.removeEventListener('resize', resizeCanvas);
+            cleanupAnimation();
+        };
     }, []);
 
     return <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -49,7 +49,6 @@ function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement
     switch (gameWorldType) {
         case GameWorldType.CARNIVAL:
             return new CarnivalWorld(canvas, ctx, () => {
-                hasCanvasContextBeenSet = false;
                 goHome();
             });
         case GameWorldType.WIGGLERS:
@@ -61,7 +60,11 @@ function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement
     }
 }
 
-function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, gameWorld: GameWorld) {
+function initCanvas(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    gameWorld: GameWorld
+): () => void {
     canvas.ontouchstart = e => {
         gameWorld.onTouchStart(e);
     };
@@ -92,6 +95,7 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, ga
     };
 
     let previousTime = performance.now();
+    let animationFrameId: number;
 
     const animate: FrameRequestCallback = (timeNow: DOMHighResTimeStamp) => {
         const deltaTime = timeNow - previousTime;
@@ -105,10 +109,14 @@ function initCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, ga
 
         gameWorld.update(deltaTime);
 
-        requestAnimationFrame(animate);
+        animationFrameId = requestAnimationFrame(animate);
     };
 
-    animate(previousTime);
+    animationFrameId = requestAnimationFrame(animate);
+
+    return () => {
+        cancelAnimationFrame(animationFrameId);
+    };
 }
 
 function drawDebug(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, deltaTime: number) {
