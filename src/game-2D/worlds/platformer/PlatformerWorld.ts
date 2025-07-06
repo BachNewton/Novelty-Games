@@ -10,6 +10,10 @@ import { createPlayer } from "./Player";
 const GRAVITY = 0.01;
 const FRICTION = 0.1;
 
+enum Mode {
+    PLAY, EDIT
+}
+
 export function createPlatformerWorld(drawer: Drawer, camera: Camera, keyboardInput: KeyboardInput): GameWorld {
     updateRoute(Route.PLATFORMER);
 
@@ -46,6 +50,11 @@ export function createPlatformerWorld(drawer: Drawer, camera: Camera, keyboardIn
             }
 
             camera.centerOn(player);
+        },
+        mouseEvents: {
+            onMouseDown: () => {
+                obstacles.push({ position: createVector(camera.mousePosition.x - 5, camera.mousePosition.y - 5), width: 10, height: 10, });
+            }
         }
     };
 }

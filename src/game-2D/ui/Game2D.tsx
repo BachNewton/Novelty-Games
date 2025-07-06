@@ -58,7 +58,7 @@ function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement
         case GameWorldType.CAT:
             return createCatWorld(canvas, ctx);
         case GameWorldType.PLATFORMER:
-            const camera = createCamera();
+            const camera = createCamera(ctx);
             return createPlatformerWorld(
                 createDrawer(ctx, camera),
                 camera,
