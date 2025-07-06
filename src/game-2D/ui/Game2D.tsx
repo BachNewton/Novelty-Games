@@ -4,6 +4,7 @@ import { CarnivalWorld } from "../worlds/carnival/CarnivalWorld";
 import { WigglerWorld } from "../worlds/wigglers/WigglerWorld";
 import { GameWorldType } from "../worlds/GameWorldType";
 import { createCatWorld } from "../worlds/cat/CatWorld";
+import { createPlatformerWorld } from "../worlds/platformer/PlatformerWorld";
 
 interface Game2DProps {
     goHome: () => void;
@@ -48,13 +49,13 @@ const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
 function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, goHome: () => void): GameWorld {
     switch (gameWorldType) {
         case GameWorldType.CARNIVAL:
-            return new CarnivalWorld(canvas, ctx, () => {
-                goHome();
-            });
+            return new CarnivalWorld(canvas, ctx, goHome);
         case GameWorldType.WIGGLERS:
             return new WigglerWorld(canvas, ctx);
         case GameWorldType.CAT:
             return createCatWorld(canvas, ctx);
+        case GameWorldType.PLATFORMER:
+            return createPlatformerWorld(canvas, ctx);
         default:
             throw new Error(`GameWorldType not supported: ${gameWorldType}`);
     }

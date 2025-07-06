@@ -1,5 +1,6 @@
 export enum GameWorldType {
     CARNIVAL,
     WIGGLERS,
-    CAT
+    CAT,
+    PLATFORMER
 }

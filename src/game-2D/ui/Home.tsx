@@ -13,40 +13,55 @@ class MenuUiState implements UiState { }
 class CarnivalUiState implements UiState { }
 class WigglersState implements UiState { }
 class CatState implements UiState { }
+class PlatformerState implements UiState { }
+
+interface ButtonClickedHandlers {
+    onHomeButtonClicked: () => void;
+    onWigglersClick: () => void;
+    onCarnivalClick: () => void;
+    onCatClick: () => void;
+    onPlatformerClick: () => void;
+}
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
     const [uiState, setUiState] = useState<UiState>(getInitialUiState());
 
-    const onCarnivalClick = () => {
-        setUiState(new CarnivalUiState());
-    }
-
-    const onWigglersClick = () => {
-        setUiState(new WigglersState());
+    const buttonClickedHandlers: ButtonClickedHandlers = {
+        onHomeButtonClicked: onHomeButtonClicked,
+        onWigglersClick: () => {
+            setUiState(new WigglersState());
+        },
+        onCarnivalClick: () => {
+            setUiState(new CarnivalUiState());
+        },
+        onCatClick: () => {
+            setUiState(new CatState());
+        },
+        onPlatformerClick: () => {
+            setUiState(new PlatformerState());
+        }
     };
 
-    const onCatClick = () => {
-        setUiState(new CatState());
-    };
-
-    return Ui(uiState, onHomeButtonClicked, onCarnivalClick, onWigglersClick, onCatClick);
+    return Ui(uiState, buttonClickedHandlers);
 };
 
-function Ui(uiState: UiState, onHomeButtonClicked: () => void, onWigglersClick: () => void, onCarnivalClick: () => void, onCatClick: () => void) {
+function Ui(uiState: UiState, buttonClickedHandlers: ButtonClickedHandlers) {
     if (uiState instanceof MenuUiState) {
-        return MenuUi(onHomeButtonClicked, onCarnivalClick, onWigglersClick, onCatClick);
+        return MenuUi(buttonClickedHandlers);
     } else if (uiState instanceof CarnivalUiState) {
-        return <Game2D goHome={onHomeButtonClicked} gameWorldType={GameWorldType.CARNIVAL} />;
+        return <Game2D goHome={buttonClickedHandlers.onHomeButtonClicked} gameWorldType={GameWorldType.CARNIVAL} />;
     } else if (uiState instanceof WigglersState) {
-        return <Game2D goHome={onHomeButtonClicked} gameWorldType={GameWorldType.WIGGLERS} />;
+        return <Game2D goHome={buttonClickedHandlers.onHomeButtonClicked} gameWorldType={GameWorldType.WIGGLERS} />;
     } else if (uiState instanceof CatState) {
-        return <Game2D goHome={onHomeButtonClicked} gameWorldType={GameWorldType.CAT} />;
+        return <Game2D goHome={buttonClickedHandlers.onHomeButtonClicked} gameWorldType={GameWorldType.CAT} />;
+    } else if (uiState instanceof PlatformerState) {
+        return <Game2D goHome={buttonClickedHandlers.onHomeButtonClicked} gameWorldType={GameWorldType.PLATFORMER} />;
     } else {
         throw new Error('UiState not supported: ' + uiState);
     }
 }
 
-function MenuUi(onHomeButtonClicked: () => void, onWigglersClick: () => void, onCarnivalClick: () => void, onCatClick: () => void) {
+function MenuUi(buttonClickedHandlers: ButtonClickedHandlers) {
     const containerStyle: React.CSSProperties = {
         color: 'white',
         display: 'flex',
@@ -64,11 +79,12 @@ function MenuUi(onHomeButtonClicked: () => void, onWigglersClick: () => void, on
     };
 
     return <div style={containerStyle}>
-        <HomeButton onClick={onHomeButtonClicked} />
+        <HomeButton onClick={buttonClickedHandlers.onHomeButtonClicked} />
         <div style={{ fontSize: '1.75em', marginBottom: '1em' }}>🟠 2D Games 🟦</div>
-        <button style={buttonStyle} onClick={onCarnivalClick}>Carnival 🎠</button>
-        <button style={buttonStyle} onClick={onWigglersClick}>Wigglers 👹</button>
-        <button style={buttonStyle} onClick={onCatClick}>Cat 🐈</button>
+        <button style={buttonStyle} onClick={buttonClickedHandlers.onCarnivalClick}>Carnival 🎠</button>
+        <button style={buttonStyle} onClick={buttonClickedHandlers.onWigglersClick}>Wigglers 👹</button>
+        <button style={buttonStyle} onClick={buttonClickedHandlers.onCatClick}>Cat 🐈</button>
+        <button style={buttonStyle} onClick={buttonClickedHandlers.onPlatformerClick}>Platformer 🦘</button>
     </div>;
 }
 
