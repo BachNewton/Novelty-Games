@@ -1,10 +1,15 @@
 import { Route, updateRoute } from "../../../ui/Routing";
+import { createKeyboardInput } from "../../../util/input/Keyboard";
 import { Drawer } from "../Drawer";
 import { GameWorld } from "../GameWorld";
 import { Box } from "../Geometry";
 
 export function createPlatformerWorld(drawer: Drawer): GameWorld {
     updateRoute(Route.PLATFORMER);
+
+    const keyboardInput = createKeyboardInput((key) => {
+        console.log(`Key pressed: ${key}`);
+    });
 
     const obstacles: Box[] = [
         { x: 50, y: 300, width: 100, height: 20 },
