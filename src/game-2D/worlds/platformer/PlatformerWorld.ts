@@ -2,7 +2,7 @@ import { Route, updateRoute } from "../../../ui/Routing";
 import { createKeyboardInput } from "../../../util/input/Keyboard";
 import { Drawer } from "../Drawer";
 import { GameWorld } from "../GameWorld";
-import { Box, isColliding } from "../Geometry";
+import { Box, isColliding, resolveCollision } from "../Geometry";
 import { createPlayer } from "./Player";
 
 export function createPlatformerWorld(drawer: Drawer): GameWorld {
@@ -13,7 +13,9 @@ export function createPlatformerWorld(drawer: Drawer): GameWorld {
     });
 
     const obstacles: Box[] = [
-        { position: { x: 250, y: 250 }, width: 250, height: 250 },
+        { position: { x: 200, y: 250 }, width: 250, height: 250 },
+        { position: { x: 600, y: 250 }, width: 100, height: 100 },
+        { position: { x: 200, y: 600 }, width: 100, height: 100 }
     ];
 
     const player = createPlayer(drawer, keyboardInput);
@@ -31,8 +33,7 @@ export function createPlatformerWorld(drawer: Drawer): GameWorld {
 
             for (const obstacle of obstacles) {
                 if (isColliding(player, obstacle)) {
-                    console.log("Collision detected with obstacle!");
-                    // Handle collision response here, e.g., stop player movement
+                    resolveCollision(player, obstacle);
                 }
             }
         }
