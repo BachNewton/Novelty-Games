@@ -5,21 +5,35 @@ import MusicPlayerProgressBar, { ProgressState } from "./MusicPlayerProgressBar"
 import { ParsedSongPackage } from "../logic/Parser";
 import Scaffold from "../../../util/ui/Scaffold";
 import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
+import { NetworkService } from "../../../util/networking/NetworkService";
 
 interface NewMusicPlayerProps {
+    networkService: NetworkService<void>;
     progressState: ProgressState | null;
 }
 
-const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ progressState }) => {
+const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ networkService, progressState }) => {
     const songs = useRef(getMusicPlayerSongs());
     const [song, setSong] = useState<Song | null>(null);
     const [searchText, setSearchText] = useState<string>('');
 
+    const onSongSelected = async (selectedSong: Song) => {
+        console.log('Song selected:', selectedSong);
+
+        const guitar = selectedSong?.guitar;
+
+        if (guitar !== undefined) {
+            // const response = await networkService.downloadFile({ id: guitar });
+            // const blob = new Blob([response.buffer]);
+            // const url = URL.createObjectURL(blob);
+            // const audio = new Audio(url);
+            // audio.play();
+        }
+    };
+
     return <Scaffold
         header={headerUi(text => setSearchText(text))}
-        content={<div>
-            <Library songs={songs.current} onSongSelected={(song) => console.log('Song selected:', song)} />
-        </div>}
+        content={<Library songs={songs.current} onSongSelected={onSongSelected} />}
         footer={footerUi(song, progressState)}
         fontScale={1.5}
     />;

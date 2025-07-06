@@ -50,6 +50,7 @@ const Home: React.FC<HomeProps> = ({ musicDatabase, networkService }) => {
         return <SongImporter songPackages={state.songPackages} onSongClicked={onSongClicked} />;
     } else if (state instanceof MusicPlayerState) {
         return <MusicPlayer
+            networkService={networkService}
             progressState={progressState}
         />;
     } else {
