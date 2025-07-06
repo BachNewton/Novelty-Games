@@ -1,42 +1,17 @@
-import { getMusicPlayerIndex, MusicPlayerIndexSong } from "../data/MusicPlayerIndex";
-import { SongPackage } from "../logic/MusicDatabase";
-import { ParsedSongPackage } from "../logic/Parser";
+import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
 
 interface LibraryProps {
-    songs: ParsedSongPackage[] | null;
-    onSongSelected: (song: SongPackage) => void;
+    onSongSelected: () => void;
 }
 
-const Library: React.FC<LibraryProps> = ({ songs, onSongSelected }) => {
+const Library: React.FC<LibraryProps> = ({ onSongSelected }) => {
     return <div>
-        {contentUi(songs, onSongSelected)}
+        {songsUi(() => { })}
     </div>;
-};
-
-function contentUi(songs: ParsedSongPackage[] | null, onSongSelected: (song: SongPackage) => void): JSX.Element | JSX.Element[] {
-    return songsUi(() => { });
-
-    // if (songs === null) {
-    //     return <div style={{ marginTop: '25px' }}>
-    //         <Loading />
-    //     </div>;
-    // } else if (songs.length === 0) {
-    //     return <div style={{ margin: '10px', textAlign: 'center' }}>Your music library is empty</div>;
-    // } else {
-    //     return songsUi(songs, onSongSelected);
-    // }
 }
-
-// function songsUi(songs: ParsedSongPackage[], onSongSelected: (song: SongPackage) => void): JSX.Element[] {
-//     const groupedSongs = groupSongsByArtist(songs);
-
-//     return Object.entries(groupedSongs)
-//         .sort((a, b) => a[0].localeCompare(b[0]))
-//         .map(([artist, songs]) => artistSectionUi(artist, songs, onSongSelected));
-// }
 
 function songsUi(onSongSelected: () => void): JSX.Element[] {
-    const songs = getMusicPlayerIndex();
+    const songs = getMusicPlayerSongs();
     const groupedSongs = groupSongsByArtist(songs);
 
     return Object.entries(groupedSongs)
@@ -44,21 +19,7 @@ function songsUi(onSongSelected: () => void): JSX.Element[] {
         .map(([artist, songs]) => artistSectionUi(artist, songs, onSongSelected));
 }
 
-// function groupSongsByArtist(songs: ParsedSongPackage[]): { [artist: string]: ParsedSongPackage[] } {
-//     return songs.reduce((acc, song) => {
-//         const artist = song.metadata.artist;
-
-//         if (!acc[artist]) {
-//             acc[artist] = [];
-//         }
-
-//         acc[artist].push(song);
-
-//         return acc;
-//     }, {} as { [artist: string]: ParsedSongPackage[] });
-// }
-
-function groupSongsByArtist(songs: MusicPlayerIndexSong[]): { [artist: string]: MusicPlayerIndexSong[] } {
+function groupSongsByArtist(songs: Song[]): { [artist: string]: Song[] } {
     return songs.reduce((acc, song) => {
         const artist = song.metadata.artist;
 
@@ -69,32 +30,10 @@ function groupSongsByArtist(songs: MusicPlayerIndexSong[]): { [artist: string]: 
         acc[artist].push(song);
 
         return acc;
-    }, {} as { [artist: string]: MusicPlayerIndexSong[] });
+    }, {} as { [artist: string]: Song[] });
 }
 
-// function artistSectionUi(artist: string, songs: ParsedSongPackage[], onSongSelected: (song: SongPackage) => void): JSX.Element {
-//     return <div key={artist}>
-//         <div
-//             style={{
-//                 position: 'sticky',
-//                 top: 0,
-//                 backgroundColor: 'var(--novelty-blue)',
-//                 padding: '5px',
-//                 fontWeight: 'bold'
-//             }}
-//         >
-//             {artist}
-//         </div>
-//         <div>
-//             {songs
-//                 .sort((a, b) => a.metadata.title.localeCompare(b.metadata.title))
-//                 .map((song, index) => songUi(index, song, onSongSelected))
-//             }
-//         </div>
-//     </div>;
-// }
-
-function artistSectionUi(artist: string, songs: MusicPlayerIndexSong[], onSongSelected: () => void): JSX.Element {
+function artistSectionUi(artist: string, songs: Song[], onSongSelected: () => void): JSX.Element {
     return <div key={artist}>
         <div
             style={{
@@ -116,22 +55,7 @@ function artistSectionUi(artist: string, songs: MusicPlayerIndexSong[], onSongSe
     </div>;
 }
 
-// function songUi(index: number, song: ParsedSongPackage, onSongSelected: (song: SongPackage) => void): JSX.Element {
-//     return <div
-//         key={index}
-//         style={{
-//             fontSize: '0.8em',
-//             padding: '5px',
-//             margin: '5px',
-//             border: '2px solid var(--novelty-blue)',
-//             borderRadius: '10px',
-//             cursor: 'pointer'
-//         }}
-//         onClick={() => onSongSelected(song)}
-//     >{song.metadata.title}</div>;
-// }
-
-function songUi(index: number, song: MusicPlayerIndexSong, onSongSelected: () => void): JSX.Element {
+function songUi(index: number, song: Song, onSongSelected: () => void): JSX.Element {
     return <div
         key={index}
         style={{

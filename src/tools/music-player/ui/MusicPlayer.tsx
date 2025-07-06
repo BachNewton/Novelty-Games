@@ -26,7 +26,7 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, deleteAllS
     return <Scaffold
         header={headerUi(text => setSearchText(text))}
         content={<div>
-            <Library songs={filterBySearchText(songs, searchText)} onSongSelected={selectedSong => setSong(selectedSong)} />
+            <Library onSongSelected={() => { }} />
         </div>}
         footer={footerUi(song, progressState)}
         fontScale={1.5}
