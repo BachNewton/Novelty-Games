@@ -1,3 +1,4 @@
+import { Route, updateRoute } from "../../../ui/Routing";
 import { GameWorld } from "../GameWorld";
 import { Box } from "../Geometry";
 
@@ -5,6 +6,8 @@ export function createPlatformerWorld(
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D
 ): GameWorld {
+    updateRoute(Route.PLATFORMER);
+
     const obstacles: Box[] = [
         { x: 50, y: 300, width: 100, height: 20 },
         { x: 200, y: 250, width: 100, height: 20 },

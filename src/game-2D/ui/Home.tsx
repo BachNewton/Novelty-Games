@@ -94,6 +94,8 @@ function getInitialUiState(): UiState {
     switch (route) {
         case Route.CAT:
             return new CatState();
+        case Route.PLATFORMER:
+            return new PlatformerState();
         default:
             return new MenuUiState();
     }

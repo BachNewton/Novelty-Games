@@ -167,6 +167,7 @@ function getInitialState(): State {
         case Route.LABYRINTH:
             return createLabyrinthState();
         case Route.CAT:
+        case Route.PLATFORMER:
             return new Game2DState();
         case Route.MUSIC_PLAYER:
         case Route.FORTNITE_FESTIVAL:
