@@ -21,8 +21,8 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ networkService, progressSt
 
     const onSongSelected = async (selectedSong: Song) => {
         console.log('Song selected:', selectedSong);
-        const trackPromises = songParser.parse(selectedSong);
-        console.log(trackPromises);
+        const parsedSong = songParser.parse(selectedSong, progress => console.log(progress));
+        console.log(parsedSong);
     };
 
     return <Scaffold
