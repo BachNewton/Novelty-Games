@@ -1,11 +1,12 @@
 import { Route, updateRoute } from "../../../ui/Routing";
 import { createKeyboardInput } from "../../../util/input/Keyboard";
+import { Camera } from "../Camera";
 import { Drawer } from "../Drawer";
 import { GameWorld } from "../GameWorld";
 import { Box, isColliding, resolveCollision } from "../Geometry";
 import { createPlayer } from "./Player";
 
-export function createPlatformerWorld(drawer: Drawer): GameWorld {
+export function createPlatformerWorld(drawer: Drawer, camera: Camera): GameWorld {
     updateRoute(Route.PLATFORMER);
 
     const keyboardInput = createKeyboardInput((key) => {
@@ -36,6 +37,8 @@ export function createPlatformerWorld(drawer: Drawer): GameWorld {
                     resolveCollision(player, obstacle);
                 }
             }
+
+            camera.centerOn(player);
         }
     };
 }

@@ -12,5 +12,17 @@
 			""
 		],
 		"description": "Creates a React Function Component with TypeScript."
+	},
+	"New Object definition": {
+		"prefix": "define",
+		"body": [
+			"export interface ${1:Object} { }",
+			"",
+			"export function create${1:Object}(): ${1:Object} {",
+			"\treturn {};",
+			"}",
+			""
+		],
+		"description": "Creates a new interface and a function which creates an object using interface."
 	}
 }
