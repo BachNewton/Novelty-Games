@@ -1,11 +1,9 @@
 import { Route, updateRoute } from "../../../ui/Routing";
+import { Drawer } from "../Drawer";
 import { GameWorld } from "../GameWorld";
 import { Box } from "../Geometry";
 
-export function createPlatformerWorld(
-    canvas: HTMLCanvasElement,
-    ctx: CanvasRenderingContext2D
-): GameWorld {
+export function createPlatformerWorld(drawer: Drawer): GameWorld {
     updateRoute(Route.PLATFORMER);
 
     const obstacles: Box[] = [
@@ -16,11 +14,15 @@ export function createPlatformerWorld(
         { x: 650, y: 100, width: 100, height: 20 }
     ];
 
+    let x = 0;
+    let y = 0;
+    const player: Box = { x: x, y: y, width: 50, height: 50, color: 'blue' };
+
     return {
         draw: () => {
             for (const obstacle of obstacles) {
-                ctx.fillStyle = "brown";
-                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                drawer.draw(obstacle);
+                drawer.draw(player);
             }
         },
         update: (deltaTime) => {
