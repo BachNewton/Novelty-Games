@@ -66,32 +66,32 @@ function initCanvas(
     gameWorld: GameWorld
 ): () => void {
     canvas.ontouchstart = e => {
-        gameWorld.onTouchStart(e);
+        gameWorld.touchEvents?.onTouchStart?.(e);
     };
 
     canvas.ontouchmove = e => {
         e.preventDefault(); // Don't refresh the page when pulling down
-        gameWorld.onTouchMove(e);
+        gameWorld.touchEvents?.onTouchMove?.(e);
     };
 
     canvas.ontouchend = e => {
-        gameWorld.onTouchEnd(e);
+        gameWorld.touchEvents?.onTouchEnd?.(e);
     };
 
     canvas.onmousedown = e => {
-        gameWorld.onMouseDown(e.pageX / canvas.width, e.pageY / canvas.height);
+        gameWorld.mouseEvents?.onMouseDown?.(e.pageX / canvas.width, e.pageY / canvas.height);
     };
 
     canvas.onmousemove = e => {
-        gameWorld.onMouseMove(e.pageX / canvas.width, e.pageY / canvas.height);
+        gameWorld.mouseEvents?.onMouseMove?.(e.pageX / canvas.width, e.pageY / canvas.height);
     };
 
     canvas.onmouseup = e => {
-        gameWorld.onMouseUp(e.pageX / canvas.width, e.pageY / canvas.height);
+        gameWorld.mouseEvents?.onMouseUp?.(e.pageX / canvas.width, e.pageY / canvas.height);
     };
 
     canvas.onclick = e => {
-        gameWorld.onClick(e);
+        gameWorld.mouseEvents?.onClick?.(e);
     };
 
     let previousTime = performance.now();

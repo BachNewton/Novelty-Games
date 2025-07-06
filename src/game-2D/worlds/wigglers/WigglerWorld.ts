@@ -1,5 +1,5 @@
 import { randomNum, shuffleArray } from "../../../util/Randomizer";
-import { GameWorld } from "../GameWorld";
+import { GameWorld, MouseEvents, TouchEvents } from "../GameWorld";
 import { Connection, HeldWiggler, Wiggler, createWiggler } from "./Data";
 import { checkEachPair, checkIntersection, isTouching } from "./Logic";
 
@@ -142,35 +142,31 @@ export class WigglerWorld implements GameWorld {
         }
     }
 
-    public onTouchStart(e: TouchEvent): void {
+    private onTouchStart(e: TouchEvent): void {
         const x = e.touches[0].pageX / this.canvas.width;
         const y = e.touches[0].pageY / this.canvas.height;
         this.handleActionDown(x, y);
     }
 
-    public onTouchMove(e: TouchEvent): void {
+    private onTouchMove(e: TouchEvent): void {
         const x = e.touches[0].pageX / this.canvas.width;
         const y = e.touches[0].pageY / this.canvas.height;
         this.handleActionMove(x, y);
     }
 
-    public onTouchEnd(e: TouchEvent): void {
+    private onTouchEnd(e: TouchEvent): void {
         this.handleActionUp();
     }
 
-    public onClick(e: MouseEvent): void {
-        // TODO
-    }
-
-    public onMouseDown(x: number, y: number): void {
+    private onMouseDown(x: number, y: number): void {
         this.handleActionDown(x, y);
     }
 
-    public onMouseMove(x: number, y: number): void {
+    private onMouseMove(x: number, y: number): void {
         this.handleActionMove(x, y);
     }
 
-    public onMouseUp(x: number, y: number): void {
+    private onMouseUp(x: number, y: number): void {
         this.handleActionUp();
     }
 
@@ -281,4 +277,28 @@ export class WigglerWorld implements GameWorld {
     private getFontSize(): number {
         return this.canvas.height * 0.06;
     }
+
+    public mouseEvents?: MouseEvents = {
+        onMouseDown: (x, y) => {
+            this.onMouseDown(x, y);
+        },
+        onMouseMove: (x, y) => {
+            this.onMouseMove(x, y);
+        },
+        onMouseUp: (x, y) => {
+            this.onMouseUp(x, y);
+        }
+    }
+
+    public touchEvents: TouchEvents = {
+        onTouchStart: (e) => {
+            this.onTouchStart(e);
+        },
+        onTouchMove: (e) => {
+            this.onTouchMove(e);
+        },
+        onTouchEnd: (e) => {
+            this.onTouchEnd(e);
+        }
+    };
 }

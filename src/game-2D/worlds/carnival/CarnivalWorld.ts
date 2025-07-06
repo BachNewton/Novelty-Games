@@ -1,6 +1,6 @@
 import { coerceToRange } from "../../../util/Math";
 import { randomNum } from "../../../util/Randomizer";
-import { GameWorld } from "../GameWorld";
+import { GameWorld, MouseEvents, TouchEvents } from "../GameWorld";
 import { collision } from "./Collisions";
 import { Box, Position, Ring } from "./Data";
 
@@ -37,18 +37,6 @@ export class CarnivalWorld implements GameWorld {
         this.rings = new Array<Ring>();
         this.startTime = performance.now();
         this.perfectTime = null;
-    }
-
-    onMouseDown(x: number, y: number): void {
-        // Unused 
-    }
-
-    onMouseMove(x: number, y: number): void {
-        // Unused
-    }
-
-    onMouseUp(x: number, y: number): void {
-        // Unused
     }
 
     public draw() {
@@ -147,7 +135,7 @@ export class CarnivalWorld implements GameWorld {
         }
     }
 
-    public onTouchStart(e: TouchEvent) {
+    private onTouchStart(e: TouchEvent) {
         if (e.touches.length >= 3) {
             this.level = 0;
             this.noMisses = true;
@@ -159,15 +147,7 @@ export class CarnivalWorld implements GameWorld {
         }
     }
 
-    public onTouchMove(e: TouchEvent): void {
-        //
-    }
-
-    public onTouchEnd(e: TouchEvent): void {
-        //
-    }
-
-    public onClick(e: MouseEvent) {
+    private onClick(e: MouseEvent) {
         if (this.finalTime !== null) return;
 
         this.handleClick(e, () => {
@@ -320,6 +300,18 @@ export class CarnivalWorld implements GameWorld {
                 return 'black'
             default:
                 throw new Error();
+        }
+    }
+
+    public mouseEvents: MouseEvents = {
+        onClick: (e) => {
+            this.onClick(e);
+        }
+    }
+
+    public touchEvents: TouchEvents = {
+        onTouchStart: (e) => {
+            this.onTouchStart(e);
         }
     }
 }
