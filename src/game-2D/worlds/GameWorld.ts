@@ -1,6 +1,9 @@
-export interface GameWorld {
+export interface GameObject {
     draw(): void;
     update(deltaTime: number): void;
+}
+
+export interface GameWorld extends GameObject {
     mouseEvents?: MouseEvents;
     touchEvents?: TouchEvents;
 }

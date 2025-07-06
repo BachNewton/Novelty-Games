@@ -1,12 +1,14 @@
-import { on } from "events";
-
 export interface KeyboardInput {
     held: { [K in Key]: boolean };
 }
 
 export enum Key {
     SPACE = 'Space',
-    TAB = 'Tab'
+    TAB = 'Tab',
+    W = 'KeyW',
+    A = 'KeyA',
+    S = 'KeyS',
+    D = 'KeyD'
 }
 
 enum KeyEventType {
@@ -16,7 +18,11 @@ enum KeyEventType {
 export function createKeyboardInput(onKeyPressed: (key: Key) => void): KeyboardInput {
     const held = {
         [Key.SPACE]: false,
-        [Key.TAB]: false
+        [Key.TAB]: false,
+        [Key.W]: false,
+        [Key.A]: false,
+        [Key.S]: false,
+        [Key.D]: false
     };
 
     const handleKeyEvent = (e: KeyboardEvent, type: KeyEventType) => {
