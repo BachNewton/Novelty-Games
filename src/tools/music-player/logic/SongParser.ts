@@ -1,4 +1,5 @@
 import { DownloadFileResponse, NetworkService } from "../../../util/networking/NetworkService";
+import { wait } from "../../../util/Wait";
 import { Song, SongMetadata, TrackIds } from "../data/MusicPlayerIndex";
 
 type TrackPromises = { [Id in keyof TrackIds]: Promise<HTMLAudioElement> | null };
@@ -8,13 +9,13 @@ interface ParsedSong {
     trackPromises: TrackPromises;
 }
 
-interface ParserProgress {
+export interface ParserProgress {
     current: number;
     total: number;
 }
 
 export interface SongParser {
-    parse(song: Song, onParserProgress: (progress: ParserProgress) => void): ParsedSong;
+    parse(song: Song, onParserProgress: (progress: ParserProgress | null) => void): ParsedSong;
 }
 
 export function createSongParser(networkService: NetworkService<void>): SongParser {
@@ -30,16 +31,25 @@ export function createSongParser(networkService: NetworkService<void>): SongPars
 
             const nonNullTrackPromises = Object.values(trackPromises).filter(trackPromise => trackPromise !== null) as Promise<HTMLAudioElement>[];
 
-            const progress: ParserProgress = {
-                current: 0,
-                total: nonNullTrackPromises.length
-            };
+            const total = nonNullTrackPromises.length;
+            let current = 0;
 
-            onParserProgress(progress);
+            onParserProgress({
+                total: total,
+                current: current
+            });
 
-            nonNullTrackPromises.forEach(trackPromise => trackPromise.then(() => {
-                progress.current = progress.current + 1;
-                onParserProgress(progress);
+            nonNullTrackPromises.forEach(trackPromise => trackPromise.then(async () => {
+                current++;
+
+                onParserProgress({
+                    total: total,
+                    current: current
+                });
+
+                await wait(1750);
+
+                onParserProgress(null);
             }))
 
             return {

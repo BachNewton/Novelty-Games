@@ -1,26 +1,24 @@
 import { useRef, useState } from "react";
 import Library from "./Library";
 import Player from "./Player";
-import MusicPlayerProgressBar, { ProgressState } from "./MusicPlayerProgressBar";
 import Scaffold from "../../../util/ui/Scaffold";
 import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
-import { NetworkService } from "../../../util/networking/NetworkService";
-import { SongParser } from "../logic/SongParser";
+import { ParserProgress, SongParser } from "../logic/SongParser";
+import ProgressBar from "../../../util/ui/ProgressBar";
 
 interface NewMusicPlayerProps {
-    networkService: NetworkService<void>;
-    progressState: ProgressState | null;
     songParser: SongParser;
 }
 
-const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ networkService, progressState, songParser }) => {
+const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
     const songs = useRef(getMusicPlayerSongs());
     const [song, setSong] = useState<Song | null>(null);
+    const [parserProgress, setParserProgress] = useState<ParserProgress | null>(null);
     const [searchText, setSearchText] = useState<string>('');
 
     const onSongSelected = async (selectedSong: Song) => {
         console.log('Song selected:', selectedSong);
-        const parsedSong = songParser.parse(selectedSong, progress => console.log(progress));
+        const parsedSong = songParser.parse(selectedSong, progress => setParserProgress(progress));
         console.log(parsedSong);
     };
 
@@ -29,7 +27,7 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ networkService, progressSt
     return <Scaffold
         header={headerUi(text => setSearchText(text))}
         content={<Library songs={filteredSongs} onSongSelected={onSongSelected} />}
-        footer={footerUi(song, progressState)}
+        footer={footerUi(song, parserProgress)}
         fontScale={1.5}
     />;
 };
@@ -52,13 +50,17 @@ function headerUi(setSearchText: (text: string) => void): JSX.Element {
     </>;
 }
 
-function footerUi(song: Song | null, progressState: ProgressState | null): JSX.Element {
+function footerUi(song: Song | null, progress: ParserProgress | null): JSX.Element {
+    const progressUi = progress === null
+        ? <></>
+        : <ProgressBar progress={progress.current / progress.total} />;
+
     return <div style={{
         padding: '10px',
         borderTop: '3px solid var(--novelty-blue)',
         boxShadow: 'black 0px -10px 20px'
     }}>
-        <MusicPlayerProgressBar state={progressState} />
+        {progressUi}
         <Player songMetadata={song?.metadata ?? null} />
     </div>;
 }
