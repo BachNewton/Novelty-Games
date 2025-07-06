@@ -1,10 +1,10 @@
-export interface Point {
+export interface Vector {
     x: number;
     y: number;
 }
 
 export interface Box {
-    position: Point;
+    position: Vector;
     width: number;
     height: number;
     color?: string | CanvasGradient | CanvasPattern

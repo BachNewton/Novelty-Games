@@ -1,12 +1,13 @@
 import { KeyboardInput } from "../../../util/input/Keyboard";
 import { Drawer } from "../Drawer";
 import { GameObject } from "../GameWorld";
-import { Box, Point } from "../Geometry";
+import { Box, Vector } from "../Geometry";
 
 interface Player extends GameObject, Box { }
 
 export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Player {
-    const position: Point = { x: 0, y: 0 };
+    const position: Vector = { x: 0, y: 0 };
+    const velocity: Vector = { x: 0, y: 0 };
 
     const box: Box = {
         position,
@@ -22,18 +23,18 @@ export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Play
             drawer.draw(box);
         },
         update: (deltaTime: number) => {
-            if (keyboardInput.held.KeyW) {
-                position.y -= speed * deltaTime;
+            const movementAxis = keyboardInput.movementAxis;
+
+            if (movementAxis.x !== 0 || movementAxis.y !== 0) {
+                velocity.x = movementAxis.x * speed * deltaTime;
+                velocity.y = movementAxis.y * speed * deltaTime;
+            } else {
+                velocity.x = 0;
+                velocity.y = 0;
             }
-            if (keyboardInput.held.KeyS) {
-                position.y += speed * deltaTime;
-            }
-            if (keyboardInput.held.KeyA) {
-                position.x -= speed * deltaTime;
-            }
-            if (keyboardInput.held.KeyD) {
-                position.x += speed * deltaTime;
-            }
+
+            position.x += velocity.x;
+            position.y += velocity.y;
         },
         ...box
     };

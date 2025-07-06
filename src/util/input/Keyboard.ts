@@ -1,14 +1,19 @@
-export interface KeyboardInput {
-    held: { [K in Key]: boolean };
-}
+import { Axis } from "./Axis";
 
-export enum Key {
+enum Key {
     SPACE = 'Space',
     TAB = 'Tab',
     W = 'KeyW',
     A = 'KeyA',
     S = 'KeyS',
     D = 'KeyD'
+}
+
+type HeldKeys = { [K in Key]: boolean };
+
+export interface KeyboardInput {
+    held: HeldKeys;
+    movementAxis: Axis;
 }
 
 enum KeyEventType {
@@ -48,6 +53,39 @@ export function createKeyboardInput(onKeyPressed: (key: Key) => void): KeyboardI
     window.onkeyup = e => handleKeyEvent(e, KeyEventType.UP);
 
     return {
-        held: held
+        held: held,
+        get movementAxis() {
+            return getMovementAxis(held);
+        }
     };
+}
+
+function getMovementAxis(held: HeldKeys): Axis {
+    const axis: Axis = { x: 0, y: 0 };
+
+    if (held.KeyW) {
+        axis.y -= 1;
+    }
+
+    if (held.KeyS) {
+        axis.y += 1;
+    }
+
+    if (held.KeyA) {
+        axis.x -= 1;
+    }
+
+    if (held.KeyD) {
+        axis.x += 1;
+    }
+
+    // Normalize to keep the axis within a unit circle
+    const length = Math.hypot(axis.x, axis.y);
+
+    if (length > 0) {
+        axis.x /= length;
+        axis.y /= length;
+    }
+
+    return axis;
 }
