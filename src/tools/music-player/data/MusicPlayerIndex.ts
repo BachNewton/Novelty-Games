@@ -1,7 +1,7 @@
 import musicPlayerIndexJson from './music-player-index.json';
 
 export interface Song {
-    ids: SongIds;
+    ids: TrackIds;
     metadata: SongMetadata;
 }
 
@@ -10,7 +10,7 @@ export interface SongMetadata {
     artist: string;
 }
 
-export interface SongIds {
+export interface TrackIds {
     guitar: string | null;
     bass: string | null;
     vocals: string | null;

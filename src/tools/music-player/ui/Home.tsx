@@ -4,7 +4,7 @@ import { Database, DatabaseNames } from "../../../util/Database";
 import { Route, updateRoute } from "../../../ui/Routing";
 import { FolderSelectedState, DatabaseOpenedState, ProgressState, SelectingFolderState, AddSongsToDatabaseState, DatabaseTransactionCompleteState, AddingSongsState, CompleteState } from "./MusicPlayerProgressBar";
 import { NetworkService } from "../../../util/networking/NetworkService";
-import { createSongParser } from "../logic/Parser2";
+import { createSongParser } from "../logic/SongParser";
 
 interface HomeProps {
     musicDatabase: Database<DatabaseNames.MUSIC>;

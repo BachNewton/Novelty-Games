@@ -6,7 +6,7 @@ import { ParsedSongPackage } from "../logic/Parser";
 import Scaffold from "../../../util/ui/Scaffold";
 import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
 import { DownloadFileResponse, NetworkService } from "../../../util/networking/NetworkService";
-import { SongParser } from "../logic/Parser2";
+import { SongParser } from "../logic/SongParser";
 
 interface NewMusicPlayerProps {
     networkService: NetworkService<void>;
@@ -21,15 +21,8 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ networkService, progressSt
 
     const onSongSelected = async (selectedSong: Song) => {
         console.log('Song selected:', selectedSong);
-        songParser.parse(selectedSong);
-
-        // if (guitar !== null) {
-        //     const response = await networkService.downloadFile({ id: guitar });
-        //     const blob = new Blob([response.buffer]);
-        //     const url = URL.createObjectURL(blob);
-        //     const audio = new Audio(url);
-        //     audio.play();
-        // }
+        const trackPromises = songParser.parse(selectedSong);
+        console.log(trackPromises);
     };
 
     return <Scaffold
