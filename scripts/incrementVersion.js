@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const VERSIONING_FILE_PATH = '../src/Versioning.ts';
-const VERSIONING_REGEX = /APP_VERSION = '((\d+)\.(\d+)\.(\d+))'/;
+const VERSIONING_REGEX = /APP_VERSION = 'v((\d+)\.(\d+)\.(\d+))'/;
 
 export function incrementVersion(type) {
     console.log(`Incrementing version type: ${type}`);
