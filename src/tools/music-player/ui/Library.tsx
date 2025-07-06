@@ -1,4 +1,4 @@
-import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
+import { Song } from "../data/MusicPlayerIndex";
 
 interface LibraryProps {
     songs: Song[];
