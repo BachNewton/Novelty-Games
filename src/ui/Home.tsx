@@ -15,8 +15,7 @@ import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DSt
 import Labyrinth from '../board-games/labyrinth/ui/Labyrinth';
 import ProfileUi from './Profile';
 import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/LabyrinthCommunicator';
-
-const APP_VERSION = 'v3.3.6';
+import { APP_VERSION } from '../Versioning';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };

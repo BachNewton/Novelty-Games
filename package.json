@@ -43,7 +43,8 @@
     "test-all": "react-scripts test --watchAll=false",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages-clean && gh-pages -b gh-pages -d build"
+    "deploy": "gh-pages-clean && gh-pages -b gh-pages -d build",
+    "patch": "node scripts/patch.js && git add src/Versioning.ts && git commit -m \"Updating patch version\" && git push && npm run deploy"
   },
   "homepage": "https://bachnewton.github.io/Novelty-Games/",
   "eslintConfig": {
