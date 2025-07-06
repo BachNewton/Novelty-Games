@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { SongPackage } from "../logic/MusicDatabase";
 import { fileToAudio } from "../logic/Parser";
+import { Song } from "../data/MusicPlayerIndex";
 
 interface PlayerProps {
-    song: SongPackage | null;
+    song: Song | null;
 }
 
 interface Tracks {
@@ -43,10 +44,10 @@ const Player: React.FC<PlayerProps> = ({ song }) => {
         setTracks(null);
         tracksRef.current = null;
 
-        loadTracks(song).then(loadedTracks => {
-            setTracks(loadedTracks);
-            tracksRef.current = loadedTracks;
-        });
+        // loadTracks(song).then(loadedTracks => {
+        //     setTracks(loadedTracks);
+        //     tracksRef.current = loadedTracks;
+        // });
     }, [song]);
 
     const icon = tracks === null ? '⏯️' : isPlaying ? '⏸️' : '▶️';
@@ -65,7 +66,7 @@ const Player: React.FC<PlayerProps> = ({ song }) => {
     return <div>
         {expandedUi(expanded, tracks, handleExpansion, forceRender)}
 
-        <div style={{ textAlign: 'center' }} onClick={handleExpansion}>{song?.folderName}</div>
+        {/* <div style={{ textAlign: 'center' }} onClick={handleExpansion}>{song?.folderName}</div> */}
 
         <div style={{ display: 'flex', justifyContent: 'center' }} onClick={handleExpansion}>
             {sliderUi(tracks, seconds, updatedSeconds => setSeconds(updatedSeconds))}

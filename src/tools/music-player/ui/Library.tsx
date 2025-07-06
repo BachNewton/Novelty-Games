@@ -1,17 +1,17 @@
 import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
 
 interface LibraryProps {
-    onSongSelected: () => void;
+    songs: Song[];
+    onSongSelected: (song: Song) => void;
 }
 
-const Library: React.FC<LibraryProps> = ({ onSongSelected }) => {
+const Library: React.FC<LibraryProps> = ({ songs, onSongSelected }) => {
     return <div>
-        {songsUi(() => { })}
+        {songsUi(songs, onSongSelected)}
     </div>;
 }
 
-function songsUi(onSongSelected: () => void): JSX.Element[] {
-    const songs = getMusicPlayerSongs();
+function songsUi(songs: Song[], onSongSelected: (song: Song) => void): JSX.Element[] {
     const groupedSongs = groupSongsByArtist(songs);
 
     return Object.entries(groupedSongs)
@@ -33,7 +33,7 @@ function groupSongsByArtist(songs: Song[]): { [artist: string]: Song[] } {
     }, {} as { [artist: string]: Song[] });
 }
 
-function artistSectionUi(artist: string, songs: Song[], onSongSelected: () => void): JSX.Element {
+function artistSectionUi(artist: string, songs: Song[], onSongSelected: (song: Song) => void): JSX.Element {
     return <div key={artist}>
         <div
             style={{
@@ -55,7 +55,7 @@ function artistSectionUi(artist: string, songs: Song[], onSongSelected: () => vo
     </div>;
 }
 
-function songUi(index: number, song: Song, onSongSelected: () => void): JSX.Element {
+function songUi(index: number, song: Song, onSongSelected: (song: Song) => void): JSX.Element {
     return <div
         key={index}
         style={{
@@ -66,7 +66,7 @@ function songUi(index: number, song: Song, onSongSelected: () => void): JSX.Elem
             borderRadius: '10px',
             cursor: 'pointer'
         }}
-        onClick={() => onSongSelected()}
+        onClick={() => onSongSelected(song)}
     >{song.metadata.title}</div>;
 }
 

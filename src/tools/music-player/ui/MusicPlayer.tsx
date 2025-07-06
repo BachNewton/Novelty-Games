@@ -1,32 +1,24 @@
-import { useState } from "react";
-import { SongPackage } from "../logic/MusicDatabase";
+import { useRef, useState } from "react";
 import Library from "./Library";
 import Player from "./Player";
 import MusicPlayerProgressBar, { ProgressState } from "./MusicPlayerProgressBar";
 import { ParsedSongPackage } from "../logic/Parser";
 import Scaffold from "../../../util/ui/Scaffold";
+import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
 
 interface NewMusicPlayerProps {
-    importNewSongs: () => void;
-    deleteAllSongs: () => void;
-    songs: ParsedSongPackage[] | null;
     progressState: ProgressState | null;
 }
 
-const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, deleteAllSongs, songs, progressState }) => {
-    const [song, setSong] = useState<SongPackage | null>(null);
+const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ progressState }) => {
+    const songs = useRef(getMusicPlayerSongs());
+    const [song, setSong] = useState<Song | null>(null);
     const [searchText, setSearchText] = useState<string>('');
-
-    const promptDeleteAllSongs = () => {
-        if (window.confirm('Are you sure you want to delete all songs?')) {
-            deleteAllSongs();
-        }
-    };
 
     return <Scaffold
         header={headerUi(text => setSearchText(text))}
         content={<div>
-            <Library onSongSelected={() => { }} />
+            <Library songs={songs.current} onSongSelected={(song) => console.log('Song selected:', song)} />
         </div>}
         footer={footerUi(song, progressState)}
         fontScale={1.5}
@@ -51,7 +43,7 @@ function headerUi(setSearchText: (text: string) => void): JSX.Element {
     </>;
 }
 
-function footerUi(song: SongPackage | null, progressState: ProgressState | null): JSX.Element {
+function footerUi(song: Song | null, progressState: ProgressState | null): JSX.Element {
     return <div style={{
         padding: '10px',
         borderTop: '3px solid var(--novelty-blue)',
