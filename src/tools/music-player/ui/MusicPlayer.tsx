@@ -4,6 +4,7 @@ import Library from "./Library";
 import Player from "./Player";
 import MusicPlayerProgressBar, { ProgressState } from "./MusicPlayerProgressBar";
 import { ParsedSongPackage } from "../logic/Parser";
+import Scaffold from "../../../util/ui/Scaffold";
 
 interface NewMusicPlayerProps {
     importNewSongs: () => void;
@@ -22,16 +23,21 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, deleteAllS
         }
     };
 
-    return <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100vh',
-        fontSize: '1.5em',
-        color: 'white'
-    }}>
+    return <Scaffold
+        header={headerUi(text => setSearchText(text))}
+        content={<div>
+            <Library songs={filterBySearchText(songs, searchText)} onSongSelected={selectedSong => setSong(selectedSong)} />
+        </div>}
+        footer={footerUi(song, progressState)}
+        fontScale={1.5}
+    />;
+};
+
+function headerUi(setSearchText: (text: string) => void): JSX.Element {
+    return <>
         <div style={{ display: 'flex' }}>
-            <button onClick={importNewSongs} style={{ fontSize: '1em', fontWeight: 'bold', flexGrow: 1 }}>Import New Songs 📁</button>
-            <button onClick={promptDeleteAllSongs} style={{ fontSize: '1em' }}>🗑️</button>
+            <button onClick={() => { }} style={{ fontSize: '1em', fontWeight: 'bold', flexGrow: 1 }}>Import New Songs 📁</button>
+            <button onClick={() => { }} style={{ fontSize: '1em' }}>🗑️</button>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -42,14 +48,8 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ importNewSongs, deleteAllS
                 onChange={e => setSearchText(e.target.value)}
             />
         </div>
-
-        <div style={{ flexGrow: 1, overflow: 'auto' }}>
-            <Library songs={filterBySearchText(songs, searchText)} onSongSelected={selectedSong => setSong(selectedSong)} />
-        </div>
-
-        {footerUi(song, progressState)}
-    </div>;
-};
+    </>;
+}
 
 function footerUi(song: SongPackage | null, progressState: ProgressState | null): JSX.Element {
     return <div style={{
