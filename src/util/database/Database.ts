@@ -1,14 +1,8 @@
-export interface DatabaseAddRequest {
-    openDatabase: Promise<void>;
-    add: Promise<void>[];
-    transactionComplete: Promise<void>;
-}
-
 export interface Database<Tables> {
     add: <T extends keyof Tables>(
         tableName: T,
-        ...data: Tables[T][]
-    ) => DatabaseAddRequest;
+        data: Tables[T]
+    ) => Promise<void>;
 
     get: <T extends keyof Tables>(
         tableName: T

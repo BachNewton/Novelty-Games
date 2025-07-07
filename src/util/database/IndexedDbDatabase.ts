@@ -12,20 +12,12 @@ export function createDatabase<Name extends keyof DatabaseSchemas>(
     };
 
     return {
-        add: <T extends keyof DatabaseSchemas[Name]>(tableName: T, ...data: DatabaseSchemas[Name][T][]) => {
-            const objectStore = getObjectStore(tableName, true);
-
-            const addPromises = data.map(async value => {
-                const addRequest = (await objectStore).add(value);
-                return await new Promise<void>(resolve => addRequest.onsuccess = () => resolve());
-            });
-
-            return {
-                openDatabase: objectStore.then(() => undefined),
-                add: addPromises,
-                transactionComplete: new Promise(async resolve => (await objectStore).transaction.oncomplete = () => resolve())
-            };
+        add: async (tableName, data) => {
+            const objectStore = await getObjectStore(tableName, true);
+            await objectStore.add(data);
+            await new Promise<void>(resolve => objectStore.transaction.oncomplete = () => resolve());
         },
+
         get: async <T extends keyof DatabaseSchemas[Name]>(tableName: T) => {
             const objectStore = await getObjectStore(tableName, false);
 
