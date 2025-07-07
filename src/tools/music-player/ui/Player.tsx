@@ -68,7 +68,7 @@ const Player: React.FC<PlayerProps> = ({ parsedSong }) => {
 function headerUi(parsedSong: ParsedSong | null, handleExpansion: (e: React.MouseEvent) => void): JSX.Element {
     if (parsedSong === null) return <></>;
 
-    return <div style={{ textAlign: 'center' }} onClick={handleExpansion}>
+    return <div style={{ textAlign: 'center', marginTop: '5px', userSelect: 'none' }} onClick={handleExpansion}>
         {parsedSong.metadata.title} - {parsedSong.metadata.artist}
     </div>;
 }
@@ -115,17 +115,17 @@ function expandedUi(
         return trackCheckbox(track, name, onSolo, handleExpansion);
     };
 
-    return <div style={{ display: 'flex', flexDirection: 'column' }}>
+    return <div style={{ display: 'flex', flexDirection: 'column', marginTop: '10px' }}>
         <button style={{ fontSize: '1em', textAlign: 'left' }} onClick={onAll}>All</button>
         {trackCheckboxFor(tracks.guitar, 'Guitar')}
         {trackCheckboxFor(tracks.bass, 'Bass')}
         {trackCheckboxFor(tracks.vocals, 'Vocals')}
-        {/* {trackCheckboxFor(tracks.drums, 'Drums')}
+        {trackCheckboxFor(tracks.drums, 'Drums')}
         {trackCheckboxFor(tracks.drums1, 'Drums 1')}
         {trackCheckboxFor(tracks.drums2, 'Drums 2')}
         {trackCheckboxFor(tracks.drums3, 'Drums 3')}
         {trackCheckboxFor(tracks.keys, 'Keys')}
-        {trackCheckboxFor(tracks.backing, 'Backing')} */}
+        {trackCheckboxFor(tracks.backing, 'Backing')}
     </div>;
 }
 

@@ -38,7 +38,7 @@ function parse(
     createResponsePromise: (id: string | null) => Promise<DownloadFileResponse | null>
 ): ParsedSong {
     let current = 0;
-    const total = Object.keys(song.ids).filter(id => id !== null).length;
+    const total = Object.values(song.ids).filter(id => id !== null).length;
 
     onParserProgress({
         total: total,
@@ -49,7 +49,12 @@ function parse(
         guitar: createResponsePromise(song.ids.guitar),
         bass: createResponsePromise(song.ids.bass),
         vocals: createResponsePromise(song.ids.vocals),
-        backing: createResponsePromise(song.ids.backing)
+        backing: createResponsePromise(song.ids.backing),
+        drums: createResponsePromise(song.ids.drums),
+        drums1: createResponsePromise(song.ids.drums1),
+        drums2: createResponsePromise(song.ids.drums2),
+        drums3: createResponsePromise(song.ids.drums3),
+        keys: createResponsePromise(song.ids.keys)
     };
 
     Object.entries(responsePromises).forEach(async ([id, responsePromise]) => {
@@ -89,7 +94,12 @@ async function createTracksPromise(responsePromises: ResponsePromises): Promise<
         guitar: await createTrackPromise(responsePromises.guitar),
         bass: await createTrackPromise(responsePromises.bass),
         vocals: await createTrackPromise(responsePromises.vocals),
-        backing: await createTrackPromise(responsePromises.backing)
+        backing: await createTrackPromise(responsePromises.backing),
+        drums: await createTrackPromise(responsePromises.drums),
+        drums1: await createTrackPromise(responsePromises.drums1),
+        drums2: await createTrackPromise(responsePromises.drums2),
+        drums3: await createTrackPromise(responsePromises.drums3),
+        keys: await createTrackPromise(responsePromises.keys)
     };
 };
 
