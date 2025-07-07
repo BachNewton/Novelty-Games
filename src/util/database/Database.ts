@@ -1,3 +1,5 @@
+import { DatabaseSchemas } from "./DatabaseSchemas";
+
 export interface DatabaseAddRequest {
     openDatabase: Promise<void>;
     add: Promise<void>[];
@@ -17,18 +19,18 @@ export interface Database<Tables> {
     delete: () => Promise<void>;
 }
 
-export function createDatabase<Tables>(
-    databaseName: string,
-    tableNames: (keyof Tables)[]
-): Database<Tables> {
-    const getObjectStore = async <T extends keyof Tables>(tableName: T, writeAccess: boolean): Promise<IDBObjectStore> => {
+export function createDatabase<Name extends keyof DatabaseSchemas>(
+    databaseName: Name,
+    tableNames: (keyof DatabaseSchemas[Name])[]
+): Database<DatabaseSchemas[Name]> {
+    const getObjectStore = async <T extends keyof DatabaseSchemas[Name]>(tableName: T, writeAccess: boolean): Promise<IDBObjectStore> => {
         const db = await openDatabase(databaseName, tableNames as string[]);
         const transaction = db.transaction(tableName as string, writeAccess ? 'readwrite' : 'readonly');
         return transaction.objectStore(tableName as string);
     };
 
     return {
-        add: <T extends keyof Tables>(tableName: T, ...data: Tables[T][]) => {
+        add: <T extends keyof DatabaseSchemas[Name]>(tableName: T, ...data: DatabaseSchemas[Name][T][]) => {
             const objectStore = getObjectStore(tableName, true);
 
             const addPromises = data.map(async value => {
@@ -42,10 +44,10 @@ export function createDatabase<Tables>(
                 transactionComplete: new Promise(async resolve => (await objectStore).transaction.oncomplete = () => resolve())
             };
         },
-        get: async <T extends keyof Tables>(tableName: T) => {
+        get: async <T extends keyof DatabaseSchemas[Name]>(tableName: T) => {
             const objectStore = await getObjectStore(tableName, false);
 
-            return new Promise<Tables[T][]>(resolve => {
+            return new Promise<DatabaseSchemas[Name][T][]>(resolve => {
                 objectStore.getAll().onsuccess = (e => {
                     const target = e.target as IDBRequest;
                     const data = target.result;
@@ -54,7 +56,7 @@ export function createDatabase<Tables>(
             });
         },
         delete: () => new Promise(resolve => {
-            const deleteRequest = indexedDB.deleteDatabase(databaseName);
+            const deleteRequest = indexedDB.deleteDatabase(databaseName as string);
             deleteRequest.onsuccess = () => resolve();
         })
     };

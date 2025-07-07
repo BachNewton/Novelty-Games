@@ -3,7 +3,6 @@ import HomeButton from "../../ui/HomeButton";
 import MusicPlayerHome from "../music-player/ui/Home";
 import FortniteFestivalHome, { getFestivalSongs } from "../fortnite-festival/ui/Home";
 import { getRoute, Route } from "../../ui/Routing";
-import { createMusicDatabase } from "../music-player/logic/MusicDatabase";
 import { createNetworkService, NetworkedApplication } from "../../util/networking/NetworkService";
 import { FestivalSong } from "../../trivia/data/Data";
 
@@ -43,7 +42,6 @@ function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
         return MenuUi(onClickHandlers);
     } else if (uiState instanceof MusicPlayerUiState) {
         return <MusicPlayerHome
-            musicDatabase={createMusicDatabase()}
             networkService={createNetworkService(NetworkedApplication.MUSIC_PLAYER)}
         />;
     } else if (uiState instanceof FortniteFestivalUiState) {
