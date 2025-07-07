@@ -34,10 +34,10 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
 
 function headerUi(setSearchText: (text: string) => void): JSX.Element {
     return <>
-        <div style={{ display: 'flex' }}>
+        {/* <div style={{ display: 'flex' }}>
             <button onClick={() => { }} style={{ fontSize: '1em', fontWeight: 'bold', flexGrow: 1 }}>Import New Songs 📁</button>
             <button onClick={() => { }} style={{ fontSize: '1em' }}>🗑️</button>
-        </div>
+        </div> */}
 
         <div style={{ display: 'flex', alignItems: 'center' }}>
             <div style={{ fontSize: '1.2em' }}>🔎</div>
