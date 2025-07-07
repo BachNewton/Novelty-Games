@@ -38,8 +38,6 @@ const Player: React.FC<PlayerProps> = ({ parsedSong }) => {
         });
     }, [parsedSong]);
 
-    const icon = tracks === null ? '⏯️' : isPlaying ? '⏸️' : '▶️';
-
     const handleExpansion = (e: React.MouseEvent) => { if (e.target === e.currentTarget) setIsExpanded(!isExpanded) };
 
     const onPlayButtonClick = () => {
@@ -60,13 +58,29 @@ const Player: React.FC<PlayerProps> = ({ parsedSong }) => {
             {sliderUi(tracks, seconds, updatedSeconds => setSeconds(updatedSeconds))}
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', fontSize: '1.75em' }} onClick={handleExpansion}>
-            <div style={{ cursor: 'pointer' }} onClick={onPlayButtonClick}>
-                {icon}
-            </div>
-        </div>
+        {iconBarUi(onPlayButtonClick, handleExpansion, tracks, isPlaying)}
     </div>;
 };
+
+function iconBarUi(
+    onPlayButtonClick: () => void,
+    handleExpansion: (e: React.MouseEvent) => void,
+    tracks: Tracks | null,
+    isPlaying: boolean
+): JSX.Element {
+    const icon = tracks === null ? '⏯️' : isPlaying ? '⏸️' : '▶️';
+
+    return <div style={{ display: 'flex', justifyContent: 'center', fontSize: '1.75em', alignItems: 'center' }} onClick={handleExpansion}>
+        <div style={{ flex: 1 }} />
+        <div style={{ cursor: 'pointer' }} onClick={onPlayButtonClick}>
+            {icon}
+        </div>
+        <div style={{ flex: 1, display: 'flex' }}>
+            <div style={{ flex: 1 }} onClick={handleExpansion} />
+            <div style={{ cursor: 'pointer' }}>💾</div>
+        </div>
+    </div>;
+}
 
 function ensureTracksAreInSync(tracks: Tracks | null, isPlaying: boolean, time: number) {
     if (tracks === null) return;
