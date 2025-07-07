@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ParsedSong, Tracks } from "../logic/SongParser";
 
 const SLIDER_UPDATE_INTERVAL = 200;
+const OUT_OF_SYNC_THRESHOLD = 0.05;
 
 interface PlayerProps {
     parsedSong: ParsedSong | null;
@@ -16,11 +17,13 @@ const Player: React.FC<PlayerProps> = ({ parsedSong }) => {
 
     useEffect(() => {
         const updateSliderInterval = setInterval(() => {
-            setSeconds(tracks?.backing?.currentTime ?? 0);
+            const time = tracks?.backing?.currentTime ?? 0;
+            ensureTracksAreInSync(tracks, isPlaying, time);
+            setSeconds(time);
         }, SLIDER_UPDATE_INTERVAL);
 
         return () => clearInterval(updateSliderInterval);
-    }, [tracks]);
+    }, [tracks, isPlaying]);
 
     useEffect(() => {
         applyToTracks(audio => audio.pause(), tracks);
@@ -64,6 +67,21 @@ const Player: React.FC<PlayerProps> = ({ parsedSong }) => {
         </div>
     </div>;
 };
+
+function ensureTracksAreInSync(tracks: Tracks | null, isPlaying: boolean, time: number) {
+    if (tracks === null) return;
+    if (!isPlaying) return;
+
+    Object.entries(tracks).forEach(([key, audio]) => {
+        if (audio === null) return;
+        if (Math.abs(audio.currentTime - time) <= OUT_OF_SYNC_THRESHOLD) return;
+
+        console.warn(`${key} is out of sync! Current: ${audio.currentTime.toFixed(3)}, Target: ${time.toFixed(3)}. Sycing...`);
+        audio.pause();
+        audio.currentTime = time;
+        audio.play();
+    });
+}
 
 function headerUi(parsedSong: ParsedSong | null, handleExpansion: (e: React.MouseEvent) => void): JSX.Element {
     if (parsedSong === null) return <></>;
