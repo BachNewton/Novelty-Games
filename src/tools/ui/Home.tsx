@@ -2,9 +2,11 @@ import { useState } from "react";
 import HomeButton from "../../ui/HomeButton";
 import MusicPlayerHome from "../music-player/ui/Home";
 import FortniteFestivalHome, { getFestivalSongs } from "../fortnite-festival/ui/Home";
+import DatabaseDebugHome from "../database-debug/ui/Home";
 import { getRoute, Route } from "../../ui/Routing";
 import { createNetworkService, NetworkedApplication } from "../../util/networking/NetworkService";
 import { FestivalSong } from "../../trivia/data/Data";
+import { createDatabase } from "../../util/database/Database";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
@@ -16,12 +18,14 @@ class MusicPlayerUiState implements UiState { }
 class FortniteFestivalUiState implements UiState {
     loadingSongs: Promise<Array<FestivalSong>> = getFestivalSongs();
 }
+class DatabaseDebugUiState implements UiState { }
 
 interface OnClickHandlers {
     onHomeButtonClicked: () => void;
     onForTheStats2Click: () => void;
     onMusicPlayerClick: () => void;
     onFortniteFestivalClick: () => void;
+    onDatabaseDebugClick: () => void;
 }
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
@@ -31,7 +35,8 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
         onHomeButtonClicked: onHomeButtonClicked,
         onForTheStats2Click: () => window.alert('Work in progress!'),
         onMusicPlayerClick: () => setUiState(new MusicPlayerUiState()),
-        onFortniteFestivalClick: () => setUiState(new FortniteFestivalUiState())
+        onFortniteFestivalClick: () => setUiState(new FortniteFestivalUiState()),
+        onDatabaseDebugClick: () => setUiState(new DatabaseDebugUiState())
     };
 
     return Ui(uiState, onClickHandlers);
@@ -46,6 +51,8 @@ function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
         />;
     } else if (uiState instanceof FortniteFestivalUiState) {
         return <FortniteFestivalHome loadingSongs={uiState.loadingSongs} />;
+    } else if (uiState instanceof DatabaseDebugUiState) {
+        return <DatabaseDebugHome database={createDatabase('example', ['numbers', 'words'])} />;
     } else {
         throw new Error('UiState not supported: ' + uiState);
     }
@@ -74,6 +81,7 @@ function MenuUi(onClickHandlers: OnClickHandlers) {
         <button style={buttonStyle} onClick={onClickHandlers.onForTheStats2Click}>For The Stats 2 👑</button>
         <button style={buttonStyle} onClick={onClickHandlers.onMusicPlayerClick}>Music Player 🎶</button>
         <button style={buttonStyle} onClick={onClickHandlers.onFortniteFestivalClick}>Fortnite Festival Difficulty Ranking 🎛️</button>
+        <button style={buttonStyle} onClick={onClickHandlers.onDatabaseDebugClick}>Database Debug 📦</button>
     </div>;
 }
 
