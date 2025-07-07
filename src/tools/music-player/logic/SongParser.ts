@@ -48,7 +48,8 @@ function parse(
     const responsePromises: ResponsePromises = {
         guitar: createResponsePromise(song.ids.guitar),
         bass: createResponsePromise(song.ids.bass),
-        vocals: createResponsePromise(song.ids.vocals)
+        vocals: createResponsePromise(song.ids.vocals),
+        backing: createResponsePromise(song.ids.backing)
     };
 
     Object.entries(responsePromises).forEach(async ([id, responsePromise]) => {
@@ -87,7 +88,8 @@ async function createTracksPromise(responsePromises: ResponsePromises): Promise<
     return {
         guitar: await createTrackPromise(responsePromises.guitar),
         bass: await createTrackPromise(responsePromises.bass),
-        vocals: await createTrackPromise(responsePromises.vocals)
+        vocals: await createTrackPromise(responsePromises.vocals),
+        backing: await createTrackPromise(responsePromises.backing)
     };
 };
 
