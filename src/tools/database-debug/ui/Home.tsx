@@ -21,12 +21,20 @@ const Home: React.FC<HomeProps> = ({ database }) => {
         database.add('words', { name: 'Hello', definition: 'A greeting' });
     };
 
+    const testDelete = () => {
+        database.delete().then(() => {
+            console.log('Database deleted successfully');
+        });
+    };
+
     return <div>
         <h1>Database Debug Home</h1>
         <h2>Output in console</h2>
         <button onClick={testGet}>Test Get</button>
         <br />
         <button onClick={testAdd}>Test Add</button>
+        <br />
+        <button onClick={testDelete}>Test Delete</button>
     </div>;
 };
 
