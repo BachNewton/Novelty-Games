@@ -18,10 +18,10 @@ export function createDatabase<Name extends keyof DatabaseSchemas>(
             await new Promise<void>(resolve => objectStore.transaction.oncomplete = () => resolve());
         },
 
-        get: async <T extends keyof DatabaseSchemas[Name]>(tableName: T) => {
+        get: async (tableName) => {
             const objectStore = await getObjectStore(tableName, false);
 
-            return new Promise<DatabaseSchemas[Name][T][]>(resolve => {
+            return new Promise(resolve => {
                 objectStore.getAll().onsuccess = (e => {
                     const target = e.target as IDBRequest;
                     const data = target.result;
@@ -29,6 +29,7 @@ export function createDatabase<Name extends keyof DatabaseSchemas>(
                 });
             });
         },
+
         delete: () => new Promise(resolve => {
             const deleteRequest = indexedDB.deleteDatabase(databaseName as string);
             deleteRequest.onsuccess = () => resolve();
