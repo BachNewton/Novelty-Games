@@ -2,7 +2,7 @@ import { DownloadFileResponse, NetworkService } from "../../../util/networking/N
 import { nullPromise, wait } from "../../../util/Async";
 import { Song, SongMetadata, TrackIds } from "../data/MusicPlayerIndex";
 
-const ON_COMPLETE_WAIT_TIME = 1500;
+const ON_COMPLETE_WAIT_TIME = 1250;
 
 type ResponsePromises = { [Id in keyof TrackIds]: Promise<DownloadFileResponse | null> };
 
@@ -111,6 +111,10 @@ async function createTrackPromise(responsePromise: Promise<DownloadFileResponse 
     const blob = new Blob([response.buffer]);
     const url = URL.createObjectURL(blob);
     const audio = new Audio(url);
+
+    await new Promise<void>(resolve => {
+        audio.oncanplaythrough = () => resolve();
+    });
 
     return audio;
 }

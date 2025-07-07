@@ -77,7 +77,7 @@ function sliderUi(tracks: Tracks | null, seconds: number, updateSeconds: (second
     return <input
         type='range'
         min={0}
-        max={tracks?.guitar?.duration ?? 0}
+        max={tracks?.backing?.duration ?? 0}
         value={seconds}
         onChange={e => {
             const newSeconds = Number(e.target.value);
@@ -115,7 +115,7 @@ function expandedUi(
         return trackCheckbox(track, name, onSolo, handleExpansion);
     };
 
-    return <div style={{ display: 'flex', flexDirection: 'column', marginTop: '10px' }}>
+    return <div style={{ display: 'flex', flexDirection: 'column', marginTop: '5px' }}>
         <button style={{ fontSize: '1em', textAlign: 'left' }} onClick={onAll}>All</button>
         {trackCheckboxFor(tracks.guitar, 'Guitar')}
         {trackCheckboxFor(tracks.bass, 'Bass')}
