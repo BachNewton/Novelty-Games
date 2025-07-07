@@ -3,7 +3,7 @@ import Library from "./Library";
 import Player from "./Player";
 import Scaffold from "../../../util/ui/Scaffold";
 import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
-import { ParserProgress, SongParser } from "../logic/SongParser";
+import { ParsedSong, ParserProgress, SongParser } from "../logic/SongParser";
 import ProgressBar from "../../../util/ui/ProgressBar";
 
 interface NewMusicPlayerProps {
@@ -12,14 +12,14 @@ interface NewMusicPlayerProps {
 
 const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
     const songs = useRef(getMusicPlayerSongs());
-    const [song, setSong] = useState<Song | null>(null);
+    const [parsedSong, setParsedSong] = useState<ParsedSong | null>(null);
     const [parserProgress, setParserProgress] = useState<ParserProgress | null>(null);
     const [searchText, setSearchText] = useState<string>('');
 
     const onSongSelected = async (selectedSong: Song) => {
         console.log('Song selected:', selectedSong);
         const parsedSong = songParser.parse(selectedSong, progress => setParserProgress(progress));
-        console.log(parsedSong);
+        setParsedSong(parsedSong);
     };
 
     const filteredSongs = filterBySearchText(songs.current, searchText);
@@ -27,7 +27,7 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
     return <Scaffold
         header={headerUi(text => setSearchText(text))}
         content={<Library songs={filteredSongs} onSongSelected={onSongSelected} />}
-        footer={footerUi(song, parserProgress)}
+        footer={footerUi(parsedSong, parserProgress)}
         fontScale={1.5}
     />;
 };
@@ -50,7 +50,7 @@ function headerUi(setSearchText: (text: string) => void): JSX.Element {
     </>;
 }
 
-function footerUi(song: Song | null, progress: ParserProgress | null): JSX.Element {
+function footerUi(parsedSong: ParsedSong | null, progress: ParserProgress | null): JSX.Element {
     const progressUi = progress === null
         ? <></>
         : <ProgressBar progress={progress.current / progress.total} />;
@@ -61,7 +61,7 @@ function footerUi(song: Song | null, progress: ParserProgress | null): JSX.Eleme
         boxShadow: 'black 0px -10px 20px'
     }}>
         {progressUi}
-        <Player songMetadata={song?.metadata ?? null} />
+        <Player parsedSong={parsedSong} />
     </div>;
 }
 

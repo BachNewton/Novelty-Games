@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { SongPackage } from "../logic/MusicDatabase";
 import { fileToAudio } from "../logic/Parser";
-import { SongMetadata } from "../data/MusicPlayerIndex";
+import { ParsedSong } from "../logic/SongParser";
+
+const SLIDER_UPDATE_INTERVAL = 200;
 
 interface PlayerProps {
-    songMetadata: SongMetadata | null;
+    parsedSong: ParsedSong | null;
 }
 
 interface Tracks {
@@ -19,9 +21,9 @@ interface Tracks {
     backing: HTMLAudioElement;
 }
 
-const Player: React.FC<PlayerProps> = ({ songMetadata }) => {
+const Player: React.FC<PlayerProps> = ({ parsedSong }) => {
     const [isPlaying, setIsPlaying] = useState(false);
-    const [expanded, setExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(true);
     const [seconds, setSeconds] = useState(0);
     const [tracks, setTracks] = useState<Tracks | null>(null);
     const [_, setForceRender] = useState(false);
@@ -29,14 +31,14 @@ const Player: React.FC<PlayerProps> = ({ songMetadata }) => {
 
     useEffect(() => {
         const updateSliderInterval = setInterval(() => {
-            setSeconds(tracksRef?.current?.guitar?.currentTime ?? 0);
-        }, 200);
+            // setSeconds(tracksRef?.current?.guitar?.currentTime ?? 0);
+        }, SLIDER_UPDATE_INTERVAL);
 
         return () => clearInterval(updateSliderInterval);
     }, []);
 
     useEffect(() => {
-        if (songMetadata === null) return;
+        if (parsedSong === null) return;
 
         // Pause any previous tracks that might have been playing
         applyToTracks(audio => audio.pause(), tracks);
@@ -48,11 +50,11 @@ const Player: React.FC<PlayerProps> = ({ songMetadata }) => {
         //     setTracks(loadedTracks);
         //     tracksRef.current = loadedTracks;
         // });
-    }, [songMetadata]);
+    }, [parsedSong]);
 
     const icon = tracks === null ? '⏯️' : isPlaying ? '⏸️' : '▶️';
 
-    const handleExpansion = (e: React.MouseEvent) => { if (e.target === e.currentTarget) setExpanded(!expanded) };
+    const handleExpansion = (e: React.MouseEvent) => { if (e.target === e.currentTarget) setIsExpanded(!isExpanded) };
 
     const onPlayButtonClick = () => {
         if (tracks === null) return;
@@ -64,7 +66,7 @@ const Player: React.FC<PlayerProps> = ({ songMetadata }) => {
     const forceRender = () => setForceRender(prev => !prev);
 
     return <div>
-        {expandedUi(expanded, tracks, handleExpansion, forceRender)}
+        {expandedUi(isExpanded, tracks, handleExpansion, forceRender)}
 
         {/* <div style={{ textAlign: 'center' }} onClick={handleExpansion}>{song?.folderName}</div> */}
 

@@ -1,12 +1,16 @@
 import { DownloadFileResponse, NetworkService } from "../../../util/networking/NetworkService";
-import { wait } from "../../../util/Wait";
+import { nullPromise, wait } from "../../../util/Async";
 import { Song, SongMetadata, TrackIds } from "../data/MusicPlayerIndex";
 
-type TrackPromises = { [Id in keyof TrackIds]: Promise<HTMLAudioElement> | null };
+const ON_COMPLETE_WAIT_TIME = 1500;
 
-interface ParsedSong {
+type ResponsePromises = { [Id in keyof TrackIds]: Promise<DownloadFileResponse | null> };
+
+export type Tracks = { [Id in keyof TrackIds]: HTMLAudioElement | null };
+
+export interface ParsedSong {
     metadata: SongMetadata;
-    trackPromises: TrackPromises;
+    tracksPromise: Promise<Tracks>;
 }
 
 export interface ParserProgress {
@@ -19,60 +23,78 @@ export interface SongParser {
 }
 
 export function createSongParser(networkService: NetworkService<void>): SongParser {
-    const createResponse = (id: string | null) => id === null ? null : networkService.downloadFile({ id: id });
+    const createResponsePromise = (id: string | null) => id === null
+        ? nullPromise<DownloadFileResponse>()
+        : networkService.downloadFile({ id: id });
 
     return {
-        parse: (song, onParserProgress) => {
-            const trackPromises: TrackPromises = {
-                guitar: createTrack('guitar', createResponse(song.ids.guitar)),
-                bass: createTrack('bass', createResponse(song.ids.bass)),
-                vocals: createTrack('vocals', createResponse(song.ids.vocals))
-            };
-
-            const nonNullTrackPromises = Object.values(trackPromises).filter(trackPromise => trackPromise !== null) as Promise<HTMLAudioElement>[];
-
-            const total = nonNullTrackPromises.length;
-            let current = 0;
-
-            onParserProgress({
-                total: total,
-                current: current
-            });
-
-            nonNullTrackPromises.forEach(trackPromise => trackPromise.then(async () => {
-                current++;
-
-                onParserProgress({
-                    total: total,
-                    current: current
-                });
-
-                await wait(1750);
-
-                onParserProgress(null);
-            }))
-
-            return {
-                metadata: song.metadata,
-                trackPromises: trackPromises
-            };
-        }
+        parse: (song, onParserProgress) => parse(song, onParserProgress, createResponsePromise)
     };
 }
 
-function createTrack(track: keyof TrackIds, responsePromise: Promise<DownloadFileResponse> | null): Promise<HTMLAudioElement> | null {
-    if (responsePromise === null) {
-        console.log('No ID found for:', track);
-        return null;
-    }
+function parse(
+    song: Song,
+    onParserProgress: (progress: ParserProgress | null) => void,
+    createResponsePromise: (id: string | null) => Promise<DownloadFileResponse | null>
+): ParsedSong {
+    let current = 0;
+    const total = Object.keys(song.ids).filter(id => id !== null).length;
 
-    return createTrackAsync(track, responsePromise);
+    onParserProgress({
+        total: total,
+        current: current
+    });
+
+    const responsePromises: ResponsePromises = {
+        guitar: createResponsePromise(song.ids.guitar),
+        bass: createResponsePromise(song.ids.bass),
+        vocals: createResponsePromise(song.ids.vocals)
+    };
+
+    Object.entries(responsePromises).forEach(async ([id, responsePromise]) => {
+        console.log(`Downloading track: ${id}`);
+
+        const response = await responsePromise;
+
+        if (response === null) {
+            console.warn(`Track ${id} is null, skipping...`);
+            return;
+        }
+
+        console.log(`Track ${id} downloaded`);
+
+        onParserProgress({
+            total: total,
+            current: ++current
+        });
+
+        if (current === total) {
+            console.log('All tracks downloaded');
+            await wait(ON_COMPLETE_WAIT_TIME);
+            onParserProgress(null);
+        }
+    });
+
+    const tracksPromise = createTracksPromise(responsePromises);
+
+    return {
+        metadata: song.metadata,
+        tracksPromise: tracksPromise
+    };
 }
 
-async function createTrackAsync(track: keyof TrackIds, responsePromise: Promise<DownloadFileResponse>): Promise<HTMLAudioElement> {
-    console.log('Downloading:', track);
+async function createTracksPromise(responsePromises: ResponsePromises): Promise<Tracks> {
+    return {
+        guitar: await createTrackPromise(responsePromises.guitar),
+        bass: await createTrackPromise(responsePromises.bass),
+        vocals: await createTrackPromise(responsePromises.vocals)
+    };
+};
+
+async function createTrackPromise(responsePromise: Promise<DownloadFileResponse | null>): Promise<HTMLAudioElement | null> {
     const response = await responsePromise;
-    console.log('Downloaded:', track);
+
+    if (response === null) return null;
 
     const blob = new Blob([response.buffer]);
     const url = URL.createObjectURL(blob);
