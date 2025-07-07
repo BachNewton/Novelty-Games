@@ -6,7 +6,7 @@ import DatabaseDebugHome from "../database-debug/ui/Home";
 import { getRoute, Route } from "../../ui/Routing";
 import { createNetworkService, NetworkedApplication } from "../../util/networking/NetworkService";
 import { FestivalSong } from "../../trivia/data/Data";
-import { createDatabase } from "../../util/database/Database";
+import { createDatabase } from "../../util/database/IndexedDbDatabase";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
