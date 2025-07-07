@@ -18,7 +18,8 @@ const Player: React.FC<PlayerProps> = ({ parsedSong }) => {
     useEffect(() => {
         const updateSliderInterval = setInterval(() => {
             const time = tracks?.backing?.currentTime ?? 0;
-            ensureTracksAreInSync(tracks, isPlaying, time);
+            // TODO: Need better way to ensure all tracks are in sync
+            // ensureTracksAreInSync(tracks, isPlaying, time);
             setSeconds(time);
         }, SLIDER_UPDATE_INTERVAL);
 
