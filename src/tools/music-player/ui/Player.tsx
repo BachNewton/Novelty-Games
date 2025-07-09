@@ -26,6 +26,7 @@ const Player: React.FC<PlayerProps> = ({ parsedSong }) => {
     useEffect(() => {
         conductor?.stop();
         setConductor(null);
+        setIsExpanded(false);
 
         parsedSong?.conductorPromise.then(conductor => {
             conductor.togglePlay();

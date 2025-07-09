@@ -49,13 +49,12 @@ export function createConductor(audioContext: AudioContext, audioBuffers: AudioB
         get state() { return state; },
         duration: duration,
         get currentTime() {
-            if (state === State.Paused) {
-                return offset + (audioContext.currentTime - startTime);
-            } else if (state === State.Playing) {
-                return offset;
+            switch (state) {
+                case State.Playing:
+                    return offset + (audioContext.currentTime - startTime);
+                case State.Paused:
+                    return offset;
             }
-
-            return 0;
         },
         updateTime: (time: number) => {
             stop(sourceNodes);
