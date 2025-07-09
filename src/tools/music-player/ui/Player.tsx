@@ -61,7 +61,10 @@ const Player: React.FC<PlayerProps> = ({ parsedSong }) => {
         {headerUi(parsedSong, handleExpansion)}
 
         <div style={{ display: 'flex', justifyContent: 'center' }} onClick={handleExpansion}>
-            {sliderUi(conductor, seconds, time => conductor?.updateTime(time))}
+            {sliderUi(conductor?.duration ?? 0, seconds, time => {
+                conductor?.updateTime(time);
+                setSeconds(time);
+            })}
         </div>
 
         {iconBarUi(conductor, onPlayButtonClick, handleExpansion)}
@@ -95,12 +98,12 @@ function headerUi(parsedSong: ParsedSong | null, handleExpansion: (e: React.Mous
     </div>;
 }
 
-function sliderUi(conductor: Conductor | null, seconds: number, updateTime: (time: number) => void): JSX.Element {
+function sliderUi(duration: number, time: number, updateTime: (time: number) => void): JSX.Element {
     return <input
         type='range'
         min={0}
-        max={conductor?.duration ?? 0}
-        value={seconds}
+        max={duration}
+        value={time}
         onChange={e => {
             const time = Number(e.target.value);
             updateTime(time);

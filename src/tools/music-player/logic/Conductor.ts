@@ -22,7 +22,8 @@ export interface Conductor {
 
 export function createConductor(audioContext: AudioContext, audioBuffers: AudioBuffers): Conductor {
     let state: State = State.Paused;
-    let pauseTime = 0;
+    let startTime = 0;
+    let offset = 0;
 
     const gainNodes: GainNodes = {
         guitar: audioContext.createGain(),
@@ -47,21 +48,36 @@ export function createConductor(audioContext: AudioContext, audioBuffers: AudioB
     return {
         get state() { return state; },
         duration: duration,
-        get currentTime() { return audioContext.currentTime; },
+        get currentTime() {
+            if (state === State.Paused) {
+                return offset + (audioContext.currentTime - startTime);
+            } else if (state === State.Playing) {
+                return offset;
+            }
+
+            return 0;
+        },
         updateTime: (time: number) => {
             stop(sourceNodes);
+
+            offset = time;
             sourceNodes = createSourceNodes(audioContext, audioBuffers, gainNodes);
-            play(sourceNodes, time);
+
+            if (state === State.Playing) {
+                startTime = audioContext.currentTime;
+                play(sourceNodes, offset);
+            }
         },
         togglePlay: () => {
             if (state === State.Playing) {
-                pauseTime = audioContext.currentTime;
+                offset += audioContext.currentTime - startTime;
                 state = State.Paused;
                 stop(sourceNodes);
             } else if (state === State.Paused) {
                 state = State.Playing;
+                startTime = audioContext.currentTime;
                 sourceNodes = createSourceNodes(audioContext, audioBuffers, gainNodes);
-                play(sourceNodes, pauseTime);
+                play(sourceNodes, offset);
             }
         },
         toggleMute: (id: keyof TrackIds) => {
