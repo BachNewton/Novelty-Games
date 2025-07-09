@@ -3,8 +3,6 @@ import { nullPromise, wait } from "../../../util/Async";
 import { Song, SongMetadata, TrackIds } from "../data/MusicPlayerIndex";
 import { Conductor, createConductor } from "./Conductor";
 
-const ON_COMPLETE_WAIT_TIME = 1250;
-
 type ResponsePromises = { [Id in keyof TrackIds]: Promise<DownloadFileResponse | null> };
 
 export type AudioBuffers = { [Id in keyof TrackIds]: AudioBuffer | null };
@@ -61,70 +59,33 @@ function parse(
         keys: createResponsePromise(song.ids.keys)
     };
 
+    Object.entries(responsePromises).forEach(async ([id, responsePromise]) => {
+        console.log(`Downloading track: ${id}`);
+
+        const response = await responsePromise;
+
+        if (response === null) {
+            console.warn(`Track ${id} is null, skipping...`);
+            return;
+        }
+
+        console.log(`Track ${id} downloaded`);
+
+        onParserProgress({
+            total: total,
+            current: ++current
+        });
+
+        if (current === total) {
+            console.log('All tracks downloaded');
+        }
+    });
+
     return {
         metadata: song.metadata,
-        conductorPromise: createConductorPromise(audioContext, responsePromises)
+        conductorPromise: createConductorPromise(audioContext, responsePromises, onParserProgress)
     };
 }
-
-// function parse_OLD(
-//     song: Song,
-//     onParserProgress: (progress: ParserProgress | null) => void,
-//     createResponsePromise: (id: string | null) => Promise<DownloadFileResponse | null>,
-//     audioContext: AudioContext
-// ): ParsedSong_OLD {
-//     let current = 0;
-//     const total = Object.values(song.ids).filter(id => id !== null).length;
-
-//     onParserProgress({
-//         total: total,
-//         current: current
-//     });
-
-//     const responsePromises: ResponsePromises = {
-//         guitar: createResponsePromise(song.ids.guitar),
-//         bass: createResponsePromise(song.ids.bass),
-//         vocals: createResponsePromise(song.ids.vocals),
-//         backing: createResponsePromise(song.ids.backing),
-//         drums: createResponsePromise(song.ids.drums),
-//         drums1: createResponsePromise(song.ids.drums1),
-//         drums2: createResponsePromise(song.ids.drums2),
-//         drums3: createResponsePromise(song.ids.drums3),
-//         keys: createResponsePromise(song.ids.keys)
-//     };
-
-//     Object.entries(responsePromises).forEach(async ([id, responsePromise]) => {
-//         console.log(`Downloading track: ${id}`);
-
-//         const response = await responsePromise;
-
-//         if (response === null) {
-//             console.warn(`Track ${id} is null, skipping...`);
-//             return;
-//         }
-
-//         console.log(`Track ${id} downloaded`);
-
-//         onParserProgress({
-//             total: total,
-//             current: ++current
-//         });
-
-//         if (current === total) {
-//             console.log('All tracks downloaded');
-//             await wait(ON_COMPLETE_WAIT_TIME);
-//             onParserProgress(null);
-//         }
-//     });
-
-//     const tracksPromise = createTracksPromise_OLD(responsePromises);
-//     createTracksPromise(audioContext, responsePromises);
-
-//     return {
-//         metadata: song.metadata,
-//         tracksPromise: tracksPromise
-//     };
-// }
 
 async function decodeAudioBuffer(audioContext: AudioContext, responsePromise: Promise<DownloadFileResponse | null>): Promise<AudioBuffer | null> {
     const response = await responsePromise;
@@ -136,7 +97,11 @@ async function decodeAudioBuffer(audioContext: AudioContext, responsePromise: Pr
     }
 }
 
-async function createConductorPromise(audioContext: AudioContext, responsePromises: ResponsePromises): Promise<Conductor> {
+async function createConductorPromise(
+    audioContext: AudioContext,
+    responsePromises: ResponsePromises,
+    onParserProgress: (progress: ParserProgress | null) => void
+): Promise<Conductor> {
     const audioBuffers: AudioBuffers = {
         guitar: await decodeAudioBuffer(audioContext, responsePromises.guitar),
         bass: await decodeAudioBuffer(audioContext, responsePromises.bass),
@@ -148,6 +113,8 @@ async function createConductorPromise(audioContext: AudioContext, responsePromis
         drums3: await decodeAudioBuffer(audioContext, responsePromises.drums3),
         keys: await decodeAudioBuffer(audioContext, responsePromises.keys)
     };
+
+    onParserProgress(null);
 
     return createConductor(audioContext, audioBuffers);
 }
