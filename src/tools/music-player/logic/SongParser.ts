@@ -6,6 +6,8 @@ import { createParserProgressTracker, ParserProgressTracker } from "./ParserProg
 
 type ResponsePromises = { [Id in keyof TrackIds]: Promise<DownloadFileResponse | null> };
 
+type AudioBufferPromises = { [Id in keyof TrackIds]: Promise<AudioBuffer | null> };
+
 export type AudioBuffers = { [Id in keyof TrackIds]: AudioBuffer | null };
 
 export interface ParsedSong {
@@ -40,7 +42,8 @@ function parse(
     createResponsePromise: (id: string | null) => Promise<DownloadFileResponse | null>,
     audioContext: AudioContext
 ): ParsedSong {
-    const total = Object.values(song.ids).filter(id => id !== null).length;
+    const nonNullIds = Object.values(song.ids).filter(id => id !== null).length;
+    const total = nonNullIds * 2; // Each track has a download and decode step
     const parserProgressTracker = createParserProgressTracker(total, onParserProgress);
 
     const responsePromises: ResponsePromises = {
@@ -91,16 +94,43 @@ async function createConductorPromise(
     responsePromises: ResponsePromises,
     parserProgressTracker: ParserProgressTracker
 ): Promise<Conductor> {
+    const audioBuffersPromises: AudioBufferPromises = {
+        guitar: decodeAudioBuffer(audioContext, responsePromises.guitar),
+        bass: decodeAudioBuffer(audioContext, responsePromises.bass),
+        vocals: decodeAudioBuffer(audioContext, responsePromises.vocals),
+        backing: decodeAudioBuffer(audioContext, responsePromises.backing),
+        drums: decodeAudioBuffer(audioContext, responsePromises.drums),
+        drums1: decodeAudioBuffer(audioContext, responsePromises.drums1),
+        drums2: decodeAudioBuffer(audioContext, responsePromises.drums2),
+        drums3: decodeAudioBuffer(audioContext, responsePromises.drums3),
+        keys: decodeAudioBuffer(audioContext, responsePromises.keys)
+    };
+
+    Object.entries(audioBuffersPromises).forEach(async ([id, audioBuffersPromise]) => {
+        console.log(`Decoding audio buffer for: ${id}`);
+
+        const audioBuffer = await audioBuffersPromise;
+
+        if (audioBuffer === null) {
+            console.warn(`Audio buffer ${id} is null, skipping...`);
+            return;
+        }
+
+        console.log(`Audio buffer ${id} decoded`);
+
+        parserProgressTracker.makeProgress();
+    });
+
     const audioBuffers: AudioBuffers = {
-        guitar: await decodeAudioBuffer(audioContext, responsePromises.guitar),
-        bass: await decodeAudioBuffer(audioContext, responsePromises.bass),
-        vocals: await decodeAudioBuffer(audioContext, responsePromises.vocals),
-        backing: await decodeAudioBuffer(audioContext, responsePromises.backing),
-        drums: await decodeAudioBuffer(audioContext, responsePromises.drums),
-        drums1: await decodeAudioBuffer(audioContext, responsePromises.drums1),
-        drums2: await decodeAudioBuffer(audioContext, responsePromises.drums2),
-        drums3: await decodeAudioBuffer(audioContext, responsePromises.drums3),
-        keys: await decodeAudioBuffer(audioContext, responsePromises.keys)
+        guitar: await audioBuffersPromises.guitar,
+        bass: await audioBuffersPromises.bass,
+        vocals: await audioBuffersPromises.vocals,
+        backing: await audioBuffersPromises.backing,
+        drums: await audioBuffersPromises.drums,
+        drums1: await audioBuffersPromises.drums1,
+        drums2: await audioBuffersPromises.drums2,
+        drums3: await audioBuffersPromises.drums3,
+        keys: await audioBuffersPromises.keys
     };
 
     parserProgressTracker.complete();
