@@ -5,7 +5,6 @@ import Scaffold from "../../../util/ui/Scaffold";
 import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
 import { ParsedSong, ParserProgress, SongParser } from "../logic/SongParser";
 import ProgressBar from "../../../util/ui/ProgressBar";
-import { createConductor } from "../logic/Conductor";
 
 interface NewMusicPlayerProps {
     songParser: SongParser;
