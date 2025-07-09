@@ -2,6 +2,7 @@ import { DownloadFileResponse, NetworkService } from "../../../util/networking/N
 import { nullPromise, wait } from "../../../util/Async";
 import { Song, SongMetadata, TrackIds } from "../data/MusicPlayerIndex";
 import { Conductor, createConductor } from "./Conductor";
+import { createParserProgressTracker, ParserProgressTracker } from "./ParserProgressTracker";
 
 type ResponsePromises = { [Id in keyof TrackIds]: Promise<DownloadFileResponse | null> };
 
@@ -39,13 +40,8 @@ function parse(
     createResponsePromise: (id: string | null) => Promise<DownloadFileResponse | null>,
     audioContext: AudioContext
 ): ParsedSong {
-    let current = 0;
     const total = Object.values(song.ids).filter(id => id !== null).length;
-
-    onParserProgress({
-        total: total,
-        current: current
-    });
+    const parserProgressTracker = createParserProgressTracker(total, onParserProgress);
 
     const responsePromises: ResponsePromises = {
         guitar: createResponsePromise(song.ids.guitar),
@@ -71,19 +67,12 @@ function parse(
 
         console.log(`Track ${id} downloaded`);
 
-        onParserProgress({
-            total: total,
-            current: ++current
-        });
-
-        if (current === total) {
-            console.log('All tracks downloaded');
-        }
+        parserProgressTracker.makeProgress();
     });
 
     return {
         metadata: song.metadata,
-        conductorPromise: createConductorPromise(audioContext, responsePromises, onParserProgress)
+        conductorPromise: createConductorPromise(audioContext, responsePromises, parserProgressTracker)
     };
 }
 
@@ -100,7 +89,7 @@ async function decodeAudioBuffer(audioContext: AudioContext, responsePromise: Pr
 async function createConductorPromise(
     audioContext: AudioContext,
     responsePromises: ResponsePromises,
-    onParserProgress: (progress: ParserProgress | null) => void
+    parserProgressTracker: ParserProgressTracker
 ): Promise<Conductor> {
     const audioBuffers: AudioBuffers = {
         guitar: await decodeAudioBuffer(audioContext, responsePromises.guitar),
@@ -114,7 +103,7 @@ async function createConductorPromise(
         keys: await decodeAudioBuffer(audioContext, responsePromises.keys)
     };
 
-    onParserProgress(null);
+    parserProgressTracker.complete();
 
     return createConductor(audioContext, audioBuffers);
 }
