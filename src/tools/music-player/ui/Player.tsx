@@ -121,12 +121,12 @@ function expandedUi(
     onAll: () => void,
     onToggleMute: (id: keyof TrackIds) => void
 ): JSX.Element {
-    if (!expanded) return <></>;
+    if (!expanded || conductor === null) return <></>;
 
     const trackCheckboxFor = (id: keyof TrackIds, label: string) => {
         return trackCheckbox(
             label,
-            conductor?.isMuted(id) ?? true,
+            conductor.isMuted(id),
             () => onSolo(id),
             () => onToggleMute(id),
             handleExpansion
