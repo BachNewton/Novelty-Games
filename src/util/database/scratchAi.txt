@@ -1,0 +1,129 @@
+// ----- Definitions (Unchanged) -----
+// This interface remains the core building block for a table.
+interface Table<T> {
+    add: (data: T) => Promise<void>;
+    getAll: () => Promise<T[]>;
+    // Future suggestion: add update, delete, getById methods here.
+}
+
+// ----- Data Models (Unchanged) -----
+// The shape of our data remains the same.
+interface Person {
+    firstName: string;
+    lastName: string;
+}
+
+interface Car {
+    make: string;
+    year: number;
+}
+
+interface Computer {
+    brand: string;
+    cpu: string;
+}
+
+interface Office {
+    location: string;
+    headcount: number;
+}
+
+
+// ----- Database Blueprints (Refactored) -----
+// We now use objects with named keys instead of tuples.
+// This makes accessing a specific table more explicit and readable.
+type ExampleAlphaDatabase = {
+    people: Table<Person>;
+    cars: Table<Car>;
+};
+
+type ExampleBravoDatabase = {
+    computers: Table<Computer>;
+    offices: Table<Office>;
+};
+
+// The main manager holds the database objects.
+interface DatabaseManager {
+    exampleAlphaDatabase: ExampleAlphaDatabase;
+    exampleBravoDatabase: ExampleBravoDatabase;
+}
+
+
+// ----- Internal Implementation (Unchanged) -----
+// This factory function is perfectly reusable as is.
+/**
+ * Creates a self-contained handler for a mock table's operations.
+ * This function returns an object that conforms to the Table<T> interface.
+ * @param dbName The name of the database for logging purposes.
+ * @param tableName The name of the table for logging purposes.
+ */
+function createMockTableHandler<T>(dbName: string, tableName: string): Table<T> {
+    // Private state (the table's rows) is encapsulated within the function's closure.
+    const rows: T[] = [];
+
+    return {
+        add: (data: T): Promise<void> => {
+            console.log(`Adding to ${dbName}.${tableName}:`, data);
+            rows.push(data);
+            return Promise.resolve();
+        },
+        getAll: (): Promise<T[]> => {
+            console.log(`Getting all from ${dbName}.${tableName}`);
+            return Promise.resolve([...rows]);
+        }
+    };
+}
+
+
+/**
+ * Creates a DatabaseManager that now constructs and provides multiple databases.
+ * (Refactored for clarity).
+ */
+function createDatabaseManager(): DatabaseManager {
+    // --- Define Database Names for clarity and reuse ---
+    const dbNames = {
+        alpha: 'example-alpha',
+        bravo: 'example-bravo'
+    };
+
+    // --- Assemble and Return the Manager ---
+    // This structure clearly groups tables under their respective databases.
+    return {
+        exampleAlphaDatabase: {
+            people: createMockTableHandler<Person>(dbNames.alpha, 'people'),
+            cars: createMockTableHandler<Car>(dbNames.alpha, 'cars')
+        },
+        exampleBravoDatabase: {
+            computers: createMockTableHandler<Computer>(dbNames.bravo, 'computers'),
+            offices: createMockTableHandler<Office>(dbNames.bravo, 'offices')
+        }
+    };
+}
+
+
+// ----- Examples (Refactored) -----
+// The usage code is now more descriptive.
+
+const databaseManager = createDatabaseManager();
+
+console.log('--- Using Alpha Database ---');
+// No more array destructuring; we access tables by their property names.
+const alphaDB = databaseManager.exampleAlphaDatabase;
+
+alphaDB.people.add({ firstName: 'Landon', lastName: 'Smith' });
+alphaDB.people.add({ firstName: 'Kyle', lastName: 'Hutchinson' });
+alphaDB.people.getAll().then(data => console.log('All People', data));
+
+alphaDB.cars.add({ make: 'Ford', year: 2013 });
+alphaDB.cars.getAll().then(data => console.log('All Cars', data));
+
+
+// The same pattern applies to the Bravo database.
+console.log('\n--- Using Bravo Database ---');
+const bravoDB = databaseManager.exampleBravoDatabase;
+
+bravoDB.computers.add({ brand: 'Apple', cpu: 'M2' });
+bravoDB.computers.getAll().then(data => console.log('All Computers', data));
+
+bravoDB.offices.add({ location: 'New York', headcount: 50 });
+bravoDB.offices.getAll().then(data => console.log('All Offices', data));
