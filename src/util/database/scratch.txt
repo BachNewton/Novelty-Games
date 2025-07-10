@@ -1,0 +1,90 @@
+// ----- Definitions -----
+
+interface Table<T> {
+    add: (data: T) => Promise<void>;
+    getAll: () => Promise<T[]>;
+}
+
+interface Person {
+    firstName: string;
+    lastName: string;
+}
+
+interface Car {
+    make: string;
+    year: number;
+}
+
+type ExampleAlphaDatabase = [Table<Person>, Table<Car>];
+
+interface DatabaseManager {
+    exampleAlphaDatabase: ExampleAlphaDatabase;
+}
+
+interface MockIndexedDbTable {
+    name: string,
+    rows: any[]
+}
+
+interface MockIndexedDbDatabase {
+    name: string;
+    tables: Record<string, MockIndexedDbTable>;
+}
+
+function createTable<T>(onAdd: (data: T) => Promise<void>, onGetAll: () => Promise<T[]>): Table<T> {
+    return {
+        add: onAdd,
+        getAll: onGetAll
+    }
+}
+
+function createDatabaseManager(): DatabaseManager {
+    const exampleAlphaDatabase: MockIndexedDbDatabase = {
+        name: 'example-alpha',
+        tables: {
+            people: { name: 'people', rows: [] },
+            cars: { name: 'cars', rows: [] }
+        }
+    };
+
+    const add = (database: MockIndexedDbDatabase, table: MockIndexedDbTable, data: any) => {
+        console.log('Adding', database.name, table.name, data);
+
+        table.rows.push(data);
+
+        return new Promise<void>(resolve => resolve());
+    };
+
+    const getAll = (database: MockIndexedDbDatabase, table: MockIndexedDbTable) => {
+        console.log('Getting', database.name, table.name);
+
+        return new Promise<any>(resolve => resolve(table.rows));
+    };
+
+    return {
+        exampleAlphaDatabase: [
+            createTable(
+                data => add(exampleAlphaDatabase, exampleAlphaDatabase.tables['people'], data),
+                () => getAll(exampleAlphaDatabase, exampleAlphaDatabase.tables['people'])
+            ),
+            createTable(
+                data => add(exampleAlphaDatabase, exampleAlphaDatabase.tables['cars'], data),
+                () => getAll(exampleAlphaDatabase, exampleAlphaDatabase.tables['cars'])
+            ),
+        ]
+    };
+}
+
+// ----- Examples -----
+
+const databaseManager = createDatabaseManager();
+
+const exampleAlphaDatabase = databaseManager.exampleAlphaDatabase;
+const [personTable, carTable] = exampleAlphaDatabase;
+
+personTable.add({ firstName: 'Landon', lastName: 'Smith' });
+personTable.add({ firstName: 'Kyle', lastName: 'Hutchinson' });
+personTable.getAll().then(data => console.log('All People', data));
+
+carTable.add({ make: 'Ford', year: 2013 });
+carTable.getAll().then(data => console.log('All Cards', data));
