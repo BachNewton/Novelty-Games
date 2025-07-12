@@ -5,6 +5,7 @@ import { TrackIds } from "../data/MusicPlayerIndex";
 import PlayPauseIcon, { State } from "./PlayPauseIcon";
 
 const SLIDER_UPDATE_INTERVAL = 200;
+const BUTTON_SYLE: React.CSSProperties = { fontSize: '1.15em', borderRadius: '15px', padding: '5px', textAlign: 'left' }
 
 interface PlayerProps {
     parsedSong: ParsedSong | null;
@@ -135,7 +136,7 @@ function expandedUi(
     };
 
     return <div style={{ display: 'flex', flexDirection: 'column', marginTop: '5px' }}>
-        <button style={{ fontSize: '1em', textAlign: 'left' }} onClick={onAll}>All</button>
+        <button style={BUTTON_SYLE} onClick={onAll}>All</button>
         {trackCheckboxFor('guitar', 'Guitar')}
         {trackCheckboxFor('bass', 'Bass')}
         {trackCheckboxFor('vocals', 'Vocals')}
@@ -155,14 +156,14 @@ function trackCheckbox(
     onToggleMute: () => void,
     handleExpansion: (e: React.MouseEvent) => void
 ): JSX.Element {
-    return <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '5px' }} onClick={handleExpansion}>
+    return <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '7.5px' }} onClick={handleExpansion}>
         <input
             type='checkbox'
             onChange={onToggleMute}
             checked={!isMuted}
             style={{ transform: 'scale(2.5)' }}
         />
-        <button style={{ width: '6em', fontSize: '1em' }} onClick={onSolo}>{label}</button>
+        <button style={{ width: '6em', ...BUTTON_SYLE }} onClick={onSolo}>{label}</button>
     </div>;
 }
 
