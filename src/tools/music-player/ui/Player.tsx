@@ -1,75 +1,83 @@
 import { useEffect, useState } from "react";
-import { ParsedSong, Tracks } from "../logic/SongParser";
+import { ParsedSong } from "../logic/SongParser";
+import { Conductor, State } from "../logic/Conductor";
+import { TrackIds } from "../data/MusicPlayerIndex";
 
 const SLIDER_UPDATE_INTERVAL = 200;
-const OUT_OF_SYNC_THRESHOLD = 0.05;
 
 interface PlayerProps {
     parsedSong: ParsedSong | null;
 }
 
 const Player: React.FC<PlayerProps> = ({ parsedSong }) => {
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
     const [seconds, setSeconds] = useState(0);
-    const [tracks, setTracks] = useState<Tracks | null>(null);
+    const [conductor, setConductor] = useState<Conductor | null>(null);
     const [_, setForceRender] = useState(false);
 
     useEffect(() => {
         const updateSliderInterval = setInterval(() => {
-            const time = tracks?.backing?.currentTime ?? 0;
-            // TODO: Need better way to ensure all tracks are in sync
-            // ensureTracksAreInSync(tracks, isPlaying, time);
-            setSeconds(time);
+            setSeconds(conductor?.currentTime ?? 0);
         }, SLIDER_UPDATE_INTERVAL);
 
         return () => clearInterval(updateSliderInterval);
-    }, [tracks, isPlaying]);
+    }, [conductor]);
 
     useEffect(() => {
-        applyToTracks(audio => audio.pause(), tracks);
-        setTracks(null);
-        setIsPlaying(false);
+        conductor?.stop();
+        setConductor(null);
+        setIsExpanded(false);
 
-        parsedSong?.tracksPromise.then(loadedTracks => {
-            setTracks(loadedTracks);
-            applyToTracks(audio => audio.play(), loadedTracks);
-            setIsPlaying(true);
-            setSeconds(0);
+        parsedSong?.conductorPromise.then(conductor => {
+            conductor.togglePlay();
+            setIsExpanded(true);
+            setConductor(conductor);
         });
     }, [parsedSong]);
 
     const handleExpansion = (e: React.MouseEvent) => { if (e.target === e.currentTarget) setIsExpanded(!isExpanded) };
 
-    const onPlayButtonClick = () => {
-        if (tracks === null) return;
-
-        setIsPlaying(!isPlaying);
-        playButtonClick(!isPlaying, tracks);
-    };
+    const onPlayButtonClick = () => conductor?.togglePlay();
 
     const forceRender = () => setForceRender(prev => !prev);
 
+    const onSolo = (id: keyof TrackIds) => {
+        conductor?.solo(id);
+        forceRender();
+    };
+
+    const onAll = () => {
+        conductor?.all();
+        forceRender();
+    };
+
+    const onToggleMute = (id: keyof TrackIds) => {
+        conductor?.toggleMute(id);
+        forceRender();
+    };
+
     return <div>
-        {expandedUi(isExpanded, tracks, handleExpansion, forceRender)}
+        {expandedUi(isExpanded, conductor, handleExpansion, onSolo, onAll, onToggleMute)}
 
         {headerUi(parsedSong, handleExpansion)}
 
         <div style={{ display: 'flex', justifyContent: 'center' }} onClick={handleExpansion}>
-            {sliderUi(tracks, seconds, updatedSeconds => setSeconds(updatedSeconds))}
+            {sliderUi(conductor?.duration ?? 0, seconds, time => {
+                conductor?.updateTime(time);
+                setSeconds(time);
+            })}
         </div>
 
-        {iconBarUi(onPlayButtonClick, handleExpansion, tracks, isPlaying)}
+        {iconBarUi(conductor, onPlayButtonClick, handleExpansion)}
     </div>;
 };
 
 function iconBarUi(
+    conductor: Conductor | null,
     onPlayButtonClick: () => void,
-    handleExpansion: (e: React.MouseEvent) => void,
-    tracks: Tracks | null,
-    isPlaying: boolean
+    handleExpansion: (e: React.MouseEvent) => void
 ): JSX.Element {
-    const icon = tracks === null ? '⏯️' : isPlaying ? '⏸️' : '▶️';
+    const icon = conductor === null ? '⏯️' : conductor.state === State.Playing ? '⏸️' : '▶️';
 
     return <div style={{ display: 'flex', justifyContent: 'center', fontSize: '1.75em', alignItems: 'center' }} onClick={handleExpansion}>
         <div style={{ flex: 1 }} />
@@ -83,21 +91,6 @@ function iconBarUi(
     </div>;
 }
 
-function ensureTracksAreInSync(tracks: Tracks | null, isPlaying: boolean, time: number) {
-    if (tracks === null) return;
-    if (!isPlaying) return;
-
-    Object.entries(tracks).forEach(([key, audio]) => {
-        if (audio === null) return;
-        if (Math.abs(audio.currentTime - time) <= OUT_OF_SYNC_THRESHOLD) return;
-
-        console.warn(`${key} is out of sync! Current: ${audio.currentTime.toFixed(3)}, Target: ${time.toFixed(3)}. Sycing...`);
-        audio.pause();
-        audio.currentTime = time;
-        audio.play();
-    });
-}
-
 function headerUi(parsedSong: ParsedSong | null, handleExpansion: (e: React.MouseEvent) => void): JSX.Element {
     if (parsedSong === null) return <></>;
 
@@ -106,16 +99,15 @@ function headerUi(parsedSong: ParsedSong | null, handleExpansion: (e: React.Mous
     </div>;
 }
 
-function sliderUi(tracks: Tracks | null, seconds: number, updateSeconds: (seconds: number) => void): JSX.Element {
+function sliderUi(duration: number, time: number, updateTime: (time: number) => void): JSX.Element {
     return <input
         type='range'
         min={0}
-        max={tracks?.backing?.duration ?? 0}
-        value={seconds}
+        max={duration}
+        value={time}
         onChange={e => {
-            const newSeconds = Number(e.target.value);
-            applyToTracks(audio => audio.currentTime = newSeconds, tracks);
-            updateSeconds(newSeconds);
+            const time = Number(e.target.value);
+            updateTime(time);
         }}
         style={{ width: '75%', cursor: 'pointer' }}
     />;
@@ -123,80 +115,58 @@ function sliderUi(tracks: Tracks | null, seconds: number, updateSeconds: (second
 
 function expandedUi(
     expanded: boolean,
-    tracks: Tracks | null,
+    conductor: Conductor | null,
     handleExpansion: (e: React.MouseEvent) => void,
-    forceRender: () => void
+    onSolo: (id: keyof TrackIds) => void,
+    onAll: () => void,
+    onToggleMute: (id: keyof TrackIds) => void
 ): JSX.Element {
-    if (!expanded || tracks === null) return <></>;
+    if (!expanded || conductor === null) return <></>;
 
-    const onSolo = (track: HTMLAudioElement) => {
-        applyToTracks(audio => {
-            if (audio === track) audio.muted = false;
-            else audio.muted = true;
-        }, tracks);
-
-        forceRender();
-    };
-
-    const onAll = () => {
-        applyToTracks(audio => audio.muted = false, tracks);
-        forceRender();
-    };
-
-    const trackCheckboxFor = (track: HTMLAudioElement | null, name: string) => {
-        if (track === null) return;
-        return trackCheckbox(track, name, onSolo, handleExpansion);
+    const trackCheckboxFor = (id: keyof TrackIds, label: string) => {
+        if (conductor.isAvailable(id)) {
+            return trackCheckbox(
+                label,
+                conductor.isMuted(id),
+                () => onSolo(id),
+                () => onToggleMute(id),
+                handleExpansion
+            );
+        } else {
+            return <></>;
+        }
     };
 
     return <div style={{ display: 'flex', flexDirection: 'column', marginTop: '5px' }}>
         <button style={{ fontSize: '1em', textAlign: 'left' }} onClick={onAll}>All</button>
-        {trackCheckboxFor(tracks.guitar, 'Guitar')}
-        {trackCheckboxFor(tracks.bass, 'Bass')}
-        {trackCheckboxFor(tracks.vocals, 'Vocals')}
-        {trackCheckboxFor(tracks.drums, 'Drums')}
-        {trackCheckboxFor(tracks.drums1, 'Drums 1')}
-        {trackCheckboxFor(tracks.drums2, 'Drums 2')}
-        {trackCheckboxFor(tracks.drums3, 'Drums 3')}
-        {trackCheckboxFor(tracks.keys, 'Keys')}
-        {trackCheckboxFor(tracks.backing, 'Backing')}
+        {trackCheckboxFor('guitar', 'Guitar')}
+        {trackCheckboxFor('bass', 'Bass')}
+        {trackCheckboxFor('vocals', 'Vocals')}
+        {trackCheckboxFor('drums', 'Drums')}
+        {trackCheckboxFor('drums1', 'Drums 1')}
+        {trackCheckboxFor('drums2', 'Drums 2')}
+        {trackCheckboxFor('drums3', 'Drums 3')}
+        {trackCheckboxFor('keys', 'Keys')}
+        {trackCheckboxFor('backing', 'Backing')}
     </div>;
 }
 
 function trackCheckbox(
-    track: HTMLAudioElement,
     label: string,
-    onSolo: (track: HTMLAudioElement) => void,
+    isMuted: boolean,
+    onSolo: () => void,
+    onToggleMute: () => void,
     handleExpansion: (e: React.MouseEvent) => void
 ): JSX.Element {
     return <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '5px' }} onClick={handleExpansion}>
         <input
             type='checkbox'
-            onChange={e => {
-                track.muted = !e.target.checked;
-            }}
-            checked={!track.muted}
+            onChange={onToggleMute}
+            checked={!isMuted}
             style={{ transform: 'scale(2.5)' }}
         />
-        <button style={{ width: '6em', fontSize: '1em' }} onClick={() => onSolo(track)}>{label}</button>
+        <button style={{ width: '6em', fontSize: '1em' }} onClick={onSolo}>{label}</button>
     </div>;
-}
-
-function playButtonClick(isPlaying: boolean, tracks: Tracks) {
-    if (isPlaying) {
-        applyToTracks(audio => audio.play(), tracks);
-    } else {
-        applyToTracks(audio => audio.pause(), tracks);
-    }
-}
-
-function applyToTracks(apply: (audioElement: HTMLAudioElement) => void, tracks: Tracks | null) {
-    if (tracks === null) return;
-
-    Object.values(tracks).forEach(audio => {
-        if (audio !== null) {
-            apply(audio);
-        }
-    });
 }
 
 export default Player;
