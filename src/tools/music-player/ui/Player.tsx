@@ -124,13 +124,17 @@ function expandedUi(
     if (!expanded || conductor === null) return <></>;
 
     const trackCheckboxFor = (id: keyof TrackIds, label: string) => {
-        return trackCheckbox(
-            label,
-            conductor.isMuted(id),
-            () => onSolo(id),
-            () => onToggleMute(id),
-            handleExpansion
-        );
+        if (conductor.isAvailable(id)) {
+            return trackCheckbox(
+                label,
+                conductor.isMuted(id),
+                () => onSolo(id),
+                () => onToggleMute(id),
+                handleExpansion
+            );
+        } else {
+            return <></>;
+        }
     };
 
     return <div style={{ display: 'flex', flexDirection: 'column', marginTop: '5px' }}>

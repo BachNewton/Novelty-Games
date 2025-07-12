@@ -17,6 +17,7 @@ export interface Conductor {
     solo: (id: keyof TrackIds) => void;
     all: () => void;
     isMuted: (id: keyof TrackIds) => boolean;
+    isAvailable: (id: keyof TrackIds) => boolean;
     stop: () => void;
 }
 
@@ -96,9 +97,8 @@ export function createConductor(audioContext: AudioContext, audioBuffers: AudioB
                 node.gain.value = 1;
             });
         },
-        isMuted: (id) => {
-            return gainNodes[id].gain.value === 0;
-        },
+        isMuted: (id) => gainNodes[id].gain.value === 0,
+        isAvailable: (id) => audioBuffers[id] !== null,
         stop: () => {
             stop(sourceNodes);
             state = State.Paused;
