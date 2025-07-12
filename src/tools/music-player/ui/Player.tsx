@@ -14,7 +14,7 @@ const Player: React.FC<PlayerProps> = ({ parsedSong }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [seconds, setSeconds] = useState(0);
     const [conductor, setConductor] = useState<Conductor | null>(null);
-    const [_, setForceRender] = useState(false);
+    const [, setForceRender] = useState(false);
 
     useEffect(() => {
         const updateSliderInterval = setInterval(() => {
