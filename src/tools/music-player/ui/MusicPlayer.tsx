@@ -6,6 +6,8 @@ import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
 import { ParsedSong, ParserProgress, SongParser } from "../logic/SongParser";
 import ProgressBar from "../../../util/ui/ProgressBar";
 
+const FONT_SCALE = 1.4;
+
 interface NewMusicPlayerProps {
     songParser: SongParser;
 }
@@ -28,7 +30,7 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
         header={headerUi(text => setSearchText(text))}
         content={<Library songs={filteredSongs} onSongSelected={onSongSelected} />}
         footer={footerUi(parsedSong, parserProgress)}
-        fontScale={1.4}
+        fontScale={FONT_SCALE}
     />;
 };
 
