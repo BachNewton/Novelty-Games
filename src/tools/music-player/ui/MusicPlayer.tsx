@@ -33,21 +33,15 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
 };
 
 function headerUi(setSearchText: (text: string) => void): JSX.Element {
-    return <>
-        {/* <div style={{ display: 'flex' }}>
-            <button onClick={() => { }} style={{ fontSize: '1em', fontWeight: 'bold', flexGrow: 1 }}>Import New Songs 📁</button>
-            <button onClick={() => { }} style={{ fontSize: '1em' }}>🗑️</button>
-        </div> */}
+    return <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div style={{ fontSize: '1.2em' }}>🔎</div>
 
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-            <div style={{ fontSize: '1.2em' }}>🔎</div>
-            <input
-                style={{ fontSize: '0.8em', flexGrow: 1, borderRadius: '15px', padding: '5px', margin: '5px' }}
-                placeholder='Search'
-                onChange={e => setSearchText(e.target.value)}
-            />
-        </div>
-    </>;
+        <input
+            style={{ fontSize: '0.8em', flexGrow: 1, borderRadius: '15px', padding: '5px', margin: '5px' }}
+            placeholder='Search'
+            onChange={e => setSearchText(e.target.value)}
+        />
+    </div>;
 }
 
 function footerUi(parsedSong: ParsedSong | null, progress: ParserProgress | null): JSX.Element {
