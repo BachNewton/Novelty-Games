@@ -92,7 +92,7 @@ function iconBarUi(
 function headerUi(parsedSong: ParsedSong | null, handleExpansion: (e: React.MouseEvent) => void): JSX.Element {
     if (parsedSong === null) return <></>;
 
-    return <div style={{ textAlign: 'center', marginTop: '5px', userSelect: 'none' }} onClick={handleExpansion}>
+    return <div style={{ textAlign: 'center', margin: '10px 0px', userSelect: 'none', fontWeight: 'bold' }} onClick={handleExpansion}>
         {parsedSong.metadata.title} - {parsedSong.metadata.artist}
     </div>;
 }
