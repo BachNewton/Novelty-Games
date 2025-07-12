@@ -79,14 +79,9 @@ function iconBarUi(
 ): JSX.Element {
     const icon = conductor === null ? '⏯️' : conductor.state === State.Playing ? '⏸️' : '▶️';
 
-    return <div style={{ display: 'flex', justifyContent: 'center', fontSize: '1.75em', alignItems: 'center' }} onClick={handleExpansion}>
-        <div style={{ flex: 1 }} />
+    return <div style={{ display: 'flex', justifyContent: 'center', fontSize: '1.75em' }} onClick={handleExpansion}>
         <div style={{ cursor: 'pointer' }} onClick={onPlayButtonClick}>
             {icon}
-        </div>
-        <div style={{ flex: 1, display: 'flex' }}>
-            <div style={{ flex: 1 }} onClick={handleExpansion} />
-            <div style={{ cursor: 'pointer' }}>💾</div>
         </div>
     </div>;
 }
