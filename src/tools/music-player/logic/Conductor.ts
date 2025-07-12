@@ -46,17 +46,19 @@ export function createConductor(audioContext: AudioContext, audioBuffers: AudioB
         return Math.max(max, node.buffer.duration);
     }, 0);
 
+    const currentTime = () => {
+        switch (state) {
+            case State.Playing:
+                return offset + (audioContext.currentTime - startTime);
+            case State.Paused:
+                return offset;
+        }
+    };
+
     return {
         get state() { return state; },
         duration: duration,
-        get currentTime() {
-            switch (state) {
-                case State.Playing:
-                    return offset + (audioContext.currentTime - startTime);
-                case State.Paused:
-                    return offset;
-            }
-        },
+        get currentTime() { return currentTime(); },
         updateTime: (time: number) => {
             stop(sourceNodes);
 

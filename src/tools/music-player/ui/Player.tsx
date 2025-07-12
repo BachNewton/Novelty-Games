@@ -5,7 +5,6 @@ import { TrackIds } from "../data/MusicPlayerIndex";
 import PlayPauseIcon, { State } from "./PlayPauseIcon";
 
 const SLIDER_UPDATE_INTERVAL = 200;
-const PLAY_PAUSE_ICON_SIZE = '3.5em';
 
 interface PlayerProps {
     parsedSong: ParsedSong | null;

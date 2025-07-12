@@ -1,5 +1,5 @@
 import { DownloadFileResponse, NetworkService } from "../../../util/networking/NetworkService";
-import { nullPromise, wait } from "../../../util/Async";
+import { nullPromise } from "../../../util/Async";
 import { Song, SongMetadata, TrackIds } from "../data/MusicPlayerIndex";
 import { Conductor, createConductor } from "./Conductor";
 import { createParserProgressTracker, ParserProgressTracker } from "./ParserProgressTracker";
