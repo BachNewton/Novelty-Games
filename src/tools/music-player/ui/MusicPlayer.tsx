@@ -28,7 +28,7 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
         header={headerUi(text => setSearchText(text))}
         content={<Library songs={filteredSongs} onSongSelected={onSongSelected} />}
         footer={footerUi(parsedSong, parserProgress)}
-        fontScale={1.5}
+        fontScale={1.3}
     />;
 };
 
