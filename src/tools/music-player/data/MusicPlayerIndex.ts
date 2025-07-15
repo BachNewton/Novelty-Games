@@ -37,7 +37,7 @@ export function getMusicPlayerSongs(): Song[] {
                 backing: song['song.ogg']
             },
             metadata: {
-                title: song.meta.title,
+                title: song.meta.name,
                 artist: song.meta.artist
             }
         };
