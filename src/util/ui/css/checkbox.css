@@ -65,3 +65,19 @@
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
 }
+
+.only-button {
+    background: none;
+    border: none;
+    color: var(--novelty-blue);
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 22px;
+    padding: 0;
+    margin-left: 5px;
+}
+
+.only-button:hover {
+    color: #0056b3;
+    text-decoration: none;
+}

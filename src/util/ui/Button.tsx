@@ -1,11 +1,11 @@
 interface ButtonProps {
-    onClick: () => void;
+    onClick?: () => void;
     fontSize?: number;
     borderRadius?: number;
     children?: React.ReactNode;
 }
 
-const Button: React.FC<ButtonProps> = ({ onClick, fontSize = 1, borderRadius = 10, children }) => {
+const Button: React.FC<ButtonProps> = ({ onClick = () => { }, fontSize = 1, borderRadius = 10, children }) => {
     return <button onClick={onClick} style={{ fontSize: `${fontSize}em`, borderRadius: `${borderRadius}px`, cursor: 'pointer' }}>
         {children}
     </button>;

@@ -39,11 +39,31 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser, musicIndex }) 
         setGenresSelected(new Map(genresSelected));
     };
 
+    const onOnlyGenreSelected = (onlyGenre: string) => {
+        for (const genre of genres.current) {
+            genresSelected.set(genre, genre === onlyGenre);
+        }
+
+        setGenresSelected(new Map(genresSelected));
+    };
+
+    const onAllGenresSelected = () => {
+        setGenresSelected(new Map());
+        setIsFilterUiOpen(false);
+    };
+
     const filteredSongs = filterBySearchText(songs.current, searchText);
 
     return <>
         <Dialog isOpen={isFilterUiOpen}>
-            {filtersUi(genres.current, genresSelected, onGenreSelected, () => setIsFilterUiOpen(false))}
+            {filtersUi(
+                genres.current,
+                genresSelected,
+                onGenreSelected,
+                onOnlyGenreSelected,
+                onAllGenresSelected,
+                () => setIsFilterUiOpen(false)
+            )}
         </Dialog>
 
         <Scaffold
@@ -56,11 +76,27 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser, musicIndex }) 
     </>;
 };
 
-function filtersUi(genres: string[], genresSelected: Map<string, boolean>, onGenreClicked: (genre: string) => void, onDone: () => void): JSX.Element {
-    const checkboxes = genres.map(genre => <Checkbox text={genre} checked={genresSelected.get(genre) ?? true} onClick={() => onGenreClicked(genre)} />);
+function filtersUi(
+    genres: string[],
+    genresSelected: Map<string, boolean>,
+    onGenreClicked: (genre: string) => void,
+    onOnlyGenreClicked: (onlyGenre: string) => void,
+    onAll: () => void,
+    onDone: () => void
+): JSX.Element {
+    const checkboxes = genres.map((genre, index) =>
+        <Checkbox
+            key={index}
+            text={genre}
+            checked={genresSelected.get(genre) ?? true}
+            onClick={() => onGenreClicked(genre)}
+            onOnlyClick={() => onOnlyGenreClicked(genre)}
+        />
+    );
 
     return <>
         <div style={{ fontSize: '2em', fontWeight: 'bold', textAlign: 'center' }}>Genre Filter</div>
+        <Button onClick={onAll}><div style={{ width: '66vw', fontSize: '1.3em' }}>All</div></Button>
         <div style={{ overflow: 'auto', height: '66vh', margin: '15px 0px' }}>{checkboxes}</div>
 
         <Button onClick={onDone}><div style={{ width: '66vw', fontSize: '1.5em' }}>Done</div></Button>
