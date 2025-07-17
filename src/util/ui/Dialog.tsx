@@ -17,7 +17,8 @@ const Dialog: React.FC<DialogProps> = ({ isOpen, children }) => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.75)'
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        zIndex: 1
     };
 
     const containerStyle: React.CSSProperties = {

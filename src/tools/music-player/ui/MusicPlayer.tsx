@@ -5,9 +5,9 @@ import Scaffold from "../../../util/ui/Scaffold";
 import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
 import { ParsedSong, ParserProgress, SongParser } from "../logic/SongParser";
 import ProgressBar from "../../../util/ui/ProgressBar";
-import FilterIcon from "../icons/filter.svg";
 import Button from "../../../util/ui/Button";
 import Icon, { Type } from "./Icon";
+// import Dialog from "../../../util/ui/Dialog";
 
 const FONT_SCALE = 1.4;
 
@@ -29,12 +29,21 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
 
     const filteredSongs = filterBySearchText(songs.current, searchText);
 
-    return <Scaffold
-        header={headerUi(text => setSearchText(text))}
-        content={<Library songs={filteredSongs} onSongSelected={onSongSelected} />}
-        footer={footerUi(parsedSong, parserProgress)}
-        fontScale={FONT_SCALE}
-    />;
+    return <>
+        {/* <Dialog>
+            <div>Filters</div>
+            Test 1
+            Test 2
+            Test 3
+        </Dialog> */}
+
+        <Scaffold
+            header={headerUi(text => setSearchText(text))}
+            content={<Library songs={filteredSongs} onSongSelected={onSongSelected} />}
+            footer={footerUi(parsedSong, parserProgress)}
+            fontScale={FONT_SCALE}
+        />
+    </>;
 };
 
 function headerUi(setSearchText: (text: string) => void): JSX.Element {
