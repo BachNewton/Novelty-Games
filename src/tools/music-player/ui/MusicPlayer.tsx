@@ -52,7 +52,7 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser, musicIndex }) 
         setIsFilterUiOpen(false);
     };
 
-    const filteredSongs = filterBySearchText(songs.current, searchText);
+    const filteredSongs = filter(songs.current, searchText, genresSelected);
 
     return <>
         <Dialog isOpen={isFilterUiOpen}>
@@ -132,16 +132,22 @@ function footerUi(parsedSong: ParsedSong | null, progress: ParserProgress | null
     </div>;
 }
 
-function filterBySearchText(songs: Song[], searchText: string): Song[] {
-    if (searchText.length < 2) return songs;
+function filter(songs: Song[], searchText: string, genresSelected: Map<string, boolean>): Song[] {
+    return songs.filter(song => filterBySearchText(song, searchText) && filterByGenre(song, genresSelected));
+}
 
-    return songs.filter(song => {
-        const search = searchText.toLowerCase();
-        const artist = song.metadata.artist.toLowerCase();
-        const title = song.metadata.title.toLowerCase();
+function filterBySearchText(song: Song, searchText: string): boolean {
+    if (searchText.length < 2) return true;
 
-        return artist.includes(search) || title.includes(search);
-    });
+    const search = searchText.toLowerCase();
+    const artist = song.metadata.artist.toLowerCase();
+    const title = song.metadata.title.toLowerCase();
+
+    return artist.includes(search) || title.includes(search);
+}
+
+function filterByGenre(song: Song, genresSelected: Map<string, boolean>): boolean {
+    return genresSelected.get(song.metadata.genre) ?? true;
 }
 
 export default MusicPlayer;
