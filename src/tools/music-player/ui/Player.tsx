@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ParsedSong } from "../logic/SongParser";
 import { Conductor, State as ConductorState } from "../logic/Conductor";
 import { TrackIds } from "../data/MusicPlayerIndex";
-import PlayPauseIcon, { State } from "./PlayPauseIcon";
+import Icon, { Type } from "./Icon";
 
 const SLIDER_UPDATE_INTERVAL = 200;
 const BUTTON_SYLE: React.CSSProperties = { fontSize: '1.15em', borderRadius: '15px', padding: '5px', textAlign: 'left' }
@@ -79,8 +79,8 @@ function iconBarUi(
     onPlayButtonClick: () => void,
     handleExpansion: (e: React.MouseEvent) => void
 ): JSX.Element {
-    const iconState = conductor === null ? State.LOADING : conductor.state === ConductorState.Playing ? State.PAUSE : State.PLAY;
-    const icon = <PlayPauseIcon state={iconState} />;
+    const iconState = conductor === null ? Type.LOADING : conductor.state === ConductorState.Playing ? Type.PAUSE : Type.PLAY;
+    const icon = <Icon type={iconState} size={3.5} />;
 
     return <div style={{ display: 'flex', justifyContent: 'center' }} onClick={handleExpansion}>
         <div style={{ cursor: 'pointer', border: '4px solid var(--novelty-blue)', borderRadius: '100%', margin: '12px' }} onClick={onPlayButtonClick}>

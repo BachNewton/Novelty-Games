@@ -8,6 +8,8 @@ export interface Song {
 export interface SongMetadata {
     title: string;
     artist: string;
+    genre: string;
+    year: number;
 }
 
 export interface TrackIds {
@@ -38,7 +40,9 @@ export function getMusicPlayerSongs(): Song[] {
             },
             metadata: {
                 title: song.meta.name,
-                artist: song.meta.artist
+                artist: song.meta.artist,
+                genre: song.meta.genre,
+                year: Number(song.meta.year)
             }
         };
     });

@@ -5,6 +5,9 @@ import Scaffold from "../../../util/ui/Scaffold";
 import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
 import { ParsedSong, ParserProgress, SongParser } from "../logic/SongParser";
 import ProgressBar from "../../../util/ui/ProgressBar";
+import FilterIcon from "../icons/filter.svg";
+import Button from "../../../util/ui/Button";
+import Icon, { Type } from "./Icon";
 
 const FONT_SCALE = 1.4;
 
@@ -36,13 +39,15 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
 
 function headerUi(setSearchText: (text: string) => void): JSX.Element {
     return <div style={{ display: 'flex', alignItems: 'center' }}>
-        <div style={{ fontSize: '1.2em' }}>🔎</div>
+        <Icon type={Type.SEARCH} size={2} />
 
         <input
             style={{ fontSize: '0.8em', flexGrow: 1, borderRadius: '15px', padding: '5px', margin: '5px' }}
             placeholder='Search'
             onChange={e => setSearchText(e.target.value)}
         />
+
+        <Button onClick={() => { }}><Icon type={Type.FILTER} size={1.5} /></Button>
     </div>;
 }
 

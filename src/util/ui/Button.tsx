@@ -5,7 +5,7 @@ interface ButtonProps {
 }
 
 const Button: React.FC<ButtonProps> = ({ onClick, fontSize = 1, children }) => {
-    return <button onClick={onClick} style={{ fontSize: `${fontSize}em` }}>
+    return <button onClick={onClick} style={{ fontSize: `${fontSize}em`, borderRadius: '15px' }}>
         {children}
     </button>;
 };
