@@ -1,11 +1,11 @@
 interface ScaffoldProps {
     header: JSX.Element;
-    content: JSX.Element;
     footer: JSX.Element;
     fontScale?: number;
+    children?: React.ReactNode;
 }
 
-const Scaffold: React.FC<ScaffoldProps> = ({ header, content, footer, fontScale = 1 }) => {
+const Scaffold: React.FC<ScaffoldProps> = ({ header, footer, fontScale = 1, children }) => {
     return <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -13,7 +13,7 @@ const Scaffold: React.FC<ScaffoldProps> = ({ header, content, footer, fontScale 
         fontSize: `${fontScale}em`
     }}>
         <div>{header}</div>
-        <div style={{ flexGrow: 1, overflow: 'auto' }}>{content}</div>
+        <div style={{ flexGrow: 1, overflow: 'auto' }}>{children}</div>
         <div>{footer}</div>
     </div>;
 };

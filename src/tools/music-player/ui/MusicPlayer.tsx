@@ -41,10 +41,11 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
 
         <Scaffold
             header={headerUi(text => setSearchText(text))}
-            content={<Library songs={filteredSongs} onSongSelected={onSongSelected} />}
             footer={footerUi(parsedSong, parserProgress)}
             fontScale={FONT_SCALE}
-        />
+        >
+            <Library songs={filteredSongs} onSongSelected={onSongSelected} />
+        </Scaffold>
     </>;
 };
 
