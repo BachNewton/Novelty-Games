@@ -40,7 +40,7 @@ enum KeyEventType {
 
 type KeyLookup = [string, keyof Keys, Key | null];
 
-export const KeyboardInputCreator: KeyboardInputCreator = {
+export const keyboardInputCreator: KeyboardInputCreator = {
     create: (onKeyPressed) => {
         const held: Keys = {
             w: false,

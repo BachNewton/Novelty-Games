@@ -64,7 +64,7 @@ interface GameWorldObjectCreator {
     create(options: GameWorldObjectOptions): GameWorldObject;
 }
 
-export const GameWorldObjectCreator: GameWorldObjectCreator = {
+export const gameWorldObjectCreator: GameWorldObjectCreator = {
     create: (options) => {
         const createGeometry = () => {
             const dimensions = options.dimensions;

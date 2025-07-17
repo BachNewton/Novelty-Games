@@ -87,7 +87,7 @@ function readyUi(tab: Tab, save: FreeMarketSave, communicator: FreeMarketCommuni
         case Tab.EXTRACT:
             return <Extract save={save} storer={storer} />;
         case Tab.CRAFT:
-            return <div>// TODO - Craft</div>;
+            return <div>TODO - Craft</div>;
         case Tab.MARKET:
             return marketUi();
         case Tab.PATENT:
@@ -142,7 +142,7 @@ function marketUi(): JSX.Element {
 
     return <div>
         <div style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '1.25em', textAlign: 'center' }}>The Market</div>
-        <div>// Placeholder</div>
+        <div>--- Placeholder ---</div>
         {marketItemsUi}
     </div>;
 }

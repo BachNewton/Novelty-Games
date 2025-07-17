@@ -18,7 +18,7 @@ export enum Button {
 
 type ButtonLookup = [number, Button, keyof Buttons];
 
-export const XboxControllerCreator: XboxControllerCreator = {
+export const xboxControllerCreator: XboxControllerCreator = {
     create: (onButtonPressed) => {
         window.addEventListener('gamepadconnected', e => console.log('Gamepad connected - id:', e.gamepad.id, 'index:', e.gamepad.index));
         window.addEventListener('gamepaddisconnected', e => console.log('Gamepad disconnected - id:', e.gamepad.id, 'index:', e.gamepad.index));

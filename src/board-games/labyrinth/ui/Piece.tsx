@@ -118,7 +118,7 @@ function brickUi(): JSX.Element {
 }
 
 function image(src: string, playerStyle?: React.CSSProperties): JSX.Element {
-    return <img style={playerStyle} src={src} draggable='false' />;
+    return <img style={playerStyle} src={src} draggable='false' alt='' />;
 }
 
 function getPlayerStyle(color: PlayerColor): React.CSSProperties {

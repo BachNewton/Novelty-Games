@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
-import { GameWorldObjectCreator } from "../../GameWorldObject";
+import { gameWorldObjectCreator } from "../../GameWorldObject";
 import PlayerTexture from '../textures/player.png';
 import PlayerNormalMap from '../textures/player-normal-map.png';
 import { OrbitControls } from 'three/examples/jsm/Addons';
@@ -26,9 +26,9 @@ interface PlayerCreator {
     create(intendedDirection: THREE.Vector3, physicalMaterial: CANNON.Material): Player;
 }
 
-export const PlayerCreator: PlayerCreator = {
+export const playerCreator: PlayerCreator = {
     create: (intendedDirection, physicalMaterial) => {
-        const player = GameWorldObjectCreator.create({
+        const player = gameWorldObjectCreator.create({
             dimensions: {
                 type: 'sphere',
                 radius: 0.5

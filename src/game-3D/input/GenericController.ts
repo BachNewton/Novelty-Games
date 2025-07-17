@@ -1,6 +1,6 @@
 import { Axis, Buttons, Controller } from "./Controller";
-import { Key, KeyboardInputCreator } from "./Keyboard";
-import { Button, XboxControllerCreator } from "./XboxController";
+import { Key, keyboardInputCreator } from "./Keyboard";
+import { Button, xboxControllerCreator } from "./XboxController";
 
 const DEADZONE = 0.13;
 
@@ -8,10 +8,10 @@ interface GenericControllerCreator {
     create(onButtonPressed: (button: Button) => void): Controller;
 }
 
-export const GenericControllerCreator: GenericControllerCreator = {
+export const genericControllerCreator: GenericControllerCreator = {
     create: (onButtonPressed) => {
-        const xboxController = XboxControllerCreator.create(onButtonPressed);
-        const keyboardInput = KeyboardInputCreator.create(key => {
+        const xboxController = xboxControllerCreator.create(onButtonPressed);
+        const keyboardInput = keyboardInputCreator.create(key => {
             if (key === Key.SPACE) {
                 onButtonPressed(Button.A);
             } else if (key === Key.TAB) {

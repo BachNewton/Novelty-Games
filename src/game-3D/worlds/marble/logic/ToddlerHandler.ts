@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { createNetworkService, NetworkedApplication } from "../../../../util/networking/NetworkService";
 import { Color, Shape, ToddlerServerData, ToddlerServerObjectData } from "../../../toddler/ToddlerServerData";
-import { GameWorldObject, GameWorldObjectCreator } from "../../GameWorldObject";
+import { GameWorldObject, gameWorldObjectCreator } from "../../GameWorldObject";
 import { Player } from './Player';
 
 export function handleToddler(
@@ -14,7 +14,7 @@ export function handleToddler(
     const networkService = createNetworkService<ToddlerServerData>(NetworkedApplication.MARBLE);
 
     const handleObjectDataType = (shape: Shape, color: Color) => {
-        const object = GameWorldObjectCreator.create({
+        const object = gameWorldObjectCreator.create({
             dimensions: shape === Shape.SPHERE
                 ? {
                     type: 'sphere',

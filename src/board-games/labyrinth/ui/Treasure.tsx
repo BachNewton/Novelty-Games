@@ -1,5 +1,5 @@
 import { TreasureDetails } from "../data/Player";
-import { getTreasureImage, Treasure as TreasureData } from "../data/Treasure";
+import { getTreasureImage } from "../data/Treasure";
 import QuestionMarkImage from '../images/question-mark.png';
 
 interface TreasureProps {
@@ -21,7 +21,7 @@ const Treasure: React.FC<TreasureProps> = ({ details }) => {
             padding: '10%',
             margin: '5%',
             background: `radial-gradient(circle, transparent 50%, ${backgroundColor})`
-        }} src={src} />;
+        }} src={src} alt='' />;
     });
 
     return <div style={{ display: 'grid', gridTemplateRows: 'repeat(auto-fit, minmax(0, 1fr))', placeItems: 'stretch', height: '100vh', maxHeight: '55em' }}>

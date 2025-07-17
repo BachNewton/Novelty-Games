@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { TransformControls, OrbitControls, TextGeometry, FontLoader, RoundedBoxGeometry } from 'three/examples/jsm/Addons';
 import FontData from 'three/examples/fonts/helvetiker_regular.typeface.json';
-import { Dimensions, GameWorldObject, GameWorldObjectCreator } from '../../GameWorldObject';
+import { Dimensions, GameWorldObject, gameWorldObjectCreator } from '../../GameWorldObject';
 import PlayerTexture from '../textures/player.png';
 import CheckeredTexture from '../textures/checkered.jpg';
 import { createLevel, Level, Obstacle, LevelMetadata } from './Level';
@@ -51,7 +51,7 @@ interface EditorCreator {
     ) => Editor;
 }
 
-export const EditorCreator: EditorCreator = {
+export const editorCreator: EditorCreator = {
     create: (scene, camera, orbitControls, bouncyMaterial, slipperyMaterial) => createEditor(scene, camera, orbitControls, bouncyMaterial, slipperyMaterial)
 };
 
@@ -444,7 +444,7 @@ function createGameWorldObject(
             radius: editableObject.userData.gameMaterial === GameMaterial.BOUNCY ? Math.PI : 0
         };
 
-    return GameWorldObjectCreator.create({
+    return gameWorldObjectCreator.create({
         dimensions: dimensions,
         visualMaterial: editableObject === editableFinishingObject
             ? {

@@ -10,10 +10,6 @@ import { createPlayer } from "./Player";
 const GRAVITY = 0.01;
 const FRICTION = 0.1;
 
-enum Mode {
-    PLAY, EDIT
-}
-
 export function createPlatformerWorld(drawer: Drawer, camera: Camera, keyboardInput: KeyboardInput): GameWorld {
     updateRoute(Route.PLATFORMER);
 

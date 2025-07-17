@@ -4,12 +4,12 @@ import * as CANNON from 'cannon-es';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GameWorldObject } from "../../GameWorldObject";
 import { Button } from "../../../input/XboxController";
-import { GenericControllerCreator } from "../../../input/GenericController";
-import { PlayerCreator } from "./Player";
-import { MouseInputCreator } from "../../../input/Mouse";
+import { genericControllerCreator } from "../../../input/GenericController";
+import { playerCreator } from "./Player";
+import { mouseInputCreator } from "../../../input/Mouse";
 import SkyboxPath from '../textures/skybox.jpg';
 import { Level } from "./Level";
-import { EditorCreator } from "./Editor";
+import { editorCreator } from "./Editor";
 import Level1 from '../levels/level1.json';
 import { createSounds } from "./Sounds";
 import { clearSummary, createSummary } from "../ui/Summary";
@@ -82,7 +82,7 @@ function createMarbleWorld(
 
     const orbitControls = createOrbitControls(camera, domElement);
 
-    const player = PlayerCreator.create(controllerDirection, playerMaterial);
+    const player = playerCreator.create(controllerDirection, playerMaterial);
     player.add(scene, world);
 
     const resetPlayer = (startingPosition: THREE.Vector3) => {
@@ -103,7 +103,7 @@ function createMarbleWorld(
     // const controllerDirectionHelper = new THREE.ArrowHelper(cameraLeft, new THREE.Vector3(0, 1.5, 0), 2, 'magenta');
     // scene.add(cameraForwardHelper, cameraLeftHelper, controllerDirectionHelper);
 
-    const editor = EditorCreator.create(scene, camera, orbitControls, objectBouncyMaterial, objectSlipperyMaterial);
+    const editor = editorCreator.create(scene, camera, orbitControls, objectBouncyMaterial, objectSlipperyMaterial);
 
     let lastAutosave = performance.now();
 
@@ -202,14 +202,14 @@ function createMarbleWorld(
         }
     );
 
-    const mouseInput = MouseInputCreator.create((pointer, target) => {
+    const mouseInput = mouseInputCreator.create((pointer, target) => {
         if (state !== State.EDIT) return;
         if (domElement !== target) return;
 
         editor.onClick(pointer);
     });
 
-    const controller = GenericControllerCreator.create(button => {
+    const controller = genericControllerCreator.create(button => {
         console.log('Button pressed:', button);
 
         if (button === Button.VIEW) {

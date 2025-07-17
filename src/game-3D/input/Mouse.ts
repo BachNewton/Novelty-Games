@@ -7,11 +7,17 @@ export interface Pointer {
     y: number;
 }
 
+enum MouseButton {
+    LEFT = 0,
+    MIDDLE = 1,
+    RIGHT = 2
+}
+
 interface MouseInputCreator {
     create(onClick: (pointer: Pointer, target: EventTarget | null) => void): MouseInput;
 }
 
-export const MouseInputCreator: MouseInputCreator = {
+export const mouseInputCreator: MouseInputCreator = {
     create: (onClick) => {
         const pointer: Pointer = {
             x: 0,
@@ -34,9 +40,3 @@ export const MouseInputCreator: MouseInputCreator = {
         };
     }
 };
-
-enum MouseButton {
-    LEFT = 0,
-    MIDDLE = 1,
-    RIGHT = 2
-}

@@ -35,7 +35,7 @@ const PokemonTypeIcon: React.FC<PokemonTypeIconProps> = ({ type }) => {
         alignItems: 'center',
         width: '8em'
     }}>
-        <img height={ICON_SIZE} width={ICON_SIZE} src={getSrc(type)} />
+        <img height={ICON_SIZE} width={ICON_SIZE} src={getSrc(type)} alt='' />
         <span style={{ margin: '0 auto 0 auto', fontSize: '1.5em' }}>{capitalizeFirstLetter(type)}</span>
     </div>;
 };

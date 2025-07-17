@@ -1,4 +1,4 @@
-import { createNetworkService, GetFileResponse, NetworkedApplication, NetworkService, SaveFileResponse } from "../../util/networking/NetworkService";
+import { createNetworkService, NetworkedApplication, NetworkService } from "../../util/networking/NetworkService";
 import { Invention } from "../data/Component";
 import { Inventor } from "../data/Inventor";
 
