@@ -23,7 +23,7 @@ export function createMusicIndex(): MusicIndex {
             metadata: {
                 title: song.meta.name,
                 artist: song.meta.artist,
-                genre: song.meta.genre,
+                genre: cleanGenre(song.meta.genre),
                 year: Number(song.meta.year)
             }
         };
@@ -35,4 +35,10 @@ export function createMusicIndex(): MusicIndex {
         songs: songs,
         genres: genres
     };
+}
+
+function cleanGenre(genre: string): string {
+    if (genre === 'CLassic Rock' || genre === 'Classicrock') return 'Classic Rock';
+
+    return genre;
 }
