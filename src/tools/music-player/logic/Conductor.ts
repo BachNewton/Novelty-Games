@@ -1,4 +1,4 @@
-import { TrackIds } from "../data/MusicPlayerIndex";
+import { TrackIds } from "../data/Song";
 import { AudioBuffers } from "./SongParser";
 
 export enum State { Playing, Paused }

@@ -1,31 +1,13 @@
-import musicPlayerIndexJson from './music-player-index.json';
+import { Song } from "../data/Song";
+import musicPlayerIndexJson from '../data/music-player-index.json';
 
-export interface Song {
-    ids: TrackIds;
-    metadata: SongMetadata;
+export interface MusicIndex {
+    songs: Song[];
+    genres: Set<string>;
 }
 
-export interface SongMetadata {
-    title: string;
-    artist: string;
-    genre: string;
-    year: number;
-}
-
-export interface TrackIds {
-    guitar: string | null;
-    bass: string | null;
-    vocals: string | null;
-    drums: string | null;
-    drums1: string | null;
-    drums2: string | null;
-    drums3: string | null;
-    keys: string | null;
-    backing: string;
-}
-
-export function getMusicPlayerSongs(): Song[] {
-    return musicPlayerIndexJson.map(song => {
+export function createMusicIndex(): MusicIndex {
+    const songs = musicPlayerIndexJson.map<Song>(song => {
         return {
             ids: {
                 guitar: song?.['guitar.ogg'] ?? null,
@@ -46,4 +28,11 @@ export function getMusicPlayerSongs(): Song[] {
             }
         };
     });
+
+    const genres = new Set(songs.map(song => song.metadata.genre));
+
+    return {
+        songs: songs,
+        genres: genres
+    };
 }

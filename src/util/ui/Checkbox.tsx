@@ -7,8 +7,8 @@ interface CheckboxProps {
 }
 
 const Checkbox: React.FC<CheckboxProps> = ({ text, checked, onClick }) => {
-    return <label className="container" onClick={onClick}>{text}
-        <input type="checkbox" checked={checked} />
+    return <label className="container">{text}
+        <input type="checkbox" checked={checked} onChange={onClick} />
         <span className="checkmark"></span>
     </label>;
 };

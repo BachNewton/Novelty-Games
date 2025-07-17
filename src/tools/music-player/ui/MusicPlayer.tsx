@@ -2,22 +2,25 @@ import { useRef, useState } from "react";
 import Library from "./Library";
 import Player from "./Player";
 import Scaffold from "../../../util/ui/Scaffold";
-import { getMusicPlayerSongs, Song } from "../data/MusicPlayerIndex";
+import { Song } from "../data/Song";
 import { ParsedSong, ParserProgress, SongParser } from "../logic/SongParser";
 import ProgressBar from "../../../util/ui/ProgressBar";
 import Button from "../../../util/ui/Button";
 import Icon, { Type } from "./Icon";
 import Dialog from "../../../util/ui/Dialog";
 import Checkbox from "../../../util/ui/Checkbox";
+import { MusicIndex } from "../logic/MusicIndex";
 
 const FONT_SCALE = 1.4;
 
 interface NewMusicPlayerProps {
     songParser: SongParser;
+    musicIndex: MusicIndex;
 }
 
-const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
-    const songs = useRef(getMusicPlayerSongs());
+const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser, musicIndex }) => {
+    const songs = useRef(musicIndex.songs);
+    const genres = useRef([...musicIndex.genres]);
     const [parsedSong, setParsedSong] = useState<ParsedSong | null>(null);
     const [parserProgress, setParserProgress] = useState<ParserProgress | null>(null);
     const [searchText, setSearchText] = useState<string>('');
@@ -32,7 +35,7 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
 
     return <>
         <Dialog isOpen={false}>
-            {filtersUi()}
+            {filtersUi(genres.current)}
         </Dialog>
 
         <Scaffold
@@ -45,19 +48,14 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
     </>;
 };
 
-function filtersUi(): JSX.Element {
-    const set = new Set(['a', 'b', 'c']);
-
-    for (const temp of set) {
-        console.log(temp);
-    }
+function filtersUi(genres: string[]): JSX.Element {
+    const checkboxes = genres.map(genre => <Checkbox text={genre} checked={false} onClick={() => { }} />);
 
     return <>
-        <div style={{ fontSize: '2em', fontWeight: 'bold', textAlign: 'center', marginBottom: '15px' }}>Filters</div>
-        <Checkbox text='Test 1' checked={false} onClick={() => { }} />
-        <Checkbox text='Test 2' checked={false} onClick={() => { }} />
-        <Checkbox text='Test 3' checked={false} onClick={() => { }} />
-        <Button onClick={() => { }}><div style={{ width: '25vw', fontSize: '1.5em' }}>Done</div></Button>
+        <div style={{ fontSize: '2em', fontWeight: 'bold', textAlign: 'center' }}>Filters</div>
+        <div style={{ overflow: 'auto', height: '66vh', margin: '15px 0px' }}>{checkboxes}</div>
+
+        <Button onClick={() => { }}><div style={{ width: '66vw', fontSize: '1.5em' }}>Done</div></Button>
     </>;
 }
 

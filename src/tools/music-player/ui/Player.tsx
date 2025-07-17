@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ParsedSong } from "../logic/SongParser";
 import { Conductor, State as ConductorState } from "../logic/Conductor";
-import { TrackIds } from "../data/MusicPlayerIndex";
+import { TrackIds } from "../data/Song";
 import Icon, { Type } from "./Icon";
 
 const SLIDER_UPDATE_INTERVAL = 200;
