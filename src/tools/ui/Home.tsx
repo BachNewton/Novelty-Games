@@ -7,6 +7,7 @@ import { getRoute, Route } from "../../ui/Routing";
 import { createNetworkService, NetworkedApplication } from "../../util/networking/NetworkService";
 import { FestivalSong } from "../../trivia/data/Data";
 import { createDatabase } from "../../util/database/IndexedDbDatabase";
+import { createDatabaseManager } from "../../util/database/v2/DatabaseManager";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
@@ -52,7 +53,10 @@ function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
     } else if (uiState instanceof FortniteFestivalUiState) {
         return <FortniteFestivalHome loadingSongs={uiState.loadingSongs} />;
     } else if (uiState instanceof DatabaseDebugUiState) {
-        return <DatabaseDebugHome database={createDatabase('example', ['numbers', 'words'])} />;
+        return <DatabaseDebugHome
+            database={createDatabase('example', ['numbers', 'words'])}
+            exampleDatabase={createDatabaseManager().exampleDatabase}
+        />;
     } else {
         throw new Error('UiState not supported: ' + uiState);
     }

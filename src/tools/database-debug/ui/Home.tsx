@@ -1,11 +1,13 @@
 import { Database } from "../../../util/database/Database";
 import { ExampleTables } from "../../../util/database/DatabaseSchemas";
+import { ExampleDatabase } from "../data/ExampleDatabase";
 
 interface HomeProps {
-    database: Database<ExampleTables>
+    database: Database<ExampleTables>,
+    exampleDatabase: ExampleDatabase;
 }
 
-const Home: React.FC<HomeProps> = ({ database }) => {
+const Home: React.FC<HomeProps> = ({ database, exampleDatabase }) => {
     const testGet = () => {
         database.get('numbers').then(numbers => {
             console.log('Numbers:', numbers)
