@@ -56,7 +56,7 @@ function headerUi(setSearchText: (text: string) => void): JSX.Element {
             onChange={e => setSearchText(e.target.value)}
         />
 
-        <Button onClick={() => { }}><Icon type={Type.FILTER} size={1.5} /></Button>
+        <Button onClick={() => { }} borderRadius={15}><Icon type={Type.FILTER} size={1.5} /></Button>
     </div>;
 }
 
