@@ -1,40 +1,49 @@
-import { Database } from "./Database";
-import { DatabaseSchemas } from "./DatabaseSchemas";
+export interface IndexedDb {
+    add: (tableName: string, data: any) => Promise<void>;
+    getAll: (tableName: string) => Promise<any[]>;
+    delete: () => Promise<void>;
+}
 
-export function createDatabase<Name extends keyof DatabaseSchemas>(
-    databaseName: Name,
-    tableNames: (keyof DatabaseSchemas[Name])[]
-): Database<DatabaseSchemas[Name]> {
-    const getObjectStore = async <T extends keyof DatabaseSchemas[Name]>(tableName: T, writeAccess: boolean): Promise<IDBObjectStore> => {
-        const db = await openDatabase(databaseName, tableNames as string[]);
-        const transaction = db.transaction(tableName as string, writeAccess ? 'readwrite' : 'readonly');
-        return transaction.objectStore(tableName as string);
-    };
-
+export function createIndexedDb(databaseName: string, tableNames: string[]): IndexedDb {
     return {
         add: async (tableName, data) => {
-            const objectStore = await getObjectStore(tableName, true);
-            await objectStore.add(data);
-            await new Promise<void>(resolve => objectStore.transaction.oncomplete = () => resolve());
+            const objectStore = await getObjectStore(databaseName, tableNames, tableName, true);
+
+            objectStore.add(data);
+
+            return new Promise<void>(resolve => objectStore.transaction.oncomplete = () => resolve());
         },
 
-        get: async (tableName) => {
-            const objectStore = await getObjectStore(tableName, false);
+        getAll: async (tableName) => {
+            const objectStore = await getObjectStore(databaseName, tableNames, tableName, false);
 
             return new Promise(resolve => {
                 objectStore.getAll().onsuccess = (e => {
                     const target = e.target as IDBRequest;
                     const data = target.result;
+
                     resolve(data);
                 });
             });
         },
 
         delete: () => new Promise(resolve => {
-            const deleteRequest = indexedDB.deleteDatabase(databaseName as string);
+            const deleteRequest = indexedDB.deleteDatabase(databaseName);
+
             deleteRequest.onsuccess = () => resolve();
         })
     };
+}
+
+async function getObjectStore(
+    databaseName: string,
+    tableNames: string[],
+    tableName: string,
+    writeAccess: boolean
+): Promise<IDBObjectStore> {
+    const db = await openDatabase(databaseName, tableNames as string[]);
+    const transaction = db.transaction(tableName as string, writeAccess ? 'readwrite' : 'readonly');
+    return transaction.objectStore(tableName as string);
 }
 
 function openDatabase(databaseName: string, tableNames: string[]): Promise<IDBDatabase> {
@@ -45,9 +54,9 @@ function openDatabase(databaseName: string, tableNames: string[]): Promise<IDBDa
             const db = getDatabase(e);
 
             for (const tableName of tableNames) {
-                if (!db.objectStoreNames.contains(tableName)) {
-                    db.createObjectStore(tableName, { autoIncrement: true });
-                }
+                if (db.objectStoreNames.contains(tableName)) continue;
+
+                db.createObjectStore(tableName, { autoIncrement: true });
             }
         };
 
