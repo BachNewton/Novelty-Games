@@ -1,4 +1,5 @@
 import { ExampleDatabase } from "../../../tools/database-debug/data/ExampleDatabase";
+import { createIndexedDb } from "../IndexedDb";
 import { createTable } from "./Table";
 
 export interface DatabaseManager {
@@ -6,16 +7,15 @@ export interface DatabaseManager {
 }
 
 export function createDatabaseManager(): DatabaseManager {
-    const databaseNames = {
-        example: 'example-v2'
-    };
+    const exampleIndexedDb = createIndexedDb('example-v2', ['people', 'cars', 'computers', 'offices']);
 
     return {
         exampleDatabase: {
-            people: createTable(databaseNames.example, 'people'),
-            cars: createTable(databaseNames.example, 'cars'),
-            computers: createTable(databaseNames.example, 'computers'),
-            offices: createTable(databaseNames.example, 'offices')
+            delete: () => exampleIndexedDb.delete(),
+            people: createTable(exampleIndexedDb, 'people'),
+            cars: createTable(exampleIndexedDb, 'cars'),
+            computers: createTable(exampleIndexedDb, 'computers'),
+            offices: createTable(exampleIndexedDb, 'offices'),
         }
     };
 }

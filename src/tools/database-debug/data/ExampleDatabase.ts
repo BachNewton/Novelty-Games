@@ -1,3 +1,4 @@
+import { Database } from "../../../util/database/v2/Database";
 import { Table } from "../../../util/database/v2/Table";
 
 interface Person {
@@ -20,9 +21,9 @@ interface Office {
     headcount: number;
 }
 
-export type ExampleDatabase = {
+export interface ExampleDatabase extends Database {
     people: Table<Person>;
     cars: Table<Car>;
     computers: Table<Computer>;
     offices: Table<Office>;
-};
+}

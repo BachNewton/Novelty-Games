@@ -1,11 +1,13 @@
-export interface Table<T> {
-    add: (data: T) => Promise<void>;
-    getAll: () => Promise<T[]>;
+import { IndexedDb } from "../IndexedDb";
+
+export interface Table<Data> {
+    add: (data: Data) => Promise<void>;
+    getAll: () => Promise<Data[]>;
 }
 
-export function createTable<T>(databaseName: string, tableName: string): Table<T> {
+export function createTable<Data>(indexedDB: IndexedDb, tableName: string): Table<Data> {
     return {
-        add: (data) => new Promise(() => { }),
-        getAll: () => new Promise(() => { })
+        add: (data) => indexedDB.add(tableName, data),
+        getAll: () => indexedDB.getAll(tableName)
     };
 }
