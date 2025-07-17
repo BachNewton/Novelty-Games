@@ -7,7 +7,8 @@ import { ParsedSong, ParserProgress, SongParser } from "../logic/SongParser";
 import ProgressBar from "../../../util/ui/ProgressBar";
 import Button from "../../../util/ui/Button";
 import Icon, { Type } from "./Icon";
-// import Dialog from "../../../util/ui/Dialog";
+import Dialog from "../../../util/ui/Dialog";
+import Checkbox from "../../../util/ui/Checkbox";
 
 const FONT_SCALE = 1.4;
 
@@ -30,12 +31,13 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
     const filteredSongs = filterBySearchText(songs.current, searchText);
 
     return <>
-        {/* <Dialog>
-            <div>Filters</div>
-            Test 1
-            Test 2
-            Test 3
-        </Dialog> */}
+        <Dialog isOpen={false}>
+            <div style={{ fontSize: '2em', fontWeight: 'bold', textAlign: 'center', marginBottom: '15px' }}>Filters</div>
+            <Checkbox text='Test 1' checked={false} onClick={() => { }} />
+            <Checkbox text='Test 2' checked={false} onClick={() => { }} />
+            <Checkbox text='Test 3' checked={false} onClick={() => { }} />
+            <Button onClick={() => { }}><div style={{ width: '25vw', fontSize: '1.5em' }}>Done</div></Button>
+        </Dialog>
 
         <Scaffold
             header={headerUi(text => setSearchText(text))}
