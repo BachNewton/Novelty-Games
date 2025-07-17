@@ -24,6 +24,8 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser, musicIndex }) 
     const [parsedSong, setParsedSong] = useState<ParsedSong | null>(null);
     const [parserProgress, setParserProgress] = useState<ParserProgress | null>(null);
     const [searchText, setSearchText] = useState<string>('');
+    const [genresSelected, setGenresSelected] = useState(new Map<string, boolean>());
+    const [isFilterUiOpen, setIsFilterUiOpen] = useState(false);
 
     const onSongSelected = async (selectedSong: Song) => {
         console.log('Song selected:', selectedSong);
@@ -31,15 +33,21 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser, musicIndex }) 
         setParsedSong(parsedSong);
     };
 
+    const onGenreSelected = (genre: string) => {
+        const selected = genresSelected.get(genre) ?? true;
+        genresSelected.set(genre, !selected);
+        setGenresSelected(new Map(genresSelected));
+    };
+
     const filteredSongs = filterBySearchText(songs.current, searchText);
 
     return <>
-        <Dialog isOpen={false}>
-            {filtersUi(genres.current)}
+        <Dialog isOpen={isFilterUiOpen}>
+            {filtersUi(genres.current, genresSelected, onGenreSelected, () => setIsFilterUiOpen(false))}
         </Dialog>
 
         <Scaffold
-            header={headerUi(text => setSearchText(text))}
+            header={headerUi(text => setSearchText(text), () => setIsFilterUiOpen(true))}
             footer={footerUi(parsedSong, parserProgress)}
             fontScale={FONT_SCALE}
         >
@@ -48,18 +56,18 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser, musicIndex }) 
     </>;
 };
 
-function filtersUi(genres: string[]): JSX.Element {
-    const checkboxes = genres.map(genre => <Checkbox text={genre} checked={false} onClick={() => { }} />);
+function filtersUi(genres: string[], genresSelected: Map<string, boolean>, onGenreClicked: (genre: string) => void, onDone: () => void): JSX.Element {
+    const checkboxes = genres.map(genre => <Checkbox text={genre} checked={genresSelected.get(genre) ?? true} onClick={() => onGenreClicked(genre)} />);
 
     return <>
-        <div style={{ fontSize: '2em', fontWeight: 'bold', textAlign: 'center' }}>Filters</div>
+        <div style={{ fontSize: '2em', fontWeight: 'bold', textAlign: 'center' }}>Genre Filter</div>
         <div style={{ overflow: 'auto', height: '66vh', margin: '15px 0px' }}>{checkboxes}</div>
 
-        <Button onClick={() => { }}><div style={{ width: '66vw', fontSize: '1.5em' }}>Done</div></Button>
+        <Button onClick={onDone}><div style={{ width: '66vw', fontSize: '1.5em' }}>Done</div></Button>
     </>;
 }
 
-function headerUi(setSearchText: (text: string) => void): JSX.Element {
+function headerUi(setSearchText: (text: string) => void, onFilterClicked: () => void): JSX.Element {
     return <div style={{ display: 'flex', alignItems: 'center' }}>
         <Icon type={Type.SEARCH} size={2} />
 
@@ -69,7 +77,7 @@ function headerUi(setSearchText: (text: string) => void): JSX.Element {
             onChange={e => setSearchText(e.target.value)}
         />
 
-        <Button onClick={() => { }} borderRadius={15}><Icon type={Type.FILTER} size={1.5} /></Button>
+        <Button onClick={onFilterClicked} borderRadius={15}><Icon type={Type.FILTER} size={1.5} /></Button>
     </div>;
 }
 
