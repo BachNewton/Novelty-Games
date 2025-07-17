@@ -3,9 +3,7 @@ interface DialogProps {
     children?: React.ReactNode;
 }
 
-const Dialog: React.FC<DialogProps> = ({ isOpen, children }) => {
-    isOpen = isOpen ?? true;
-
+const Dialog: React.FC<DialogProps> = ({ isOpen = true, children }) => {
     if (!isOpen) return <></>;
 
     const overlayStyle: React.CSSProperties = {

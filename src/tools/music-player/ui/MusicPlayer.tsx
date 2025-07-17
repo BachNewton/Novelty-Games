@@ -32,11 +32,7 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
 
     return <>
         <Dialog isOpen={false}>
-            <div style={{ fontSize: '2em', fontWeight: 'bold', textAlign: 'center', marginBottom: '15px' }}>Filters</div>
-            <Checkbox text='Test 1' checked={false} onClick={() => { }} />
-            <Checkbox text='Test 2' checked={false} onClick={() => { }} />
-            <Checkbox text='Test 3' checked={false} onClick={() => { }} />
-            <Button onClick={() => { }}><div style={{ width: '25vw', fontSize: '1.5em' }}>Done</div></Button>
+            {filtersUi()}
         </Dialog>
 
         <Scaffold
@@ -48,6 +44,22 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser }) => {
         </Scaffold>
     </>;
 };
+
+function filtersUi(): JSX.Element {
+    const set = new Set(['a', 'b', 'c']);
+
+    for (const temp of set) {
+        console.log(temp);
+    }
+
+    return <>
+        <div style={{ fontSize: '2em', fontWeight: 'bold', textAlign: 'center', marginBottom: '15px' }}>Filters</div>
+        <Checkbox text='Test 1' checked={false} onClick={() => { }} />
+        <Checkbox text='Test 2' checked={false} onClick={() => { }} />
+        <Checkbox text='Test 3' checked={false} onClick={() => { }} />
+        <Button onClick={() => { }}><div style={{ width: '25vw', fontSize: '1.5em' }}>Done</div></Button>
+    </>;
+}
 
 function headerUi(setSearchText: (text: string) => void): JSX.Element {
     return <div style={{ display: 'flex', alignItems: 'center' }}>
