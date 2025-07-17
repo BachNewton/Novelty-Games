@@ -6,7 +6,7 @@ import DatabaseDebugHome from "../database-debug/ui/Home";
 import { getRoute, Route } from "../../ui/Routing";
 import { createNetworkService, NetworkedApplication } from "../../util/networking/NetworkService";
 import { FestivalSong } from "../../trivia/data/Data";
-import { createDatabase } from "../../util/database/IndexedDbDatabase";
+import { createDatabase } from "../../util/database/v1/IndexedDbDatabase";
 import { createDatabaseManager } from "../../util/database/v2/DatabaseManager";
 
 interface HomeProps {

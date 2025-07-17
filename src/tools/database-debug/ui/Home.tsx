@@ -1,5 +1,5 @@
-import { Database } from "../../../util/database/Database";
-import { ExampleTables } from "../../../util/database/DatabaseSchemas";
+import { Database } from "../../../util/database/v1/Database";
+import { ExampleTables } from "../../../util/database/v1/DatabaseSchemas";
 import { ExampleDatabase } from "../data/ExampleDatabase";
 
 interface HomeProps {
