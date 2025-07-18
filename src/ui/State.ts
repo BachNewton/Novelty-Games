@@ -26,6 +26,8 @@ export class FreeMarketState implements State {
     }
 }
 
+export class PetsState implements State { }
+
 export class BoardGamesState implements State { }
 
 export class MilleBornesState extends BoardGamesState {

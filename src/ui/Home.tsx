@@ -6,16 +6,18 @@ import Games3DHome from '../game-3D/ui/Home';
 import ToolsHome from '../tools/ui/Home';
 import { getRoute, Route } from './Routing';
 import FreeMarket from '../free-market/ui/FreeMarket';
+import Pets from '../pets/ui/Home';
 import { NewtorkCommunicator as MilleBornesNetworkCommunicator } from '../board-games/mille-bornes/logic/NewtorkCommunicator';
 import { createFreeMarketCommunicator } from '../free-market/logic/FreeMarketCommunicator';
 import { createStorer } from '../util/Storage';
 import { FreeMarketSave } from '../free-market/data/FreeMarketSave';
 import SubMenu from './SubMenu';
-import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState } from './State';
+import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState, PetsState } from './State';
 import Labyrinth from '../board-games/labyrinth/ui/Labyrinth';
 import ProfileUi from './Profile';
 import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/LabyrinthCommunicator';
 import { APP_VERSION } from '../Versioning';
+import Button from '../util/ui/Button';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -31,6 +33,7 @@ interface OnClickHandlers {
     onFreeMarketClick: () => void;
     onBoardGamesClick: () => void;
     onLabyrinthClick: () => void;
+    onPetsClick: () => void;
 }
 
 const Home: React.FC<HomeProps> = ({ updateListener }) => {
@@ -66,7 +69,8 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         onToolsClick: () => setState(new ToolsState()),
         onFreeMarketClick: () => setState(createFreeMarketState()),
         onBoardGamesClick: () => setState(new BoardGamesState()),
-        onLabyrinthClick: () => setState(createLabyrinthState())
+        onLabyrinthClick: () => setState(createLabyrinthState()),
+        onPetsClick: () => setState(new PetsState())
     };
 
     if (state instanceof TriviaState) {
@@ -79,6 +83,8 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         return <ToolsHome onHomeButtonClicked={onClickHandlers.onHomeButtonClick} />;
     } else if (state instanceof FreeMarketState) {
         return <FreeMarket communicator={state.communicator} storer={state.storer} />;
+    } else if (state instanceof PetsState) {
+        return <Pets />;
     } else if (state instanceof BoardGamesState) {
         return boardGamesUi(state, onClickHandlers);
     } else {
@@ -117,10 +123,14 @@ function HomeUi(versionState: VersionState, onClickHandlers: OnClickHandlers) {
         <div><br /></div>
         <button style={buttonStyle} onClick={onClickHandlers.onTriviaClick}>Trivia 🤔</button>
         <button style={buttonStyle} onClick={onClickHandlers.onBoardGamesClick}>Board Games 🎲</button>
-        <button style={buttonStyle} onClick={onClickHandlers.on2DGamesClick}>2D Games 🟦</button>
-        <button style={buttonStyle} onClick={onClickHandlers.on3DGamesClick}>3D Games 🧊</button>
+        <div style={{ display: 'flex', width: '75%', height: '4em' }}>
+            <Button fontSize={1.5} onClick={onClickHandlers.on2DGamesClick}>2D Games 🟦</Button>
+            <Button fontSize={1.5} onClick={onClickHandlers.on3DGamesClick}>3D Games 🧊</Button>
+        </div>
+
         <button style={buttonStyle} onClick={onClickHandlers.onToolsClick}>Tools 🔨</button>
         <button style={buttonStyle} onClick={onClickHandlers.onFreeMarketClick}>Free Market 💸</button>
+        <button style={buttonStyle} onClick={onClickHandlers.onPetsClick}>Pets 🐾</button>
     </div>;
 }
 
@@ -171,6 +181,8 @@ function getInitialState(): State {
         case Route.MUSIC_PLAYER:
         case Route.FORTNITE_FESTIVAL:
             return new ToolsState();
+        case Route.PETS:
+            return new PetsState();
         default:
             return new HomeState();
     }
