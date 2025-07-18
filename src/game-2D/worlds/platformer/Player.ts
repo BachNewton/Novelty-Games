@@ -27,18 +27,17 @@ export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Play
         velocity: velocity
     };
 
-    keyboardInput.addKeyListener((key) => {
-        if (key === Key.SPACE && isOnGround) {
-            velocity.add(jumpSpeed);
-            isOnGround = false;
-        }
-    });
-
     return {
+        ...object,
         draw: () => {
             drawer.draw(object);
         },
         update: (deltaTime: number) => {
+            if (keyboardInput.held.Space && isOnGround) {
+                velocity.add(jumpSpeed);
+                isOnGround = false;
+            }
+
             const movementAxis = keyboardInput.movementAxis;
 
             if (movementAxis.x !== 0) {
@@ -48,7 +47,6 @@ export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Play
 
             position.add(velocity, deltaTime);
         },
-        ...object,
         applyAcceleration: (acceleration) => velocity.add(acceleration),
         updateIsOnGround: (isOnGroundUpdate: boolean) => isOnGround = isOnGroundUpdate
     };

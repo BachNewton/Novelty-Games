@@ -38,6 +38,7 @@ export function createPlatformerWorld(drawer: Drawer, camera: Camera, keyboardIn
 
             player.applyAcceleration(gravity);
 
+            player.updateIsOnGround(false);
             for (const obstacle of obstacles) {
                 if (isColliding(player, obstacle) && resolveCollision(player, obstacle, FRICTION) === NormalDirection.UP) {
                     player.updateIsOnGround(true);
