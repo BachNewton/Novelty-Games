@@ -3,6 +3,7 @@ import { Route, updateRoute } from "../../ui/Routing";
 import Scaffold from "../../util/ui/Scaffold";
 import Button from "../../util/ui/Button";
 import DemoImage from "../images/demo.jpeg";
+import DemoImage2 from "../images/demo2.jpeg";
 
 interface HomeProps { }
 
@@ -16,20 +17,33 @@ const Home: React.FC<HomeProps> = ({ }) => {
         footer={footerUi()}
         fontScale={1.5}
     >
-        <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
             <img src={DemoImage} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
+            <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
+                <div>Name: (Uknown)</div>
+                <div>Age: (Uknown)</div>
+                <div>Location: (Uknown)</div>
+            </div>
+            <div style={{ position: 'absolute', bottom: '5px', left: '5px', border: '2px solid var(--novelty-orange)', borderRadius: '15px', padding: '5px', backgroundColor: 'black' }}>
+                <div>
+                    Hello, I am a pet. This is my dialogue. This game is a work in progress. In the future I will say some really cute things.
+                    Right now you can greet me, pet me, or feed me. But these are just some placeholder options and they don't do anything.
+                </div>
+            </div>
         </div>
     </Scaffold>;
 };
 
 function headerUi(): JSX.Element {
-    return <div style={{ borderBottom: '5px solid blue' }}>
-        <div>Header 1</div><div>Header 2</div><div>Header 3</div>
+    return <div style={{ display: 'flex', borderBottom: '2px solid var(--novelty-blue)', padding: '5px' }}>
+        <Button>PetName 1</Button>
+        <Button>PetName 2</Button>
+        <Button>PetName 3</Button>
     </div>;
 }
 
 function footerUi(): JSX.Element {
-    return <div style={{ display: 'flex', borderTop: '5px solid blue' }}>
+    return <div style={{ display: 'flex', borderTop: '2px solid var(--novelty-blue)', padding: '5px' }}>
         <Button>Greet</Button>
         <Button>Pet</Button>
         <Button>Feed</Button>
