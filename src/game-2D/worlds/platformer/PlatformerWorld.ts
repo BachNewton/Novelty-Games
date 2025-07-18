@@ -10,7 +10,11 @@ import { createPlayer } from "./Player";
 const GRAVITY = 0.01;
 const FRICTION = 0.1;
 
-export function createPlatformerWorld(drawer: Drawer, camera: Camera, keyboardInput: KeyboardInput): GameWorld {
+export function createPlatformerWorld(
+    drawer: Drawer,
+    camera: Camera,
+    keyboardInput: KeyboardInput
+): GameWorld {
     updateRoute(Route.PLATFORMER);
 
     const gravity = createVector(0, -GRAVITY);
