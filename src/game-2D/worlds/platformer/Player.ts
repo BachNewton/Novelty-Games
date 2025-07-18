@@ -1,4 +1,4 @@
-import { Key, KeyboardInput } from "../../../util/input/Keyboard";
+import { KeyboardInput } from "../../../util/input/Keyboard";
 import { Drawer } from "../Drawer";
 import { GameObject } from "../GameWorld";
 import { MovingBox } from "../Geometry";
