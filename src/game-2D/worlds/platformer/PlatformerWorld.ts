@@ -13,14 +13,14 @@ const FRICTION = 0.1;
 export function createPlatformerWorld(drawer: Drawer, camera: Camera, keyboardInput: KeyboardInput): GameWorld {
     updateRoute(Route.PLATFORMER);
 
-    const gravity = createVector(0, GRAVITY);
+    const gravity = createVector(0, -GRAVITY);
 
     const obstacles: Box[] = [
-        { position: createVector(0, 200), width: 1000, height: 100, color: 'grey' },
+        { position: createVector(0, -200), width: 1000, height: 100, color: 'grey' },
         { position: createVector(250, 0), width: 300, height: 100, color: 'grey' },
         { position: createVector(-250, 0), width: 300, height: 100, color: 'grey' },
-        { position: createVector(300, -200), width: 150, height: 50, color: 'yellow' },
-        { position: createVector(-300, -200), width: 150, height: 50, color: 'orange' }
+        { position: createVector(300, 200), width: 150, height: 50, color: 'yellow' },
+        { position: createVector(-300, 200), width: 150, height: 50, color: 'orange' }
     ];
 
     const player = createPlayer(drawer, keyboardInput);

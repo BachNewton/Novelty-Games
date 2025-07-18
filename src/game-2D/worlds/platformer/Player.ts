@@ -16,7 +16,7 @@ interface Player extends GameObject, MovingBox {
 export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Player {
     const position = createVector(0, 0);
     const velocity = createVector(0, 0);
-    const jumpSpeed = createVector(0, -JUMP_SPEED);
+    const jumpSpeed = createVector(0, JUMP_SPEED);
     let isOnGround = false;
 
     const object: MovingBox = {

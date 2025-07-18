@@ -28,41 +28,35 @@ export enum NormalDirection {
  * 0 is no friction, 1 is full friction.
  */
 export function resolveCollision(a: MovingBox, b: Box, friction: number = 0): NormalDirection {
-    const dx = a.position.x - b.position.x; // Difference in x positions (center to center)
-    const dy = a.position.y - b.position.y; // Difference in y positions (center to center)
+    const dx = a.position.x - b.position.x;
+    const dy = a.position.y - b.position.y;
 
     const combinedHalfWidths = a.width / 2 + b.width / 2;
     const combinedHalfHeights = a.height / 2 + b.height / 2;
 
-    // Calculate the overlap on each axis
     const overlapX = combinedHalfWidths - Math.abs(dx);
     const overlapY = combinedHalfHeights - Math.abs(dy);
 
     let direction: NormalDirection;
 
-    // The collision occurs on the axis with the smaller overlap
     if (overlapX < overlapY) {
-        // Horizontal collision
-        if (dx > 0) { // 'a' is to the right of 'b'
+        if (dx > 0) {
             a.position.x += overlapX;
             direction = NormalDirection.RIGHT;
-        } else { // 'a' is to the left of 'b'
+        } else {
             a.position.x -= overlapX;
             direction = NormalDirection.LEFT;
         }
-        // Update velocity
         a.velocity.x = 0;
         a.velocity.y *= 1 - friction;
     } else {
-        // Vertical collision
-        if (dy > 0) { // 'a' is below 'b'
+        if (dy > 0) {
             a.position.y += overlapY;
-            direction = NormalDirection.DOWN;
-        } else { // 'a' is above 'b'
-            a.position.y -= overlapY;
             direction = NormalDirection.UP;
+        } else {
+            a.position.y -= overlapY;
+            direction = NormalDirection.DOWN;
         }
-        // Update velocity
         a.velocity.y = 0;
         a.velocity.x *= 1 - friction;
     }
