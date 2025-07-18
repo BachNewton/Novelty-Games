@@ -4,6 +4,7 @@ import Scaffold from "../../util/ui/Scaffold";
 import Button from "../../util/ui/Button";
 import DemoImage from "../images/demo.jpeg";
 import DemoImage2 from "../images/demo2.jpeg";
+import TextReveal from "./TextReveal";
 
 interface HomeProps { }
 
@@ -25,13 +26,13 @@ const Home: React.FC<HomeProps> = ({ }) => {
                 <div>Location: (Uknown)</div>
             </div>
             <div style={{ position: 'absolute', bottom: '5px', left: '5px', border: '2px solid var(--novelty-orange)', borderRadius: '15px', padding: '5px', backgroundColor: 'black' }}>
-                <div>
+                <TextReveal>
                     Hello, I am a pet. This is my dialogue. This game is a work in progress. In the future I will say some really cute things.
                     Right now you can greet me, pet me, or feed me. But these are just some placeholder options and they don't do anything.
-                </div>
+                </TextReveal>
             </div>
         </div>
-    </Scaffold>;
+    </Scaffold >;
 };
 
 function headerUi(): JSX.Element {
