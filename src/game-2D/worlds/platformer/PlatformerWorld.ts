@@ -16,12 +16,11 @@ export function createPlatformerWorld(drawer: Drawer, camera: Camera, keyboardIn
     const gravity = createVector(0, GRAVITY);
 
     const obstacles: Box[] = [
-        { position: createVector(-500, 250), width: 1000, height: 100, color: 'grey' },
-        { position: createVector(200, 50), width: 250, height: 50, color: 'grey' },
-        { position: createVector(200, 550), width: 450, height: 50, color: 'grey' },
-        { position: createVector(-20, 500), width: 100, height: 20, color: 'grey' },
-        { position: createVector(-100, 400), width: 100, height: 20, color: 'grey' },
-        { position: createVector(-200, 600), width: 100, height: 20, color: 'grey' }
+        { position: createVector(0, 200), width: 1000, height: 100, color: 'grey' },
+        { position: createVector(250, 0), width: 300, height: 100, color: 'grey' },
+        { position: createVector(-250, 0), width: 300, height: 100, color: 'grey' },
+        { position: createVector(300, -200), width: 150, height: 50, color: 'yellow' },
+        { position: createVector(-300, -200), width: 150, height: 50, color: 'orange' }
     ];
 
     const player = createPlayer(drawer, keyboardInput);

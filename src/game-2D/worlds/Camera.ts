@@ -25,8 +25,8 @@ export function createCamera(ctx: CanvasRenderingContext2D): Camera {
             return mousePosition;
         },
         centerOn: (target: Box) => {
-            position.x = target.position.x + target.width / 2;
-            position.y = target.position.y + target.height / 2;
+            position.x = target.position.x;
+            position.y = target.position.y;
         }
     };
 }

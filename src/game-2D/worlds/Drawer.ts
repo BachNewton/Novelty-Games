@@ -9,16 +9,19 @@ export function createDrawer(ctx: CanvasRenderingContext2D, camera: Camera): Dra
     const canvas = ctx.canvas;
 
     return {
-        draw: (box: Box) => {
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
+        draw: (box) => {
+            const canvasCenterX = canvas.width / 2;
+            const canvasCenterY = canvas.height / 2;
 
-            const x = box.position.x - camera.position.x + centerX;
-            const y = box.position.y - camera.position.y + centerY;
+            const boxScreenCenterX = box.position.x - camera.position.x + canvasCenterX;
+            const boxScreenCenterY = box.position.y - camera.position.y + canvasCenterY;
+
+            const drawX = boxScreenCenterX - (box.width / 2);
+            const drawY = boxScreenCenterY - (box.height / 2);
 
             ctx.fillStyle = box.color ?? 'magenta';
 
-            ctx.fillRect(x, y, box.width, box.height);
+            ctx.fillRect(drawX, drawY, box.width, box.height);
         }
     };
 }
