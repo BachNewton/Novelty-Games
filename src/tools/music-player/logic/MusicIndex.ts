@@ -3,7 +3,7 @@ import musicPlayerIndexJson from '../data/music-player-index.json';
 
 export interface MusicIndex {
     songs: Song[];
-    genres: Set<string>;
+    genres: string[];
 }
 
 export function createMusicIndex(): MusicIndex {
@@ -22,7 +22,7 @@ export function createMusicIndex(): MusicIndex {
             },
             metadata: {
                 title: song.meta.name,
-                artist: song.meta.artist,
+                artist: cleanArtist(song.meta.artist),
                 genre: cleanGenre(song.meta.genre),
                 year: Number(song.meta.year)
             }
@@ -33,12 +33,19 @@ export function createMusicIndex(): MusicIndex {
 
     return {
         songs: songs,
-        genres: genres
+        genres: [...genres]
     };
+}
+
+function cleanArtist(artist: string): string {
+    if (artist === 'Dragonforce') return 'DragonForce';
+
+    return artist;
 }
 
 function cleanGenre(genre: string): string {
     if (genre === 'CLassic Rock' || genre === 'Classicrock') return 'Classic Rock';
+    if (genre === 'Nu-Metal') return 'Nu Metal';
 
     return genre;
 }

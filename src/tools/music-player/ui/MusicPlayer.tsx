@@ -20,7 +20,7 @@ interface NewMusicPlayerProps {
 
 const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser, musicIndex }) => {
     const songs = useRef(musicIndex.songs);
-    const genres = useRef([...musicIndex.genres]);
+    const genres = useRef(musicIndex.genres);
     const [parsedSong, setParsedSong] = useState<ParsedSong | null>(null);
     const [parserProgress, setParserProgress] = useState<ParserProgress | null>(null);
     const [searchText, setSearchText] = useState<string>('');
