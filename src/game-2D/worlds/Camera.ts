@@ -15,8 +15,8 @@ export function createCamera(ctx: CanvasRenderingContext2D): Camera {
     window.addEventListener('mousemove', (e) => {
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
-        mousePosition.x = e.clientX + position.x - centerX;
-        mousePosition.y = e.clientY + position.y - centerY;
+        mousePosition.x = e.clientX - centerX + position.x;
+        mousePosition.y = centerY - e.clientY + position.y;
     });
 
     return {
