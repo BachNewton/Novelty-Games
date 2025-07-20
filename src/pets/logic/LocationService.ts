@@ -1,7 +1,7 @@
 import { calculateDistanceAndDirection, DistanceAndDirection } from "./Navigation";
 
 export interface LocationService {
-    calculateDistanceAndDirectionTo: (location: Location) => Promise<DistanceAndDirection | null>;
+    calculateDistanceAndDirectionTo: (location: Location) => Promise<DistanceAndDirection>;
 }
 
 export interface Location {
