@@ -5,7 +5,7 @@ import Button from "../../util/ui/Button";
 import PlaceholderImage from "../images/placeholder.jpg";
 import TextReveal from "./TextReveal";
 import { LocationService } from "../logic/LocationService";
-import { ALL_PETS } from "../data/Pet";
+import { ALL_PETS } from "../data/Pets";
 import { DistanceAndDirection } from "../logic/Navigation";
 import { Database } from "../../util/database/v1/Database";
 import { PetsTables } from "../../util/database/v1/DatabaseSchemas";
@@ -58,7 +58,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
         }}>
             <img src={PlaceholderImage} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
             <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
-                <div>Distance: {distanceAndDirection?.distance?.toFixed(3)} km</div>
+                <div>Distance: {formatDistance(distanceAndDirection)}</div>
                 <div>Direction: {distanceAndDirection?.direction}</div>
             </div>
             <div style={{
@@ -79,6 +79,15 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
         </div>
     </Scaffold >;
 };
+
+function formatDistance(distanceAndDirection: DistanceAndDirection | null): string {
+    if (distanceAndDirection === null) return '(unknown)';
+
+    const distance = distanceAndDirection.distance;
+
+    if (distance < 1) return (distance * 1000).toFixed(0) + ' m';
+    return distance.toFixed(3) + ' km';
+}
 
 function headerUi(selectedTab: number, onTabSelected: (index: number) => void): JSX.Element {
     const tabs = ALL_PETS.map((pet, index) => {
