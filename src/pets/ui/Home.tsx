@@ -64,7 +64,7 @@ const Home: React.FC<HomeProps> = ({ locationService }) => {
                 border: `3px solid ${COLORS.secondary}`,
                 borderRadius: '25px',
                 padding: '10px',
-                backgroundColor: 'black'
+                backgroundColor: 'rgba(0,0,0,0.6)'
             }}>
                 <TextReveal>
                     Hello, I am a pet. This is my dialogue. This game is a work in progress. In the future I will say some really cute things.
