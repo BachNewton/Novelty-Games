@@ -8,6 +8,11 @@ import { LocationService } from "../logic/LocationService";
 import { frog } from "../data/Pet";
 import { DistanceAndDirection } from "../logic/Navigation";
 
+const COLORS = {
+    primary: 'hotpink',
+    surface: 'grey'
+};
+
 const petNames = ['PetNameOne', 'PetNameTwo', 'PetNameThree', 'PetNameFour', 'PetNameFive', 'PetNameSix', 'PetNameSeven'];
 
 interface HomeProps {
@@ -29,9 +34,16 @@ const Home: React.FC<HomeProps> = ({ locationService }) => {
     return <Scaffold
         header={headerUi(selectedTab, index => setSelectedTab(index))}
         footer={footerUi()}
-        fontScale={1.5}
+        fontScale={1.35}
     >
-        <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+        <div style={{
+            display: 'flex',
+            height: '100%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+            background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)`
+        }}>
             <img src={PlaceholderImage} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
             <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
                 <div>Distance: {distanceAndDirection?.distance?.toFixed(3)} km</div>
@@ -53,14 +65,14 @@ function headerUi(selectedTab: number, onTabSelected: (index: number) => void): 
 
         return <div
             key={index}
-            style={{ ...borderStyle, padding: '7.5px' }}
+            style={{ ...borderStyle, padding: '7.5px', userSelect: 'none' }}
             onClick={() => onTabSelected(index)}
         >
             {petName}
         </div>;
     });
 
-    return <div style={{ display: 'flex', overflow: 'auto' }}>
+    return <div style={{ display: 'flex', overflow: 'auto', backgroundColor: COLORS.surface }}>
         {tabs}
     </div>;
 }
@@ -70,12 +82,14 @@ function getTabBorderStyle(selectedTab: number, tabIndex: number): React.CSSProp
 
     if (tabIndex === selectedTab) {
         return {
-            borderTop: border
+            borderTop: border,
+            background: `linear-gradient(0deg, ${COLORS.surface}, ${COLORS.primary})`
         };
     } else if (tabIndex === selectedTab - 1) {
         return {
             border: border,
-            borderBottomRightRadius: '15px'
+            borderBottomRightRadius: '15px',
+            backgroundClip: 'border-box'
         };
     } else if (tabIndex === selectedTab + 1) {
         return {
