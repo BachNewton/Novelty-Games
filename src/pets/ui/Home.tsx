@@ -29,6 +29,8 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
     const [selectedTab, setSelectedTab] = useState(0);
 
     const updateDistanceAndDirection = () => {
+        setDistanceAndDirection(null);
+
         locationService.calculateDistanceAndDirectionTo(ALL_PETS[selectedTab].location).then(calculatedDistanceAndDirection => {
             if (calculatedDistanceAndDirection.distance < DISCOVERY_THRESHOLD) {
                 database.savePet({
@@ -70,7 +72,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
             <img src={PlaceholderImage} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
             <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
                 <div>Distance: {formatDistance(distanceAndDirection)}</div>
-                <div>Direction: {distanceAndDirection?.direction}</div>
+                <div>Direction: {distanceAndDirection?.direction ?? '(unknonwn)'}</div>
             </div>
             <div style={{
                 position: 'absolute',
