@@ -8,12 +8,15 @@ import { LocationService } from "../logic/LocationService";
 import { frog } from "../data/Pet";
 import { DistanceAndDirection } from "../logic/Navigation";
 
+const petNames = ['PetNameOne', 'PetNameTwo', 'PetNameThree', 'PetNameFour', 'PetNameFive', 'PetNameSix', 'PetNameSeven'];
+
 interface HomeProps {
     locationService: LocationService;
 }
 
 const Home: React.FC<HomeProps> = ({ locationService }) => {
     const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
+    const [selectedTab, setSelectedTab] = useState(1);
 
     useEffect(() => {
         updateRoute(Route.PETS);
@@ -24,7 +27,7 @@ const Home: React.FC<HomeProps> = ({ locationService }) => {
     }, []);
 
     return <Scaffold
-        header={headerUi()}
+        header={headerUi(selectedTab, index => setSelectedTab(index))}
         footer={footerUi()}
         fontScale={1.5}
     >
@@ -44,12 +47,46 @@ const Home: React.FC<HomeProps> = ({ locationService }) => {
     </Scaffold >;
 };
 
-function headerUi(): JSX.Element {
-    return <div style={{ display: 'flex', borderBottom: '2px solid var(--novelty-blue)', padding: '5px' }}>
-        <Button>PetName 1</Button>
-        <Button>PetName 2</Button>
-        <Button>PetName 3</Button>
+function headerUi(selectedTab: number, onTabSelected: (index: number) => void): JSX.Element {
+    const tabs = petNames.map((petName, index) => {
+        const borderStyle = getTabBorderStyle(selectedTab, index);
+
+        return <div
+            key={index}
+            style={{ ...borderStyle, padding: '7.5px' }}
+            onClick={() => onTabSelected(index)}
+        >
+            {petName}
+        </div>;
+    });
+
+    return <div style={{ display: 'flex', overflow: 'auto' }}>
+        {tabs}
     </div>;
+}
+
+function getTabBorderStyle(selectedTab: number, tabIndex: number): React.CSSProperties {
+    const border = '2px solid white';
+
+    if (tabIndex === selectedTab) {
+        return {
+            borderTop: border
+        };
+    } else if (tabIndex === selectedTab - 1) {
+        return {
+            border: border,
+            borderBottomRightRadius: '15px'
+        };
+    } else if (tabIndex === selectedTab + 1) {
+        return {
+            border: border,
+            borderBottomLeftRadius: '15px'
+        };
+    }
+
+    return {
+        border: border
+    };
 }
 
 function footerUi(): JSX.Element {
