@@ -1,7 +1,7 @@
 export interface IndexedDb {
     add: (tableName: string, data: any) => Promise<void>;
     getAll: (tableName: string) => Promise<any[]>;
-    deleteRow: (tableName: string, condition: (data: any) => boolean) => Promise<void>;
+    deleteRow: (tableName: string, condition: (data: any) => boolean) => Promise<any>;
     delete: () => Promise<void>;
 }
 
@@ -28,22 +28,27 @@ export function createIndexedDb(databaseName: string, tableNames: string[]): Ind
             });
         },
 
-        deleteRow: async (tableName, condition) => {
+        deleteRow: (tableName, condition) => new Promise(async (resolve, reject) => {
             const objectStore = await getObjectStore(databaseName, tableNames, tableName, true);
             const cursorRequest = objectStore.openCursor();
+
+            let deletedValue: any;
+
+            objectStore.transaction.oncomplete = () => resolve(deletedValue);
 
             cursorRequest.onsuccess = e => {
                 const cursor = (e.target as IDBRequest<IDBCursorWithValue | null>).result;
 
-                if (cursor === null) return;
-
-                if (condition(cursor.value)) {
+                if (cursor === null) {
+                    reject();
+                } else if (condition(cursor.value)) {
+                    deletedValue = cursor.value;
                     cursor.delete();
                 } else {
                     cursor.continue();
                 }
             };
-        },
+        }),
 
         delete: () => new Promise(resolve => {
             const deleteRequest = indexedDB.deleteDatabase(databaseName);

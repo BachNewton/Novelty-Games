@@ -32,7 +32,9 @@ const Home: React.FC<HomeProps> = ({ database, exampleDatabase }) => {
     };
 
     const testDeleteText_v1 = () => {
-        database.deleteRow('words', data => data.name === text);
+        database.deleteRow('words', data => data.name === text)
+            .then((data) => console.log('Deleted:', data))
+            .catch(() => console.warn('Failed to deleted!'));
     };
 
     const testDelete_v1 = () => {
