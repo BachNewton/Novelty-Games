@@ -18,6 +18,7 @@ import ProfileUi from './Profile';
 import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/LabyrinthCommunicator';
 import { APP_VERSION } from '../Versioning';
 import Button from '../util/ui/Button';
+import { createLocationService } from '../pets/logic/LocationService';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -84,7 +85,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
     } else if (state instanceof FreeMarketState) {
         return <FreeMarket communicator={state.communicator} storer={state.storer} />;
     } else if (state instanceof PetsState) {
-        return <Pets />;
+        return <Pets locationService={createLocationService()} />;
     } else if (state instanceof BoardGamesState) {
         return boardGamesUi(state, onClickHandlers);
     } else {

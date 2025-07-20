@@ -4,10 +4,13 @@ import Scaffold from "../../util/ui/Scaffold";
 import Button from "../../util/ui/Button";
 import PlaceholderImage from "../images/placeholder.jpg";
 import TextReveal from "./TextReveal";
+import { LocationService } from "../logic/LocationService";
 
-interface HomeProps { }
+interface HomeProps {
+    locationService: LocationService;
+}
 
-const Home: React.FC<HomeProps> = ({ }) => {
+const Home: React.FC<HomeProps> = ({ locationService }) => {
     useEffect(() => {
         updateRoute(Route.PETS);
     }, []);
