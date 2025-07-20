@@ -1,7 +1,7 @@
 import { calculateDistanceAndDirection, DistanceAndDirection } from "./Navigation";
 
 export interface LocationService {
-    calculateDistanceAndDirectionTo: (location: Location) => DistanceAndDirection | null;
+    calculateDistanceAndDirectionTo: (location: Location) => Promise<DistanceAndDirection | null>;
 }
 
 export interface Location {
@@ -10,25 +10,20 @@ export interface Location {
 }
 
 export function createLocationService(): LocationService {
-    let currentLocation: Location | null = null;
-
-    const updateCurrentLocation = (position: GeolocationPosition) => {
-        console.log(position);
-
-        currentLocation = {
-            lat: position.coords.latitude,
-            lon: position.coords.longitude
-        };
-    };
-
-    navigator.geolocation.getCurrentPosition(updateCurrentLocation);
-    navigator.geolocation.watchPosition(updateCurrentLocation);
-
     return {
-        calculateDistanceAndDirectionTo: (location) => {
-            if (currentLocation === null) return null;
+        calculateDistanceAndDirectionTo: (location) => new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(position => {
+                const currentLocation: Location = {
+                    lat: position.coords.latitude,
+                    lon: position.coords.longitude
+                };
 
-            return calculateDistanceAndDirection(currentLocation, location);
-        }
-    };
-}
+                const distanceAndDirection = calculateDistanceAndDirection(currentLocation, location);
+
+                resolve(distanceAndDirection);
+            }, error => {
+                reject(error);
+            });
+        })
+    }
+};

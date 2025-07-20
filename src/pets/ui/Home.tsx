@@ -18,7 +18,9 @@ const Home: React.FC<HomeProps> = ({ locationService }) => {
     useEffect(() => {
         updateRoute(Route.PETS);
 
-        setTimeout(() => setDistanceAndDirection(locationService.calculateDistanceAndDirectionTo(frog.location)), 1000);
+        locationService.calculateDistanceAndDirectionTo(frog.location).then(calculatedDistanceAndDirection => {
+            setDistanceAndDirection(calculatedDistanceAndDirection);
+        });
     }, []);
 
     return <Scaffold
