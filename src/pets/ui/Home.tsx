@@ -1,18 +1,24 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Route, updateRoute } from "../../ui/Routing";
 import Scaffold from "../../util/ui/Scaffold";
 import Button from "../../util/ui/Button";
 import PlaceholderImage from "../images/placeholder.jpg";
 import TextReveal from "./TextReveal";
 import { LocationService } from "../logic/LocationService";
+import { frog } from "../data/Pet";
+import { DistanceAndDirection } from "../logic/Navigation";
 
 interface HomeProps {
     locationService: LocationService;
 }
 
 const Home: React.FC<HomeProps> = ({ locationService }) => {
+    const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
+
     useEffect(() => {
         updateRoute(Route.PETS);
+
+        setTimeout(() => setDistanceAndDirection(locationService.calculateDistanceAndDirectionTo(frog.location)), 1000);
     }, []);
 
     return <Scaffold
@@ -23,9 +29,8 @@ const Home: React.FC<HomeProps> = ({ locationService }) => {
         <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
             <img src={PlaceholderImage} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
             <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
-                <div>Name: (Uknown)</div>
-                <div>Age: (Uknown)</div>
-                <div>Location: (Uknown)</div>
+                <div>Distance: {distanceAndDirection?.distance?.toFixed(3)} km</div>
+                <div>Direction: {distanceAndDirection?.direction}</div>
             </div>
             <div style={{ position: 'absolute', bottom: '5px', left: '5px', border: '2px solid var(--novelty-orange)', borderRadius: '15px', padding: '5px', backgroundColor: 'black' }}>
                 <TextReveal>

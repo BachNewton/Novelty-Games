@@ -12,14 +12,17 @@ export interface Location {
 export function createLocationService(): LocationService {
     let currentLocation: Location | null = null;
 
-    navigator.geolocation.watchPosition(position => {
+    const updateCurrentLocation = (position: GeolocationPosition) => {
         console.log(position);
 
         currentLocation = {
             lat: position.coords.latitude,
             lon: position.coords.longitude
         };
-    });
+    };
+
+    navigator.geolocation.getCurrentPosition(updateCurrentLocation);
+    navigator.geolocation.watchPosition(updateCurrentLocation);
 
     return {
         calculateDistanceAndDirectionTo: (location) => {
