@@ -2,8 +2,7 @@ import { useEffect } from "react";
 import { Route, updateRoute } from "../../ui/Routing";
 import Scaffold from "../../util/ui/Scaffold";
 import Button from "../../util/ui/Button";
-import DemoImage from "../images/demo.jpeg";
-import DemoImage2 from "../images/demo2.jpeg";
+import DemoImage from "../images/demo.png";
 import TextReveal from "./TextReveal";
 
 interface HomeProps { }
