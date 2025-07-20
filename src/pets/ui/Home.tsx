@@ -5,8 +5,10 @@ import Button from "../../util/ui/Button";
 import PlaceholderImage from "../images/placeholder.jpg";
 import TextReveal from "./TextReveal";
 import { LocationService } from "../logic/LocationService";
-import { pets } from "../data/Pet";
+import { ALL_PETS } from "../data/Pet";
 import { DistanceAndDirection } from "../logic/Navigation";
+import { Database } from "../../util/database/v1/Database";
+import { PetsTables } from "../../util/database/v1/DatabaseSchemas";
 
 const COLORS = {
     primary: ' #FF2D95',
@@ -18,20 +20,23 @@ const petNames = ['PetNameOne', 'PetNameTwo', 'PetNameThree', 'PetNameFour', 'Pe
 
 interface HomeProps {
     locationService: LocationService;
+    database: Database<PetsTables>;
 }
 
-const Home: React.FC<HomeProps> = ({ locationService }) => {
+const Home: React.FC<HomeProps> = ({ locationService, database }) => {
     const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
     const [selectedTab, setSelectedTab] = useState(0);
 
     const updateDistanceAndDirection = () => {
-        locationService.calculateDistanceAndDirectionTo(pets[selectedTab].location).then(calculatedDistanceAndDirection => {
+        locationService.calculateDistanceAndDirectionTo(ALL_PETS[selectedTab].location).then(calculatedDistanceAndDirection => {
             setDistanceAndDirection(calculatedDistanceAndDirection);
         });
     };
 
     useEffect(() => {
         updateRoute(Route.PETS);
+
+        database.getAll('pets').then(pets => console.log('Saved pets:', pets));
 
         updateDistanceAndDirection();
     }, []);
