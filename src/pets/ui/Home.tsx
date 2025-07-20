@@ -120,7 +120,13 @@ function getTabBorderStyle(selectedTab: number, tabIndex: number): React.CSSProp
 }
 
 function footerUi(): JSX.Element {
-    return <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderTop: `2px solid ${COLORS.primary}`, padding: '5px' }}>
+    return <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        borderTop: `3px solid ${COLORS.primary}`,
+        padding: '5px',
+        backgroundColor: COLORS.surface
+    }}>
         <Button>Greet</Button>
         <Button>Pet</Button>
         <Button>Feed</Button>
