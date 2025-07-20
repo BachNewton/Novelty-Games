@@ -9,14 +9,13 @@ import { ALL_PETS } from "../data/Pet";
 import { DistanceAndDirection } from "../logic/Navigation";
 import { Database } from "../../util/database/v1/Database";
 import { PetsTables } from "../../util/database/v1/DatabaseSchemas";
+import { createID } from "../../util/ID";
 
 const COLORS = {
     primary: ' #FF2D95',
     secondary: ' #00CED1',
     surface: ' #808080'
 };
-
-const petNames = ['PetNameOne', 'PetNameTwo', 'PetNameThree', 'PetNameFour', 'PetNameFive', 'PetNameSix', 'PetNameSeven'];
 
 interface HomeProps {
     locationService: LocationService;
@@ -35,6 +34,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
 
     useEffect(() => {
         updateRoute(Route.PETS);
+        console.log(createID()); // For debugging
 
         database.getAll('pets').then(pets => console.log('Saved pets:', pets));
 
@@ -63,8 +63,8 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
             </div>
             <div style={{
                 position: 'absolute',
-                bottom: '0px',
-                left: '0px',
+                bottom: '0',
+                left: '0',
                 margin: '7.5px',
                 border: `3px solid ${COLORS.secondary}`,
                 borderRadius: '25px',
@@ -81,15 +81,15 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
 };
 
 function headerUi(selectedTab: number, onTabSelected: (index: number) => void): JSX.Element {
-    const tabs = petNames.map((petName, index) => {
+    const tabs = ALL_PETS.map((pet, index) => {
         const borderStyle = getTabBorderStyle(selectedTab, index);
 
         return <div
             key={index}
-            style={{ ...borderStyle, padding: '7.5px', userSelect: 'none' }}
+            style={{ ...borderStyle, padding: '7.5px', userSelect: 'none', flex: '0 0 4em', textAlign: 'center' }}
             onClick={() => onTabSelected(index)}
         >
-            {petName}
+            {pet.name}
         </div>;
     });
 

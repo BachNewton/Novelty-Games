@@ -23,6 +23,8 @@ export function createLocationService(): LocationService {
                 resolve(distanceAndDirection);
             }, error => {
                 reject(error);
+            }, {
+                enableHighAccuracy: true
             });
         })
     }
