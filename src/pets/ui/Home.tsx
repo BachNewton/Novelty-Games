@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Route, updateRoute } from "../../ui/Routing";
 import Scaffold from "../../util/ui/Scaffold";
 import Button from "../../util/ui/Button";
-import DemoImage from "../images/demo.png";
+import PlaceholderImage from "../images/placeholder.jpg";
 import TextReveal from "./TextReveal";
 
 interface HomeProps { }
@@ -18,7 +18,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
         fontScale={1.5}
     >
         <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-            <img src={DemoImage} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
+            <img src={PlaceholderImage} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
             <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
                 <div>Name: (Uknown)</div>
                 <div>Age: (Uknown)</div>
