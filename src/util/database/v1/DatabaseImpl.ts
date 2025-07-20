@@ -11,7 +11,9 @@ export function createDatabase<Name extends keyof DatabaseSchemas>(
     return {
         add: (tableName, data) => indexedDB.add(tableName as string, data),
 
-        get: (tableName) => indexedDB.getAll(tableName as string),
+        getAll: (tableName) => indexedDB.getAll(tableName as string),
+
+        deleteRow: (tableName, condition) => indexedDB.deleteRow(tableName as string, condition),
 
         delete: () => indexedDB.delete()
     };

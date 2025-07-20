@@ -33,7 +33,7 @@ const Home: React.FC<HomeProps> = ({ locationService }) => {
     useEffect(() => {
         updateRoute(Route.PETS);
 
-        updateDistanceAndDirection()
+        updateDistanceAndDirection();
     }, []);
 
     useEffect(updateDistanceAndDirection, [selectedTab]);

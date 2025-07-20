@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Database } from "../../../util/database/v1/Database";
 import { ExampleTables } from "../../../util/database/v1/DatabaseSchemas";
 import Button from "../../../util/ui/Button";
@@ -9,12 +10,14 @@ interface HomeProps {
 }
 
 const Home: React.FC<HomeProps> = ({ database, exampleDatabase }) => {
-    const testGet_v1 = () => {
-        database.get('numbers').then(numbers => {
+    const [text, setText] = useState('');
+
+    const testGetAll_v1 = () => {
+        database.getAll('numbers').then(numbers => {
             console.log('Numbers:', numbers)
         });
 
-        database.get('words').then(words => {
+        database.getAll('words').then(words => {
             console.log('Words:', words)
         });
     };
@@ -22,6 +25,14 @@ const Home: React.FC<HomeProps> = ({ database, exampleDatabase }) => {
     const testAdd_v1 = () => {
         database.add('numbers', { value: 42, description: 'The answer to life, the universe, and everything' }).then(() => console.log('Added numbers'));
         database.add('words', { name: 'Hello', definition: 'A greeting' }).then(() => console.log('Added words'));
+    };
+
+    const testAddText_v1 = () => {
+        database.add('words', { name: text, definition: 'Custom text' }).then(() => console.log('Added custom text'));
+    };
+
+    const testDeleteText_v1 = () => {
+        database.deleteRow('words', data => data.name === text);
     };
 
     const testDelete_v1 = () => {
@@ -55,9 +66,13 @@ const Home: React.FC<HomeProps> = ({ database, exampleDatabase }) => {
         <h2>Output in console</h2>
 
         <h3>V1</h3>
-        <Button onClick={testGet_v1}>Test Get</Button>
+        <Button onClick={testGetAll_v1}>Test Get All</Button>
         <br />
         <Button onClick={testAdd_v1}>Test Add</Button>
+        <br />
+        <Button onClick={testAddText_v1}>Test Add Text</Button>
+        <Button onClick={testDeleteText_v1}>Test Delete Text</Button>
+        <input placeholder='Text' onChange={e => setText(e.target.value)} />
         <br />
         <Button onClick={testDelete_v1}>Test Delete</Button>
 
