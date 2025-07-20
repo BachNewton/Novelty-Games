@@ -9,8 +9,9 @@ import { pets } from "../data/Pet";
 import { DistanceAndDirection } from "../logic/Navigation";
 
 const COLORS = {
-    primary: 'hotpink',
-    surface: 'grey'
+    primary: ' #FF2D95',
+    secondary: ' #00CED1',
+    surface: ' #808080'
 };
 
 const petNames = ['PetNameOne', 'PetNameTwo', 'PetNameThree', 'PetNameFour', 'PetNameFive', 'PetNameSix', 'PetNameSeven'];
@@ -55,7 +56,16 @@ const Home: React.FC<HomeProps> = ({ locationService }) => {
                 <div>Distance: {distanceAndDirection?.distance?.toFixed(3)} km</div>
                 <div>Direction: {distanceAndDirection?.direction}</div>
             </div>
-            <div style={{ position: 'absolute', bottom: '5px', left: '5px', border: '2px solid var(--novelty-orange)', borderRadius: '15px', padding: '5px', backgroundColor: 'black' }}>
+            <div style={{
+                position: 'absolute',
+                bottom: '0px',
+                left: '0px',
+                margin: '7.5px',
+                border: `3px solid ${COLORS.secondary}`,
+                borderRadius: '25px',
+                padding: '10px',
+                backgroundColor: 'black'
+            }}>
                 <TextReveal>
                     Hello, I am a pet. This is my dialogue. This game is a work in progress. In the future I will say some really cute things.
                     Right now you can greet me, pet me, or feed me. But these are just some placeholder options and they don't do anything.
