@@ -19,7 +19,7 @@ import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/Laby
 import { APP_VERSION } from '../Versioning';
 import Button from '../util/ui/Button';
 import { createLocationService } from '../pets/logic/LocationService';
-import { createDatabase } from '../util/database/v1/DatabaseImpl';
+import { createPetsDatabase } from '../pets/logic/PetsDatabase';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -88,7 +88,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
     } else if (state instanceof PetsState) {
         return <Pets
             locationService={createLocationService()}
-            database={createDatabase('pets', ['pets'])}
+            database={createPetsDatabase()}
         />;
     } else if (state instanceof BoardGamesState) {
         return boardGamesUi(state, onClickHandlers);

@@ -7,9 +7,9 @@ import TextReveal from "./TextReveal";
 import { LocationService } from "../logic/LocationService";
 import { ALL_PETS } from "../data/Pets";
 import { DistanceAndDirection } from "../logic/Navigation";
-import { Database } from "../../util/database/v1/Database";
-import { PetsTables } from "../../util/database/v1/DatabaseSchemas";
 import { createID } from "../../util/ID";
+import { PetsDatabase } from "../logic/PetsDatabase";
+import { State } from "../data/PetSave";
 
 const COLORS = {
     primary: ' #FF2D95',
@@ -17,9 +17,11 @@ const COLORS = {
     surface: ' #808080'
 };
 
+const DISCOVERY_THRESHOLD = 0.075; // 75 meters
+
 interface HomeProps {
     locationService: LocationService;
-    database: Database<PetsTables>;
+    database: PetsDatabase;
 }
 
 const Home: React.FC<HomeProps> = ({ locationService, database }) => {
@@ -28,6 +30,15 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
 
     const updateDistanceAndDirection = () => {
         locationService.calculateDistanceAndDirectionTo(ALL_PETS[selectedTab].location).then(calculatedDistanceAndDirection => {
+            if (calculatedDistanceAndDirection.distance < DISCOVERY_THRESHOLD) {
+                database.savePet({
+                    id: ALL_PETS[selectedTab].id,
+                    state: State.AWAKE,
+                    nextCycle: -1,
+                    discovered: true
+                });
+            }
+
             setDistanceAndDirection(calculatedDistanceAndDirection);
         });
     };
@@ -36,7 +47,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
         updateRoute(Route.PETS);
         console.log(createID()); // For debugging
 
-        database.getAll('pets').then(pets => console.log('Saved pets:', pets));
+        database.getPets().then(pets => console.log('Saved pets:', pets));
 
         updateDistanceAndDirection();
     }, []);
