@@ -5,7 +5,7 @@ import Button from "../../util/ui/Button";
 import PlaceholderImage from "../images/placeholder.jpg";
 import TextReveal from "./TextReveal";
 import { LocationService } from "../logic/LocationService";
-import { frog } from "../data/Pet";
+import { pets } from "../data/Pet";
 import { DistanceAndDirection } from "../logic/Navigation";
 
 const COLORS = {
@@ -21,15 +21,21 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ locationService }) => {
     const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
-    const [selectedTab, setSelectedTab] = useState(1);
+    const [selectedTab, setSelectedTab] = useState(0);
+
+    const updateDistanceAndDirection = () => {
+        locationService.calculateDistanceAndDirectionTo(pets[selectedTab].location).then(calculatedDistanceAndDirection => {
+            setDistanceAndDirection(calculatedDistanceAndDirection);
+        });
+    };
 
     useEffect(() => {
         updateRoute(Route.PETS);
 
-        locationService.calculateDistanceAndDirectionTo(frog.location).then(calculatedDistanceAndDirection => {
-            setDistanceAndDirection(calculatedDistanceAndDirection);
-        });
+        updateDistanceAndDirection()
     }, []);
+
+    useEffect(updateDistanceAndDirection, [selectedTab]);
 
     return <Scaffold
         header={headerUi(selectedTab, index => setSelectedTab(index))}
