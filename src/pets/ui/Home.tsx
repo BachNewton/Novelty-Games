@@ -10,7 +10,7 @@ import { PET_DATA } from "../data/PetData";
 import { DistanceAndDirection } from "../logic/Navigation";
 import { createID } from "../../util/ID";
 import { PetsDatabase } from "../logic/PetsDatabase";
-import { getDefaultPets, discoverPetInDatabase } from "../logic/DataManagement";
+import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave } from "../logic/DataManagement";
 import { Pet } from "../data/Pet";
 
 const COLORS = {
@@ -28,8 +28,8 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ locationService, database }) => {
     const [pets, setPets] = useState(getDefaultPets());
-    const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
     const [selectedTab, setSelectedTab] = useState(0);
+    const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
 
     const discoverPet = () => {
         discoverPetInDatabase(database, selectedTab);
@@ -39,6 +39,8 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
 
     const updateDistanceAndDirection = () => {
         setDistanceAndDirection(null);
+
+        if (pets[selectedTab].discovered) return; // Don't need to check location if the pet is already discoverd
 
         locationService.calculateDistanceAndDirectionTo(PET_DATA[selectedTab].location).then(calculatedDistanceAndDirection => {
             if (calculatedDistanceAndDirection.distance < DISCOVERY_THRESHOLD) {
@@ -54,39 +56,23 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
 
         console.log(createID()); // For debugging
 
-        database.getPets().then(savedPets => {
-            console.log('Saved pets:', savedPets);
-
-            const updatedPets = pets.map<Pet>(pet => {
-                if (savedPets.has(pet.id)) {
-                    const petSave = savedPets.get(pet.id)!;
-
-                    return {
-                        ...pet,
-                        ...petSave
-                    };
-                }
-
-                return pet;
-            });
-
-            setPets(updatedPets);
-        });
+        updatePetsFromSave(database, pets).then(updatedPets => setPets(updatedPets));
 
         updateDistanceAndDirection();
     }, []);
 
     useEffect(updateDistanceAndDirection, [selectedTab]);
 
-    const isDiscovered = pets[selectedTab].discovered;
+    const selectedPet = pets[selectedTab];
+    const isDiscovered = selectedPet.discovered;
     const image = isDiscovered ? PlaceholderImage : HiddenImage;
     const text = isDiscovered
         ? 'Hello, I am a pet. This is my dialogue. This game is a work in progress. In the future I will say some really cute things. Right now you can greet me, pet me, or feed me. But these are just some placeholder options and they don\'t do anything.'
         : 'I am a pet and I am hidden. Come find me!'
-    const locationElement = isDiscovered
+    const locationElement = !isDiscovered
         ? <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
             <div>Distance: {formatDistance(distanceAndDirection)}</div>
-            <div>Direction: {distanceAndDirection?.direction ?? '(unknonwn)'}</div>
+            <div>Direction: {distanceAndDirection?.direction ?? '(Searching...)'}</div>
         </div>
         : <></>;
 
@@ -125,7 +111,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
 };
 
 function formatDistance(distanceAndDirection: DistanceAndDirection | null): string {
-    if (distanceAndDirection === null) return '(unknown)';
+    if (distanceAndDirection === null) return '(Searching...)';
 
     const distance = distanceAndDirection.distance;
 

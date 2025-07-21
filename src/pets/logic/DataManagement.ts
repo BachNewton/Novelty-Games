@@ -12,7 +12,8 @@ export function getDefaultPets(): Pet[] {
             name: pet.name,
             discovered: false,
             state: State.ASLEEP,
-            nextCycle: -1
+            nextCycle: -1,
+            distanceAndDirection: null
         };
     });
 }
@@ -23,5 +24,23 @@ export function discoverPetInDatabase(database: PetsDatabase, selectedTab: numbe
         state: State.AWAKE,
         nextCycle: Date.now() + CYCLE_TIME,
         discovered: true
+    });
+}
+
+export async function updatePetsFromSave(database: PetsDatabase, pets: Pet[]): Promise<Pet[]> {
+    const savedPets = await database.getPets();
+    console.log('Saved pets:', savedPets);
+
+    return pets.map(pet => {
+        if (savedPets.has(pet.id)) {
+            const savedPet = savedPets.get(pet.id)!;
+
+            return {
+                ...pet,
+                ...savedPet
+            };
+        }
+
+        return pet;
     });
 }
