@@ -1,9 +1,12 @@
 import { Pet } from "../data/Pet";
 import { PET_DATA } from "../data/PetData";
 import { PetSave, State } from "../data/PetSave";
+import { LocationService } from "./LocationService";
+import { DistanceAndDirection } from "./Navigation";
 import { PetsDatabase } from "./PetsDatabase";
 
 const CYCLE_TIME = 15 * 1000; // 15 seconds
+const DISCOVERY_THRESHOLD = 0.075; // 75 meters
 
 export function getDefaultPets(): Pet[] {
     return PET_DATA.map<Pet>(pet => {
@@ -76,4 +79,22 @@ function cycleState(state: State): State {
         case State.AWAKE:
             return State.ASLEEP;
     }
+}
+
+export function distanceAndDirectionHandler(
+    pets: Pet[],
+    selectedTab: number,
+    locationService: LocationService,
+    onPetDiscovered: () => void,
+    onDistanceAndDirectionUpdate: (calculatedDistanceAndDirection: DistanceAndDirection) => void
+) {
+    if (pets[selectedTab].discovered) return; // Don't need to check location if the pet is already discoverd
+
+    locationService.calculateDistanceAndDirectionTo(PET_DATA[selectedTab].location).then(calculatedDistanceAndDirection => {
+        if (calculatedDistanceAndDirection.distance < DISCOVERY_THRESHOLD) {
+            onPetDiscovered();
+        } else {
+            onDistanceAndDirectionUpdate(calculatedDistanceAndDirection);
+        }
+    });
 }

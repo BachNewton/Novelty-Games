@@ -73,3 +73,5 @@ export const PET_DATA: PetData[] = [
         dialogue: getDefaultDialogue()
     }
 ];
+
+export const PET_DATA_MAP = new Map(PET_DATA.map(pet => [pet.id, pet]));

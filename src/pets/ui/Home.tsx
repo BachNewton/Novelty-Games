@@ -7,11 +7,10 @@ import HiddenImage from "../images/hidden.png";
 import SleepingImage from "../images/sleeping.png";
 import TextReveal from "./TextReveal";
 import { LocationService } from "../logic/LocationService";
-import { PET_DATA } from "../data/PetData";
 import { DistanceAndDirection } from "../logic/Navigation";
 import { createID } from "../../util/ID";
 import { PetsDatabase } from "../logic/PetsDatabase";
-import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState } from "../logic/DataManagement";
+import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler } from "../logic/DataManagement";
 import { Pet } from "../data/Pet";
 import { State } from "../data/PetSave";
 import { debugNextCycle, debugResetAllData } from "../logic/Debugging";
@@ -21,8 +20,6 @@ const COLORS = {
     secondary: ' #00CED1',
     surface: ' #808080'
 };
-
-const DISCOVERY_THRESHOLD = 0.075; // 75 meters
 
 interface HomeProps {
     locationService: LocationService;
@@ -48,15 +45,13 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
     const updateDistanceAndDirection = () => {
         setDistanceAndDirection(null);
 
-        if (pets[selectedTab].discovered) return; // Don't need to check location if the pet is already discoverd
-
-        locationService.calculateDistanceAndDirectionTo(PET_DATA[selectedTab].location).then(calculatedDistanceAndDirection => {
-            if (calculatedDistanceAndDirection.distance < DISCOVERY_THRESHOLD) {
-                discoverPet();
-            } else {
-                setDistanceAndDirection(calculatedDistanceAndDirection);
-            }
-        });
+        distanceAndDirectionHandler(
+            pets,
+            selectedTab,
+            locationService,
+            discoverPet,
+            calculatedDistanceAndDirection => setDistanceAndDirection(calculatedDistanceAndDirection)
+        );
     };
 
     const onTabChange = () => {
