@@ -4,14 +4,16 @@ import Scaffold from "../../util/ui/Scaffold";
 import Button from "../../util/ui/Button";
 import PlaceholderImage from "../images/placeholder.png";
 import HiddenImage from "../images/hidden.png";
+import SleepingImage from "../images/sleeping.png";
 import TextReveal from "./TextReveal";
 import { LocationService } from "../logic/LocationService";
 import { PET_DATA } from "../data/PetData";
 import { DistanceAndDirection } from "../logic/Navigation";
 import { createID } from "../../util/ID";
 import { PetsDatabase } from "../logic/PetsDatabase";
-import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave } from "../logic/DataManagement";
+import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState } from "../logic/DataManagement";
 import { Pet } from "../data/Pet";
+import { State } from "../data/PetSave";
 
 const COLORS = {
     primary: ' #FF2D95',
@@ -32,8 +34,13 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
     const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
 
     const discoverPet = () => {
-        discoverPetInDatabase(database, selectedTab);
-        pets[selectedTab].discovered = true;
+        const updatedPet = discoverPetInDatabase(database, selectedTab);
+
+        pets[selectedTab] = {
+            ...pets[selectedTab],
+            ...updatedPet
+        };
+
         setPets([...pets]);
     };
 
@@ -51,6 +58,12 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
         });
     };
 
+    const onTabChange = () => {
+        updateDistanceAndDirection();
+        const updatedPets = updatePetsState(database, pets, selectedTab);
+        setPets(updatedPets);
+    };
+
     useEffect(() => {
         updateRoute(Route.PETS);
 
@@ -61,14 +74,12 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
         updateDistanceAndDirection();
     }, []);
 
-    useEffect(updateDistanceAndDirection, [selectedTab]);
+    useEffect(onTabChange, [selectedTab]);
 
     const selectedPet = pets[selectedTab];
     const isDiscovered = selectedPet.discovered;
-    const image = isDiscovered ? PlaceholderImage : HiddenImage;
-    const text = isDiscovered
-        ? 'Hello, I am a pet. This is my dialogue. This game is a work in progress. In the future I will say some really cute things. Right now you can greet me, pet me, or feed me. But these are just some placeholder options and they don\'t do anything.'
-        : 'I am a pet and I am hidden. Come find me!'
+    const image = getImage(selectedPet);
+    const text = getText(selectedPet);
     const locationElement = !isDiscovered
         ? <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
             <div>Distance: {formatDistance(distanceAndDirection)}</div>
@@ -79,7 +90,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
 
     return <Scaffold
         header={headerUi(pets, selectedTab, index => setSelectedTab(index))}
-        footer={footerUi(discoverPet)}
+        footer={footerUi(discoverPet, selectedPet)}
         fontScale={1.35}
     >
         <div style={{
@@ -109,6 +120,32 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
         </div>
     </Scaffold >;
 };
+
+function getImage(pet: Pet): string {
+    if (pet.discovered) {
+        switch (pet.state) {
+            case State.AWAKE:
+                return PlaceholderImage;
+            case State.ASLEEP:
+                return SleepingImage;
+        }
+    } else {
+        return HiddenImage;
+    }
+}
+
+function getText(pet: Pet): string {
+    if (pet.discovered) {
+        switch (pet.state) {
+            case State.AWAKE:
+                return 'Hello, I am a pet. I am awake and this is my dialogue. This game is a work in progress. In the future I will say some really cute things. Right now you can greet me, pet me, or feed me. But these are just some placeholder options and they don\'t do anything.';
+            case State.ASLEEP:
+                return 'I am a sleeping pet. I don\'t want to interact right now. How about you come back later when I am awake?';
+        }
+    } else {
+        return 'I am a pet and I am hidden. Come find me!';
+    }
+}
 
 function formatDistance(distanceAndDirection: DistanceAndDirection | null): string {
     if (distanceAndDirection === null) return '(Searching...)';
@@ -165,7 +202,7 @@ function getTabBorderStyle(selectedTab: number, tabIndex: number): React.CSSProp
     };
 }
 
-function footerUi(discoverPet: () => void): JSX.Element {
+function footerUi(discoverPet: () => void, selectedPet: Pet): JSX.Element {
     return <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
@@ -178,7 +215,14 @@ function footerUi(discoverPet: () => void): JSX.Element {
         <Button>Feed</Button>
         <Button>Play</Button>
         <Button fontScale={0.75} onClick={discoverPet}>Debug: discoverPet</Button>
+        <Button fontScale={0.75} onClick={discoverPet} isEnabled={false}>nextCyle: {debugNextCycle(selectedPet)}</Button>
     </div>;
+}
+
+function debugNextCycle(pet: Pet): string {
+    if (pet.nextCycle === null) return 'N/A';
+
+    return `nextCyle: ${((pet.nextCycle - Date.now()) / 1000).toFixed(0)}s`;
 }
 
 export default Home;

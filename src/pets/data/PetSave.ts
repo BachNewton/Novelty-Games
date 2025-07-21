@@ -1,7 +1,7 @@
 export interface PetSave {
     id: string;
     state: State;
-    nextCycle: number;
+    nextCycle: number | null;
     discovered: boolean;
 }
 
