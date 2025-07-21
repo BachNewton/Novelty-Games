@@ -46,5 +46,21 @@ export const PET_DATA: PetData[] = [
             lat: 60.173555,
             lon: 24.937540
         }
+    },
+    {
+        id: '7BUR-NBXS-YK4L-DQFF',
+        name: 'Nissa',
+        location: { // Pihlajasaari
+            lat: 60.140322,
+            lon: 24.916174
+        }
+    },
+    {
+        id: 'FAFK-YR7G-YJKE-QZTG',
+        name: 'Charlemagne',
+        location: { // Senate Square
+            lat: 60.169639,
+            lon: 24.952259
+        }
     }
 ];
