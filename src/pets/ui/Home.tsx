@@ -10,7 +10,7 @@ import { LocationService } from "../logic/LocationService";
 import { DistanceAndDirection } from "../logic/Navigation";
 import { createID } from "../../util/ID";
 import { PetsDatabase } from "../logic/PetsDatabase";
-import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler } from "../logic/DataManagement";
+import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler, getDialogue } from "../logic/DataManagement";
 import { Pet } from "../data/Pet";
 import { State } from "../data/PetSave";
 import { debugNextCycle, debugResetAllData } from "../logic/Debugging";
@@ -46,8 +46,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
         setDistanceAndDirection(null);
 
         distanceAndDirectionHandler(
-            pets,
-            selectedTab,
+            pets[selectedTab],
             locationService,
             discoverPet,
             calculatedDistanceAndDirection => setDistanceAndDirection(calculatedDistanceAndDirection)
@@ -131,15 +130,17 @@ function getImage(pet: Pet): string {
 }
 
 function getText(pet: Pet): string {
+    const dialogue = getDialogue(pet);
+
     if (pet.discovered) {
         switch (pet.state) {
             case State.AWAKE:
-                return 'Hello, I am a pet. I am awake and this is my dialogue. This game is a work in progress. In the future I will say some really cute things. Right now you can greet me, pet me, or feed me. But these are just some placeholder options and they don\'t do anything.';
+                return dialogue.greeting;
             case State.ASLEEP:
-                return 'I am a sleeping pet. I don\'t want to interact right now. How about you come back later when I am awake?';
+                return dialogue.sleeping;
         }
     } else {
-        return 'I am a pet and I am hidden. Come find me!';
+        return dialogue.hidden;
     }
 }
 

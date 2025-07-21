@@ -1,5 +1,6 @@
+import { Dialogue } from "../data/Dialogue";
 import { Pet } from "../data/Pet";
-import { PET_DATA } from "../data/PetData";
+import { PET_DATA, PET_DATA_MAP } from "../data/PetData";
 import { PetSave, State } from "../data/PetSave";
 import { LocationService } from "./LocationService";
 import { DistanceAndDirection } from "./Navigation";
@@ -82,19 +83,26 @@ function cycleState(state: State): State {
 }
 
 export function distanceAndDirectionHandler(
-    pets: Pet[],
-    selectedTab: number,
+    pet: Pet,
     locationService: LocationService,
     onPetDiscovered: () => void,
     onDistanceAndDirectionUpdate: (calculatedDistanceAndDirection: DistanceAndDirection) => void
 ) {
-    if (pets[selectedTab].discovered) return; // Don't need to check location if the pet is already discoverd
+    if (pet.discovered) return; // Don't need to check location if the pet is already discoverd
 
-    locationService.calculateDistanceAndDirectionTo(PET_DATA[selectedTab].location).then(calculatedDistanceAndDirection => {
+    const petData = PET_DATA_MAP.get(pet.id)!;
+
+    locationService.calculateDistanceAndDirectionTo(petData.location).then(calculatedDistanceAndDirection => {
         if (calculatedDistanceAndDirection.distance < DISCOVERY_THRESHOLD) {
             onPetDiscovered();
         } else {
             onDistanceAndDirectionUpdate(calculatedDistanceAndDirection);
         }
     });
+}
+
+export function getDialogue(pet: Pet): Dialogue {
+    const petData = PET_DATA_MAP.get(pet.id)!;
+
+    return petData.dialogue;
 }
