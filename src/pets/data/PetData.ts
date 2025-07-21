@@ -1,9 +1,11 @@
 import { Location } from "../logic/LocationService";
+import { Dialogue, ellaDialog, getDefaultDialogue } from "./Dialogue";
 
 interface PetData {
     id: string;
     name: string;
     location: Location;
+    dialogue: Dialogue;
 }
 
 export const PET_DATA: PetData[] = [
@@ -13,7 +15,8 @@ export const PET_DATA: PetData[] = [
         location: { // Lauttasaari Beach
             lat: 60.155143,
             lon: 24.871984
-        }
+        },
+        dialogue: getDefaultDialogue()
     },
     {
         id: 'GM9G-3VS8-ICFQ-XMSI',
@@ -21,7 +24,8 @@ export const PET_DATA: PetData[] = [
         location: { // Supercell office
             lat: 60.161052,
             lon: 24.921724
-        }
+        },
+        dialogue: getDefaultDialogue()
     },
     {
         id: '0YHF-2UNI-RY2H-U59U',
@@ -29,7 +33,8 @@ export const PET_DATA: PetData[] = [
         location: { // Lapinlahden Lähde
             lat: 60.167550,
             lon: 24.913651
-        }
+        },
+        dialogue: ellaDialog
     },
     {
         id: 'I6R0-BROC-DVMX-9GKQ',
@@ -37,7 +42,8 @@ export const PET_DATA: PetData[] = [
         location: { // Seurasaari
             lat: 60.185826,
             lon: 24.884611
-        }
+        },
+        dialogue: getDefaultDialogue()
     },
     {
         id: 'K7EJ-VGA0-BNRZ-CZZ8',
@@ -45,7 +51,8 @@ export const PET_DATA: PetData[] = [
         location: { // Oodi
             lat: 60.173555,
             lon: 24.937540
-        }
+        },
+        dialogue: getDefaultDialogue()
     },
     {
         id: '7BUR-NBXS-YK4L-DQFF',
@@ -53,7 +60,8 @@ export const PET_DATA: PetData[] = [
         location: { // Pihlajasaari
             lat: 60.140322,
             lon: 24.916174
-        }
+        },
+        dialogue: getDefaultDialogue()
     },
     {
         id: 'FAFK-YR7G-YJKE-QZTG',
@@ -61,6 +69,7 @@ export const PET_DATA: PetData[] = [
         location: { // Senate Square
             lat: 60.169639,
             lon: 24.952259
-        }
+        },
+        dialogue: getDefaultDialogue()
     }
 ];
