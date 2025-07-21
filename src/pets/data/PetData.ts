@@ -89,7 +89,50 @@ export const PET_DATA: PetData[] = [
             lon: 25.657639
         },
         dialogue: getDefaultDialogue()
+    },
+    {
+        id: 'F4ZS-EEOT-54DV-TQDA',
+        name: 'Debug 1',
+        location: { // Fort Wayne - Purdue University pedestrian bridge
+            lat: 41.116543,
+            lon: -85.115103
+        },
+        dialogue: {
+            hidden: 'Hi Nick, thanks for testing my game!',
+            greeting: 'Hi Nick, did you enjoy the bridge?',
+            sleeping: 'Hi Nick, this debug bridge is alseep.'
+        }
+    },
+    {
+        id: 'T28V-SFZY-K1V3-65OF',
+        name: 'Debug 2',
+        location: { // Fort Wayne - Promenade Park
+            lat: 41.082817,
+            lon: -85.142990
+        },
+        dialogue: {
+            hidden: 'Hi Nick, thanks for testing my game AGAIN!',
+            greeting: 'I really enjoyed the boat tour and the time hanging out here by the water.',
+            sleeping: 'Nick! Boats sleep too!'
+        }
+    },
+    {
+        id: '9DKI-B4DS-V6YM-C2M9',
+        name: 'Debug 3',
+        location: { // Fort Wayne - Turner Softball, Homeplate
+            lat: 41.109803,
+            lon: -85.123687
+        },
+        dialogue: {
+            hidden: 'Come bike and find me, Nick!',
+            greeting: 'Homeplate! Batter up!',
+            sleeping: 'I can\'t think of anything creative to say about sleeping and basebase...'
+        }
     }
 ];
+
+// Location Ideas:
+// Cafe Regatta
+// Helsinki Winter Garden
 
 export const PET_DATA_MAP = new Map(PET_DATA.map(pet => [pet.id, pet]));
