@@ -71,6 +71,24 @@ export const PET_DATA: PetData[] = [
             lon: 24.952259
         },
         dialogue: getDefaultDialogue()
+    },
+    {
+        id: 'GA9X-D1BP-N28O-O7FA',
+        name: 'Prinsessa',
+        location: { // Friend's home in Lahti
+            lat: 60.979645,
+            lon: 25.708814
+        },
+        dialogue: getDefaultDialogue()
+    },
+    {
+        id: 'KGUP-HUGJ-71PR-PEB0',
+        name: 'Viola',
+        location: { // Lahi train station
+            lat: 60.976995,
+            lon: 25.657639
+        },
+        dialogue: getDefaultDialogue()
     }
 ];
 
