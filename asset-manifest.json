@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/Novelty-Games/static/css/main.41b85a5d.css",
-    "main.js": "/Novelty-Games/static/js/main.aca92a5c.js",
+    "main.js": "/Novelty-Games/static/js/main.736f7362.js",
     "static/js/453.ed3810f9.chunk.js": "/Novelty-Games/static/js/453.ed3810f9.chunk.js",
     "static/media/skybox.jpg": "/Novelty-Games/static/media/skybox.abf8b9fe4fbb55e8b983.jpg",
     "static/media/player-normal-map.png": "/Novelty-Games/static/media/player-normal-map.93bce2b1183322f67fd2.png",
@@ -10,6 +10,7 @@
     "static/media/player.png": "/Novelty-Games/static/media/player.f318e1bc385e2ab4f957.png",
     "static/media/CedarvilleCursive-Regular.ttf": "/Novelty-Games/static/media/CedarvilleCursive-Regular.a669593f51bb81ad0cc1.ttf",
     "static/media/troll.png": "/Novelty-Games/static/media/troll.f1981e0994f3c699bd50.png",
+    "static/media/placeholder.png": "/Novelty-Games/static/media/placeholder.a2539d74cc586cefec91.png",
     "static/media/lizard.png": "/Novelty-Games/static/media/lizard.734688b10ee2b6838ac8.png",
     "static/media/butterfly.png": "/Novelty-Games/static/media/butterfly.5eaaf730513ea0f1da4e.png",
     "static/media/collect.wav": "/Novelty-Games/static/media/collect.a287fb90cd0a2aa2ceab.wav",
@@ -24,6 +25,7 @@
     "static/media/unicorn.png": "/Novelty-Games/static/media/unicorn.c8916cc5d01391e5a8cc.png",
     "static/media/shield.png": "/Novelty-Games/static/media/shield.fc96ec01e89908034cc2.png",
     "static/media/trophy.png": "/Novelty-Games/static/media/trophy.f6b51f53759353e6eabf.png",
+    "static/media/hidden.png": "/Novelty-Games/static/media/hidden.f17c6e83da3f5249608e.png",
     "static/media/ghost.png": "/Novelty-Games/static/media/ghost.b4a7d3098996ed26c3b7.png",
     "static/media/spider.png": "/Novelty-Games/static/media/spider.52ef500dea1a2530fde7.png",
     "static/media/bottle.png": "/Novelty-Games/static/media/bottle.d4d416c7b936717f9d90.png",
@@ -60,11 +62,11 @@
     "static/media/MB-outline.svg": "/Novelty-Games/static/media/MB-outline.9375dcb67c2602a348842bb92635c97b.svg",
     "static/media/MB-back.svg": "/Novelty-Games/static/media/MB-back.73af888104565973b102803815b53578.svg",
     "main.41b85a5d.css.map": "/Novelty-Games/static/css/main.41b85a5d.css.map",
-    "main.aca92a5c.js.map": "/Novelty-Games/static/js/main.aca92a5c.js.map",
+    "main.736f7362.js.map": "/Novelty-Games/static/js/main.736f7362.js.map",
     "453.ed3810f9.chunk.js.map": "/Novelty-Games/static/js/453.ed3810f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.41b85a5d.css",
-    "static/js/main.aca92a5c.js"
+    "static/js/main.736f7362.js"
   ]
 }
