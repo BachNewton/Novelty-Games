@@ -1,5 +1,5 @@
 import { Location } from "../logic/LocationService";
-import { Dialogue, ellaDialog, getDefaultDialogue } from "./Dialogue";
+import { Dialogue, doryDialog, ellaDialog, getDefaultDialogue } from "./Dialogue";
 
 interface PetData {
     id: string;
@@ -38,12 +38,12 @@ export const PET_DATA: PetData[] = [
     },
     {
         id: 'I6R0-BROC-DVMX-9GKQ',
-        name: 'Dorian',
+        name: 'Dory',
         location: { // Seurasaari
             lat: 60.185826,
             lon: 24.884611
         },
-        dialogue: getDefaultDialogue()
+        dialogue: doryDialog
     },
     {
         id: 'K7EJ-VGA0-BNRZ-CZZ8',

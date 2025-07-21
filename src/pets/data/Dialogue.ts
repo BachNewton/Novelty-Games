@@ -13,7 +13,13 @@ export function getDefaultDialogue(): Dialogue {
 }
 
 export const ellaDialog: Dialogue = {
-    hidden: 'This is the hidden dialog',
-    greeting: 'This is the greeting dialog',
-    sleeping: 'This is the sleeping dialog'
+    hidden: 'Oh, this is new. Where am I?',
+    greeting: 'Oh hi! Who are you? sniff I don\'t know you, but you seem interesting.',
+    sleeping: 'ignore'
+};
+
+export const doryDialog: Dialogue = {
+    hidden: 'Oh my god! What is this? How did I get here? I better find a place to hide!',
+    greeting: 'Um… hello. I\'m not so sure about y—wait, are those treats?? You\'re my new best friend.',
+    sleeping: 'Hrmph. Unless you\'ve got food, don\'t bother. I need my beauty sleep.'
 };
