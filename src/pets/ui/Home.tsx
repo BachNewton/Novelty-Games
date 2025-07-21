@@ -5,11 +5,13 @@ import Button from "../../util/ui/Button";
 import PlaceholderImage from "../images/placeholder.jpg";
 import TextReveal from "./TextReveal";
 import { LocationService } from "../logic/LocationService";
-import { PETS_DATA } from "../data/PetsData";
+import { PET_DATA } from "../data/PetData";
 import { DistanceAndDirection } from "../logic/Navigation";
 import { createID } from "../../util/ID";
 import { PetsDatabase } from "../logic/PetsDatabase";
 import { State } from "../data/PetSave";
+import { getDefaultPets } from "../logic/InitialLoad";
+import { Pet } from "../data/Pet";
 
 const COLORS = {
     primary: ' #FF2D95',
@@ -25,16 +27,17 @@ interface HomeProps {
 }
 
 const Home: React.FC<HomeProps> = ({ locationService, database }) => {
+    const [pets, setPets] = useState(getDefaultPets());
     const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
     const [selectedTab, setSelectedTab] = useState(0);
 
     const updateDistanceAndDirection = () => {
         setDistanceAndDirection(null);
 
-        locationService.calculateDistanceAndDirectionTo(PETS_DATA[selectedTab].location).then(calculatedDistanceAndDirection => {
+        locationService.calculateDistanceAndDirectionTo(PET_DATA[selectedTab].location).then(calculatedDistanceAndDirection => {
             if (calculatedDistanceAndDirection.distance < DISCOVERY_THRESHOLD) {
                 database.savePet({
-                    id: PETS_DATA[selectedTab].id,
+                    id: PET_DATA[selectedTab].id,
                     state: State.AWAKE,
                     nextCycle: -1,
                     discovered: true
@@ -47,9 +50,27 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
 
     useEffect(() => {
         updateRoute(Route.PETS);
+
         console.log(createID()); // For debugging
 
-        database.getPets().then(pets => console.log('Saved pets:', pets));
+        database.getPets().then(savedPets => {
+            console.log('Saved pets:', savedPets);
+
+            const updatedPets = pets.map<Pet>(pet => {
+                if (savedPets.has(pet.id)) {
+                    const petSave = savedPets.get(pet.id)!;
+
+                    return {
+                        ...pet,
+                        ...petSave
+                    };
+                }
+
+                return pet;
+            });
+
+            setPets(updatedPets);
+        });
 
         updateDistanceAndDirection();
     }, []);
@@ -103,7 +124,7 @@ function formatDistance(distanceAndDirection: DistanceAndDirection | null): stri
 }
 
 function headerUi(selectedTab: number, onTabSelected: (index: number) => void): JSX.Element {
-    const tabs = PETS_DATA.map((pet, index) => {
+    const tabs = PET_DATA.map((pet, index) => {
         const borderStyle = getTabBorderStyle(selectedTab, index);
 
         return <div

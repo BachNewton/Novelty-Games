@@ -6,5 +6,5 @@ export interface PetSave {
 }
 
 export enum State {
-    AWAKE, SLEEPING
+    AWAKE, ASLEEP
 }

@@ -1,12 +1,12 @@
 import { Location } from "../logic/LocationService";
 
-interface Pet {
+interface PetData {
     id: string;
     name: string;
     location: Location;
 }
 
-export const PETS_DATA: Pet[] = [
+export const PET_DATA: PetData[] = [
     {
         id: '8GRO-SBWZ-9VBV-47WX',
         name: 'Frog',
