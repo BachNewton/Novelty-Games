@@ -6,7 +6,7 @@ interface Pet {
     location: Location;
 }
 
-export const ALL_PETS: Pet[] = [
+export const PETS_DATA: Pet[] = [
     {
         id: '8GRO-SBWZ-9VBV-47WX',
         name: 'Frog',

@@ -5,7 +5,7 @@ import Button from "../../util/ui/Button";
 import PlaceholderImage from "../images/placeholder.jpg";
 import TextReveal from "./TextReveal";
 import { LocationService } from "../logic/LocationService";
-import { ALL_PETS } from "../data/Pets";
+import { PETS_DATA } from "../data/PetsData";
 import { DistanceAndDirection } from "../logic/Navigation";
 import { createID } from "../../util/ID";
 import { PetsDatabase } from "../logic/PetsDatabase";
@@ -31,10 +31,10 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
     const updateDistanceAndDirection = () => {
         setDistanceAndDirection(null);
 
-        locationService.calculateDistanceAndDirectionTo(ALL_PETS[selectedTab].location).then(calculatedDistanceAndDirection => {
+        locationService.calculateDistanceAndDirectionTo(PETS_DATA[selectedTab].location).then(calculatedDistanceAndDirection => {
             if (calculatedDistanceAndDirection.distance < DISCOVERY_THRESHOLD) {
                 database.savePet({
-                    id: ALL_PETS[selectedTab].id,
+                    id: PETS_DATA[selectedTab].id,
                     state: State.AWAKE,
                     nextCycle: -1,
                     discovered: true
@@ -103,7 +103,7 @@ function formatDistance(distanceAndDirection: DistanceAndDirection | null): stri
 }
 
 function headerUi(selectedTab: number, onTabSelected: (index: number) => void): JSX.Element {
-    const tabs = ALL_PETS.map((pet, index) => {
+    const tabs = PETS_DATA.map((pet, index) => {
         const borderStyle = getTabBorderStyle(selectedTab, index);
 
         return <div
