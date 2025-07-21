@@ -10,8 +10,7 @@ import { PET_DATA } from "../data/PetData";
 import { DistanceAndDirection } from "../logic/Navigation";
 import { createID } from "../../util/ID";
 import { PetsDatabase } from "../logic/PetsDatabase";
-import { State } from "../data/PetSave";
-import { getDefaultPets } from "../logic/InitialLoad";
+import { getDefaultPets, discoverPetInDatabase } from "../logic/DataManagement";
 import { Pet } from "../data/Pet";
 
 const COLORS = {
@@ -32,20 +31,21 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
     const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
     const [selectedTab, setSelectedTab] = useState(0);
 
+    const discoverPet = () => {
+        discoverPetInDatabase(database, selectedTab);
+        pets[selectedTab].discovered = true;
+        setPets([...pets]);
+    };
+
     const updateDistanceAndDirection = () => {
         setDistanceAndDirection(null);
 
         locationService.calculateDistanceAndDirectionTo(PET_DATA[selectedTab].location).then(calculatedDistanceAndDirection => {
             if (calculatedDistanceAndDirection.distance < DISCOVERY_THRESHOLD) {
-                database.savePet({
-                    id: PET_DATA[selectedTab].id,
-                    state: State.AWAKE,
-                    nextCycle: -1,
-                    discovered: true
-                });
+                discoverPet();
+            } else {
+                setDistanceAndDirection(calculatedDistanceAndDirection);
             }
-
-            setDistanceAndDirection(calculatedDistanceAndDirection);
         });
     };
 
@@ -78,14 +78,22 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
 
     useEffect(updateDistanceAndDirection, [selectedTab]);
 
-    const image = pets[selectedTab].discovered ? PlaceholderImage : HiddenImage;
-    const text = pets[selectedTab].discovered
+    const isDiscovered = pets[selectedTab].discovered;
+    const image = isDiscovered ? PlaceholderImage : HiddenImage;
+    const text = isDiscovered
         ? 'Hello, I am a pet. This is my dialogue. This game is a work in progress. In the future I will say some really cute things. Right now you can greet me, pet me, or feed me. But these are just some placeholder options and they don\'t do anything.'
         : 'I am a pet and I am hidden. Come find me!'
+    const locationElement = isDiscovered
+        ? <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
+            <div>Distance: {formatDistance(distanceAndDirection)}</div>
+            <div>Direction: {distanceAndDirection?.direction ?? '(unknonwn)'}</div>
+        </div>
+        : <></>;
+
 
     return <Scaffold
         header={headerUi(pets, selectedTab, index => setSelectedTab(index))}
-        footer={footerUi()}
+        footer={footerUi(discoverPet)}
         fontScale={1.35}
     >
         <div style={{
@@ -97,10 +105,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
             background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)`
         }}>
             <img src={image} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
-            <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
-                <div>Distance: {formatDistance(distanceAndDirection)}</div>
-                <div>Direction: {distanceAndDirection?.direction ?? '(unknonwn)'}</div>
-            </div>
+            {locationElement}
             <div style={{
                 position: 'absolute',
                 bottom: '0',
@@ -174,7 +179,7 @@ function getTabBorderStyle(selectedTab: number, tabIndex: number): React.CSSProp
     };
 }
 
-function footerUi(): JSX.Element {
+function footerUi(discoverPet: () => void): JSX.Element {
     return <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
@@ -186,8 +191,7 @@ function footerUi(): JSX.Element {
         <Button>Pet</Button>
         <Button>Feed</Button>
         <Button>Play</Button>
-        <Button fontScale={0.75}>Debug: discoverPet</Button>
-        <Button fontScale={0.75}>Debug: undiscoverPet</Button>
+        <Button fontScale={0.75} onClick={discoverPet}>Debug: discoverPet</Button>
     </div>;
 }
 

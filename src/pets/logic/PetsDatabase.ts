@@ -12,8 +12,13 @@ export function createPetsDatabase(): PetsDatabase {
     return {
         getPets: async () => new Map((await database.getAll('pets')).map(pet => [pet.id, pet])),
         savePet: async (pet) => {
-            await database.deleteRow('pets', row => pet.id === row.id);
-            await database.add('pets', pet);
+            try {
+                await database.deleteRow('pets', row => pet.id === row.id);
+            } catch {
+                // If the row can't be deleted, we can ignore this
+            } finally {
+                await database.add('pets', pet);
+            }
         }
     };
 }
