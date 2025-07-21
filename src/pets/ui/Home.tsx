@@ -179,6 +179,8 @@ function footerUi(): JSX.Element {
         <Button>Pet</Button>
         <Button>Feed</Button>
         <Button>Play</Button>
+        <Button fontScale={0.8}>Debug: discoverPet</Button>
+        <Button fontScale={0.8}>Debug: undiscoverPet</Button>
     </div>;
 }
 
