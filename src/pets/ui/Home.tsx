@@ -14,6 +14,7 @@ import { PetsDatabase } from "../logic/PetsDatabase";
 import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState } from "../logic/DataManagement";
 import { Pet } from "../data/Pet";
 import { State } from "../data/PetSave";
+import { debugNextCycle, debugResetAllData } from "../logic/Debugging";
 
 const COLORS = {
     primary: ' #FF2D95',
@@ -214,15 +215,11 @@ function footerUi(discoverPet: () => void, selectedPet: Pet): JSX.Element {
         <Button>Pet</Button>
         <Button>Feed</Button>
         <Button>Play</Button>
-        <Button fontScale={0.75} onClick={discoverPet}>Debug: discoverPet</Button>
-        <Button fontScale={0.75} onClick={discoverPet} isEnabled={false}>nextCyle: {debugNextCycle(selectedPet)}</Button>
+        <Button fontScale={0.8} onClick={discoverPet}>Debug: discoverPet</Button>
+        <Button fontScale={0.8} onClick={discoverPet} isEnabled={false}>nextCyle: {debugNextCycle(selectedPet)}</Button>
+        <div />
+        <Button fontScale={0.8} onClick={debugResetAllData}>Debug: resetAllData</Button>
     </div>;
-}
-
-function debugNextCycle(pet: Pet): string {
-    if (pet.nextCycle === null) return 'N/A';
-
-    return `nextCyle: ${((pet.nextCycle - Date.now()) / 1000).toFixed(0)}s`;
 }
 
 export default Home;
