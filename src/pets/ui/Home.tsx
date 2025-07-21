@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Route, updateRoute } from "../../ui/Routing";
 import Scaffold from "../../util/ui/Scaffold";
 import Button from "../../util/ui/Button";
-import PlaceholderImage from "../images/placeholder.jpg";
+import PlaceholderImage from "../images/placeholder.png";
+import HiddenImage from "../images/hidden.png";
 import TextReveal from "./TextReveal";
 import { LocationService } from "../logic/LocationService";
 import { PET_DATA } from "../data/PetData";
@@ -77,8 +78,13 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
 
     useEffect(updateDistanceAndDirection, [selectedTab]);
 
+    const image = pets[selectedTab].discovered ? PlaceholderImage : HiddenImage;
+    const text = pets[selectedTab].discovered
+        ? 'Hello, I am a pet. This is my dialogue. This game is a work in progress. In the future I will say some really cute things. Right now you can greet me, pet me, or feed me. But these are just some placeholder options and they don\'t do anything.'
+        : 'I am a pet and I am hidden. Come find me!'
+
     return <Scaffold
-        header={headerUi(selectedTab, index => setSelectedTab(index))}
+        header={headerUi(pets, selectedTab, index => setSelectedTab(index))}
         footer={footerUi()}
         fontScale={1.35}
     >
@@ -90,7 +96,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
             position: 'relative',
             background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)`
         }}>
-            <img src={PlaceholderImage} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
+            <img src={image} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
             <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
                 <div>Distance: {formatDistance(distanceAndDirection)}</div>
                 <div>Direction: {distanceAndDirection?.direction ?? '(unknonwn)'}</div>
@@ -106,8 +112,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
                 backgroundColor: 'rgba(0,0,0,0.6)'
             }}>
                 <TextReveal>
-                    Hello, I am a pet. This is my dialogue. This game is a work in progress. In the future I will say some really cute things.
-                    Right now you can greet me, pet me, or feed me. But these are just some placeholder options and they don't do anything.
+                    {text}
                 </TextReveal>
             </div>
         </div>
@@ -123,16 +128,18 @@ function formatDistance(distanceAndDirection: DistanceAndDirection | null): stri
     return distance.toFixed(3) + ' km';
 }
 
-function headerUi(selectedTab: number, onTabSelected: (index: number) => void): JSX.Element {
-    const tabs = PET_DATA.map((pet, index) => {
+function headerUi(pets: Pet[], selectedTab: number, onTabSelected: (index: number) => void): JSX.Element {
+    const tabs = pets.map((pet, index) => {
         const borderStyle = getTabBorderStyle(selectedTab, index);
+
+        const name = pet.discovered ? pet.name : '???';
 
         return <div
             key={index}
             style={{ ...borderStyle, padding: '7.5px', userSelect: 'none', flex: '0 0 4em', textAlign: 'center' }}
             onClick={() => onTabSelected(index)}
         >
-            {pet.name}
+            {name}
         </div>;
     });
 
@@ -179,8 +186,8 @@ function footerUi(): JSX.Element {
         <Button>Pet</Button>
         <Button>Feed</Button>
         <Button>Play</Button>
-        <Button fontScale={0.8}>Debug: discoverPet</Button>
-        <Button fontScale={0.8}>Debug: undiscoverPet</Button>
+        <Button fontScale={0.75}>Debug: discoverPet</Button>
+        <Button fontScale={0.75}>Debug: undiscoverPet</Button>
     </div>;
 }
 
