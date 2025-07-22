@@ -98,6 +98,9 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
         }}>
             <img src={image} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
             {locationElement}
+            <div style={{ position: 'absolute', top: '2px', right: '2px' }}>
+                <Button fontScale={0.75}>Debug</Button>
+            </div>
             <div style={{
                 position: 'absolute',
                 bottom: '0',
