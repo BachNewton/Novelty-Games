@@ -14,15 +14,13 @@ import { Pet } from "../data/Pet";
 import { State } from "../data/PetSave";
 import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
+import Footer from "./Footer";
 
-const COLORS = {
+export const COLORS = {
     primary: ' #FF2D95',
     secondary: ' #00CED1',
     surface: ' #808080'
 };
-
-const FOOTER_BUTTONS_SCALE = 1.4;
-const FOOTER_BUTTONS_BORDER_RADIUS = 20;
 
 interface HomeProps {
     locationService: LocationService;
@@ -81,7 +79,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database, petsDebugger }) 
 
     return <Scaffold
         header={headerUi(pets, selectedTab, index => setSelectedTab(index))}
-        footer={footerUi()}
+        footer={<Footer />}
         fontScale={1.35}
     >
         <div style={{
@@ -215,22 +213,6 @@ function getTabBorderStyle(selectedTab: number, tabIndex: number): React.CSSProp
     return {
         border: border
     };
-}
-
-function footerUi(): JSX.Element {
-    return <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        borderTop: `4px solid ${COLORS.primary}`,
-        padding: '10px',
-        backgroundColor: COLORS.surface,
-        gap: '10px'
-    }}>
-        <Button fontScale={FOOTER_BUTTONS_SCALE} borderRadius={FOOTER_BUTTONS_BORDER_RADIUS}>Chat</Button>
-        <Button fontScale={FOOTER_BUTTONS_SCALE} borderRadius={FOOTER_BUTTONS_BORDER_RADIUS}>Give Treat</Button>
-        <Button fontScale={FOOTER_BUTTONS_SCALE} borderRadius={FOOTER_BUTTONS_BORDER_RADIUS}>Play</Button>
-        <Button fontScale={FOOTER_BUTTONS_SCALE} borderRadius={FOOTER_BUTTONS_BORDER_RADIUS}>Pet</Button>
-    </div>;
 }
 
 export default Home;
