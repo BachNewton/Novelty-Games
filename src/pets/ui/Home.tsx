@@ -79,7 +79,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database, petsDebugger }) 
 
     return <Scaffold
         header={headerUi(pets, selectedTab, index => setSelectedTab(index))}
-        footer={<Footer />}
+        footer={<Footer selectedTab={selectedTab} />}
         fontScale={1.35}
     >
         <div style={{
