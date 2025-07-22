@@ -59,7 +59,7 @@ function MenuUi(onHomeButtonClicked: () => void, onMarbleClick: () => void, onTo
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100vh',
+        height: '100dvh',
         flexDirection: 'column'
     };
 

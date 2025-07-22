@@ -27,7 +27,7 @@ const Game3D: React.FC<Game3DProps> = ({ game }) => {
         setupGame(game, containerElement?.current!, setHUDText, setSummary);
     }, []);
 
-    return <div style={{ overflow: 'hidden', height: '100vh' }} ref={containerElement}>
+    return <div style={{ overflow: 'hidden', height: '100dvh' }} ref={containerElement}>
         <div style={{
             position: 'absolute',
             width: '100%',

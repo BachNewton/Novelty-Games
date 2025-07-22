@@ -94,7 +94,7 @@ const Scoreboard: React.FC<ScoreboardProps> = ({ game, onBackToLobby, onPlayNext
         ? <button onClick={onBackToLobby} style={footerStyle}>Back to Lobby</button>
         : <button onClick={() => onPlayNextRound(game, scores)} style={footerStyle}>Play next round</button>;
 
-    return <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', color: 'white', justifyContent: 'center', alignItems: 'center' }}>
+    return <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', color: 'white', justifyContent: 'center', alignItems: 'center' }}>
         {teamScoresUi}
         {declareWinner}
         {scoreboardButton}

@@ -37,7 +37,7 @@ const Question: React.FC<QuestionProps> = ({
     onQuestionAnswered,
     HighScoreUi
 }) => {
-    return <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', textAlign: 'center' }}>
+    return <div style={{ height: '100dvh', width: '100vw', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', textAlign: 'center' }}>
         {StatsUi(score, lives, MAX_LIVES, HighScoreUi)}
         {QuestionUi(question, uiState, questionNumber, disableImages, totalQuestions, onImageSectionClick)}
         {OptionsUi(question, uiState, onQuestionAnswered)}

@@ -107,7 +107,7 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
         : <></>;
 
     return <>
-        <div style={{ color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
+        <div style={{ color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100dvh', flexDirection: 'column' }}>
             <HomeButton onClick={onHomeButtonClicked} />
             <div style={{ fontSize: '1.75em', marginBottom: '1em' }}>🏎️ Mille Bornes Lobby 🏁</div>
             <div>

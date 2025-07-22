@@ -121,7 +121,7 @@ function HomeUi(versionState: VersionState, onClickHandlers: OnClickHandlers) {
         padding: '0.5em'
     };
 
-    return <div style={{ color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+    return <div style={{ color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
         <div style={versionStateStyle}>{versionStateUi(versionState)}</div>
         <ProfileUi />
         <code style={versionLabelStyle}>{APP_VERSION}</code>

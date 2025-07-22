@@ -24,7 +24,7 @@ const ToddlerCompanionApp: React.FC = () => {
         networkService.broadcast(data);
     };
 
-    return <div style={{ display: 'grid', height: '100vh', gridTemplateRows: '1fr 7fr' }}>
+    return <div style={{ display: 'grid', height: '100dvh', gridTemplateRows: '1fr 7fr' }}>
         <button style={buttonStyle} onClick={() => broadcastClear()}>🗑️</button>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
             <div style={{ display: 'grid' }}>

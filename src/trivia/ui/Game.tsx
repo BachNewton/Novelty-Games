@@ -88,7 +88,7 @@ const Game: React.FC<GameProps> = ({ pendingData, dataType, onBackClicked, progr
         <button onClick={onBackClicked}>⬅️</button>
         {enableImagesButton}
       </div>
-      <div style={{ width: '100vw', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ width: '100vw', height: '100dvh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         {Ui(gameState, setGameState)}
       </div>
     </div>

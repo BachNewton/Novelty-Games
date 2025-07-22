@@ -9,7 +9,7 @@ const Scaffold: React.FC<ScaffoldProps> = ({ header, footer, fontScale = 1, chil
     return <div style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
+        height: '100dvh',
         fontSize: `${fontScale}em`
     }}>
         <div>{header}</div>
