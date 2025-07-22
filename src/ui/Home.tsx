@@ -22,6 +22,19 @@ import { createLocationService } from '../pets/logic/LocationService';
 import { createPetsDatabase } from '../pets/logic/PetsDatabase';
 import { createPetsDebugger } from '../pets/logic/PetsDebugger';
 
+const BUTTON_BORDER_RADIUS = 20;
+const BUTTON_MARGIN = '7px';
+const BUTTON_WIDTH = '315px';
+
+const BUTTON_STYLE: React.CSSProperties = {
+    width: BUTTON_WIDTH,
+    fontSize: '1.5em',
+    margin: BUTTON_MARGIN,
+    padding: '10px',
+    borderRadius: `${BUTTON_BORDER_RADIUS}px`,
+    cursor: 'pointer'
+};
+
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
 }
@@ -114,13 +127,6 @@ function HomeUi(versionState: VersionState, onClickHandlers: OnClickHandlers) {
         fontSize: '12px'
     };
 
-    const buttonStyle: React.CSSProperties = {
-        width: '75%',
-        fontSize: '1.5em',
-        margin: '0.5em',
-        padding: '0.5em'
-    };
-
     return <div style={{ color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
         <div style={versionStateStyle}>{versionStateUi(versionState)}</div>
         <ProfileUi />
@@ -128,16 +134,16 @@ function HomeUi(versionState: VersionState, onClickHandlers: OnClickHandlers) {
         <div style={{ fontSize: '2em', fontWeight: 'bold', marginBottom: '2px' }}>🕹️ Novelty Games 🎰</div>
         <div>Created by: Kyle Hutchinson</div>
         <div><br /></div>
-        <button style={buttonStyle} onClick={onClickHandlers.onTriviaClick}>Trivia 🤔</button>
-        <button style={buttonStyle} onClick={onClickHandlers.onBoardGamesClick}>Board Games 🎲</button>
-        <div style={{ display: 'flex', width: '75%', height: '4em', gap: '10px' }}>
-            <Button fontScale={1.5} onClick={onClickHandlers.on2DGamesClick}>2D Games 🟦</Button>
-            <Button fontScale={1.5} onClick={onClickHandlers.on3DGamesClick}>3D Games 🧊</Button>
+        <button style={BUTTON_STYLE} onClick={onClickHandlers.onTriviaClick}>Trivia 🤔</button>
+        <button style={BUTTON_STYLE} onClick={onClickHandlers.onBoardGamesClick}>Board Games 🎲</button>
+        <div style={{ display: 'flex', width: BUTTON_WIDTH, height: '4.5em', gap: '10px', margin: BUTTON_MARGIN }}>
+            <Button fontScale={1.5} borderRadius={BUTTON_BORDER_RADIUS} onClick={onClickHandlers.on2DGamesClick}>2D Games 🟦</Button>
+            <Button fontScale={1.5} borderRadius={BUTTON_BORDER_RADIUS} onClick={onClickHandlers.on3DGamesClick}>3D Games 🧊</Button>
         </div>
 
-        <button style={buttonStyle} onClick={onClickHandlers.onToolsClick}>Tools 🔨</button>
-        <button style={buttonStyle} onClick={onClickHandlers.onFreeMarketClick}>Free Market 💸</button>
-        <button style={buttonStyle} onClick={onClickHandlers.onPetsClick}>Pets 🐾</button>
+        <button style={BUTTON_STYLE} onClick={onClickHandlers.onToolsClick}>Tools 🔨</button>
+        <button style={BUTTON_STYLE} onClick={onClickHandlers.onFreeMarketClick}>Free Market 💸</button>
+        <button style={BUTTON_STYLE} onClick={onClickHandlers.onPetsClick}>Pets 🐾</button>
     </div>;
 }
 
