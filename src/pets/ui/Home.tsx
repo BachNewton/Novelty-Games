@@ -75,13 +75,6 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
     const isDiscovered = selectedPet.discovered;
     const image = getImage(selectedPet);
     const text = getText(selectedPet);
-    const locationElement = !isDiscovered
-        ? <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
-            <div>Distance: {formatDistance(distanceAndDirection)}</div>
-            <div>Direction: {distanceAndDirection?.direction ?? '(Searching...)'}</div>
-        </div>
-        : <></>;
-
 
     return <Scaffold
         header={headerUi(pets, selectedTab, index => setSelectedTab(index))}
@@ -97,7 +90,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
             background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)`
         }}>
             <img src={image} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
-            {locationElement}
+            {locatorUi(isDiscovered, distanceAndDirection)}
             <div style={{ position: 'absolute', top: '2px', right: '2px' }}>
                 <Button fontScale={0.75}>Debug</Button>
             </div>
@@ -118,6 +111,21 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
         </div>
     </Scaffold >;
 };
+
+function locatorUi(isDiscovered: boolean, distanceAndDirection: DistanceAndDirection | null): JSX.Element {
+    if (isDiscovered) return <></>;
+
+    const content = distanceAndDirection === null
+        ? <div>( ... locating pet ... )</div>
+        : <>
+            <div>Distance: {formatDistance(distanceAndDirection.distance)}</div>
+            <div>Direction: {distanceAndDirection.direction}</div>
+        </>;
+
+    return <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
+        {content}
+    </div>;
+}
 
 function getImage(pet: Pet): string {
     if (pet.discovered) {
@@ -147,11 +155,7 @@ function getText(pet: Pet): string {
     }
 }
 
-function formatDistance(distanceAndDirection: DistanceAndDirection | null): string {
-    if (distanceAndDirection === null) return '(Searching...)';
-
-    const distance = distanceAndDirection.distance;
-
+function formatDistance(distance: number): string {
     if (distance < 1) return (distance * 1000).toFixed(0) + ' m';
     return distance.toFixed(3) + ' km';
 }
