@@ -130,7 +130,7 @@ function HomeUi(versionState: VersionState, onClickHandlers: OnClickHandlers) {
         <div><br /></div>
         <button style={buttonStyle} onClick={onClickHandlers.onTriviaClick}>Trivia 🤔</button>
         <button style={buttonStyle} onClick={onClickHandlers.onBoardGamesClick}>Board Games 🎲</button>
-        <div style={{ display: 'flex', width: '75%', height: '4em' }}>
+        <div style={{ display: 'flex', width: '75%', height: '4em', gap: '10px' }}>
             <Button fontScale={1.5} onClick={onClickHandlers.on2DGamesClick}>2D Games 🟦</Button>
             <Button fontScale={1.5} onClick={onClickHandlers.on3DGamesClick}>3D Games 🧊</Button>
         </div>
