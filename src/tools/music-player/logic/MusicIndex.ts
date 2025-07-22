@@ -6,7 +6,7 @@ export interface MusicIndex {
     genres: string[];
 }
 
-export function createMusicIndex(): MusicIndex {
+const createMusicIndex: () => MusicIndex = () => {
     const songs = musicPlayerIndexJson.map<Song>(song => {
         return {
             ids: {
@@ -35,7 +35,7 @@ export function createMusicIndex(): MusicIndex {
         songs: songs,
         genres: [...genres]
     };
-}
+};
 
 function cleanArtist(artist: string): string {
     if (artist === 'Dragonforce') return 'DragonForce';
@@ -49,3 +49,5 @@ function cleanGenre(genre: string): string {
 
     return genre;
 }
+
+export { createMusicIndex };

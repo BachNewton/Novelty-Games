@@ -4,10 +4,11 @@ import MusicPlayerHome from "../music-player/ui/Home";
 import FortniteFestivalHome, { getFestivalSongs } from "../fortnite-festival/ui/Home";
 import DatabaseDebugHome from "../database-debug/ui/Home";
 import { getRoute, Route } from "../../ui/Routing";
-import { createNetworkService, NetworkedApplication } from "../../util/networking/NetworkService";
+import { createNetworkService, NetworkedApplication, NetworkService } from "../../util/networking/NetworkService";
 import { FestivalSong } from "../../trivia/data/Data";
 import { createDatabase } from "../../util/database/v1/DatabaseImpl";
 import { createDatabaseManager } from "../../util/database/v2/DatabaseManager";
+import { MusicIndex } from "../music-player/logic/MusicIndex";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
@@ -15,10 +16,22 @@ interface HomeProps {
 
 interface UiState { }
 class MenuUiState implements UiState { }
-class MusicPlayerUiState implements UiState { }
+
+class MusicPlayerUiState implements UiState {
+    networkService: NetworkService<void> = createNetworkService(NetworkedApplication.MUSIC_PLAYER);
+
+    musicIndexPromise: Promise<MusicIndex> = new Promise((resolve) => {
+        import('../music-player/logic/MusicIndex').then(({ createMusicIndex }) => {
+            console.log('Loaded the MusicIndex module');
+            resolve(createMusicIndex());
+        });
+    });
+}
+
 class FortniteFestivalUiState implements UiState {
     loadingSongs: Promise<Array<FestivalSong>> = getFestivalSongs();
 }
+
 class DatabaseDebugUiState implements UiState { }
 
 interface OnClickHandlers {
@@ -48,7 +61,8 @@ function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
         return MenuUi(onClickHandlers);
     } else if (uiState instanceof MusicPlayerUiState) {
         return <MusicPlayerHome
-            networkService={createNetworkService(NetworkedApplication.MUSIC_PLAYER)}
+            networkService={uiState.networkService}
+            musicIndexPromise={uiState.musicIndexPromise}
         />;
     } else if (uiState instanceof FortniteFestivalUiState) {
         return <FortniteFestivalHome loadingSongs={uiState.loadingSongs} />;

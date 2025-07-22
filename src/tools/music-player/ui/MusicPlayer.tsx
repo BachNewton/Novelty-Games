@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Library from "./Library";
 import Player from "./Player";
 import Scaffold from "../../../util/ui/Scaffold";
@@ -10,17 +10,18 @@ import Icon, { Type } from "./Icon";
 import Dialog from "../../../util/ui/Dialog";
 import Checkbox from "../../../util/ui/Checkbox";
 import { MusicIndex } from "../logic/MusicIndex";
+import Loading from "../../../util/ui/Loading";
 
 const FONT_SCALE = 1.4;
 
 interface NewMusicPlayerProps {
     songParser: SongParser;
-    musicIndex: MusicIndex;
+    musicIndex: MusicIndex | null;
 }
 
 const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser, musicIndex }) => {
-    const songs = useRef(musicIndex.songs);
-    const genres = useRef(musicIndex.genres);
+    const songs = musicIndex?.songs ?? null;
+    const genres = musicIndex?.genres ?? [];
     const [parsedSong, setParsedSong] = useState<ParsedSong | null>(null);
     const [parserProgress, setParserProgress] = useState<ParserProgress | null>(null);
     const [searchText, setSearchText] = useState<string>('');
@@ -40,7 +41,7 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser, musicIndex }) 
     };
 
     const onOnlyGenreSelected = (onlyGenre: string) => {
-        for (const genre of genres.current) {
+        for (const genre of genres) {
             genresSelected.set(genre, genre === onlyGenre);
         }
 
@@ -52,12 +53,17 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser, musicIndex }) 
         setIsFilterUiOpen(false);
     };
 
-    const filteredSongs = filter(songs.current, searchText, genresSelected);
+    const scaffoldContentUi = songs === null
+        ? <Loading />
+        : <Library
+            songs={filter(songs, searchText, genresSelected)}
+            onSongSelected={onSongSelected}
+        />;
 
     return <>
         <Dialog isOpen={isFilterUiOpen}>
             {filtersUi(
-                genres.current,
+                genres,
                 genresSelected,
                 onGenreSelected,
                 onOnlyGenreSelected,
@@ -71,7 +77,7 @@ const MusicPlayer: React.FC<NewMusicPlayerProps> = ({ songParser, musicIndex }) 
             footer={footerUi(parsedSong, parserProgress)}
             fontScale={FONT_SCALE}
         >
-            <Library songs={filteredSongs} onSongSelected={onSongSelected} />
+            {scaffoldContentUi}
         </Scaffold>
     </>;
 };
