@@ -20,6 +20,7 @@ import { APP_VERSION } from '../Versioning';
 import Button from '../util/ui/Button';
 import { createLocationService } from '../pets/logic/LocationService';
 import { createPetsDatabase } from '../pets/logic/PetsDatabase';
+import { createPetsDebugger } from '../pets/logic/PetsDebugger';
 
 interface HomeProps {
     updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
@@ -89,6 +90,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         return <Pets
             locationService={createLocationService()}
             database={createPetsDatabase()}
+            petsDebugger={createPetsDebugger()}
         />;
     } else if (state instanceof BoardGamesState) {
         return boardGamesUi(state, onClickHandlers);

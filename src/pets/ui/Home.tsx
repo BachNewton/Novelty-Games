@@ -13,8 +13,8 @@ import { PetsDatabase } from "../logic/PetsDatabase";
 import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler, getDialogue } from "../logic/DataManagement";
 import { Pet } from "../data/Pet";
 import { State } from "../data/PetSave";
-import { debugNextCycle, debugResetAllData } from "../logic/Debugging";
 import DebugMenu from "./DebugMenu";
+import { PetsDebugger } from "../logic/PetsDebugger";
 
 const COLORS = {
     primary: ' #FF2D95',
@@ -25,9 +25,10 @@ const COLORS = {
 interface HomeProps {
     locationService: LocationService;
     database: PetsDatabase;
+    petsDebugger: PetsDebugger;
 }
 
-const Home: React.FC<HomeProps> = ({ locationService, database }) => {
+const Home: React.FC<HomeProps> = ({ locationService, database, petsDebugger }) => {
     const [pets, setPets] = useState(getDefaultPets());
     const [selectedTab, setSelectedTab] = useState(0);
     const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
@@ -94,7 +95,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
             <img src={image} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
             {locatorUi(isDiscovered, distanceAndDirection)}
             <div style={{ position: 'absolute', top: '2px', right: '2px' }}>
-                <Button fontScale={0.75} onClick={() => setIsDebugMenuOpen(true)}>Debug</Button>
+                <Button fontScale={0.8} onClick={() => setIsDebugMenuOpen(true)}>Debug</Button>
             </div>
             <div style={{
                 position: 'absolute',
@@ -110,8 +111,15 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
                     {text}
                 </TextReveal>
             </div>
-            <DebugMenu isOpen={isDebugMenuOpen} onClose={() => setIsDebugMenuOpen(false)} />
         </div>
+
+        <DebugMenu
+            isOpen={isDebugMenuOpen}
+            onClose={() => setIsDebugMenuOpen(false)}
+            discoverPet={discoverPet}
+            petsDebugger={petsDebugger}
+            selectedPet={selectedPet}
+        />
     </Scaffold>;
 };
 
@@ -221,10 +229,6 @@ function footerUi(discoverPet: () => void, selectedPet: Pet): JSX.Element {
         <Button>Pet</Button>
         <Button>Feed</Button>
         <Button>Play</Button>
-        <Button fontScale={0.8} onClick={discoverPet}>Debug: discoverPet</Button>
-        <Button fontScale={0.8} onClick={discoverPet} isEnabled={false}>nextCyle: {debugNextCycle(selectedPet)}</Button>
-        <div />
-        <Button fontScale={0.8} onClick={debugResetAllData}>Debug: resetAllData</Button>
     </div>;
 }
 
