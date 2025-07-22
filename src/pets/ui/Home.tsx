@@ -8,7 +8,6 @@ import SleepingImage from "../images/sleeping.png";
 import TextReveal from "./TextReveal";
 import { LocationService } from "../logic/LocationService";
 import { DistanceAndDirection } from "../logic/Navigation";
-import { createID } from "../../util/ID";
 import { PetsDatabase } from "../logic/PetsDatabase";
 import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler, getDialogue } from "../logic/DataManagement";
 import { Pet } from "../data/Pet";
@@ -64,8 +63,6 @@ const Home: React.FC<HomeProps> = ({ locationService, database, petsDebugger }) 
 
     useEffect(() => {
         updateRoute(Route.PETS);
-
-        console.log(createID()); // For debugging
 
         updatePetsFromSave(database, pets).then(updatedPets => setPets(updatedPets));
 
