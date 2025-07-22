@@ -14,6 +14,7 @@ import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsSt
 import { Pet } from "../data/Pet";
 import { State } from "../data/PetSave";
 import { debugNextCycle, debugResetAllData } from "../logic/Debugging";
+import DebugMenu from "./DebugMenu";
 
 const COLORS = {
     primary: ' #FF2D95',
@@ -30,6 +31,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
     const [pets, setPets] = useState(getDefaultPets());
     const [selectedTab, setSelectedTab] = useState(0);
     const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
+    const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
 
     const discoverPet = () => {
         const updatedPet = discoverPetInDatabase(database, selectedTab);
@@ -92,7 +94,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
             <img src={image} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
             {locatorUi(isDiscovered, distanceAndDirection)}
             <div style={{ position: 'absolute', top: '2px', right: '2px' }}>
-                <Button fontScale={0.75}>Debug</Button>
+                <Button fontScale={0.75} onClick={() => setIsDebugMenuOpen(true)}>Debug</Button>
             </div>
             <div style={{
                 position: 'absolute',
@@ -108,8 +110,9 @@ const Home: React.FC<HomeProps> = ({ locationService, database }) => {
                     {text}
                 </TextReveal>
             </div>
+            <DebugMenu isOpen={isDebugMenuOpen} onClose={() => setIsDebugMenuOpen(false)} />
         </div>
-    </Scaffold >;
+    </Scaffold>;
 };
 
 function locatorUi(isDiscovered: boolean, distanceAndDirection: DistanceAndDirection | null): JSX.Element {
