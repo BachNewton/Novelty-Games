@@ -21,10 +21,11 @@ class MusicPlayerUiState implements UiState {
     networkService: NetworkService<void> = createNetworkService(NetworkedApplication.MUSIC_PLAYER);
 
     musicIndexPromise: Promise<MusicIndex> = new Promise((resolve) => {
-        import('../music-player/logic/MusicIndex').then(({ createMusicIndex }) => {
-            console.log('Loaded the MusicIndex module');
-            resolve(createMusicIndex());
-        });
+        import(/* webpackChunkName: "MusicIndex" */ '../music-player/logic/MusicIndex')
+            .then(({ createMusicIndex }) => {
+                console.log('Loaded the MusicIndex module');
+                resolve(createMusicIndex());
+            });
     });
 }
 
