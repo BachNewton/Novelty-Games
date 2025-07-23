@@ -1,5 +1,4 @@
-import { LocationService } from "../../../util/geolocation/LocationService";
-import { DistanceAndDirection } from "../../../util/geolocation/Navigation";
+import { DistanceAndDirection, Navigator } from "../../../util/geolocation/Navigator";
 import { Dialogue } from "../data/Dialogue";
 import { Pet } from "../data/Pet";
 import { PET_DATA, PET_DATA_MAP } from "../data/PetData";
@@ -84,7 +83,7 @@ function cycleState(state: State): State {
 
 export function distanceAndDirectionHandler(
     pet: Pet,
-    locationService: LocationService,
+    navigator: Navigator,
     onPetDiscovered: () => void,
     onDistanceAndDirectionUpdate: (calculatedDistanceAndDirection: DistanceAndDirection) => void
 ) {
@@ -92,7 +91,7 @@ export function distanceAndDirectionHandler(
 
     const petData = PET_DATA_MAP.get(pet.id)!;
 
-    locationService.calculateDistanceAndDirectionTo(petData.location).then(calculatedDistanceAndDirection => {
+    navigator.calculateDistanceAndDirectionTo(petData.location).then(calculatedDistanceAndDirection => {
         if (calculatedDistanceAndDirection.distance < DISCOVERY_THRESHOLD) {
             onPetDiscovered();
         } else {

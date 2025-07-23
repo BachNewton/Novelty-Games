@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import Scaffold from "../../../util/ui/Scaffold";
 import Button from "../../../util/ui/Button";
@@ -13,8 +13,8 @@ import { State } from "../data/PetSave";
 import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
 import Footer from "./Footer";
-import { LocationService } from "../../../util/geolocation/LocationService";
-import { DistanceAndDirection } from "../../../util/geolocation/Navigation";
+import { createLocationService, LocationService } from "../../../util/geolocation/LocationService";
+import { createNavigator, DistanceAndDirection } from "../../../util/geolocation/Navigator";
 
 export const COLORS = {
     primary: ' #FF2D95',
@@ -23,12 +23,12 @@ export const COLORS = {
 };
 
 interface HomeProps {
-    locationService: LocationService;
     database: PetsDatabase;
     petsDebugger: PetsDebugger;
 }
 
-const Home: React.FC<HomeProps> = ({ locationService, database, petsDebugger }) => {
+const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
+    const navigator = useRef(createNavigator(createLocationService()));
     const [pets, setPets] = useState(getDefaultPets());
     const [selectedTab, setSelectedTab] = useState(0);
     const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
@@ -50,7 +50,7 @@ const Home: React.FC<HomeProps> = ({ locationService, database, petsDebugger }) 
 
         distanceAndDirectionHandler(
             pets[selectedTab],
-            locationService,
+            navigator.current,
             discoverPet,
             calculatedDistanceAndDirection => setDistanceAndDirection(calculatedDistanceAndDirection)
         );

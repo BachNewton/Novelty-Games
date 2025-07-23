@@ -1,6 +1,6 @@
 import { toRadians, toDegrees } from "../Math";
 import { getDirection } from "./Compass";
-import { Location } from "./LocationService";
+import { Location, LocationService } from "./LocationService";
 
 const EARTH_RADIUS = 6371; // Radius of the Earth in kilometers
 
@@ -9,7 +9,21 @@ export interface DistanceAndDirection {
     direction: string;
 }
 
-export function calculateDistanceAndDirection(location1: Location, location2: Location): DistanceAndDirection {
+export interface Navigator {
+    calculateDistanceAndDirectionTo: (location: Location) => Promise<DistanceAndDirection>;
+}
+
+export function createNavigator(locationService: LocationService): Navigator {
+    return {
+        calculateDistanceAndDirectionTo: async (location) => {
+            const currentLocation = await locationService.getLocation();
+
+            return calculateDistanceAndDirection(currentLocation, location);
+        }
+    };
+}
+
+function calculateDistanceAndDirection(location1: Location, location2: Location): DistanceAndDirection {
     const lat1 = location1.lat;
     const lon1 = location1.lon;
     const lat2 = location2.lat;
