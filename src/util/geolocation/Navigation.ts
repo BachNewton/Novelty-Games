@@ -1,5 +1,5 @@
-import { getDirection } from "../../../util/geolocation/Compass";
-import { toDegrees, toRadians } from "../../../util/Math";
+import { toRadians, toDegrees } from "../Math";
+import { getDirection } from "./Compass";
 import { Location } from "./LocationService";
 
 const EARTH_RADIUS = 6371; // Radius of the Earth in kilometers

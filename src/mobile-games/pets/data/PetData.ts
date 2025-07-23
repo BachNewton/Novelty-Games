@@ -1,4 +1,4 @@
-import { Location } from "../logic/LocationService";
+import { Location } from "../../../util/geolocation/LocationService";
 import { Dialogue, doryDialog, ellaDialog, getDefaultDialogue } from "./Dialogue";
 
 interface PetData {

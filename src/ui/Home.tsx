@@ -19,9 +19,9 @@ import ProfileUi from './Profile';
 import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/LabyrinthCommunicator';
 import { APP_VERSION } from '../Versioning';
 import Button from '../util/ui/Button';
-import { createLocationService } from '../mobile-games/pets/logic/LocationService';
 import { createPetsDatabase } from '../mobile-games/pets/logic/PetsDatabase';
 import { createPetsDebugger } from '../mobile-games/pets/logic/PetsDebugger';
+import { createLocationService } from '../util/geolocation/LocationService';
 
 const BUTTON_BORDER_RADIUS = 20;
 const BUTTON_MARGIN = '7px';

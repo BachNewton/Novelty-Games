@@ -1,9 +1,9 @@
+import { LocationService } from "../../../util/geolocation/LocationService";
+import { DistanceAndDirection } from "../../../util/geolocation/Navigation";
 import { Dialogue } from "../data/Dialogue";
 import { Pet } from "../data/Pet";
 import { PET_DATA, PET_DATA_MAP } from "../data/PetData";
 import { PetSave, State } from "../data/PetSave";
-import { LocationService } from "./LocationService";
-import { DistanceAndDirection } from "./Navigation";
 import { PetsDatabase } from "./PetsDatabase";
 
 const CYCLE_TIME = 15 * 1000; // 15 seconds

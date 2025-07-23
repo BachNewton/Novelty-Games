@@ -6,8 +6,6 @@ import PlaceholderImage from "../images/placeholder.png";
 import HiddenImage from "../images/hidden.png";
 import SleepingImage from "../images/sleeping.png";
 import TextReveal from "./TextReveal";
-import { LocationService } from "../logic/LocationService";
-import { DistanceAndDirection } from "../logic/Navigation";
 import { PetsDatabase } from "../logic/PetsDatabase";
 import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler, getDialogue } from "../logic/DataManagement";
 import { Pet } from "../data/Pet";
@@ -15,6 +13,8 @@ import { State } from "../data/PetSave";
 import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
 import Footer from "./Footer";
+import { LocationService } from "../../../util/geolocation/LocationService";
+import { DistanceAndDirection } from "../../../util/geolocation/Navigation";
 
 export const COLORS = {
     primary: ' #FF2D95',
