@@ -1,5 +1,5 @@
-import { FreeMarketSave } from "../free-market/data/FreeMarketSave";
-import { FreeMarketCommunicator } from "../free-market/logic/FreeMarketCommunicator";
+import { FreeMarketSave } from "../mobile-games/free-market/data/FreeMarketSave";
+import { FreeMarketCommunicator } from "../mobile-games/free-market/logic/FreeMarketCommunicator";
 import { Storer } from "../util/Storage";
 import { Communicator as MilleBornesCommunicator } from '../board-games/mille-bornes/logic/Communicator';
 import { LabyrinthCommunicator } from "../board-games/labyrinth/logic/LabyrinthCommunicator";

@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import '../css/font.css';
 import HorizontalLine from "./HorizontalLine";
-import Dialog from '../../util/ui/Dialog';
+import Dialog from '../../../util/ui/Dialog';
 import { Component, Invention, RAW_MATERIALS } from '../data/Component';
 import { FreeMarketCommunicator } from '../logic/FreeMarketCommunicator';
-import { createID } from '../../util/ID';
+import { createID } from '../../../util/ID';
 import ComponentUi from './Component';
 import { Inventor } from '../data/Inventor';
-import Loading from '../../util/ui/Loading';
+import Loading from '../../../util/ui/Loading';
 
 interface InventProps {
     communicator: FreeMarketCommunicator;

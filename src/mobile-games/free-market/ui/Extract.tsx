@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { RAW_MATERIALS } from "../data/Component";
 import { ExtractionDetails, FreeMarketSave } from "../data/FreeMarketSave";
 import HorizontalLine from "./HorizontalLine";
-import { StorageKey, Storer } from "../../util/Storage";
+import { StorageKey, Storer } from "../../../util/Storage";
 import { format } from '../logic/NumberFormatter';
 
 interface ExtractProps {

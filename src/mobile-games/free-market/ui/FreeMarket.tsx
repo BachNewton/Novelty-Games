@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 import HorizontalLine from "./HorizontalLine";
-import { Route, updateRoute } from "../../ui/Routing";
+import { Route, updateRoute } from "../../../ui/Routing";
 import Tabs, { Tab } from "./Tabs";
 import Invent from "./Invent";
 import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
 import Patent from "./Patent";
-import { StorageKey, Storer } from "../../util/Storage";
+import { StorageKey, Storer } from "../../../util/Storage";
 import { FreeMarketSave, SAVE_VERSION } from "../data/FreeMarketSave";
-import Dialog from "../../util/ui/Dialog";
+import Dialog from "../../../util/ui/Dialog";
 import NewProfile from "./NewProfile";
 import Extract from './Extract';
 import { format } from "../logic/NumberFormatter";
 import { RAW_MATERIALS_MAPPED } from "../data/Component";
-import Loading from "../../util/ui/Loading";
+import Loading from "../../../util/ui/Loading";
 
 interface FreeMarketProps {
     communicator: FreeMarketCommunicator;

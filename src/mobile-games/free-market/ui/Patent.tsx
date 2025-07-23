@@ -4,7 +4,7 @@ import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
 import HorizontalLine from "./HorizontalLine";
 import InventionUi from "./Invention";
 import { Inventor } from "../data/Inventor";
-import Loading from "../../util/ui/Loading";
+import Loading from "../../../util/ui/Loading";
 
 interface PatentProps {
     communicator: FreeMarketCommunicator
