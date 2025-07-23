@@ -1,11 +1,22 @@
+const DIRECTIONS = [
+    "North", "Northeast", "East", "Southeast",
+    "South", "Southwest", "West", "Northwest",
+];
+
 export interface Compass {
     readonly heading: number | null;
 }
 
-export function createCompass(): Compass {
+export function createCompass(onHeadingUpdate: (heading: number) => void): Compass {
     let heading: number | null = null;
 
-    enableOrientation(e => heading = handleOrientationEvent(e));
+    enableOrientation(e => {
+        heading = handleOrientationEvent(e);
+
+        if (heading !== null) {
+            onHeadingUpdate(heading);
+        }
+    });
 
     return {
         get heading() { return heading; }
@@ -37,4 +48,11 @@ function handleOrientationEvent(e: DeviceOrientationEvent): number | null {
     const headingDeg = 360 - e.alpha;
 
     return headingDeg;
+}
+
+export function getDirection(heading: number): string {
+    const index = Math.round(heading / 45) % 8;
+    const direction = DIRECTIONS[index];
+
+    return direction;
 }
