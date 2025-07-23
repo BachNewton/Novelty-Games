@@ -25,7 +25,8 @@ const SubMenu: React.FC<SubMenuProps> = ({ onHomeButtonClicked, header, menuItem
         width: '75%',
         fontSize: '1.5em',
         margin: '15px',
-        padding: '15px'
+        padding: '15px',
+        borderRadius: '25px'
     };
 
     const menuItemsUi = menuItems.map((menuItem, index) => {

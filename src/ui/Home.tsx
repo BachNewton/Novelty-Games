@@ -12,7 +12,7 @@ import { createFreeMarketCommunicator } from '../free-market/logic/FreeMarketCom
 import { createStorer } from '../util/Storage';
 import { FreeMarketSave } from '../free-market/data/FreeMarketSave';
 import SubMenu from './SubMenu';
-import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState, PetsState } from './State';
+import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState, PetsState, MobileGamesState } from './State';
 import Labyrinth from '../board-games/labyrinth/ui/Labyrinth';
 import ProfileUi from './Profile';
 import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/LabyrinthCommunicator';
@@ -45,6 +45,7 @@ interface OnClickHandlers {
     onTriviaClick: () => void;
     on2DGamesClick: () => void;
     on3DGamesClick: () => void;
+    onMobileGamesClick: () => void;
     onToolsClick: () => void;
     onFreeMarketClick: () => void;
     onBoardGamesClick: () => void;
@@ -85,6 +86,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         onToolsClick: () => setState(new ToolsState()),
         onFreeMarketClick: () => setState(createFreeMarketState()),
         onBoardGamesClick: () => setState(new BoardGamesState()),
+        onMobileGamesClick: () => setState(new MobileGamesState()),
         onLabyrinthClick: () => setState(createLabyrinthState()),
         onPetsClick: () => setState(new PetsState())
     };
@@ -95,16 +97,10 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         return <Games2DHome onHomeButtonClicked={onClickHandlers.onHomeButtonClick} />;
     } else if (state instanceof Game3DState) {
         return <Games3DHome onHomeButtonClicked={onClickHandlers.onHomeButtonClick} />;
+    } else if (state instanceof MobileGamesState) {
+        return mobileGamesUi(state, onClickHandlers);
     } else if (state instanceof ToolsState) {
         return <ToolsHome onHomeButtonClicked={onClickHandlers.onHomeButtonClick} />;
-    } else if (state instanceof FreeMarketState) {
-        return <FreeMarket communicator={state.communicator} storer={state.storer} />;
-    } else if (state instanceof PetsState) {
-        return <Pets
-            locationService={createLocationService()}
-            database={createPetsDatabase()}
-            petsDebugger={createPetsDebugger()}
-        />;
     } else if (state instanceof BoardGamesState) {
         return boardGamesUi(state, onClickHandlers);
     } else {
@@ -140,10 +136,8 @@ function HomeUi(versionState: VersionState, onClickHandlers: OnClickHandlers) {
             <Button fontScale={1.5} borderRadius={BUTTON_BORDER_RADIUS} onClick={onClickHandlers.on2DGamesClick}>2D Games 🟦</Button>
             <Button fontScale={1.5} borderRadius={BUTTON_BORDER_RADIUS} onClick={onClickHandlers.on3DGamesClick}>3D Games 🧊</Button>
         </div>
-
+        <button style={BUTTON_STYLE} onClick={onClickHandlers.onMobileGamesClick}>Mobile Games 📱</button>
         <button style={BUTTON_STYLE} onClick={onClickHandlers.onToolsClick}>Tools 🔨</button>
-        <button style={BUTTON_STYLE} onClick={onClickHandlers.onFreeMarketClick}>Free Market 💸</button>
-        <button style={BUTTON_STYLE} onClick={onClickHandlers.onPetsClick}>Pets 🐾</button>
     </div>;
 }
 
@@ -173,6 +167,27 @@ function boardGamesUi(boardGamesState: BoardGamesState, onClickHandlers: OnClick
         menuItems={[
             { buttonText: 'Mille Bornes 🏎️', onClick: onClickHandlers.onMilleBornesClick },
             { buttonText: 'Labyrinth 🧩', onClick: onClickHandlers.onLabyrinthClick }
+        ]}
+    />;
+}
+
+function mobileGamesUi(mobileGamesState: MobileGamesState, onClickHandlers: OnClickHandlers): JSX.Element {
+    if (mobileGamesState instanceof FreeMarketState) {
+        return <FreeMarket communicator={mobileGamesState.communicator} storer={mobileGamesState.storer} />;
+    } else if (mobileGamesState instanceof PetsState) {
+        return <Pets
+            locationService={createLocationService()}
+            database={createPetsDatabase()}
+            petsDebugger={createPetsDebugger()}
+        />;
+    }
+
+    return <SubMenu
+        onHomeButtonClicked={onClickHandlers.onHomeButtonClick}
+        header='📶 Mobile Games 📱'
+        menuItems={[
+            { buttonText: 'Free Market 💸', onClick: onClickHandlers.onFreeMarketClick },
+            { buttonText: 'Pets 🐾', onClick: onClickHandlers.onPetsClick }
         ]}
     />;
 }

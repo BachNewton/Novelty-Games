@@ -16,17 +16,21 @@ export class Game3DState implements State { }
 
 export class ToolsState implements State { }
 
-export class FreeMarketState implements State {
+export class MobileGamesState implements State { }
+
+export class FreeMarketState extends MobileGamesState {
     communicator: FreeMarketCommunicator;
     storer: Storer<FreeMarketSave>;
 
     constructor(communicator: FreeMarketCommunicator, storer: Storer<FreeMarketSave>) {
+        super();
+
         this.communicator = communicator;
         this.storer = storer;
     }
 }
 
-export class PetsState implements State { }
+export class PetsState extends MobileGamesState { }
 
 export class BoardGamesState implements State { }
 
