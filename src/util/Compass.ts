@@ -45,7 +45,7 @@ function handleOrientationEvent(e: DeviceOrientationEvent): number | null {
     // The alpha value is the compass direction the device is facing,
     // ranging from 0 to 360 degrees.
     // 0 is North.
-    const heading = (e.alpha + 90) % 360;
+    const heading = (360 - (e.alpha + 90)) % 360;
 
     return heading;
 }
