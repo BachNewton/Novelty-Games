@@ -1,6 +1,8 @@
 // This optional code is used to register a service worker.
 // register() is not called by default.
 
+import { isLocalhost } from "./util/LocalHost";
+
 // This lets the app load faster on subsequent visits in production, and gives
 // it offline capabilities. However, it also means that developers (and users)
 // will only see deployed updates on subsequent visits to a page, after all the
@@ -11,14 +13,6 @@
 // opt-in, read https://cra.link/PWA
 
 const UPDATE_FOUND_WAIT_TIME = 3000; // 3 seconds
-
-const isLocalhost = Boolean(
-  window.location.hostname === 'localhost' ||
-  // [::1] is the IPv6 localhost address.
-  window.location.hostname === '[::1]' ||
-  // 127.0.0.0/8 are considered localhost for IPv4.
-  window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/)
-);
 
 type Config = {
   onSuccess?: (registration: ServiceWorkerRegistration) => void;
@@ -40,7 +34,7 @@ export function register(config?: Config) {
     window.addEventListener('load', () => {
       const swUrl = `${process.env.PUBLIC_URL}/service-worker.js`;
 
-      if (isLocalhost) {
+      if (isLocalhost()) {
         // This is running on localhost. Let's check if a service worker still exists or not.
         checkValidServiceWorker(swUrl, config);
 
