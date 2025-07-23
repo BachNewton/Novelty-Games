@@ -1,3 +1,5 @@
+import { isLocalhost } from "./Localhost";
+
 /**
  * The cardinal and intercardinal directions.
  */
@@ -49,16 +51,12 @@ export function createCompass(onHeadingUpdate: (heading: number) => void): Compa
             }
         }
 
-        // Prefer the 'absolute' event, which is relative to true north.
-        // Fall back to the standard 'deviceorientation' event.
-        const eventName = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
-        window.addEventListener(eventName as keyof WindowEventMap, orientationListener as EventListener, true);
+        window.addEventListener(getEventName(), orientationListener as EventListener, true);
     };
 
     const stop = () => {
         if (orientationListener) {
-            const eventName = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
-            window.removeEventListener(eventName as keyof WindowEventMap, orientationListener as EventListener, true);
+            window.removeEventListener(getEventName(), orientationListener as EventListener, true);
             orientationListener = null;
         }
     };
@@ -68,6 +66,17 @@ export function createCompass(onHeadingUpdate: (heading: number) => void): Compa
         start,
         stop,
     };
+}
+
+/**
+ * Prefer the 'absolute' event, which is relative to true north.
+ * Fall back to the standard 'deviceorientation' event.
+ */
+function getEventName(): keyof WindowEventMap {
+    const useAbsolute = 'ondeviceorientationabsolute' in window && !isLocalhost();
+    const eventName = useAbsolute ? 'deviceorientationabsolute' : 'deviceorientation';
+
+    return eventName as keyof WindowEventMap;
 }
 
 /**
@@ -92,7 +101,7 @@ function handleOrientationEvent(event: DeviceOrientationEvent): number | null {
     }
 
     // We need to check if the alpha value is absolute (relative to North)
-    if (!event.absolute) {
+    if (!event.absolute && !isLocalhost()) {
         // If alpha is not absolute, it's relative to the device's initial
         // position. This is not useful for a compass. We return null.
         console.warn("DeviceOrientationEvent.alpha is not absolute.");
