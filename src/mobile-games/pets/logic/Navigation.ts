@@ -1,12 +1,8 @@
+import { getDirection } from "../../../util/Compass";
 import { toDegrees, toRadians } from "../../../util/Math";
 import { Location } from "./LocationService";
 
 const EARTH_RADIUS = 6371; // Radius of the Earth in kilometers
-
-const DIRECTIONS = [
-    "North", "Northeast", "East", "Southeast",
-    "South", "Southwest", "West", "Northwest",
-];
 
 export interface DistanceAndDirection {
     distance: number;
@@ -52,8 +48,5 @@ function calculateDirection(dLon: number, radLat2: number, radLat1: number): str
 
     const bearing = (toDegrees(Math.atan2(y, x)) + 360) % 360;
 
-    const index = Math.round(bearing / 45) % 8;
-    const direction = DIRECTIONS[index];
-
-    return direction;
+    return getDirection(bearing);;
 }
