@@ -1,6 +1,6 @@
-import { createID } from "../../util/ID";
-import Button from "../../util/ui/Button";
-import Dialog from "../../util/ui/Dialog";
+import { createID } from "../../../util/ID";
+import Button from "../../../util/ui/Button";
+import Dialog from "../../../util/ui/Dialog";
 import { Pet } from "../data/Pet";
 import { PetsDebugger } from "../logic/PetsDebugger";
 

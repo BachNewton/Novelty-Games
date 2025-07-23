@@ -1,4 +1,4 @@
-import { toDegrees, toRadians } from "../../util/Math";
+import { toDegrees, toRadians } from "../../../util/Math";
 import { Location } from "./LocationService";
 
 const EARTH_RADIUS = 6371; // Radius of the Earth in kilometers

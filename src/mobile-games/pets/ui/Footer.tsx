@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Button from "../../util/ui/Button";
+import Button from "../../../util/ui/Button";
 import { COLORS } from "./Home";
 
 const FOOTER_BUTTONS_SCALE = 1.4;

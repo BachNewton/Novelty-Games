@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Route, updateRoute } from "../../ui/Routing";
-import Scaffold from "../../util/ui/Scaffold";
-import Button from "../../util/ui/Button";
+import { Route, updateRoute } from "../../../ui/Routing";
+import Scaffold from "../../../util/ui/Scaffold";
+import Button from "../../../util/ui/Button";
 import PlaceholderImage from "../images/placeholder.png";
 import HiddenImage from "../images/hidden.png";
 import SleepingImage from "../images/sleeping.png";

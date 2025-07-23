@@ -1,4 +1,4 @@
-import { PetSave } from "../../../pets/data/PetSave";
+import { PetSave } from "../../../mobile-games/pets/data/PetSave";
 
 export type ExampleTables = {
     words: { name: string; definition: string };
