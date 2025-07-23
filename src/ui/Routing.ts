@@ -7,7 +7,8 @@ export enum Route {
     MUSIC_PLAYER = 'Music-Player',
     FORTNITE_FESTIVAL = 'Fortnite-Festival',
     PLATFORMER = 'Platformer',
-    PETS = 'Pets'
+    PETS = 'Pets',
+    TODDLER_TREASURE_HUNT = 'Toddler-Treasure-Hunt'
 }
 
 export function getRoute(): string | null {

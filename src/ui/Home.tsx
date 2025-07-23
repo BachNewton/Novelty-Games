@@ -7,12 +7,13 @@ import ToolsHome from '../tools/ui/Home';
 import { getRoute, Route } from './Routing';
 import FreeMarket from '../mobile-games/free-market/ui/FreeMarket';
 import Pets from '../mobile-games/pets/ui/Home';
+import ToddlerTreasureHunt from '../mobile-games/toddler-treasure-hunt/ui/Home';
 import { NewtorkCommunicator as MilleBornesNetworkCommunicator } from '../board-games/mille-bornes/logic/NewtorkCommunicator';
 import { createFreeMarketCommunicator } from '../mobile-games/free-market/logic/FreeMarketCommunicator';
 import { createStorer } from '../util/Storage';
 import { FreeMarketSave } from '../mobile-games/free-market/data/FreeMarketSave';
 import SubMenu from './SubMenu';
-import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState, PetsState, MobileGamesState } from './State';
+import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState, PetsState, MobileGamesState, ToddlerTreasureHuntState } from './State';
 import Labyrinth from '../board-games/labyrinth/ui/Labyrinth';
 import ProfileUi from './Profile';
 import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/LabyrinthCommunicator';
@@ -51,6 +52,7 @@ interface OnClickHandlers {
     onBoardGamesClick: () => void;
     onLabyrinthClick: () => void;
     onPetsClick: () => void;
+    onToddlerTreasureHuntClick: () => void;
 }
 
 const Home: React.FC<HomeProps> = ({ updateListener }) => {
@@ -88,7 +90,8 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         onBoardGamesClick: () => setState(new BoardGamesState()),
         onMobileGamesClick: () => setState(new MobileGamesState()),
         onLabyrinthClick: () => setState(createLabyrinthState()),
-        onPetsClick: () => setState(new PetsState())
+        onPetsClick: () => setState(new PetsState()),
+        onToddlerTreasureHuntClick: () => setState(new ToddlerTreasureHuntState())
     };
 
     if (state instanceof TriviaState) {
@@ -180,6 +183,8 @@ function mobileGamesUi(mobileGamesState: MobileGamesState, onClickHandlers: OnCl
             database={createPetsDatabase()}
             petsDebugger={createPetsDebugger()}
         />;
+    } else if (mobileGamesState instanceof ToddlerTreasureHuntState) {
+        return <ToddlerTreasureHunt />;
     }
 
     return <SubMenu
@@ -187,7 +192,8 @@ function mobileGamesUi(mobileGamesState: MobileGamesState, onClickHandlers: OnCl
         header='📶 Mobile Games 📱'
         menuItems={[
             { buttonText: 'Free Market 💸', onClick: onClickHandlers.onFreeMarketClick },
-            { buttonText: 'Pets 🐾', onClick: onClickHandlers.onPetsClick }
+            { buttonText: 'Pets 🐾', onClick: onClickHandlers.onPetsClick },
+            { buttonText: 'Toddler Treasure Hunt 🐞', onClick: onClickHandlers.onToddlerTreasureHuntClick }
         ]}
     />;
 }
@@ -211,6 +217,8 @@ function getInitialState(): State {
             return new ToolsState();
         case Route.PETS:
             return new PetsState();
+        case Route.TODDLER_TREASURE_HUNT:
+            return new ToddlerTreasureHuntState();
         default:
             return new HomeState();
     }

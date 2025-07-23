@@ -32,6 +32,8 @@ export class FreeMarketState extends MobileGamesState {
 
 export class PetsState extends MobileGamesState { }
 
+export class ToddlerTreasureHuntState extends MobileGamesState { }
+
 export class BoardGamesState implements State { }
 
 export class MilleBornesState extends BoardGamesState {
