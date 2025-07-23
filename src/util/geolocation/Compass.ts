@@ -1,4 +1,4 @@
-import { isLocalhost } from "./Localhost";
+import { isLocalhost } from "../Localhost";
 
 /**
  * The cardinal and intercardinal directions.

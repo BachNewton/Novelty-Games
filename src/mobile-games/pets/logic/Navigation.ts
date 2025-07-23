@@ -1,4 +1,4 @@
-import { getDirection } from "../../../util/Compass";
+import { getDirection } from "../../../util/geolocation/Compass";
 import { toDegrees, toRadians } from "../../../util/Math";
 import { Location } from "./LocationService";
 

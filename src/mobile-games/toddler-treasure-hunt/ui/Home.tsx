@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
-import { createCompass, getDirection } from "../../../util/Compass";
+import { createCompass, getDirection } from "../../../util/geolocation/Compass";
 
 interface HomeProps { }
 
