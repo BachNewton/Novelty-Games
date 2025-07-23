@@ -7,7 +7,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
     useEffect(() => updateRoute(Route.TODDLER_TREASURE_HUNT));
 
     return <div>
-        Toddler Treasure Hunt
+        <div>Toddler Treasure Hunt</div>
     </div>;
 };
 
