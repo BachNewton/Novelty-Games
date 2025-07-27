@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/Novelty-Games/static/css/main.f193cccc.css",
-    "main.js": "/Novelty-Games/static/js/main.544b4111.js",
+    "main.js": "/Novelty-Games/static/js/main.02c29097.js",
     "static/js/453.68693753.chunk.js": "/Novelty-Games/static/js/453.68693753.chunk.js",
     "MusicIndex.js": "/Novelty-Games/static/js/MusicIndex.7371e6f9.chunk.js",
     "static/media/play.jpg": "/Novelty-Games/static/media/play.be1d99a1eceaece88c8b.jpg",
@@ -77,12 +77,12 @@
     "static/media/MB-outline.svg": "/Novelty-Games/static/media/MB-outline.9375dcb67c2602a348842bb92635c97b.svg",
     "static/media/MB-back.svg": "/Novelty-Games/static/media/MB-back.73af888104565973b102803815b53578.svg",
     "main.f193cccc.css.map": "/Novelty-Games/static/css/main.f193cccc.css.map",
-    "main.544b4111.js.map": "/Novelty-Games/static/js/main.544b4111.js.map",
+    "main.02c29097.js.map": "/Novelty-Games/static/js/main.02c29097.js.map",
     "453.68693753.chunk.js.map": "/Novelty-Games/static/js/453.68693753.chunk.js.map",
     "MusicIndex.7371e6f9.chunk.js.map": "/Novelty-Games/static/js/MusicIndex.7371e6f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f193cccc.css",
-    "static/js/main.544b4111.js"
+    "static/js/main.02c29097.js"
   ]
 }
