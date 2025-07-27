@@ -7,6 +7,7 @@ import { PetsDatabase } from "./PetsDatabase";
 
 const CYCLE_TIME = 15 * 1000; // 15 seconds
 const DISCOVERY_THRESHOLD = 0.075; // 75 meters
+const LOW_FRIENDSHIP_THRESHOLD = 5;
 
 export function getDefaultPets(): Pet[] {
     return PET_DATA.map<Pet>(pet => {
@@ -102,8 +103,27 @@ export function distanceAndDirectionHandler(
     });
 }
 
-export function getDialogue(pet: Pet): Dialogue {
+function getDialogue(pet: Pet): Dialogue {
     const petData = PET_DATA_MAP.get(pet.id)!;
 
     return petData.dialogue;
+}
+
+export function getText(pet: Pet): string {
+    const dialogue = getDialogue(pet);
+
+    if (pet.discovered) {
+        switch (pet.state) {
+            case State.AWAKE:
+                if (pet.friendship < LOW_FRIENDSHIP_THRESHOLD) {
+                    return dialogue.greeting.lowFriendship;
+                } else {
+                    return dialogue.greeting.highFriendship;
+                }
+            case State.ASLEEP:
+                return dialogue.sleeping;
+        }
+    } else {
+        return dialogue.hidden;
+    }
 }

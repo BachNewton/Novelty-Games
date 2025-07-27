@@ -7,7 +7,7 @@ import HiddenImage from "../images/hidden.png";
 import SleepingImage from "../images/sleeping.png";
 import TextReveal from "./TextReveal";
 import { PetsDatabase } from "../logic/PetsDatabase";
-import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler, getDialogue } from "../logic/DataManagement";
+import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler, getText } from "../logic/DataManagement";
 import { Pet } from "../data/Pet";
 import { State } from "../data/PetSave";
 import DebugMenu from "./DebugMenu";
@@ -31,8 +31,11 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const navigator = useRef(createNavigator(createLocationService()));
     const [pets, setPets] = useState(getDefaultPets());
     const [selectedTab, setSelectedTab] = useState(0);
+    const [text, setText] = useState('');
     const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
     const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
+
+    const selectedPet = pets[selectedTab];
 
     const discoverPet = () => {
         const updatedPet = discoverPetInDatabase(database, selectedTab);
@@ -43,6 +46,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         };
 
         setPets([...pets]);
+        setText(getText(pets[selectedTab]));
     };
 
     const updateDistanceAndDirection = () => {
@@ -60,22 +64,25 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         updateDistanceAndDirection();
         const updatedPets = updatePetsState(database, pets, selectedTab);
         setPets(updatedPets);
+        setText(getText(selectedPet));
     };
 
     useEffect(() => {
         updateRoute(Route.PETS);
 
-        updatePetsFromSave(database, pets).then(updatedPets => setPets(updatedPets));
+        updatePetsFromSave(database, pets).then(updatedPets => {
+            const updatedPetStates = updatePetsState(database, updatedPets, selectedTab);
+            setPets(updatedPetStates);
+            setText(getText(updatedPetStates[selectedTab]));
+        });
 
         updateDistanceAndDirection();
     }, []);
 
     useEffect(onTabChange, [selectedTab]);
 
-    const selectedPet = pets[selectedTab];
     const isDiscovered = selectedPet.discovered;
     const image = getImage(selectedPet);
-    const text = getText(selectedPet);
 
     return <Scaffold
         header={headerUi(pets, selectedTab, index => setSelectedTab(index))}
@@ -146,21 +153,6 @@ function getImage(pet: Pet): string {
         }
     } else {
         return HiddenImage;
-    }
-}
-
-function getText(pet: Pet): string {
-    const dialogue = getDialogue(pet);
-
-    if (pet.discovered) {
-        switch (pet.state) {
-            case State.AWAKE:
-                return dialogue.greeting.lowFriendship;
-            case State.ASLEEP:
-                return dialogue.sleeping;
-        }
-    } else {
-        return dialogue.hidden;
     }
 }
 

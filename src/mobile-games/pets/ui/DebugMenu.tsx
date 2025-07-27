@@ -24,6 +24,7 @@ const DebugMenu: React.FC<DebugMenuProps> = ({ isOpen, onClose, discoverPet, pet
             <div style={{ margin: '10px' }} />
 
             <Button onClick={discoverPet}>discoverPet</Button>
+            <Button onClick={() => petsDebugger.setHighFriendship(selectedPet)}>setHighFriendship</Button>
             <Button onClick={petsDebugger.resetAllData}>resetAllData</Button>
             <div>Random ID: <span style={{ fontFamily: 'monospace', cursor: 'pointer' }} onClick={copyRandomIdToClipboard}>{randomId}</span></div>
             <div>nextCycle: <span style={{ fontFamily: 'monospace' }}>{petsDebugger.nextCycle(selectedPet)}</span></div>

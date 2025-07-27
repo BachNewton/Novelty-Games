@@ -177,9 +177,11 @@ function mobileGamesUi(mobileGamesState: MobileGamesState, onClickHandlers: OnCl
     if (mobileGamesState instanceof FreeMarketState) {
         return <FreeMarket communicator={mobileGamesState.communicator} storer={mobileGamesState.storer} />;
     } else if (mobileGamesState instanceof PetsState) {
+        const petsDatabase = createPetsDatabase();
+
         return <Pets
-            database={createPetsDatabase()}
-            petsDebugger={createPetsDebugger()}
+            database={petsDatabase}
+            petsDebugger={createPetsDebugger(petsDatabase)}
         />;
     } else if (mobileGamesState instanceof ToddlerTreasureHuntState) {
         return <ToddlerTreasureHunt />;
