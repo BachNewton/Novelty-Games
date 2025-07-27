@@ -13,7 +13,7 @@ import { State } from "../data/PetSave";
 import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
 import Footer from "./Footer";
-import { createLocationService, LocationService } from "../../../util/geolocation/LocationService";
+import { createLocationService } from "../../../util/geolocation/LocationService";
 import { createNavigator, DistanceAndDirection } from "../../../util/geolocation/Navigator";
 
 export const COLORS = {

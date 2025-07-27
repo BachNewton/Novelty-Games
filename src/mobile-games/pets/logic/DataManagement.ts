@@ -16,7 +16,8 @@ export function getDefaultPets(): Pet[] {
             discovered: false,
             state: State.ASLEEP,
             nextCycle: null,
-            distanceAndDirection: null
+            distanceAndDirection: null,
+            friendship: 0
         };
     });
 }
@@ -26,7 +27,8 @@ export function discoverPetInDatabase(database: PetsDatabase, selectedTab: numbe
         id: PET_DATA[selectedTab].id,
         state: State.AWAKE,
         nextCycle: Date.now() + CYCLE_TIME,
-        discovered: true
+        discovered: true,
+        friendship: 0
     };
 
     database.savePet(petSave);

@@ -3,6 +3,7 @@ export interface PetSave {
     state: State;
     nextCycle: number | null;
     discovered: boolean;
+    friendship: number;
 }
 
 export enum State {
