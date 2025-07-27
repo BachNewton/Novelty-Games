@@ -1,7 +1,7 @@
 import { Location } from "../../../util/geolocation/LocationService";
-import { Dialogue, frogDialog } from "./Dialogue";
-import { frogInteractions, Interactions } from "./Interaction";
-import { frogImages, PetImages } from "./PetImages";
+import { baxterDialog, Dialogue, frogDialog, ziggyDialog } from "./Dialogue";
+import { baxterInteractions, frogInteractions, Interactions, ziggyInteractions } from "./Interaction";
+import { defaultImages, frogImages, PetImages } from "./PetImages";
 
 interface PetData {
     id: string;
@@ -24,15 +24,28 @@ export const PET_DATA: PetData[] = [
         interactions: frogInteractions,
         images: frogImages
     },
-    // {
-    //     id: 'GM9G-3VS8-ICFQ-XMSI',
-    //     name: 'Ziggy',
-    //     location: { // Supercell office
-    //         lat: 60.161052,
-    //         lon: 24.921724
-    //     },
-    //     dialogue: getDefaultDialogue()
-    // },
+    {
+        id: 'GM9G-3VS8-ICFQ-XMSI',
+        name: 'Ziggy',
+        location: { // Supercell office
+            lat: 60.161052,
+            lon: 24.921724
+        },
+        dialogue: ziggyDialog,
+        interactions: ziggyInteractions,
+        images: defaultImages
+    },
+    {
+        id: 'K7EJ-VGA0-BNRZ-CZZ8',
+        name: 'Baxter',
+        location: { // Oodi
+            lat: 60.173555,
+            lon: 24.937540
+        },
+        dialogue: baxterDialog,
+        interactions: baxterInteractions,
+        images: defaultImages
+    },
     // {
     //     id: '0YHF-2UNI-RY2H-U59U',
     //     name: 'Ella',
@@ -50,15 +63,6 @@ export const PET_DATA: PetData[] = [
     //         lon: 24.884611
     //     },
     //     dialogue: doryDialog
-    // },
-    // {
-    //     id: 'K7EJ-VGA0-BNRZ-CZZ8',
-    //     name: 'Baxter',
-    //     location: { // Oodi
-    //         lat: 60.173555,
-    //         lon: 24.937540
-    //     },
-    //     dialogue: getDefaultDialogue()
     // },
     // {
     //     id: '7BUR-NBXS-YK4L-DQFF',

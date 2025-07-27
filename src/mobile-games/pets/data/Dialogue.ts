@@ -18,14 +18,20 @@ export const frogDialog: Dialogue = {
     sleeping: "Can you come back later? I've found the perfect quiet place in the sun and I don't want to be disturbed. It's so comfortable here, but I'll leave if I hear a baby cry."
 };
 
-// export const ellaDialog: Dialogue = {
-//     hidden: 'Oh, this is new. Where am I?',
-//     greeting: 'Oh hi! Who are you? sniff I don\'t know you, but you seem interesting.',
-//     sleeping: 'ignore'
-// };
+export const ziggyDialog: Dialogue = {
+    hidden: "Ziggy hidden",
+    greeting: {
+        lowFriendship: "Ziggy low friendship",
+        highFriendship: "Ziggy high friendship"
+    },
+    sleeping: "Ziggy sleeping"
+};
 
-// export const doryDialog: Dialogue = {
-//     hidden: 'Oh my god! What is this? How did I get here? I better find a place to hide!',
-//     greeting: 'Um… hello. I\'m not so sure about y—wait, are those treats?? You\'re my new best friend.',
-//     sleeping: 'Hrmph. Unless you\'ve got food, don\'t bother. I need my beauty sleep.'
-// };
+export const baxterDialog: Dialogue = {
+    hidden: "Baxter hidden",
+    greeting: {
+        lowFriendship: "Baxter low friendship",
+        highFriendship: "Baxter high friendship"
+    },
+    sleeping: "Baxter sleeping"
+};

@@ -2,12 +2,19 @@ import { DistanceAndDirection, Navigator } from "../../../util/geolocation/Navig
 import { Dialogue } from "../data/Dialogue";
 import { Pet } from "../data/Pet";
 import { PET_DATA, PET_DATA_MAP } from "../data/PetData";
+import { PetImages } from "../data/PetImages";
 import { PetSave, State } from "../data/PetSave";
 import { PetsDatabase } from "./PetsDatabase";
+import HiddenImage from "../images/hidden.png";
 
 const CYCLE_TIME = 15 * 1000; // 15 seconds
 const DISCOVERY_THRESHOLD = 0.075; // 75 meters
 const LOW_FRIENDSHIP_THRESHOLD = 5;
+
+export interface PetTextAndImage {
+    text: string;
+    image: string;
+}
 
 export function getDefaultPets(): Pet[] {
     return PET_DATA.map<Pet>(pet => {
@@ -109,21 +116,40 @@ function getDialogue(pet: Pet): Dialogue {
     return petData.dialogue;
 }
 
-export function getText(pet: Pet): string {
+function getImages(pet: Pet): PetImages {
+    const petData = PET_DATA_MAP.get(pet.id)!;
+
+    return petData.images;
+}
+
+export function getTextAndImage(pet: Pet): PetTextAndImage {
     const dialogue = getDialogue(pet);
+    const images = getImages(pet);
 
     if (pet.discovered) {
         switch (pet.state) {
             case State.AWAKE:
                 if (pet.friendship < LOW_FRIENDSHIP_THRESHOLD) {
-                    return dialogue.greeting.lowFriendship;
+                    return {
+                        text: dialogue.greeting.lowFriendship,
+                        image: images.greetLowFriendship
+                    };
                 } else {
-                    return dialogue.greeting.highFriendship;
+                    return {
+                        text: dialogue.greeting.highFriendship,
+                        image: images.greetHighFriendShip
+                    };
                 }
             case State.ASLEEP:
-                return dialogue.sleeping;
+                return {
+                    text: dialogue.sleeping,
+                    image: images.sleep
+                };
         }
     } else {
-        return dialogue.hidden;
+        return {
+            text: dialogue.hidden,
+            image: HiddenImage
+        };
     }
 }

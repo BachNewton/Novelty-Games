@@ -2,19 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import Scaffold from "../../../util/ui/Scaffold";
 import Button from "../../../util/ui/Button";
-import PlaceholderImage from "../images/placeholder.png";
-import HiddenImage from "../images/hidden.png";
-import SleepingImage from "../images/sleeping.png";
 import TextReveal from "./TextReveal";
 import { PetsDatabase } from "../logic/PetsDatabase";
-import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler, getText } from "../logic/DataManagement";
+import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler, getTextAndImage, PetTextAndImage } from "../logic/DataManagement";
 import { Pet } from "../data/Pet";
-import { State } from "../data/PetSave";
 import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
 import Footer from "./Footer";
 import { createLocationService } from "../../../util/geolocation/LocationService";
 import { createNavigator, DistanceAndDirection } from "../../../util/geolocation/Navigator";
+import HiddenImage from "../images/hidden.png";
 
 export const COLORS = {
     primary: ' #FF2D95',
@@ -31,7 +28,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const navigator = useRef(createNavigator(createLocationService()));
     const [pets, setPets] = useState(getDefaultPets());
     const [selectedTab, setSelectedTab] = useState(0);
-    const [text, setText] = useState('');
+    const [textAndImage, setTextAndImage] = useState<PetTextAndImage>({ text: '', image: HiddenImage });
     const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
     const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
 
@@ -46,7 +43,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         };
 
         setPets([...pets]);
-        setText(getText(pets[selectedTab]));
+        setTextAndImage(getTextAndImage(pets[selectedTab]));
     };
 
     const updateDistanceAndDirection = () => {
@@ -64,7 +61,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         updateDistanceAndDirection();
         const updatedPets = updatePetsState(database, pets, selectedTab);
         setPets(updatedPets);
-        setText(getText(selectedPet));
+        setTextAndImage(getTextAndImage(selectedPet));
     };
 
     useEffect(() => {
@@ -73,7 +70,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         updatePetsFromSave(database, pets).then(updatedPets => {
             const updatedPetStates = updatePetsState(database, updatedPets, selectedTab);
             setPets(updatedPetStates);
-            setText(getText(updatedPetStates[selectedTab]));
+            setTextAndImage(getTextAndImage(updatedPetStates[selectedTab]));
         });
 
         updateDistanceAndDirection();
@@ -82,7 +79,6 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     useEffect(onTabChange, [selectedTab]);
 
     const isDiscovered = selectedPet.discovered;
-    const image = getImage(selectedPet);
 
     return <Scaffold
         header={headerUi(pets, selectedTab, index => setSelectedTab(index))}
@@ -97,7 +93,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             position: 'relative',
             background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)`
         }}>
-            <img src={image} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
+            <img src={textAndImage.image} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
             {locatorUi(isDiscovered, distanceAndDirection)}
             <div style={{ position: 'absolute', top: '2px', right: '2px' }}>
                 <Button fontScale={0.8} onClick={() => setIsDebugMenuOpen(true)}>Debug</Button>
@@ -113,7 +109,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
                 backgroundColor: 'rgba(0,0,0,0.6)'
             }}>
                 <TextReveal>
-                    {text}
+                    {textAndImage.text}
                 </TextReveal>
             </div>
         </div>
@@ -141,19 +137,6 @@ function locatorUi(isDiscovered: boolean, distanceAndDirection: DistanceAndDirec
     return <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
         {content}
     </div>;
-}
-
-function getImage(pet: Pet): string {
-    if (pet.discovered) {
-        switch (pet.state) {
-            case State.AWAKE:
-                return PlaceholderImage;
-            case State.ASLEEP:
-                return SleepingImage;
-        }
-    } else {
-        return HiddenImage;
-    }
 }
 
 function formatDistance(distance: number): string {

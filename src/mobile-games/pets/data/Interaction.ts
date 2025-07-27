@@ -47,3 +47,53 @@ export const frogInteractions: Interactions = {
         }]
     ])
 };
+
+export const ziggyInteractions: Interactions = {
+    space: {
+        id: '-1',
+        text: 'Ziggy space'
+    },
+    pet: {
+        id: '-1',
+        text: 'Ziggy pet'
+    },
+    treat: {
+        id: '-1',
+        text: 'Ziggy treat'
+    },
+    play: {
+        id: '-1',
+        text: 'Ziggy play'
+    },
+    chat: new Map([
+        ['Chat 1', {
+            id: '-1',
+            text: 'Ziggy chat'
+        }]
+    ])
+};
+
+export const baxterInteractions: Interactions = {
+    space: {
+        id: '-1',
+        text: 'Baxter space'
+    },
+    pet: {
+        id: '-1',
+        text: 'Baxter pet'
+    },
+    treat: {
+        id: '-1',
+        text: 'Baxter treat'
+    },
+    play: {
+        id: '-1',
+        text: 'Baxter play'
+    },
+    chat: new Map([
+        ['Chat 1', {
+            id: '-1',
+            text: 'Baxter chat'
+        }]
+    ])
+};
