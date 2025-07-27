@@ -104,7 +104,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             position: 'relative',
             background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)`
         }}>
-            <img src={textAndImage.image} alt='' style={{ maxWidth: '100%', maxHeight: '100%' }} />
+            {imageUi(textAndImage.image)}
             {locatorUi(isDiscovered, distanceAndDirection)}
             <div style={{ position: 'absolute', top: '2px', right: '2px' }}>
                 <Button fontScale={0.8} onClick={() => setIsDebugMenuOpen(true)}>Debug</Button>
@@ -135,6 +135,14 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         />
     </Scaffold>;
 };
+
+function imageUi(image: string): JSX.Element {
+    return <img
+        src={image}
+        alt=''
+        style={{ maxWidth: '100%', maxHeight: '100%', maskImage: 'radial-gradient(circle, black 60%, transparent 75%)' }}
+    />;
+}
 
 function locatorUi(isDiscovered: boolean, distanceAndDirection: DistanceAndDirection | null): JSX.Element {
     if (isDiscovered) return <></>;
