@@ -1,22 +1,20 @@
 import { useEffect, useState } from "react";
-import Button from "../../../util/ui/Button";
 import { COLORS } from "./Home";
-
-const FOOTER_BUTTONS_SCALE = 1.4;
-const FOOTER_BUTTONS_BORDER_RADIUS = 20;
+import PetsButton from "./PetsButton";
+import { PET_DATA } from "../data/PetData";
 
 interface FooterProps {
     selectedTab: number;
 }
 
-enum SubMenu {
-    CHAT, GIVE_TREAT, PLAY, PET
+enum Menu {
+    MAIN, CHAT
 }
 
 const Footer: React.FC<FooterProps> = ({ selectedTab }) => {
-    const [subMenu, setSubMenu] = useState<SubMenu | null>(null);
+    const [menu, setMenu] = useState<Menu>(Menu.MAIN);
 
-    useEffect(() => setSubMenu(null), [selectedTab]);
+    useEffect(() => setMenu(Menu.MAIN), [selectedTab]);
 
     return <div style={{
         display: 'grid',
@@ -26,73 +24,39 @@ const Footer: React.FC<FooterProps> = ({ selectedTab }) => {
         backgroundColor: COLORS.surface,
         gap: '10px'
     }}>
-        {menuUi(subMenu, updatedSubMenu => setSubMenu(updatedSubMenu))}
+        {getMenu(menu, selectedTab, () => setMenu(Menu.CHAT))}
     </div>;
 };
 
-function menuUi(subMenu: SubMenu | null, setSubMenu: (subMenu: SubMenu) => void): JSX.Element {
-    switch (subMenu) {
-        case null:
-            return mainMenuUi(setSubMenu);
-        case SubMenu.CHAT:
-            return chatSubMenuUi();
-        case SubMenu.GIVE_TREAT:
-            return giveTreatSubMenuUi();
-        case SubMenu.PLAY:
-            return playSubMenuUi();
-        case SubMenu.PET:
-            return petSubMenuUi();
-
+function getMenu(menu: Menu, selectedTab: number, onChat: () => void): JSX.Element {
+    switch (menu) {
+        case Menu.MAIN:
+            return mainMenuUi(onChat);
+        case Menu.CHAT:
+            return chatMenuUi(selectedTab);
     }
 }
 
-function mainMenuUi(setSubMenu: (subMenu: SubMenu) => void): JSX.Element {
+function mainMenuUi(onChat: () => void): JSX.Element {
     return <>
-        {subMenuButton('Chat', () => setSubMenu(SubMenu.CHAT))}
-        {subMenuButton('Give Treat', () => setSubMenu(SubMenu.GIVE_TREAT))}
-        {subMenuButton('Play', () => setSubMenu(SubMenu.PLAY))}
-        {subMenuButton('Pet', () => setSubMenu(SubMenu.PET))}
+        <PetsButton text="Give Space" onClick={() => { }} />
+        <PetsButton text="Pet" onClick={() => { }} />
+        <PetsButton text="Give Treat" onClick={() => { }} />
+        <PetsButton text="Play" onClick={() => { }} />
+        <PetsButton text="Chat" onClick={onChat} columns={2} />
     </>;
 }
 
-function chatSubMenuUi(): JSX.Element {
-    return <>
-        {subMenuButton('Owner')}
-        {subMenuButton('Silly')}
-        {subMenuButton('Chat 3')}
-        {subMenuButton('Chat 4')}
-    </>;
-}
+function chatMenuUi(selectedTab: number): JSX.Element {
+    const chat = PET_DATA[selectedTab].interactions.chat;
 
-function giveTreatSubMenuUi(): JSX.Element {
-    return <>
-        {subMenuButton('Treat 1')}
-        {subMenuButton('Treat 2')}
-        {subMenuButton('Treat 3')}
-        {subMenuButton('Treat 4')}
-    </>;
-}
+    const items = Array.from(chat.keys()).map(key => <PetsButton
+        key={key}
+        text={key}
+        onClick={() => { }}
+    />);
 
-function playSubMenuUi(): JSX.Element {
-    return <>
-        {subMenuButton('Play 1')}
-        {subMenuButton('Play 2')}
-        {subMenuButton('Play 3')}
-        {subMenuButton('Play 4')}
-    </>;
-}
-
-function petSubMenuUi(): JSX.Element {
-    return <>
-        {subMenuButton('Pet 1')}
-        {subMenuButton('Pet 2')}
-        {subMenuButton('Pet 3')}
-        {subMenuButton('Pet 4')}
-    </>;
-}
-
-function subMenuButton(text: string, onClick?: () => void): JSX.Element {
-    return <Button onClick={onClick} fontScale={FOOTER_BUTTONS_SCALE} borderRadius={FOOTER_BUTTONS_BORDER_RADIUS}>{text}</Button>;
+    return <>{items}</>;
 }
 
 export default Footer;
