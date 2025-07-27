@@ -155,7 +155,7 @@ function getText(pet: Pet): string {
     if (pet.discovered) {
         switch (pet.state) {
             case State.AWAKE:
-                return dialogue.greeting;
+                return dialogue.greeting.lowFriendship;
             case State.ASLEEP:
                 return dialogue.sleeping;
         }
