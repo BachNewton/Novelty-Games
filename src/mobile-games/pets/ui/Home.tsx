@@ -1,3 +1,4 @@
+import "../css/font.css";
 import { useEffect, useRef, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import Scaffold from "../../../util/ui/Scaffold";
@@ -119,7 +120,9 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
                 borderRadius: '25px',
                 padding: '10px',
                 backgroundColor: 'rgba(0,0,0,0.6)',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                fontFamily: 'Pet',
+                fontSize: '1.2em'
             }}>
                 <TextReveal>
                     {textAndImage.text}
