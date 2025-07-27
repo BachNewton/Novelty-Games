@@ -14,7 +14,6 @@ import { createLocationService } from "../../../util/geolocation/LocationService
 import { createNavigator, DistanceAndDirection } from "../../../util/geolocation/Navigator";
 import HiddenImage from "../images/hidden.png";
 import { Interactions, Interaction } from "../data/Interaction";
-import { State } from "../data/PetSave";
 
 export const COLORS = {
     primary: ' #FF2D95',

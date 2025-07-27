@@ -2,9 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import { createCompass, getDirection } from "../../../util/geolocation/Compass";
 
-interface HomeProps { }
-
-const Home: React.FC<HomeProps> = ({ }) => {
+const Home: React.FC = () => {
     const [heading, setHeading] = useState<number | null>(null);
     const compass = useRef(createCompass(updatedHeading => setHeading(updatedHeading)));
 
