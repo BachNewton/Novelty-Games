@@ -112,12 +112,14 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             <div style={{
                 position: 'absolute',
                 bottom: '0',
-                left: '0',
+                width: 'calc(100% - 15px)',
+                minHeight: '2.5em',
                 margin: '7.5px',
                 border: `3px solid ${COLORS.secondary}`,
                 borderRadius: '25px',
                 padding: '10px',
-                backgroundColor: 'rgba(0,0,0,0.6)'
+                backgroundColor: 'rgba(0,0,0,0.6)',
+                boxSizing: 'border-box'
             }}>
                 <TextReveal>
                     {textAndImage.text}

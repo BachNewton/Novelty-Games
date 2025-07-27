@@ -4,7 +4,7 @@ interface TextRevealProps {
     children: string;
 }
 
-const REVEAL_SPEED = 75;
+const REVEAL_SPEED = 70;
 
 const TextReveal: React.FC<TextRevealProps> = ({ children }) => {
     const [revealedText, setRevealedText] = useState('');
