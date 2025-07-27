@@ -3,7 +3,7 @@ import { baxterDialog, Dialogue, frogDialog, ziggyDialog } from "./Dialogue";
 import { baxterInteractions, frogInteractions, Interactions, ziggyInteractions } from "./Interaction";
 import { defaultImages, frogImages, PetImages } from "./PetImages";
 
-interface PetData {
+export interface PetData {
     id: string;
     name: string;
     location: Location;

@@ -1,11 +1,10 @@
 import { DistanceAndDirection, Navigator } from "../../../util/geolocation/Navigator";
-import { Dialogue } from "../data/Dialogue";
 import { Pet } from "../data/Pet";
-import { PET_DATA, PET_DATA_MAP } from "../data/PetData";
-import { PetImages } from "../data/PetImages";
+import { PET_DATA, PET_DATA_MAP, PetData } from "../data/PetData";
 import { PetSave, State } from "../data/PetSave";
 import { PetsDatabase } from "./PetsDatabase";
 import HiddenImage from "../images/hidden.png";
+import { Interaction, Interactions } from "../data/Interaction";
 
 const CYCLE_TIME = 15 * 1000; // 15 seconds
 const DISCOVERY_THRESHOLD = 0.075; // 75 meters
@@ -110,21 +109,13 @@ export function distanceAndDirectionHandler(
     });
 }
 
-function getDialogue(pet: Pet): Dialogue {
-    const petData = PET_DATA_MAP.get(pet.id)!;
-
-    return petData.dialogue;
-}
-
-function getImages(pet: Pet): PetImages {
-    const petData = PET_DATA_MAP.get(pet.id)!;
-
-    return petData.images;
+function getPetData(pet: Pet): PetData {
+    return PET_DATA_MAP.get(pet.id)!;
 }
 
 export function getTextAndImage(pet: Pet): PetTextAndImage {
-    const dialogue = getDialogue(pet);
-    const images = getImages(pet);
+    const dialogue = getPetData(pet).dialogue;
+    const images = getPetData(pet).images;
 
     if (pet.discovered) {
         switch (pet.state) {
@@ -151,5 +142,32 @@ export function getTextAndImage(pet: Pet): PetTextAndImage {
             text: dialogue.hidden,
             image: HiddenImage
         };
+    }
+}
+
+export function handleInteraction(type: keyof Interactions, interaction: Interaction, pet: Pet, database: PetsDatabase): PetTextAndImage {
+    pet.friendship++; // For now friendship increases by just 1 after an interaction
+    database.savePet(pet);
+
+    return {
+        text: interaction.text,
+        image: getInteractionImage(type, pet)
+    };
+}
+
+function getInteractionImage(type: keyof Interactions, pet: Pet): string {
+    const images = getPetData(pet).images;
+
+    switch (type) {
+        case 'chat':
+            return images.chat;
+        case 'pet':
+            return images.pet;
+        case 'play':
+            return images.play;
+        case 'space':
+            return images.space;
+        case 'treat':
+            return images.treat;
     }
 }

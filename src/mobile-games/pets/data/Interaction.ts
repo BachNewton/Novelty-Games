@@ -1,4 +1,4 @@
-interface Interaction {
+export interface Interaction {
     id: string;
     text: string;
 }

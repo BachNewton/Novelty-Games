@@ -4,7 +4,7 @@ import Scaffold from "../../../util/ui/Scaffold";
 import Button from "../../../util/ui/Button";
 import TextReveal from "./TextReveal";
 import { PetsDatabase } from "../logic/PetsDatabase";
-import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler, getTextAndImage, PetTextAndImage } from "../logic/DataManagement";
+import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler, getTextAndImage, PetTextAndImage, handleInteraction } from "../logic/DataManagement";
 import { Pet } from "../data/Pet";
 import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
@@ -12,6 +12,7 @@ import Footer from "./Footer";
 import { createLocationService } from "../../../util/geolocation/LocationService";
 import { createNavigator, DistanceAndDirection } from "../../../util/geolocation/Navigator";
 import HiddenImage from "../images/hidden.png";
+import { Interactions, Interaction } from "../data/Interaction";
 
 export const COLORS = {
     primary: ' #FF2D95',
@@ -78,11 +79,16 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
 
     useEffect(onTabChange, [selectedTab]);
 
+    const onInteractionSelected = (type: keyof Interactions, interaction: Interaction) => {
+        const interactionTextAndImage = handleInteraction(type, interaction, selectedPet, database);
+        setTextAndImage(interactionTextAndImage);
+    };
+
     const isDiscovered = selectedPet.discovered;
 
     return <Scaffold
         header={headerUi(pets, selectedTab, index => setSelectedTab(index))}
-        footer={<Footer selectedTab={selectedTab} interactionSelected={id => console.log(id)} />}
+        footer={<Footer selectedTab={selectedTab} interactionSelected={onInteractionSelected} />}
         fontScale={1.35}
     >
         <div style={{
