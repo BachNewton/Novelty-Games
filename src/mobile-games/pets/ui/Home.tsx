@@ -4,7 +4,7 @@ import Scaffold from "../../../util/ui/Scaffold";
 import Button from "../../../util/ui/Button";
 import TextReveal from "./TextReveal";
 import { PetsDatabase } from "../logic/PetsDatabase";
-import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler, getTextAndImage, PetTextAndImage, handleInteraction } from "../logic/DataManagement";
+import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler, getTextAndImage, PetTextAndImage, handleInteraction, areInteractionsEnabled } from "../logic/DataManagement";
 import { Pet } from "../data/Pet";
 import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
@@ -91,7 +91,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         header={headerUi(pets, selectedTab, index => setSelectedTab(index))}
         footer={<Footer
             selectedTab={selectedTab}
-            interactionsEnabled={selectedPet.discovered && selectedPet.state === State.AWAKE}
+            interactionsEnabled={areInteractionsEnabled(selectedPet)}
             interactionSelected={onInteractionSelected}
         />}
         fontScale={1.35}

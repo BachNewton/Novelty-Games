@@ -9,6 +9,7 @@ import { Interaction, Interactions } from "../data/Interaction";
 const CYCLE_TIME = 15 * 1000; // 15 seconds
 const DISCOVERY_THRESHOLD = 0.050; // 50 meters
 const LOW_FRIENDSHIP_THRESHOLD = 5;
+const INTERACTION_PER_CYCLE = 1;
 
 export interface PetTextAndImage {
     text: string;
@@ -24,7 +25,8 @@ export function getDefaultPets(): Pet[] {
             state: State.ASLEEP,
             nextCycle: null,
             distanceAndDirection: null,
-            friendship: 0
+            friendship: 0,
+            interactionsThisCycle: 0
         };
     });
 }
@@ -35,7 +37,8 @@ export function discoverPetInDatabase(database: PetsDatabase, selectedTab: numbe
         state: State.AWAKE,
         nextCycle: Date.now() + CYCLE_TIME,
         discovered: true,
-        friendship: 0
+        friendship: 0,
+        interactionsThisCycle: 0
     };
 
     database.savePet(petSave);
@@ -73,6 +76,7 @@ export function updatePetsState(database: PetsDatabase, pets: Pet[], selectedTab
     if (diff < 0) {
         selectedPet.nextCycle = Date.now() + CYCLE_TIME;
         selectedPet.state = cycleState(selectedPet.state);
+        selectedPet.interactionsThisCycle = 0;
         database.savePet(selectedPet);
 
         return [...pets];
@@ -147,6 +151,7 @@ export function getTextAndImage(pet: Pet): PetTextAndImage {
 
 export function handleInteraction(type: keyof Interactions, interaction: Interaction, pet: Pet, database: PetsDatabase): PetTextAndImage {
     pet.friendship++; // For now friendship increases by just 1 after an interaction
+    pet.interactionsThisCycle++;
     database.savePet(pet);
 
     return {
@@ -170,4 +175,8 @@ function getInteractionImage(type: keyof Interactions, pet: Pet): string {
         case 'treat':
             return images.treat;
     }
+}
+
+export function areInteractionsEnabled(pet: Pet): boolean {
+    return pet.discovered && pet.state === State.AWAKE && pet.interactionsThisCycle < INTERACTION_PER_CYCLE;
 }
