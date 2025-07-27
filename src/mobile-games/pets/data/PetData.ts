@@ -1,6 +1,7 @@
 import { Location } from "../../../util/geolocation/LocationService";
 import { Dialogue, frogDialog } from "./Dialogue";
 import { frogInteractions, Interactions } from "./Interaction";
+import { frogImages, PetImages } from "./PetImages";
 
 interface PetData {
     id: string;
@@ -8,6 +9,7 @@ interface PetData {
     location: Location;
     dialogue: Dialogue;
     interactions: Interactions;
+    images: PetImages;
 }
 
 export const PET_DATA: PetData[] = [
@@ -19,7 +21,8 @@ export const PET_DATA: PetData[] = [
             lon: 24.871984
         },
         dialogue: frogDialog,
-        interactions: frogInteractions
+        interactions: frogInteractions,
+        images: frogImages
     },
     // {
     //     id: 'GM9G-3VS8-ICFQ-XMSI',
