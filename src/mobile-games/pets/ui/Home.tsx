@@ -109,24 +109,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             <div style={{ position: 'absolute', top: '2px', right: '2px' }}>
                 <Button fontScale={0.8} onClick={() => setIsDebugMenuOpen(true)}>Debug</Button>
             </div>
-            <div style={{
-                position: 'absolute',
-                bottom: '0',
-                width: 'calc(100% - 15px)',
-                minHeight: '2.5em',
-                margin: '7.5px',
-                border: `3px solid ${COLORS.secondary}`,
-                borderRadius: '25px',
-                padding: '10px',
-                backgroundColor: 'rgba(0,0,0,0.6)',
-                boxSizing: 'border-box',
-                fontFamily: 'Pet',
-                fontSize: '1.2em'
-            }}>
-                <TextReveal>
-                    {textAndImage.text}
-                </TextReveal>
-            </div>
+            {textBubbleUi(textAndImage.text)}
         </div>
 
         <DebugMenu
@@ -147,6 +130,27 @@ function imageUi(image: string): JSX.Element {
         alt=''
         style={{ maxWidth: '100%', maxHeight: '100%', maskImage: 'radial-gradient(circle, black 60%, transparent 75%)' }}
     />;
+}
+
+function textBubbleUi(text: string): JSX.Element {
+    return <div style={{
+        position: 'absolute',
+        bottom: '0',
+        width: 'calc(100% - 15px)',
+        minHeight: '2.5em',
+        margin: '7.5px',
+        border: `3px solid ${COLORS.secondary}`,
+        borderRadius: '25px',
+        padding: '10px',
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        boxSizing: 'border-box',
+        fontFamily: 'Pet',
+        fontSize: '1.2em'
+    }}>
+        <TextReveal>
+            {text}
+        </TextReveal>
+    </div>;
 }
 
 function locatorUi(isDiscovered: boolean, distanceAndDirection: DistanceAndDirection | null): JSX.Element {
