@@ -6,11 +6,13 @@ const FOOTER_BUTTONS_BORDER_RADIUS = 20;
 interface PetsButtonProps {
     text: string;
     onClick: () => void;
+    isEnabled: boolean;
     columns?: number;
 }
 
-const PetsButton: React.FC<PetsButtonProps> = ({ text, onClick, columns = 1 }) => {
+const PetsButton: React.FC<PetsButtonProps> = ({ text, onClick, isEnabled, columns = 1 }) => {
     return <div style={{ display: 'flex', gridColumn: `span ${columns}` }}><Button
+        isEnabled={isEnabled}
         onClick={onClick}
         fontScale={FOOTER_BUTTONS_SCALE}
         borderRadius={FOOTER_BUTTONS_BORDER_RADIUS}>

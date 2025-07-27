@@ -13,6 +13,7 @@ import { createLocationService } from "../../../util/geolocation/LocationService
 import { createNavigator, DistanceAndDirection } from "../../../util/geolocation/Navigator";
 import HiddenImage from "../images/hidden.png";
 import { Interactions, Interaction } from "../data/Interaction";
+import { State } from "../data/PetSave";
 
 export const COLORS = {
     primary: ' #FF2D95',
@@ -88,7 +89,11 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
 
     return <Scaffold
         header={headerUi(pets, selectedTab, index => setSelectedTab(index))}
-        footer={<Footer selectedTab={selectedTab} interactionSelected={onInteractionSelected} />}
+        footer={<Footer
+            selectedTab={selectedTab}
+            interactionsEnabled={selectedPet.discovered && selectedPet.state === State.AWAKE}
+            interactionSelected={onInteractionSelected}
+        />}
         fontScale={1.35}
     >
         <div style={{
