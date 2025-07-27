@@ -22,7 +22,6 @@ export function createPetsDebugger(database: PetsDatabase): PetsDebugger {
         setHighFriendship: async (pet) => {
             pet.friendship = 100;
             await database.savePet(pet);
-            window.location.reload();
         }
     };
 }

@@ -136,6 +136,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             petsDebugger={petsDebugger}
             selectedPet={selectedPet}
             forceNextCycle={() => onTabChange(true)}
+            setHighFriendship={() => onTabChange()}
         />
     </Scaffold>;
 };

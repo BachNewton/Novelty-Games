@@ -9,11 +9,12 @@ interface DebugMenuProps {
     onClose: () => void;
     discoverPet: () => void;
     forceNextCycle: () => void;
+    setHighFriendship: () => void;
     petsDebugger: PetsDebugger;
     selectedPet: Pet;
 }
 
-const DebugMenu: React.FC<DebugMenuProps> = ({ isOpen, onClose, discoverPet, forceNextCycle, petsDebugger, selectedPet }) => {
+const DebugMenu: React.FC<DebugMenuProps> = ({ isOpen, onClose, discoverPet, forceNextCycle, setHighFriendship, petsDebugger, selectedPet }) => {
     const randomId = createID();
 
     const copyRandomIdToClipboard = () => { navigator.clipboard.writeText(randomId) };
@@ -25,7 +26,10 @@ const DebugMenu: React.FC<DebugMenuProps> = ({ isOpen, onClose, discoverPet, for
             <div style={{ margin: '10px' }} />
 
             <Button onClick={discoverPet}>discoverPet</Button>
-            <Button onClick={() => petsDebugger.setHighFriendship(selectedPet)}>setHighFriendship</Button>
+            <Button onClick={async () => {
+                await petsDebugger.setHighFriendship(selectedPet);
+                setHighFriendship();
+            }}>setHighFriendship</Button>
             <Button onClick={forceNextCycle}>forceNextCycle</Button>
             <Button onClick={petsDebugger.resetAllData}>resetAllData</Button>
             <div>Random ID: <span style={{ fontFamily: 'monospace', cursor: 'pointer' }} onClick={copyRandomIdToClipboard}>{randomId}</span></div>
