@@ -6,7 +6,7 @@ import { PetsDatabase } from "./PetsDatabase";
 import HiddenImage from "../images/hidden.png";
 import { Interaction, Interactions } from "../data/Interaction";
 
-const CYCLE_TIME = 15 * 1000; // 15 seconds
+const CYCLE_TIME = 15 * 60 * 1000; // 15 minutes
 const DISCOVERY_THRESHOLD = 0.050; // 50 meters
 const LOW_FRIENDSHIP_THRESHOLD = 5;
 const INTERACTION_PER_CYCLE = 1;
@@ -64,7 +64,7 @@ export async function updatePetsFromSave(database: PetsDatabase, pets: Pet[]): P
     });
 }
 
-export function updatePetsState(database: PetsDatabase, pets: Pet[], selectedTab: number): Pet[] {
+export function updatePetsState(database: PetsDatabase, pets: Pet[], selectedTab: number, forceNextCycle: boolean = false): Pet[] {
     const selectedPet = pets[selectedTab];
 
     if (!selectedPet.discovered || selectedPet.nextCycle === null) return pets; // We don't need to udpate the state of undiscovered pets
@@ -73,7 +73,7 @@ export function updatePetsState(database: PetsDatabase, pets: Pet[], selectedTab
     const diff = nextCycle - Date.now();
     console.log(`${selectedPet.name} will change state in ${diff / 1000} seconds`);
 
-    if (diff < 0) {
+    if (diff < 0 || forceNextCycle) {
         selectedPet.nextCycle = Date.now() + CYCLE_TIME;
         selectedPet.state = cycleState(selectedPet.state);
         selectedPet.interactionsThisCycle = 0;

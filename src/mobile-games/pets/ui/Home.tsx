@@ -59,9 +59,9 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         );
     };
 
-    const onTabChange = () => {
+    const onTabChange = (forceNextCycle: boolean = false) => {
         updateDistanceAndDirection();
-        const updatedPets = updatePetsState(database, pets, selectedTab);
+        const updatedPets = updatePetsState(database, pets, selectedTab, forceNextCycle);
         setPets(updatedPets);
         setTextAndImage(getTextAndImage(selectedPet));
     };
@@ -131,6 +131,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             discoverPet={discoverPet}
             petsDebugger={petsDebugger}
             selectedPet={selectedPet}
+            forceNextCycle={() => onTabChange(true)}
         />
     </Scaffold>;
 };
