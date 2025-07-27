@@ -7,7 +7,7 @@ import HiddenImage from "../images/hidden.png";
 import { Interaction, Interactions } from "../data/Interaction";
 
 const CYCLE_TIME = 15 * 1000; // 15 seconds
-const DISCOVERY_THRESHOLD = 0.075; // 75 meters
+const DISCOVERY_THRESHOLD = 0.050; // 50 meters
 const LOW_FRIENDSHIP_THRESHOLD = 5;
 
 export interface PetTextAndImage {
