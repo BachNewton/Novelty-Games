@@ -1,5 +1,5 @@
 import { toRadians, toDegrees } from "../Math";
-import { Location, LocationService } from "./LocationService";
+import { Location } from "./LocationService";
 
 const EARTH_RADIUS = 6371; // Radius of the Earth in kilometers
 
@@ -9,16 +9,12 @@ export interface DistanceAndBearing {
 }
 
 export interface Navigator {
-    calculateDistanceAndBearingTo: (location: Location) => Promise<DistanceAndBearing>;
+    calculateDistanceAndBearing: (location1: Location, location2: Location) => DistanceAndBearing;
 }
 
-export function createNavigator(locationService: LocationService): Navigator {
+export function createNavigator(): Navigator {
     return {
-        calculateDistanceAndBearingTo: async (location) => {
-            const currentLocation = await locationService.getLocation();
-
-            return calculateDistanceAndDirection(currentLocation, location);
-        }
+        calculateDistanceAndBearing: calculateDistanceAndDirection
     };
 }
 

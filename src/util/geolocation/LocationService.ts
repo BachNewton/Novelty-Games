@@ -1,7 +1,8 @@
 export interface LocationService {
     getLocation: () => Promise<Location>;
-    watchLocation: (onLocationUpdate: (location: Location) => void) => void;
+    watchLocation: () => void;
     stopWatching: () => void;
+    setLocationListener: (locationListener: (location: Location) => void) => void;
 }
 
 export interface Location {
@@ -10,6 +11,7 @@ export interface Location {
 }
 
 export function createLocationService(): LocationService {
+    let locationListener: ((location: Location) => void) | null = null;
     let watchId: number | null = null;
 
     return {
@@ -22,9 +24,9 @@ export function createLocationService(): LocationService {
                 enableHighAccuracy: true
             });
         }),
-        watchLocation: (onLocationUpdate) => {
+        watchLocation: () => {
             watchId = navigator.geolocation.watchPosition(position => {
-                onLocationUpdate(toLocation(position));
+                locationListener?.(toLocation(position));
             }, _ => {
                 // Ignore errors
             }, {
@@ -34,7 +36,8 @@ export function createLocationService(): LocationService {
         stopWatching: () => {
             if (watchId === null) return;
             navigator.geolocation.clearWatch(watchId);
-        }
+        },
+        setLocationListener: listener => locationListener = listener
     }
 };
 

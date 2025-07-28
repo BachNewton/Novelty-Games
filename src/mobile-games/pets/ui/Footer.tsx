@@ -7,6 +7,7 @@ import { Interaction, Interactions } from "../data/Interaction";
 interface FooterProps {
     selectedTab: number;
     interactionsEnabled: boolean;
+    isDiscovered: boolean;
     distance: number | null;
     interactionSelected: (type: keyof Interactions, interaction: Interaction) => void;
 }
@@ -15,12 +16,12 @@ enum Menu {
     MAIN, CHAT
 }
 
-const Footer: React.FC<FooterProps> = ({ selectedTab, interactionsEnabled, distance, interactionSelected }) => {
+const Footer: React.FC<FooterProps> = ({ selectedTab, interactionsEnabled, isDiscovered, distance, interactionSelected }) => {
     const [menu, setMenu] = useState<Menu>(Menu.MAIN);
 
     useEffect(() => setMenu(Menu.MAIN), [selectedTab]);
 
-    const footerContent = distance === null
+    const footerContent = distance === null || isDiscovered
         ? getMenu(menu, selectedTab, interactionsEnabled, () => setMenu(Menu.CHAT), interactionSelected, () => setMenu(Menu.MAIN))
         : distanceUi(distance);
 

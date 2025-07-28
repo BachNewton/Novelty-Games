@@ -5,17 +5,17 @@ import Scaffold from "../../../util/ui/Scaffold";
 import Button from "../../../util/ui/Button";
 import TextReveal from "./TextReveal";
 import { PetsDatabase } from "../logic/PetsDatabase";
-import { getDefaultPets, discoverPetInDatabase, updatePetsFromSave, updatePetsState, distanceAndDirectionHandler, getTextAndImage, PetTextAndImage, handleInteraction, areInteractionsEnabled } from "../logic/DataManagement";
 import { Pet } from "../data/Pet";
 import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
 import Footer from "./Footer";
-import { createLocationService } from "../../../util/geolocation/LocationService";
+import { createLocationService, Location } from "../../../util/geolocation/LocationService";
 import { createNavigator, DistanceAndBearing } from "../../../util/geolocation/Navigator";
 import PawIcon from "../icons/paw.svg";
 import ArrowIcon from "../icons/arrow.png";
 import { Interactions, Interaction } from "../data/Interaction";
 import { createCompass } from "../../../util/geolocation/Compass";
+import { createDataManager, PetTextAndImage } from "../logic/DataManager";
 
 export const COLORS = {
     primary: ' #FF2D95',
@@ -29,19 +29,22 @@ interface HomeProps {
 }
 
 const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
-    const navigator = useRef(createNavigator(createLocationService()));
+    const locationService = useRef(createLocationService());
     const [heading, setHeading] = useState<number | null>(null);
     const compass = useRef(createCompass(updatedHeading => setHeading(updatedHeading)));
-    const [pets, setPets] = useState(getDefaultPets());
+    const dataManagerRef = useRef(createDataManager(database, createNavigator()));
+    const [pets, setPets] = useState(dataManagerRef.current.getDefaultPets());
     const [selectedTab, setSelectedTab] = useState(0);
     const [textAndImage, setTextAndImage] = useState<PetTextAndImage>({ text: null, image: null });
     const [distanceAndBearing, setDistanceAndBearing] = useState<DistanceAndBearing | null>(null);
+    const [location, setLocation] = useState<Location | null>(null);
     const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
 
     const selectedPet = pets[selectedTab];
+    const dataManager = dataManagerRef.current;
 
     const discoverPet = () => {
-        const updatedPet = discoverPetInDatabase(database, selectedTab);
+        const updatedPet = dataManager.discoverPetInDatabase(selectedTab);
 
         pets[selectedTab] = {
             ...pets[selectedTab],
@@ -49,47 +52,60 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         };
 
         setPets([...pets]);
-        setTextAndImage(getTextAndImage(pets[selectedTab]));
-    };
-
-    const updateDistanceAndDirection = () => {
-        setDistanceAndBearing(null);
-
-        distanceAndDirectionHandler(
-            pets[selectedTab],
-            navigator.current,
-            discoverPet,
-            calculatedDistanceAndDirection => setDistanceAndBearing(calculatedDistanceAndDirection)
-        );
+        setTextAndImage(dataManager.getTextAndImage(pets[selectedTab]));
     };
 
     const onTabChange = (forceNextCycle: boolean = false) => {
-        updateDistanceAndDirection();
-        const updatedPets = updatePetsState(database, pets, selectedTab, forceNextCycle);
+        const updatedPets = dataManager.updatePetsState(pets, selectedTab, forceNextCycle);
         setPets(updatedPets);
-        setTextAndImage(getTextAndImage(selectedPet));
+        setTextAndImage(dataManager.getTextAndImage(selectedPet));
+
+        if (location !== null) {
+            dataManager.handleUpdatedLocation(
+                selectedPet,
+                location,
+                discoverPet,
+                updatedDistanceAndBearing => setDistanceAndBearing(updatedDistanceAndBearing)
+            );
+        }
+    };
+
+    const onLocationUpdate = (updatedLocation: Location) => {
+        setLocation(updatedLocation);
+
+        dataManager.handleUpdatedLocation(
+            selectedPet,
+            updatedLocation,
+            discoverPet,
+            updatedDistanceAndBearing => setDistanceAndBearing(updatedDistanceAndBearing)
+        );
     };
 
     useEffect(() => {
         updateRoute(Route.PETS);
 
-        updatePetsFromSave(database, pets).then(updatedPets => {
-            const updatedPetStates = updatePetsState(database, updatedPets, selectedTab);
+        dataManager.getPetsFromSave(pets).then(updatedPets => {
+            const updatedPetStates = dataManager.updatePetsState(updatedPets, selectedTab);
             setPets(updatedPetStates);
-            setTextAndImage(getTextAndImage(updatedPetStates[selectedTab]));
+            setTextAndImage(dataManager.getTextAndImage(updatedPetStates[selectedTab]));
         });
 
-        updateDistanceAndDirection();
+        locationService.current.watchLocation();
+        locationService.current.setLocationListener(onLocationUpdate);
 
         compass.current.start();
 
-        return () => compass.current.stop();
+        return () => {
+            locationService.current.stopWatching();
+
+            compass.current.stop();
+        };
     }, []);
 
     useEffect(onTabChange, [selectedTab]);
 
     const onInteractionSelected = (type: keyof Interactions, interaction: Interaction) => {
-        const interactionTextAndImage = handleInteraction(type, interaction, selectedPet, database);
+        const interactionTextAndImage = dataManager.handleInteraction(type, interaction, selectedPet);
         setTextAndImage(interactionTextAndImage);
     };
 
@@ -99,7 +115,8 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         header={headerUi(pets, selectedTab, index => setSelectedTab(index))}
         footer={<Footer
             selectedTab={selectedTab}
-            interactionsEnabled={areInteractionsEnabled(selectedPet)}
+            interactionsEnabled={dataManager.areInteractionsEnabled(selectedPet)}
+            isDiscovered={isDiscovered}
             distance={distanceAndBearing?.distance ?? null}
             interactionSelected={onInteractionSelected}
         />}
