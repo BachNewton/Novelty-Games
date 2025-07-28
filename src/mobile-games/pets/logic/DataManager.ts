@@ -22,7 +22,7 @@ export interface DataManager {
 
     handleUpdatedLocation: (
         pet: Pet,
-        location: Location,
+        location: Location | null,
         onPetDiscovered: () => void,
         distanceAndBearingUpdate: (distanceAndBearing: DistanceAndBearing) => void
     ) => void;
@@ -146,11 +146,11 @@ function cycleState(state: State): State {
 function handleUpdatedLocation(
     pet: Pet,
     navigator: Navigator,
-    location: Location,
+    location: Location | null,
     onPetDiscovered: () => void,
     distanceAndBearingUpdate: (distanceAndBearing: DistanceAndBearing) => void
 ) {
-    if (pet.discovered) return; // Don't need to do any work if the pet is already discoverd
+    if (pet.discovered || location === null) return; // Don't need to do any work if the pet is already discoverd
 
     const petData = getPetData(pet);
 

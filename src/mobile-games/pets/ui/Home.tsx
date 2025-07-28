@@ -55,31 +55,23 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         setTextAndImage(dataManager.getTextAndImage(pets[selectedTab]));
     };
 
-    const onTabChange = (forceNextCycle: boolean = false) => {
-        const updatedPets = dataManager.updatePetsState(pets, selectedTab, forceNextCycle);
-        setPets(updatedPets);
-        setTextAndImage(dataManager.getTextAndImage(selectedPet));
-
-        if (location !== null) {
-            dataManager.handleUpdatedLocation(
-                selectedPet,
-                location,
-                discoverPet,
-                updatedDistanceAndBearing => setDistanceAndBearing(updatedDistanceAndBearing)
-            );
-        }
-    };
-
-    const onLocationUpdate = (updatedLocation: Location) => {
-        setLocation(updatedLocation);
-
+    const onLocationUpdate = () => {
         dataManager.handleUpdatedLocation(
             selectedPet,
-            updatedLocation,
+            location,
             discoverPet,
             updatedDistanceAndBearing => setDistanceAndBearing(updatedDistanceAndBearing)
         );
     };
+
+    const onTabChange = (forceNextCycle: boolean = false) => {
+        const updatedPets = dataManager.updatePetsState(pets, selectedTab, forceNextCycle);
+        setPets(updatedPets);
+        setTextAndImage(dataManager.getTextAndImage(selectedPet));
+        onLocationUpdate();
+    };
+
+    useEffect(onLocationUpdate, [location]);
 
     useEffect(() => {
         updateRoute(Route.PETS);
@@ -91,7 +83,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         });
 
         locationService.current.watchLocation();
-        locationService.current.setLocationListener(onLocationUpdate);
+        locationService.current.setLocationListener(updatedLocation => setLocation(updatedLocation));
 
         compass.current.start();
 
