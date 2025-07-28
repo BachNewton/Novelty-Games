@@ -3,7 +3,6 @@ import { Pet } from "../data/Pet";
 import { PET_DATA, PET_DATA_MAP, PetData } from "../data/PetData";
 import { PetSave, State } from "../data/PetSave";
 import { PetsDatabase } from "./PetsDatabase";
-import HiddenImage from "../images/hidden.png";
 import { Interaction, Interactions } from "../data/Interaction";
 
 const CYCLE_TIME = 15 * 60 * 1000; // 15 minutes
@@ -12,8 +11,8 @@ const LOW_FRIENDSHIP_THRESHOLD = 5;
 const INTERACTION_PER_CYCLE = 1;
 
 export interface PetTextAndImage {
-    text: string;
-    image: string;
+    text: string | null;
+    image: string | null;
 }
 
 export function getDefaultPets(): Pet[] {
@@ -144,7 +143,7 @@ export function getTextAndImage(pet: Pet): PetTextAndImage {
     } else {
         return {
             text: dialogue.hidden,
-            image: HiddenImage
+            image: null
         };
     }
 }

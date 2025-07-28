@@ -40,7 +40,7 @@ const Footer: React.FC<FooterProps> = ({ selectedTab, interactionsEnabled, dista
 function distanceUi(distance: number): JSX.Element {
     return <>
         <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: '1.5em' }}>Distance</div>
-        <div style={{ gridArea: 'span 2 / span 2', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '2.25em' }}>{formatDistance(distance)}</div>
+        <div style={{ gridArea: 'span 2 / span 2', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', fontSize: '2.25em' }}>{formatDistance(distance)}</div>
     </>;
 }
 

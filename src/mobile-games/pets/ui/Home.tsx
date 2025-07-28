@@ -12,8 +12,10 @@ import { PetsDebugger } from "../logic/PetsDebugger";
 import Footer from "./Footer";
 import { createLocationService } from "../../../util/geolocation/LocationService";
 import { createNavigator, DistanceAndDirection } from "../../../util/geolocation/Navigator";
-import HiddenImage from "../images/hidden.png";
+import PawIcon from "../icons/paw.svg";
+import ArrowIcon from "../icons/arrow.png";
 import { Interactions, Interaction } from "../data/Interaction";
+import { createCompass } from "../../../util/geolocation/Compass";
 
 export const COLORS = {
     primary: ' #FF2D95',
@@ -28,9 +30,11 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const navigator = useRef(createNavigator(createLocationService()));
+    const [heading, setHeading] = useState<number | null>(null);
+    const compass = useRef(createCompass(updatedHeading => setHeading(updatedHeading)));
     const [pets, setPets] = useState(getDefaultPets());
     const [selectedTab, setSelectedTab] = useState(0);
-    const [textAndImage, setTextAndImage] = useState<PetTextAndImage>({ text: '', image: HiddenImage });
+    const [textAndImage, setTextAndImage] = useState<PetTextAndImage>({ text: null, image: null });
     const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
     const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
 
@@ -76,6 +80,10 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         });
 
         updateDistanceAndDirection();
+
+        compass.current.start();
+
+        return () => compass.current.stop();
     }, []);
 
     useEffect(onTabChange, [selectedTab]);
@@ -105,7 +113,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             position: 'relative',
             background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)`
         }}>
-            {imageUi(textAndImage.image)}
+            {imageUi(isDiscovered, textAndImage.image, heading)}
             {locatorUi(isDiscovered, distanceAndDirection)}
             <div style={{ position: 'absolute', top: '2px', right: '2px' }}>
                 <Button fontScale={0.8} onClick={() => setIsDebugMenuOpen(true)}>Debug</Button>
@@ -125,15 +133,31 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     </Scaffold>;
 };
 
-function imageUi(image: string): JSX.Element {
-    return <img
-        src={image}
-        alt=''
-        style={{ maxWidth: '100%', maxHeight: '100%', maskImage: 'radial-gradient(circle, black 60%, transparent 75%)' }}
-    />;
+function imageUi(isDiscovered: boolean, image: string | null, heading: number | null): JSX.Element {
+    if (isDiscovered && image !== null) {
+        return <img
+            src={image}
+            alt=''
+            style={{ maxWidth: '100%', maxHeight: '100%', maskImage: 'radial-gradient(circle, black 60%, transparent 75%)' }}
+        />;
+    } else {
+        const rotation = heading ?? 0;
+
+        return <>
+            <img src={ArrowIcon} alt='' style={{
+                maxWidth: '70%',
+                maxHeight: '70%',
+                transform: `rotate(${rotation}deg)`,
+                background: `radial-gradient(circle, ${COLORS.surface}, transparent 60%)`,
+                padding: '25px',
+                boxSizing: 'border-box'
+            }} />
+            <img src={PawIcon} alt='' style={{ position: 'absolute', maxWidth: '20%', maxHeight: '20%' }} />
+        </>;
+    }
 }
 
-function textBubbleUi(text: string): JSX.Element {
+function textBubbleUi(text: string | null): JSX.Element {
     return <div style={{
         position: 'absolute',
         bottom: '0',
@@ -149,7 +173,7 @@ function textBubbleUi(text: string): JSX.Element {
         fontSize: '1.2em'
     }}>
         <TextReveal>
-            {text}
+            {text ?? ''}
         </TextReveal>
     </div>;
 }
