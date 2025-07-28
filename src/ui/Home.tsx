@@ -113,8 +113,8 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
 function HomeUi(versionState: VersionState, onClickHandlers: OnClickHandlers) {
     const versionStateStyle: React.CSSProperties = {
         position: 'fixed',
-        top: '0.25em',
-        left: '0.25em'
+        top: '10px',
+        left: '10px'
     };
 
     const versionLabelStyle: React.CSSProperties = {
@@ -150,7 +150,12 @@ function versionStateUi(versionState: VersionState) {
         case VersionState.CURRENT:
             return <>✔️ Up-to-date</>;
         case VersionState.OUTDATED:
-            return <button style={{ fontSize: '1em' }} onClick={() => { window.location.reload() }}>🔄 Update App</button>;
+            return <Button
+                onClick={() => window.location.reload()}
+                fontScale={1.25}
+            >
+                <div style={{ padding: '2px' }}>🔄 Update App</div>
+            </Button>;
         case VersionState.UNKNOWN:
             return <>✖️ Offline</>;
     }

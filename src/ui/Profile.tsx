@@ -56,8 +56,8 @@ interface TopRightProps { children?: React.ReactNode }
 const TopRight: React.FC<TopRightProps> = ({ children }) => {
     return <div style={{
         position: 'fixed',
-        top: '0.25em',
-        right: '0.25em'
+        top: '10px',
+        right: '10px'
     }}>
         {children}
     </div>;
