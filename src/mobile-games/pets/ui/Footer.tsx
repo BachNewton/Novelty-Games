@@ -62,7 +62,7 @@ function mainMenuUi(
         <PetsButton isEnabled={interactionsEnabled} text="Give Space" onClick={() => interactionSelected('space', interactions.space)} />
         <PetsButton isEnabled={interactionsEnabled} text="Pet" onClick={() => interactionSelected('pet', interactions.pet)} />
         <PetsButton isEnabled={interactionsEnabled} text="Give Treat" onClick={() => interactionSelected('treat', interactions.treat)} />
-        <PetsButton isEnabled={interactionsEnabled} text="Play" onClick={() => interactionSelected('play', interactions.pet)} />
+        <PetsButton isEnabled={interactionsEnabled} text="Play" onClick={() => interactionSelected('play', interactions.play)} />
         <PetsButton isEnabled={interactionsEnabled} text="Chat" onClick={onChat} columns={2} />
     </>;
 }
