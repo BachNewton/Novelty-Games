@@ -122,7 +122,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             position: 'relative',
             background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)`
         }}>
-            {imageUi(isDiscovered, textAndImage.image, heading, distanceAndBearing)}
+            {imageUi(isDiscovered, textAndImage.image, dataManager.calculateArrowRotation(heading, distanceAndBearing))}
             <div style={{ position: 'absolute', top: '2px', right: '2px' }}>
                 <Button fontScale={0.8} onClick={() => setIsDebugMenuOpen(true)}>Debug</Button>
             </div>
@@ -135,6 +135,9 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             discoverPet={discoverPet}
             petsDebugger={petsDebugger}
             selectedPet={selectedPet}
+            heading={heading}
+            distanceAndBearing={distanceAndBearing}
+            arrowRotation={dataManager.calculateArrowRotation(heading, distanceAndBearing)}
             forceNextCycle={() => onTabChange(true)}
             setHighFriendship={() => onTabChange()}
         />
@@ -144,17 +147,12 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
 function imageUi(
     isDiscovered: boolean,
     image: string | null,
-    compassHeading: number | null,
-    distanceAndBearing: DistanceAndBearing | null
+    rotation: number | null
 ): JSX.Element {
     if (isDiscovered && image !== null) {
         return petImageUi(image);
     } else {
-        const heading = compassHeading ?? 0;
-        const bearing = distanceAndBearing?.bearing ?? 0;
-        const rotation = (bearing - heading + 360) % 360;
-
-        return arrowUi(rotation);
+        return arrowUi(rotation ?? 0);
     }
 }
 

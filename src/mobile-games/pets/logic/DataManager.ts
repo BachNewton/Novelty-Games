@@ -32,6 +32,8 @@ export interface DataManager {
     handleInteraction: (type: keyof Interactions, interaction: Interaction, pet: Pet) => PetTextAndImage;
 
     areInteractionsEnabled: (pet: Pet) => boolean;
+
+    calculateArrowRotation: (heading: number | null, distanceAndBearing: DistanceAndBearing | null) => number | null;
 }
 
 export interface PetTextAndImage {
@@ -61,7 +63,9 @@ export function createDataManager(database: PetsDatabase, navigator: Navigator):
 
         handleInteraction: (type, interaction, pet) => handleInteraction(type, interaction, pet, database),
 
-        areInteractionsEnabled: areInteractionsEnabled
+        areInteractionsEnabled: areInteractionsEnabled,
+
+        calculateArrowRotation: calculateArrowRotation
     };
 }
 
@@ -229,4 +233,13 @@ function getInteractionImage(type: keyof Interactions, pet: Pet): string {
 
 function areInteractionsEnabled(pet: Pet): boolean {
     return pet.discovered && pet.state === State.AWAKE && pet.interactionsThisCycle < INTERACTION_PER_CYCLE;
+}
+
+function calculateArrowRotation(heading: number | null, distanceAndBearing: DistanceAndBearing | null): number | null {
+    if (heading === null || distanceAndBearing === null) return null;
+
+    const bearing = distanceAndBearing.bearing;
+    const rotation = (bearing - heading + 360) % 360;
+
+    return rotation;
 }
