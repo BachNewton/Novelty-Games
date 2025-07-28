@@ -7,6 +7,7 @@ import { Interaction, Interactions } from "../data/Interaction";
 interface FooterProps {
     selectedTab: number;
     interactionsEnabled: boolean;
+    distance: number | null;
     interactionSelected: (type: keyof Interactions, interaction: Interaction) => void;
 }
 
@@ -14,22 +15,39 @@ enum Menu {
     MAIN, CHAT
 }
 
-const Footer: React.FC<FooterProps> = ({ selectedTab, interactionsEnabled, interactionSelected }) => {
+const Footer: React.FC<FooterProps> = ({ selectedTab, interactionsEnabled, distance, interactionSelected }) => {
     const [menu, setMenu] = useState<Menu>(Menu.MAIN);
 
     useEffect(() => setMenu(Menu.MAIN), [selectedTab]);
 
+    const footerContent = distance === null
+        ? getMenu(menu, selectedTab, interactionsEnabled, () => setMenu(Menu.CHAT), interactionSelected, () => setMenu(Menu.MAIN))
+        : distanceUi(distance);
+
     return <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
+        gridTemplateRows: 'repeat(3, minmax(2em, auto))',
         borderTop: `4px solid ${COLORS.primary}`,
         padding: '10px',
         backgroundColor: COLORS.surface,
         gap: '10px'
     }}>
-        {getMenu(menu, selectedTab, interactionsEnabled, () => setMenu(Menu.CHAT), interactionSelected, () => setMenu(Menu.MAIN))}
+        {footerContent}
     </div>;
 };
+
+function distanceUi(distance: number): JSX.Element {
+    return <>
+        <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: '1.5em' }}>Distance</div>
+        <div style={{ gridArea: 'span 2 / span 2', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '2.25em' }}>{formatDistance(distance)}</div>
+    </>;
+}
+
+function formatDistance(distance: number): string {
+    if (distance < 1) return (distance * 1000).toFixed(0) + ' m';
+    return distance.toFixed(3) + ' km';
+}
 
 function getMenu(
     menu: Menu,

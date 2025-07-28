@@ -92,6 +92,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         footer={<Footer
             selectedTab={selectedTab}
             interactionsEnabled={areInteractionsEnabled(selectedPet)}
+            distance={distanceAndDirection?.distance ?? null}
             interactionSelected={onInteractionSelected}
         />}
         fontScale={1.35}
@@ -158,19 +159,11 @@ function locatorUi(isDiscovered: boolean, distanceAndDirection: DistanceAndDirec
 
     const content = distanceAndDirection === null
         ? <div>( ... locating pet ... )</div>
-        : <>
-            <div>Distance: {formatDistance(distanceAndDirection.distance)}</div>
-            <div>Direction: {distanceAndDirection.direction}</div>
-        </>;
+        : <div>Direction: {distanceAndDirection.direction}</div>;
 
     return <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
         {content}
     </div>;
-}
-
-function formatDistance(distance: number): string {
-    if (distance < 1) return (distance * 1000).toFixed(0) + ' m';
-    return distance.toFixed(3) + ' km';
 }
 
 function headerUi(pets: Pet[], selectedTab: number, onTabSelected: (index: number) => void): JSX.Element {
