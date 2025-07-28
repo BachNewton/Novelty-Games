@@ -90,6 +90,39 @@ export const PET_DATA: PetData[] = [
         interactions: baxterInteractions,
         images: defaultImages
     },
+    {
+        id: '5',
+        name: 'Debug 5',
+        location: { // Fort Wayne - Playground
+            lat: 41.129258,
+            lon: -85.114223
+        },
+        dialogue: baxterDialog,
+        interactions: baxterInteractions,
+        images: defaultImages
+    },
+    {
+        id: '6',
+        name: 'Debug 6',
+        location: { // Fort Wayne - Walking path
+            lat: 41.130339,
+            lon: -85.116686
+        },
+        dialogue: baxterDialog,
+        interactions: baxterInteractions,
+        images: defaultImages
+    },
+    {
+        id: '7',
+        name: 'Debug 7',
+        location: { // Fort Wayne - Basketball
+            lat: 41.131679,
+            lon: -85.111868
+        },
+        dialogue: baxterDialog,
+        interactions: baxterInteractions,
+        images: defaultImages
+    },
     // {
     //     id: '0YHF-2UNI-RY2H-U59U',
     //     name: 'Ella',
