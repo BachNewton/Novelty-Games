@@ -11,7 +11,7 @@ import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
 import Footer from "./Footer";
 import { createLocationService } from "../../../util/geolocation/LocationService";
-import { createNavigator, DistanceAndDirection } from "../../../util/geolocation/Navigator";
+import { createNavigator, DistanceAndBearing } from "../../../util/geolocation/Navigator";
 import PawIcon from "../icons/paw.svg";
 import ArrowIcon from "../icons/arrow.png";
 import { Interactions, Interaction } from "../data/Interaction";
@@ -35,7 +35,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const [pets, setPets] = useState(getDefaultPets());
     const [selectedTab, setSelectedTab] = useState(0);
     const [textAndImage, setTextAndImage] = useState<PetTextAndImage>({ text: null, image: null });
-    const [distanceAndDirection, setDistanceAndDirection] = useState<DistanceAndDirection | null>(null);
+    const [distanceAndBearing, setDistanceAndBearing] = useState<DistanceAndBearing | null>(null);
     const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
 
     const selectedPet = pets[selectedTab];
@@ -53,13 +53,13 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     };
 
     const updateDistanceAndDirection = () => {
-        setDistanceAndDirection(null);
+        setDistanceAndBearing(null);
 
         distanceAndDirectionHandler(
             pets[selectedTab],
             navigator.current,
             discoverPet,
-            calculatedDistanceAndDirection => setDistanceAndDirection(calculatedDistanceAndDirection)
+            calculatedDistanceAndDirection => setDistanceAndBearing(calculatedDistanceAndDirection)
         );
     };
 
@@ -100,7 +100,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         footer={<Footer
             selectedTab={selectedTab}
             interactionsEnabled={areInteractionsEnabled(selectedPet)}
-            distance={distanceAndDirection?.distance ?? null}
+            distance={distanceAndBearing?.distance ?? null}
             interactionSelected={onInteractionSelected}
         />}
         fontScale={1.35}
@@ -113,8 +113,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             position: 'relative',
             background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)`
         }}>
-            {imageUi(isDiscovered, textAndImage.image, heading)}
-            {locatorUi(isDiscovered, distanceAndDirection)}
+            {imageUi(isDiscovered, textAndImage.image, heading, distanceAndBearing)}
             <div style={{ position: 'absolute', top: '2px', right: '2px' }}>
                 <Button fontScale={0.8} onClick={() => setIsDebugMenuOpen(true)}>Debug</Button>
             </div>
@@ -133,28 +132,43 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     </Scaffold>;
 };
 
-function imageUi(isDiscovered: boolean, image: string | null, heading: number | null): JSX.Element {
+function imageUi(
+    isDiscovered: boolean,
+    image: string | null,
+    compassHeading: number | null,
+    distanceAndBearing: DistanceAndBearing | null
+): JSX.Element {
     if (isDiscovered && image !== null) {
-        return <img
-            src={image}
-            alt=''
-            style={{ maxWidth: '100%', maxHeight: '100%', maskImage: 'radial-gradient(circle, black 60%, transparent 75%)' }}
-        />;
+        return petImageUi(image);
     } else {
-        const rotation = heading ?? 0;
+        const heading = compassHeading ?? 0;
+        const bearing = distanceAndBearing?.bearing ?? 0;
+        const rotation = (bearing - heading + 360) % 360;
 
-        return <>
-            <img src={ArrowIcon} alt='' style={{
-                maxWidth: '70%',
-                maxHeight: '70%',
-                transform: `rotate(${rotation}deg)`,
-                background: `radial-gradient(circle, ${COLORS.surface}, transparent 60%)`,
-                padding: '25px',
-                boxSizing: 'border-box'
-            }} />
-            <img src={PawIcon} alt='' style={{ position: 'absolute', maxWidth: '20%', maxHeight: '20%' }} />
-        </>;
+        return arrowUi(rotation);
     }
+}
+
+function petImageUi(image: string): JSX.Element {
+    return <img
+        src={image}
+        alt=''
+        style={{ maxWidth: '100%', maxHeight: '100%', maskImage: 'radial-gradient(circle, black 60%, transparent 75%)' }}
+    />;
+}
+
+function arrowUi(rotation: number): JSX.Element {
+    return <>
+        <img src={ArrowIcon} alt='' style={{
+            maxWidth: '70%',
+            maxHeight: '70%',
+            transform: `rotate(${rotation}deg)`,
+            background: `radial-gradient(circle, ${COLORS.surface}, transparent 60%)`,
+            padding: '25px',
+            boxSizing: 'border-box'
+        }} />
+        <img src={PawIcon} alt='' style={{ position: 'absolute', maxWidth: '20%', maxHeight: '20%' }} />
+    </>;
 }
 
 function textBubbleUi(text: string | null): JSX.Element {
@@ -175,18 +189,6 @@ function textBubbleUi(text: string | null): JSX.Element {
         <TextReveal>
             {text ?? ''}
         </TextReveal>
-    </div>;
-}
-
-function locatorUi(isDiscovered: boolean, distanceAndDirection: DistanceAndDirection | null): JSX.Element {
-    if (isDiscovered) return <></>;
-
-    const content = distanceAndDirection === null
-        ? <div>( ... locating pet ... )</div>
-        : <div>Direction: {distanceAndDirection.direction}</div>;
-
-    return <div style={{ position: 'absolute', top: '5px', left: '5px' }}>
-        {content}
     </div>;
 }
 

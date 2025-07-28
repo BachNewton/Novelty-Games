@@ -1,21 +1,20 @@
 import { toRadians, toDegrees } from "../Math";
-import { getDirection } from "./Compass";
 import { Location, LocationService } from "./LocationService";
 
 const EARTH_RADIUS = 6371; // Radius of the Earth in kilometers
 
-export interface DistanceAndDirection {
+export interface DistanceAndBearing {
     distance: number;
-    direction: string;
+    bearing: number;
 }
 
 export interface Navigator {
-    calculateDistanceAndDirectionTo: (location: Location) => Promise<DistanceAndDirection>;
+    calculateDistanceAndBearingTo: (location: Location) => Promise<DistanceAndBearing>;
 }
 
 export function createNavigator(locationService: LocationService): Navigator {
     return {
-        calculateDistanceAndDirectionTo: async (location) => {
+        calculateDistanceAndBearingTo: async (location) => {
             const currentLocation = await locationService.getLocation();
 
             return calculateDistanceAndDirection(currentLocation, location);
@@ -23,7 +22,7 @@ export function createNavigator(locationService: LocationService): Navigator {
     };
 }
 
-function calculateDistanceAndDirection(location1: Location, location2: Location): DistanceAndDirection {
+function calculateDistanceAndDirection(location1: Location, location2: Location): DistanceAndBearing {
     const lat1 = location1.lat;
     const lon1 = location1.lon;
     const lat2 = location2.lat;
@@ -35,11 +34,11 @@ function calculateDistanceAndDirection(location1: Location, location2: Location)
     const radLat2 = toRadians(lat2);
 
     const distance = calculateDistance(dLat, radLat1, radLat2, dLon);
-    const direction = calculateDirection(dLon, radLat2, radLat1);
+    const bearing = calculateBearing(dLon, radLat2, radLat1);
 
     return {
         distance: distance,
-        direction: direction
+        bearing: bearing
     };
 }
 
@@ -55,12 +54,12 @@ function calculateDistance(dLat: number, radLat1: number, radLat2: number, dLon:
     return distance;
 }
 
-function calculateDirection(dLon: number, radLat2: number, radLat1: number): string {
+function calculateBearing(dLon: number, radLat2: number, radLat1: number): number {
     const y = Math.sin(dLon) * Math.cos(radLat2);
     const x = Math.cos(radLat1) * Math.sin(radLat2) -
         Math.sin(radLat1) * Math.cos(radLat2) * Math.cos(dLon);
 
     const bearing = (toDegrees(Math.atan2(y, x)) + 360) % 360;
 
-    return getDirection(bearing);;
+    return bearing;
 }
