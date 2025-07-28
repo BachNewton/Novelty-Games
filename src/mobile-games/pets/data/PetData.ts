@@ -46,6 +46,50 @@ export const PET_DATA: PetData[] = [
         interactions: baxterInteractions,
         images: defaultImages
     },
+    {
+        id: '1',
+        name: 'Debug 1',
+        location: { // Veijarivuoren ranta
+            lat: 60.146393,
+            lon: 24.882560
+        },
+        dialogue: baxterDialog,
+        interactions: baxterInteractions,
+        images: defaultImages
+    },
+    {
+        id: '2',
+        name: 'Debug 2',
+        location: { // Persilja Restaurant
+            lat: 60.157827,
+            lon: 24.880785
+        },
+        dialogue: baxterDialog,
+        interactions: baxterInteractions,
+        images: defaultImages
+    },
+    {
+        id: '3',
+        name: 'Debug 3',
+        location: { // Elliott's Office
+            lat: 60.156316,
+            lon: 24.885009
+        },
+        dialogue: baxterDialog,
+        interactions: baxterInteractions,
+        images: defaultImages
+    },
+    {
+        id: '4',
+        name: 'Debug 4',
+        location: { // HSK Docks
+            lat: 60.152068,
+            lon: 24.891240
+        },
+        dialogue: baxterDialog,
+        interactions: baxterInteractions,
+        images: defaultImages
+    },
     // {
     //     id: '0YHF-2UNI-RY2H-U59U',
     //     name: 'Ella',
@@ -102,8 +146,12 @@ export const PET_DATA: PetData[] = [
     // }
 ];
 
-// Location Ideas:
+// ----- Location Ideas -----
 // Cafe Regatta
 // Helsinki Winter Garden
+// Veijarivuoren ranta: 60.146393, 24.882560
+// Persilja Restaurant: 60.157827, 24.880785
+// Elliott's Office: 60.156316, 24.885009
+// HSK Docks: 60.152068, 24.891240
 
 export const PET_DATA_MAP = new Map(PET_DATA.map(pet => [pet.id, pet]));
