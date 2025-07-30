@@ -31,34 +31,39 @@ function getTabBorderStyle(selectedTab: number, tabIndex: number): React.CSSProp
     const borderRadius = '15px';
     const lightWidth = '2px';
     const strongWidth = '4px';
-    const borderLight = `${lightWidth} solid white`;
-    const borderStrong = `${strongWidth} solid ${COLORS.secondary}`;
+    const lightBorder = `${lightWidth} solid white`;
+    const strongBorder = `${strongWidth} solid ${COLORS.secondary}`;
 
     if (tabIndex === selectedTab) {
         return {
             borderTop: `${lightWidth} solid ${COLORS.secondary}`,
             background: `linear-gradient(0deg, ${COLORS.surface}, ${COLORS.primary})`
         };
-    } else if (tabIndex === (selectedTab - 1)) {
+    } else if (tabIndex === selectedTab - 1) {
         return {
-            border: borderLight,
-            borderBottom: borderStrong,
-            borderRight: borderStrong,
+            borderTop: lightBorder,
+            borderRight: strongBorder,
+            borderBottom: strongBorder,
+            borderLeft: lightBorder,
             borderBottomRightRadius: borderRadius,
             backgroundClip: 'border-box'
         };
-    } else if (tabIndex === (selectedTab + 1)) {
+    } else if (tabIndex === selectedTab + 1) {
         return {
-            border: borderLight,
-            borderBottom: borderStrong,
-            borderLeft: borderStrong,
-            borderBottomLeftRadius: borderRadius
+            borderTop: lightBorder,
+            borderLeft: strongBorder,
+            borderBottom: strongBorder,
+            borderRight: lightBorder,
+            borderBottomLeftRadius: borderRadius,
+            backgroundClip: 'border-box'
         };
     }
 
     return {
-        border: borderLight,
-        borderBottom: borderStrong
+        borderTop: lightBorder,
+        borderRight: lightBorder,
+        borderBottom: strongBorder,
+        borderLeft: lightBorder
     };
 }
 
