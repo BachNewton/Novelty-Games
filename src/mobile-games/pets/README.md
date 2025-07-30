@@ -32,3 +32,17 @@
 - GPS access isn't requested until a pet that is undiscovered is selected
 - Cloud save - so that the game can be played on multiple devices
 - Clicking on the pet image hide the text bubble so the full image can be appreciated
+
+## Pet Owners
+
+- [X] ME (1 cat)
+- [ ] Nick (1 cat)
+- [ ] Dice & Felix (1 dog)
+- [ ] Robert & Atria (2 cats)
+- [ ] Hanna (1 cat)
+- [ ] Anna (1 dog, 7 chickens)
+- [ ] Landon (1 robot)
+- [ ] Uncle Gary & Aunt Marta (1 dog)
+- [ ] Mallory & Chris ( ??? )
+- [ ] Steven & Ellie ( ??? )
+- [ ] Matt & Emily (1 cat)
