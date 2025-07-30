@@ -1,46 +1,55 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { COLORS } from "./Home";
 
 const MAX_HEARTS = 5;
 const BORDER_RADIUS = '20px';
+const ANIMATION_DELAY_MS = 20;
+const ANIMATION_SPEED = '1s';
+const PADDING = '3px';
 
 interface FriendshipBarProps {
     isDiscovered: boolean;
     level: number;
-    // A unique key (like an ID) to trigger a full animation reset.
-    animationKey: string | number;
+    animationKey: number;
 }
 
 const FriendshipBar: React.FC<FriendshipBarProps> = ({ isDiscovered, level, animationKey }) => {
     const [barWidth, setBarWidth] = useState('0%');
+    const [shouldAnimate, setShouldAnimate] = useState(false);
+    const previousLevel = useRef(level);
+    const previousAnimationKey = useRef(animationKey);
 
-    // This effect runs whenever the animationKey or level changes.
     useEffect(() => {
-        // Instantly reset the bar to 0% width.
-        setBarWidth('0%');
+        const isNewAnimation = previousAnimationKey.current !== animationKey;
 
-        // After a very short delay, set the bar to its true target width.
-        // This forces the CSS transition to play from 0% every time.
-        const timer = setTimeout(() => {
-            const targetWidth = (level / MAX_HEARTS) * 100;
-            setBarWidth(`${targetWidth}%`);
-        }, 50); // Delay allows React to process the 0% state first.
+        if (isNewAnimation) {
+            setShouldAnimate(false);
+            setBarWidth('0%');
 
-        return () => clearTimeout(timer); // Cleanup on re-render.
-    }, [animationKey]); // The effect's dependency array.
+            const timer = setTimeout(() => {
+                setShouldAnimate(true);
+                setBarWidth(calculateTargetWidth(level));
+            }, ANIMATION_DELAY_MS);
+
+            previousAnimationKey.current = animationKey;
+            previousLevel.current = level;
+
+            return () => clearTimeout(timer);
+        } else {
+            setShouldAnimate(true);
+            setBarWidth(calculateTargetWidth(level));
+
+            previousLevel.current = level;
+        }
+    }, [animationKey, level]);
 
     if (!isDiscovered) return <></>;
 
-    // A helper to generate a row of hearts.
-    const heartRow = (symbol: '🩷' | '🤍') => (
-        <div style={{ display: 'flex', width: '100%' }}>
-            {Array.from({ length: MAX_HEARTS }).map((_, i) => (
-                <div key={i} style={{ flexGrow: 1, textAlign: 'center', padding: '2px' }}>
-                    {symbol}
-                </div>
-            ))}
-        </div>
-    );
+    const heartStyle: React.CSSProperties = {
+        flexGrow: 1,
+        textAlign: 'center',
+        padding: PADDING
+    };
 
     return <div style={{
         position: 'absolute',
@@ -48,28 +57,36 @@ const FriendshipBar: React.FC<FriendshipBarProps> = ({ isDiscovered, level, anim
         width: '80%',
         border: `2px solid ${COLORS.primary}`,
         borderRadius: BORDER_RADIUS,
-        backgroundColor: COLORS.surface,
-        overflow: 'hidden',
-        // position: 'relative' // Needed for child absolute positioning.
+        backgroundColor: COLORS.surface
     }}>
-        {/* Layer 1: The background with empty hearts */}
-        {heartRow('🤍')}
+        {backgroundColor(shouldAnimate, barWidth, level)}
 
-        {/* Layer 2: The foreground that grows in width */}
-        <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            height: '100%',
-            width: barWidth, // The width is now a state variable
-            backgroundColor: COLORS.secondary,
-            overflow: 'hidden',
-            transition: 'width 0.8s cubic-bezier(0.25, 1, 0.5, 1)',
-            whiteSpace: 'nowrap'
-        }}>
-            {heartRow('🩷')}
+        <div style={{ display: 'flex', position: 'absolute', top: '0px', width: '100%' }}>
+            <div style={heartStyle}>🩷</div>
+            <div style={heartStyle}>🩷</div>
+            <div style={heartStyle}>🩷</div>
+            <div style={heartStyle}>🤍</div>
+            <div style={heartStyle}>🤍</div>
         </div>
     </div>;
 };
+
+function backgroundColor(shouldAnimate: boolean, barWidth: string, level: number): JSX.Element {
+    if (level === 0) return <div style={{ padding: PADDING }}>{'\u200B'}</div>;
+
+    return <div style={{
+        width: `calc(${barWidth} - ${PADDING} - ${PADDING})`,
+        background: `linear-gradient(to right, white 0%, ${COLORS.secondary} 50%, ${COLORS.primary} 100%)`,
+        borderRadius: BORDER_RADIUS,
+        padding: PADDING,
+        transition: shouldAnimate ? `width ${ANIMATION_SPEED} cubic-bezier(0.25, 1, 0.5, 1)` : 'none'
+    }}>{'\u200B'}</div>;
+}
+
+function calculateTargetWidth(level: number): string {
+    const width = Math.min((level / MAX_HEARTS) * 100, 100);
+
+    return `${width}%`;
+}
 
 export default FriendshipBar;
