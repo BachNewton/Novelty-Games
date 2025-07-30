@@ -16,6 +16,7 @@ import ArrowIcon from "../icons/arrow.png";
 import { Interactions, Interaction } from "../data/Interaction";
 import { createCompass } from "../../../util/geolocation/Compass";
 import { createDataManager, PetTextAndImage } from "../logic/DataManager";
+import Tabs from "./Tabs";
 
 export const COLORS = {
     primary: ' #FF2D95',
@@ -104,7 +105,12 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const isDiscovered = selectedPet.discovered;
 
     return <Scaffold
-        header={headerUi(pets, selectedTab, index => setSelectedTab(index))}
+        header={<Tabs
+            pets={pets}
+            selectedTab={selectedTab}
+            onTabSelected={index => setSelectedTab(index)}
+        />}
+
         footer={<Footer
             selectedTab={selectedTab}
             interactionsEnabled={dataManager.areInteractionsEnabled(selectedPet)}
@@ -112,6 +118,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             distance={distanceAndBearing?.distance ?? null}
             interactionSelected={onInteractionSelected}
         />}
+
         fontScale={1.35}
     >
         <div style={{
@@ -241,52 +248,6 @@ function textBubbleUi(text: string | null): JSX.Element {
             {text ?? ''}
         </TextReveal>
     </div>;
-}
-
-function headerUi(pets: Pet[], selectedTab: number, onTabSelected: (index: number) => void): JSX.Element {
-    const tabs = pets.map((pet, index) => {
-        const borderStyle = getTabBorderStyle(selectedTab, index);
-
-        const name = pet.discovered ? pet.name : '???';
-
-        return <div
-            key={index}
-            style={{ ...borderStyle, padding: '7.5px', userSelect: 'none', flex: '0 0 4em', textAlign: 'center' }}
-            onClick={() => onTabSelected(index)}
-        >
-            {name}
-        </div>;
-    });
-
-    return <div style={{ display: 'flex', overflow: 'auto', backgroundColor: COLORS.surface }}>
-        {tabs}
-    </div>;
-}
-
-function getTabBorderStyle(selectedTab: number, tabIndex: number): React.CSSProperties {
-    const border = '2px solid white';
-
-    if (tabIndex === selectedTab) {
-        return {
-            borderTop: border,
-            background: `linear-gradient(0deg, ${COLORS.surface}, ${COLORS.primary})`
-        };
-    } else if (tabIndex === selectedTab - 1) {
-        return {
-            border: border,
-            borderBottomRightRadius: '15px',
-            backgroundClip: 'border-box'
-        };
-    } else if (tabIndex === selectedTab + 1) {
-        return {
-            border: border,
-            borderBottomLeftRadius: '15px'
-        };
-    }
-
-    return {
-        border: border
-    };
 }
 
 export default Home;
