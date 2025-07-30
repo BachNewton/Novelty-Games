@@ -10,8 +10,8 @@
     - Pets discoverd out of total
     - Interations seen out of total
     - Friendship level of each pet
-- [ ] Indicate the friendship level of the currently selected pet
-- [ ] Indicate that the friendship level is increasing after an interaction is selected
+- [X] Indicate the friendship level of the currently selected pet
+- [X] Indicate that the friendship level is increasing after an interaction is selected
 - [ ] _(optional)_ Different interactions add different amounts of friendship to the pet
 - [ ] _(optional)_ Allow pets' text to have multiple pages for long messages, or add a max text length
 - [ ] _(optional)_ Indicate to the player that only one interaction is permitted per wake cycle
