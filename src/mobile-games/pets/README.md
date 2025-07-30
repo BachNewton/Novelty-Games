@@ -37,7 +37,7 @@
 
 - [X] ME (1 cat)
 - [ ] Nick (1 cat)
-- [ ] Dice & Felix (1 dog)
+- [X] Dice & Felix (1 dog)
 - [ ] Robert & Atria (2 cats)
 - [ ] Hanna (1 cat)
 - [ ] Anna (1 dog, 7 chickens)
