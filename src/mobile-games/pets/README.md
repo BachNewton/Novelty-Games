@@ -15,7 +15,7 @@
 - [ ] _(optional)_ Different interactions add different amounts of friendship to the pet
 - [ ] _(optional)_ Allow pets' text to have multiple pages for long messages, or add a max text length
 - [ ] _(optional)_ Indicate to the player that only one interaction is permitted per wake cycle
-- [ ] _(optional)_ Add a "welcome to the game" pop-up that explains the game and is only shown the first time the game is launched
+- [X] _(optional)_ Add a "welcome to the game" pop-up that explains the game and is only shown the first time the game is launched
 - [ ] _(optional)_ Indicate to the player how much longer a pet might be awake or sleeping for
 
 ## Content Ideas

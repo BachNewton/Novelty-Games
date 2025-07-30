@@ -17,6 +17,7 @@ import { createCompass } from "../../../util/geolocation/Compass";
 import { createDataManager, PetTextAndImage } from "../logic/DataManager";
 import Tabs from "./Tabs";
 import FriendshipBar from "./FriendshipBar";
+import Welcome from "./Welcome";
 
 const SHOW_DEBUG_MENU_BUTTON = true;
 
@@ -33,6 +34,7 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const locationService = useRef(createLocationService());
+    const [showWelcome, setShowWelcome] = useState(false);
     const [heading, setHeading] = useState<number | null>(null);
     const compass = useRef(createCompass(updatedHeading => setHeading(updatedHeading)));
     const dataManagerRef = useRef(createDataManager(database, createNavigator()));
@@ -84,6 +86,9 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             const updatedPetStates = dataManager.updatePetsState(updatedPets, selectedTab);
             setPets(updatedPetStates);
             setTextAndImage(dataManager.getTextAndImage(updatedPetStates[selectedTab]));
+
+            // Show the Welcome screen only if the first pet, "Frog", hasn't been discovered yet
+            setShowWelcome(!updatedPets[0].discovered);
         });
 
         database.getSeenInteractions().then(savedSeenInteractions => setSeenInteractions(savedSeenInteractions));
@@ -142,6 +147,8 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             <FriendshipBar isDiscovered={isDiscovered} level={selectedPet.friendship} animationKey={selectedTab} />
             {textBubbleUi(textAndImage.text)}
         </div>
+
+        <Welcome show={showWelcome} onClose={() => setShowWelcome(false)} />
 
         <DebugMenu
             isOpen={isDebugMenuOpen}
