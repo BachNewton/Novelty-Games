@@ -1,5 +1,4 @@
 import Button from "../../../util/ui/Button";
-import Checkbox from "../../../util/ui/Checkbox";
 import Dialog from "../../../util/ui/Dialog";
 import VerticalSpacer from "../../../util/ui/Spacer";
 import { COLORS } from "./Home";

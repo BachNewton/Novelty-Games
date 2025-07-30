@@ -4,12 +4,14 @@ import PetsButton from "./PetsButton";
 import { PET_DATA } from "../data/PetData";
 import { Interaction, Interactions } from "../data/Interaction";
 import { INTERACTION_PER_CYCLE } from "../logic/DataManager";
+import SleepingIcon from "../icons/sleeping.png";
 
 interface FooterProps {
     selectedTab: number;
     interactionsEnabled: boolean;
     interactionsThisCycle: number;
     isDiscovered: boolean;
+    isSleeping: boolean;
     hasLoaded: boolean;
     distance: number | null;
     seenInteractions: Set<string>;
@@ -20,7 +22,17 @@ enum Menu {
     MAIN, CHAT
 }
 
-const Footer: React.FC<FooterProps> = ({ selectedTab, interactionsEnabled, interactionsThisCycle, isDiscovered, hasLoaded, distance, seenInteractions, interactionSelected }) => {
+const Footer: React.FC<FooterProps> = ({
+    selectedTab,
+    interactionsEnabled,
+    interactionsThisCycle,
+    isDiscovered,
+    isSleeping,
+    hasLoaded,
+    distance,
+    seenInteractions,
+    interactionSelected
+}) => {
     const previousHasLoaded = useRef(hasLoaded);
     const [menu, setMenu] = useState<Menu>(Menu.MAIN);
     const [showComeBackLaterMessage, setShowComeBackLaterMessage] = useState(false);
@@ -45,7 +57,16 @@ const Footer: React.FC<FooterProps> = ({ selectedTab, interactionsEnabled, inter
     const footerContent = distance === null || isDiscovered
         ? showComeBackLaterMessage
             ? comeBackLaterUi()
-            : getMenu(menu, selectedTab, interactionsEnabled, seenInteractions, () => setMenu(Menu.CHAT), interactionSelected, () => setMenu(Menu.MAIN))
+            : getMenu(
+                menu,
+                selectedTab,
+                interactionsEnabled,
+                seenInteractions,
+                isSleeping,
+                () => setMenu(Menu.CHAT),
+                interactionSelected,
+                () => setMenu(Menu.MAIN)
+            )
         : distanceUi(distance);
 
     return <div style={{
@@ -92,10 +113,13 @@ function getMenu(
     selectedTab: number,
     interactionsEnabled: boolean,
     seenInteractions: Set<string>,
+    isSleeping: boolean,
     onChat: () => void,
     interactionSelected: (type: keyof Interactions, interaction: Interaction) => void,
     resetMenu: () => void
 ): JSX.Element {
+    if (isSleeping) return sleepingUi();
+
     switch (menu) {
         case Menu.MAIN:
             return mainMenuUi(onChat, selectedTab, interactionsEnabled, seenInteractions, interactionSelected);
@@ -107,6 +131,18 @@ function getMenu(
                 // resetMenu();
             });
     }
+}
+
+function sleepingUi(): JSX.Element {
+    return <div style={{
+        gridArea: 'span 3 / span 2',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        textAlign: 'center'
+    }}>
+        <img style={{ height: '6em' }} src={SleepingIcon} alt='' />
+    </div>;
 }
 
 function mainMenuUi(

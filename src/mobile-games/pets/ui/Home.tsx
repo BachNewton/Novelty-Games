@@ -18,6 +18,7 @@ import { createDataManager, PetTextAndImage } from "../logic/DataManager";
 import Tabs from "./Tabs";
 import FriendshipBar from "./FriendshipBar";
 import Welcome from "./Welcome";
+import { State } from "../data/PetSave";
 
 const SHOW_DEBUG_MENU_BUTTON = true;
 
@@ -132,6 +133,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             interactionsEnabled={dataManager.areInteractionsEnabled(selectedPet)}
             interactionsThisCycle={selectedPet.interactionsThisCycle}
             isDiscovered={isDiscovered}
+            isSleeping={selectedPet.state === State.ASLEEP}
             distance={distanceAndBearing?.distance ?? null}
             seenInteractions={seenInteractions}
             interactionSelected={onInteractionSelected}
