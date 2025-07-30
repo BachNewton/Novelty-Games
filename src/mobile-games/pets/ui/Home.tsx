@@ -17,6 +17,7 @@ import { Interactions, Interaction } from "../data/Interaction";
 import { createCompass } from "../../../util/geolocation/Compass";
 import { createDataManager, PetTextAndImage } from "../logic/DataManager";
 import Tabs from "./Tabs";
+import FriendshipBar from "./FriendshipBar";
 
 export const COLORS = {
     primary: ' #FF2D95',
@@ -133,7 +134,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             <div style={{ position: 'absolute', top: '60px', right: '5px' }}>
                 <Button fontScale={0.8} onClick={() => setIsDebugMenuOpen(true)}>Debug</Button>
             </div>
-            {friendshipLevelUi(isDiscovered, selectedPet.friendship)}
+            <FriendshipBar isDiscovered={isDiscovered} level={selectedPet.friendship} animationKey={selectedTab} />
             {textBubbleUi(textAndImage.text)}
         </div>
 
@@ -186,7 +187,7 @@ function arrowUi(rotation: number): JSX.Element {
     </>;
 }
 
-function friendshipLevelUi(isDiscovered: boolean, level: number): JSX.Element {
+function friendshipLevelUi_OLD(isDiscovered: boolean, level: number): JSX.Element {
     if (!isDiscovered) return <></>;
 
     const MAX_HEARTS = 5;
