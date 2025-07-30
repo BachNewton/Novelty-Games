@@ -22,3 +22,8 @@
 
 - Pets can ask the player questions. Example: "Favorite thing to do", and the options are avaliable are only what a pet would do would do, like lie in the sun, or chase bugs.
 - Pets know about each other and can talk about each other. You can learn about a different pet from the pet you're talking to. Something like a dating game.
+
+## Bugs / Improvements
+
+- GPS access isn't requested until a pet that is undiscovered is selected
+- Cloud save - so that the game can be played on multiple devices
