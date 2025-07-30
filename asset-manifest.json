@@ -1,14 +1,22 @@
 {
   "files": {
     "main.css": "/Novelty-Games/static/css/main.f193cccc.css",
-    "main.js": "/Novelty-Games/static/js/main.060c9263.js",
+    "main.js": "/Novelty-Games/static/js/main.71d3f71a.js",
     "static/js/453.68693753.chunk.js": "/Novelty-Games/static/js/453.68693753.chunk.js",
     "MusicIndex.js": "/Novelty-Games/static/js/MusicIndex.7371e6f9.chunk.js",
     "static/media/play.jpg": "/Novelty-Games/static/media/play.be1d99a1eceaece88c8b.jpg",
+    "static/media/treat.jpeg": "/Novelty-Games/static/media/treat.ae8edd8d9617aa04a2f0.jpeg",
+    "static/media/chat.jpeg": "/Novelty-Games/static/media/chat.ddbf8fa8075f90c2b360.jpeg",
+    "static/media/greet_low_friendship.jpeg": "/Novelty-Games/static/media/greet_low_friendship.341ae9d3805f2db8df7c.jpeg",
+    "static/media/space.jpeg": "/Novelty-Games/static/media/space.aa4b869bbf3126833a36.jpeg",
     "static/media/treat.jpg": "/Novelty-Games/static/media/treat.f3e178413c36291f3d99.jpg",
+    "static/media/play.jpeg": "/Novelty-Games/static/media/play.fc12e60d8f5194086fe6.jpeg",
     "static/media/sleep.jpg": "/Novelty-Games/static/media/sleep.71f566b84fa6e497c137.jpg",
+    "static/media/sleep.jpeg": "/Novelty-Games/static/media/sleep.25794ee6645633ace393.jpeg",
     "static/media/space.jpg": "/Novelty-Games/static/media/space.049848bd1cb9f310b82f.jpg",
+    "static/media/greet_high_friendship.jpeg": "/Novelty-Games/static/media/greet_high_friendship.20e4bf47af28f5e9ad49.jpeg",
     "static/media/greet_low_friendship.jpg": "/Novelty-Games/static/media/greet_low_friendship.d15e59740f4429d4aae2.jpg",
+    "static/media/pet.jpeg": "/Novelty-Games/static/media/pet.10edaea6548d133f89bf.jpeg",
     "static/media/greet_high_friendship.jpg": "/Novelty-Games/static/media/greet_high_friendship.022c8a4f7a1977f8357f.jpg",
     "static/media/skybox.jpg": "/Novelty-Games/static/media/skybox.abf8b9fe4fbb55e8b983.jpg",
     "static/media/player-normal-map.png": "/Novelty-Games/static/media/player-normal-map.93bce2b1183322f67fd2.png",
@@ -24,8 +32,8 @@
     "static/media/lizard.png": "/Novelty-Games/static/media/lizard.734688b10ee2b6838ac8.png",
     "static/media/butterfly.png": "/Novelty-Games/static/media/butterfly.5eaaf730513ea0f1da4e.png",
     "static/media/collect.wav": "/Novelty-Games/static/media/collect.a287fb90cd0a2aa2ceab.wav",
-    "static/media/mage.png": "/Novelty-Games/static/media/mage.051e4eefba52f6df8a9f.png",
     "service-worker.js": "/Novelty-Games/service-worker.js",
+    "static/media/mage.png": "/Novelty-Games/static/media/mage.051e4eefba52f6df8a9f.png",
     "static/media/dragon.png": "/Novelty-Games/static/media/dragon.a780b4c2a7e58e1bb603.png",
     "static/media/candle.png": "/Novelty-Games/static/media/candle.c1bec1742c5c7010f0eb.png",
     "static/media/owl.png": "/Novelty-Games/static/media/owl.594b0400fffc7dedb370.png",
@@ -79,12 +87,12 @@
     "static/media/MB-outline.svg": "/Novelty-Games/static/media/MB-outline.9375dcb67c2602a348842bb92635c97b.svg",
     "static/media/MB-back.svg": "/Novelty-Games/static/media/MB-back.73af888104565973b102803815b53578.svg",
     "main.f193cccc.css.map": "/Novelty-Games/static/css/main.f193cccc.css.map",
-    "main.060c9263.js.map": "/Novelty-Games/static/js/main.060c9263.js.map",
+    "main.71d3f71a.js.map": "/Novelty-Games/static/js/main.71d3f71a.js.map",
     "453.68693753.chunk.js.map": "/Novelty-Games/static/js/453.68693753.chunk.js.map",
     "MusicIndex.7371e6f9.chunk.js.map": "/Novelty-Games/static/js/MusicIndex.7371e6f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f193cccc.css",
-    "static/js/main.060c9263.js"
+    "static/js/main.71d3f71a.js"
   ]
 }
