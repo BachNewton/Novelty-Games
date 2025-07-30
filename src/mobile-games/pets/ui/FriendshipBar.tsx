@@ -51,6 +51,12 @@ const FriendshipBar: React.FC<FriendshipBarProps> = ({ isDiscovered, level, anim
         padding: PADDING
     };
 
+    const hearts = Array.from({ length: MAX_HEARTS }).map((_, index) => {
+        const heart = index < level ? '🩷' : '🤍';
+
+        return <div key={index} style={heartStyle}>{heart}</div>;
+    });
+
     return <div style={{
         position: 'absolute',
         top: '15px',
@@ -62,11 +68,7 @@ const FriendshipBar: React.FC<FriendshipBarProps> = ({ isDiscovered, level, anim
         {backgroundColor(shouldAnimate, barWidth, level)}
 
         <div style={{ display: 'flex', position: 'absolute', top: '0px', width: '100%' }}>
-            <div style={heartStyle}>🩷</div>
-            <div style={heartStyle}>🩷</div>
-            <div style={heartStyle}>🩷</div>
-            <div style={heartStyle}>🤍</div>
-            <div style={heartStyle}>🤍</div>
+            {hearts}
         </div>
     </div>;
 };
