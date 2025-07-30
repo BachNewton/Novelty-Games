@@ -64,7 +64,8 @@ const FriendshipBar: React.FC<FriendshipBarProps> = ({ isDiscovered, level, anim
         width: '80%',
         border: `2px solid ${COLORS.primary}`,
         borderRadius: BORDER_RADIUS,
-        backgroundColor: COLORS.surface
+        backgroundColor: COLORS.surface,
+        overflow: 'hidden'
     }}>
         {backgroundColor(shouldAnimate, barWidth, level)}
 
