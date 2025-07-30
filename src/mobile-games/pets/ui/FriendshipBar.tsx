@@ -4,7 +4,7 @@ import { COLORS } from "./Home";
 const MAX_HEARTS = 5;
 const BORDER_RADIUS = '20px';
 const ANIMATION_DELAY_MS = 20;
-const ANIMATION_SPEED = '2s';
+const ANIMATION_SPEED = '1.5s';
 const PADDING = '3px';
 
 interface FriendshipBarProps {
@@ -65,7 +65,8 @@ const FriendshipBar: React.FC<FriendshipBarProps> = ({ isDiscovered, level, anim
         border: `2px solid ${COLORS.primary}`,
         borderRadius: BORDER_RADIUS,
         backgroundColor: COLORS.surface,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        boxShadow: level < MAX_HEARTS ? undefined : glowEffect()
     }}>
         {backgroundColor(shouldAnimate, barWidth, level)}
 
@@ -74,6 +75,15 @@ const FriendshipBar: React.FC<FriendshipBarProps> = ({ isDiscovered, level, anim
         </div>
     </div>;
 };
+
+function glowEffect(): string {
+    return `
+        0 0 10px rgba(255, 215, 0, 0.6),
+        0 0 17px rgba(255, 215, 0, 0.5),
+        0 0 24px rgba(255, 215, 0, 0.4),
+        0 0 31px rgba(255, 215, 0, 0.3)
+    `;
+}
 
 function backgroundColor(shouldAnimate: boolean, barWidth: string, level: number): JSX.Element {
     if (level === 0) return <div style={{ padding: PADDING }}>{'\u200B'}</div>;
