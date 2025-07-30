@@ -97,3 +97,53 @@ export const baxterInteractions: Interactions = {
         }]
     ])
 };
+
+export const ellaInteractions: Interactions = {
+    space: {
+        id: '-1',
+        text: 'Ella space'
+    },
+    pet: {
+        id: '-1',
+        text: 'Ella pet'
+    },
+    treat: {
+        id: '-1',
+        text: 'Ella treat'
+    },
+    play: {
+        id: '-1',
+        text: 'Ella play'
+    },
+    chat: new Map([
+        ['Chat 1', {
+            id: '-1',
+            text: 'Ella chat'
+        }]
+    ])
+};
+
+export const doryInteractions: Interactions = {
+    space: {
+        id: '-1',
+        text: 'Dory space'
+    },
+    pet: {
+        id: '-1',
+        text: 'Dory pet'
+    },
+    treat: {
+        id: '-1',
+        text: 'Dory treat'
+    },
+    play: {
+        id: '-1',
+        text: 'Dory play'
+    },
+    chat: new Map([
+        ['Chat 1', {
+            id: '-1',
+            text: 'Dory chat'
+        }]
+    ])
+};

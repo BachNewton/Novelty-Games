@@ -35,3 +35,21 @@ export const baxterDialog: Dialogue = {
     },
     sleeping: "Baxter sleeping"
 };
+
+export const ellaDialog: Dialogue = {
+    hidden: "Ella hidden",
+    greeting: {
+        lowFriendship: "Ella low friendship",
+        highFriendship: "Ella high friendship"
+    },
+    sleeping: "Ella sleeping"
+};
+
+export const doryDialog: Dialogue = {
+    hidden: "Dory hidden",
+    greeting: {
+        lowFriendship: "Dory low friendship",
+        highFriendship: "Dory high friendship"
+    },
+    sleeping: "Dory sleeping"
+};
