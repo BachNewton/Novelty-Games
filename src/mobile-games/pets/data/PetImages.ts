@@ -14,6 +14,14 @@ import frog_play from '../images/frog/play.jpg';
 import frog_sleep from '../images/frog/sleep.jpg';
 import frog_space from '../images/frog/space.jpg';
 import frog_treat from '../images/frog/treat.jpg';
+import ziggy_chat from '../images/ziggy/chat.jpeg';
+import ziggy_greet_high_friendship from '../images/ziggy/greet_high_friendship.jpeg';
+import ziggy_greet_low_friendship from '../images/ziggy/greet_low_friendship.jpeg';
+import ziggy_pet from '../images/ziggy/pet.jpeg';
+import ziggy_play from '../images/ziggy/play.jpeg';
+import ziggy_sleep from '../images/ziggy/sleep.jpeg';
+import ziggy_space from '../images/ziggy/space.jpeg';
+import ziggy_treat from '../images/ziggy/treat.jpeg';
 
 export interface PetImages {
     chat: string;
@@ -46,4 +54,15 @@ export const frogImages: PetImages = {
     sleep: frog_sleep,
     space: frog_space,
     treat: frog_treat
+};
+
+export const ziggyImages: PetImages = {
+    chat: ziggy_chat,
+    greetHighFriendShip: ziggy_greet_high_friendship,
+    greetLowFriendship: ziggy_greet_low_friendship,
+    pet: ziggy_pet,
+    play: ziggy_play,
+    sleep: ziggy_sleep,
+    space: ziggy_space,
+    treat: ziggy_treat
 };
