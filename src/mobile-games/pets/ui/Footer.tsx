@@ -1,13 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { COLORS } from "./Home";
 import PetsButton from "./PetsButton";
 import { PET_DATA } from "../data/PetData";
 import { Interaction, Interactions } from "../data/Interaction";
+import { INTERACTION_PER_CYCLE } from "../logic/DataManager";
 
 interface FooterProps {
     selectedTab: number;
     interactionsEnabled: boolean;
+    interactionsThisCycle: number;
     isDiscovered: boolean;
+    hasLoaded: boolean;
     distance: number | null;
     seenInteractions: Set<string>;
     interactionSelected: (type: keyof Interactions, interaction: Interaction) => void;
@@ -17,13 +20,32 @@ enum Menu {
     MAIN, CHAT
 }
 
-const Footer: React.FC<FooterProps> = ({ selectedTab, interactionsEnabled, isDiscovered, distance, seenInteractions, interactionSelected }) => {
+const Footer: React.FC<FooterProps> = ({ selectedTab, interactionsEnabled, interactionsThisCycle, isDiscovered, hasLoaded, distance, seenInteractions, interactionSelected }) => {
+    const previousHasLoaded = useRef(hasLoaded);
     const [menu, setMenu] = useState<Menu>(Menu.MAIN);
+    const [showComeBackLaterMessage, setShowComeBackLaterMessage] = useState(false);
 
-    useEffect(() => setMenu(Menu.MAIN), [selectedTab]);
+    const hasReachedInteractionThreshold = interactionsThisCycle >= INTERACTION_PER_CYCLE;
+
+    useEffect(() => {
+        // On the first load
+        if (previousHasLoaded.current !== hasLoaded) {
+            setShowComeBackLaterMessage(hasReachedInteractionThreshold);
+        }
+
+        previousHasLoaded.current = hasLoaded;
+    }, [hasLoaded]);
+
+    useEffect(() => {
+        setMenu(Menu.MAIN);
+
+        setShowComeBackLaterMessage(hasReachedInteractionThreshold);
+    }, [selectedTab]);
 
     const footerContent = distance === null || isDiscovered
-        ? getMenu(menu, selectedTab, interactionsEnabled, seenInteractions, () => setMenu(Menu.CHAT), interactionSelected, () => setMenu(Menu.MAIN))
+        ? showComeBackLaterMessage
+            ? comeBackLaterUi()
+            : getMenu(menu, selectedTab, interactionsEnabled, seenInteractions, () => setMenu(Menu.CHAT), interactionSelected, () => setMenu(Menu.MAIN))
         : distanceUi(distance);
 
     return <div style={{
@@ -38,6 +60,20 @@ const Footer: React.FC<FooterProps> = ({ selectedTab, interactionsEnabled, isDis
         {footerContent}
     </div>;
 };
+
+function comeBackLaterUi(): JSX.Element {
+    return <div style={{
+        gridArea: 'span 3 / span 2',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        textAlign: 'center'
+    }}>
+        <div>You've seen me recently,</div>
+        <div>check back in after I've had a nap</div>
+    </div>;
+}
 
 function distanceUi(distance: number): JSX.Element {
     return <>

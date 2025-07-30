@@ -34,6 +34,7 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const locationService = useRef(createLocationService());
+    const [hasLoaded, setHasLoaded] = useState(false);
     const [showWelcome, setShowWelcome] = useState(false);
     const [heading, setHeading] = useState<number | null>(null);
     const compass = useRef(createCompass(updatedHeading => setHeading(updatedHeading)));
@@ -83,6 +84,8 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         updateRoute(Route.PETS);
 
         dataManager.getPetsFromSave(pets).then(updatedPets => {
+            setHasLoaded(true);
+
             const updatedPetStates = dataManager.updatePetsState(updatedPets, selectedTab);
             setPets(updatedPetStates);
             setTextAndImage(dataManager.getTextAndImage(updatedPetStates[selectedTab]));
@@ -124,8 +127,10 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         />}
 
         footer={<Footer
+            hasLoaded={hasLoaded}
             selectedTab={selectedTab}
             interactionsEnabled={dataManager.areInteractionsEnabled(selectedPet)}
+            interactionsThisCycle={selectedPet.interactionsThisCycle}
             isDiscovered={isDiscovered}
             distance={distanceAndBearing?.distance ?? null}
             seenInteractions={seenInteractions}

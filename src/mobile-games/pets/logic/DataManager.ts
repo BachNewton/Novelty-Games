@@ -9,7 +9,7 @@ import { Location } from "../../../util/geolocation/LocationService";
 const CYCLE_TIME = 15 * 60 * 1000; // 15 minutes
 const DISCOVERY_THRESHOLD = 0.050; // 50 meters
 const LOW_FRIENDSHIP_THRESHOLD = 5;
-const INTERACTION_PER_CYCLE = 1;
+export const INTERACTION_PER_CYCLE = 1;
 
 export interface DataManager {
     getDefaultPets: () => Pet[];
