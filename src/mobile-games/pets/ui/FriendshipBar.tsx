@@ -4,7 +4,7 @@ import { COLORS } from "./Home";
 const MAX_HEARTS = 5;
 const BORDER_RADIUS = '20px';
 const ANIMATION_DELAY_MS = 20;
-const ANIMATION_SPEED = '1s';
+const ANIMATION_SPEED = '2s';
 const PADDING = '3px';
 
 interface FriendshipBarProps {
