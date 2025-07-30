@@ -200,7 +200,7 @@ function textBubbleUi(text: string | null): JSX.Element {
         width: 'calc(100% - 15px)',
         minHeight: '2.5em',
         margin: '7.5px',
-        border: `3px solid ${COLORS.primary}`,
+        border: `2px solid ${COLORS.primary}`,
         borderRadius: '25px',
         padding: '10px',
         backgroundColor: 'rgba(0,0,0,0.5)',
