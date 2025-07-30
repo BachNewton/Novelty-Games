@@ -29,7 +29,7 @@ const Footer: React.FC<FooterProps> = ({ selectedTab, interactionsEnabled, isDis
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         gridTemplateRows: 'repeat(3, minmax(2em, auto))',
-        borderTop: `4px solid ${COLORS.primary}`,
+        borderTop: `4px solid ${COLORS.secondary}`,
         padding: '10px',
         backgroundColor: COLORS.surface,
         gap: '10px'

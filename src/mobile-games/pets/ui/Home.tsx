@@ -187,49 +187,6 @@ function arrowUi(rotation: number): JSX.Element {
     </>;
 }
 
-function friendshipLevelUi_OLD(isDiscovered: boolean, level: number): JSX.Element {
-    if (!isDiscovered) return <></>;
-
-    const MAX_HEARTS = 5;
-    const borderRadius = '20px';
-
-    const hearts = Array.from({ length: MAX_HEARTS }).map((_, index) => {
-        const backgroundColor = index < level ? COLORS.secondary : COLORS.surface;
-        const heart = index < level ? '🩷' : '🤍';
-
-        const heartStyle: React.CSSProperties = {
-            backgroundColor: backgroundColor,
-            flexGrow: 1,
-            textAlign: 'center',
-            padding: '2px'
-        };
-
-        if (index === 0) {
-            heartStyle.borderTopLeftRadius = borderRadius;
-            heartStyle.borderBottomLeftRadius = borderRadius;
-        }
-
-        if (index === (level - 1) || index === (MAX_HEARTS - 1)) {
-            heartStyle.borderTopRightRadius = borderRadius;
-            heartStyle.borderBottomRightRadius = borderRadius;
-        }
-
-        return <div key={index} style={heartStyle}>{heart}</div>;
-    });
-
-    return <div style={{
-        display: 'flex',
-        position: 'absolute',
-        top: '15px',
-        width: '80%',
-        border: `2px solid ${COLORS.primary}`,
-        borderRadius: borderRadius,
-        backgroundColor: COLORS.surface
-    }}>
-        {hearts}
-    </div>;
-}
-
 function textBubbleUi(text: string | null): JSX.Element {
     return <div style={{
         position: 'absolute',
@@ -237,10 +194,10 @@ function textBubbleUi(text: string | null): JSX.Element {
         width: 'calc(100% - 15px)',
         minHeight: '2.5em',
         margin: '7.5px',
-        border: `3px solid ${COLORS.secondary}`,
+        border: `3px solid ${COLORS.primary}`,
         borderRadius: '25px',
         padding: '10px',
-        backgroundColor: 'rgba(0,0,0,0.6)',
+        backgroundColor: 'rgba(0,0,0,0.5)',
         boxSizing: 'border-box',
         fontFamily: 'Pet',
         fontSize: '1.2em'
