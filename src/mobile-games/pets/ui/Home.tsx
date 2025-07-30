@@ -40,6 +40,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const [textAndImage, setTextAndImage] = useState<PetTextAndImage>({ text: null, image: null });
     const [distanceAndBearing, setDistanceAndBearing] = useState<DistanceAndBearing | null>(null);
     const [location, setLocation] = useState<Location | null>(null);
+    const [seenInteractions, setSeenInteractions] = useState(new Set<string>);
     const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
 
     const selectedPet = pets[selectedTab];
@@ -84,6 +85,8 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             setTextAndImage(dataManager.getTextAndImage(updatedPetStates[selectedTab]));
         });
 
+        database.getSeenInteractions().then(savedSeenInteractions => setSeenInteractions(savedSeenInteractions));
+
         locationService.current.watchLocation();
         locationService.current.setLocationListener(updatedLocation => setLocation(updatedLocation));
 
@@ -100,6 +103,8 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
 
     const onInteractionSelected = (type: keyof Interactions, interaction: Interaction) => {
         const interactionTextAndImage = dataManager.handleInteraction(type, interaction, selectedPet);
+        database.addSeenInteraction(interaction.id);
+        seenInteractions.add(interaction.id);
         setTextAndImage(interactionTextAndImage);
     };
 
@@ -117,6 +122,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             interactionsEnabled={dataManager.areInteractionsEnabled(selectedPet)}
             isDiscovered={isDiscovered}
             distance={distanceAndBearing?.distance ?? null}
+            seenInteractions={seenInteractions}
             interactionSelected={onInteractionSelected}
         />}
 

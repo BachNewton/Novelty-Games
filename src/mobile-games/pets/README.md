@@ -5,7 +5,7 @@
 #### Things that should get done before the game is released.
 
 - [ ] Get pet content from pet owners and add it to game
-- [ ] Indicate which interactions have been used and seen by the player already
+- [X] Indicate which interactions have been used and seen by the player already
 - [ ] Add an overview that shows:
     - Pets discoverd out of total
     - Interations seen out of total

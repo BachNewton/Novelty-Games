@@ -7,6 +7,7 @@ export type ExampleTables = {
 
 export type PetsTables = {
     pets: PetSave;
+    interations: { id: string }
 };
 
 export type DatabaseSchemas = {
