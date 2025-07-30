@@ -1,6 +1,6 @@
 import { Location } from "../../../util/geolocation/LocationService";
-import { baxterDialog, Dialogue, ellaDialog, frogDialog, ziggyDialog } from "./Dialogue";
-import { baxterInteractions, ellaInteractions, frogInteractions, Interactions, ziggyInteractions } from "./Interaction";
+import { baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, ziggyDialog } from "./Dialogue";
+import { baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, Interactions, ziggyInteractions } from "./Interaction";
 import { jätkäsaariPark, lapinlahdenLähde, lauttasaariBeach, oodi, seurasaari } from "./Locations";
 import { defaultImages, frogImages, PetImages, ziggyImages } from "./PetImages";
 
@@ -50,8 +50,8 @@ export const PET_DATA: PetData[] = [
         id: 'I6R0-BROC-DVMX-9GKQ',
         name: 'Dory',
         location: seurasaari,
-        dialogue: ellaDialog,
-        interactions: ellaInteractions,
+        dialogue: doryDialog,
+        interactions: doryInteractions,
         images: defaultImages
     },
     // {
