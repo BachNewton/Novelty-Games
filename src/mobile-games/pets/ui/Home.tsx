@@ -5,7 +5,6 @@ import Scaffold from "../../../util/ui/Scaffold";
 import Button from "../../../util/ui/Button";
 import TextReveal from "./TextReveal";
 import { PetsDatabase } from "../logic/PetsDatabase";
-import { Pet } from "../data/Pet";
 import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
 import Footer from "./Footer";
@@ -18,6 +17,8 @@ import { createCompass } from "../../../util/geolocation/Compass";
 import { createDataManager, PetTextAndImage } from "../logic/DataManager";
 import Tabs from "./Tabs";
 import FriendshipBar from "./FriendshipBar";
+
+const SHOW_DEBUG_MENU_BUTTON = true;
 
 export const COLORS = {
     primary: ' #FF2D95',
@@ -40,7 +41,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const [textAndImage, setTextAndImage] = useState<PetTextAndImage>({ text: null, image: null });
     const [distanceAndBearing, setDistanceAndBearing] = useState<DistanceAndBearing | null>(null);
     const [location, setLocation] = useState<Location | null>(null);
-    const [seenInteractions, setSeenInteractions] = useState(new Set<string>);
+    const [seenInteractions, setSeenInteractions] = useState(new Set<string>());
     const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
 
     const selectedPet = pets[selectedTab];
@@ -137,9 +138,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)`
         }}>
             {imageUi(isDiscovered, textAndImage.image, dataManager.calculateArrowRotation(heading, distanceAndBearing))}
-            <div style={{ position: 'absolute', top: '60px', right: '5px' }}>
-                <Button fontScale={0.8} onClick={() => setIsDebugMenuOpen(true)}>Debug</Button>
-            </div>
+            {debugMenuButtonUi(() => setIsDebugMenuOpen(true))}
             <FriendshipBar isDiscovered={isDiscovered} level={selectedPet.friendship} animationKey={selectedTab} />
             {textBubbleUi(textAndImage.text)}
         </div>
@@ -158,6 +157,14 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         />
     </Scaffold>;
 };
+
+function debugMenuButtonUi(onDebugMenuButtonClicked: () => void): JSX.Element {
+    if (!SHOW_DEBUG_MENU_BUTTON) return <></>;
+
+    return <div style={{ position: 'absolute', top: '60px', right: '5px' }}>
+        <Button fontScale={0.8} onClick={onDebugMenuButtonClicked}>Debug</Button>
+    </div>;
+}
 
 function imageUi(
     isDiscovered: boolean,

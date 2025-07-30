@@ -66,7 +66,9 @@ function getMenu(
         case Menu.CHAT:
             return chatMenuUi(selectedTab, interactionsEnabled, seenInteractions, (type, interaction) => {
                 interactionSelected(type, interaction);
-                resetMenu();
+
+                // We have the option to reset the menu, but for now staying on the disabled chat menu is fine.
+                // resetMenu();
             });
     }
 }
@@ -126,7 +128,7 @@ function chatMenuUi(
 }
 
 function areAllChatInteractionsSeen(chat: Map<string, Interaction>, seenInteractions: Set<string>): boolean {
-    for (const [_, { id }] of chat) {
+    for (const [, { id }] of chat) {
         if (!seenInteractions.has(id)) return false;
     }
 
