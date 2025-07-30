@@ -6,10 +6,6 @@
 
 - [ ] Get pet content from pet owners and add it to game
 - [X] Indicate which interactions have been used and seen by the player already
-- [ ] Add an overview that shows:
-    - Pets discoverd out of total
-    - Interations seen out of total
-    - Friendship level of each pet
 - [X] Indicate the friendship level of the currently selected pet
 - [X] Indicate that the friendship level is increasing after an interaction is selected
 - [ ] _(optional)_ Different interactions add different amounts of friendship to the pet
@@ -17,6 +13,10 @@
 - [ ] _(optional)_ Indicate to the player that only one interaction is permitted per wake cycle
 - [X] _(optional)_ Add a "welcome to the game" pop-up that explains the game and is only shown the first time the game is launched
 - [ ] _(optional)_ Indicate to the player how much longer a pet might be awake or sleeping for
+- [ ] _(optional)_ Add an overview page that shows:
+    - Pets discoverd out of total
+    - Interations seen out of total
+    - Friendship level of each pet
 
 ## Content Ideas
 
@@ -24,6 +24,7 @@
 - Pets know about each other and can talk about each other. You can learn about a different pet from the pet you're talking to. Something like a dating game.
 - Pets have their own color pallet / theme, or maybe a favorite color, and the UI uses those colors when that pet is selected.
 - Pet owners to provide an audio clip of their pet meowing / barking so that clip can be played in game.
+- Pets have birthdays and can celebrate with the player on their birthday.
 - Sleep / wake cycle can be improved so the player doesn't have to see a pet sleeping before they will wake up again. Maybe if a player has been away long enough, when they come back the sleep state can be skipped?
 
 ## Bugs / Improvements
