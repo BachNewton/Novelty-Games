@@ -28,28 +28,37 @@ const Tabs: React.FC<TabsProps> = ({ pets, selectedTab, onTabSelected }) => {
 };
 
 function getTabBorderStyle(selectedTab: number, tabIndex: number): React.CSSProperties {
-    const border = '2px solid white';
+    const borderRadius = '15px';
+    const lightWidth = '2px';
+    const strongWidth = '4px';
+    const borderLight = `${lightWidth} solid white`;
+    const borderStrong = `${strongWidth} solid ${COLORS.secondary}`;
 
     if (tabIndex === selectedTab) {
         return {
-            borderTop: border,
+            borderTop: `${lightWidth} solid ${COLORS.secondary}`,
             background: `linear-gradient(0deg, ${COLORS.surface}, ${COLORS.primary})`
         };
-    } else if (tabIndex === selectedTab - 1) {
+    } else if (tabIndex === (selectedTab - 1)) {
         return {
-            border: border,
-            borderBottomRightRadius: '15px',
+            border: borderLight,
+            borderBottom: borderStrong,
+            borderRight: borderStrong,
+            borderBottomRightRadius: borderRadius,
             backgroundClip: 'border-box'
         };
-    } else if (tabIndex === selectedTab + 1) {
+    } else if (tabIndex === (selectedTab + 1)) {
         return {
-            border: border,
-            borderBottomLeftRadius: '15px'
+            border: borderLight,
+            borderBottom: borderStrong,
+            borderLeft: borderStrong,
+            borderBottomLeftRadius: borderRadius
         };
     }
 
     return {
-        border: border
+        border: borderLight,
+        borderBottom: borderStrong
     };
 }
 
