@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { COLORS } from "./Home";
 
 const MAX_HEARTS = 5;
@@ -43,19 +43,20 @@ const FriendshipBar: React.FC<FriendshipBarProps> = ({ isDiscovered, level, anim
         }
     }, [animationKey, level]);
 
-    if (!isDiscovered) return <></>;
-
     const heartStyle: React.CSSProperties = {
         flexGrow: 1,
         textAlign: 'center',
         padding: PADDING
     };
 
-    const hearts = Array.from({ length: MAX_HEARTS }).map((_, index) => {
-        const heart = index < level ? '🩷' : '🤍';
+    const hearts = useMemo(() => {
+        return Array.from({ length: MAX_HEARTS }).map((_, index) => {
+            const heart = index < level ? '🩷' : '🤍';
+            return <div key={index} style={heartStyle}>{heart}</div>;
+        });
+    }, [level]);
 
-        return <div key={index} style={heartStyle}>{heart}</div>;
-    });
+    if (!isDiscovered) return <></>;
 
     return <div style={{
         position: 'absolute',
