@@ -19,12 +19,12 @@ export const frogDialog: Dialogue = {
 };
 
 export const ziggyDialog: Dialogue = {
-    hidden: "Ziggy hidden",
+    hidden: "I love how many dogs there are here! But where is my person? I like it best with my person. Come find me please!",
     greeting: {
-        lowFriendship: "Ziggy low friendship",
-        highFriendship: "Ziggy high friendship"
+        lowFriendship: "Hello! My name is Ziggy. I'm a little shy, and people are scary sometimes. I'll like you best if you let me sneak up and sniff you without you looking. But once I know you, I'll remember you for a really, really long time!",
+        highFriendship: "I'm so excited! You're here! You're great! I have to go find a toy to chew about how excited I am! Will throw my toy for me? Please? Again?"
     },
-    sleeping: "Ziggy sleeping"
+    sleeping: "I'm sooooo tired. I had a really busy day of going outside, and then back inside, and sleeping, and playing, and sleeping again. You can hang out, but I'm too tired. So I'm going to lie on my back like a dead bug and snore now. "
 };
 
 export const baxterDialog: Dialogue = {

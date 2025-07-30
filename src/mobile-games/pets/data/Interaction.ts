@@ -50,25 +50,37 @@ export const frogInteractions: Interactions = {
 
 export const ziggyInteractions: Interactions = {
     space: {
-        id: '-1',
-        text: 'Ziggy space'
+        id: 'H7RY-O6E7-WIVN-E82M',
+        text: "Space is better when I don't know you very well. I like to get to know new people at my own pace! But I really like to be close to my friends."
     },
     pet: {
-        id: '-1',
-        text: 'Ziggy pet'
+        id: '3RS1-USG8-SW17-MP03',
+        text: "Are you my friend? You will be as soon as I figure out that you do neck scritches! Those are my favorite—just under my chin. Yep, just like that. I like belly scritches too. I'll let you know that's what I want by rolling over on my side and looking hopefully at you. "
     },
     treat: {
-        id: '-1',
-        text: 'Ziggy treat'
+        id: 'TFJG-2KL6-ON5D-5LMV',
+        text: "Hmm…thanks, but most treats don't do it for me. And I'm not that interested in most food. Besides, I'm not allowed to eat human food, and I'm allergic to chicken. So most dog treats make my tummy feel bad. I might sniff it a little though."
     },
     play: {
-        id: '-1',
-        text: 'Ziggy play'
+        id: 'GHLF-4MFR-VW2I-QRRX',
+        text: "Playing is great! My favorite game is Hide And Go Fish. I'll tell you how to play it. First, you tell me to stay somewhere (I don't like that part but I'll do it because the next part is fun). Then you go hide my toy fish somewhere in the house. I'll listen to where you're walking, but that makes it too easy. So you should walk into more than one room. Then you come back and tell me to go get it!"
     },
     chat: new Map([
-        ['Chat 1', {
-            id: '-1',
-            text: 'Ziggy chat'
+        ['My person', {
+            id: 'DFW8-BWHW-9OKR-I8ZH',
+            text: "My person is Felix. I was trained to be their service dog, so I'm really attached to them. I feel really sad and anxious when they're gone. But when they're around, I feel really happy! I like to follow them from room to room. And sometimes we go on adventures together!"
+        }],
+        ['Children', {
+            id: '91GX-CQ46-ALZT-22KJ',
+            text: "Oh no! You mean the little humans? They're so scary! They make loud noises and they run at me when I'm not expecting it. I get really nervous when they're close to me. But it's not my fault. I was a puppy at the beginning of Covid, so I didn't get used to being around kids."
+        }],
+        ['Cats', {
+            id: 'HXCS-3PXB-JGJZ-363C',
+            text: "The thing I like most, after my person and other dogs, is cats! I want to be every cat's friend. But they never want to be my friend. It's confusing and sad. But I'll keep trying to make them like me!"
+        }],
+        ['Job', {
+            id: 'X0NH-0FVU-92NP-TSBE',
+            text: "I used to be a service dog, and I was really serious about my job! I listened really well, and got to go all kinds of places that dogs can't usually go. I even got to ride in the cabin of an airplane across the Atlantic Ocean! I was really quiet and perfectly behaved the whole time. But being retired is nice too."
         }]
     ])
 };

@@ -1,7 +1,7 @@
 import { Location } from "../../../util/geolocation/LocationService";
 import { baxterDialog, Dialogue, ellaDialog, frogDialog, ziggyDialog } from "./Dialogue";
 import { baxterInteractions, ellaInteractions, frogInteractions, Interactions, ziggyInteractions } from "./Interaction";
-import { lapinlahdenLähde, lauttasaariBeach, oodi, seurasaari, supercellOffice } from "./Locations";
+import { jätkäsaariPark, lapinlahdenLähde, lauttasaariBeach, oodi, seurasaari } from "./Locations";
 import { defaultImages, frogImages, PetImages } from "./PetImages";
 
 export interface PetData {
@@ -25,7 +25,7 @@ export const PET_DATA: PetData[] = [
     {
         id: 'GM9G-3VS8-ICFQ-XMSI',
         name: 'Ziggy',
-        location: supercellOffice,
+        location: jätkäsaariPark,
         dialogue: ziggyDialog,
         interactions: ziggyInteractions,
         images: defaultImages

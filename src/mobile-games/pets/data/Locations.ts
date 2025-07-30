@@ -5,6 +5,11 @@ export const lauttasaariBeach: Location = {
     lon: 24.871984
 };
 
+export const jätkäsaariPark: Location = {
+    lat: 60.157269,
+    lon: 24.917717
+};
+
 export const supercellOffice: Location = {
     lat: 60.161052,
     lon: 24.921724
