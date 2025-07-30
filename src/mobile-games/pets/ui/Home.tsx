@@ -123,9 +123,10 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)`
         }}>
             {imageUi(isDiscovered, textAndImage.image, dataManager.calculateArrowRotation(heading, distanceAndBearing))}
-            <div style={{ position: 'absolute', top: '2px', right: '2px' }}>
+            <div style={{ position: 'absolute', top: '60px', right: '5px' }}>
                 <Button fontScale={0.8} onClick={() => setIsDebugMenuOpen(true)}>Debug</Button>
             </div>
+            {friendshipLevelUi(isDiscovered, selectedPet.friendship)}
             {textBubbleUi(textAndImage.text)}
         </div>
 
@@ -176,6 +177,49 @@ function arrowUi(rotation: number): JSX.Element {
         }} />
         <img src={PawIcon} alt='' style={{ position: 'absolute', maxWidth: '20%', maxHeight: '20%' }} />
     </>;
+}
+
+function friendshipLevelUi(isDiscovered: boolean, level: number): JSX.Element {
+    if (!isDiscovered) return <></>;
+
+    const MAX_HEARTS = 5;
+    const borderRadius = '20px';
+
+    const hearts = Array.from({ length: MAX_HEARTS }).map((_, index) => {
+        const backgroundColor = index < level ? COLORS.secondary : COLORS.surface;
+        const heart = index < level ? '🩷' : '🤍';
+
+        const heartStyle: React.CSSProperties = {
+            backgroundColor: backgroundColor,
+            flexGrow: 1,
+            textAlign: 'center',
+            padding: '2px'
+        };
+
+        if (index === 0) {
+            heartStyle.borderTopLeftRadius = borderRadius;
+            heartStyle.borderBottomLeftRadius = borderRadius;
+        }
+
+        if (index === (level - 1) || index === (MAX_HEARTS - 1)) {
+            heartStyle.borderTopRightRadius = borderRadius;
+            heartStyle.borderBottomRightRadius = borderRadius;
+        }
+
+        return <div key={index} style={heartStyle}>{heart}</div>;
+    });
+
+    return <div style={{
+        display: 'flex',
+        position: 'absolute',
+        top: '15px',
+        width: '80%',
+        border: `2px solid ${COLORS.primary}`,
+        borderRadius: borderRadius,
+        backgroundColor: COLORS.surface
+    }}>
+        {hearts}
+    </div>;
 }
 
 function textBubbleUi(text: string | null): JSX.Element {
