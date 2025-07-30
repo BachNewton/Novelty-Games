@@ -24,8 +24,10 @@
 - Pets know about each other and can talk about each other. You can learn about a different pet from the pet you're talking to. Something like a dating game.
 - Pets have their own color pallet / theme, or maybe a favorite color, and the UI uses those colors when that pet is selected.
 - Pet owners to provide an audio clip of their pet meowing / barking so that clip can be played in game.
+- Sleep / wake cycle can be improved so the player doesn't have to see a pet sleeping before they will wake up again. Maybe if a player has been away long enough, when they come back the sleep state can be skipped?
 
 ## Bugs / Improvements
 
 - GPS access isn't requested until a pet that is undiscovered is selected
 - Cloud save - so that the game can be played on multiple devices
+- Clicking on the pet image hide the text bubble so the full image can be appreciated
