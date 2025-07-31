@@ -185,27 +185,72 @@ export const albyInteractions: Interactions = {
     ])
 };
 
+export const lenoreInteractions: Interactions = {
+    space: {
+        id: '042R-40ME-E61P-P0AL',
+        text: "You have not been dismissed. I will inform you when you are allowed to go. Oh, now you're staying? Yeah, you can go."
+    },
+    pet: {
+        id: 'RMWS-76KP-3ZRV-P5E0',
+        text: "I enjoy scritches on my neck and under my chin, but let me take the lead. I'll move around your hand so you're in the right spot. If you really hit it I might even kick my foot a little."
+    },
+    treat: {
+        id: 'Z1MH-0CEU-IWEC-NDJ2',
+        text: "HIGH-FIVE"
+    },
+    play: {
+        id: 'HZUN-V0WU-KPCK-TPQC',
+        text: "Pounce! Claw!! Attack!!! Yes good, now you keep going for 20 minutes while I lay under this chair and just watch. That's the stuff."
+    },
+    chat: new Map([
+        ['New Digs', {
+            id: 'IRZP-0FMB-AQHL-0J49',
+            text: "I like my new apartment okay. I watch birds and squirrels eat on the patio. The best part is NO Ziggies allowed 😻"
+        }],
+        ['My Human', {
+            id: 'V6G5-T00L-TJ98-PWWY',
+            text: "My person doesn't understand that her sole purpose is to be warm and rub my belly. We've been doing this for over a decade. Why is she so hard to educate!! 😾"
+        }],
+        ['Reminisce', {
+            id: '5Y6Q-XIGT-TZEV-GKL6',
+            text: "When I first met my person we lived in a big house and I was queen of my neighborhood. I'd fight anyone who looked at me wrong and end up at the vet. Sometimes I would disappear to the elementary school across the street much to my human's distress. I miss having a yard 😿"
+        }],
+        ['Gotcha', {
+            id: 'LJEF-RTVW-QPEI-2IYS',
+            text: "I saw you move your hand!! I have run across the room to high-five you!! You now owe me treats. It is a blood contract that you have no way out of 😼"
+        }],
+        ['Scream', {
+            id: '2NQN-O3AA-VNOT-Y0N5',
+            text: "MEOW- What do I want? MEOW- Haha, I'll never tell!! But you better figure it out if you want to sleep tonight MEEEeeEeooOOoowwwww 😹"
+        }],
+        ['Request Paw', {
+            id: 'OS74-VFIZ-7N28-IWI5',
+            text: "If you are truly blessed I may bounce my request paw at you and allow you to rub my belly. No one has ever dared to ignore the request paw. Will you be the first? 🙀"
+        }]
+    ])
+};
+
 export const templateInteractions: Interactions = {
     space: {
         id: 'XXXXX',
-        text: ""
+        text: "XXXXX"
     },
     pet: {
         id: 'XXXXX',
-        text: ""
+        text: "XXXXX"
     },
     treat: {
         id: 'XXXXX',
-        text: ""
+        text: "XXXXX"
     },
     play: {
         id: 'XXXXX',
-        text: ""
+        text: "XXXXX"
     },
     chat: new Map([
         ['XXXXX', {
             id: 'XXXXX',
-            text: ""
+            text: "XXXXX"
         }]
     ])
 };

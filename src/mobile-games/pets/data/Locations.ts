@@ -30,6 +30,11 @@ export const seurasaari: Location = {
     lon: 24.884611
 };
 
+export const lionStatueHelsinki: Location = {
+    lat: 60.201337,
+    lon: 24.966610
+};
+
 export const fortWaynePlayground: Location = {
     lat: 41.129258,
     lon: -85.114223

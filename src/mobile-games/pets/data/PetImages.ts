@@ -30,6 +30,14 @@ import alby_play from '../images/alby/play.jpeg';
 import alby_sleep from '../images/alby/sleep.jpeg';
 import alby_space from '../images/alby/space.jpeg';
 import alby_treat from '../images/alby/treat.jpeg';
+import lenore_chat from '../images/lenore/chat.jpg';
+import lenore_greet_high_friendship from '../images/lenore/greet_high_friendship.jpg';
+import lenore_greet_low_friendship from '../images/lenore/greet_low_friendship.jpg';
+import lenore_pet from '../images/lenore/pet.jpg';
+import lenore_play from '../images/lenore/play.jpg';
+import lenore_sleep from '../images/lenore/sleep.jpg';
+import lenore_space from '../images/lenore/space.jpg';
+import lenore_treat from '../images/lenore/treat.jpg';
 
 export interface PetImages {
     chat: string;
@@ -84,4 +92,15 @@ export const albyImages: PetImages = {
     sleep: alby_sleep,
     space: alby_space,
     treat: alby_treat
+};
+
+export const lenoreImages: PetImages = {
+    chat: lenore_chat,
+    greetHighFriendShip: lenore_greet_high_friendship,
+    greetLowFriendship: lenore_greet_low_friendship,
+    pet: lenore_pet,
+    play: lenore_play,
+    sleep: lenore_sleep,
+    space: lenore_space,
+    treat: lenore_treat
 };

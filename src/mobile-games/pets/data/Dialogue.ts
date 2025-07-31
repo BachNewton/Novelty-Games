@@ -62,3 +62,21 @@ export const albyDialog: Dialogue = {
     },
     sleeping: "I'll ttyl im all played out!!!"
 };
+
+export const lenoreDialog: Dialogue = {
+    hidden: "Hmm, I don't know about Helsinki. But maybe you can find me \"lion\" around...",
+    greeting: {
+        lowFriendship: "I am Lenore. You can buy my attention with treats. My affection is not for sale, but if you're quiet and give high quality chin scritches I'll consider throwing a purr your way.",
+        highFriendship: "Hmm, yes, your lap is warm. Let's sit here for eternity. No, you don't need to pee or eat."
+    },
+    sleeping: "No thanks. Come back later. Wait, do you have treats?? No? Definitely come back later."
+};
+
+export const templateDialog: Dialogue = {
+    hidden: "XXXXX",
+    greeting: {
+        lowFriendship: "XXXXX",
+        highFriendship: "XXXXX"
+    },
+    sleeping: "XXXXX"
+};

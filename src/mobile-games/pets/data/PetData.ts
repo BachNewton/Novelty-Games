@@ -1,8 +1,8 @@
 import { Location } from "../../../util/geolocation/LocationService";
-import { albyDialog, baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, ziggyDialog } from "./Dialogue";
-import { albyInteractions, baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, Interactions, ziggyInteractions } from "./Interaction";
-import { helsinkiWinterGarden, jätkäsaariPark, lapinlahdenLähde, lauttasaariBeach, oodi, seurasaari } from "./Locations";
-import { albyImages, defaultImages, frogImages, PetImages, ziggyImages } from "./PetImages";
+import { albyDialog, baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, lenoreDialog, ziggyDialog } from "./Dialogue";
+import { albyInteractions, baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, Interactions, lenoreInteractions, ziggyInteractions } from "./Interaction";
+import { helsinkiWinterGarden, jätkäsaariPark, lapinlahdenLähde, lauttasaariBeach, lionStatueHelsinki, oodi, seurasaari } from "./Locations";
+import { albyImages, defaultImages, frogImages, lenoreImages, PetImages, ziggyImages } from "./PetImages";
 
 export interface PetData {
     id: string;
@@ -53,6 +53,14 @@ export const PET_DATA: PetData[] = [
         dialogue: doryDialog,
         interactions: doryInteractions,
         images: defaultImages
+    },
+    {
+        id: '6M06-7XC1-V1QZ-OAKF',
+        name: 'Lenore',
+        location: lionStatueHelsinki,
+        dialogue: lenoreDialog,
+        interactions: lenoreInteractions,
+        images: lenoreImages
     },
     {
         id: '20XX-5F0Z-M1BV-MQKE',
