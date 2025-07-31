@@ -1,8 +1,8 @@
 import { Location } from "../../../util/geolocation/LocationService";
-import { baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, ziggyDialog } from "./Dialogue";
-import { baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, Interactions, ziggyInteractions } from "./Interaction";
-import { jätkäsaariPark, lapinlahdenLähde, lauttasaariBeach, oodi, seurasaari } from "./Locations";
-import { defaultImages, frogImages, PetImages, ziggyImages } from "./PetImages";
+import { albyDialog, baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, ziggyDialog } from "./Dialogue";
+import { albyInteractions, baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, Interactions, ziggyInteractions } from "./Interaction";
+import { helsinkiWinterGarden, jätkäsaariPark, lapinlahdenLähde, lauttasaariBeach, oodi, seurasaari } from "./Locations";
+import { albyImages, defaultImages, frogImages, PetImages, ziggyImages } from "./PetImages";
 
 export interface PetData {
     id: string;
@@ -54,6 +54,14 @@ export const PET_DATA: PetData[] = [
         interactions: doryInteractions,
         images: defaultImages
     },
+    {
+        id: '20XX-5F0Z-M1BV-MQKE',
+        name: 'Alby',
+        location: helsinkiWinterGarden,
+        dialogue: albyDialog,
+        interactions: albyInteractions,
+        images: albyImages
+    },
     // {
     //     id: '7BUR-NBXS-YK4L-DQFF',
     //     name: 'Nissa',
@@ -94,7 +102,6 @@ export const PET_DATA: PetData[] = [
 
 // ----- Location Ideas -----
 // Cafe Regatta
-// Helsinki Winter Garden
 // Veijarivuoren ranta: 60.146393, 24.882560
 // Persilja Restaurant: 60.157827, 24.880785
 // Elliott's Office: 60.156316, 24.885009

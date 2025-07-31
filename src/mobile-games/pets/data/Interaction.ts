@@ -159,3 +159,53 @@ export const doryInteractions: Interactions = {
         }]
     ])
 };
+
+export const albyInteractions: Interactions = {
+    space: {
+        id: '5K6V-VI93-KI9N-N9JH',
+        text: "I'd rather not have space how about we go outside??"
+    },
+    pet: {
+        id: 'LCQL-7R69-BUP6-YPAC',
+        text: "Keep it comin'"
+    },
+    treat: {
+        id: 'TENO-BT21-7P8W-H3S6',
+        text: "That is pretty delicious I'd like 50 more"
+    },
+    play: {
+        id: 'SIK4-8YXT-ONH6-61T4',
+        text: "RAWRRRRRR I love to yell when I'm playing but I'm not actually scary lol"
+    },
+    chat: new Map([
+        ['Sister', {
+            id: 'RDL7-WK1O-YHCX-BMNV',
+            text: "My sister is pretty cranky. Is it because she's an old lady?"
+        }]
+    ])
+};
+
+export const templateInteractions: Interactions = {
+    space: {
+        id: 'XXXXX',
+        text: ""
+    },
+    pet: {
+        id: 'XXXXX',
+        text: ""
+    },
+    treat: {
+        id: 'XXXXX',
+        text: ""
+    },
+    play: {
+        id: 'XXXXX',
+        text: ""
+    },
+    chat: new Map([
+        ['XXXXX', {
+            id: 'XXXXX',
+            text: ""
+        }]
+    ])
+};

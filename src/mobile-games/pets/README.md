@@ -43,7 +43,7 @@
 - [ ] Anna (1 dog, 7 chickens)
 - [ ] Landon (1 robot)
 - [ ] Uncle Gary & Aunt Marta (1 dog)
-- [ ] Mallory & Chris ( ??? )
+- [X] Mallory & Chris ( 1 dog + ??? )
 - [ ] Steven & Ellie ( ??? )
 - [ ] Matt & Emily (1 cat)
 - [ ] Evelin (2 dogs)

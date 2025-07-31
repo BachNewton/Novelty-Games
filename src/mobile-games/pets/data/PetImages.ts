@@ -22,6 +22,14 @@ import ziggy_play from '../images/ziggy/play.jpeg';
 import ziggy_sleep from '../images/ziggy/sleep.jpeg';
 import ziggy_space from '../images/ziggy/space.jpeg';
 import ziggy_treat from '../images/ziggy/treat.jpeg';
+import alby_chat from '../images/alby/chat.jpeg';
+import alby_greet_high_friendship from '../images/alby/greet_high_friendship.jpeg';
+import alby_greet_low_friendship from '../images/alby/greet_low_friendship.jpeg';
+import alby_pet from '../images/alby/pet.jpeg';
+import alby_play from '../images/alby/play.jpeg';
+import alby_sleep from '../images/alby/sleep.jpeg';
+import alby_space from '../images/alby/space.jpeg';
+import alby_treat from '../images/alby/treat.jpeg';
 
 export interface PetImages {
     chat: string;
@@ -65,4 +73,15 @@ export const ziggyImages: PetImages = {
     sleep: ziggy_sleep,
     space: ziggy_space,
     treat: ziggy_treat
+};
+
+export const albyImages: PetImages = {
+    chat: alby_chat,
+    greetHighFriendShip: alby_greet_high_friendship,
+    greetLowFriendship: alby_greet_low_friendship,
+    pet: alby_pet,
+    play: alby_play,
+    sleep: alby_sleep,
+    space: alby_space,
+    treat: alby_treat
 };

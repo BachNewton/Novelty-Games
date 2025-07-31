@@ -44,3 +44,8 @@ export const fortWayneBasketball: Location = {
     lat: 41.131679,
     lon: -85.111868
 };
+
+export const helsinkiWinterGarden: Location = {
+    lat: 60.185980,
+    lon: 24.931804
+};

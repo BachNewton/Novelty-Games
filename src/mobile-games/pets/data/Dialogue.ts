@@ -53,3 +53,12 @@ export const doryDialog: Dialogue = {
     },
     sleeping: "Dory sleeping"
 };
+
+export const albyDialog: Dialogue = {
+    hidden: "I'm gonna start howling like Baltimore any minute now!",
+    greeting: {
+        lowFriendship: "Hi, I'm Alby aka Salami Bing-Bing. Can you play with me forever and if you stop I'll start screaming and crying? I love to play fetch!",
+        highFriendship: "Wow I need to sit down on top of your feet because we are best friends now."
+    },
+    sleeping: "I'll ttyl im all played out!!!"
+};
