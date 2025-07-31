@@ -72,6 +72,15 @@ export const lenoreDialog: Dialogue = {
     sleeping: "No thanks. Come back later. Wait, do you have treats?? No? Definitely come back later."
 };
 
+export const nissaDialog: Dialogue = {
+    hidden: "I love meeting new people who will give me treats and belly scratches, they don't seem to want me to keep jumping up on them, though. But how else will they know that I want the rest of their korvapuusti?",
+    greeting: {
+        lowFriendship: "Hi! Hello! Hi! Hi! Hi! Hi! My name is Nissa! Did you come to give me a scratch? Or a treat? OR BOTH?! Be careful though, if I get too excited I might jump up on you, or rollover onto my back and pee on myself. Which for some reason makes people want to pet my belly less… I don't get it.",
+        highFriendship: "Thanks for not getting too upset when I jumped up. Sometimes I just need some patience so I can calm down and enjoy some love and pets… now that we are friends, it's nice to just sit nearby and enjoy your company… and whatever food you leave unattended."
+    },
+    sleeping: "Sorry, can't move. Too comfy. My legs won't work until I hear my food dish filled."
+};
+
 export const templateDialog: Dialogue = {
     hidden: "XXXXX",
     greeting: {

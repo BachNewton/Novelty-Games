@@ -38,12 +38,17 @@
 - [X] ME (1 cat)
 - [ ] Nick (1 cat)
 - [X] Dice & Felix (1 dog)
+- [ ] Keri (2 cats)
 - [ ] Robert & Atria (2 cats)
 - [X] Hanna (1 cat)
 - [ ] Anna (1 dog, 7 chickens)
+    - [X] 1 dog
+    - [ ] 1 flock of chickens
 - [ ] Landon (1 robot)
 - [ ] Uncle Gary & Aunt Marta (1 dog)
-- [X] Mallory & Chris ( 1 dog + ??? )
+- [ ] Mallory & Chris ( 2 dogs )
+    - [X] 1 dog
+    - [ ] 1 dog
 - [ ] Steven & Ellie ( ??? )
 - [ ] Matt & Emily (1 cat)
 - [ ] Evelin (2 dogs)

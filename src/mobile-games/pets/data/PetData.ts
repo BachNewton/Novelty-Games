@@ -1,8 +1,8 @@
 import { Location } from "../../../util/geolocation/LocationService";
-import { albyDialog, baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, lenoreDialog, ziggyDialog } from "./Dialogue";
-import { albyInteractions, baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, Interactions, lenoreInteractions, ziggyInteractions } from "./Interaction";
-import { helsinkiWinterGarden, jätkäsaariPark, lapinlahdenLähde, lauttasaariBeach, lionStatueHelsinki, oodi, seurasaari } from "./Locations";
-import { albyImages, defaultImages, frogImages, lenoreImages, PetImages, ziggyImages } from "./PetImages";
+import { albyDialog, baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, lenoreDialog, nissaDialog, ziggyDialog } from "./Dialogue";
+import { albyInteractions, baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, Interactions, lenoreInteractions, nissaInteractions, ziggyInteractions } from "./Interaction";
+import { cafeRegatta, helsinkiWinterGarden, jätkäsaariPark, lapinlahdenLähde, lauttasaariBeach, lionStatueHelsinki, oodi, seurasaari } from "./Locations";
+import { albyImages, defaultImages, frogImages, lenoreImages, nissaImages, PetImages, ziggyImages } from "./PetImages";
 
 export interface PetData {
     id: string;
@@ -70,15 +70,14 @@ export const PET_DATA: PetData[] = [
         interactions: albyInteractions,
         images: albyImages
     },
-    // {
-    //     id: '7BUR-NBXS-YK4L-DQFF',
-    //     name: 'Nissa',
-    //     location: { // Pihlajasaari
-    //         lat: 60.140322,
-    //         lon: 24.916174
-    //     },
-    //     dialogue: getDefaultDialogue()
-    // },
+    {
+        id: 'BKS4-FAGG-ACBU-LZR1',
+        name: 'Nissa',
+        location: cafeRegatta,
+        dialogue: nissaDialog,
+        interactions: nissaInteractions,
+        images: nissaImages
+    },
     // {
     //     id: 'FAFK-YR7G-YJKE-QZTG',
     //     name: 'Charlemagne',
@@ -107,12 +106,5 @@ export const PET_DATA: PetData[] = [
     //     dialogue: getDefaultDialogue()
     // }
 ];
-
-// ----- Location Ideas -----
-// Cafe Regatta
-// Veijarivuoren ranta: 60.146393, 24.882560
-// Persilja Restaurant: 60.157827, 24.880785
-// Elliott's Office: 60.156316, 24.885009
-// HSK Docks: 60.152068, 24.891240
 
 export const PET_DATA_MAP = new Map(PET_DATA.map(pet => [pet.id, pet]));

@@ -54,3 +54,19 @@ export const helsinkiWinterGarden: Location = {
     lat: 60.185980,
     lon: 24.931804
 };
+
+export const cafeRegatta: Location = {
+    lat: 60.180073,
+    lon: 24.911833
+};
+
+export const pihlajasaari: Location = {
+    lat: 60.140322,
+    lon: 24.916174
+};
+
+// ----- Location Ideas -----
+// Veijarivuoren ranta: 60.146393, 24.882560
+// Persilja Restaurant: 60.157827, 24.880785
+// Elliott's Office: 60.156316, 24.885009
+// HSK Docks: 60.152068, 24.891240

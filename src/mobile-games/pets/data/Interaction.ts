@@ -230,6 +230,43 @@ export const lenoreInteractions: Interactions = {
     ])
 };
 
+export const nissaInteractions: Interactions = {
+    space: {
+        id: 'B7M6-02LU-2RL8-RTZM',
+        text: "Hey! Hey! Hey you! You're so far away. How are you going to give me pets? Oh well. Call me over when you have a snack, though, okay?!"
+    },
+    pet: {
+        id: 'NHFS-GOON-RQYX-34XQ',
+        text: "Oh my gosh! Oh my gosh! Oh my gosh! It's HAPPENING! I LOVE PETS!!!! I LOVE YOU!!!! ARE WE BEST FRIENDS NOW?! I THINK WE'RE BEST FRIENDS NOW!"
+    },
+    treat: {
+        id: 'AJN6-24YY-5N61-SI2H',
+        text: "A TREAT?! YOU DO LOVE ME! Let's be friends forever! Can I have another? And another? Cans I have all the nothers?"
+    },
+    play: {
+        id: '201Y-0CQH-0N34-VKHJ',
+        text: "Play? Whatcha doing with that toy? Can I eat it?! No? Then why would I want that?!"
+    },
+    chat: new Map([
+        ['Family', {
+            id: 'KGCE-GPD6-X7U3-OVG3',
+            text: "I have 5 people. I like the littlest one best. He gives me pets and some of his sandwiches. The medium sized ones are okay… they let me outside and fill my dishes sometimes. The biggest ones are the best at pets and belly rubs, I like to give them puppy wiggles sometimes still, because they knew me then. But now that we are all a bit older, it's nice to just lay beside them."
+        }],
+        ['Outside', {
+            id: '8Z2J-89G2-RJ7P-M3IZ',
+            text: "I love going for walks! But don't go too far, or you might have to drag me home."
+        }],
+        ['The car', {
+            id: '0F8O-PYDL-I5XY-WL2W',
+            text: "The car is my least favorite. But, I  tolerate it because it takes me to Nan and Pap's house. I can roam and be free and wild!!!! Until I need food… then I get to eat up all of my friend Roxy's kibble (unless I get caught)."
+        }],
+        ['Bed', {
+            id: 'UDB0-TXUF-BL28-DMYA',
+            text: "I love bed. Bed is great. Bed is perfect place. Especially if I get treats in bed!"
+        }]
+    ])
+};
+
 export const templateInteractions: Interactions = {
     space: {
         id: 'XXXXX',
