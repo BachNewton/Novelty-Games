@@ -1,20 +1,20 @@
 {
   "files": {
     "main.css": "/Novelty-Games/static/css/main.f193cccc.css",
-    "main.js": "/Novelty-Games/static/js/main.7631f79d.js",
+    "main.js": "/Novelty-Games/static/js/main.455a17d1.js",
     "static/js/453.68693753.chunk.js": "/Novelty-Games/static/js/453.68693753.chunk.js",
     "MusicIndex.js": "/Novelty-Games/static/js/MusicIndex.7371e6f9.chunk.js",
     "static/media/play.jpg": "/Novelty-Games/static/media/play.a2a36b11052e1df2e6c0.jpg",
+    "static/media/play.jpeg": "/Novelty-Games/static/media/play.6229748dd1adcfe458d5.jpeg",
     "static/media/sleep.jpg": "/Novelty-Games/static/media/sleep.71f566b84fa6e497c137.jpg",
     "static/media/treat.jpeg": "/Novelty-Games/static/media/treat.0114561d31fbc4cd15bf.jpeg",
     "static/media/chat.jpeg": "/Novelty-Games/static/media/chat.31b962d0150414276af8.jpeg",
     "static/media/greet_low_friendship.jpeg": "/Novelty-Games/static/media/greet_low_friendship.d9fb15201d06ecbd08fd.jpeg",
     "static/media/pet.jpg": "/Novelty-Games/static/media/pet.78a5be5fd739aa2dc035.jpg",
-    "static/media/space.jpeg": "/Novelty-Games/static/media/space.ca22c38e54536e088744.jpeg",
-    "static/media/treat.jpg": "/Novelty-Games/static/media/treat.0c9d26abcdd2972780c0.jpg",
-    "static/media/pet.jpeg": "/Novelty-Games/static/media/pet.10edaea6548d133f89bf.jpeg",
-    "static/media/play.jpeg": "/Novelty-Games/static/media/play.6229748dd1adcfe458d5.jpeg",
+    "static/media/space.jpeg": "/Novelty-Games/static/media/space.92073970d446c2c56ec8.jpeg",
     "static/media/sleep.jpeg": "/Novelty-Games/static/media/sleep.25794ee6645633ace393.jpeg",
+    "static/media/treat.jpg": "/Novelty-Games/static/media/treat.ea5a695953a2c1e06bac.jpg",
+    "static/media/pet.jpeg": "/Novelty-Games/static/media/pet.10edaea6548d133f89bf.jpeg",
     "static/media/space.jpg": "/Novelty-Games/static/media/space.049848bd1cb9f310b82f.jpg",
     "static/media/greet_high_friendship.jpg": "/Novelty-Games/static/media/greet_high_friendship.022c8a4f7a1977f8357f.jpg",
     "static/media/greet_high_friendship.jpeg": "/Novelty-Games/static/media/greet_high_friendship.941c3a5d2dc69acf07f6.jpeg",
@@ -87,12 +87,12 @@
     "static/media/MB-outline.svg": "/Novelty-Games/static/media/MB-outline.9375dcb67c2602a348842bb92635c97b.svg",
     "static/media/MB-back.svg": "/Novelty-Games/static/media/MB-back.73af888104565973b102803815b53578.svg",
     "main.f193cccc.css.map": "/Novelty-Games/static/css/main.f193cccc.css.map",
-    "main.7631f79d.js.map": "/Novelty-Games/static/js/main.7631f79d.js.map",
+    "main.455a17d1.js.map": "/Novelty-Games/static/js/main.455a17d1.js.map",
     "453.68693753.chunk.js.map": "/Novelty-Games/static/js/453.68693753.chunk.js.map",
     "MusicIndex.7371e6f9.chunk.js.map": "/Novelty-Games/static/js/MusicIndex.7371e6f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f193cccc.css",
-    "static/js/main.7631f79d.js"
+    "static/js/main.455a17d1.js"
   ]
 }
