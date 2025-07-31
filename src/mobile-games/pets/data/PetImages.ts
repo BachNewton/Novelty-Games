@@ -39,10 +39,7 @@ import lenore_sleep from '../images/lenore/sleep.jpg';
 import lenore_space from '../images/lenore/space.jpg';
 import lenore_treat from '../images/lenore/treat.jpg';
 import nissa_chat from '../images/nissa/chat.jpeg';
-
-// TODO: Awaiting image approval
-// import nissa_greet_high_friendship from '../images/nissa/greet_high_friendship.jpeg';
-
+import nissa_greet_high_friendship from '../images/nissa/greet_high_friendship.jpeg';
 import nissa_greet_low_friendship from '../images/nissa/greet_low_friendship.jpeg';
 import nissa_pet from '../images/nissa/pet.jpeg';
 import nissa_play from '../images/nissa/play.jpeg';
@@ -118,7 +115,7 @@ export const lenoreImages: PetImages = {
 
 export const nissaImages: PetImages = {
     chat: nissa_chat,
-    greetHighFriendShip: default_greet_high_friendship, // TODO: Awaiting approval
+    greetHighFriendShip: nissa_greet_high_friendship,
     greetLowFriendship: nissa_greet_low_friendship,
     pet: nissa_pet,
     play: nissa_play,
