@@ -39,7 +39,7 @@
 - [ ] Nick (1 cat)
 - [X] Dice & Felix (1 dog)
 - [ ] Robert & Atria (2 cats)
-- [ ] Hanna (1 cat)
+- [X] Hanna (1 cat)
 - [ ] Anna (1 dog, 7 chickens)
 - [ ] Landon (1 robot)
 - [ ] Uncle Gary & Aunt Marta (1 dog)
