@@ -37,21 +37,21 @@ export const baxterDialog: Dialogue = {
 };
 
 export const ellaDialog: Dialogue = {
-    hidden: "Ella hidden",
+    hidden: "This place looks strange, but there are lots of new people to get pets from! Don't you want to join them? Come find me!",
     greeting: {
-        lowFriendship: "Ella low friendship",
-        highFriendship: "Ella high friendship"
+        lowFriendship: "Hi, my name is Ella. I'm curious about you! I bet we'll be friends in no time.",
+        highFriendship: "It's so nice to sit three feet away from you. I like being around you, just close enough for you to pet me but not quite touching you. I might seem quiet, but if you put your finger on my throat, you'll feel my soft purr."
     },
-    sleeping: "Ella sleeping"
+    sleeping: "Not now. I need my beauty sleep."
 };
 
 export const doryDialog: Dialogue = {
-    hidden: "Dory hidden",
+    hidden: "Where am I?! This isn't home! None of my stuff is here. Come find me and take me back to my safe place.",
     greeting: {
-        lowFriendship: "Dory low friendship",
-        highFriendship: "Dory high friendship"
+        lowFriendship: "My name is Dorian, but everyone calls me Dory. Or asshole when I've done something naughty. I'm a little wary of you because I don't know you yet, but if you give me treats I'll quickly become your best friend.",
+        highFriendship: "I'm going to sit on you. That's not a request, it's an order. I have to be touching you at all times, or at least no farther away than 2 feet. I'll purr at you for hours, so loud you can hear it from across the room — if I let you get that far."
     },
-    sleeping: "Dory sleeping"
+    sleeping: "Hmph. Come back if you've got food."
 };
 
 export const albyDialog: Dialogue = {

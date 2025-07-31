@@ -87,24 +87,24 @@ export const ziggyInteractions: Interactions = {
 
 export const baxterInteractions: Interactions = {
     space: {
-        id: '-1',
+        id: 'XXXXX',
         text: 'Baxter space'
     },
     pet: {
-        id: '-1',
+        id: 'XXXXX',
         text: 'Baxter pet'
     },
     treat: {
-        id: '-1',
+        id: 'XXXXX',
         text: 'Baxter treat'
     },
     play: {
-        id: '-1',
+        id: 'XXXXX',
         text: 'Baxter play'
     },
     chat: new Map([
         ['Chat 1', {
-            id: '-1',
+            id: 'XXXXX',
             text: 'Baxter chat'
         }]
     ])
@@ -112,51 +112,59 @@ export const baxterInteractions: Interactions = {
 
 export const ellaInteractions: Interactions = {
     space: {
-        id: '-1',
-        text: 'Ella space'
+        id: 'HB55-HCI2-OBRY-FH8G',
+        text: "Why are you standing all the way over there? I need petting! Let me smell you, and then if I like you, I'll headbutt your hand."
     },
     pet: {
-        id: '-1',
-        text: 'Ella pet'
+        id: '9QKL-WFZR-1ZBM-5FY7',
+        text: "Chin scritches are my shit. Cheeks too. Oh yeah. I'll lean into your hand so hard that I'll fall over. Back's good and so is the top of the head, but if anyone except My Person pets my belly, they'll get a gentle chomp."
     },
     treat: {
-        id: '-1',
-        text: 'Ella treat'
+        id: '9S4V-6AIM-6TN8-8TLL',
+        text: "Hmm, maybe. Let me see what you've got. My idiot brother loves those dried fish things but I think they're atrocious. Temptations are the good stuff. I'll accept a churu of course, but I might not finish it. Wait, you have CHEESE? GIMME!"
     },
     play: {
-        id: '-1',
-        text: 'Ella play'
+        id: 'YJMS-WRZR-W095-Y22E',
+        text: "Anything shaped like a ball, I'm all over it! Foil balls especially. But best of all is trash. Bottle cap? Sign me up. Just make sure you get it out from under the couch. Repeatedly."
     },
     chat: new Map([
-        ['Chat 1', {
-            id: '-1',
-            text: 'Ella chat'
+        ['Owner', {
+            id: 'B6VK-GH9X-IOK9-25VT',
+            text: "My mommy got me for free from a rescue one day many years ago. I waited so long for her. Now she gives me everything I could ever want. Cuddles, treats, and lots of toys. She's not home as much as she used to be, but that just means I get her bed to myself more often."
+        }],
+        ['Silly', {
+            id: 'X171-QZD7-78KD-MI89',
+            text: "I love to ekekek when I see birds! Wood pigeons are my favorite. One day mommy will let me through that wretched window and I'll finally get to eat one."
         }]
     ])
 };
 
 export const doryInteractions: Interactions = {
     space: {
-        id: '-1',
-        text: 'Dory space'
+        id: 'F52L-2G8O-DNUO-Z5B2',
+        text: "You're a little sus. I might come up and smell your hand though. Oh, do you have treats? Put them on the floor and I'll think about getting closer."
     },
     pet: {
-        id: '-1',
-        text: 'Dory pet'
+        id: '2MWM-382R-UDJJ-DUK3',
+        text: "Pet me anywhere! The only rule is that you have to let me lick you until your skin is raw. Even my belly is not off limits, but I WILL clean you."
     },
     treat: {
-        id: '-1',
-        text: 'Dory treat'
+        id: 'EMPZ-N5PC-MSBP-ZB27',
+        text: "This is my favorite! And that one too! Do you have any others? I'll take anything. Fish, chicken, human food — I want it all!"
     },
     play: {
-        id: '-1',
-        text: 'Dory play'
+        id: '5VOZ-552Y-OILF-U1E4',
+        text: "Maybe I'll play with this. Maybe not. Even I don't know my own tastes. I like to roughhouse with my sister, but she's not always in the mood. When she's not, I like to attack big soft things that can't hiss back at me."
     },
     chat: new Map([
-        ['Chat 1', {
-            id: '-1',
-            text: 'Dory chat'
-        }]
+        ['Owner', {
+            id: '9KDZ-THZ1-LMEY-DDTE',
+            text: "I live with my mommy (and sister). She gives me everything I could ever want. Well… except letting me open doors. That really pisses her off for some reason. I love to cuddle with and lick her."
+        }],
+        ['Silly', {
+            id: 'QLIK-2TCT-LD2N-VMGL',
+            text: "Sometimes I just get a burst of energy, especially right after I take a shit. You haven't lived until you've dashed across the apartment at full speed after a dump."
+        }],
     ])
 };
 

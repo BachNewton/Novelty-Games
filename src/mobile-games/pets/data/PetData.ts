@@ -2,7 +2,7 @@ import { Location } from "../../../util/geolocation/LocationService";
 import { albyDialog, baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, lenoreDialog, nissaDialog, ziggyDialog } from "./Dialogue";
 import { albyInteractions, baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, Interactions, lenoreInteractions, nissaInteractions, ziggyInteractions } from "./Interaction";
 import { cafeRegatta, helsinkiWinterGarden, jätkäsaariPark, lapinlahdenLähde, lauttasaariBeach, lionStatueHelsinki, oodi, seurasaari } from "./Locations";
-import { albyImages, defaultImages, frogImages, lenoreImages, nissaImages, PetImages, ziggyImages } from "./PetImages";
+import { albyImages, defaultImages, doryImages, ellaImages, frogImages, lenoreImages, nissaImages, PetImages, ziggyImages } from "./PetImages";
 
 export interface PetData {
     id: string;
@@ -39,20 +39,20 @@ export const PET_DATA: PetData[] = [
         images: defaultImages
     },
     {
-        id: '0YHF-2UNI-RY2H-U59U',
+        id: '67R2-XJ9A-S3GL-SKYN',
         name: 'Ella',
         location: lapinlahdenLähde,
         dialogue: ellaDialog,
         interactions: ellaInteractions,
-        images: defaultImages
+        images: ellaImages
     },
     {
-        id: 'I6R0-BROC-DVMX-9GKQ',
+        id: 'O65A-EIAT-P85Q-9AP4',
         name: 'Dory',
         location: seurasaari,
         dialogue: doryDialog,
         interactions: doryInteractions,
-        images: defaultImages
+        images: doryImages
     },
     {
         id: '6M06-7XC1-V1QZ-OAKF',

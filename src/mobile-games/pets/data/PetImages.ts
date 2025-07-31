@@ -22,6 +22,22 @@ import ziggy_play from '../images/ziggy/play.jpeg';
 import ziggy_sleep from '../images/ziggy/sleep.jpeg';
 import ziggy_space from '../images/ziggy/space.jpeg';
 import ziggy_treat from '../images/ziggy/treat.jpeg';
+import ella_chat from '../images/ella/chat.jpeg';
+import ella_greet_high_friendship from '../images/ella/greet_high_friendship.jpeg';
+import ella_greet_low_friendship from '../images/ella/greet_low_friendship.jpeg';
+import ella_pet from '../images/ella/pet.jpeg';
+import ella_play from '../images/ella/play.jpeg';
+import ella_sleep from '../images/ella/sleep.jpeg';
+import ella_space from '../images/ella/space.jpeg';
+import ella_treat from '../images/ella/treat.jpeg';
+import dory_chat from '../images/dory/chat.jpeg';
+import dory_greet_high_friendship from '../images/dory/greet_high_friendship.jpeg';
+import dory_greet_low_friendship from '../images/dory/greet_low_friendship.jpeg';
+import dory_pet from '../images/dory/pet.jpeg';
+import dory_play from '../images/dory/play.jpeg';
+import dory_sleep from '../images/dory/sleep.jpeg';
+import dory_space from '../images/dory/space.jpeg';
+import dory_treat from '../images/dory/treat.jpeg';
 import alby_chat from '../images/alby/chat.jpeg';
 import alby_greet_high_friendship from '../images/alby/greet_high_friendship.jpeg';
 import alby_greet_low_friendship from '../images/alby/greet_low_friendship.jpeg';
@@ -89,6 +105,28 @@ export const ziggyImages: PetImages = {
     sleep: ziggy_sleep,
     space: ziggy_space,
     treat: ziggy_treat
+};
+
+export const ellaImages: PetImages = {
+    chat: ella_chat,
+    greetHighFriendShip: ella_greet_high_friendship,
+    greetLowFriendship: ella_greet_low_friendship,
+    pet: ella_pet,
+    play: ella_play,
+    sleep: ella_sleep,
+    space: ella_space,
+    treat: ella_treat
+};
+
+export const doryImages: PetImages = {
+    chat: dory_chat,
+    greetHighFriendShip: dory_greet_high_friendship,
+    greetLowFriendship: dory_greet_low_friendship,
+    pet: dory_pet,
+    play: dory_play,
+    sleep: dory_sleep,
+    space: dory_space,
+    treat: dory_treat
 };
 
 export const albyImages: PetImages = {
