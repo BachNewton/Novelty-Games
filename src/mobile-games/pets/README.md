@@ -51,4 +51,4 @@
     - [ ] 1 dog
 - [ ] Steven & Ellie ( ??? )
 - [ ] Matt & Emily (1 cat)
-- [ ] Evelin (2 dogs)
+- [X] Evelin (2 dogs)
