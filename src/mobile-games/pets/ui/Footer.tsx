@@ -54,7 +54,7 @@ const Footer: React.FC<FooterProps> = ({
         setShowComeBackLaterMessage(hasReachedInteractionThreshold);
     }, [selectedTab]);
 
-    const footerContent = distance === null || isDiscovered
+    const footerContent = isDiscovered
         ? showComeBackLaterMessage
             ? comeBackLaterUi()
             : getMenu(
@@ -96,14 +96,15 @@ function comeBackLaterUi(): JSX.Element {
     </div>;
 }
 
-function distanceUi(distance: number): JSX.Element {
+function distanceUi(distance: number | null): JSX.Element {
     return <>
         <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: '1.5em' }}>Distance</div>
         <div style={{ gridArea: 'span 2 / span 2', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', fontSize: '2.25em' }}>{formatDistance(distance)}</div>
     </>;
 }
 
-function formatDistance(distance: number): string {
+function formatDistance(distance: number | null): string {
+    if (distance === null) return '???';
     if (distance < 1) return (distance * 1000).toFixed(0) + ' m';
     return distance.toFixed(3) + ' km';
 }

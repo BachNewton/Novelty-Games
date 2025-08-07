@@ -1,4 +1,3 @@
-import { DistanceAndBearing } from "../../../util/geolocation/Navigator";
 import { createID } from "../../../util/ID";
 import Button from "../../../util/ui/Button";
 import Dialog from "../../../util/ui/Dialog";
@@ -13,12 +12,9 @@ interface DebugMenuProps {
     setHighFriendship: () => void;
     petsDebugger: PetsDebugger;
     selectedPet: Pet;
-    heading: number | null;
-    distanceAndBearing: DistanceAndBearing | null;
-    arrowRotation: number | null;
 }
 
-const DebugMenu: React.FC<DebugMenuProps> = ({ isOpen, onClose, discoverPet, forceNextCycle, setHighFriendship, petsDebugger, selectedPet, heading, distanceAndBearing, arrowRotation }) => {
+const DebugMenu: React.FC<DebugMenuProps> = ({ isOpen, onClose, discoverPet, forceNextCycle, setHighFriendship, petsDebugger, selectedPet }) => {
     const randomId = createID();
 
     const copyRandomIdToClipboard = () => { navigator.clipboard.writeText(randomId) };
@@ -30,9 +26,6 @@ const DebugMenu: React.FC<DebugMenuProps> = ({ isOpen, onClose, discoverPet, for
             <div style={{ margin: '10px' }} />
 
             <div>Pet Name: <span style={{ fontFamily: 'monospace' }}>{selectedPet.name}</span></div>
-            <div>Compass Heading: <span style={{ fontFamily: 'monospace' }}>{heading?.toFixed(1)}°</span></div>
-            <div>Bearing to Pet: <span style={{ fontFamily: 'monospace' }}>{distanceAndBearing?.bearing.toFixed(1)}°</span></div>
-            <div>Arrow Rotation: <span style={{ fontFamily: 'monospace' }}>{arrowRotation?.toFixed(1)}°</span></div>
             <Button onClick={discoverPet}>discoverPet</Button>
             <Button onClick={async () => {
                 await petsDebugger.setHighFriendship(selectedPet);

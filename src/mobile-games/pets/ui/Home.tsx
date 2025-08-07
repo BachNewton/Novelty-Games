@@ -8,17 +8,14 @@ import { PetsDatabase } from "../logic/PetsDatabase";
 import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
 import Footer from "./Footer";
-import { createLocationService, Location } from "../../../util/geolocation/LocationService";
-import { createNavigator, DistanceAndBearing } from "../../../util/geolocation/Navigator";
-import PawIcon from "../icons/paw.svg";
-import ArrowIcon from "../icons/arrow.png";
+import { createNavigator } from "../../../util/geolocation/Navigator";
 import { Interactions, Interaction } from "../data/Interaction";
-import { createCompass } from "../../../util/geolocation/Compass";
 import { createDataManager, PetTextAndImage } from "../logic/DataManager";
 import Tabs from "./Tabs";
 import FriendshipBar from "./FriendshipBar";
 import Welcome from "./Welcome";
 import { State } from "../data/PetSave";
+import Discover from "./Discover";
 
 const SHOW_DEBUG_MENU_BUTTON = true;
 
@@ -34,17 +31,13 @@ interface HomeProps {
 }
 
 const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
-    const locationService = useRef(createLocationService());
     const [hasLoaded, setHasLoaded] = useState(false);
     const [showWelcome, setShowWelcome] = useState(false);
-    const [heading, setHeading] = useState<number | null>(null);
-    const compass = useRef(createCompass(updatedHeading => setHeading(updatedHeading)));
     const dataManagerRef = useRef(createDataManager(database, createNavigator()));
     const [pets, setPets] = useState(dataManagerRef.current.getDefaultPets());
     const [selectedTab, setSelectedTab] = useState(0);
     const [textAndImage, setTextAndImage] = useState<PetTextAndImage>({ text: null, image: null });
-    const [distanceAndBearing, setDistanceAndBearing] = useState<DistanceAndBearing | null>(null);
-    const [location, setLocation] = useState<Location | null>(null);
+    const [distanceToPet, setDistanceToPet] = useState<number | null>(null);
     const [seenInteractions, setSeenInteractions] = useState(new Set<string>());
     const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
 
@@ -63,23 +56,11 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         setTextAndImage(dataManager.getTextAndImage(pets[selectedTab]));
     };
 
-    const onLocationUpdate = () => {
-        dataManager.handleUpdatedLocation(
-            selectedPet,
-            location,
-            discoverPet,
-            updatedDistanceAndBearing => setDistanceAndBearing(updatedDistanceAndBearing)
-        );
-    };
-
     const onTabChange = (forceNextCycle: boolean = false) => {
         const updatedPets = dataManager.updatePetsState(pets, selectedTab, forceNextCycle);
         setPets(updatedPets);
         setTextAndImage(dataManager.getTextAndImage(selectedPet));
-        onLocationUpdate();
     };
-
-    useEffect(onLocationUpdate, [location]);
 
     useEffect(() => {
         updateRoute(Route.PETS);
@@ -96,17 +77,6 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         });
 
         database.getSeenInteractions().then(savedSeenInteractions => setSeenInteractions(savedSeenInteractions));
-
-        locationService.current.watchLocation();
-        locationService.current.setLocationListener(updatedLocation => setLocation(updatedLocation));
-
-        compass.current.start();
-
-        return () => {
-            locationService.current.stopWatching();
-
-            compass.current.stop();
-        };
     }, []);
 
     useEffect(onTabChange, [selectedTab]);
@@ -119,6 +89,16 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     };
 
     const isDiscovered = selectedPet.discovered;
+
+    const mainContent = isDiscovered && textAndImage.image !== null
+        ? petImageUi(textAndImage.image)
+        : <Discover
+            dataManager={dataManager}
+            selectedPet={selectedPet}
+            selectedTab={selectedTab}
+            discoverPet={discoverPet}
+            onDistanceUpdate={distance => setDistanceToPet(distance)}
+        />;
 
     return <Scaffold
         header={<Tabs
@@ -134,7 +114,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             interactionsThisCycle={selectedPet.interactionsThisCycle}
             isDiscovered={isDiscovered}
             isSleeping={selectedPet.state === State.ASLEEP}
-            distance={distanceAndBearing?.distance ?? null}
+            distance={distanceToPet}
             seenInteractions={seenInteractions}
             interactionSelected={onInteractionSelected}
         />}
@@ -149,7 +129,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             position: 'relative',
             background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)`
         }}>
-            {imageUi(isDiscovered, textAndImage.image, dataManager.calculateArrowRotation(heading, distanceAndBearing))}
+            {mainContent}
             {debugMenuButtonUi(() => setIsDebugMenuOpen(true))}
             <FriendshipBar isDiscovered={isDiscovered} level={selectedPet.friendship} animationKey={selectedTab} />
             {textBubbleUi(textAndImage.text)}
@@ -163,9 +143,6 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             discoverPet={discoverPet}
             petsDebugger={petsDebugger}
             selectedPet={selectedPet}
-            heading={heading}
-            distanceAndBearing={distanceAndBearing}
-            arrowRotation={dataManager.calculateArrowRotation(heading, distanceAndBearing)}
             forceNextCycle={() => onTabChange(true)}
             setHighFriendship={() => onTabChange()}
         />
@@ -180,38 +157,12 @@ function debugMenuButtonUi(onDebugMenuButtonClicked: () => void): JSX.Element {
     </div>;
 }
 
-function imageUi(
-    isDiscovered: boolean,
-    image: string | null,
-    rotation: number | null
-): JSX.Element {
-    if (isDiscovered && image !== null) {
-        return petImageUi(image);
-    } else {
-        return arrowUi(rotation ?? 0);
-    }
-}
-
 function petImageUi(image: string): JSX.Element {
     return <img
         src={image}
         alt=''
         style={{ maxWidth: '100%', maxHeight: '100%', maskImage: 'radial-gradient(circle, black 60%, transparent 75%)' }}
     />;
-}
-
-function arrowUi(rotation: number): JSX.Element {
-    return <>
-        <img src={ArrowIcon} alt='' style={{
-            maxWidth: '70%',
-            maxHeight: '70%',
-            transform: `rotate(${rotation}deg)`,
-            background: `radial-gradient(circle, ${COLORS.surface}, transparent 60%)`,
-            padding: '25px',
-            boxSizing: 'border-box'
-        }} />
-        <img src={PawIcon} alt='' style={{ position: 'absolute', maxWidth: '20%', maxHeight: '20%' }} />
-    </>;
 }
 
 function textBubbleUi(text: string | null): JSX.Element {
