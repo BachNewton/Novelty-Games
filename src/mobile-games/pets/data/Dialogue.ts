@@ -81,6 +81,24 @@ export const nissaDialog: Dialogue = {
     sleeping: "Sorry, can't move. Too comfy. My legs won't work until I hear my food dish filled."
 };
 
+export const nikaDialog: Dialogue = {
+    hidden: "I'm always there where my brother is, we are never apart. We love to run here and chase each other sometimes our games look little bit violent but trust me it's the we play.",
+    greeting: {
+        lowFriendship: "Hello my name is Nika. I love to get petted especially if you scratch my butt I'll never leave.",
+        highFriendship: "I love to come close to you and hint that I would like to get scratched and if you stop I will ask for more."
+    },
+    sleeping: "I love to nap like my bother we often make noises in our sleep because we are chasing birds. I like my space but you can pet me unless it will stop me from chasing the birds."
+};
+
+export const lucaDialog: Dialogue = {
+    hidden: "It's my favorite place where I can run and play or fight with my friends. I love to play and chase my sister but she's really fast. We get super tired really fast and hungry from running around.",
+    greeting: {
+        lowFriendship: "Hello my name is Luca. I'm really tired of running in the park but I'm ready to go back and get some food. I love my dinner but I eat too fast because I'm scared my sister would take it from me.",
+        highFriendship: "I love you when you eat your dinner at the table and I look at you with my cute look and you give me a taste but I'm might want more:)"
+    },
+    sleeping: "I'm sleeping even though my legs are moving it's just in my sleep I'm chasing birds."
+};
+
 export const templateDialog: Dialogue = {
     hidden: "XXXXX",
     greeting: {

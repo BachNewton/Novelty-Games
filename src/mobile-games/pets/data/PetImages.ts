@@ -62,6 +62,22 @@ import nissa_play from '../images/nissa/play.jpeg';
 import nissa_sleep from '../images/nissa/sleep.jpeg';
 import nissa_space from '../images/nissa/space.jpeg';
 import nissa_treat from '../images/nissa/treat.jpg';
+import nika_chat from '../images/nika/chat.png';
+import nika_greet_high_friendship from '../images/nika/greet_high_friendship.png';
+import nika_greet_low_friendship from '../images/nika/greet_low_friendship.png';
+import nika_pet from '../images/nika/pet.png';
+import nika_play from '../images/nika/play.png';
+import nika_sleep from '../images/nika/sleep.png';
+import nika_space from '../images/nika/space.png';
+import nika_treat from '../images/nika/treat.png';
+import luca_chat from '../images/luca/chat.png';
+import luca_greet_high_friendship from '../images/luca/greet_high_friendship.png';
+import luca_greet_low_friendship from '../images/luca/greet_low_friendship.png';
+import luca_pet from '../images/luca/pet.png';
+import luca_play from '../images/luca/play.png';
+import luca_sleep from '../images/luca/sleep.png';
+import luca_space from '../images/luca/space.png';
+import luca_treat from '../images/luca/treat.png';
 
 export interface PetImages {
     chat: string;
@@ -160,4 +176,26 @@ export const nissaImages: PetImages = {
     sleep: nissa_sleep,
     space: nissa_space,
     treat: nissa_treat
+};
+
+export const nikaImages: PetImages = {
+    chat: nika_chat,
+    greetHighFriendShip: nika_greet_high_friendship,
+    greetLowFriendship: nika_greet_low_friendship,
+    pet: nika_pet,
+    play: nika_play,
+    sleep: nika_sleep,
+    space: nika_space,
+    treat: nika_treat
+};
+
+export const lucaImages: PetImages = {
+    chat: luca_chat,
+    greetHighFriendShip: luca_greet_high_friendship,
+    greetLowFriendship: luca_greet_low_friendship,
+    pet: luca_pet,
+    play: luca_play,
+    sleep: luca_sleep,
+    space: luca_space,
+    treat: luca_treat
 };

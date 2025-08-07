@@ -275,6 +275,56 @@ export const nissaInteractions: Interactions = {
     ])
 };
 
+export const nikaInteractions: Interactions = {
+    space: {
+        id: 'OA1H-U1EG-N651-A75K',
+        text: "I love my own space:) I will come to you when I need more scratches but I'm warning there is going to be a lot of fur."
+    },
+    pet: {
+        id: 'R3H5-BRE6-POC3-7SU7',
+        text: "I love when you pet me but please don't stop. I will stay here forever"
+    },
+    treat: {
+        id: '7M7X-MV8Y-301H-I6ZO',
+        text: "I love treats and food. But I will take my time and maybe take a nap close to my bowl just to make sure my brother will not try to eat also my portion"
+    },
+    play: {
+        id: 'UIEI-EBLF-77I6-M7FT',
+        text: "Oh you stopped scratching me? Just for you to know I will look with my cute eyes and nudge you with my nose and paws until I get more"
+    },
+    chat: new Map([
+        ['My brother', {
+            id: '8Q2G-AU8M-ANJS-9A63',
+            text: "Me and my bother are one. We go always together everywhere if my brother has to go to the doctor I will cry the entire time he's not here. We sleep together, go on a walks together, eat together well that sometimes is hard task because I have to be careful with my food that's the only thing I'm not sharing with him"
+        }]
+    ])
+};
+
+export const lucaInteractions: Interactions = {
+    space: {
+        id: 'N22W-9NOS-6V5J-OKUL',
+        text: "Perfect nobody is disturbing my peace just call me when it's time for food or time to go to the park."
+    },
+    pet: {
+        id: '81NV-4GXH-V8UC-8DTM',
+        text: "I like when you scratch behind my ears that's my weak spot but I would also like to go back to my bed please."
+    },
+    treat: {
+        id: 'F5FI-7J94-1FDG-WOPE',
+        text: "I love treats all kinds especially if you have some meat on your plate I would love a taste too."
+    },
+    play: {
+        id: '6JUB-KW46-CYDP-6USM',
+        text: "Thank you for trying to play with me but to be honest I would like to rest I'm so tired of running. "
+    },
+    chat: new Map([
+        ['Prefect day', {
+            id: 'IWM8-6K29-DIGD-F0PI',
+            text: "Perfect day would start by getting outside little bit because I need to pee and then nice breakfast then I already need some rest it's been exhausting morning in the evening it's time to go to the park and that's when I run and meet new dogs sometimes I don't like them but usually I meet new friends and we run around the park and my sister is there too:) And of course end the day with my favorite: food and resting of course"
+        }]
+    ])
+};
+
 export const templateInteractions: Interactions = {
     space: {
         id: 'XXXXX',

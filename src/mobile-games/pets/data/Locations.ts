@@ -10,11 +10,6 @@ export const jätkäsaariPark: Location = {
     lon: 24.917717
 };
 
-export const supercellOffice: Location = {
-    lat: 60.161052,
-    lon: 24.921724
-};
-
 export const oodi: Location = {
     lat: 60.173555,
     lon: 24.937540
@@ -35,6 +30,28 @@ export const lionStatueHelsinki: Location = {
     lon: 24.966610
 };
 
+export const helsinkiWinterGarden: Location = {
+    lat: 60.185980,
+    lon: 24.931804
+};
+
+export const cafeRegatta: Location = {
+    lat: 60.180073,
+    lon: 24.911833
+};
+
+export const rajasaariKoirapuisto: Location = {
+    lat: 60.182122,
+    lon: 24.904780
+};
+
+// ------------- Unused Locations -------------
+
+export const pihlajasaari: Location = {
+    lat: 60.140322,
+    lon: 24.916174
+};
+
 export const fortWaynePlayground: Location = {
     lat: 41.129258,
     lon: -85.114223
@@ -50,22 +67,12 @@ export const fortWayneBasketball: Location = {
     lon: -85.111868
 };
 
-export const helsinkiWinterGarden: Location = {
-    lat: 60.185980,
-    lon: 24.931804
+export const supercellOffice: Location = {
+    lat: 60.161052,
+    lon: 24.921724
 };
 
-export const cafeRegatta: Location = {
-    lat: 60.180073,
-    lon: 24.911833
-};
-
-export const pihlajasaari: Location = {
-    lat: 60.140322,
-    lon: 24.916174
-};
-
-// ----- Location Ideas -----
+// ------------- Location Ideas -------------
 // Veijarivuoren ranta: 60.146393, 24.882560
 // Persilja Restaurant: 60.157827, 24.880785
 // Elliott's Office: 60.156316, 24.885009
