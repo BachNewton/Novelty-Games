@@ -7,6 +7,7 @@ const BORDER_RADIUS = '20px';
 const ANIMATION_DELAY_MS = 200;
 const ANIMATION_SPEED = '1.5s';
 const PADDING = '3px';
+const WIDTH = '80%';
 
 interface FriendshipBarProps {
     isDiscovered: boolean;
@@ -62,7 +63,7 @@ const FriendshipBar: React.FC<FriendshipBarProps> = ({ isDiscovered, level, anim
     return <div style={{
         position: 'absolute',
         top: '15px',
-        width: '85%',
+        width: WIDTH,
         border: `2px solid ${COLORS.primary}`,
         borderRadius: BORDER_RADIUS,
         backgroundColor: COLORS.surface,
