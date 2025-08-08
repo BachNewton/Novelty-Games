@@ -3,14 +3,14 @@ import FriendshipBar from "./FriendshipBar";
 import { COLORS } from "./Home";
 import TextReveal from "./TextReveal";
 
-interface PetContentProps {
+interface PetDiscoveredProps {
     pets: Pet[];
     selectedTab: number;
     text: string;
     image: string;
 }
 
-const PetContent: React.FC<PetContentProps> = ({ pets, selectedTab, text, image }) => {
+const PetDiscovered: React.FC<PetDiscoveredProps> = ({ pets, selectedTab, text, image }) => {
     const selectedPet = pets[selectedTab];
     const isDiscovered = selectedPet.discovered;
 
@@ -60,4 +60,4 @@ function textBubbleUi(text: string): JSX.Element {
     </div>;
 }
 
-export default PetContent;
+export default PetDiscovered;

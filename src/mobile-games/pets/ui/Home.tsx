@@ -14,7 +14,7 @@ import Tabs from "./Tabs";
 import Welcome from "./Welcome";
 import { State } from "../data/PetSave";
 import Discover from "./Discover";
-import PetContent from "./PetContent";
+import PetDiscovered from "./PetDiscovered";
 
 const SHOW_DEBUG_MENU_BUTTON = true;
 
@@ -90,7 +90,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const isDiscovered = selectedPet.discovered;
 
     const mainContent = isDiscovered && textAndImage.image !== null
-        ? <PetContent
+        ? <PetDiscovered
             pets={pets}
             selectedTab={selectedTab}
             text={textAndImage.text}
