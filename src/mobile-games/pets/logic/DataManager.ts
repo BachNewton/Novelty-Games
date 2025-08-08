@@ -37,7 +37,7 @@ export interface DataManager {
 }
 
 export interface PetTextAndImage {
-    text: string | null;
+    text: string;
     image: string | null;
 }
 

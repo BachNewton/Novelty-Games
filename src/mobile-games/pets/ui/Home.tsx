@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import Scaffold from "../../../util/ui/Scaffold";
 import Button from "../../../util/ui/Button";
-import TextReveal from "./TextReveal";
 import { PetsDatabase } from "../logic/PetsDatabase";
 import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
@@ -12,10 +11,10 @@ import { createNavigator } from "../../../util/geolocation/Navigator";
 import { Interactions, Interaction } from "../data/Interaction";
 import { createDataManager, PetTextAndImage } from "../logic/DataManager";
 import Tabs from "./Tabs";
-import FriendshipBar from "./FriendshipBar";
 import Welcome from "./Welcome";
 import { State } from "../data/PetSave";
 import Discover from "./Discover";
+import PetContent from "./PetContent";
 
 const SHOW_DEBUG_MENU_BUTTON = true;
 
@@ -36,7 +35,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const dataManagerRef = useRef(createDataManager(database, createNavigator()));
     const [pets, setPets] = useState(dataManagerRef.current.getDefaultPets());
     const [selectedTab, setSelectedTab] = useState(0);
-    const [textAndImage, setTextAndImage] = useState<PetTextAndImage>({ text: null, image: null });
+    const [textAndImage, setTextAndImage] = useState<PetTextAndImage>({ text: '', image: null });
     const [distanceToPet, setDistanceToPet] = useState<number | null>(null);
     const [seenInteractions, setSeenInteractions] = useState(new Set<string>());
     const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
@@ -91,7 +90,12 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const isDiscovered = selectedPet.discovered;
 
     const mainContent = isDiscovered && textAndImage.image !== null
-        ? petImageUi(textAndImage.image)
+        ? <PetContent
+            pets={pets}
+            selectedTab={selectedTab}
+            text={textAndImage.text}
+            image={textAndImage.image}
+        />
         : <Discover
             dataManager={dataManager}
             selectedPet={selectedPet}
@@ -131,8 +135,6 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         }}>
             {mainContent}
             {debugMenuButtonUi(() => setIsDebugMenuOpen(true))}
-            <FriendshipBar isDiscovered={isDiscovered} level={selectedPet.friendship} animationKey={selectedTab} />
-            {textBubbleUi(textAndImage.text)}
         </div>
 
         <Welcome show={showWelcome} onClose={() => setShowWelcome(false)} />
@@ -154,35 +156,6 @@ function debugMenuButtonUi(onDebugMenuButtonClicked: () => void): JSX.Element {
 
     return <div style={{ position: 'absolute', top: '60px', right: '5px' }}>
         <Button fontScale={0.8} onClick={onDebugMenuButtonClicked}>Debug</Button>
-    </div>;
-}
-
-function petImageUi(image: string): JSX.Element {
-    return <img
-        src={image}
-        alt=''
-        style={{ maxWidth: '100%', maxHeight: '100%', maskImage: 'radial-gradient(circle, black 60%, transparent 75%)' }}
-    />;
-}
-
-function textBubbleUi(text: string | null): JSX.Element {
-    return <div style={{
-        position: 'absolute',
-        bottom: '0',
-        width: 'calc(100% - 15px)',
-        minHeight: '2.5em',
-        margin: '7.5px',
-        border: `2px solid ${COLORS.primary}`,
-        borderRadius: '25px',
-        padding: '10px',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        boxSizing: 'border-box',
-        fontFamily: 'Pet',
-        fontSize: '1.2em'
-    }}>
-        <TextReveal>
-            {text ?? ''}
-        </TextReveal>
     </div>;
 }
 
