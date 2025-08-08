@@ -108,7 +108,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         header={<Tabs
             pets={pets}
             selectedTab={selectedTab}
-            onTabSelected={index => setSelectedTab(index)}
+            onTabSelected={index => setSelectedTab(index ?? 0)}
         />}
 
         footer={<Footer
