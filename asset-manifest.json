@@ -1,21 +1,21 @@
 {
   "files": {
     "main.css": "/Novelty-Games/static/css/main.f193cccc.css",
-    "main.js": "/Novelty-Games/static/js/main.25dab4dd.js",
+    "main.js": "/Novelty-Games/static/js/main.e85a857f.js",
     "static/js/453.68693753.chunk.js": "/Novelty-Games/static/js/453.68693753.chunk.js",
     "MusicIndex.js": "/Novelty-Games/static/js/MusicIndex.7371e6f9.chunk.js",
     "static/media/play.jpg": "/Novelty-Games/static/media/play.a2a36b11052e1df2e6c0.jpg",
-    "static/media/play.jpeg": "/Novelty-Games/static/media/play.6229748dd1adcfe458d5.jpeg",
+    "static/media/play.jpeg": "/Novelty-Games/static/media/play.b472c1f20e068b124e45.jpeg",
     "static/media/chat.jpeg": "/Novelty-Games/static/media/chat.31b962d0150414276af8.jpeg",
     "static/media/sleep.jpg": "/Novelty-Games/static/media/sleep.71f566b84fa6e497c137.jpg",
-    "static/media/space.jpeg": "/Novelty-Games/static/media/space.92073970d446c2c56ec8.jpeg",
-    "static/media/treat.jpeg": "/Novelty-Games/static/media/treat.0114561d31fbc4cd15bf.jpeg",
-    "static/media/sleep.jpeg": "/Novelty-Games/static/media/sleep.e6708cf9ec74ca6a1fb6.jpeg",
-    "static/media/greet_low_friendship.jpeg": "/Novelty-Games/static/media/greet_low_friendship.d9fb15201d06ecbd08fd.jpeg",
-    "static/media/pet.jpeg": "/Novelty-Games/static/media/pet.10edaea6548d133f89bf.jpeg",
+    "static/media/space.jpeg": "/Novelty-Games/static/media/space.17a42bd301449d92ae22.jpeg",
+    "static/media/treat.jpeg": "/Novelty-Games/static/media/treat.302fe7daa679e4feb4de.jpeg",
+    "static/media/sleep.jpeg": "/Novelty-Games/static/media/sleep.9ca8b9499f3ee1e6ae8c.jpeg",
+    "static/media/greet_low_friendship.jpeg": "/Novelty-Games/static/media/greet_low_friendship.451da95521bdd6c66457.jpeg",
+    "static/media/pet.jpeg": "/Novelty-Games/static/media/pet.8107b7dc431d6703c702.jpeg",
     "static/media/pet.jpg": "/Novelty-Games/static/media/pet.78a5be5fd739aa2dc035.jpg",
     "static/media/greet_low_friendship.png": "/Novelty-Games/static/media/greet_low_friendship.de7fbfc02cee0ce87897.png",
-    "static/media/greet_high_friendship.jpeg": "/Novelty-Games/static/media/greet_high_friendship.941c3a5d2dc69acf07f6.jpeg",
+    "static/media/greet_high_friendship.jpeg": "/Novelty-Games/static/media/greet_high_friendship.484200c482348c3ca37f.jpeg",
     "static/media/space.png": "/Novelty-Games/static/media/space.1a0aaa26eb016b3e63bf.png",
     "static/media/treat.jpg": "/Novelty-Games/static/media/treat.ea5a695953a2c1e06bac.jpg",
     "static/media/greet_high_friendship.png": "/Novelty-Games/static/media/greet_high_friendship.ef2c299277d3988b6f94.png",
@@ -36,8 +36,8 @@
     "static/media/CedarvilleCursive-Regular.ttf": "/Novelty-Games/static/media/CedarvilleCursive-Regular.a669593f51bb81ad0cc1.ttf",
     "static/media/troll.png": "/Novelty-Games/static/media/troll.f1981e0994f3c699bd50.png",
     "static/media/lizard.png": "/Novelty-Games/static/media/lizard.734688b10ee2b6838ac8.png",
-    "static/media/butterfly.png": "/Novelty-Games/static/media/butterfly.5eaaf730513ea0f1da4e.png",
     "service-worker.js": "/Novelty-Games/service-worker.js",
+    "static/media/butterfly.png": "/Novelty-Games/static/media/butterfly.5eaaf730513ea0f1da4e.png",
     "static/media/collect.wav": "/Novelty-Games/static/media/collect.a287fb90cd0a2aa2ceab.wav",
     "static/media/mage.png": "/Novelty-Games/static/media/mage.051e4eefba52f6df8a9f.png",
     "static/media/dragon.png": "/Novelty-Games/static/media/dragon.a780b4c2a7e58e1bb603.png",
@@ -89,12 +89,12 @@
     "static/media/MB-outline.svg": "/Novelty-Games/static/media/MB-outline.9375dcb67c2602a348842bb92635c97b.svg",
     "static/media/MB-back.svg": "/Novelty-Games/static/media/MB-back.73af888104565973b102803815b53578.svg",
     "main.f193cccc.css.map": "/Novelty-Games/static/css/main.f193cccc.css.map",
-    "main.25dab4dd.js.map": "/Novelty-Games/static/js/main.25dab4dd.js.map",
+    "main.e85a857f.js.map": "/Novelty-Games/static/js/main.e85a857f.js.map",
     "453.68693753.chunk.js.map": "/Novelty-Games/static/js/453.68693753.chunk.js.map",
     "MusicIndex.7371e6f9.chunk.js.map": "/Novelty-Games/static/js/MusicIndex.7371e6f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f193cccc.css",
-    "static/js/main.25dab4dd.js"
+    "static/js/main.e85a857f.js"
   ]
 }
