@@ -87,25 +87,37 @@ export const ziggyInteractions: Interactions = {
 
 export const baxterInteractions: Interactions = {
     space: {
-        id: 'XXXXX',
-        text: 'Baxter space'
+        id: 'X9DJ-ZAGH-36PY-57KN',
+        text: "I'm happy to sit here and watch the birds. Or watch you. But only for an hour! Next time, let's play!"
     },
     pet: {
-        id: 'XXXXX',
-        text: 'Baxter pet'
+        id: '96UD-WKM5-WWE1-D0UM',
+        text: "Ooh yes I like some pets. I'll stretch out nice and long! I like the deluxe package. Pet a bit of everything - back, chin, cheeks, nose, paws, and I'll hang out for longer! I'll lick you back! And when it's time to stop, those licks will turn into bites."
     },
     treat: {
-        id: 'XXXXX',
-        text: 'Baxter treat'
+        id: 'P1R6-QCO0-EG8A-5KHJ',
+        text: "Mrrru? Did you say... treat? That means a squeeze up! I'll follow you around now please gimme Mrrooowohroww! Yes this is the stuff, now I'm gonna go flop belly up and wait to play! (except this is a game, I'll be asleep soon)."
     },
     play: {
-        id: 'XXXXX',
-        text: 'Baxter play'
+        id: 'TOHF-KILU-E7Z5-57I4',
+        text: "Yes! It's play time. You're not going to get any of those colorful springs by me! Afterwards, let's play rough! I promise I'll only play bite, and I'll yell uncle if you go too far, but I'll be back for more!"
     },
     chat: new Map([
-        ['Chat 1', {
-            id: 'XXXXX',
-            text: 'Baxter chat'
+        ['Owner', {
+            id: 'D6KS-FZVS-375Z-OWDK',
+            text: "Nick is a pretty cool guy. We get along well. We relax together. He has a lot of gadgets and I like to chew on them to get his attention. He trusts me not to eat too much and keeps my food dishes full. I like that."
+        }],
+        ['Neighbors', {
+            id: 'NY5Z-Q77Z-RVWW-BCJY',
+            text: "I'm a bit of a local celebrity. Whenever Nick gets back from a bike ride, the neighborhood kids want to know if I'm awake. I'll go out and see them, but really I'm more interested in eating grass. And those toddlers should pet me more gently. "
+        }],
+        ['Fleas', {
+            id: 'P8ES-O998-VSZ2-VCCL',
+            text: "I'm not an outdoor cat, but I spend a lot of time outside. One time I got really itchy and had all of these little jumping bugs on me. On my back, on my chin, ugh. Nick had to comb me with this little brush every day for a month. It wasn't fun. I'm glad it's over. "
+        }],
+        ['Embarrassed', {
+            id: 'AVPP-YAFT-QSQ4-RZO1',
+            text: "Nick bought this new mattress pad for his bed. As I slinked off the bed, I misjudged how solid it was and slipped head first, bonking it on the floor. It kinda hurt. I trotted away with my tail down and hid the rest of the day. I'm supposed to land on my feet!"
         }]
     ])
 };

@@ -52,6 +52,11 @@ export const pihlajasaari: Location = {
     lon: 24.916174
 };
 
+export const supercellOffice: Location = {
+    lat: 60.161052,
+    lon: 24.921724
+};
+
 export const fortWaynePlayground: Location = {
     lat: 41.129258,
     lon: -85.114223
@@ -65,11 +70,6 @@ export const fortWayneWalkingPath: Location = {
 export const fortWayneBasketball: Location = {
     lat: 41.131679,
     lon: -85.111868
-};
-
-export const supercellOffice: Location = {
-    lat: 60.161052,
-    lon: 24.921724
 };
 
 // ------------- Location Ideas -------------

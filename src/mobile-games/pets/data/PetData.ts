@@ -2,7 +2,7 @@ import { Location } from "../../../util/geolocation/LocationService";
 import { albyDialog, baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, lenoreDialog, lucaDialog, nikaDialog, nissaDialog, ziggyDialog } from "./Dialogue";
 import { albyInteractions, baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, Interactions, lenoreInteractions, lucaInteractions, nikaInteractions, nissaInteractions, ziggyInteractions } from "./Interaction";
 import { cafeRegatta, helsinkiWinterGarden, jätkäsaariPark, lapinlahdenLähde, lauttasaariBeach, lionStatueHelsinki, oodi, rajasaariKoirapuisto, seurasaari } from "./Locations";
-import { albyImages, defaultImages, doryImages, ellaImages, frogImages, lenoreImages, lucaImages, nikaImages, nissaImages, PetImages, ziggyImages } from "./PetImages";
+import { albyImages, baxterImages, doryImages, ellaImages, frogImages, lenoreImages, lucaImages, nikaImages, nissaImages, PetImages, ziggyImages } from "./PetImages";
 
 export interface PetData {
     id: string;
@@ -31,12 +31,12 @@ export const PET_DATA: PetData[] = [
         images: ziggyImages
     },
     {
-        id: 'K7EJ-VGA0-BNRZ-CZZ8',
+        id: '457R-35AY-KQHR-SWR2',
         name: 'Baxter',
         location: oodi,
         dialogue: baxterDialog,
         interactions: baxterInteractions,
-        images: defaultImages
+        images: baxterImages
     },
     {
         id: '67R2-XJ9A-S3GL-SKYN',

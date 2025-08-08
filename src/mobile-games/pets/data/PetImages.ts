@@ -14,6 +14,14 @@ import frog_play from '../images/frog/play.jpg';
 import frog_sleep from '../images/frog/sleep.jpg';
 import frog_space from '../images/frog/space.jpg';
 import frog_treat from '../images/frog/treat.jpg';
+import baxter_chat from '../images/baxter/chat.jpeg';
+import baxter_greet_high_friendship from '../images/baxter/greet_high_friendship.jpeg';
+import baxter_greet_low_friendship from '../images/baxter/greet_low_friendship.jpeg';
+import baxter_pet from '../images/baxter/pet.jpeg';
+import baxter_play from '../images/baxter/play.jpeg';
+import baxter_sleep from '../images/baxter/sleep.jpeg';
+import baxter_space from '../images/baxter/space.jpeg';
+import baxter_treat from '../images/baxter/treat.jpeg';
 import ziggy_chat from '../images/ziggy/chat.jpeg';
 import ziggy_greet_high_friendship from '../images/ziggy/greet_high_friendship.jpeg';
 import ziggy_greet_low_friendship from '../images/ziggy/greet_low_friendship.jpeg';
@@ -121,6 +129,17 @@ export const ziggyImages: PetImages = {
     sleep: ziggy_sleep,
     space: ziggy_space,
     treat: ziggy_treat
+};
+
+export const baxterImages: PetImages = {
+    chat: baxter_chat,
+    greetHighFriendShip: baxter_greet_high_friendship,
+    greetLowFriendship: baxter_greet_low_friendship,
+    pet: baxter_pet,
+    play: baxter_play,
+    sleep: baxter_sleep,
+    space: baxter_space,
+    treat: baxter_treat
 };
 
 export const ellaImages: PetImages = {

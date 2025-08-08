@@ -28,12 +28,12 @@ export const ziggyDialog: Dialogue = {
 };
 
 export const baxterDialog: Dialogue = {
-    hidden: "Baxter hidden",
+    hidden: "I found a cozy place to curl up inside. Hmm, there is more water than grass here, what will I chew on? Come find me!",
     greeting: {
-        lowFriendship: "Baxter low friendship",
-        highFriendship: "Baxter high friendship"
+        lowFriendship: "Hello and welcome, I am Baxter the cat! What are you like? If I climb up your leg will you pat me on the head? Mrrwoow!",
+        highFriendship: "Yay, I'm glad I have another friend who comes by! You can rub my belly at any time! And I'll lay on top and purr when you're feeling sad. Thanks for all the pets and treats! And please let me outside?"
     },
-    sleeping: "Baxter sleeping"
+    sleeping: "I'm not available right now, I'm sleeping. If you call my name enough, I'll yawn a bunch and make my way over, but please just let me be in my bed hammock."
 };
 
 export const ellaDialog: Dialogue = {

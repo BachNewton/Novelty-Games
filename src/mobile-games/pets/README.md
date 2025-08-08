@@ -36,7 +36,7 @@
 ## Pet Owners
 
 - [X] ME (1 cat)
-- [ ] Nick (1 cat)
+- [X] Nick (1 cat)
 - [X] Dice & Felix (1 dog)
 - [X] Keri (2 cats)
 - [ ] Robert & Atria (2 cats)
