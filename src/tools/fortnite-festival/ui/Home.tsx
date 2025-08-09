@@ -11,6 +11,7 @@ import VerticalSpacer from "../../../util/ui/Spacer";
 import HorizontalLine from "../../../util/ui/HorizontalLine";
 import Button from "../../../util/ui/Button";
 import Widget from "./Widget";
+import Track from "./Track";
 
 const VISIBLE_COUNT = 50; // Initial number of songs to show
 const DISTANCE_FROM_BOTTOM_PX = 300; // Distance from the bottom of the page to trigger loading more songs
@@ -266,6 +267,10 @@ function songsUi(
     };
 
     return <div style={{ margin: '15px' }}>
+        <Track song={songs[0]} rank={123} overallDifficulty={4.3} />
+
+        <VerticalSpacer height='15px' />
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 3fr 3fr 1fr 1fr 1fr 1fr 1fr' }}>
             {createHeaderCell('Meta', undefined, 2)}
             {createHeaderCell('Song Details', undefined, 2)}

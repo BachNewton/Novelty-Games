@@ -12,7 +12,8 @@ const Checkbox: React.FC<CheckboxProps> = ({ text, checked, onClick, onOnlyClick
         ? <></>
         : <button type="button" className="only-button" onClick={onOnlyClick}>only</button>;
 
-    return <label className="container">{text}
+    return <label className="container">
+        {text}
         <input type="checkbox" checked={checked} onChange={onClick} />
         <span className="checkmark"></span>
         {onlyButton}
