@@ -7,7 +7,8 @@ const Widget: React.FC<WidgetProps> = ({ children }) => {
         border: '1px solid var(--novelty-blue)',
         borderRadius: '15px',
         padding: '10px',
-        margin: '7.5px'
+        margin: '7.5px',
+        boxShadow: 'black 0px 0px 10px'
     }}>
         {children}
     </div>;

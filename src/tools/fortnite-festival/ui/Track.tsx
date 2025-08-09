@@ -34,7 +34,8 @@ const Track: React.FC<TrackProps> = ({ song, rank, selectedInstruments, selected
         padding: '7.5px',
         border: '1px solid var(--novelty-blue)',
         borderRadius: '15px',
-        width: TRACK_WIDTH
+        width: TRACK_WIDTH,
+        boxShadow: 'black 0px 0px 10px'
     }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <div style={{ fontWeight: 'bold', fontSize: '1.3em' }}>#{rank}</div>
