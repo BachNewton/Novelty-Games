@@ -4,7 +4,6 @@ import { DataType, FestivalSong } from "../../../trivia/data/Data";
 import Loading from "../../../util/ui/Loading";
 import { Route, updateRoute } from "../../../ui/Routing";
 import React from "react";
-import Difficulty from "./Difficulty";
 import ToggleSwitch from "../../../util/ui/ToggleSwitch";
 import { deleteData } from "../../../trivia/logic/Database";
 import VerticalSpacer from "../../../util/ui/Spacer";
@@ -13,7 +12,8 @@ import Button from "../../../util/ui/Button";
 import Widget from "./Widget";
 import Track from "./Track";
 
-const VISIBLE_COUNT = 50; // Initial number of songs to show
+const VISIBLE_COUNT = 10; // Initial number of songs to show
+const SONGS_PER_PAGE = 20; // Number of songs to load on scroll
 const DISTANCE_FROM_BOTTOM_PX = 300; // Distance from the bottom of the page to trigger loading more songs
 const DIFFICULTY_WEIGHT_DEFAULT = 1.3;
 
@@ -54,7 +54,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     useEffect(() => {
         const onScroll = () => {
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight - DISTANCE_FROM_BOTTOM_PX) {
-                setVisibleCount(count => Math.min((songs?.length ?? 0), count + 50));
+                setVisibleCount(count => Math.min((songs?.length ?? 0), count + SONGS_PER_PAGE));
             }
         };
 
@@ -87,8 +87,6 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
                 Fortnite Festival Difficulty Rankings
             </div>
 
-            {searchUi()}
-
             <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Widget>
                     {toolsUi(setFilterEpicGamesSongs)}
@@ -102,6 +100,8 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
             <Widget>
                 {difficultyWeightUi(difficultyWeight, setDifficultyWeight)}
             </Widget>
+
+            {searchUi()}
         </div>
 
         <HorizontalLine thickness='4px' color='var(--novelty-blue)' />
