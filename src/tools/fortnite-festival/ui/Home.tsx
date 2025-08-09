@@ -22,7 +22,7 @@ interface HomeProps {
     loadingSongs: Promise<Array<FestivalSong>>;
 }
 
-interface SelectedInstruments {
+export interface SelectedInstruments {
     guitar: boolean;
     drums: boolean;
     bass: boolean;
@@ -156,7 +156,7 @@ function toolsUi(filterEpicGamesSongs: boolean, setFilterEpicGamesSongs: (checke
 }
 
 function instrumentSelectorUi(selectedInstruments: SelectedInstruments, instrumentToggled: (instrument: Instrument) => void, isPro: boolean): JSX.Element {
-    const headerLabel = isPro ? 'Pro Instruments' : 'Instruments';
+    const headerLabel = isPro ? 'Pro Instruments (WIP)' : 'Select Instruments';
 
     const description = isPro
         ? 'Select if you want the pro difficulty of an instruemnt included in the difficulty calculations.'
@@ -174,7 +174,7 @@ function instrumentSelectorUi(selectedInstruments: SelectedInstruments, instrume
         gap: '10px',
         maxWidth: '250px'
     }}>
-        <div style={{ gridColumn: 'span 2', fontWeight: 'bold', fontSize: '1.2em' }}>{headerLabel} (WIP)</div>
+        <div style={{ gridColumn: 'span 2', fontWeight: 'bold', fontSize: '1.2em' }}>{headerLabel}</div>
 
         <div style={{ gridColumn: 'span 2', fontSize: DESCRIPTION_FONT_SIZE }}>
             {description}
@@ -239,7 +239,13 @@ function songsUi(
     const tracks = visibleSongs.map((song, index) => {
         const overallDifficulty = calculateOverallDifficulty(song, difficultyWeight, selectedInstruments);
 
-        return <Track key={index} song={song} rank={sortedSongs.length - index} overallDifficulty={overallDifficulty} />;
+        return <Track
+            key={index}
+            song={song}
+            rank={sortedSongs.length - index}
+            selectedInstruments={selectedInstruments}
+            overallDifficulty={overallDifficulty}
+        />;
     });
 
     return <div>
