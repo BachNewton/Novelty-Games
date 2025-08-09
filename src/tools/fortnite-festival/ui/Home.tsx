@@ -10,6 +10,7 @@ import { deleteData } from "../../../trivia/logic/Database";
 import VerticalSpacer from "../../../util/ui/Spacer";
 import HorizontalLine from "../../../util/ui/HorizontalLine";
 import Button from "../../../util/ui/Button";
+import Widget from "./Widget";
 
 interface HomeProps {
     loadingSongs: Promise<Array<FestivalSong>>;
@@ -67,22 +68,6 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
             <div style={{ fontWeight: 'bold', fontSize: '1.3em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
                 Fortnite Festival Band Difficulty Ranking
             </div>
-            {/* <div style={{ display: 'flex', justifyContent: 'space-evenly', marginTop: '15px' }}>
-                <div>
-                    <label>Difficulty Scalar</label>
-                    <input
-                        type='text'
-                        style={{ fontSize: '1em', width: '3em', marginLeft: '15px' }}
-                        value={difficultyScalar}
-                        onChange={e => setDifficultyScalar(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <label style={{ marginRight: '15px' }}>Filter Epic Games Songs</label>
-                    <ToggleSwitch onChange={checked => setFilterEpicGamesSongs(checked)} />
-                </div>
-                <button style={{ fontSize: '1em', cursor: 'pointer' }} onClick={fetchLatestSongs}>Fetch Latest Songs</button>
-            </div> */}
 
             <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0px' }}>
                 <input
@@ -92,79 +77,92 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
                 />
             </div>
 
-            <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '10px',
-                margin: '10px auto',
-                border: '1px solid var(--novelty-blue)',
-                borderRadius: '15px',
-                padding: '10px',
-                width: 'fit-content'
-            }}>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <div>Filter Epic Games Songs</div>
-                    <ToggleSwitch onChange={checked => setFilterEpicGamesSongs(checked)} />
-                </div>
-                <Button onClick={fetchLatestSongs}>Fetch Latest Songs</Button>
+            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Widget>
+                    {toolsUi(setFilterEpicGamesSongs)}
+                </Widget>
+
+                <Widget>
+                    {proSelectorUi()}
+                </Widget>
             </div>
 
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                justifyItems: 'center',
-                gap: '10px',
-                margin: '10px auto',
-                border: '1px solid var(--novelty-blue)',
-                borderRadius: '15px',
-                padding: '10px',
-                width: 'fit-content'
-            }}>
-                <div style={{ gridColumn: 'span 2', fontWeight: 'bold' }}>Pro Instruments</div>
-                <div>Pro Guitar</div>
-                <ToggleSwitch />
-                <div>Pro Bass</div>
-                <ToggleSwitch />
-                <div>Pro Drums</div>
-                <ToggleSwitch />
-                <div>Pro Vocals</div>
-                <ToggleSwitch />
-            </div>
-            <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '5px',
-                border: '1px solid var(--novelty-blue)',
-                borderRadius: '15px',
-                padding: '10px'
-            }}>
-                <div style={{ gridColumn: 'span 2', fontWeight: 'bold' }}>High Difficulty Weight</div>
-                <div style={{ gridColumn: 'span 2', fontSize: '0.7em' }}>
-                    Provides control over how much high-difficulty parts affect the overall difficulty. A higher weight means the hardest parts will have more influence on the overall score. If the weight is 1, it's just a simple average.
-                </div>
-                <div style={{ display: 'flex', width: '100%', gap: '5px' }}>
-                    <input
-                        type='range'
-                        min={1}
-                        max={3}
-                        step={0.1}
-                        value={difficultyWeight}
-                        onChange={e => setDifficultyWeight(Number(e.target.value))}
-                        style={{ flexGrow: 1 }}
-                    />
-                    <div>{difficultyWeight}</div>
-                </div>
-            </div>
+            <Widget>
+                {difficultyWeightUi(difficultyWeight, setDifficultyWeight)}
+            </Widget>
         </div>
 
-        <HorizontalLine thickness='3px' color='var(--novelty-blue)' />
+        <HorizontalLine thickness='4px' color='var(--novelty-blue)' />
         <VerticalSpacer height='15px' />
 
         {songsUi(filteredSongs, difficultyScalar, selectedInstruments, onHeaderClick)}
     </div >;
 };
+
+function toolsUi(setFilterEpicGamesSongs: (checked: boolean) => void): JSX.Element {
+    return <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        gap: '10px',
+        height: '100%'
+    }}>
+        <div><Button borderRadius={15} onClick={fetchLatestSongs}><div style={{ padding: '5px' }}>Fetch Latest Songs</div></Button></div>
+
+        <div style={{ display: 'flex', gap: '10px' }}>
+            <div>Filter Epic Games Songs</div>
+            <ToggleSwitch onChange={checked => setFilterEpicGamesSongs(checked)} />
+        </div>
+    </div>;
+}
+
+function proSelectorUi(): JSX.Element {
+    return <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        justifyItems: 'center',
+        gap: '10px'
+    }}>
+        <div style={{ gridColumn: 'span 2', fontWeight: 'bold' }}>Pro Instruments (WIP)</div>
+        <div>Pro Guitar</div>
+        <ToggleSwitch />
+        <div>Pro Bass</div>
+        <ToggleSwitch />
+        <div>Pro Drums</div>
+        <ToggleSwitch />
+        <div>Pro Vocals</div>
+        <ToggleSwitch />
+    </div>;
+}
+
+function difficultyWeightUi(difficultyWeight: number, setDifficultyWeight: (weight: number) => void): JSX.Element {
+    return <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '5px'
+    }}>
+        <div style={{ gridColumn: 'span 2', fontWeight: 'bold' }}>High Difficulty Weight (WIP)</div>
+
+        <div style={{ gridColumn: 'span 2', fontSize: '0.7em' }}>
+            Provides control over how much high-difficulty parts affect the overall difficulty. A higher weight means the hardest parts will have more influence on the overall score. If the weight is 1, it's just a simple average.
+        </div>
+
+        <div style={{ display: 'flex', width: '100%', gap: '5px' }}>
+            <input
+                type='range'
+                min={1}
+                max={3}
+                step={0.1}
+                value={difficultyWeight}
+                onChange={e => setDifficultyWeight(Number(e.target.value))}
+                style={{ flexGrow: 1 }}
+            />
+            <div>{difficultyWeight}</div>
+        </div>
+    </div>;
+}
 
 function songsUi(
     songs: Array<FestivalSong> | null,
