@@ -9,6 +9,7 @@ import ToggleSwitch from "../../../util/ui/ToggleSwitch";
 import { deleteData } from "../../../trivia/logic/Database";
 import VerticalSpacer from "../../../util/ui/Spacer";
 import HorizontalLine from "../../../util/ui/HorizontalLine";
+import Button from "../../../util/ui/Button";
 
 interface HomeProps {
     loadingSongs: Promise<Array<FestivalSong>>;
@@ -27,6 +28,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const [songs, setSongs] = useState<Array<FestivalSong> | null>(null);
     const [filterEpicGamesSongs, setFilterEpicGamesSongs] = useState(false);
     const [difficultyScalar, setDifficultyScalar] = useState<string>('1.5');
+    const [difficultyWeight, setDifficultyWeight] = useState(1.5);
     const [selectedInstruments, setSelectedInstruments] = useState<SelectedInstruments>({
         guitar: true,
         drums: true,
@@ -61,8 +63,8 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     }) ?? null;
 
     return <div>
-        <div style={{ margin: '15px', fontSize: '1.5em' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
+        <div style={{ margin: '15px', fontSize: '1.25em' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '1.3em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
                 Fortnite Festival Band Difficulty Ranking
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-evenly', marginTop: '15px' }}>
@@ -81,13 +83,72 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
                 </div>
                 <button style={{ fontSize: '1em', cursor: 'pointer' }} onClick={fetchLatestSongs}>Fetch Latest Songs</button>
             </div>
+
+
+
+            <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0px' }}>
+                <input
+                    style={{ fontSize: '1em', borderRadius: '15px', padding: '5px', width: '100%' }}
+                    placeholder='Search'
+                    onChange={e => { }}
+                />
+            </div>
+
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                justifyItems: 'center',
+                gap: '5px',
+                margin: '10px auto',
+                border: '1px solid var(--novelty-blue)',
+                borderRadius: '15px',
+                padding: '10px',
+                width: 'fit-content'
+            }}>
+                <div style={{ gridColumn: 'span 2', fontWeight: 'bold' }}>Pro Instruments</div>
+                <div>Pro Guitar</div>
+                <ToggleSwitch />
+                <div>Pro Bass</div>
+                <ToggleSwitch />
+                <div>Pro Drums</div>
+                <ToggleSwitch />
+                <div>Pro Vocals</div>
+                <ToggleSwitch />
+
+            </div>
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '5px',
+                border: '1px solid var(--novelty-blue)',
+                borderRadius: '15px',
+                padding: '10px'
+            }}>
+                <div style={{ gridColumn: 'span 2', fontWeight: 'bold' }}>High Difficulty Weight</div>
+                <div style={{ gridColumn: 'span 2', fontSize: '0.7em' }}>
+                    Provides control over how much high-difficulty parts affect the overall difficulty. A higher weight means the hardest parts will have more influence on the overall score. If the weight is 1, it's just a simple average.
+                </div>
+                <div style={{ display: 'flex', width: '100%', gap: '5px' }}>
+                    <input
+                        type='range'
+                        min={1}
+                        max={3}
+                        step={0.1}
+                        value={difficultyWeight}
+                        onChange={e => setDifficultyWeight(Number(e.target.value))}
+                        style={{ flexGrow: 1 }}
+                    />
+                    <div>{difficultyWeight}</div>
+                </div>
+            </div>
         </div>
 
         <HorizontalLine thickness='3px' color='var(--novelty-blue)' />
         <VerticalSpacer height='15px' />
 
         {songsUi(filteredSongs, difficultyScalar, selectedInstruments, onHeaderClick)}
-    </div>;
+    </div >;
 };
 
 function songsUi(
@@ -154,7 +215,7 @@ function songsUi(
         return <div style={{
             ...cellStyle,
             fontWeight: 'bold',
-            fontSize: '1.5em',
+            fontSize: '1.25em',
             position: 'sticky',
             top: 0,
             backgroundColor: 'var(--novelty-background)',
