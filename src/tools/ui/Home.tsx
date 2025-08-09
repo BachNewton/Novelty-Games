@@ -14,26 +14,30 @@ interface HomeProps {
     onHomeButtonClicked: () => void;
 }
 
-interface UiState { }
-class MenuUiState implements UiState { }
+type UiState =
+    | MenuUiState
+    | MusicPlayerUiState
+    | FortniteFestivalUiState
+    | DatabaseDebugUiState;
 
-class MusicPlayerUiState implements UiState {
-    networkService: NetworkService<void> = createNetworkService(NetworkedApplication.MUSIC_PLAYER);
-
-    musicIndexPromise: Promise<MusicIndex> = new Promise((resolve) => {
-        import(/* webpackChunkName: "MusicIndex" */ '../music-player/logic/MusicIndex')
-            .then(({ createMusicIndex }) => {
-                console.log('Loaded the MusicIndex module');
-                resolve(createMusicIndex());
-            });
-    });
+interface MenuUiState {
+    type: 'Menu';
 }
 
-class FortniteFestivalUiState implements UiState {
-    loadingSongs: Promise<Array<FestivalSong>> = getFestivalSongs();
+interface MusicPlayerUiState {
+    type: 'MusicPlayer';
+    networkService: NetworkService<void>;
+    musicIndexPromise: Promise<MusicIndex>;
 }
 
-class DatabaseDebugUiState implements UiState { }
+interface FortniteFestivalUiState {
+    type: 'FortniteFestival';
+    loadingSongs: Promise<Array<FestivalSong>>;
+}
+
+interface DatabaseDebugUiState {
+    type: 'DatabaseDebug';
+}
 
 interface OnClickHandlers {
     onHomeButtonClicked: () => void;
@@ -49,31 +53,30 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
     const onClickHandlers: OnClickHandlers = {
         onHomeButtonClicked: onHomeButtonClicked,
         onForTheStats2Click: () => window.alert('Work in progress!'),
-        onMusicPlayerClick: () => setUiState(new MusicPlayerUiState()),
-        onFortniteFestivalClick: () => setUiState(new FortniteFestivalUiState()),
-        onDatabaseDebugClick: () => setUiState(new DatabaseDebugUiState())
+        onMusicPlayerClick: () => setUiState(createMusicPlayerUiState()),
+        onFortniteFestivalClick: () => setUiState(createFortniteFestivalUiState()),
+        onDatabaseDebugClick: () => setUiState(createDatabaseDebugUiState())
     };
 
     return Ui(uiState, onClickHandlers);
 };
 
 function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
-    if (uiState instanceof MenuUiState) {
-        return MenuUi(onClickHandlers);
-    } else if (uiState instanceof MusicPlayerUiState) {
-        return <MusicPlayerHome
-            networkService={uiState.networkService}
-            musicIndexPromise={uiState.musicIndexPromise}
-        />;
-    } else if (uiState instanceof FortniteFestivalUiState) {
-        return <FortniteFestivalHome loadingSongs={uiState.loadingSongs} />;
-    } else if (uiState instanceof DatabaseDebugUiState) {
-        return <DatabaseDebugHome
-            database={createDatabase('example', ['numbers', 'words'])}
-            exampleDatabase={createDatabaseManager().exampleDatabase}
-        />;
-    } else {
-        throw new Error('UiState not supported: ' + uiState);
+    switch (uiState.type) {
+        case 'Menu':
+            return MenuUi(onClickHandlers);
+        case 'MusicPlayer':
+            return <MusicPlayerHome
+                networkService={uiState.networkService}
+                musicIndexPromise={uiState.musicIndexPromise}
+            />;
+        case 'FortniteFestival':
+            return <FortniteFestivalHome loadingSongs={uiState.loadingSongs} />;
+        case 'DatabaseDebug':
+            return <DatabaseDebugHome
+                database={createDatabase('example', ['numbers', 'words'])}
+                exampleDatabase={createDatabaseManager().exampleDatabase}
+            />;
     }
 }
 
@@ -109,12 +112,45 @@ function getInitialState(): UiState {
 
     switch (route) {
         case Route.MUSIC_PLAYER:
-            return new MusicPlayerUiState();
+            return createMusicPlayerUiState();
         case Route.FORTNITE_FESTIVAL:
-            return new FortniteFestivalUiState();
+            return createFortniteFestivalUiState();
         default:
-            return new MenuUiState();
+            return createMenuUiState();
     }
+}
+
+function createMusicPlayerUiState(): MusicPlayerUiState {
+    return {
+        type: 'MusicPlayer',
+        networkService: createNetworkService(NetworkedApplication.MUSIC_PLAYER),
+        musicIndexPromise: new Promise((resolve) => {
+            import(/* webpackChunkName: "MusicIndex" */ '../music-player/logic/MusicIndex')
+                .then(({ createMusicIndex }) => {
+                    console.log('Loaded the MusicIndex module');
+                    resolve(createMusicIndex());
+                });
+        })
+    };
+}
+
+function createFortniteFestivalUiState(): FortniteFestivalUiState {
+    return {
+        type: 'FortniteFestival',
+        loadingSongs: getFestivalSongs()
+    };
+}
+
+function createDatabaseDebugUiState(): DatabaseDebugUiState {
+    return {
+        type: 'DatabaseDebug'
+    };
+}
+
+function createMenuUiState(): MenuUiState {
+    return {
+        type: 'Menu'
+    };
 }
 
 export default Home;

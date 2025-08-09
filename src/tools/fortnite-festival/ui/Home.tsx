@@ -7,6 +7,8 @@ import React from "react";
 import Difficulty from "./Difficulty";
 import ToggleSwitch from "../../../util/ui/ToggleSwitch";
 import { deleteData } from "../../../trivia/logic/Database";
+import VerticalSpacer from "../../../util/ui/Spacer";
+import HorizontalLine from "../../../util/ui/HorizontalLine";
 
 interface HomeProps {
     loadingSongs: Promise<Array<FestivalSong>>;
@@ -81,7 +83,8 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
             </div>
         </div>
 
-        <div style={{ borderTop: '3px solid var(--novelty-blue)', margin: '15px 0px' }} />
+        <HorizontalLine thickness='3px' color='var(--novelty-blue)' />
+        <VerticalSpacer height='15px' />
 
         {songsUi(filteredSongs, difficultyScalar, selectedInstruments, onHeaderClick)}
     </div>;
@@ -181,7 +184,6 @@ function songsUi(
             {createHeaderCell('Band')}
             {rows}
         </div>
-
     </div>;
 }
 
