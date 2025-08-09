@@ -103,7 +103,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
 
     return <div>
         <div style={{ margin: '15px', fontSize: '1.2em' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '1.75em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
                 Fortnite Festival Difficulty Rankings
             </div>
 
