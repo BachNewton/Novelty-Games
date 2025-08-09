@@ -101,7 +101,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
 
             <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Widget>
-                    {toolsUi(filterEpicGamesSongs, setFilterEpicGamesSongs)}
+                    {toolsUi(filterEpicGamesSongs, setFilterEpicGamesSongs, fetchedSongs => setSongs(fetchedSongs))}
                 </Widget>
 
                 <Widget>
@@ -139,7 +139,11 @@ function searchUi(): JSX.Element {
     </div>;
 }
 
-function toolsUi(filterEpicGamesSongs: boolean, setFilterEpicGamesSongs: (checked: boolean) => void): JSX.Element {
+function toolsUi(
+    filterEpicGamesSongs: boolean,
+    setFilterEpicGamesSongs: (checked: boolean) => void,
+    onSongsFetched: (fetchedSongs: FestivalSong[] | null) => void
+): JSX.Element {
     return <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -148,7 +152,9 @@ function toolsUi(filterEpicGamesSongs: boolean, setFilterEpicGamesSongs: (checke
         gap: '10px',
         height: '100%'
     }}>
-        <div><Button borderRadius={15} onClick={fetchLatestSongs}><div style={{ padding: '5px' }}>Fetch Latest Songs</div></Button></div>
+        <div><Button borderRadius={15} onClick={() => fetchLatestSongs(onSongsFetched)}>
+            <div style={{ padding: '5px' }}>Fetch Latest Songs</div>
+        </Button></div>
 
         <div style={{ display: 'flex', gap: '10px' }}>
             <div>Filter Epic Games Songs</div>
@@ -283,8 +289,14 @@ export async function getFestivalSongs(): Promise<Array<FestivalSong>> {
     return data as Array<FestivalSong>;
 }
 
-function fetchLatestSongs() {
-    deleteData(DataType.FORTNITE_FESTIVAL).then(() => window.location.reload());
+async function fetchLatestSongs(onSongsFetched: (fetchedSongs: FestivalSong[] | null) => void) {
+    onSongsFetched(null);
+
+    await deleteData(DataType.FORTNITE_FESTIVAL);
+
+    const songs = await getFestivalSongs();
+
+    onSongsFetched(songs);
 }
 
 export default Home;
