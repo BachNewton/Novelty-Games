@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: npm install  # Install dependencies from package.json
       - name: Run the Fortnite Festival scrape script
-        run: node scrapper/scrapeFortniteFestival.js
+        run: node scrapers/scrapeFortniteFestival.js
       - name: Configure Git user
         run: |
           git config --global user.name 'GitHub Actions'
