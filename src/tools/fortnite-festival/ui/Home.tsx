@@ -152,6 +152,11 @@ function toolsUi(filterEpicGamesSongs: boolean, setFilterEpicGamesSongs: (checke
             <div>Filter Epic Games Songs</div>
             <ToggleSwitch enabled={filterEpicGamesSongs} onChange={checked => setFilterEpicGamesSongs(checked)} />
         </div>
+
+        <div style={{ display: 'flex', gap: '10px' }}>
+            <div>Filter Owned Songs (WIP)</div>
+            <ToggleSwitch enabled={false} onChange={() => { }} />
+        </div>
     </div>;
 }
 
