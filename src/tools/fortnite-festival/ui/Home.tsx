@@ -14,6 +14,7 @@ import Widget from "./Widget";
 
 const VISIBLE_COUNT = 50; // Initial number of songs to show
 const DISTANCE_FROM_BOTTOM_PX = 300; // Distance from the bottom of the page to trigger loading more songs
+const DIFFICULTY_WEIGHT_DEFAULT = 1.3;
 
 interface HomeProps {
     loadingSongs: Promise<Array<FestivalSong>>;
@@ -31,8 +32,7 @@ type Instrument = keyof SelectedInstruments;
 const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const [songs, setSongs] = useState<Array<FestivalSong> | null>(null);
     const [filterEpicGamesSongs, setFilterEpicGamesSongs] = useState(false);
-    const [difficultyScalar, setDifficultyScalar] = useState<string>('1.5');
-    const [difficultyWeight, setDifficultyWeight] = useState(1.5);
+    const [difficultyWeight, setDifficultyWeight] = useState(DIFFICULTY_WEIGHT_DEFAULT);
     const [selectedInstruments, setSelectedInstruments] = useState<SelectedInstruments>({
         guitar: true,
         drums: true,
@@ -106,7 +106,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         <HorizontalLine thickness='4px' color='var(--novelty-blue)' />
         <VerticalSpacer height='15px' />
 
-        {songsUi(filteredSongs, difficultyScalar, selectedInstruments, onHeaderClick, visibleCount)}
+        {songsUi(filteredSongs, '1.3', selectedInstruments, onHeaderClick, visibleCount)}
     </div >;
 };
 
@@ -178,7 +178,7 @@ function difficultyWeightUi(difficultyWeight: number, setDifficultyWeight: (weig
                 step={0.1}
                 value={difficultyWeight}
                 onChange={e => setDifficultyWeight(Number(e.target.value))}
-                style={{ flexGrow: 1 }}
+                style={{ flexGrow: 1, accentColor: 'var(--novelty-orange)' }}
             />
             <div>{difficultyWeight}</div>
         </div>
