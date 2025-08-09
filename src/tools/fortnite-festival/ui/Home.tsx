@@ -181,7 +181,7 @@ function instrumentSelectorUi(selectedInstruments: SelectedInstruments, instrume
     const headerLabel = isPro ? 'Pro Instruments' : 'Select Instruments';
 
     const description = isPro
-        ? 'Select if you want the pro difficulty of an instruemnt included in the difficulty calculations.'
+        ? 'Select if you want the pro difficulty of an instrument included in the difficulty calculations.'
         : 'Select which instruments you want to include in the difficulty calculations.';
 
     const guitarLabel = isPro ? 'Pro Guitar' : 'Guitar';
@@ -236,7 +236,7 @@ function difficultyWeightUi(difficultyWeight: number, setDifficultyWeight: (weig
                 onChange={e => setDifficultyWeight(Number(e.target.value))}
                 style={{ flexGrow: 1, accentColor: 'var(--novelty-orange)' }}
             />
-            <div>{difficultyWeight}</div>
+            <div>{difficultyWeight.toFixed(1)}</div>
         </div>
     </div>;
 }
