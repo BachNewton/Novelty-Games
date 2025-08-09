@@ -81,9 +81,9 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     }) ?? null;
 
     return <div>
-        <div style={{ margin: '15px', fontSize: '1.25em' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '1.3em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
-                Fortnite Festival Band Difficulty Ranking
+        <div style={{ margin: '15px', fontSize: '1.2em' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
+                Fortnite Festival Difficulty Rankings
             </div>
 
             {searchUi()}
@@ -106,7 +106,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         <HorizontalLine thickness='4px' color='var(--novelty-blue)' />
         <VerticalSpacer height='15px' />
 
-        {songsUi(filteredSongs, '1.3', selectedInstruments, onHeaderClick, visibleCount)}
+        {songsUi(filteredSongs, difficultyWeight, selectedInstruments, onHeaderClick, visibleCount)}
     </div >;
 };
 
@@ -145,7 +145,7 @@ function proSelectorUi(): JSX.Element {
         justifyItems: 'center',
         gap: '10px'
     }}>
-        <div style={{ gridColumn: 'span 2', fontWeight: 'bold' }}>Pro Instruments (WIP)</div>
+        <div style={{ gridColumn: 'span 2', fontWeight: 'bold', fontSize: '1.2em' }}>Pro Instruments (WIP)</div>
         <div>Pro Guitar</div>
         <ToggleSwitch />
         <div>Pro Bass</div>
@@ -164,9 +164,9 @@ function difficultyWeightUi(difficultyWeight: number, setDifficultyWeight: (weig
         alignItems: 'center',
         gap: '5px'
     }}>
-        <div style={{ gridColumn: 'span 2', fontWeight: 'bold' }}>High Difficulty Weight (WIP)</div>
+        <div style={{ gridColumn: 'span 2', fontWeight: 'bold', fontSize: '1.2em' }}>Difficulty Weight</div>
 
-        <div style={{ gridColumn: 'span 2', fontSize: '0.7em' }}>
+        <div style={{ gridColumn: 'span 2', fontSize: '0.75em' }}>
             Provides control over how much high-difficulty parts affect the overall difficulty. A higher weight means the hardest parts will have more influence on the overall score. If the weight is 1, it's just a simple average.
         </div>
 
@@ -187,7 +187,7 @@ function difficultyWeightUi(difficultyWeight: number, setDifficultyWeight: (weig
 
 function songsUi(
     songs: Array<FestivalSong> | null,
-    difficultyScalar: string,
+    difficultyWeight: number,
     selectedInstruments: SelectedInstruments,
     onHeaderClick: (instrument: Instrument) => void,
     visibleCount: number
@@ -195,8 +195,8 @@ function songsUi(
     if (songs === null) return <Loading />;
 
     const sortedSongs = songs.sort((a, b) => {
-        const aDifficulty = calculateBandDifficulty(a, difficultyScalar, selectedInstruments);
-        const bDifficulty = calculateBandDifficulty(b, difficultyScalar, selectedInstruments);
+        const aDifficulty = calculateOverallDifficulty(a, difficultyWeight, selectedInstruments);
+        const bDifficulty = calculateOverallDifficulty(b, difficultyWeight, selectedInstruments);
 
         return aDifficulty - bDifficulty;
     });
@@ -244,7 +244,7 @@ function songsUi(
             {createCell(<Difficulty level={guitar} isSelected={!isGreyedOut('guitar')} />, 'guitar')}
             {createCell(<Difficulty level={bass} isSelected={!isGreyedOut('bass')} />, 'bass')}
             {createCell(<Difficulty level={drums} isSelected={!isGreyedOut('drums')} />, 'drums')}
-            {createCell(calculateBandDifficulty(song, difficultyScalar, selectedInstruments).toFixed(1))}
+            {createCell(calculateOverallDifficulty(song, difficultyWeight, selectedInstruments).toFixed(1))}
         </React.Fragment>;
     });
 
@@ -278,20 +278,17 @@ function songsUi(
             {createHeaderCell('Pro Guitar', () => onHeaderClick('guitar'))}
             {createHeaderCell('Pro Bass', () => onHeaderClick('bass'))}
             {createHeaderCell('Drums', () => onHeaderClick('drums'))}
-            {createHeaderCell('Band')}
+            {createHeaderCell('Overall')}
             {rows}
         </div>
     </div>;
 }
 
-function calculateBandDifficulty(song: FestivalSong, difficultyScalar: string, selectedInstruments: SelectedInstruments): number {
-    const difficultyScalarValue = parseFloat(difficultyScalar);
-    const scalar = isNaN(difficultyScalarValue) ? 1.5 : difficultyScalarValue;
-
-    const guitar = selectedInstruments.guitar ? song.difficulties.proGuitar ** scalar : 0;
-    const bass = selectedInstruments.bass ? song.difficulties.proBass ** scalar : 0;
-    const drums = selectedInstruments.drums ? song.difficulties.drums ** scalar : 0;
-    const vocals = selectedInstruments.vocals ? song.difficulties.vocals ** scalar : 0;
+function calculateOverallDifficulty(song: FestivalSong, difficultyWeight: number, selectedInstruments: SelectedInstruments): number {
+    const guitar = selectedInstruments.guitar ? song.difficulties.proGuitar ** difficultyWeight : 0;
+    const bass = selectedInstruments.bass ? song.difficulties.proBass ** difficultyWeight : 0;
+    const drums = selectedInstruments.drums ? song.difficulties.drums ** difficultyWeight : 0;
+    const vocals = selectedInstruments.vocals ? song.difficulties.vocals ** difficultyWeight : 0;
 
     const totalInstruments = (selectedInstruments.guitar ? 1 : 0) +
         (selectedInstruments.bass ? 1 : 0) +
@@ -299,9 +296,9 @@ function calculateBandDifficulty(song: FestivalSong, difficultyScalar: string, s
         (selectedInstruments.vocals ? 1 : 0);
 
     const meanPow = (guitar + bass + drums + vocals) / totalInstruments;
-    const bandDifficulty = Math.pow(meanPow, 1 / scalar);
+    const overallDifficulty = Math.pow(meanPow, 1 / difficultyWeight);
 
-    return bandDifficulty;
+    return overallDifficulty;
 }
 
 export async function getFestivalSongs(): Promise<Array<FestivalSong>> {
