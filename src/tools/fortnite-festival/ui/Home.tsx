@@ -133,7 +133,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         <HorizontalLine thickness='4px' color='var(--novelty-blue)' />
         <VerticalSpacer height='15px' />
 
-        {songsUi(filteredSongs, difficultyWeight, selectedInstruments, visibleCount)}
+        {songsUi(filteredSongs, difficultyWeight, selectedInstruments, selectedProInstruments, visibleCount)}
     </div >;
 };
 
@@ -178,7 +178,7 @@ function toolsUi(
 }
 
 function instrumentSelectorUi(selectedInstruments: SelectedInstruments, instrumentToggled: (instrument: Instrument) => void, isPro: boolean): JSX.Element {
-    const headerLabel = isPro ? 'Pro Instruments (WIP)' : 'Select Instruments';
+    const headerLabel = isPro ? 'Pro Instruments' : 'Select Instruments';
 
     const description = isPro
         ? 'Select if you want the pro difficulty of an instruemnt included in the difficulty calculations.'
@@ -245,13 +245,21 @@ function songsUi(
     songs: Array<FestivalSong> | null,
     difficultyWeight: number,
     selectedInstruments: SelectedInstruments,
+    selectedProInstruments: SelectedInstruments,
     visibleCount: number
 ): JSX.Element {
     if (songs === null) return <Loading />;
 
+    const getOverallDifficulty = (song: FestivalSong) => calculateOverallDifficulty(
+        song,
+        difficultyWeight,
+        selectedInstruments,
+        selectedProInstruments
+    );
+
     const sortedSongs = songs.sort((a, b) => {
-        const aDifficulty = calculateOverallDifficulty(a, difficultyWeight, selectedInstruments);
-        const bDifficulty = calculateOverallDifficulty(b, difficultyWeight, selectedInstruments);
+        const aDifficulty = getOverallDifficulty(a);
+        const bDifficulty = getOverallDifficulty(b);
 
         return aDifficulty - bDifficulty;
     });
@@ -259,13 +267,14 @@ function songsUi(
     const visibleSongs = sortedSongs.slice(0, visibleCount); // Only show visibleCount songs
 
     const tracks = visibleSongs.map((song, index) => {
-        const overallDifficulty = calculateOverallDifficulty(song, difficultyWeight, selectedInstruments);
+        const overallDifficulty = getOverallDifficulty(song);
 
         return <Track
             key={index}
             song={song}
             rank={sortedSongs.length - index}
             selectedInstruments={selectedInstruments}
+            selectedProInstruments={selectedProInstruments}
             overallDifficulty={overallDifficulty}
         />;
     });
@@ -275,11 +284,21 @@ function songsUi(
     </div>;
 }
 
-function calculateOverallDifficulty(song: FestivalSong, difficultyWeight: number, selectedInstruments: SelectedInstruments): number {
-    const guitar = selectedInstruments.guitar && song.difficulties.guitar !== null ? song.difficulties.guitar ** difficultyWeight : 0;
-    const bass = selectedInstruments.bass ? song.difficulties.bass ** difficultyWeight : 0;
-    const drums = selectedInstruments.drums ? song.difficulties.drums ** difficultyWeight : 0;
-    const vocals = selectedInstruments.vocals ? song.difficulties.vocals ** difficultyWeight : 0;
+function calculateOverallDifficulty(
+    song: FestivalSong,
+    difficultyWeight: number,
+    selectedInstruments: SelectedInstruments,
+    selectedProInstruments: SelectedInstruments
+): number {
+    const guitarDifficulty = selectedProInstruments.guitar ? song.difficulties.proGuitar : song.difficulties.guitar;
+    const bassDifficulty = selectedProInstruments.bass ? song.difficulties.proBass : song.difficulties.bass;
+    const drumsDifficulty = selectedProInstruments.drums ? song.difficulties.proDrums : song.difficulties.drums;
+    const vocalsDifficulty = song.difficulties.vocals;
+
+    const guitar = selectedInstruments.guitar && guitarDifficulty !== null ? guitarDifficulty ** difficultyWeight : 0;
+    const bass = selectedInstruments.bass ? bassDifficulty ** difficultyWeight : 0;
+    const drums = selectedInstruments.drums ? drumsDifficulty ** difficultyWeight : 0;
+    const vocals = selectedInstruments.vocals ? vocalsDifficulty ** difficultyWeight : 0;
 
     const totalInstruments =
         (selectedInstruments.guitar && song.difficulties.proGuitar !== null ? 1 : 0) +

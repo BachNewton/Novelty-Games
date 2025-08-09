@@ -15,13 +15,19 @@ interface TrackProps {
     song: FestivalSong;
     rank: number;
     selectedInstruments: SelectedInstruments;
+    selectedProInstruments: SelectedInstruments;
     overallDifficulty: number;
 }
 
-const Track: React.FC<TrackProps> = ({ song, rank, selectedInstruments, overallDifficulty }) => {
-    const guitarDifficulty = song.difficulties.guitar === null
+const Track: React.FC<TrackProps> = ({ song, rank, selectedInstruments, selectedProInstruments, overallDifficulty }) => {
+    const guitarDifficulty = selectedProInstruments.guitar ? song.difficulties.proGuitar : song.difficulties.guitar;
+    const bassDifficulty = selectedProInstruments.bass ? song.difficulties.proBass : song.difficulties.bass;
+    const drumsDifficulty = selectedProInstruments.drums ? song.difficulties.proDrums : song.difficulties.drums;
+    const vocalsDifficulty = song.difficulties.vocals;
+
+    const guitarDifficultyUi = guitarDifficulty === null
         ? 'No part'
-        : <Difficulty level={song.difficulties.guitar} isSelected={selectedInstruments.guitar} />;
+        : <Difficulty level={guitarDifficulty} isSelected={selectedInstruments.guitar} />;
 
     return <div style={{
         margin: '7.5px',
@@ -52,22 +58,22 @@ const Track: React.FC<TrackProps> = ({ song, rank, selectedInstruments, overallD
             <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                     <img src={GuitarIcon} alt='Guitar' style={{ height: ICON_SIZE }} />
-                    <div>{guitarDifficulty}</div>
+                    <div>{guitarDifficultyUi}</div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                     <img src={BassIcon} alt='Bass' style={{ height: ICON_SIZE }} />
-                    <div><Difficulty level={song.difficulties.bass} isSelected={selectedInstruments.bass} /></div>
+                    <div><Difficulty level={bassDifficulty} isSelected={selectedInstruments.bass} /></div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                     <img src={DrumsIcon} alt='Drums' style={{ height: ICON_SIZE }} />
-                    <div><Difficulty level={song.difficulties.drums} isSelected={selectedInstruments.drums} /></div>
+                    <div><Difficulty level={drumsDifficulty} isSelected={selectedInstruments.drums} /></div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                     <img src={VocalsIcon} alt='Vocals' style={{ height: ICON_SIZE }} />
-                    <div><Difficulty level={song.difficulties.vocals} isSelected={selectedInstruments.vocals} /></div>
+                    <div><Difficulty level={vocalsDifficulty} isSelected={selectedInstruments.vocals} /></div>
                 </div>
             </div>
 
