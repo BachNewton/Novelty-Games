@@ -67,7 +67,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
             <div style={{ fontWeight: 'bold', fontSize: '1.3em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
                 Fortnite Festival Band Difficulty Ranking
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-evenly', marginTop: '15px' }}>
+            {/* <div style={{ display: 'flex', justifyContent: 'space-evenly', marginTop: '15px' }}>
                 <div>
                     <label>Difficulty Scalar</label>
                     <input
@@ -82,23 +82,39 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
                     <ToggleSwitch onChange={checked => setFilterEpicGamesSongs(checked)} />
                 </div>
                 <button style={{ fontSize: '1em', cursor: 'pointer' }} onClick={fetchLatestSongs}>Fetch Latest Songs</button>
-            </div>
-
-
+            </div> */}
 
             <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0px' }}>
                 <input
-                    style={{ fontSize: '1em', borderRadius: '15px', padding: '5px', width: '100%' }}
+                    style={{ fontSize: '1em', borderRadius: '15px', padding: '5px', flexGrow: 1 }}
                     placeholder='Search'
                     onChange={e => { }}
                 />
             </div>
 
             <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '10px',
+                margin: '10px auto',
+                border: '1px solid var(--novelty-blue)',
+                borderRadius: '15px',
+                padding: '10px',
+                width: 'fit-content'
+            }}>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <div>Filter Epic Games Songs</div>
+                    <ToggleSwitch onChange={checked => setFilterEpicGamesSongs(checked)} />
+                </div>
+                <Button onClick={fetchLatestSongs}>Fetch Latest Songs</Button>
+            </div>
+
+            <div style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
                 justifyItems: 'center',
-                gap: '5px',
+                gap: '10px',
                 margin: '10px auto',
                 border: '1px solid var(--novelty-blue)',
                 borderRadius: '15px',
@@ -114,7 +130,6 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
                 <ToggleSwitch />
                 <div>Pro Vocals</div>
                 <ToggleSwitch />
-
             </div>
             <div style={{
                 display: 'flex',
