@@ -34,6 +34,7 @@ type Instrument = keyof SelectedInstruments;
 const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const [songs, setSongs] = useState<Array<FestivalSong> | null>(null);
     const [filterEpicGamesSongs, setFilterEpicGamesSongs] = useState(false);
+    const [searchText, setSearchText] = useState('');
     const [difficultyWeight, setDifficultyWeight] = useState(DIFFICULTY_WEIGHT_DEFAULT);
 
     const [selectedInstruments, setSelectedInstruments] = useState<SelectedInstruments>({
@@ -88,9 +89,11 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     };
 
     const filteredSongs = songs?.filter(song => {
-        if (!filterEpicGamesSongs) return true;
+        if (!filterBySearchText(song, searchText)) return false;
 
-        return !song.artist.includes('Epic Games');
+        if (filterEpicGamesSongs && song.artist.includes('Epic Games')) return false;
+
+        return true;
     }) ?? null;
 
     return <div>
@@ -118,7 +121,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
                     {difficultyWeightUi(difficultyWeight, setDifficultyWeight)}
                 </Widget>
 
-                {searchUi()}
+                {searchUi(searchText, setSearchText)}
             </div>
         </div>
 
@@ -129,12 +132,13 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     </div >;
 };
 
-function searchUi(): JSX.Element {
+function searchUi(searchText: string, setSearchText: (text: string) => void): JSX.Element {
     return <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0px' }}>
         <input
             style={{ fontSize: '1em', borderRadius: '15px', padding: '7.5px', flexGrow: 1 }}
-            placeholder='Search (WIP)'
-            onChange={e => { }}
+            placeholder='Search'
+            value={searchText}
+            onChange={e => setSearchText(e.target.value)}
         />
     </div>;
 }
@@ -281,6 +285,16 @@ function calculateOverallDifficulty(song: FestivalSong, difficultyWeight: number
     const overallDifficulty = Math.pow(meanPow, 1 / difficultyWeight);
 
     return overallDifficulty;
+}
+
+function filterBySearchText(song: FestivalSong, searchText: string): boolean {
+    if (searchText.length < 2) return true;
+
+    const search = searchText.toLowerCase();
+    const artist = song.artist.toLowerCase();
+    const title = song.name.toLowerCase();
+
+    return artist.includes(search) || title.includes(search);
 }
 
 export async function getFestivalSongs(): Promise<Array<FestivalSong>> {
