@@ -150,7 +150,7 @@ function songsUi(
         </React.Fragment>;
     });
 
-    const createHeaderCell = (text: string, onClick?: () => void) => {
+    const createHeaderCell = (text: string, onClick?: () => void, gridColumnSpan?: number) => {
         return <div style={{
             ...cellStyle,
             fontWeight: 'bold',
@@ -160,6 +160,7 @@ function songsUi(
             backgroundColor: 'var(--novelty-background)',
             zIndex: 1,
             cursor: onClick ? 'pointer' : 'default',
+            gridColumn: gridColumnSpan === undefined ? undefined : `span ${gridColumnSpan}`,
         }}
             onClick={onClick}>
             {text}
@@ -167,12 +168,10 @@ function songsUi(
     };
 
     return <div style={{ margin: '15px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 6fr 5fr' }}>
-            {createHeaderCell('Meta')}
-            {createHeaderCell('Song Details')}
-            {createHeaderCell('Difficulty')}
-        </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 3fr 3fr 1fr 1fr 1fr 1fr 1fr' }}>
+            {createHeaderCell('Meta', undefined, 2)}
+            {createHeaderCell('Song Details', undefined, 2)}
+            {createHeaderCell('Difficulty', undefined, 5)}
             {createHeaderCell('Rank')}
             {createHeaderCell('Owned')}
             {createHeaderCell('Title')}
