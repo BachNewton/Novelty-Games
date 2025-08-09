@@ -187,7 +187,7 @@ function instrumentSelectorUi(selectedInstruments: SelectedInstruments, instrume
     const guitarLabel = isPro ? 'Pro Guitar' : 'Guitar';
     const bassLabel = isPro ? 'Pro Bass' : 'Bass';
     const drumsLabel = isPro ? 'Pro Drums' : 'Drums';
-    const vocalsLabel = isPro ? 'Pro Vocals' : 'Vocals';
+    const vocalsLabel = isPro ? <span style={{ textDecoration: 'line-through', color: 'grey' }}>Pro Vocals</span> : 'Vocals';
 
     return <div style={{
         display: 'grid',
@@ -209,7 +209,7 @@ function instrumentSelectorUi(selectedInstruments: SelectedInstruments, instrume
         <div>{drumsLabel}</div>
         <ToggleSwitch enabled={selectedInstruments.drums} onChange={() => instrumentToggled('drums')} />
         <div>{vocalsLabel}</div>
-        <ToggleSwitch enabled={selectedInstruments.vocals} onChange={() => instrumentToggled('vocals')} />
+        <ToggleSwitch enabled={selectedInstruments.vocals} onChange={() => { if (!isPro) instrumentToggled('vocals') }} />
     </div>;
 }
 
