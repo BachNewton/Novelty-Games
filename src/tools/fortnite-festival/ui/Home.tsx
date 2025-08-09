@@ -60,7 +60,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         return !song.artist.includes('Epic Games');
     }) ?? null;
 
-    return <div style={{ color: 'white' }}>
+    return <div>
         <div style={{ margin: '15px', fontSize: '1.5em' }}>
             <div style={{ fontWeight: 'bold', fontSize: '1.5em', textAlign: 'center', color: 'var(--novelty-orange)' }}>
                 Fortnite Festival Band Difficulty Ranking
