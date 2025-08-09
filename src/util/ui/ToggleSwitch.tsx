@@ -1,11 +1,12 @@
 import './css/toggleSwitch.css';
 
 interface ToggleSwitchProps {
+    enabled: boolean;
     size?: 'small' | 'large'; // Optional size prop
     onChange?: (checked: boolean) => void; // Optional onChange callback
 }
 
-const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ size = 'large', onChange }) => {
+const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ enabled, size = 'large', onChange }) => {
     const switchClass = size === 'small' ? 'switch-small' : 'switch';
     const sliderClass = size === 'small' ? 'slider-small' : 'slider';
 
@@ -17,7 +18,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ size = 'large', onChange })
 
     return (
         <label className={switchClass}>
-            <input type="checkbox" onChange={handleChange} />
+            <input type="checkbox" onChange={handleChange} checked={enabled} />
             <span className={`${sliderClass} round`}></span>
         </label>
     );

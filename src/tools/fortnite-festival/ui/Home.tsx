@@ -16,6 +16,7 @@ const VISIBLE_COUNT = 10; // Initial number of songs to show
 const SONGS_PER_PAGE = 20; // Number of songs to load on scroll
 const DISTANCE_FROM_BOTTOM_PX = 300; // Distance from the bottom of the page to trigger loading more songs
 const DIFFICULTY_WEIGHT_DEFAULT = 1.3;
+const DESCRIPTION_FONT_SIZE = '0.75em';
 
 interface HomeProps {
     loadingSongs: Promise<Array<FestivalSong>>;
@@ -34,12 +35,21 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const [songs, setSongs] = useState<Array<FestivalSong> | null>(null);
     const [filterEpicGamesSongs, setFilterEpicGamesSongs] = useState(false);
     const [difficultyWeight, setDifficultyWeight] = useState(DIFFICULTY_WEIGHT_DEFAULT);
+
     const [selectedInstruments, setSelectedInstruments] = useState<SelectedInstruments>({
         guitar: true,
         drums: true,
+        bass: true,
+        vocals: true
+    });
+
+    const [selectedProInstruments, setSelectedProInstruments] = useState<SelectedInstruments>({
+        guitar: false,
+        drums: false,
         bass: false,
         vocals: false
     });
+
     const [visibleCount, setVisibleCount] = useState(VISIBLE_COUNT);
 
     useEffect(() => {
@@ -63,15 +73,17 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         return () => window.removeEventListener('scroll', onScroll);
     }, [songs]);
 
-    const onHeaderClick = (instrument: Instrument) => {
+    const onInstrumentToggled = (instrument: Instrument, isPro: boolean) => {
+        const setter = isPro ? setSelectedProInstruments : setSelectedInstruments;
+
         if (instrument === 'guitar') {
-            setSelectedInstruments(prev => ({ ...prev, guitar: !prev.guitar }));
+            setter(prev => ({ ...prev, guitar: !prev.guitar }));
         } else if (instrument === 'drums') {
-            setSelectedInstruments(prev => ({ ...prev, drums: !prev.drums }));
+            setter(prev => ({ ...prev, drums: !prev.drums }));
         } else if (instrument === 'bass') {
-            setSelectedInstruments(prev => ({ ...prev, bass: !prev.bass }));
+            setter(prev => ({ ...prev, bass: !prev.bass }));
         } else if (instrument === 'vocals') {
-            setSelectedInstruments(prev => ({ ...prev, vocals: !prev.vocals }));
+            setter(prev => ({ ...prev, vocals: !prev.vocals }));
         }
     };
 
@@ -89,11 +101,15 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
 
             <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Widget>
-                    {toolsUi(setFilterEpicGamesSongs)}
+                    {toolsUi(filterEpicGamesSongs, setFilterEpicGamesSongs)}
                 </Widget>
 
                 <Widget>
-                    {proSelectorUi()}
+                    {instrumentSelectorUi(selectedInstruments, instrument => onInstrumentToggled(instrument, false), false)}
+                </Widget>
+
+                <Widget>
+                    {instrumentSelectorUi(selectedProInstruments, instrument => onInstrumentToggled(instrument, true), true)}
                 </Widget>
             </div>
 
@@ -107,7 +123,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         <HorizontalLine thickness='4px' color='var(--novelty-blue)' />
         <VerticalSpacer height='15px' />
 
-        {songsUi(filteredSongs, difficultyWeight, selectedInstruments, onHeaderClick, visibleCount)}
+        {songsUi(filteredSongs, difficultyWeight, selectedInstruments, visibleCount)}
     </div >;
 };
 
@@ -121,7 +137,7 @@ function searchUi(): JSX.Element {
     </div>;
 }
 
-function toolsUi(setFilterEpicGamesSongs: (checked: boolean) => void): JSX.Element {
+function toolsUi(filterEpicGamesSongs: boolean, setFilterEpicGamesSongs: (checked: boolean) => void): JSX.Element {
     return <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -134,27 +150,44 @@ function toolsUi(setFilterEpicGamesSongs: (checked: boolean) => void): JSX.Eleme
 
         <div style={{ display: 'flex', gap: '10px' }}>
             <div>Filter Epic Games Songs</div>
-            <ToggleSwitch onChange={checked => setFilterEpicGamesSongs(checked)} />
+            <ToggleSwitch enabled={filterEpicGamesSongs} onChange={checked => setFilterEpicGamesSongs(checked)} />
         </div>
     </div>;
 }
 
-function proSelectorUi(): JSX.Element {
+function instrumentSelectorUi(selectedInstruments: SelectedInstruments, instrumentToggled: (instrument: Instrument) => void, isPro: boolean): JSX.Element {
+    const headerLabel = isPro ? 'Pro Instruments' : 'Instruments';
+
+    const description = isPro
+        ? 'Select if you want the pro difficulty of an instruemnt included in the difficulty calculations.'
+        : 'Select which instruments you want to include in the difficulty calculations.';
+
+    const guitarLabel = isPro ? 'Pro Guitar' : 'Guitar';
+    const bassLabel = isPro ? 'Pro Bass' : 'Bass';
+    const drumsLabel = isPro ? 'Pro Drums' : 'Drums';
+    const vocalsLabel = isPro ? 'Pro Vocals' : 'Vocals';
+
     return <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
         justifyItems: 'center',
-        gap: '10px'
+        gap: '10px',
+        maxWidth: '250px'
     }}>
-        <div style={{ gridColumn: 'span 2', fontWeight: 'bold', fontSize: '1.2em' }}>Pro Instruments (WIP)</div>
-        <div>Pro Guitar</div>
-        <ToggleSwitch />
-        <div>Pro Bass</div>
-        <ToggleSwitch />
-        <div>Pro Drums</div>
-        <ToggleSwitch />
-        <div>Pro Vocals</div>
-        <ToggleSwitch />
+        <div style={{ gridColumn: 'span 2', fontWeight: 'bold', fontSize: '1.2em' }}>{headerLabel} (WIP)</div>
+
+        <div style={{ gridColumn: 'span 2', fontSize: DESCRIPTION_FONT_SIZE }}>
+            {description}
+        </div>
+
+        <div>{guitarLabel}</div>
+        <ToggleSwitch enabled={selectedInstruments.guitar} onChange={() => instrumentToggled('guitar')} />
+        <div>{bassLabel}</div>
+        <ToggleSwitch enabled={selectedInstruments.bass} onChange={() => instrumentToggled('bass')} />
+        <div>{drumsLabel}</div>
+        <ToggleSwitch enabled={selectedInstruments.drums} onChange={() => instrumentToggled('drums')} />
+        <div>{vocalsLabel}</div>
+        <ToggleSwitch enabled={selectedInstruments.vocals} onChange={() => instrumentToggled('vocals')} />
     </div>;
 }
 
@@ -167,7 +200,7 @@ function difficultyWeightUi(difficultyWeight: number, setDifficultyWeight: (weig
     }}>
         <div style={{ gridColumn: 'span 2', fontWeight: 'bold', fontSize: '1.2em' }}>Difficulty Weight</div>
 
-        <div style={{ gridColumn: 'span 2', fontSize: '0.75em' }}>
+        <div style={{ gridColumn: 'span 2', fontSize: DESCRIPTION_FONT_SIZE }}>
             Provides control over how much high-difficulty parts affect the overall difficulty. A higher weight means the hardest parts will have more influence on the overall score. If the weight is 1, it's just a simple average.
         </div>
 
@@ -190,7 +223,6 @@ function songsUi(
     songs: Array<FestivalSong> | null,
     difficultyWeight: number,
     selectedInstruments: SelectedInstruments,
-    onHeaderClick: (instrument: Instrument) => void,
     visibleCount: number
 ): JSX.Element {
     if (songs === null) return <Loading />;
@@ -300,8 +332,8 @@ function songsUi(
 }
 
 function calculateOverallDifficulty(song: FestivalSong, difficultyWeight: number, selectedInstruments: SelectedInstruments): number {
-    const guitar = selectedInstruments.guitar ? song.difficulties.proGuitar ** difficultyWeight : 0;
-    const bass = selectedInstruments.bass ? song.difficulties.proBass ** difficultyWeight : 0;
+    const guitar = selectedInstruments.guitar ? song.difficulties.guitar ** difficultyWeight : 0;
+    const bass = selectedInstruments.bass ? song.difficulties.bass ** difficultyWeight : 0;
     const drums = selectedInstruments.drums ? song.difficulties.drums ** difficultyWeight : 0;
     const vocals = selectedInstruments.vocals ? song.difficulties.vocals ** difficultyWeight : 0;
 
