@@ -19,6 +19,10 @@ interface TrackProps {
 }
 
 const Track: React.FC<TrackProps> = ({ song, rank, selectedInstruments, overallDifficulty }) => {
+    const guitarDifficulty = song.difficulties.guitar === null
+        ? 'No part'
+        : <Difficulty level={song.difficulties.guitar} isSelected={selectedInstruments.guitar} />;
+
     return <div style={{
         margin: '7.5px',
         padding: '7.5px',
@@ -48,7 +52,7 @@ const Track: React.FC<TrackProps> = ({ song, rank, selectedInstruments, overallD
             <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                     <img src={GuitarIcon} alt='Guitar' style={{ height: ICON_SIZE }} />
-                    <div><Difficulty level={song.difficulties.guitar} isSelected={selectedInstruments.guitar} /></div>
+                    <div>{guitarDifficulty}</div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>

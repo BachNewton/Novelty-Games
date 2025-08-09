@@ -49,10 +49,10 @@ export interface FestivalSong extends Data {
 interface FestivalSongDifficulty {
     bass: number;
     drums: number;
-    guitar: number;
+    guitar: number | null;
     proBass: number;
     proDrums: number;
-    proGuitar: number;
+    proGuitar: number | null;
     vocals: number;
 }
 

@@ -276,12 +276,13 @@ function songsUi(
 }
 
 function calculateOverallDifficulty(song: FestivalSong, difficultyWeight: number, selectedInstruments: SelectedInstruments): number {
-    const guitar = selectedInstruments.guitar ? song.difficulties.guitar ** difficultyWeight : 0;
+    const guitar = selectedInstruments.guitar && song.difficulties.guitar !== null ? song.difficulties.guitar ** difficultyWeight : 0;
     const bass = selectedInstruments.bass ? song.difficulties.bass ** difficultyWeight : 0;
     const drums = selectedInstruments.drums ? song.difficulties.drums ** difficultyWeight : 0;
     const vocals = selectedInstruments.vocals ? song.difficulties.vocals ** difficultyWeight : 0;
 
-    const totalInstruments = (selectedInstruments.guitar ? 1 : 0) +
+    const totalInstruments =
+        (selectedInstruments.guitar && song.difficulties.proGuitar !== null ? 1 : 0) +
         (selectedInstruments.bass ? 1 : 0) +
         (selectedInstruments.drums ? 1 : 0) +
         (selectedInstruments.vocals ? 1 : 0);
