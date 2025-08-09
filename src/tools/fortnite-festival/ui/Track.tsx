@@ -7,6 +7,7 @@ import VocalsIcon from "../icons/vocals.png";
 import VerticalSpacer from "../../../util/ui/Spacer";
 import { SelectedInstruments } from "./Home";
 
+const TRACK_WIDTH = '325px';
 const ICON_SIZE = '40px';
 const ALBUM_ART_SIZE = '100px';
 
@@ -22,7 +23,8 @@ const Track: React.FC<TrackProps> = ({ song, rank, selectedInstruments, overallD
         margin: '7.5px',
         padding: '7.5px',
         border: '1px solid var(--novelty-blue)',
-        borderRadius: '15px'
+        borderRadius: '15px',
+        width: TRACK_WIDTH
     }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <div style={{ fontWeight: 'bold', fontSize: '1.3em' }}>#{rank}</div>
