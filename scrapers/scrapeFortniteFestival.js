@@ -13,13 +13,14 @@ const SCRIPT_CONTENT_REGEX = /<script id=\"__NEXT_DATA__\".+>(.+)<\/script>/g;
     const json = matches.next().value[1];
     const object = JSON.parse(json);
     const songs = object.props.pageProps.data.map(song => {
-        const bassDifficulty = song.difficulties.ba !== undefined ? song.difficulties.ba : 0;
-        const drumsDifficulty = song.difficulties.ds !== undefined ? song.difficulties.ds : 0;
-        const guitarDifficulty = song.difficulties.gr !== undefined ? song.difficulties.gr : 0;
-        const proBassDifficulty = song.difficulties.pb !== undefined ? song.difficulties.pb : 0;
-        const proDrumsDifficulty = song.difficulties.pd !== undefined ? song.difficulties.pd : 0;
-        const proGuitarDifficulty = song.difficulties.pg !== undefined ? song.difficulties.pg : 0;
-        const vocalsDifficulty = song.difficulties.vl !== undefined ? song.difficulties.vl : 0;
+        const guitarDifficulty = song.difficulties.gr !== undefined ? song.difficulties.gr : null;
+        const proGuitarDifficulty = song.difficulties.pg !== undefined ? song.difficulties.pg : null;
+
+        const bassDifficulty = song.difficulties.ba;
+        const drumsDifficulty = song.difficulties.ds;
+        const proBassDifficulty = song.difficulties.pb;
+        const proDrumsDifficulty = song.difficulties.pd;
+        const vocalsDifficulty = song.difficulties.vl;
 
         return {
             name: song.title,
@@ -39,6 +40,7 @@ const SCRIPT_CONTENT_REGEX = /<script id=\"__NEXT_DATA__\".+>(.+)<\/script>/g;
             }
         };
     });
+
     console.log('Songs:', songs);
 
     console.log('Writing songs to JSON file');
