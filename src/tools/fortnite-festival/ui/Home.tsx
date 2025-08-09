@@ -113,7 +113,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
 function searchUi(): JSX.Element {
     return <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0px' }}>
         <input
-            style={{ fontSize: '1em', borderRadius: '15px', padding: '5px', flexGrow: 1 }}
+            style={{ fontSize: '1em', borderRadius: '15px', padding: '7.5px', flexGrow: 1 }}
             placeholder='Search (WIP)'
             onChange={e => { }}
         />
