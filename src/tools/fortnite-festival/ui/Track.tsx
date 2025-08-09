@@ -7,7 +7,7 @@ import VocalsIcon from "../icons/vocals.png";
 import VerticalSpacer from "../../../util/ui/Spacer";
 
 const ICON_SIZE = '40px';
-const ALBUM_ART_SIZE = '80px';
+const ALBUM_ART_SIZE = '100px';
 
 interface TrackProps {
     song: FestivalSong;
@@ -17,8 +17,10 @@ interface TrackProps {
 
 const Track: React.FC<TrackProps> = ({ song, rank, overallDifficulty }) => {
     return <div style={{
+        margin: '7.5px',
         padding: '7.5px',
-        border: '1px solid var(--novelty-blue)'
+        border: '1px solid var(--novelty-blue)',
+        borderRadius: '15px'
     }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <div style={{ fontWeight: 'bold', fontSize: '1.3em' }}>#{rank}</div>
@@ -36,7 +38,7 @@ const Track: React.FC<TrackProps> = ({ song, rank, overallDifficulty }) => {
 
         <VerticalSpacer height='5px' />
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
             <img style={{ height: ALBUM_ART_SIZE }} src={song.albumArt} />
 
             <div>
@@ -61,7 +63,7 @@ const Track: React.FC<TrackProps> = ({ song, rank, overallDifficulty }) => {
                 </div>
             </div>
 
-            <div style={{ fontWeight: 'bold', fontSize: '2em' }}>{overallDifficulty}</div>
+            <div style={{ fontWeight: 'bold', fontSize: '2em' }}>{overallDifficulty.toFixed(1)}</div>
         </div>
     </div>;
 };

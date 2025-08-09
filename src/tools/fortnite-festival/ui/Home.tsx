@@ -204,89 +204,99 @@ function songsUi(
 
     const visibleSongs = sortedSongs.slice(0, visibleCount); // Only show visibleCount songs
 
-    const cellStyle: React.CSSProperties = {
-        padding: '5px',
-        border: '1px solid var(--novelty-blue)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center'
-    };
+    const tracks = visibleSongs.map((song, index) => {
+        const overallDifficulty = calculateOverallDifficulty(song, difficultyWeight, selectedInstruments);
 
-    const isGreyedOut = (instrument?: Instrument) => {
-        return instrument !== undefined && !selectedInstruments[instrument];
-    };
-
-    const createCell = (content: JSX.Element | string, instrument?: Instrument) => {
-        const style: React.CSSProperties = { ...cellStyle };
-
-        if (isGreyedOut(instrument)) {
-            style.border = '1px solid grey';
-            style.color = 'grey'
-        }
-
-        return <div style={style}>
-            {content}
-        </div>;
-    };
-
-    const rows = visibleSongs.map((song, index) => {
-        const vocals = song.difficulties.vocals;
-        const guitar = song.difficulties.proGuitar;
-        const bass = song.difficulties.proBass;
-        const drums = song.difficulties.drums;
-
-        return <React.Fragment key={index}>
-            {createCell(`#${sortedSongs.length - index}`)}
-            <div style={cellStyle}><input type='checkbox' style={{ transform: 'scale(2)' }} disabled={true} /></div>
-            {createCell(song.name)}
-            {createCell(song.artist)}
-            {createCell(<Difficulty level={vocals} isSelected={!isGreyedOut('vocals')} />, 'vocals')}
-            {createCell(<Difficulty level={guitar} isSelected={!isGreyedOut('guitar')} />, 'guitar')}
-            {createCell(<Difficulty level={bass} isSelected={!isGreyedOut('bass')} />, 'bass')}
-            {createCell(<Difficulty level={drums} isSelected={!isGreyedOut('drums')} />, 'drums')}
-            {createCell(calculateOverallDifficulty(song, difficultyWeight, selectedInstruments).toFixed(1))}
-        </React.Fragment>;
+        return <Track key={index} song={song} rank={sortedSongs.length - index} overallDifficulty={overallDifficulty} />;
     });
 
-    const createHeaderCell = (text: string, onClick?: () => void, gridColumnSpan?: number) => {
-        return <div style={{
-            ...cellStyle,
-            fontWeight: 'bold',
-            fontSize: '1.25em',
-            position: 'sticky',
-            top: 0,
-            backgroundColor: 'var(--novelty-background)',
-            zIndex: 1,
-            cursor: onClick ? 'pointer' : 'default',
-            gridColumn: gridColumnSpan === undefined ? undefined : `span ${gridColumnSpan}`,
-        }}
-            onClick={onClick}>
-            {text}
-        </div>;
-    };
-
-    return <div style={{ margin: '15px' }}>
-        <Track song={songs[0]} rank={123} overallDifficulty={4.3} />
-
-        <VerticalSpacer height='15px' />
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 3fr 3fr 1fr 1fr 1fr 1fr 1fr' }}>
-            {createHeaderCell('Meta', undefined, 2)}
-            {createHeaderCell('Song Details', undefined, 2)}
-            {createHeaderCell('Difficulty', undefined, 5)}
-            {createHeaderCell('Rank')}
-            {createHeaderCell('Owned')}
-            {createHeaderCell('Title')}
-            {createHeaderCell('Artist')}
-            {createHeaderCell('Vocals', () => onHeaderClick('vocals'))}
-            {createHeaderCell('Pro Guitar', () => onHeaderClick('guitar'))}
-            {createHeaderCell('Pro Bass', () => onHeaderClick('bass'))}
-            {createHeaderCell('Drums', () => onHeaderClick('drums'))}
-            {createHeaderCell('Overall')}
-            {rows}
-        </div>
+    return <div>
+        {tracks}
     </div>;
+
+    // const cellStyle: React.CSSProperties = {
+    //     padding: '5px',
+    //     border: '1px solid var(--novelty-blue)',
+    //     display: 'flex',
+    //     alignItems: 'center',
+    //     justifyContent: 'center',
+    //     textAlign: 'center'
+    // };
+
+    // const isGreyedOut = (instrument?: Instrument) => {
+    //     return instrument !== undefined && !selectedInstruments[instrument];
+    // };
+
+    // const createCell = (content: JSX.Element | string, instrument?: Instrument) => {
+    //     const style: React.CSSProperties = { ...cellStyle };
+
+    //     if (isGreyedOut(instrument)) {
+    //         style.border = '1px solid grey';
+    //         style.color = 'grey'
+    //     }
+
+    //     return <div style={style}>
+    //         {content}
+    //     </div>;
+    // };
+
+    // const rows = visibleSongs.map((song, index) => {
+    //     const vocals = song.difficulties.vocals;
+    //     const guitar = song.difficulties.proGuitar;
+    //     const bass = song.difficulties.proBass;
+    //     const drums = song.difficulties.drums;
+
+    //     return <React.Fragment key={index}>
+    //         {createCell(`#${sortedSongs.length - index}`)}
+    //         <div style={cellStyle}><input type='checkbox' style={{ transform: 'scale(2)' }} disabled={true} /></div>
+    //         {createCell(song.name)}
+    //         {createCell(song.artist)}
+    //         {createCell(<Difficulty level={vocals} isSelected={!isGreyedOut('vocals')} />, 'vocals')}
+    //         {createCell(<Difficulty level={guitar} isSelected={!isGreyedOut('guitar')} />, 'guitar')}
+    //         {createCell(<Difficulty level={bass} isSelected={!isGreyedOut('bass')} />, 'bass')}
+    //         {createCell(<Difficulty level={drums} isSelected={!isGreyedOut('drums')} />, 'drums')}
+    //         {createCell(calculateOverallDifficulty(song, difficultyWeight, selectedInstruments).toFixed(1))}
+    //     </React.Fragment>;
+    // });
+
+    // const createHeaderCell = (text: string, onClick?: () => void, gridColumnSpan?: number) => {
+    //     return <div style={{
+    //         ...cellStyle,
+    //         fontWeight: 'bold',
+    //         fontSize: '1.25em',
+    //         position: 'sticky',
+    //         top: 0,
+    //         backgroundColor: 'var(--novelty-background)',
+    //         zIndex: 1,
+    //         cursor: onClick ? 'pointer' : 'default',
+    //         gridColumn: gridColumnSpan === undefined ? undefined : `span ${gridColumnSpan}`,
+    //     }}
+    //         onClick={onClick}>
+    //         {text}
+    //     </div>;
+    // };
+
+    // return <div style={{ margin: '15px' }}>
+    //     <Track song={songs[0]} rank={123} overallDifficulty={4.3} />
+
+    //     <VerticalSpacer height='15px' />
+
+    //     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 3fr 3fr 1fr 1fr 1fr 1fr 1fr' }}>
+    //         {createHeaderCell('Meta', undefined, 2)}
+    //         {createHeaderCell('Song Details', undefined, 2)}
+    //         {createHeaderCell('Difficulty', undefined, 5)}
+    //         {createHeaderCell('Rank')}
+    //         {createHeaderCell('Owned')}
+    //         {createHeaderCell('Title')}
+    //         {createHeaderCell('Artist')}
+    //         {createHeaderCell('Vocals', () => onHeaderClick('vocals'))}
+    //         {createHeaderCell('Pro Guitar', () => onHeaderClick('guitar'))}
+    //         {createHeaderCell('Pro Bass', () => onHeaderClick('bass'))}
+    //         {createHeaderCell('Drums', () => onHeaderClick('drums'))}
+    //         {createHeaderCell('Overall')}
+    //         {rows}
+    //     </div>
+    // </div>;
 }
 
 function calculateOverallDifficulty(song: FestivalSong, difficultyWeight: number, selectedInstruments: SelectedInstruments): number {
