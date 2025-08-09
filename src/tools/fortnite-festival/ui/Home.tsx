@@ -12,6 +12,9 @@ import HorizontalLine from "../../../util/ui/HorizontalLine";
 import Button from "../../../util/ui/Button";
 import Widget from "./Widget";
 
+const VISIBLE_COUNT = 50; // Initial number of songs to show
+const DISTANCE_FROM_BOTTOM_PX = 300; // Distance from the bottom of the page to trigger loading more songs
+
 interface HomeProps {
     loadingSongs: Promise<Array<FestivalSong>>;
 }
@@ -36,6 +39,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         bass: false,
         vocals: false
     });
+    const [visibleCount, setVisibleCount] = useState(VISIBLE_COUNT);
 
     useEffect(() => {
         updateRoute(Route.FORTNITE_FESTIVAL);
@@ -44,6 +48,19 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
             setSongs(songs);
         });
     }, []);
+
+    // Infinite scroll effect
+    useEffect(() => {
+        const onScroll = () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - DISTANCE_FROM_BOTTOM_PX) {
+                setVisibleCount(count => Math.min((songs?.length ?? 0), count + 50));
+            }
+        };
+
+        window.addEventListener('scroll', onScroll);
+
+        return () => window.removeEventListener('scroll', onScroll);
+    }, [songs]);
 
     const onHeaderClick = (instrument: Instrument) => {
         if (instrument === 'guitar') {
@@ -69,13 +86,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
                 Fortnite Festival Band Difficulty Ranking
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0px' }}>
-                <input
-                    style={{ fontSize: '1em', borderRadius: '15px', padding: '5px', flexGrow: 1 }}
-                    placeholder='Search'
-                    onChange={e => { }}
-                />
-            </div>
+            {searchUi()}
 
             <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Widget>
@@ -95,9 +106,19 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         <HorizontalLine thickness='4px' color='var(--novelty-blue)' />
         <VerticalSpacer height='15px' />
 
-        {songsUi(filteredSongs, difficultyScalar, selectedInstruments, onHeaderClick)}
+        {songsUi(filteredSongs, difficultyScalar, selectedInstruments, onHeaderClick, visibleCount)}
     </div >;
 };
+
+function searchUi(): JSX.Element {
+    return <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0px' }}>
+        <input
+            style={{ fontSize: '1em', borderRadius: '15px', padding: '5px', flexGrow: 1 }}
+            placeholder='Search (WIP)'
+            onChange={e => { }}
+        />
+    </div>;
+}
 
 function toolsUi(setFilterEpicGamesSongs: (checked: boolean) => void): JSX.Element {
     return <div style={{
@@ -168,7 +189,8 @@ function songsUi(
     songs: Array<FestivalSong> | null,
     difficultyScalar: string,
     selectedInstruments: SelectedInstruments,
-    onHeaderClick: (instrument: Instrument) => void
+    onHeaderClick: (instrument: Instrument) => void,
+    visibleCount: number
 ): JSX.Element {
     if (songs === null) return <Loading />;
 
@@ -178,6 +200,8 @@ function songsUi(
 
         return aDifficulty - bDifficulty;
     });
+
+    const visibleSongs = sortedSongs.slice(0, visibleCount); // Only show visibleCount songs
 
     const cellStyle: React.CSSProperties = {
         padding: '5px',
@@ -205,7 +229,7 @@ function songsUi(
         </div>;
     };
 
-    const rows = sortedSongs.map((song, index) => {
+    const rows = visibleSongs.map((song, index) => {
         const vocals = song.difficulties.vocals;
         const guitar = song.difficulties.proGuitar;
         const bass = song.difficulties.proBass;
