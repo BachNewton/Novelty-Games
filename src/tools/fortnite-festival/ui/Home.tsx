@@ -74,6 +74,11 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         return () => window.removeEventListener('scroll', onScroll);
     }, [songs]);
 
+    // Reset visibleCount when searchText changes
+    useEffect(() => {
+        setVisibleCount(VISIBLE_COUNT);
+    }, [searchText]);
+
     const onInstrumentToggled = (instrument: Instrument, isPro: boolean) => {
         const setter = isPro ? setSelectedProInstruments : setSelectedInstruments;
 
