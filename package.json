@@ -46,7 +46,8 @@
     "deploy": "gh-pages-clean && gh-pages -b gh-pages -d build",
     "patch": "node scripts/updatePatchVersion.js && git add src/Versioning.ts && git commit -m \"Updated patch version\" && git push && npm run deploy",
     "minor": "node scripts/updateMinorVersion.js && git add src/Versioning.ts && git commit -m \"Updated minor version\" && git push && npm run deploy",
-    "major": "node scripts/updateMajorVersion.js && git add src/Versioning.ts && git commit -m \"Updated major version\" && git push && npm run deploy"
+    "major": "node scripts/updateMajorVersion.js && git add src/Versioning.ts && git commit -m \"Updated major version\" && git push && npm run deploy",
+    "check-size": "npm run build && source-map-explorer 'build/static/js/*.js'"
   },
   "homepage": "https://bachnewton.github.io/Novelty-Games/",
   "eslintConfig": {
