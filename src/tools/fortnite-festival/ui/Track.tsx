@@ -45,7 +45,7 @@ const Track: React.FC<TrackProps> = ({ song, rank, selectedInstruments, selected
                 <div>{song.artist}</div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'center' }}>
                 <div>Owned</div>
                 <input type='checkbox' style={{ accentColor: 'var(--novelty-orange)', transform: 'scale(1.75)' }} />
             </div>
