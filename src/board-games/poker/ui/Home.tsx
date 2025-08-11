@@ -5,6 +5,7 @@ import Button from "../../../util/ui/Button";
 import { createNetworkService, NetworkedApplication } from "../../../util/networking/NetworkService";
 import { createID } from "../../../util/ID";
 import VerticalSpacer from "../../../util/ui/Spacer";
+import TableUi from "./Table";
 
 interface HomeProps { }
 
@@ -44,6 +45,12 @@ const Home: React.FC<HomeProps> = ({ }) => {
         updateRoute(Route.POKER);
 
         refreshTables();
+
+        // game.startRound();
+        // game.bet(1);
+        // game.raise(0, 10);
+        // // console.log(game.endRound());
+        // console.log(game.getState());
     }, []);
 
     useEffect(() => {
@@ -74,20 +81,26 @@ const Home: React.FC<HomeProps> = ({ }) => {
         <div>Players: {t.players.length}</div>
     </div>);
 
+    const content = table === null
+        ? <>
+            <div>Poker</div>
+
+            <VerticalSpacer height='15px' />
+
+            <div style={{ display: 'flex', gap: '5px' }}>
+                <div>Tables</div>
+                <div><Button onClick={refreshTables}>Refresh</Button></div>
+            </div>
+            {tablesUi}
+
+            <VerticalSpacer height='15px' />
+
+            <Button onClick={createTable}>Create Table</Button>
+        </>
+        : <TableUi />;
+
     return <div style={{ margin: '15px' }}>
-        <div>Poker</div>
-
-        <VerticalSpacer height='15px' />
-
-        <div style={{ display: 'flex', gap: '5px' }}>
-            <div>Tables</div>
-            <div><Button onClick={refreshTables}>Refresh</Button></div>
-        </div>
-        {tablesUi}
-
-        <VerticalSpacer height='15px' />
-
-        <Button onClick={createTable}>Create Table</Button>
+        {content}
     </div>;
 };
 
