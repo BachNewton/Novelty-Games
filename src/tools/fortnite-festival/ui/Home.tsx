@@ -172,6 +172,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
             selectedInstruments,
             selectedProInstruments,
             visibleCount,
+            sortOrder,
             ownedSongs,
             updateOwnedSong
         )}
@@ -308,6 +309,7 @@ function songsUi(
     selectedInstruments: SelectedInstruments,
     selectedProInstruments: SelectedInstruments,
     visibleCount: number,
+    sortOrder: SortOrder,
     ownedSongs: Set<string>,
     updateOwnedSong: (isOwned: boolean, song: FestivalSong) => void
 ): JSX.Element {
@@ -324,7 +326,11 @@ function songsUi(
         const aDifficulty = getOverallDifficulty(a);
         const bDifficulty = getOverallDifficulty(b);
 
-        return aDifficulty - bDifficulty;
+        const compare = sortOrder === SortOrder.DESCENDING
+            ? aDifficulty - bDifficulty
+            : bDifficulty - aDifficulty;
+
+        return compare;
     });
 
     const visibleSongs = sortedSongs.slice(0, visibleCount); // Only show visibleCount songs
@@ -332,10 +338,14 @@ function songsUi(
     const tracks = visibleSongs.map((song, index) => {
         const overallDifficulty = getOverallDifficulty(song);
 
+        const rank = sortOrder === SortOrder.DESCENDING
+            ? sortedSongs.length - index
+            : index + 1;
+
         return <Track
             key={index}
             song={song}
-            rank={sortedSongs.length - index}
+            rank={rank}
             selectedInstruments={selectedInstruments}
             selectedProInstruments={selectedProInstruments}
             overallDifficulty={overallDifficulty}
