@@ -4,14 +4,13 @@ import { COLORS } from "./Home";
 import TextReveal from "./TextReveal";
 
 interface PetDiscoveredProps {
-    pets: Pet[];
+    selectedPet: Pet;
     selectedTab: number;
     text: string;
     image: string;
 }
 
-const PetDiscovered: React.FC<PetDiscoveredProps> = ({ pets, selectedTab, text, image }) => {
-    const selectedPet = pets[selectedTab];
+const PetDiscovered: React.FC<PetDiscoveredProps> = ({ selectedPet, selectedTab, text, image }) => {
     const isDiscovered = selectedPet.discovered;
 
     return <>
