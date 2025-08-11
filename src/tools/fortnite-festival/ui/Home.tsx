@@ -11,7 +11,8 @@ import HorizontalLine from "../../../util/ui/HorizontalLine";
 import Button from "../../../util/ui/Button";
 import Widget from "./Widget";
 import Track from "./Track";
-import { createFortniteFestivalDatabase, FortniteFestivalDatabase, getSuperKey } from "../logic/FortniteFestivalDatabase";
+import { createFortniteFestivalDatabase, getSuperKey } from "../logic/FortniteFestivalDatabase";
+import SortIcon from "../icons/sort.svg";
 
 const VISIBLE_COUNT = 20; // Initial number of songs to show
 const SONGS_PER_PAGE = 25; // Number of songs to load on scroll
@@ -176,6 +177,16 @@ function searchUi(searchText: string, setSearchText: (text: string) => void): JS
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
         />
+
+        <img src={SortIcon} alt='Sort' style={{
+            height: '50px',
+            border: '1px solid var(--novelty-blue)',
+            borderRadius: '15px',
+            cursor: 'pointer',
+            padding: '1px',
+            marginLeft: '5px',
+            boxShadow: 'black 0px 0px 10px'
+        }} />
     </div>;
 }
 
@@ -267,7 +278,7 @@ function difficultyWeightUi(difficultyWeight: number, setDifficultyWeight: (weig
                 step={0.1}
                 value={difficultyWeight}
                 onChange={e => setDifficultyWeight(Number(e.target.value))}
-                style={{ flexGrow: 1, accentColor: 'var(--novelty-orange)' }}
+                style={{ flexGrow: 1, accentColor: 'var(--novelty-orange)', cursor: 'pointer' }}
             />
             <div>{difficultyWeight.toFixed(1)}</div>
         </div>
