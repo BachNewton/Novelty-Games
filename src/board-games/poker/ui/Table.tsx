@@ -1,6 +1,11 @@
-interface TableProps { }
+import { Table as TableData } from "../ui/Home";
 
-const Table: React.FC<TableProps> = ({ }) => {
+interface TableProps {
+    hostGame: boolean;
+    data: TableData;
+}
+
+const Table: React.FC<TableProps> = ({ hostGame, data }) => {
     return <div>Table</div>;
 };
 

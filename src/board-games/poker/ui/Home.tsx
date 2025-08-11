@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
-// import { Game } from "holdem-poker";
+import { Game } from "holdem-poker";
 import Button from "../../../util/ui/Button";
 import { createNetworkService, NetworkedApplication } from "../../../util/networking/NetworkService";
 import { createID } from "../../../util/ID";
@@ -22,7 +22,7 @@ interface TableNetworkData {
     table: Table;
 }
 
-interface Table {
+export interface Table {
     id: string;
     players: string[];
 }
@@ -30,11 +30,12 @@ interface Table {
 const Home: React.FC<HomeProps> = ({ }) => {
     const playerId = useRef(createID()).current;
     const networkService = useRef(createNetworkService<PokerNetworkData>(NetworkedApplication.POKER)).current;
+    const [hostGame, setHostGame] = useState(false);
 
-    // const game = useRef(new Game(
-    //     [100, 100],
-    //     5
-    // )).current;
+    const game = useRef(new Game(
+        [100, 100],
+        5
+    )).current;
 
     const [tables, setTables] = useState<Table[]>([]);
     const [table, setTable] = useState<Table | null>(null);
@@ -46,11 +47,10 @@ const Home: React.FC<HomeProps> = ({ }) => {
 
         refreshTables();
 
-        // game.startRound();
-        // game.bet(1);
-        // game.raise(0, 10);
-        // // console.log(game.endRound());
-        // console.log(game.getState());
+        game.startRound();
+        // game.fold(0);
+        // console.log(game.checkResult());
+        console.log(game.getState());
     }, []);
 
     useEffect(() => {
@@ -74,6 +74,8 @@ const Home: React.FC<HomeProps> = ({ }) => {
             id: createID(),
             players: [playerId]
         });
+
+        setHostGame(true);
     };
 
     const tablesUi = tables.map((t, index) => <div key={index}>
@@ -97,7 +99,10 @@ const Home: React.FC<HomeProps> = ({ }) => {
 
             <Button onClick={createTable}>Create Table</Button>
         </>
-        : <TableUi />;
+        : <TableUi
+            hostGame={hostGame}
+            data={table}
+        />;
 
     return <div style={{ margin: '15px' }}>
         {content}
