@@ -13,7 +13,7 @@ import { createFreeMarketCommunicator } from '../mobile-games/free-market/logic/
 import { createStorer } from '../util/Storage';
 import { FreeMarketSave } from '../mobile-games/free-market/data/FreeMarketSave';
 import SubMenu from './SubMenu';
-import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState, PetsState, MobileGamesState, ToddlerTreasureHuntState } from './State';
+import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState, PetsState, MobileGamesState, ToddlerTreasureHuntState, PokerState } from './State';
 import Labyrinth from '../board-games/labyrinth/ui/Labyrinth';
 import ProfileUi from './Profile';
 import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/LabyrinthCommunicator';
@@ -21,6 +21,7 @@ import { APP_VERSION } from '../Versioning';
 import Button from '../util/ui/Button';
 import { createPetsDatabase } from '../mobile-games/pets/logic/PetsDatabase';
 import { createPetsDebugger } from '../mobile-games/pets/logic/PetsDebugger';
+import Poker from "../board-games/poker/ui/Home";
 
 const BUTTON_BORDER_RADIUS = 20;
 const BUTTON_MARGIN = '7px';
@@ -50,6 +51,7 @@ interface OnClickHandlers {
     onFreeMarketClick: () => void;
     onBoardGamesClick: () => void;
     onLabyrinthClick: () => void;
+    onPokerClick: () => void;
     onPetsClick: () => void;
     onToddlerTreasureHuntClick: () => void;
 }
@@ -89,6 +91,7 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         onBoardGamesClick: () => setState(new BoardGamesState()),
         onMobileGamesClick: () => setState(new MobileGamesState()),
         onLabyrinthClick: () => setState(createLabyrinthState()),
+        onPokerClick: () => setState(new PokerState()),
         onPetsClick: () => setState(new PetsState()),
         onToddlerTreasureHuntClick: () => setState(new ToddlerTreasureHuntState())
     };
@@ -166,6 +169,8 @@ function boardGamesUi(boardGamesState: BoardGamesState, onClickHandlers: OnClick
         return <MilleBornesHome onHomeButtonClicked={onClickHandlers.onHomeButtonClick} communicator={boardGamesState.communicator} />;
     } else if (boardGamesState instanceof LabyrinthState) {
         return <Labyrinth communicator={boardGamesState.communicator} />;
+    } else if (boardGamesState instanceof PokerState) {
+        return <Poker />;
     }
 
     return <SubMenu
@@ -173,7 +178,8 @@ function boardGamesUi(boardGamesState: BoardGamesState, onClickHandlers: OnClick
         header='🃏 Board Games 🎲'
         menuItems={[
             { buttonText: 'Mille Bornes 🏎️', onClick: onClickHandlers.onMilleBornesClick },
-            { buttonText: 'Labyrinth 🧩', onClick: onClickHandlers.onLabyrinthClick }
+            { buttonText: 'Labyrinth 🧩', onClick: onClickHandlers.onLabyrinthClick },
+            { buttonText: 'Poker ♠️', onClick: onClickHandlers.onPokerClick }
         ]}
     />;
 }
@@ -214,6 +220,8 @@ function getInitialState(): State {
             return createFreeMarketState();
         case Route.LABYRINTH:
             return createLabyrinthState();
+        case Route.POKER:
+            return new PokerState();
         case Route.CAT:
         case Route.PLATFORMER:
             return new Game2DState();
