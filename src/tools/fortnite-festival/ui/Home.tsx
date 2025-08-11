@@ -36,6 +36,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const database = useRef(createFortniteFestivalDatabase()).current;
     const [songs, setSongs] = useState<Array<FestivalSong> | null>(null);
     const [filterEpicGamesSongs, setFilterEpicGamesSongs] = useState(false);
+    const [filterOwnedSongs, setFilterOwnedSongs] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [difficultyWeight, setDifficultyWeight] = useState(DIFFICULTY_WEIGHT_DEFAULT);
     const [ownedSongs, setOwnedSongs] = useState(new Set<string>());
@@ -111,8 +112,8 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
 
     const filteredSongs = songs?.filter(song => {
         if (!filterBySearchText(song, searchText)) return false;
-
         if (filterEpicGamesSongs && song.artist.includes('Epic Games')) return false;
+        if (filterOwnedSongs && !ownedSongs.has(getSuperKey(song))) return false;
 
         return true;
     }) ?? null;
@@ -125,7 +126,13 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
 
             <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Widget>
-                    {toolsUi(filterEpicGamesSongs, setFilterEpicGamesSongs, fetchedSongs => setSongs(fetchedSongs))}
+                    {toolsUi(
+                        filterEpicGamesSongs,
+                        setFilterEpicGamesSongs,
+                        filterOwnedSongs,
+                        setFilterOwnedSongs,
+                        fetchedSongs => setSongs(fetchedSongs)
+                    )}
                 </Widget>
 
                 <Widget>
@@ -175,6 +182,8 @@ function searchUi(searchText: string, setSearchText: (text: string) => void): JS
 function toolsUi(
     filterEpicGamesSongs: boolean,
     setFilterEpicGamesSongs: (checked: boolean) => void,
+    filterOwnedSongs: boolean,
+    setFilterOwnedSongs: (checked: boolean) => void,
     onSongsFetched: (fetchedSongs: FestivalSong[] | null) => void
 ): JSX.Element {
     return <div style={{
@@ -195,8 +204,8 @@ function toolsUi(
         </div>
 
         <div style={{ display: 'flex', gap: '10px' }}>
-            <div>Filter Owned Songs (WIP)</div>
-            <ToggleSwitch enabled={false} onChange={() => { }} />
+            <div>Filter Owned Songs</div>
+            <ToggleSwitch enabled={filterOwnedSongs} onChange={checked => setFilterOwnedSongs(checked)} />
         </div>
     </div>;
 }
