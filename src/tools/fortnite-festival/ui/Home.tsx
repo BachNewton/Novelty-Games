@@ -14,6 +14,7 @@ import Track from "./Track";
 import { createFortniteFestivalDatabase, getSuperKey } from "../logic/FortniteFestivalDatabase";
 import SortIcon from "../icons/sort.svg";
 import { calculateOverallDifficulty } from "../logic/OverallDifficulty";
+import { RankedSong } from "../data/RankedSong";
 
 const VISIBLE_COUNT = 20; // Initial number of songs to show
 const SONGS_PER_PAGE = 25; // Number of songs to load on scroll
@@ -122,7 +123,6 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     };
 
     const filteredSongs = songs?.filter(song => {
-        if (!filterBySearchText(song, searchText)) return false;
         if (filterEpicGamesSongs && song.artist.includes('Epic Games')) return false;
         if (filterOwnedSongs && !ownedSongs.has(getSuperKey(song))) return false;
 
@@ -169,6 +169,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
 
         {songsUi(
             filteredSongs,
+            searchText,
             difficultyWeight,
             selectedInstruments,
             selectedProInstruments,
@@ -306,6 +307,7 @@ function difficultyWeightUi(difficultyWeight: number, setDifficultyWeight: (weig
 
 function songsUi(
     songs: Array<FestivalSong> | null,
+    searchText: string,
     difficultyWeight: number,
     selectedInstruments: SelectedInstruments,
     selectedProInstruments: SelectedInstruments,
@@ -331,25 +333,44 @@ function songsUi(
             ? aDifficulty - bDifficulty
             : bDifficulty - aDifficulty;
 
-        return compare;
+        if (compare === 0) {
+            const aSeconds = lengthToSeconds(a.length);
+            const bSeconds = lengthToSeconds(b.length);
+
+            const subCompare = sortOrder === SortOrder.DESCENDING
+                ? aSeconds - bSeconds
+                : bSeconds - aSeconds;
+
+            return subCompare;
+        } else {
+            return compare;
+        }
     });
 
-    const visibleSongs = sortedSongs.slice(0, visibleCount); // Only show visibleCount songs
-
-    const tracks = visibleSongs.map((song, index) => {
-        const overallDifficulty = getOverallDifficulty(song);
-
+    const rankedSongs = sortedSongs.map<RankedSong>((song, index) => {
         const rank = sortOrder === SortOrder.DESCENDING
             ? sortedSongs.length - index
             : index + 1;
 
+        return {
+            rank: rank,
+            overallDifficulty: getOverallDifficulty(song),
+            ...song
+        };
+    });
+
+    const searchedSongs = rankedSongs.filter(song => filterBySearchText(song, searchText));
+
+    const visibleSongs = searchedSongs.slice(0, visibleCount); // Only show visibleCount songs
+
+    const tracks = visibleSongs.map((song, index) => {
         return <Track
             key={index}
             song={song}
-            rank={rank}
+            rank={song.rank}
             selectedInstruments={selectedInstruments}
             selectedProInstruments={selectedProInstruments}
-            overallDifficulty={overallDifficulty}
+            overallDifficulty={song.overallDifficulty}
             isOwned={ownedSongs.has(getSuperKey(song))}
             updateOwned={isOwned => updateOwnedSong(isOwned, song)}
         />;
@@ -384,6 +405,12 @@ async function fetchLatestSongs(onSongsFetched: (fetchedSongs: FestivalSong[] | 
     const songs = await getFestivalSongs();
 
     onSongsFetched(songs);
+}
+
+function lengthToSeconds(time: string): number {
+    const [min, sec] = time.split(':').map(Number);
+
+    return min * 60 + sec;
 }
 
 export default Home;
