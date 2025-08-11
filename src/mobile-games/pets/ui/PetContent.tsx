@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "../../../util/ui/Button";
-import { COLORS } from "./Home";
+import { COLORS, InteractionSelection } from "./Home";
 import PetDiscovered from "./PetDiscovered";
 import Discover from "./Discover";
 import { Pet } from "../data/Pet";
@@ -14,28 +14,28 @@ interface PetContentProps {
     pets: Pet[];
     selectedPet: Pet;
     selectedTab: number;
-    textAndImage: PetTextAndImage;
+    hasLoaded: boolean;
+    interteractionSelection: InteractionSelection | null;
     dataManager: DataManager;
     petsDebugger: PetsDebugger;
-    setTextAndImage: (textAndImage: PetTextAndImage) => void;
     setPets: (pets: Pet[]) => void;
     setDistanceToPet: (distance: number | null) => void;
-    onTabChange: (forceNextCycle?: boolean) => void;
 }
 
 const PetContent: React.FC<PetContentProps> = ({
     pets,
     selectedPet,
     selectedTab,
-    textAndImage,
+    hasLoaded,
+    interteractionSelection,
     dataManager,
     petsDebugger,
-    setTextAndImage,
     setPets,
-    setDistanceToPet,
-    onTabChange
+    setDistanceToPet
 }) => {
     const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
+    const [textAndImage, setTextAndImage] = useState<PetTextAndImage>({ text: '', image: null });
+
     const isDiscovered = selectedPet.discovered;
 
     const discoverPet = () => {
@@ -49,6 +49,32 @@ const PetContent: React.FC<PetContentProps> = ({
         setPets([...pets]);
         setTextAndImage(dataManager.getTextAndImage(pets[selectedTab]));
     };
+
+    const onTabChange = (forceNextCycle: boolean = false) => {
+        const updatedPets = dataManager.updatePetsState(pets, selectedTab, forceNextCycle);
+
+        setPets(updatedPets);
+        setTextAndImage(dataManager.getTextAndImage(selectedPet));
+    };
+
+    useEffect(onTabChange, [selectedTab]);
+
+    useEffect(
+        () => setTextAndImage(dataManager.getTextAndImage(pets[selectedTab])),
+        [hasLoaded]
+    );
+
+    useEffect(() => {
+        if (interteractionSelection === null) return;
+
+        const interactionTextAndImage = dataManager.handleInteraction(
+            interteractionSelection.type,
+            interteractionSelection.interaction,
+            selectedPet
+        );
+
+        setTextAndImage(interactionTextAndImage);
+    }, [interteractionSelection]);
 
     const mainContent = isDiscovered && textAndImage.image !== null
         ? <PetDiscovered

@@ -7,7 +7,7 @@ import { PetsDebugger } from "../logic/PetsDebugger";
 import Footer from "./Footer";
 import { createNavigator } from "../../../util/geolocation/Navigator";
 import { Interactions, Interaction } from "../data/Interaction";
-import { createDataManager, PetTextAndImage } from "../logic/DataManager";
+import { createDataManager } from "../logic/DataManager";
 import Tabs from "./Tabs";
 import Welcome from "./Welcome";
 import { State } from "../data/PetSave";
@@ -24,24 +24,22 @@ interface HomeProps {
     petsDebugger: PetsDebugger;
 }
 
+export interface InteractionSelection {
+    type: keyof Interactions;
+    interaction: Interaction;
+}
+
 const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const [hasLoaded, setHasLoaded] = useState(false);
     const [showWelcome, setShowWelcome] = useState(false);
     const dataManager = useRef(createDataManager(database, createNavigator())).current;
     const [pets, setPets] = useState(dataManager.getDefaultPets());
     const [selectedTab, setSelectedTab] = useState(0);
-    const [textAndImage, setTextAndImage] = useState<PetTextAndImage>({ text: '', image: null });
     const [distanceToPet, setDistanceToPet] = useState<number | null>(null);
     const [seenInteractions, setSeenInteractions] = useState(new Set<string>());
+    const [interteractionSelection, setInterteractionSelection] = useState<InteractionSelection | null>(null);
 
     const selectedPet = pets[selectedTab];
-    const isDiscovered = selectedPet.discovered;
-
-    const onTabChange = (forceNextCycle: boolean = false) => {
-        const updatedPets = dataManager.updatePetsState(pets, selectedTab, forceNextCycle);
-        setPets(updatedPets);
-        setTextAndImage(dataManager.getTextAndImage(selectedPet));
-    };
 
     useEffect(() => {
         updateRoute(Route.PETS);
@@ -51,22 +49,21 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
 
             const updatedPetStates = dataManager.updatePetsState(updatedPets, selectedTab);
             setPets(updatedPetStates);
-            setTextAndImage(dataManager.getTextAndImage(updatedPetStates[selectedTab]));
 
             // Show the Welcome screen only if the first pet, "Frog", hasn't been discovered yet
             setShowWelcome(!updatedPets[0].discovered);
         });
 
-        database.getSeenInteractions().then(savedSeenInteractions => setSeenInteractions(savedSeenInteractions));
+        database.getSeenInteractions().then(
+            savedSeenInteractions => setSeenInteractions(savedSeenInteractions)
+        );
     }, []);
 
-    useEffect(onTabChange, [selectedTab]);
-
     const onInteractionSelected = (type: keyof Interactions, interaction: Interaction) => {
-        const interactionTextAndImage = dataManager.handleInteraction(type, interaction, selectedPet);
         database.addSeenInteraction(interaction.id);
         seenInteractions.add(interaction.id);
-        setTextAndImage(interactionTextAndImage);
+
+        setInterteractionSelection({ type, interaction });
     };
 
     return <Scaffold
@@ -81,7 +78,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             selectedTab={selectedTab}
             interactionsEnabled={dataManager.areInteractionsEnabled(selectedPet)}
             interactionsThisCycle={selectedPet.interactionsThisCycle}
-            isDiscovered={isDiscovered}
+            isDiscovered={selectedPet.discovered}
             isSleeping={selectedPet.state === State.ASLEEP}
             distance={distanceToPet}
             seenInteractions={seenInteractions}
@@ -90,18 +87,16 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
 
         fontScale={1.35}
     >
-
         <PetContent
             pets={pets}
             selectedPet={selectedPet}
             selectedTab={selectedTab}
-            textAndImage={textAndImage}
+            hasLoaded={hasLoaded}
             dataManager={dataManager}
-            setTextAndImage={setTextAndImage}
+            interteractionSelection={interteractionSelection}
             setPets={setPets}
             setDistanceToPet={distance => setDistanceToPet(distance)}
             petsDebugger={petsDebugger}
-            onTabChange={onTabChange}
         />
 
         <Welcome show={showWelcome} onClose={() => setShowWelcome(false)} />
