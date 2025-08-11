@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { get } from "../../../trivia/logic/Repository";
 import { DataType, FestivalSong } from "../../../trivia/data/Data";
 import Loading from "../../../util/ui/Loading";
@@ -11,6 +11,7 @@ import HorizontalLine from "../../../util/ui/HorizontalLine";
 import Button from "../../../util/ui/Button";
 import Widget from "./Widget";
 import Track from "./Track";
+import { createFortniteFestivalDatabase, FortniteFestivalDatabase, getSuperKey } from "../logic/FortniteFestivalDatabase";
 
 const VISIBLE_COUNT = 20; // Initial number of songs to show
 const SONGS_PER_PAGE = 25; // Number of songs to load on scroll
@@ -32,10 +33,12 @@ export interface SelectedInstruments {
 type Instrument = keyof SelectedInstruments;
 
 const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
+    const database = useRef(createFortniteFestivalDatabase()).current;
     const [songs, setSongs] = useState<Array<FestivalSong> | null>(null);
     const [filterEpicGamesSongs, setFilterEpicGamesSongs] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [difficultyWeight, setDifficultyWeight] = useState(DIFFICULTY_WEIGHT_DEFAULT);
+    const [ownedSongs, setOwnedSongs] = useState(new Set<string>());
 
     const [selectedInstruments, setSelectedInstruments] = useState<SelectedInstruments>({
         guitar: true,
@@ -56,9 +59,9 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     useEffect(() => {
         updateRoute(Route.FORTNITE_FESTIVAL);
 
-        loadingSongs.then(songs => {
-            setSongs(songs);
-        });
+        loadingSongs.then(songs => setSongs(songs));
+
+        database.getOwnedSongs().then(savedOwnedSongs => setOwnedSongs(savedOwnedSongs));
     }, []);
 
     // Infinite scroll effect
@@ -91,6 +94,19 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         } else if (instrument === 'vocals') {
             setter(prev => ({ ...prev, vocals: !prev.vocals }));
         }
+    };
+
+    const updateOwnedSong = (isOwned: boolean, song: FestivalSong) => {
+        const superKey = getSuperKey(song);
+
+        if (isOwned) {
+            ownedSongs.add(superKey)
+        } else {
+            ownedSongs.delete(superKey);
+        }
+
+        setOwnedSongs(new Set(ownedSongs));
+        database.updateOwnedSong(isOwned, song);
     };
 
     const filteredSongs = songs?.filter(song => {
@@ -133,7 +149,15 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         <HorizontalLine thickness='4px' color='var(--novelty-blue)' />
         <VerticalSpacer height='15px' />
 
-        {songsUi(filteredSongs, difficultyWeight, selectedInstruments, selectedProInstruments, visibleCount)}
+        {songsUi(
+            filteredSongs,
+            difficultyWeight,
+            selectedInstruments,
+            selectedProInstruments,
+            visibleCount,
+            ownedSongs,
+            updateOwnedSong
+        )}
     </div >;
 };
 
@@ -246,7 +270,9 @@ function songsUi(
     difficultyWeight: number,
     selectedInstruments: SelectedInstruments,
     selectedProInstruments: SelectedInstruments,
-    visibleCount: number
+    visibleCount: number,
+    ownedSongs: Set<string>,
+    updateOwnedSong: (isOwned: boolean, song: FestivalSong) => void
 ): JSX.Element {
     if (songs === null) return <Loading />;
 
@@ -276,6 +302,8 @@ function songsUi(
             selectedInstruments={selectedInstruments}
             selectedProInstruments={selectedProInstruments}
             overallDifficulty={overallDifficulty}
+            isOwned={ownedSongs.has(getSuperKey(song))}
+            updateOwned={isOwned => updateOwnedSong(isOwned, song)}
         />;
     });
 

@@ -10,7 +10,12 @@ export type PetsTables = {
     interations: { id: string }
 };
 
+export type FortniteFestivalTables = {
+    owned: { superKey: string; }
+};
+
 export type DatabaseSchemas = {
     example: ExampleTables;
     pets: PetsTables;
+    fortniteFestival: FortniteFestivalTables;
 };

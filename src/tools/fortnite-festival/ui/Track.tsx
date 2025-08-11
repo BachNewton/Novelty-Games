@@ -17,9 +17,11 @@ interface TrackProps {
     selectedInstruments: SelectedInstruments;
     selectedProInstruments: SelectedInstruments;
     overallDifficulty: number;
+    isOwned: boolean;
+    updateOwned: (isOwned: boolean) => void;
 }
 
-const Track: React.FC<TrackProps> = ({ song, rank, selectedInstruments, selectedProInstruments, overallDifficulty }) => {
+const Track: React.FC<TrackProps> = ({ song, rank, selectedInstruments, selectedProInstruments, overallDifficulty, isOwned, updateOwned }) => {
     const guitarDifficulty = selectedProInstruments.guitar ? song.difficulties.proGuitar : song.difficulties.guitar;
     const bassDifficulty = selectedProInstruments.bass ? song.difficulties.proBass : song.difficulties.bass;
     const drumsDifficulty = selectedProInstruments.drums ? song.difficulties.proDrums : song.difficulties.drums;
@@ -47,7 +49,12 @@ const Track: React.FC<TrackProps> = ({ song, rank, selectedInstruments, selected
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'center' }}>
                 <div>Owned</div>
-                <input type='checkbox' style={{ accentColor: 'var(--novelty-orange)', transform: 'scale(1.75)' }} />
+                <input
+                    type='checkbox'
+                    style={{ accentColor: 'var(--novelty-orange)', transform: 'scale(1.75)' }}
+                    checked={isOwned}
+                    onChange={e => updateOwned(e.target.checked)}
+                />
             </div>
         </div>
 
