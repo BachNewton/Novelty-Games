@@ -33,6 +33,10 @@ export interface SelectedInstruments {
 
 type Instrument = keyof SelectedInstruments;
 
+enum SortOrder {
+    ASCENDING, DESCENDING
+}
+
 const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const database = useRef(createFortniteFestivalDatabase()).current;
     const [songs, setSongs] = useState<Array<FestivalSong> | null>(null);
@@ -41,6 +45,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const [searchText, setSearchText] = useState('');
     const [difficultyWeight, setDifficultyWeight] = useState(DIFFICULTY_WEIGHT_DEFAULT);
     const [ownedSongs, setOwnedSongs] = useState(new Set<string>());
+    const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.DESCENDING);
 
     const [selectedInstruments, setSelectedInstruments] = useState<SelectedInstruments>({
         guitar: true,
@@ -111,6 +116,10 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         database.updateOwnedSong(isOwned, song);
     };
 
+    const changeSortOrder = () => {
+        setSortOrder(prev => prev === SortOrder.DESCENDING ? SortOrder.ASCENDING : SortOrder.DESCENDING);
+    };
+
     const filteredSongs = songs?.filter(song => {
         if (!filterBySearchText(song, searchText)) return false;
         if (filterEpicGamesSongs && song.artist.includes('Epic Games')) return false;
@@ -150,7 +159,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
                     {difficultyWeightUi(difficultyWeight, setDifficultyWeight)}
                 </Widget>
 
-                {searchUi(searchText, setSearchText)}
+                {searchUi(searchText, setSearchText, sortOrder, changeSortOrder)}
             </div>
         </div>
 
@@ -169,7 +178,14 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     </div >;
 };
 
-function searchUi(searchText: string, setSearchText: (text: string) => void): JSX.Element {
+function searchUi(
+    searchText: string,
+    setSearchText: (text: string) => void,
+    sortOrder: SortOrder,
+    changeSortOrder: () => void
+): JSX.Element {
+    const sortIconTransformation = sortOrder === SortOrder.ASCENDING ? 'rotate(180deg) scaleX(-1)' : 'none';
+
     return <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0px' }}>
         <input
             style={{ fontSize: '1em', borderRadius: '15px', padding: '7.5px', flexGrow: 1 }}
@@ -185,8 +201,9 @@ function searchUi(searchText: string, setSearchText: (text: string) => void): JS
             cursor: 'pointer',
             padding: '1px',
             marginLeft: '5px',
-            boxShadow: 'black 0px 0px 10px'
-        }} />
+            boxShadow: 'black 0px 0px 10px',
+            transform: sortIconTransformation
+        }} onClick={changeSortOrder} />
     </div>;
 }
 
