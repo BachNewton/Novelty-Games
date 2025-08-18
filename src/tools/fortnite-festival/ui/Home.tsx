@@ -229,6 +229,14 @@ function toolsUi(
             <div style={{ padding: '5px' }}>Fetch Latest Songs</div>
         </Button></div>
 
+        <div><Button borderRadius={15} onClick={() => { }}>
+            <div style={{ padding: '5px' }}>Import Owned Songs</div>
+        </Button></div>
+
+        <div><Button borderRadius={15} onClick={() => { }}>
+            <div style={{ padding: '5px' }}>Export Owned Songs</div>
+        </Button></div>
+
         <div style={{ display: 'flex', gap: '10px' }}>
             <div>Filter Epic Games Songs</div>
             <ToggleSwitch enabled={filterEpicGamesSongs} onChange={checked => setFilterEpicGamesSongs(checked)} />
