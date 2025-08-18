@@ -1,5 +1,6 @@
 export interface IndexedDb {
-    add: (tableName: string, data: any) => Promise<void>;
+    add: <T>(tableName: string, data: T) => Promise<void>;
+    addAll: <T>(tableName: string, data: T[]) => Promise<void>;
     getAll: (tableName: string) => Promise<any[]>;
     deleteRow: (tableName: string, condition: (data: any) => boolean) => Promise<any>;
     delete: () => Promise<void>;
@@ -7,13 +8,9 @@ export interface IndexedDb {
 
 export function createIndexedDb(databaseName: string, tableNames: string[]): IndexedDb {
     return {
-        add: async (tableName, data) => {
-            const objectStore = await getObjectStore(databaseName, tableNames, tableName, true);
+        add: (tableName, data) => addData(databaseName, tableNames, tableName, objectStore => objectStore.add(data)),
 
-            objectStore.add(data);
-
-            return new Promise<void>(resolve => objectStore.transaction.oncomplete = () => resolve());
-        },
+        addAll: (tableName, data) => addData(databaseName, tableNames, tableName, objectStore => data.forEach(value => objectStore.add(value))),
 
         getAll: async (tableName) => {
             const objectStore = await getObjectStore(databaseName, tableNames, tableName, false);
@@ -56,6 +53,19 @@ export function createIndexedDb(databaseName: string, tableNames: string[]): Ind
             deleteRequest.onsuccess = () => resolve();
         })
     };
+}
+
+async function addData(
+    databaseName: string,
+    tableNames: string[],
+    tableName: string,
+    withObjectStore: (objectStore: IDBObjectStore) => void
+) {
+    const objectStore = await getObjectStore(databaseName, tableNames, tableName, true);
+
+    withObjectStore(objectStore);
+
+    return new Promise<void>(resolve => objectStore.transaction.oncomplete = () => resolve());
 }
 
 async function getObjectStore(

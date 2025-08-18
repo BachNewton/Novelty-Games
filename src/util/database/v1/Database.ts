@@ -4,6 +4,11 @@ export interface Database<Tables> {
         data: Tables[T]
     ) => Promise<void>;
 
+    addAll: <T extends keyof Tables>(
+        tableName: T,
+        data: Tables[T][]
+    ) => Promise<void>;
+
     getAll: <T extends keyof Tables>(
         tableName: T
     ) => Promise<Tables[T][]>;
