@@ -16,9 +16,9 @@ import SortIcon from "../icons/sort.svg";
 import { calculateOverallDifficulty } from "../logic/OverallDifficulty";
 import { RankedSong } from "../data/RankedSong";
 
-const INITIAL_VISIBLE_COUNT = 20; // Initial number of songs to show
+const INITIAL_VISIBLE_COUNT = 25; // Initial number of songs to show
 const SONGS_PER_PAGE = 25; // Number of songs to load on scroll
-const DISTANCE_FROM_BOTTOM_PX = 300; // Distance from the bottom of the page to trigger loading more songs
+const DISTANCE_FROM_BOTTOM_PX = 400; // Distance from the bottom of the page to trigger loading more songs
 const DIFFICULTY_WEIGHT_DEFAULT = 1.3;
 const DESCRIPTION_FONT_SIZE = '0.75em';
 
