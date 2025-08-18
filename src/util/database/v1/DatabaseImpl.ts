@@ -17,6 +17,8 @@ export function createDatabase<Name extends keyof DatabaseSchemas>(
 
         deleteRow: (tableName, condition) => indexedDB.deleteRow(tableName as string, condition),
 
+        deleteTable: (tableName) => indexedDB.deleteTable(tableName as string),
+
         delete: () => indexedDB.delete()
     };
 }

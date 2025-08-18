@@ -47,6 +47,12 @@ const Home: React.FC<HomeProps> = ({ database, exampleDatabase }) => {
             .catch(() => console.warn('Failed to deleted!'));
     };
 
+    const testDeleteTable_v1 = () => {
+        database.deleteTable('numbers').then(() => {
+            console.log('Numbers table deleted successfully');
+        });
+    };
+
     const testDelete_v1 = () => {
         database.delete().then(() => {
             console.log('Database deleted successfully');
@@ -87,7 +93,9 @@ const Home: React.FC<HomeProps> = ({ database, exampleDatabase }) => {
         <Button onClick={testDeleteText_v1}>Test Delete Text</Button>
         <input placeholder='Text' onChange={e => setText(e.target.value)} />
         <br />
-        <Button onClick={testDelete_v1}>Test Delete</Button>
+        <Button onClick={testDeleteTable_v1}>Test Delete Numbers Table</Button>
+        <br />
+        <Button onClick={testDelete_v1}>Test Delete Database</Button>
 
         <h3>V2</h3>
         <Button onClick={testGetAll_v2}>Test Get All</Button>

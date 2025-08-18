@@ -18,5 +18,9 @@ export interface Database<Tables> {
         condition: (data: Tables[T]) => boolean
     ) => Promise<Tables[T]>;
 
+    deleteTable: <T extends keyof Tables>(
+        tableName: T,
+    ) => Promise<void>;
+
     delete: () => Promise<void>;
 }
