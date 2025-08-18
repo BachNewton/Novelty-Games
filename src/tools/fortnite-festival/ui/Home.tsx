@@ -142,7 +142,9 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
                         setFilterEpicGamesSongs,
                         filterOwnedSongs,
                         setFilterOwnedSongs,
-                        fetchedSongs => setSongs(fetchedSongs)
+                        fetchedSongs => setSongs(fetchedSongs),
+                        () => database.importOwnedSongs().then(importedSongs => setOwnedSongs(importedSongs)),
+                        database.exportOwnedSongs
                     )}
                 </Widget>
 
@@ -215,7 +217,9 @@ function toolsUi(
     setFilterEpicGamesSongs: (checked: boolean) => void,
     filterOwnedSongs: boolean,
     setFilterOwnedSongs: (checked: boolean) => void,
-    onSongsFetched: (fetchedSongs: FestivalSong[] | null) => void
+    onSongsFetched: (fetchedSongs: FestivalSong[] | null) => void,
+    onImport: () => void,
+    onExport: () => void
 ): JSX.Element {
     return <div style={{
         display: 'flex',
@@ -229,11 +233,11 @@ function toolsUi(
             <div style={{ padding: '5px' }}>Fetch Latest Songs</div>
         </Button></div>
 
-        <div><Button borderRadius={15} onClick={() => { }}>
+        <div><Button borderRadius={15} onClick={onImport}>
             <div style={{ padding: '5px' }}>Import Owned Songs</div>
         </Button></div>
 
-        <div><Button borderRadius={15} onClick={() => { }}>
+        <div><Button borderRadius={15} onClick={onExport}>
             <div style={{ padding: '5px' }}>Export Owned Songs</div>
         </Button></div>
 
