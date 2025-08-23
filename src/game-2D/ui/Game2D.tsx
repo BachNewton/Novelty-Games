@@ -54,6 +54,9 @@ const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
 };
 
 function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, goHome: () => void): GameWorld {
+    const camera = createCamera(canvas);
+    const drawer = createDrawer(ctx, camera);
+
     switch (gameWorldType) {
         case GameWorldType.CARNIVAL:
             return new CarnivalWorld(canvas, ctx, goHome);
@@ -62,10 +65,8 @@ function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement
         case GameWorldType.CAT:
             return createCatWorld(canvas, ctx);
         case GameWorldType.PLATFORMER:
-            const camera = createCamera(canvas);
-
             return createPlatformerWorld(
-                createDrawer(ctx, camera),
+                drawer,
                 camera,
                 createKeyboardInput()
             );
@@ -73,7 +74,8 @@ function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement
             return createRpgWorld(
                 canvas,
                 ctx,
-                createCamera(canvas),
+                camera,
+                drawer,
                 createKeyboardInput()
             );
         default:

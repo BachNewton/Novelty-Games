@@ -5,6 +5,7 @@ export interface Vector {
     y: number;
     add: (v: Vector | Axis, scalar?: number) => void;
     copy: (v: Vector) => void;
+    set: (x: number, y: number) => void;
 }
 
 export function createVector(initialX: number, initialY: number): Vector {
@@ -23,6 +24,10 @@ export function createVector(initialX: number, initialY: number): Vector {
         copy: (v) => {
             x = v.x;
             y = v.y;
+        },
+        set: (newX, newY) => {
+            x = newX;
+            y = newY;
         }
     };
 }

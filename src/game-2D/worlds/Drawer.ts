@@ -19,8 +19,28 @@ export function createDrawer(ctx: CanvasRenderingContext2D, camera: Camera): Dra
             const drawX = boxScreenCenterX - (box.width / 2);
             const drawY = boxScreenCenterY - (box.height / 2);
 
-            ctx.fillStyle = box.color ?? 'magenta';
-            ctx.fillRect(drawX, drawY, box.width, box.height);
+            if (box.color !== undefined) {
+                const color = box.color;
+
+                ctx.fillStyle = color;
+
+                ctx.fillRect(drawX, drawY, box.width, box.height);
+            }
+
+            if (box.borderColor !== undefined) {
+                const borderColor = box.borderColor;
+                const borderWidth = box.borderWidth ?? 1;
+
+                ctx.strokeStyle = borderColor;
+                ctx.lineWidth = borderWidth;
+
+                ctx.strokeRect(
+                    drawX,
+                    drawY,
+                    box.width,
+                    box.height
+                );
+            }
         }
     };
 }

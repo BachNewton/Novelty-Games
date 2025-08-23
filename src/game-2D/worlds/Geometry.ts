@@ -4,7 +4,9 @@ export interface Box {
     position: Vector;
     width: number;
     height: number;
-    color?: string | CanvasGradient | CanvasPattern
+    color?: string;
+    borderColor?: string;
+    borderWidth?: number;
 }
 
 export interface MovingBox extends Box {

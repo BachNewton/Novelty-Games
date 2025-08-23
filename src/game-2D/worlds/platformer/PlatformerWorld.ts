@@ -53,7 +53,7 @@ export function createPlatformerWorld(
         },
         mouseEvents: {
             onMouseDown: () => {
-                obstacles.push({ position: createVector(camera.mousePosition.x, camera.mousePosition.y), width: 20, height: 20, });
+                obstacles.push({ position: createVector(camera.mousePosition.x, camera.mousePosition.y), width: 20, height: 20, color: 'white' });
             }
         }
     };
