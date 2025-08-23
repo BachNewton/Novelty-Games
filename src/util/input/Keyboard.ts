@@ -71,11 +71,11 @@ function getMovementAxis(held: HeldKeys): Axis {
     const axis: Axis = { x: 0, y: 0 };
 
     if (held.KeyW) {
-        axis.y -= 1;
+        axis.y += 1;
     }
 
     if (held.KeyS) {
-        axis.y += 1;
+        axis.y -= 1;
     }
 
     if (held.KeyA) {

@@ -17,29 +17,21 @@ export function createRpgWorld(
 
     return {
         draw: () => {
-            const cols = Math.floor(canvas.width / TILE_SIZE) + 1;
-            const rows = Math.floor(canvas.height / TILE_SIZE) + 1;
+            ctx.strokeStyle = 'yellow';
+            ctx.lineWidth = 2;
 
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 0.1;
-
-            for (let y = -1; y < rows; y++) {
-                for (let x = -1; x < cols; x++) {
-                    const screenX = x * TILE_SIZE - (camera.position.x % TILE_SIZE);
-                    const screenY = y * TILE_SIZE - (camera.position.y % TILE_SIZE);
-
-                    ctx.strokeRect(
-                        screenX,
-                        screenY,
-                        TILE_SIZE,
-                        TILE_SIZE
-                    );
-                }
-            }
+            ctx.strokeRect(
+                camera.mousePosition.x - TILE_SIZE / 2,
+                camera.mousePosition.y - TILE_SIZE / 2,
+                TILE_SIZE,
+                TILE_SIZE
+            );
         },
 
         update: (deltaTime) => {
             camera.position.add(keyboardInput.movementAxis, deltaTime * CAMERA_SPEED);
+            // console.log(camera.position.x, camera.position.y);
+            // console.log(keyboardInput.movementAxis);
         },
 
         overlay: getOverlay()
