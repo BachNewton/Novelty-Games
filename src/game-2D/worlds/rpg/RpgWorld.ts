@@ -7,6 +7,8 @@ import { createTile, Tile, TILE_SIZE } from "./data/Tile";
 import { getOverlay } from "./ui/Main";
 
 const CAMERA_SPEED = 0.25;
+const GRID_MINOR_WIDTH = 0.1;
+const GRID_MAJOR_WIDTH = 0.25;
 
 export function createRpgWorld(
     canvas: HTMLCanvasElement,
@@ -50,14 +52,20 @@ function drawGrid(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, came
 
     ctx.beginPath();
 
-    for (let x = firstGridX; x < canvas.width; x += TILE_SIZE) {
+    for (let x = firstGridX, i = Math.floor(worldStartX / TILE_SIZE); x < canvas.width; x += TILE_SIZE, i++) {
+        ctx.beginPath();
+        ctx.lineWidth = (i % 10 === 0) ? GRID_MAJOR_WIDTH : GRID_MINOR_WIDTH;
         ctx.moveTo(x, 0);
         ctx.lineTo(x, canvas.height);
+        ctx.stroke();
     }
 
-    for (let y = firstGridY; y < canvas.height; y += TILE_SIZE) {
+    for (let y = firstGridY, j = Math.floor(worldStartY / TILE_SIZE); y < canvas.height; y += TILE_SIZE, j--) {
+        ctx.beginPath();
+        ctx.lineWidth = (j % 10 === 0) ? GRID_MAJOR_WIDTH : GRID_MINOR_WIDTH;
         ctx.moveTo(0, y);
         ctx.lineTo(canvas.width, y);
+        ctx.stroke();
     }
 
     ctx.stroke();
