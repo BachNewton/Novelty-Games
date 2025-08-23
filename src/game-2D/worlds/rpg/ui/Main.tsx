@@ -5,9 +5,11 @@ import { TileType } from "../data/Tile";
 
 interface MainProps {
     onTileSelected: (type: TileType) => void;
+    onSave: () => void;
+    isMouseOverPannel: (isOver: boolean) => void;
 }
 
-const Main: React.FC<MainProps> = ({ onTileSelected }) => {
+const Main: React.FC<MainProps> = ({ onTileSelected, onSave, isMouseOverPannel }) => {
     const [selectedTileType, setSelectedTileType] = useState<TileType>(TileType.GRASS);
 
     const onTileOptionClicked = (type: TileType) => {
@@ -20,15 +22,19 @@ const Main: React.FC<MainProps> = ({ onTileSelected }) => {
         alignItems: 'center',
         height: '100%'
     }}>
-        <div style={{
-            border: '2px white solid',
-            borderRadius: '15px',
-            height: '75%',
-            margin: '10px',
-            padding: '10px',
-            pointerEvents: 'auto',
-            backgroundColor: 'rgba(0,0,0,0.5)'
-        }}>
+        <div
+            style={{
+                border: '2px white solid',
+                borderRadius: '15px',
+                height: '75%',
+                margin: '10px',
+                padding: '10px',
+                pointerEvents: 'auto',
+                backgroundColor: 'rgba(0,0,0,0.5)'
+            }}
+            onMouseEnter={() => isMouseOverPannel(true)}
+            onMouseLeave={() => isMouseOverPannel(false)}
+        >
             <div>Edit Pannel</div>
             <VerticalSpacer height={15} />
             <Button onClick={() => console.log('Button clicked')}>Button</Button>
@@ -36,6 +42,9 @@ const Main: React.FC<MainProps> = ({ onTileSelected }) => {
             <div>Titles</div>
             {tileOption(onTileOptionClicked, TileType.GRASS, selectedTileType)}
             {tileOption(onTileOptionClicked, TileType.TREE, selectedTileType)}
+            <VerticalSpacer height={15} />
+            <Button onClick={onSave}>Save</Button>
+            <Button onClick={() => console.log('Button clicked')}>Load</Button>
         </div>
     </div>;
 };
@@ -60,8 +69,14 @@ function getTileColor(type: TileType): string | undefined {
     }
 }
 
-export function getOverlay(onTileSelected: (type: TileType) => void): JSX.Element {
+export function getOverlay(
+    onTileSelected: (type: TileType) => void,
+    onSave: () => void,
+    isMouseOverPannel: (isOver: boolean) => void
+): JSX.Element {
     return <Main
         onTileSelected={onTileSelected}
+        onSave={onSave}
+        isMouseOverPannel={isMouseOverPannel}
     />;
 }

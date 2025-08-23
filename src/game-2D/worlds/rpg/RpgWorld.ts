@@ -1,4 +1,5 @@
 import { Route, updateRoute } from "../../../ui/Routing";
+import { createFile, FileType } from "../../../util/File";
 import { KeyboardInput } from "../../../util/input/Keyboard";
 import { MouseInput } from "../../../util/input/Mouse";
 import { Camera } from "../Camera";
@@ -27,6 +28,12 @@ export function createRpgWorld(
     const centerTile = createTile(drawer, TileType.GRID);
 
     let selectedTileType: TileType = TileType.GRASS;
+    let isMouseOverPannel = false;
+
+    const onSave = () => {
+        const zone = Array.from(tiles).map(([, tile]) => tile);
+        createFile(FileType.JSON, 'zone', JSON.stringify(zone));
+    };
 
     return {
         draw: () => {
@@ -45,7 +52,7 @@ export function createRpgWorld(
 
             updateTileFromMousePosition(camera, selectedTile);
 
-            if (mouseInput.held.Left || mouseInput.held.Right) {
+            if (!isMouseOverPannel && (mouseInput.held.Left || mouseInput.held.Right)) {
                 const tile = createTile(drawer, selectedTileType);
                 updateTileFromMousePosition(camera, tile);
                 const key = `${tile.x},${tile.y}`;
@@ -58,7 +65,11 @@ export function createRpgWorld(
             }
         },
 
-        overlay: getOverlay((type) => selectedTileType = type)
+        overlay: getOverlay(
+            (type) => selectedTileType = type,
+            onSave,
+            isOverPannel => isMouseOverPannel = isOverPannel
+        )
     };
 }
 
