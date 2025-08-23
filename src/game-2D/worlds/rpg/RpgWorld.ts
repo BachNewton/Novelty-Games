@@ -5,7 +5,7 @@ import { GameWorld } from "../GameWorld";
 import { getOverlay } from "./ui/Main";
 
 const TILE_SIZE = 35;
-const CAMERA_SPEED = 0.1;
+const CAMERA_SPEED = 0.25;
 
 export function createRpgWorld(
     canvas: HTMLCanvasElement,
@@ -20,15 +20,14 @@ export function createRpgWorld(
             const cols = Math.floor(canvas.width / TILE_SIZE) + 1;
             const rows = Math.floor(canvas.height / TILE_SIZE) + 1;
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 0.1;
 
-            for (let y = 0; y < rows; y++) {
-                for (let x = 0; x < cols; x++) {
+            for (let y = -1; y < rows; y++) {
+                for (let x = -1; x < cols; x++) {
                     const screenX = x * TILE_SIZE - (camera.position.x % TILE_SIZE);
                     const screenY = y * TILE_SIZE - (camera.position.y % TILE_SIZE);
+
                     ctx.strokeRect(
                         screenX,
                         screenY,
@@ -40,7 +39,7 @@ export function createRpgWorld(
         },
 
         update: (deltaTime) => {
-            // const x = camera.position.x + keyboardInput.movementAxis.x * deltaTime * CAMERA_SPEED;
+            camera.position.add(keyboardInput.movementAxis, deltaTime * CAMERA_SPEED);
         },
 
         overlay: getOverlay()

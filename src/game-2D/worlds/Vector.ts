@@ -1,7 +1,9 @@
+import { Axis } from "../../util/input/Axis";
+
 export interface Vector {
     x: number;
     y: number;
-    add: (v: Vector, scalar?: number) => void;
+    add: (v: Vector | Axis, scalar?: number) => void;
     copy: (v: Vector) => void;
 }
 
