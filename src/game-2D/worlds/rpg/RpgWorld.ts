@@ -1,5 +1,6 @@
 import { Route, updateRoute } from "../../../ui/Routing";
 import { KeyboardInput } from "../../../util/input/Keyboard";
+import { MouseInput } from "../../../util/input/Mouse";
 import { Camera } from "../Camera";
 import { Drawer } from "../Drawer";
 import { GameWorld } from "../GameWorld";
@@ -15,7 +16,8 @@ export function createRpgWorld(
     ctx: CanvasRenderingContext2D,
     camera: Camera,
     drawer: Drawer,
-    keyboardInput: KeyboardInput
+    keyboardInput: KeyboardInput,
+    mouseInput: MouseInput
 ): GameWorld {
     updateRoute(Route.RPG);
 
