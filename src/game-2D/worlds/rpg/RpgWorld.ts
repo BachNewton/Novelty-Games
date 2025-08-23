@@ -3,7 +3,7 @@ import { KeyboardInput } from "../../../util/input/Keyboard";
 import { Camera } from "../Camera";
 import { Drawer } from "../Drawer";
 import { GameWorld } from "../GameWorld";
-import { createTile, Tile, TILE_SIZE } from "./data/Tile";
+import { createTile, Tile, TILE_SIZE, TileType } from "./data/Tile";
 import { getOverlay } from "./ui/Main";
 
 const CAMERA_SPEED = 0.25;
@@ -19,8 +19,12 @@ export function createRpgWorld(
 ): GameWorld {
     updateRoute(Route.RPG);
 
-    const selectedTile = createTile(drawer, true);
-    const centerTile = createTile(drawer, false);
+    // const tiles = new Map<Vector, Tile>();
+
+    const selectedTile = createTile(drawer, TileType.SELECTION);
+    const centerTile = createTile(drawer, TileType.GRID);
+
+    let selectedTileType: TileType = TileType.GRASS;
 
     return {
         draw: () => {
@@ -36,7 +40,13 @@ export function createRpgWorld(
             updateSelectedTile(camera, selectedTile);
         },
 
-        overlay: getOverlay()
+        mouseEvents: {
+            onClick: () => {
+                console.log('Click');
+            }
+        },
+
+        overlay: getOverlay((type) => selectedTileType = type)
     };
 }
 

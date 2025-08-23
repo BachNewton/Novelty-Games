@@ -8,9 +8,14 @@ export const TILE_SIZE = 45;
 export interface Tile extends GameObject {
     x: number;
     y: number;
+    type: TileType;
 }
 
-export function createTile(drawer: Drawer, isHighlight: boolean): Tile {
+export enum TileType {
+    SELECTION, GRID, GRASS, TREE
+}
+
+export function createTile(drawer: Drawer, type: TileType): Tile {
     let x = 0;
     let y = 0;
 
@@ -18,8 +23,8 @@ export function createTile(drawer: Drawer, isHighlight: boolean): Tile {
         position: createVector(0, 0),
         width: TILE_SIZE,
         height: TILE_SIZE,
-        borderColor: isHighlight ? 'yellow' : 'white',
-        borderWidth: isHighlight ? 4 : 1
+        borderColor: type === TileType.SELECTION ? 'yellow' : 'white',
+        borderWidth: type === TileType.SELECTION ? 2 : 1
     };
 
     return {
@@ -27,6 +32,8 @@ export function createTile(drawer: Drawer, isHighlight: boolean): Tile {
         set x(value: number) { x = value; },
         get y() { return y; },
         set y(value: number) { y = value; },
+
+        type: type,
 
         draw: () => {
             const centerX = (x * TILE_SIZE) + (TILE_SIZE / 2);
