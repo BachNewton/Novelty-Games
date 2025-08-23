@@ -70,7 +70,7 @@ function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement
                 createKeyboardInput()
             );
         case GameWorldType.RPG:
-            return createRpgWorld();
+            return createRpgWorld(canvas, ctx, createCamera(canvas));
         default:
             throw new Error(`GameWorldType not supported: ${gameWorldType}`);
     }
