@@ -11,7 +11,7 @@ import TestZone from "./zone/test.json";
 
 const CAMERA_SPEED = 0.4;
 const GRID_MINOR_WIDTH = 0.1;
-const GRID_MAJOR_WIDTH = 0.25;
+const GRID_MAJOR_WIDTH = 0.3;
 
 export function createRpgWorld(
     canvas: HTMLCanvasElement,
