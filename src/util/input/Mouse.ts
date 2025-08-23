@@ -3,8 +3,8 @@ export interface MouseInput {
 }
 
 enum MouseButton {
-    LEFT = 0,
-    RIGHT = 2
+    LEFT = 'Left',
+    RIGHT = 'Right'
 }
 
 type HeldButtons = { [Button in MouseButton]: boolean };
@@ -20,14 +20,14 @@ export function createMouseInput(): MouseInput {
     };
 
     const handleMouseEvent = (e: MouseEvent, type: MouseEventType) => {
-        const button = e.button as MouseButton;
+        const mouseButton = buttonToMouseButton(e.button);
 
-        if (!(button in held)) {
-            console.warn(`Unhandled button: ${button}`);
+        if (mouseButton === null) {
+            console.warn(`Unhandled button: ${e.button}`);
             return;
         }
 
-        held[button] = type === MouseEventType.DOWN ? true : false;
+        held[mouseButton] = type === MouseEventType.DOWN ? true : false;
     };
 
     window.onmousedown = e => handleMouseEvent(e, MouseEventType.DOWN);
@@ -36,4 +36,12 @@ export function createMouseInput(): MouseInput {
     return {
         held: held
     };
+}
+
+function buttonToMouseButton(button: number): MouseButton | null {
+    switch (button) {
+        case 0: return MouseButton.LEFT;
+        case 2: return MouseButton.RIGHT;
+        default: return null;
+    }
 }

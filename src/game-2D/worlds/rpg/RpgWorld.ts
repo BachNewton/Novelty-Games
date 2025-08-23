@@ -44,12 +44,8 @@ export function createRpgWorld(
             camera.position.add(keyboardInput.movementAxis, deltaTime * CAMERA_SPEED);
 
             updateTileFromMousePosition(camera, selectedTile);
-        },
 
-        mouseEvents: {
-            onClick: () => {
-                console.log('Click');
-
+            if (mouseInput.held.Left) {
                 const tile = createTile(drawer, selectedTileType);
                 updateTileFromMousePosition(camera, tile);
                 tiles.set(`${tile.x},${tile.y}`, tile);
