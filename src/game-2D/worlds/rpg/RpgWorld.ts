@@ -69,6 +69,32 @@ function drawGrid(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, came
     }
 
     ctx.stroke();
+
+    // drawGridNumbers(ctx, camera, canvas);
+}
+
+function drawGridNumbers(ctx: CanvasRenderingContext2D, camera: Camera, canvas: HTMLCanvasElement) {
+    ctx.fillStyle = 'grey';
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const minTileX = Math.floor((camera.position.x - canvas.width / 2) / TILE_SIZE);
+    const maxTileX = Math.floor((camera.position.x + canvas.width / 2) / TILE_SIZE);
+    const minTileY = Math.floor((camera.position.y - canvas.height / 2) / TILE_SIZE);
+    const maxTileY = Math.floor((camera.position.y + canvas.height / 2) / TILE_SIZE);
+
+    for (let tileX = minTileX; tileX <= maxTileX; tileX++) {
+        for (let tileY = minTileY; tileY <= maxTileY; tileY++) {
+            const screenX = (tileX * TILE_SIZE) - (camera.position.x - canvas.width / 2) + TILE_SIZE / 2;
+            const screenY = canvas.height - ((tileY * TILE_SIZE) - (camera.position.y - canvas.height / 2) + TILE_SIZE / 2);
+
+            if (screenX >= 0 && screenX < canvas.width &&
+                screenY >= 0 && screenY < canvas.height) {
+                ctx.fillText(`${tileX}, ${tileY}`, screenX, screenY);
+            }
+        }
+    }
 }
 
 function updateSelectedTile(camera: Camera, selectedTile: Tile) {

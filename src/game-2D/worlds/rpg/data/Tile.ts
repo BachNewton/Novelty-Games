@@ -3,7 +3,7 @@ import { GameObject } from "../../GameWorld";
 import { Box } from "../../Geometry";
 import { createVector } from "../../Vector";
 
-export const TILE_SIZE = 40;
+export const TILE_SIZE = 45;
 
 export interface Tile extends GameObject {
     x: number;
