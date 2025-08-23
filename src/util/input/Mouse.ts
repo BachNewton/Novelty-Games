@@ -32,6 +32,7 @@ export function createMouseInput(): MouseInput {
 
     window.onmousedown = e => handleMouseEvent(e, MouseEventType.DOWN);
     window.onmouseup = e => handleMouseEvent(e, MouseEventType.UP);
+    window.oncontextmenu = e => e.preventDefault();
 
     return {
         held: held

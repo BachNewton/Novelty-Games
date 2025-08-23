@@ -45,10 +45,16 @@ export function createRpgWorld(
 
             updateTileFromMousePosition(camera, selectedTile);
 
-            if (mouseInput.held.Left) {
+            if (mouseInput.held.Left || mouseInput.held.Right) {
                 const tile = createTile(drawer, selectedTileType);
                 updateTileFromMousePosition(camera, tile);
-                tiles.set(`${tile.x},${tile.y}`, tile);
+                const key = `${tile.x},${tile.y}`;
+
+                if (mouseInput.held.Left) {
+                    tiles.set(key, tile);
+                } else if (mouseInput.held.Right) {
+                    tiles.delete(key);
+                }
             }
         },
 
