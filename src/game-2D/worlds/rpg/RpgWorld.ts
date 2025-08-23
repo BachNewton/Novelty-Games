@@ -7,6 +7,7 @@ import { Drawer } from "../Drawer";
 import { GameWorld } from "../GameWorld";
 import { createTile, Tile, TILE_SIZE, TileType } from "./data/Tile";
 import { getOverlay } from "./ui/Main";
+import TestZone from "./zone/test.json";
 
 const CAMERA_SPEED = 0.4;
 const GRID_MINOR_WIDTH = 0.1;
@@ -23,6 +24,15 @@ export function createRpgWorld(
     updateRoute(Route.RPG);
 
     const tiles = new Map<string, Tile>();
+
+    TestZone.forEach(t => {
+        const tile = createTile(drawer, t.type);
+
+        tile.x = t.x;
+        tile.y = t.y;
+
+        tiles.set(getKey(tile), tile);
+    });
 
     const selectedTile = createTile(drawer, TileType.SELECTION);
     const centerTile = createTile(drawer, TileType.GRID);
@@ -55,7 +65,7 @@ export function createRpgWorld(
             if (!isMouseOverPannel && (mouseInput.held.Left || mouseInput.held.Right)) {
                 const tile = createTile(drawer, selectedTileType);
                 updateTileFromMousePosition(camera, tile);
-                const key = `${tile.x},${tile.y}`;
+                const key = getKey(tile);
 
                 if (mouseInput.held.Left) {
                     tiles.set(key, tile);
@@ -136,4 +146,8 @@ function updateTileFromMousePosition(camera: Camera, tile: Tile) {
 
     tile.x = tileX;
     tile.y = tileY;
+}
+
+function getKey(tile: Tile): string {
+    return `${tile.x},${tile.y}`;
 }
