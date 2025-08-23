@@ -22,6 +22,8 @@ export function createRpgWorld(
 
     return {
         draw: () => {
+            drawGrid(canvas, ctx, camera);
+
             centerTile.draw();
             selectedTile.draw();
         },
@@ -34,6 +36,31 @@ export function createRpgWorld(
 
         overlay: getOverlay()
     };
+}
+
+function drawGrid(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, camera: Camera) {
+    const worldStartX = camera.position.x - canvas.width / 2;
+    const worldStartY = camera.position.y + canvas.height / 2;
+
+    const firstGridX = -((worldStartX % TILE_SIZE) + TILE_SIZE) % TILE_SIZE;
+    const firstGridY = ((worldStartY % TILE_SIZE) + TILE_SIZE) % TILE_SIZE;
+
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 0.25;
+
+    ctx.beginPath();
+
+    for (let x = firstGridX; x < canvas.width; x += TILE_SIZE) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+    }
+
+    for (let y = firstGridY; y < canvas.height; y += TILE_SIZE) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+    }
+
+    ctx.stroke();
 }
 
 function updateSelectedTile(camera: Camera, selectedTile: Tile) {

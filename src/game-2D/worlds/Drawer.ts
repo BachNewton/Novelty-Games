@@ -34,6 +34,13 @@ export function createDrawer(ctx: CanvasRenderingContext2D, camera: Camera): Dra
                 ctx.strokeStyle = borderColor;
                 ctx.lineWidth = borderWidth;
 
+                // ctx.strokeRect(
+                //     drawX + borderWidth / 2,
+                //     drawY + borderWidth / 2,
+                //     box.width - borderWidth,
+                //     box.height - borderWidth
+                // );
+
                 ctx.strokeRect(
                     drawX,
                     drawY,

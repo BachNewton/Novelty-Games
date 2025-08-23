@@ -25,6 +25,7 @@ export function createCamera(canvas: HTMLCanvasElement): Camera {
         }
     };
 }
+
 function updateMousePosition(canvas: HTMLCanvasElement, mousePosition: Vector, clientPosition: Vector, position: Vector) {
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;

@@ -3,7 +3,7 @@ import { GameObject } from "../../GameWorld";
 import { Box } from "../../Geometry";
 import { createVector } from "../../Vector";
 
-export const TILE_SIZE = 35;
+export const TILE_SIZE = 40;
 
 export interface Tile extends GameObject {
     x: number;
@@ -19,7 +19,7 @@ export function createTile(drawer: Drawer, isHighlight: boolean): Tile {
         width: TILE_SIZE,
         height: TILE_SIZE,
         borderColor: isHighlight ? 'yellow' : 'white',
-        borderWidth: isHighlight ? 2 : 1
+        borderWidth: isHighlight ? 4 : 1
     };
 
     return {
