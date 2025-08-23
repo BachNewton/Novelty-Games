@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GameWorld } from "../worlds/GameWorld";
 import { CarnivalWorld } from "../worlds/carnival/CarnivalWorld";
 import { WigglerWorld } from "../worlds/wigglers/WigglerWorld";
@@ -17,6 +17,7 @@ interface Game2DProps {
 
 const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [overlay, setOverlay] = useState<JSX.Element | null>(null);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -36,6 +37,7 @@ const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
         window.addEventListener('resize', resizeCanvas);
 
         const gameWorld = createGameWorld(gameWorldType, canvas, ctx, goHome);
+        setOverlay(gameWorld.overlay ?? null);
 
         const cleanupAnimation = initCanvas(canvas, ctx, gameWorld);
 
@@ -47,7 +49,7 @@ const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
 
     return <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', position: 'relative' }}>
         <canvas ref={canvasRef} />
-        <div style={{ position: 'absolute', height: '100%', width: '100%' }}></div>
+        <div style={{ position: 'absolute', height: '100%', width: '100%' }}>{overlay}</div>
     </div>;
 };
 

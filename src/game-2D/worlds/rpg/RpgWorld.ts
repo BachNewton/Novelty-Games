@@ -1,5 +1,6 @@
 import { Route, updateRoute } from "../../../ui/Routing";
 import { GameWorld } from "../GameWorld";
+import { getOverlay } from "./ui/Main";
 
 export function createRpgWorld(): GameWorld {
     updateRoute(Route.RPG);
@@ -11,6 +12,8 @@ export function createRpgWorld(): GameWorld {
 
         update: (deltaTime) => {
             // throw new Error("Function not implemented.");
-        }
+        },
+
+        overlay: getOverlay()
     };
 }

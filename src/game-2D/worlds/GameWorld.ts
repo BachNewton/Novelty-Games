@@ -6,6 +6,7 @@ export interface GameObject {
 export interface GameWorld extends GameObject {
     mouseEvents?: MouseEvents;
     touchEvents?: TouchEvents;
+    overlay?: JSX.Element;
 }
 
 export interface MouseEvents {
