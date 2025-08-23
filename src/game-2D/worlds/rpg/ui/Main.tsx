@@ -18,7 +18,7 @@ const Main: React.FC<MainProps> = ({ }) => {
             pointerEvents: 'auto'
         }}>
             <div>Edit Pannel</div>
-            <VerticalSpacer height='15px' />
+            <VerticalSpacer height={15} />
             <Button onClick={() => console.log('Button clicked')}>Button</Button>
         </div>
     </div>;

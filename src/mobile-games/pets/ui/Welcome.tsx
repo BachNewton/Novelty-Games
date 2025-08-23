@@ -21,15 +21,15 @@ const Welcome: React.FC<WelcomeProps> = ({ show, onClose }) => {
             borderRadius: '10px'
         }}>Welcome Pets!</div>
 
-        <VerticalSpacer height='30px' />
+        <VerticalSpacer height={30} />
 
         <div>This is a surprise video game gift for my animal loving spouse, {accent('Elliott')}!</div>
 
-        <VerticalSpacer height='15px' />
+        <VerticalSpacer height={15} />
 
         <div>This is a game about {accent('discovering')}, {accent('interacting')} with, and {accent('befriending')} pets!</div>
 
-        <VerticalSpacer height='15px' />
+        <VerticalSpacer height={15} />
 
         <div style={{ fontWeight: 'bold' }}>How to play</div>
         <ul style={{ margin: '2px' }}>
@@ -40,11 +40,11 @@ const Welcome: React.FC<WelcomeProps> = ({ show, onClose }) => {
             <li>And, of course, {accent('fall in love')} with the unique personality of every pet</li>
         </ul>
 
-        <VerticalSpacer height='15px' />
+        <VerticalSpacer height={15} />
 
         <div>Have fun, and I love you!</div>
 
-        <VerticalSpacer height='30px' />
+        <VerticalSpacer height={30} />
 
         <div style={{ display: 'flex' }}><Button onClick={onClose}>Close</Button></div>
     </Dialog>

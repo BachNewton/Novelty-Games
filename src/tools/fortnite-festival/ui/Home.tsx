@@ -167,7 +167,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         </div>
 
         <HorizontalLine thickness='4px' color='var(--novelty-blue)' />
-        <VerticalSpacer height='15px' />
+        <VerticalSpacer height={15} />
 
         {songsUi(
             filteredSongs,
