@@ -6,7 +6,7 @@ import { GameWorld } from "../GameWorld";
 import { createTile, Tile, TILE_SIZE, TileType } from "./data/Tile";
 import { getOverlay } from "./ui/Main";
 
-const CAMERA_SPEED = 0.25;
+const CAMERA_SPEED = 0.4;
 const GRID_MINOR_WIDTH = 0.1;
 const GRID_MAJOR_WIDTH = 0.25;
 
@@ -19,7 +19,7 @@ export function createRpgWorld(
 ): GameWorld {
     updateRoute(Route.RPG);
 
-    // const tiles = new Map<Vector, Tile>();
+    const tiles = new Map<string, Tile>();
 
     const selectedTile = createTile(drawer, TileType.SELECTION);
     const centerTile = createTile(drawer, TileType.GRID);
@@ -30,6 +30,10 @@ export function createRpgWorld(
         draw: () => {
             drawGrid(canvas, ctx, camera);
 
+            for (const [, tile] of tiles) {
+                tile.draw();
+            }
+
             centerTile.draw();
             selectedTile.draw();
         },
@@ -37,12 +41,16 @@ export function createRpgWorld(
         update: (deltaTime) => {
             camera.position.add(keyboardInput.movementAxis, deltaTime * CAMERA_SPEED);
 
-            updateSelectedTile(camera, selectedTile);
+            updateTileFromMousePosition(camera, selectedTile);
         },
 
         mouseEvents: {
             onClick: () => {
                 console.log('Click');
+
+                const tile = createTile(drawer, selectedTileType);
+                updateTileFromMousePosition(camera, tile);
+                tiles.set(`${tile.x},${tile.y}`, tile);
             }
         },
 
@@ -107,10 +115,10 @@ function drawGridNumbers(ctx: CanvasRenderingContext2D, camera: Camera, canvas: 
     }
 }
 
-function updateSelectedTile(camera: Camera, selectedTile: Tile) {
+function updateTileFromMousePosition(camera: Camera, tile: Tile) {
     const tileX = Math.floor(camera.mousePosition.x / TILE_SIZE);
     const tileY = Math.floor(camera.mousePosition.y / TILE_SIZE);
 
-    selectedTile.x = tileX;
-    selectedTile.y = tileY;
+    tile.x = tileX;
+    tile.y = tileY;
 }

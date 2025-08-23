@@ -23,8 +23,9 @@ export function createTile(drawer: Drawer, type: TileType): Tile {
         position: createVector(0, 0),
         width: TILE_SIZE,
         height: TILE_SIZE,
-        borderColor: type === TileType.SELECTION ? 'yellow' : 'white',
-        borderWidth: type === TileType.SELECTION ? 2 : 1
+        color: getTileColor(type),
+        borderColor: getTileBorderColor(type),
+        borderWidth: getTileBorderWidth(type)
     };
 
     return {
@@ -46,4 +47,28 @@ export function createTile(drawer: Drawer, type: TileType): Tile {
 
         update: (deltaTime) => { }
     };
+}
+
+function getTileBorderColor(type: TileType): string | undefined {
+    switch (type) {
+        case TileType.SELECTION: return 'yellow';
+        case TileType.GRID: return 'white';
+        default: return undefined;
+    }
+}
+
+function getTileBorderWidth(type: TileType): number | undefined {
+    switch (type) {
+        case TileType.SELECTION: return 2;
+        case TileType.GRID: return 1;
+        default: return undefined;
+    }
+}
+
+function getTileColor(type: TileType): string | undefined {
+    switch (type) {
+        case TileType.GRASS: return 'green';
+        case TileType.TREE: return 'brown';
+        default: return undefined;
+    }
 }
