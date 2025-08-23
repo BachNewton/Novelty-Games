@@ -8,6 +8,7 @@ import { createPlatformerWorld } from "../worlds/platformer/PlatformerWorld";
 import { createDrawer } from "../worlds/Drawer";
 import { createCamera } from "../worlds/Camera";
 import { createKeyboardInput } from "../../util/input/Keyboard";
+import { createRpgWorld } from "../worlds/rpg/RpgWorld";
 
 interface Game2DProps {
     goHome: () => void;
@@ -66,6 +67,8 @@ function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement
                 camera,
                 createKeyboardInput()
             );
+        case GameWorldType.RPG:
+            return createRpgWorld();
         default:
             throw new Error(`GameWorldType not supported: ${gameWorldType}`);
     }

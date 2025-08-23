@@ -7,6 +7,7 @@ export enum Route {
     MUSIC_PLAYER = 'Music-Player',
     FORTNITE_FESTIVAL = 'Fortnite-Festival',
     PLATFORMER = 'Platformer',
+    RPG = 'RPG',
     PETS = 'Pets',
     TODDLER_TREASURE_HUNT = 'Toddler-Treasure-Hunt'
 }

@@ -14,6 +14,7 @@ class CarnivalUiState implements UiState { }
 class WigglersState implements UiState { }
 class CatState implements UiState { }
 class PlatformerState implements UiState { }
+class RpgState implements UiState { }
 
 interface ButtonClickedHandlers {
     onHomeButtonClicked: () => void;
@@ -21,6 +22,7 @@ interface ButtonClickedHandlers {
     onCarnivalClick: () => void;
     onCatClick: () => void;
     onPlatformerClick: () => void;
+    onRpgClick: () => void;
 }
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
@@ -28,18 +30,11 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
 
     const buttonClickedHandlers: ButtonClickedHandlers = {
         onHomeButtonClicked: onHomeButtonClicked,
-        onWigglersClick: () => {
-            setUiState(new WigglersState());
-        },
-        onCarnivalClick: () => {
-            setUiState(new CarnivalUiState());
-        },
-        onCatClick: () => {
-            setUiState(new CatState());
-        },
-        onPlatformerClick: () => {
-            setUiState(new PlatformerState());
-        }
+        onWigglersClick: () => setUiState(new WigglersState()),
+        onCarnivalClick: () => setUiState(new CarnivalUiState()),
+        onCatClick: () => setUiState(new CatState()),
+        onPlatformerClick: () => setUiState(new PlatformerState()),
+        onRpgClick: () => setUiState(new RpgState())
     };
 
     return Ui(uiState, buttonClickedHandlers);
@@ -48,14 +43,22 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
 function Ui(uiState: UiState, buttonClickedHandlers: ButtonClickedHandlers) {
     if (uiState instanceof MenuUiState) {
         return MenuUi(buttonClickedHandlers);
-    } else if (uiState instanceof CarnivalUiState) {
-        return <Game2D goHome={buttonClickedHandlers.onHomeButtonClicked} gameWorldType={GameWorldType.CARNIVAL} />;
+    } else {
+        return <Game2D goHome={buttonClickedHandlers.onHomeButtonClicked} gameWorldType={getGameWorldType(uiState)} />;
+    }
+}
+
+function getGameWorldType(uiState: UiState): GameWorldType {
+    if (uiState instanceof CarnivalUiState) {
+        return GameWorldType.CARNIVAL;
     } else if (uiState instanceof WigglersState) {
-        return <Game2D goHome={buttonClickedHandlers.onHomeButtonClicked} gameWorldType={GameWorldType.WIGGLERS} />;
+        return GameWorldType.WIGGLERS;
     } else if (uiState instanceof CatState) {
-        return <Game2D goHome={buttonClickedHandlers.onHomeButtonClicked} gameWorldType={GameWorldType.CAT} />;
+        return GameWorldType.CAT;
     } else if (uiState instanceof PlatformerState) {
-        return <Game2D goHome={buttonClickedHandlers.onHomeButtonClicked} gameWorldType={GameWorldType.PLATFORMER} />;
+        return GameWorldType.PLATFORMER;
+    } else if (uiState instanceof RpgState) {
+        return GameWorldType.RPG;
     } else {
         throw new Error('UiState not supported: ' + uiState);
     }
@@ -85,6 +88,7 @@ function MenuUi(buttonClickedHandlers: ButtonClickedHandlers) {
         <button style={buttonStyle} onClick={buttonClickedHandlers.onWigglersClick}>Wigglers 👹</button>
         <button style={buttonStyle} onClick={buttonClickedHandlers.onCatClick}>Cat 🐈</button>
         <button style={buttonStyle} onClick={buttonClickedHandlers.onPlatformerClick}>Platformer 🦘</button>
+        <button style={buttonStyle} onClick={buttonClickedHandlers.onRpgClick}>RPG 🗡️</button>
     </div>;
 }
 
@@ -96,6 +100,8 @@ function getInitialUiState(): UiState {
             return new CatState();
         case Route.PLATFORMER:
             return new PlatformerState();
+        case Route.RPG:
+            return new RpgState();
         default:
             return new MenuUiState();
     }
