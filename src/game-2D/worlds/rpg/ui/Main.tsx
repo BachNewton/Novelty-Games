@@ -9,13 +9,30 @@ interface MainProps {
     isMouseOverPannel: (isOver: boolean) => void;
 }
 
+enum Mode { EDIT, PLAY }
+
 const Main: React.FC<MainProps> = ({ onTileSelected, onSave, isMouseOverPannel }) => {
+    const [mode, setMode] = useState<Mode>(Mode.EDIT);
     const [selectedTileType, setSelectedTileType] = useState<TileType>(TileType.GRASS);
 
     const onTileOptionClicked = (type: TileType) => {
         setSelectedTileType(type);
         onTileSelected(type);
     };
+
+    const onModeSelected = () => setMode(pre => pre === Mode.EDIT ? Mode.PLAY : Mode.EDIT);
+
+    const pannelContent = mode === Mode.EDIT
+        ? editModeUi(
+            mode,
+            selectedTileType,
+            onModeSelected,
+            onTileOptionClicked,
+            onSave
+        )
+        : playModeUi(
+            onModeSelected
+        );
 
     return <div style={{
         display: 'flex',
@@ -26,7 +43,6 @@ const Main: React.FC<MainProps> = ({ onTileSelected, onSave, isMouseOverPannel }
             style={{
                 border: '2px white solid',
                 borderRadius: '15px',
-                height: '75%',
                 margin: '10px',
                 padding: '10px',
                 pointerEvents: 'auto',
@@ -35,19 +51,39 @@ const Main: React.FC<MainProps> = ({ onTileSelected, onSave, isMouseOverPannel }
             onMouseEnter={() => isMouseOverPannel(true)}
             onMouseLeave={() => isMouseOverPannel(false)}
         >
-            <div>Edit Pannel</div>
-            <VerticalSpacer height={15} />
-            <Button onClick={() => console.log('Button clicked')}>Button</Button>
-            <VerticalSpacer height={15} />
-            <div>Titles</div>
-            {tileOption(onTileOptionClicked, TileType.GRASS, selectedTileType)}
-            {tileOption(onTileOptionClicked, TileType.TREE, selectedTileType)}
-            <VerticalSpacer height={15} />
-            <Button onClick={onSave}>Save</Button>
-            <Button onClick={() => console.log('Button clicked')}>Load</Button>
+            {pannelContent}
         </div>
     </div>;
 };
+
+function editModeUi(
+    mode: Mode,
+    selectedTileType: TileType,
+    onModeSelected: () => void,
+    onTileOptionClicked: (type: TileType) => void,
+    onSave: () => void
+): JSX.Element {
+    return <div>
+        <div>Edit Pannel</div>
+        <VerticalSpacer height={15} />
+        <Button onClick={onModeSelected}>Play Mode</Button>
+        <VerticalSpacer height={15} />
+        <div>Titles</div>
+        {tileOption(onTileOptionClicked, TileType.GRASS, selectedTileType)}
+        {tileOption(onTileOptionClicked, TileType.TREE, selectedTileType)}
+        <VerticalSpacer height={15} />
+        <Button onClick={onSave}>Save</Button>
+        <Button onClick={() => console.log('Button clicked')}>Load</Button>
+    </div>;
+}
+
+function playModeUi(onModeSelected: () => void): JSX.Element {
+    return <div>
+        <div>Play Pannel</div>
+        <VerticalSpacer height={15} />
+        <Button onClick={onModeSelected}>Edit Mode</Button>
+    </div>;
+}
 
 function tileOption(onClick: (type: TileType) => void, type: TileType, selectedType: TileType): JSX.Element {
     const style: React.CSSProperties = {
