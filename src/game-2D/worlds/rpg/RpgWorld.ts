@@ -1,11 +1,18 @@
 import { Route, updateRoute } from "../../../ui/Routing";
+import { KeyboardInput } from "../../../util/input/Keyboard";
 import { Camera } from "../Camera";
 import { GameWorld } from "../GameWorld";
 import { getOverlay } from "./ui/Main";
 
 const TILE_SIZE = 35;
+const CAMERA_SPEED = 0.1;
 
-export function createRpgWorld(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, camera: Camera): GameWorld {
+export function createRpgWorld(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    camera: Camera,
+    keyboardInput: KeyboardInput
+): GameWorld {
     updateRoute(Route.RPG);
 
     return {
@@ -33,7 +40,7 @@ export function createRpgWorld(canvas: HTMLCanvasElement, ctx: CanvasRenderingCo
         },
 
         update: (deltaTime) => {
-            // throw new Error("Function not implemented.");
+            // const x = camera.position.x + keyboardInput.movementAxis.x * deltaTime * CAMERA_SPEED;
         },
 
         overlay: getOverlay()

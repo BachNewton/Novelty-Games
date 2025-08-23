@@ -1,3 +1,6 @@
+import Button from "../../../../util/ui/Button";
+import VerticalSpacer from "../../../../util/ui/Spacer";
+
 interface MainProps { }
 
 const Main: React.FC<MainProps> = ({ }) => {
@@ -11,8 +14,13 @@ const Main: React.FC<MainProps> = ({ }) => {
             borderRadius: '15px',
             height: '75%',
             margin: '10px',
-            padding: '10px'
-        }}>Edit Pannel</div>
+            padding: '10px',
+            pointerEvents: 'auto'
+        }}>
+            <div>Edit Pannel</div>
+            <VerticalSpacer height='15px' />
+            <Button onClick={() => console.log('Button clicked')}>Button</Button>
+        </div>
     </div>;
 };
 

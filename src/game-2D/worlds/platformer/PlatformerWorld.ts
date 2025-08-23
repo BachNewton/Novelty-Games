@@ -49,7 +49,7 @@ export function createPlatformerWorld(
                 }
             }
 
-            camera.centerOn(player);
+            camera.position.copy(player.position);
         },
         mouseEvents: {
             onMouseDown: () => {

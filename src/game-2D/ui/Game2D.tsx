@@ -49,7 +49,7 @@ const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
 
     return <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', position: 'relative' }}>
         <canvas ref={canvasRef} />
-        <div style={{ position: 'absolute', height: '100%', width: '100%' }}>{overlay}</div>
+        <div style={{ position: 'absolute', height: '100%', width: '100%', pointerEvents: 'none' }}>{overlay}</div>
     </div>;
 };
 
@@ -70,7 +70,12 @@ function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement
                 createKeyboardInput()
             );
         case GameWorldType.RPG:
-            return createRpgWorld(canvas, ctx, createCamera(canvas));
+            return createRpgWorld(
+                canvas,
+                ctx,
+                createCamera(canvas),
+                createKeyboardInput()
+            );
         default:
             throw new Error(`GameWorldType not supported: ${gameWorldType}`);
     }
