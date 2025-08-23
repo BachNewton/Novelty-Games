@@ -44,8 +44,9 @@ const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
         };
     }, []);
 
-    return <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden' }}>
+    return <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', position: 'relative' }}>
         <canvas ref={canvasRef} />
+        <div style={{ position: 'absolute', height: '100%', width: '100%' }}></div>
     </div>;
 };
 
