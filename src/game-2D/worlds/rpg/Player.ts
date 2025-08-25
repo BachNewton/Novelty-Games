@@ -5,7 +5,7 @@ import { GameObject } from "../GameWorld";
 import { Box } from "../Geometry";
 import { createVector } from "../Vector";
 import { TILE_SIZE, tileLocationToPosition } from "./data/Tile";
-import PlayerWalk from "./sprites/player_walk.png";
+import PlayerWalk from "./spritesheet/player_walk.png";
 
 export interface Player extends GameObject { }
 
