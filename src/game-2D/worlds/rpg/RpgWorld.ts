@@ -58,9 +58,20 @@ export function createRpgWorld(
                 startingRow: 1,
                 startingCol: 0,
                 frames: 6
+            },
+            walkRight: {
+                startingRow: 2,
+                startingCol: 0,
+                frames: 6
+            },
+            walkUp: {
+                startingRow: 3,
+                startingCol: 0,
+                frames: 6
             }
         },
-        frameRate: 500
+        frameRate: 250,
+        padding: 17
     }, true);
 
     animator.play('walkDown');

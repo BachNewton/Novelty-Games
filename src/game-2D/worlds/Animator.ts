@@ -26,6 +26,7 @@ interface AnimatorProperties<Animations extends AnimatorAnimations> {
     cols: number;
     animations: Animations;
     frameRate: number;
+    padding: number;
 }
 
 export function createAnimator<Animations extends AnimatorAnimations>(
@@ -39,27 +40,42 @@ export function createAnimator<Animations extends AnimatorAnimations>(
     const height = image.height / properties.rows;
 
     let animation: AnimationProperties | null = null;
-    let time: number = -1;
+    let time = -1;
     let frame: AnimationFrame | null = null;
+    let col = -1;
+    let row = -1;
 
     return {
         play: (animationName) => {
             animation = properties.animations[animationName];
             time = performance.now();
 
+            col = animation.startingCol;
+            row = animation.startingRow;
+
             frame = {
                 image: image,
-                x: animation.startingCol * width,
-                y: animation.startingCol * height,
-                width: width,
-                height: height,
+                x: col * width + properties.padding,
+                y: row * height + properties.padding,
+                width: width - (properties.padding * 2),
+                height: height - (properties.padding * 2),
                 debug: debug
             };
         },
 
         getFrame: () => {
+            if (frame === null || animation === null) return null;
+
             if (performance.now() - time > properties.frameRate) {
-                //
+                col++;
+
+                if (col >= animation.frames) {
+                    col = animation.startingCol;
+                }
+
+                frame.x = col * width + properties.padding;
+
+                time = performance.now();
             }
 
             return frame;
