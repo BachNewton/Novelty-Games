@@ -111,32 +111,40 @@ export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Play
 
 function getAnimator() {
     return createAnimator({
-        imageSrc: PlayerWalk,
-        rows: 4,
-        cols: 6,
+        spritesheets: {
+            playerWalk: {
+                src: PlayerWalk,
+                rows: 4,
+                cols: 6,
+                padding: 17
+            }
+        },
         animations: {
             walkDown: {
                 startingRow: 0,
                 startingCol: 0,
-                frames: 6
+                frames: 6,
+                imageKey: 'playerWalk'
             },
             walkLeft: {
                 startingRow: 1,
                 startingCol: 0,
-                frames: 6
+                frames: 6,
+                imageKey: 'playerWalk'
             },
             walkRight: {
                 startingRow: 2,
                 startingCol: 0,
-                frames: 6
+                frames: 6,
+                imageKey: 'playerWalk'
             },
             walkUp: {
                 startingRow: 3,
                 startingCol: 0,
-                frames: 6
+                frames: 6,
+                imageKey: 'playerWalk'
             }
         },
-        frameRate: 150,
-        padding: 17
+        frameRate: 150
     }, true);
 }
