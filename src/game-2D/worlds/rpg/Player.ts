@@ -4,6 +4,7 @@ import { Drawer } from "../Drawer";
 import { GameObject } from "../GameWorld";
 import { Box } from "../Geometry";
 import { createVector } from "../Vector";
+import { TILE_SIZE, tileLocationToPosition } from "./data/Tile";
 import PlayerWalk from "./sprites/player_walk.png";
 
 export interface Player extends GameObject { }
@@ -18,8 +19,8 @@ export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Play
 
     const box: Box = {
         position: createVector(0, 0),
-        width: 800,
-        height: 800,
+        width: TILE_SIZE,
+        height: TILE_SIZE,
         getAnimationFrame: animator.getFrame
     };
 
@@ -29,6 +30,10 @@ export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Play
 
     return {
         draw: () => {
+            const { centerX, centerY } = tileLocationToPosition(x, y);
+
+            box.position.set(centerX, centerY);
+
             drawer.draw(box);
         },
 

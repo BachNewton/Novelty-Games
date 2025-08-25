@@ -52,9 +52,9 @@ export function createRpgWorld(
         draw: () => {
             drawGrid(canvas, ctx, camera);
 
-            // for (const [, tile] of tiles) {
-            //     tile.draw();
-            // }
+            for (const [, tile] of tiles) {
+                tile.draw();
+            }
 
             centerTile.draw();
             selectedTile.draw();

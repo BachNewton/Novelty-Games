@@ -3,7 +3,7 @@ import { GameObject } from "../../GameWorld";
 import { Box } from "../../Geometry";
 import { createVector } from "../../Vector";
 
-export const TILE_SIZE = 45;
+export const TILE_SIZE = 100;
 
 export interface Tile extends GameObject {
     x: number;
@@ -37,8 +37,7 @@ export function createTile(drawer: Drawer, type: TileType): Tile {
         type: type,
 
         draw: () => {
-            const centerX = (x * TILE_SIZE) + (TILE_SIZE / 2);
-            const centerY = (y * TILE_SIZE) + (TILE_SIZE / 2);
+            const { centerX, centerY } = tileLocationToPosition(x, y);
 
             box.position.set(centerX, centerY);
 
@@ -46,6 +45,13 @@ export function createTile(drawer: Drawer, type: TileType): Tile {
         },
 
         update: (deltaTime) => { }
+    };
+}
+
+export function tileLocationToPosition(x: number, y: number): { centerX: number, centerY: number } {
+    return {
+        centerX: (x * TILE_SIZE) + (TILE_SIZE / 2),
+        centerY: (y * TILE_SIZE) + (TILE_SIZE / 2)
     };
 }
 
