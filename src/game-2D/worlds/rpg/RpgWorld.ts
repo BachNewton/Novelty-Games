@@ -8,10 +8,7 @@ import { GameWorld } from "../GameWorld";
 import { createTile, Tile, TILE_SIZE, TileType } from "./data/Tile";
 import { getOverlay } from "./ui/Main";
 import TestZone from "./zone/test.json";
-import PlayerWalk from "./sprites/player_walk.png";
-import { Box } from "../Geometry";
-import { createVector } from "../Vector";
-import { createAnimator } from "../Animator";
+import { createPlayer } from "./Player";
 
 const CAMERA_SPEED = 0.4;
 const GRID_MINOR_WIDTH = 0.1;
@@ -44,44 +41,7 @@ export function createRpgWorld(
     let selectedTileType: TileType = TileType.GRASS;
     let isMouseOverPannel = false;
 
-    const animator = createAnimator({
-        imageSrc: PlayerWalk,
-        rows: 4,
-        cols: 6,
-        animations: {
-            walkDown: {
-                startingRow: 0,
-                startingCol: 0,
-                frames: 6
-            },
-            walkLeft: {
-                startingRow: 1,
-                startingCol: 0,
-                frames: 6
-            },
-            walkRight: {
-                startingRow: 2,
-                startingCol: 0,
-                frames: 6
-            },
-            walkUp: {
-                startingRow: 3,
-                startingCol: 0,
-                frames: 6
-            }
-        },
-        frameRate: 250,
-        padding: 17
-    }, true);
-
-    animator.play('walkDown');
-
-    const player: Box = {
-        position: createVector(0, 0),
-        width: 800,
-        height: 800,
-        getAnimationFrame: animator.getFrame
-    };
+    const player = createPlayer(drawer, keyboardInput);
 
     const onSave = () => {
         const zone = Array.from(tiles).map(([, tile]) => tile);
@@ -98,8 +58,7 @@ export function createRpgWorld(
 
             centerTile.draw();
             selectedTile.draw();
-
-            drawer.draw(player);
+            player.draw();
         },
 
         update: (deltaTime) => {
@@ -119,7 +78,7 @@ export function createRpgWorld(
                 }
             }
 
-            // player.animation?.update(deltaTime);
+            player.update(deltaTime);
         },
 
         overlay: getOverlay(
