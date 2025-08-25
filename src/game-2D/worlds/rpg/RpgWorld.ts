@@ -8,6 +8,10 @@ import { GameWorld } from "../GameWorld";
 import { createTile, Tile, TILE_SIZE, TileType } from "./data/Tile";
 import { getOverlay } from "./ui/Main";
 import TestZone from "./zone/test.json";
+import PlayerWalk from "./sprites/player_walk.png";
+import { Box } from "../Geometry";
+import { createVector } from "../Vector";
+import { createAnimator } from "../Animator";
 
 const CAMERA_SPEED = 0.4;
 const GRID_MINOR_WIDTH = 0.1;
@@ -40,6 +44,34 @@ export function createRpgWorld(
     let selectedTileType: TileType = TileType.GRASS;
     let isMouseOverPannel = false;
 
+    const animator = createAnimator({
+        imageSrc: PlayerWalk,
+        rows: 4,
+        cols: 6,
+        animations: {
+            walkDown: {
+                startingRow: 0,
+                startingCol: 0,
+                frames: 6
+            },
+            walkLeft: {
+                startingRow: 1,
+                startingCol: 0,
+                frames: 6
+            }
+        },
+        frameRate: 500
+    }, true);
+
+    animator.play('walkDown');
+
+    const player: Box = {
+        position: createVector(0, 0),
+        width: 800,
+        height: 800,
+        getAnimationFrame: animator.getFrame
+    };
+
     const onSave = () => {
         const zone = Array.from(tiles).map(([, tile]) => tile);
         createFile(FileType.JSON, 'zone', JSON.stringify(zone));
@@ -49,12 +81,14 @@ export function createRpgWorld(
         draw: () => {
             drawGrid(canvas, ctx, camera);
 
-            for (const [, tile] of tiles) {
-                tile.draw();
-            }
+            // for (const [, tile] of tiles) {
+            //     tile.draw();
+            // }
 
             centerTile.draw();
             selectedTile.draw();
+
+            drawer.draw(player);
         },
 
         update: (deltaTime) => {
@@ -73,6 +107,8 @@ export function createRpgWorld(
                     tiles.delete(key);
                 }
             }
+
+            // player.animation?.update(deltaTime);
         },
 
         overlay: getOverlay(

@@ -19,6 +19,36 @@ export function createDrawer(ctx: CanvasRenderingContext2D, camera: Camera): Dra
             const drawX = boxScreenCenterX - (box.width / 2);
             const drawY = boxScreenCenterY - (box.height / 2);
 
+            if (box.getAnimationFrame !== undefined) {
+                const frame = box.getAnimationFrame();
+
+                if (frame !== null) {
+                    ctx.drawImage(
+                        frame.image,
+                        frame.x,
+                        frame.y,
+                        frame.width,
+                        frame.height,
+                        drawX,
+                        drawY,
+                        box.width,
+                        box.height
+                    );
+
+                    if (frame.debug) {
+                        ctx.strokeStyle = 'magenta';
+                        ctx.lineWidth = 1;
+
+                        ctx.strokeRect(
+                            drawX,
+                            drawY,
+                            box.width,
+                            box.height
+                        );
+                    }
+                }
+            }
+
             if (box.color !== undefined) {
                 const color = box.color;
 
@@ -33,13 +63,6 @@ export function createDrawer(ctx: CanvasRenderingContext2D, camera: Camera): Dra
 
                 ctx.strokeStyle = borderColor;
                 ctx.lineWidth = borderWidth;
-
-                // ctx.strokeRect(
-                //     drawX + borderWidth / 2,
-                //     drawY + borderWidth / 2,
-                //     box.width - borderWidth,
-                //     box.height - borderWidth
-                // );
 
                 ctx.strokeRect(
                     drawX,
