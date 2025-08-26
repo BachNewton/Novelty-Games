@@ -3,7 +3,11 @@ import { GameObject } from "../../GameWorld";
 import { Box } from "../../Geometry";
 import { createVector } from "../../Vector";
 
-export const TILE_SIZE = 100;
+export const TILE_SIZE = {
+    current: 100,
+    MAX: 300,
+    MIN: 20
+};
 
 export interface Tile extends GameObject {
     x: number;
@@ -21,8 +25,8 @@ export function createTile(drawer: Drawer, type: TileType): Tile {
 
     const box: Box = {
         position: createVector(0, 0),
-        width: TILE_SIZE,
-        height: TILE_SIZE,
+        get width() { return TILE_SIZE.current; },
+        get height() { return TILE_SIZE.current; },
         color: getTileColor(type),
         borderColor: getTileBorderColor(type),
         borderWidth: getTileBorderWidth(type)
@@ -50,8 +54,8 @@ export function createTile(drawer: Drawer, type: TileType): Tile {
 
 export function tileLocationToPosition(x: number, y: number): { centerX: number, centerY: number } {
     return {
-        centerX: (x * TILE_SIZE) + (TILE_SIZE / 2),
-        centerY: (y * TILE_SIZE) + (TILE_SIZE / 2)
+        centerX: (x * TILE_SIZE.current) + (TILE_SIZE.current / 2),
+        centerY: (y * TILE_SIZE.current) + (TILE_SIZE.current / 2)
     };
 }
 

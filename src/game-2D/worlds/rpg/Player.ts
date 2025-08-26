@@ -7,14 +7,15 @@ import { createVector } from "../Vector";
 import { TILE_SIZE, tileLocationToPosition } from "./data/Tile";
 import PlayerWalk from "./spritesheet/player_walk.png";
 import PlayerIdle from "./spritesheet/player_idle.png";
+import { MouseInput } from "../../../util/input/Mouse";
 
 export interface Player extends GameObject { }
 
-const SPEED = 4; // Speed in pixels per frame for the movement animation
+const SPEED = 0.004;
 
 enum Direction { UP, DOWN, LEFT, RIGHT }
 
-export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Player {
+export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput, mouseInput: MouseInput): Player {
     const animator = getAnimator();
     animator.play('idleDown'); // Start with a default animation
 
@@ -27,36 +28,43 @@ export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Play
 
     const box: Box = {
         position: createVector(startPixelX, startPixelY),
-        width: TILE_SIZE,
-        height: TILE_SIZE,
+        get width() { return TILE_SIZE.current; },
+        get height() { return TILE_SIZE.current; },
         getAnimationFrame: animator.getFrame
     };
 
     let isMoving = false;
     let currentDirection: Direction = Direction.DOWN;
 
+    mouseInput.addScrollListener(() => {
+        if (isMoving) return;
+
+        const { centerX, centerY } = tileLocationToPosition(x, y);
+        box.position.set(centerX, centerY);
+    });
+
     return {
         draw: () => {
-            // The box's position is updated directly in the update loop for smoothness
             drawer.draw(box);
         },
 
         update: (deltaTime) => {
             if (isMoving) {
-                // --- Smoothly slide to target tile ---
                 const { centerX: targetPixelX, centerY: targetPixelY } = tileLocationToPosition(x, y);
                 const currentPos = box.position;
 
+                const speed = deltaTime * SPEED * TILE_SIZE.current;
+
                 if (currentPos.x < targetPixelX) {
-                    currentPos.x = Math.min(currentPos.x + SPEED, targetPixelX);
+                    currentPos.x = Math.min(currentPos.x + speed, targetPixelX);
                 } else if (currentPos.x > targetPixelX) {
-                    currentPos.x = Math.max(currentPos.x - SPEED, targetPixelX);
+                    currentPos.x = Math.max(currentPos.x - speed, targetPixelX);
                 }
 
                 if (currentPos.y < targetPixelY) {
-                    currentPos.y = Math.min(currentPos.y + SPEED, targetPixelY);
+                    currentPos.y = Math.min(currentPos.y + speed, targetPixelY);
                 } else if (currentPos.y > targetPixelY) {
-                    currentPos.y = Math.max(currentPos.y - SPEED, targetPixelY);
+                    currentPos.y = Math.max(currentPos.y - speed, targetPixelY);
                 }
 
                 // Reached target tile

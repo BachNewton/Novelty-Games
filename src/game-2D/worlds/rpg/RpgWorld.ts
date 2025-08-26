@@ -1,11 +1,11 @@
 import { Route, updateRoute } from "../../../ui/Routing";
 import { createFile, FileType } from "../../../util/File";
 import { KeyboardInput } from "../../../util/input/Keyboard";
-import { MouseInput } from "../../../util/input/Mouse";
+import { MouseInput, MouseScroll } from "../../../util/input/Mouse";
 import { Camera } from "../Camera";
 import { Drawer } from "../Drawer";
 import { GameWorld } from "../GameWorld";
-import { createTile, Tile, TILE_SIZE, TileType } from "./data/Tile";
+import { createTile, Tile, TileType, TILE_SIZE } from "./data/Tile";
 import { getOverlay } from "./ui/Main";
 import TestZone from "./zone/test.json";
 import { createPlayer } from "./Player";
@@ -41,7 +41,15 @@ export function createRpgWorld(
     let selectedTileType: TileType = TileType.GRASS;
     let isMouseOverPannel = false;
 
-    const player = createPlayer(drawer, keyboardInput);
+    const player = createPlayer(drawer, keyboardInput, mouseInput);
+
+    mouseInput.addScrollListener(scroll => {
+        if (scroll === MouseScroll.UP) {
+            TILE_SIZE.current = Math.min(TILE_SIZE.current + 1, TILE_SIZE.MAX);
+        } else {
+            TILE_SIZE.current = Math.max(TILE_SIZE.current - 1, TILE_SIZE.MIN);
+        }
+    });
 
     const onSave = () => {
         const zone = Array.from(tiles).map(([, tile]) => tile);
@@ -93,15 +101,15 @@ function drawGrid(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, came
     const worldStartX = camera.position.x - canvas.width / 2;
     const worldStartY = camera.position.y + canvas.height / 2;
 
-    const firstGridX = -((worldStartX % TILE_SIZE) + TILE_SIZE) % TILE_SIZE;
-    const firstGridY = ((worldStartY % TILE_SIZE) + TILE_SIZE) % TILE_SIZE;
+    const firstGridX = -((worldStartX % TILE_SIZE.current) + TILE_SIZE.current) % TILE_SIZE.current;
+    const firstGridY = ((worldStartY % TILE_SIZE.current) + TILE_SIZE.current) % TILE_SIZE.current;
 
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 0.25;
 
     ctx.beginPath();
 
-    for (let x = firstGridX, i = Math.floor(worldStartX / TILE_SIZE); x < canvas.width; x += TILE_SIZE, i++) {
+    for (let x = firstGridX, i = Math.floor(worldStartX / TILE_SIZE.current); x < canvas.width; x += TILE_SIZE.current, i++) {
         ctx.beginPath();
         ctx.lineWidth = (i % 10 === 0) ? GRID_MAJOR_WIDTH : GRID_MINOR_WIDTH;
         ctx.moveTo(x, 0);
@@ -109,7 +117,7 @@ function drawGrid(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, came
         ctx.stroke();
     }
 
-    for (let y = firstGridY, j = Math.floor(worldStartY / TILE_SIZE); y < canvas.height; y += TILE_SIZE, j--) {
+    for (let y = firstGridY, j = Math.floor(worldStartY / TILE_SIZE.current); y < canvas.height; y += TILE_SIZE.current, j--) {
         ctx.beginPath();
         ctx.lineWidth = (j % 10 === 0) ? GRID_MAJOR_WIDTH : GRID_MINOR_WIDTH;
         ctx.moveTo(0, y);
@@ -128,15 +136,15 @@ function drawGridNumbers(ctx: CanvasRenderingContext2D, camera: Camera, canvas: 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    const minTileX = Math.floor((camera.position.x - canvas.width / 2) / TILE_SIZE);
-    const maxTileX = Math.floor((camera.position.x + canvas.width / 2) / TILE_SIZE);
-    const minTileY = Math.floor((camera.position.y - canvas.height / 2) / TILE_SIZE);
-    const maxTileY = Math.floor((camera.position.y + canvas.height / 2) / TILE_SIZE);
+    const minTileX = Math.floor((camera.position.x - canvas.width / 2) / TILE_SIZE.current);
+    const maxTileX = Math.floor((camera.position.x + canvas.width / 2) / TILE_SIZE.current);
+    const minTileY = Math.floor((camera.position.y - canvas.height / 2) / TILE_SIZE.current);
+    const maxTileY = Math.floor((camera.position.y + canvas.height / 2) / TILE_SIZE.current);
 
     for (let tileX = minTileX; tileX <= maxTileX; tileX++) {
         for (let tileY = minTileY; tileY <= maxTileY; tileY++) {
-            const screenX = (tileX * TILE_SIZE) - (camera.position.x - canvas.width / 2) + TILE_SIZE / 2;
-            const screenY = canvas.height - ((tileY * TILE_SIZE) - (camera.position.y - canvas.height / 2) + TILE_SIZE / 2);
+            const screenX = (tileX * TILE_SIZE.current) - (camera.position.x - canvas.width / 2) + TILE_SIZE.current / 2;
+            const screenY = canvas.height - ((tileY * TILE_SIZE.current) - (camera.position.y - canvas.height / 2) + TILE_SIZE.current / 2);
 
             if (screenX >= 0 && screenX < canvas.width &&
                 screenY >= 0 && screenY < canvas.height) {
@@ -147,8 +155,8 @@ function drawGridNumbers(ctx: CanvasRenderingContext2D, camera: Camera, canvas: 
 }
 
 function updateTileFromMousePosition(camera: Camera, tile: Tile) {
-    const tileX = Math.floor(camera.mousePosition.x / TILE_SIZE);
-    const tileY = Math.floor(camera.mousePosition.y / TILE_SIZE);
+    const tileX = Math.floor(camera.mousePosition.x / TILE_SIZE.current);
+    const tileY = Math.floor(camera.mousePosition.y / TILE_SIZE.current);
 
     tile.x = tileX;
     tile.y = tileY;

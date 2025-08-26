@@ -1,11 +1,18 @@
+import { listeners } from "process";
+
 export interface MouseInput {
     held: HeldButtons;
+    addScrollListener: (listener: ScrollListener) => void;
 }
+
+type ScrollListener = (scroll: MouseScroll) => void;
 
 enum MouseButton {
     LEFT = 'Left',
     RIGHT = 'Right'
 }
+
+export enum MouseScroll { UP, DOWN }
 
 type HeldButtons = { [Button in MouseButton]: boolean };
 
@@ -19,6 +26,8 @@ export function createMouseInput(): MouseInput {
         [MouseButton.RIGHT]: false
     };
 
+    const scrollListeners: ScrollListener[] = [];
+
     const handleMouseEvent = (e: MouseEvent, type: MouseEventType) => {
         const mouseButton = buttonToMouseButton(e.button);
 
@@ -30,12 +39,21 @@ export function createMouseInput(): MouseInput {
         held[mouseButton] = type === MouseEventType.DOWN ? true : false;
     };
 
+    const handleScrollEvent = (e: WheelEvent) => {
+        if (e.deltaY === 0) return;
+
+        const scroll = e.deltaY > 0 ? MouseScroll.UP : MouseScroll.DOWN;
+        scrollListeners.forEach(listener => listener(scroll));
+    };
+
     window.onmousedown = e => handleMouseEvent(e, MouseEventType.DOWN);
     window.onmouseup = e => handleMouseEvent(e, MouseEventType.UP);
+    window.onwheel = handleScrollEvent;
     window.oncontextmenu = e => e.preventDefault();
 
     return {
-        held: held
+        held: held,
+        addScrollListener: (listener) => scrollListeners.push(listener)
     };
 }
 
