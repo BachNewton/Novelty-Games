@@ -6,6 +6,7 @@ import { Box } from "../Geometry";
 import { createVector } from "../Vector";
 import { TILE_SIZE, tileLocationToPosition } from "./data/Tile";
 import PlayerWalk from "./spritesheet/player_walk.png";
+import PlayerIdle from "./spritesheet/player_idle.png";
 
 export interface Player extends GameObject { }
 
@@ -15,7 +16,7 @@ enum Direction { UP, DOWN, LEFT, RIGHT }
 
 export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Player {
     const animator = getAnimator();
-    animator.play('walkDown'); // Start with a default animation
+    animator.play('idleDown'); // Start with a default animation
 
     // Grid position (the player's "logical" location on the map)
     let x = 0;
@@ -63,7 +64,13 @@ export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Play
                 // Check if we've arrived at the destination tile
                 if (currentPos.x === targetPixelX && currentPos.y === targetPixelY) {
                     isMoving = false;
-                    // You could switch to an "idle" animation here if you have one
+
+                    if (keyboardInput.movementAxis.x === 0 && keyboardInput.movementAxis.y === 0) {
+                        if (currentDirection === Direction.UP) animator.play('idleUp');
+                        if (currentDirection === Direction.DOWN) animator.play('idleDown');
+                        if (currentDirection === Direction.LEFT) animator.play('idleLeft');
+                        if (currentDirection === Direction.RIGHT) animator.play('idleRight');
+                    }
                 }
             } else {
                 // --- If not moving, check for new input ---
@@ -112,10 +119,16 @@ export function createPlayer(drawer: Drawer, keyboardInput: KeyboardInput): Play
 function getAnimator() {
     return createAnimator({
         spritesheets: {
-            playerWalk: {
+            walk: {
                 src: PlayerWalk,
                 rows: 4,
                 cols: 6,
+                padding: 17
+            },
+            idle: {
+                src: PlayerIdle,
+                rows: 4,
+                cols: 12,
                 padding: 17
             }
         },
@@ -124,25 +137,49 @@ function getAnimator() {
                 startingRow: 0,
                 startingCol: 0,
                 frames: 6,
-                imageKey: 'playerWalk'
+                imageKey: 'walk'
             },
             walkLeft: {
                 startingRow: 1,
                 startingCol: 0,
                 frames: 6,
-                imageKey: 'playerWalk'
+                imageKey: 'walk'
             },
             walkRight: {
                 startingRow: 2,
                 startingCol: 0,
                 frames: 6,
-                imageKey: 'playerWalk'
+                imageKey: 'walk'
             },
             walkUp: {
                 startingRow: 3,
                 startingCol: 0,
                 frames: 6,
-                imageKey: 'playerWalk'
+                imageKey: 'walk'
+            },
+            idleDown: {
+                imageKey: 'idle',
+                startingRow: 0,
+                startingCol: 0,
+                frames: 12
+            },
+            idleLeft: {
+                imageKey: 'idle',
+                startingRow: 1,
+                startingCol: 0,
+                frames: 12
+            },
+            idleRight: {
+                imageKey: 'idle',
+                startingRow: 2,
+                startingCol: 0,
+                frames: 12
+            },
+            idleUp: {
+                imageKey: 'idle',
+                startingRow: 3,
+                startingCol: 0,
+                frames: 4
             }
         },
         frameRate: 150
