@@ -1,11 +1,8 @@
-// ## 1. Core Interfaces (with Generic Updates)
-
-export interface Animator<A extends Record<string, any>> {
-    play: (animationName: keyof A) => void;
+export interface Animator<Animations extends Record<string, any>> {
+    play: (animationName: keyof Animations) => void;
     getFrame: () => AnimationFrame | null;
 }
 
-// No changes to AnimationFrame
 export interface AnimationFrame {
     image: HTMLImageElement;
     x: number;
@@ -15,7 +12,6 @@ export interface AnimationFrame {
     debug: boolean;
 }
 
-// No changes to SpritesheetProperties
 interface SpritesheetProperties {
     src: string;
     rows: number;
@@ -23,49 +19,33 @@ interface SpritesheetProperties {
     padding: number;
 }
 
-// AnimationProperties is now generic. It must be created with a type
-// that represents the valid keys for a spritesheet.
 interface AnimationProperties<SpritesheetKey extends string> {
-    imageKey: SpritesheetKey; // This property is now strongly typed
+    imageKey: SpritesheetKey;
     startingRow: number;
     startingCol: number;
     frames: number;
 }
 
-
-// ## 2. The Updated `createAnimator` Function
-
-/**
- * Creates a type-safe animator for sprite sheets.
- * @param properties - The animator properties.
- * @param properties.spritesheets - A map of unique keys to spritesheet configurations.
- * @param properties.animations - A map of animations, where each animation's `imageKey`
- * MUST be a key from the `spritesheets` map.
- * @param properties.frameRate - The delay in milliseconds between animation frames.
- * @param debug - Renders debug outlines if true.
- */
 export function createAnimator<
-    S extends Record<string, SpritesheetProperties>,
-    A extends Record<string, AnimationProperties<keyof S & string>>
+    Spritesheets extends Record<string, SpritesheetProperties>,
+    Animations extends Record<string, AnimationProperties<keyof Spritesheets & string>>
 >(
     properties: {
-        spritesheets: S;
-        animations: A;
+        spritesheets: Spritesheets;
+        animations: Animations;
         frameRate: number;
     },
     debug: boolean = false
-): Animator<A> { // The returned animator is typed to only accept keys from `A`.
-
-    // Load all provided spritesheets into a map of HTMLImageElement objects.
+): Animator<Animations> {
     const images: Record<string, HTMLImageElement> = {};
+
     for (const key in properties.spritesheets) {
         const image = new Image();
         image.src = properties.spritesheets[key].src;
         images[key] = image;
     }
 
-    // State for the currently playing animation
-    let animation: AnimationProperties<keyof S & string> | null = null;
+    let animation: AnimationProperties<keyof Spritesheets & string> | null = null;
     let currentSpritesheet: SpritesheetProperties | null = null;
     let currentImage: HTMLImageElement | null = null;
     let time = -1;
@@ -78,20 +58,12 @@ export function createAnimator<
     return {
         play: (animationName) => {
             const newAnimation = properties.animations[animationName];
+
             if (animation === newAnimation) return;
 
             animation = newAnimation;
-            // `animation.imageKey` is now guaranteed to be a valid key of `spritesheets`
             currentSpritesheet = properties.spritesheets[animation.imageKey];
-            currentImage = images[animation.imageKey as string];
-
-            if (!currentSpritesheet || !currentImage) {
-                // This error should now be unreachable if the code compiles,
-                // but it's good defensive programming.
-                console.error(`Animator Error: Spritesheet with key "${String(animation.imageKey)}" not found.`);
-                animation = null;
-                return;
-            }
+            currentImage = images[animation.imageKey];
 
             width = currentImage.width / currentSpritesheet.cols;
             height = currentImage.height / currentSpritesheet.rows;
@@ -111,18 +83,16 @@ export function createAnimator<
         },
 
         getFrame: () => {
-            if (frame === null || animation === null || currentSpritesheet === null || currentImage === null) {
+            if (frame === null || animation === null || currentSpritesheet === null || currentImage === null || width === 0) {
                 return null;
             }
 
-            if (width === 0 && currentImage.width > 0) {
+            if (currentImage.width > 0) {
                 width = currentImage.width / currentSpritesheet.cols;
                 height = currentImage.height / currentSpritesheet.rows;
                 frame.width = width - (currentSpritesheet.padding * 2);
                 frame.height = height - (currentSpritesheet.padding * 2);
             }
-
-            if (width === 0) return null;
 
             if (performance.now() - time > properties.frameRate) {
                 col++;
