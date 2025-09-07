@@ -11,7 +11,7 @@ import GoToJailIcon from '../icon/go-to-jail.png';
 import ElectricUtilityIcon from '../icon/electric-utility.png';
 import WaterUtilityIcon from '../icon/water-utility.png';
 
-const STREET_COLOR_WIDTH = 12;
+const STREET_COLOR_WIDTH = 10;
 
 interface SquareProps {
     data: SquareData;
