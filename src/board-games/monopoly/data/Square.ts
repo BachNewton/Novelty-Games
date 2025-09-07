@@ -2,6 +2,8 @@ export type Square = Property | Chance | CommunityChest | Tax | Jail | Go | Free
 
 type Property = Street | Railroad | Utility;
 
+type Utility = ElectricUtility | WaterUtility;
+
 export enum Side { BOTTOM, LEFT, TOP, RIGHT }
 
 interface Street {
@@ -19,8 +21,15 @@ interface Railroad {
     price: number;
 }
 
-interface Utility {
-    type: 'utility';
+interface ElectricUtility {
+    type: 'electric-utility';
+    name: string;
+    side: Side;
+    price: number;
+}
+
+interface WaterUtility {
+    type: 'water-utility';
     name: string;
     side: Side;
     price: number;

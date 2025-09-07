@@ -26,7 +26,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
 
             // Left Side
             { type: 'street', name: 'St. Charles Place', side: Side.LEFT, color: 'pink', price: 140 },
-            { type: 'utility', name: 'Electric Company', side: Side.LEFT, price: 150 },
+            { type: 'electric-utility', name: 'Electric Company', side: Side.LEFT, price: 150 },
             { type: 'street', name: 'States Avenue', side: Side.LEFT, color: 'pink', price: 140 },
             { type: 'street', name: 'Virginia Avenue', side: Side.LEFT, color: 'pink', price: 160 },
             { type: 'railroad', name: 'Pennsylvania Railroad', side: Side.LEFT, price: 200 },
@@ -44,7 +44,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
             { type: 'railroad', name: 'B. & O. Railroad', side: Side.TOP, price: 200 },
             { type: 'street', name: 'Atlantic Avenue', side: Side.TOP, color: 'yellow', price: 260 },
             { type: 'street', name: 'Ventnor Avenue', side: Side.TOP, color: 'yellow', price: 260 },
-            { type: 'utility', name: 'Water Works', side: Side.TOP, price: 150 },
+            { type: 'water-utility', name: 'Water Works', side: Side.TOP, price: 150 },
             { type: 'street', name: 'Marvin Gardens', side: Side.TOP, color: 'yellow', price: 280 },
             { type: 'go-to-jail', name: 'Go to Jail', side: Side.TOP },
 
