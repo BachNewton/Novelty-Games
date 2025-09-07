@@ -1,4 +1,5 @@
 import { MonopolyState } from "../data/MonopolyState";
+import Square from "./Square";
 
 interface MonopolyProps {
     state: MonopolyState;
@@ -12,7 +13,7 @@ const Monopoly: React.FC<MonopolyProps> = ({ state }) => {
             padding: '5px',
             boxSizing: 'border-box'
         }}>
-            {square.name}
+            <Square data={square} />
         </div>
     ));
 
