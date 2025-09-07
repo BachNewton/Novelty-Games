@@ -10,7 +10,6 @@ const Monopoly: React.FC<MonopolyProps> = ({ state }) => {
         <div key={index} style={{
             ...getGridPosition(index),
             border: '1px solid white',
-            padding: '5px',
             boxSizing: 'border-box'
         }}>
             <Square data={square} />

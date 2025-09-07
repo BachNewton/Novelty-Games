@@ -6,7 +6,9 @@ interface SquareProps {
 
 const Square: React.FC<SquareProps> = ({ data }) => {
     return <div style={{
-        backgroundColor: data.type === 'property' ? data.color : undefined
+        width: '100%',
+        height: '100%',
+        backgroundColor: data.type === 'street' ? data.color : undefined
     }}>
         {data.name}
     </div>;
