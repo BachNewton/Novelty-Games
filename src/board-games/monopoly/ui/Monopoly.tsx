@@ -1,6 +1,8 @@
 import { MonopolyState } from "../data/MonopolyState";
 import Square from "./Square";
 
+const MAX_BOARD_WIDTH = 800;
+
 interface MonopolyProps {
     state: MonopolyState;
 }
@@ -10,7 +12,8 @@ const Monopoly: React.FC<MonopolyProps> = ({ state }) => {
         <div key={index} style={{
             ...getGridPosition(index),
             border: '1px solid white',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            aspectRatio: 1
         }}>
             <Square data={square} />
         </div>
@@ -22,7 +25,7 @@ const Monopoly: React.FC<MonopolyProps> = ({ state }) => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        fontSize: '2em'
+        fontSize: '1.5em'
     }}>
         This is the Monopoly board!
     </div>
@@ -30,7 +33,9 @@ const Monopoly: React.FC<MonopolyProps> = ({ state }) => {
     return <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(11, 1fr)',
-        gridTemplateRows: 'repeat(11, 1fr)'
+        gridTemplateRows: 'repeat(11, 1fr)',
+        margin: '2px',
+        maxWidth: `${MAX_BOARD_WIDTH}px`
     }}>
         {squares}
         {center}

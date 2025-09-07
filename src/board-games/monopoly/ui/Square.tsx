@@ -14,7 +14,7 @@ const Square: React.FC<SquareProps> = ({ data }) => {
         boxSizing: 'border-box',
         ...getBorder(data)
     }}>
-        {data.name}
+        {/* {data.name} */}
     </div>;
 };
 
