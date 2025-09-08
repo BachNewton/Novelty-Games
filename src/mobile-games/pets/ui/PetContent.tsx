@@ -67,7 +67,7 @@ const PetContent: React.FC<PetContentProps> = ({
     useEffect(() => {
         if (interteractionSelection === null) return;
 
-        const interactionTextAndImage = dataManager.handleInteraction(
+        const interactionTextAndImage = dataManager.getTextAndImageFromInteraction(
             interteractionSelection.type,
             interteractionSelection.interaction,
             selectedPet

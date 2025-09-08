@@ -60,8 +60,8 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     }, []);
 
     const onInteractionSelected = (type: keyof Interactions, interaction: Interaction) => {
-        database.addSeenInteraction(interaction.id);
         seenInteractions.add(interaction.id);
+        dataManager.handleInteraction(selectedPet, interaction);
 
         setInterteractionSelection({ type, interaction });
     };
