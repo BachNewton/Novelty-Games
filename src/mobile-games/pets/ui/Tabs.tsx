@@ -8,7 +8,17 @@ interface TabsProps {
 }
 
 const Tabs: React.FC<TabsProps> = ({ pets, selectedTab, onTabSelected }) => {
-    const tabs = pets.map((pet, index) => {
+    return <div style={{ display: 'flex' }}>
+        {menuUi(selectedTab)}
+
+        <div style={{ display: 'flex', overflow: 'auto', backgroundColor: COLORS.surface }}>
+            {tabsUi(pets, selectedTab, onTabSelected)}
+        </div>
+    </div>;
+};
+
+function tabsUi(pets: Pet[], selectedTab: number, onTabSelected: (index: number | null) => void): JSX.Element[] {
+    return pets.map((pet, index) => {
         const name = pet.discovered ? pet.name : '???';
 
         return <div
@@ -19,14 +29,7 @@ const Tabs: React.FC<TabsProps> = ({ pets, selectedTab, onTabSelected }) => {
             {name}
         </div>;
     });
-
-    return <div style={{ display: 'flex' }}>
-        {menuUi(selectedTab)}
-        <div style={{ display: 'flex', overflow: 'auto', backgroundColor: COLORS.surface }}>
-            {tabs}
-        </div>
-    </div>;
-};
+}
 
 function menuUi(selectedTab: number | null): JSX.Element {
     return <div style={{ ...getTabStyle(selectedTab, null), backgroundColor: COLORS.surface }}>
