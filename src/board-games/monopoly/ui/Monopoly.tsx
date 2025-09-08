@@ -16,12 +16,15 @@ interface MonopolyProps {
 const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
     useEffect(() => {
         const currentPlayer = state.players[state.currentPlayerIndex];
+        let timeoutId: NodeJS.Timeout | undefined;
 
         if (id === currentPlayer.id) {
-            setTimeout(() => {
+            timeoutId = setTimeout(() => {
                 actions.roll();
             }, ACTION_DELAY_MS);
         }
+
+        return () => clearTimeout(timeoutId);
     }, [state]);
 
     const log = state.log.map((_, index) => {
