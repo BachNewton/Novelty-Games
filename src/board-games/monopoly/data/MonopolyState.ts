@@ -5,4 +5,5 @@ export interface MonopolyState {
     board: Square[];
     players: Player[];
     currentPlayerIndex: number;
+    log: string[];
 }

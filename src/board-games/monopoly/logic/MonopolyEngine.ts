@@ -1,3 +1,4 @@
+import { randomInt } from "../../../util/Randomizer";
 import { MonopolyState } from "../data/MonopolyState";
 
 export interface MonopolyEngine {
@@ -10,9 +11,15 @@ export function createMonopolyEngine(): MonopolyEngine {
             const state = { ...formerState };
 
             const currentPlayer = state.players[state.currentPlayerIndex];
-            currentPlayer.position = (currentPlayer.position + 1) % state.board.length;
 
+            const die1 = randomInt(6) + 1;
+            const die2 = randomInt(6) + 1;
+            const roll = die1 + die2;
+
+            currentPlayer.position = (currentPlayer.position + roll) % state.board.length;
             state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
+
+            state.log.push(`${currentPlayer.name}'s turn - rolled ${roll} (${die1}+${die2}) - landed on ${state.board[currentPlayer.position].name}`);
 
             return state;
         }

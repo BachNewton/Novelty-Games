@@ -61,10 +61,11 @@ const Home: React.FC<HomeProps> = ({ }) => {
             { type: 'street', name: 'Boardwalk', side: Side.RIGHT, color: 'darkblue', price: 400 },
         ],
         players: [
-            { id: '1', name: 'Kyle', color: 'blue', position: 1, money: 1500 },
-            { id: '1', name: 'Eric', color: 'red', position: 12, money: 1500 }
+            { id: '1', name: 'Kyle', color: 'blue', position: 0, money: 1500 },
+            { id: '1', name: 'Eric', color: 'red', position: 0, money: 1500 }
         ],
-        currentPlayerIndex: 0
+        currentPlayerIndex: 0,
+        log: []
     });
 
     useEffect(() => updateRoute(Route.MONOPOLY), []);

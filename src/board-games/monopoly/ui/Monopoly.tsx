@@ -5,7 +5,7 @@ import Square from "./Square";
 import { MonopolyActions } from "../data/MonopolyActions";
 
 const MAX_BOARD_WIDTH = 900;
-const ACTION_DELAY_MS = 500;
+const ACTION_DELAY_MS = 2000;
 
 interface MonopolyProps {
     state: MonopolyState;
@@ -23,6 +23,15 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
             }, ACTION_DELAY_MS);
         }
     }, [state]);
+
+    const log = state.log.map((_, index) => {
+        const entry = state.log[state.log.length - 1 - index];
+
+        return <div key={index} style={{
+            border: '1px solid grey',
+            padding: '2px'
+        }}>{entry}</div>;
+    });
 
     const squares = state.board.map((square, index) => (
         <div key={index} style={{
@@ -50,14 +59,22 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
     </div>
 
     return <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(11, 1fr)',
-        gridTemplateRows: 'repeat(11, 1fr)',
         margin: '2px',
-        maxWidth: `${MAX_BOARD_WIDTH}px`
     }}>
-        {squares}
-        {center}
+        <div style={{
+            height: '125px',
+            overflow: 'auto'
+        }}>{log}</div>
+
+        <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(11, 1fr)',
+            gridTemplateRows: 'repeat(11, 1fr)',
+            maxWidth: `${MAX_BOARD_WIDTH}px`
+        }}>
+            {squares}
+            {center}
+        </div>
     </div>;
 };
 
