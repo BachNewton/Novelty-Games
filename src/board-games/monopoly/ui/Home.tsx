@@ -1,15 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import { MonopolyState } from "../data/MonopolyState";
 import Monopoly from "./Monopoly";
 import { Side } from "../data/Square"
+import { createMonopolyEngine } from "../logic/MonopolyEngine";
 
 interface HomeProps { }
 
 const Home: React.FC<HomeProps> = ({ }) => {
-    useEffect(() => updateRoute(Route.MONOPOLY), []);
+    const engine = useRef(createMonopolyEngine()).current;
 
-    const state = useRef<MonopolyState>({
+    const [state, setState] = useState<MonopolyState>({
         board: [
             // Bottom Side
             { type: 'go', name: 'Go', side: Side.BOTTOM },
@@ -61,11 +62,16 @@ const Home: React.FC<HomeProps> = ({ }) => {
         ],
         players: [
             { id: '1', name: 'Kyle', color: 'blue', position: 1, money: 1500 },
-            { id: '2', name: 'Eric', color: 'red', position: 12, money: 1500 }
-        ]
+            { id: '1', name: 'Eric', color: 'red', position: 12, money: 1500 }
+        ],
+        currentPlayerIndex: 0
     });
 
-    return <Monopoly state={state.current} />;
+    useEffect(() => updateRoute(Route.MONOPOLY), []);
+
+    return <Monopoly state={state} id={'1'} actions={{
+        roll: () => setState(engine.roll(state))
+    }} />;
 };
 
 export default Home;

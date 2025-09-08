@@ -1,14 +1,29 @@
+import { useEffect } from "react";
 import { MonopolyState } from "../data/MonopolyState";
 import { Player } from "../data/Player";
 import Square from "./Square";
+import { MonopolyActions } from "../data/MonopolyActions";
 
 const MAX_BOARD_WIDTH = 900;
+const ACTION_DELAY_MS = 500;
 
 interface MonopolyProps {
     state: MonopolyState;
+    actions: MonopolyActions;
+    id: string;
 }
 
-const Monopoly: React.FC<MonopolyProps> = ({ state }) => {
+const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
+    useEffect(() => {
+        const currentPlayer = state.players[state.currentPlayerIndex];
+
+        if (id === currentPlayer.id) {
+            setTimeout(() => {
+                actions.roll();
+            }, ACTION_DELAY_MS);
+        }
+    }, [state]);
+
     const squares = state.board.map((square, index) => (
         <div key={index} style={{
             ...getGridPosition(index),
