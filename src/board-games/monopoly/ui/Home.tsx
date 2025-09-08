@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import { MonopolyState } from "../data/MonopolyState";
 import Monopoly from "./Monopoly";
-import { Side } from "../data/Square";
+import { Side } from "../data/Square"
 
 interface HomeProps { }
 
@@ -58,6 +58,10 @@ const Home: React.FC<HomeProps> = ({ }) => {
             { type: 'street', name: 'Park Place', side: Side.RIGHT, color: 'darkblue', price: 350 },
             { type: 'tax', name: 'Luxury Tax', side: Side.RIGHT, amount: 100 },
             { type: 'street', name: 'Boardwalk', side: Side.RIGHT, color: 'darkblue', price: 400 },
+        ],
+        players: [
+            { id: '1', name: 'Kyle', color: 'blue', position: 1, money: 1500 },
+            { id: '2', name: 'Eric', color: 'red', position: 12, money: 1500 }
         ]
     });
 

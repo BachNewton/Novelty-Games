@@ -1,7 +1,8 @@
 import { MonopolyState } from "../data/MonopolyState";
+import { Player } from "../data/Player";
 import Square from "./Square";
 
-const MAX_BOARD_WIDTH = 800;
+const MAX_BOARD_WIDTH = 900;
 
 interface MonopolyProps {
     state: MonopolyState;
@@ -13,9 +14,12 @@ const Monopoly: React.FC<MonopolyProps> = ({ state }) => {
             ...getGridPosition(index),
             border: '1px solid white',
             boxSizing: 'border-box',
-            aspectRatio: 1
+            aspectRatio: 1,
+            position: 'relative'
         }}>
             <Square data={square} />
+
+            {playersUi(index, state.players)}
         </div>
     ));
 
@@ -41,6 +45,35 @@ const Monopoly: React.FC<MonopolyProps> = ({ state }) => {
         {center}
     </div>;
 };
+
+function playersUi(index: number, players: Player[]): React.ReactNode {
+    const player1 = players[0]?.position === index ? players[0]?.color : 'transparent';
+    const player2 = players[1]?.position === index ? players[1]?.color : 'transparent';
+    const player3 = players[2]?.position === index ? players[2]?.color : 'transparent';
+    const player4 = players[3]?.position === index ? players[3]?.color : 'transparent';
+
+    return <div style={{
+        position: 'absolute',
+        top: '0px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%'
+    }}>
+        <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            width: '75%',
+            height: '75%'
+        }}>
+            <div style={{ borderRadius: '100%', backgroundColor: player1 }} />
+            <div style={{ borderRadius: '100%', backgroundColor: player2 }} />
+            <div style={{ borderRadius: '100%', backgroundColor: player3 }} />
+            <div style={{ borderRadius: '100%', backgroundColor: player4 }} />
+        </div>
+    </div>;
+}
 
 function getGridPosition(index: number): React.CSSProperties {
     // Bottom Row (squares 0-10)
