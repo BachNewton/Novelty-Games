@@ -1,5 +1,6 @@
 import { Pet } from "../data/Pet";
 import { COLORS } from "./Home";
+import PawIcon from "../icons/paw.svg";
 
 interface TabsProps {
     pets: Pet[];
@@ -33,7 +34,9 @@ function tabsUi(pets: Pet[], selectedTab: number, onTabSelected: (index: number 
 
 function menuUi(selectedTab: number | null): JSX.Element {
     return <div style={{ ...getTabStyle(selectedTab, null), backgroundColor: COLORS.surface }}>
-        Menu
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+            <img src={PawIcon} alt="Menu" style={{ height: '1.5em' }} />
+        </div>
     </div>;
 }
 
@@ -42,7 +45,7 @@ function getTabStyle(selectedTab: number | null, index: number | null): React.CS
         ...getTabBorderStyle(selectedTab, index),
         padding: '7.5px',
         userSelect: 'none',
-        flex: '0 0 4em',
+        flex: index === null ? '0 0 2.5em' : '0 0 4em',
         textAlign: 'center'
     };
 }
