@@ -21,8 +21,6 @@ const Canvas: React.FC<CanvasProps> = ({ width, height, draw }) => {
         canvas.style.width = `${width}px`;
         canvas.style.height = `${height}px`;
 
-        ctx.imageSmoothingEnabled = false;
-
         const cleanupCanvas = initCanvas(canvas, ctx, () => draw(ctx));
 
         return cleanupCanvas;

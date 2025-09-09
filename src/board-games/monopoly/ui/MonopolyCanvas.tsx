@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Canvas from "../../../util/ui/Canvas";
 import { MonopolyActions } from "../data/MonopolyActions";
 import { MonopolyState } from "../data/MonopolyState";
 import { drawBoard } from "../canvas/board";
+import { createMonopolyIcons } from "../data/MonopolyIcons";
 
 const PADDING = 2;
 
@@ -13,6 +14,7 @@ interface MonopolyCanvasProps {
 }
 
 const MonopolyCanvas: React.FC<MonopolyCanvasProps> = ({ state, actions, id }) => {
+    const icons = useRef(createMonopolyIcons()).current;
     const [width, setWidth] = useState(window.innerWidth);
     const [height, setHeight] = useState(window.innerHeight);
 
@@ -36,7 +38,8 @@ const MonopolyCanvas: React.FC<MonopolyCanvasProps> = ({ state, actions, id }) =
             drawBoard(
                 ctx,
                 { x: PADDING, y: PADDING, width: width - (PADDING * 2), height: height - (PADDING * 2) },
-                state
+                state,
+                icons
             );
         }}
     />;

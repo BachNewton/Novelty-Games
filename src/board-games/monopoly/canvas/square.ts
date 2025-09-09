@@ -1,10 +1,11 @@
+import { MonopolyIcons } from "../data/MonopolyIcons";
 import { MonopolyState } from "../data/MonopolyState";
 import { Street } from "../data/Square";
 import { Rect } from "./Rect";
 
 const STREET_COLOR_SIZE = 1 / 5;
 
-export function drawSquare(ctx: CanvasRenderingContext2D, view: Rect, boardIndex: number, state: MonopolyState) {
+export function drawSquare(ctx: CanvasRenderingContext2D, view: Rect, boardIndex: number, state: MonopolyState, icons: MonopolyIcons) {
     const square = state.board[boardIndex];
 
     ctx.strokeStyle = 'white';
@@ -13,9 +14,13 @@ export function drawSquare(ctx: CanvasRenderingContext2D, view: Rect, boardIndex
 
     if (square.type === 'street') {
         drawStreet(ctx, view, square, boardIndex);
+    } else if (square.type === 'community-chest') {
+        drawIcon(ctx, view, icons.communityChest);
+    } else if (square.type === 'tax') {
+
     }
 
-    ctx.font = '20px Arial';
+    ctx.font = '15px Arial';
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -44,4 +49,12 @@ function getSide(index: number): 'bottom' | 'left' | 'top' | 'right' {
     if (index >= 20 && index <= 30) return 'top';
     if (index >= 31 && index <= 39) return 'right';
     throw new Error('Invalid index');
+}
+
+function drawIcon(ctx: CanvasRenderingContext2D, view: Rect, icon: HTMLImageElement) {
+    const size = Math.min(view.width, view.height);
+    const x = view.x + (view.width / 2) - (size / 2);
+    const y = view.y + (view.height / 2) - (size / 2);
+
+    ctx.drawImage(icon, x, y, size, size);
 }
