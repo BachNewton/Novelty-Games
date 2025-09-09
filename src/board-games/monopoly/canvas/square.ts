@@ -17,14 +17,30 @@ export function drawSquare(ctx: CanvasRenderingContext2D, view: Rect, boardIndex
     } else if (square.type === 'community-chest') {
         drawIcon(ctx, view, icons.communityChest);
     } else if (square.type === 'tax') {
-
+        drawIcon(ctx, view, icons.tax);
+    } else if (square.type === 'chance') {
+        drawIcon(ctx, view, icons.chance);
+    } else if (square.type === 'electric-utility') {
+        drawIcon(ctx, view, icons.electricUtility);
+    } else if (square.type === 'water-utility') {
+        drawIcon(ctx, view, icons.waterUtility);
+    } else if (square.type === 'railroad') {
+        drawIcon(ctx, view, icons.railroad);
+    } else if (square.type === 'go') {
+        drawIcon(ctx, view, icons.go);
+    } else if (square.type === 'jail') {
+        drawIcon(ctx, view, icons.jail);
+    } else if (square.type === 'free-parking') {
+        drawIcon(ctx, view, icons.freeParking);
+    } else if (square.type === 'go-to-jail') {
+        drawIcon(ctx, view, icons.goToJail);
     }
 
     ctx.font = '15px Arial';
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(boardIndex.toString(), view.x + (view.width / 2), view.y + (view.height / 2));
+    // ctx.fillText(boardIndex.toString(), view.x + (view.width / 2), view.y + (view.height / 2));
 }
 
 function drawStreet(ctx: CanvasRenderingContext2D, view: Rect, square: Street, boardIndex: number) {
