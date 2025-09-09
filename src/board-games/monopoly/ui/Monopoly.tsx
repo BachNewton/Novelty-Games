@@ -4,7 +4,6 @@ import { Player } from "../data/Player";
 import Square from "./Square";
 import { MonopolyActions } from "../data/MonopolyActions";
 
-const MAX_BOARD_WIDTH = 900;
 const ACTION_DELAY_MS = 2000;
 
 interface MonopolyProps {
@@ -61,8 +60,21 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         This is the Monopoly board!
     </div>
 
+    const actionButton = (text: string) => <div style={{
+        border: '1px solid white',
+        padding: '10px',
+        borderRadius: '15px'
+    }}>
+        {text}
+    </div>;
+
     return <div style={{
-        margin: '2px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        height: '100dvh',
+        padding: '2px',
+        boxSizing: 'border-box'
     }}>
         <div style={{
             height: '125px',
@@ -70,13 +82,26 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         }}>{log}</div>
 
         <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(11, 1fr)',
-            gridTemplateRows: 'repeat(11, 1fr)',
-            maxWidth: `${MAX_BOARD_WIDTH}px`
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
         }}>
-            {squares}
-            {center}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(11, 1fr)',
+                gridTemplateRows: 'repeat(11, 1fr)',
+                width: 'min(100dvw, calc(100dvh - 124px - 100px))'
+            }}>
+                {squares}
+                {center}
+            </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', height: '100px' }}>
+            {actionButton('Action 1')}
+            {actionButton('Action 2')}
+            {actionButton('Action 3')}
+            {actionButton('Action 4')}
         </div>
     </div>;
 };
