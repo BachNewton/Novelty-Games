@@ -11,14 +11,54 @@ export function drawBoard(ctx: CanvasRenderingContext2D, view: Rect): void {
     const width = view.width / SQUARE_PER_SIDE;
     const height = view.height / SQUARE_PER_SIDE;
 
+    let boardIndex = 0;
+
+    // Bottom side
     for (let i = 0; i < SQUARE_PER_SIDE; i++) {
+        const x = view.x + (SQUARE_PER_SIDE - 1 - i) * width;
+
+        drawSquare(ctx, {
+            x: x,
+            y: view.y + view.height - height,
+            width: width,
+            height: height
+        }, boardIndex++);
+    }
+
+    // Left side
+    for (let i = 1; i < SQUARE_PER_SIDE; i++) {
+        const y = view.y + (SQUARE_PER_SIDE - 1 - i) * height;
+
+        drawSquare(ctx, {
+            x: view.x,
+            y: y,
+            width: width,
+            height: height
+        }, boardIndex++);
+    }
+
+    // Top side
+    for (let i = 1; i < SQUARE_PER_SIDE; i++) {
         const x = view.x + i * width;
 
         drawSquare(ctx, {
-            x,
-            y: view.height - height,
-            width,
-            height
-        });
+            x: x,
+            y: view.y,
+            width: width,
+            height: height
+        }, boardIndex++);
+    }
+
+    // Right side
+    for (let i = 1; i < SQUARE_PER_SIDE - 1; i++) {
+        const x = view.x + view.width - width;
+        const y = view.y + i * height;
+
+        drawSquare(ctx, {
+            x: x,
+            y: y,
+            width: width,
+            height: height
+        }, boardIndex++);
     }
 }
