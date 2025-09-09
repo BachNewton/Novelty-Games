@@ -6,7 +6,7 @@ type Utility = ElectricUtility | WaterUtility;
 
 export enum Side { BOTTOM, LEFT, TOP, RIGHT }
 
-interface Street {
+export interface Street {
     type: 'street';
     name: string;
     side: Side;
