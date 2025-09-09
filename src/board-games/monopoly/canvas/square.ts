@@ -1,13 +1,42 @@
+import { MonopolyState } from "../data/MonopolyState";
 import { Rect } from "./Rect";
 
-export function drawSquare(ctx: CanvasRenderingContext2D, view: Rect, boardIndex: number) {
+const STREET_COLOR_SIZE = 1 / 5;
+
+export function drawSquare(ctx: CanvasRenderingContext2D, view: Rect, boardIndex: number, state: MonopolyState) {
+    const square = state.board[boardIndex];
+
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 2;
     ctx.strokeRect(view.x, view.y, view.width, view.height);
+
+    if (square.type === 'street') {
+        const side = getSide(boardIndex);
+
+        ctx.fillStyle = square.color;
+
+        if (side === 'bottom') {
+            ctx.fillRect(view.x + 1, view.y + 1, view.width - 2, view.height * STREET_COLOR_SIZE);
+        } else if (side === 'left') {
+            ctx.fillRect((view.x + view.width) - (view.width * STREET_COLOR_SIZE) - 1, view.y + 1, view.width * STREET_COLOR_SIZE, view.height - 2);
+        } else if (side === 'top') {
+            ctx.fillRect(view.x + 1, (view.y + view.height) - (view.height * STREET_COLOR_SIZE) - 1, view.width - 2, view.height * STREET_COLOR_SIZE);
+        } else if (side === 'right') {
+            ctx.fillRect(view.x + 1, view.y + 1, view.width * STREET_COLOR_SIZE, view.height - 2);
+        }
+    }
 
     ctx.font = '20px Arial';
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(boardIndex.toString(), view.x + (view.width / 2), view.y + (view.height / 2));
+}
+
+function getSide(index: number): 'bottom' | 'left' | 'top' | 'right' {
+    if (index >= 0 && index <= 10) return 'bottom';
+    if (index >= 11 && index <= 19) return 'left';
+    if (index >= 20 && index <= 30) return 'top';
+    if (index >= 31 && index <= 39) return 'right';
+    throw new Error('Invalid index');
 }

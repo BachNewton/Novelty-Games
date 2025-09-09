@@ -33,7 +33,11 @@ const MonopolyCanvas: React.FC<MonopolyCanvasProps> = ({ state, actions, id }) =
         width={width}
         height={height}
         draw={(ctx) => {
-            drawBoard(ctx, { x: PADDING, y: PADDING, width: width - (PADDING * 2), height: height - (PADDING * 2) });
+            drawBoard(
+                ctx,
+                { x: PADDING, y: PADDING, width: width - (PADDING * 2), height: height - (PADDING * 2) },
+                state
+            );
         }}
     />;
 };

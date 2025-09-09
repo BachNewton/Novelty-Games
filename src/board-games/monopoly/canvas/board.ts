@@ -1,10 +1,11 @@
+import { MonopolyState } from "../data/MonopolyState";
 import { Rect } from "./Rect";
 import { drawSquare } from "./square";
 
 const LINE_WIDTH = 2;
 const SQUARE_PER_SIDE = 11;
 
-export function drawBoard(ctx: CanvasRenderingContext2D, view: Rect): void {
+export function drawBoard(ctx: CanvasRenderingContext2D, view: Rect, state: MonopolyState): void {
     ctx.strokeStyle = 'white';
     ctx.lineWidth = LINE_WIDTH;
 
@@ -22,7 +23,7 @@ export function drawBoard(ctx: CanvasRenderingContext2D, view: Rect): void {
             y: view.y + view.height - height,
             width: width,
             height: height
-        }, boardIndex++);
+        }, boardIndex++, state);
     }
 
     // Left side
@@ -34,7 +35,7 @@ export function drawBoard(ctx: CanvasRenderingContext2D, view: Rect): void {
             y: y,
             width: width,
             height: height
-        }, boardIndex++);
+        }, boardIndex++, state);
     }
 
     // Top side
@@ -46,7 +47,7 @@ export function drawBoard(ctx: CanvasRenderingContext2D, view: Rect): void {
             y: view.y,
             width: width,
             height: height
-        }, boardIndex++);
+        }, boardIndex++, state);
     }
 
     // Right side
@@ -59,6 +60,6 @@ export function drawBoard(ctx: CanvasRenderingContext2D, view: Rect): void {
             y: y,
             width: width,
             height: height
-        }, boardIndex++);
+        }, boardIndex++, state);
     }
 }
