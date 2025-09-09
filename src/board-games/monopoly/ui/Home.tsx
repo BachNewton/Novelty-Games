@@ -4,6 +4,7 @@ import { MonopolyState } from "../data/MonopolyState";
 import Monopoly from "./Monopoly";
 import { Side } from "../data/Square"
 import { createMonopolyEngine } from "../logic/MonopolyEngine";
+import MonopolyCanvas from "./MonopolyCanvas";
 
 interface HomeProps { }
 
@@ -72,7 +73,11 @@ const Home: React.FC<HomeProps> = ({ }) => {
 
     useEffect(() => updateRoute(Route.MONOPOLY), []);
 
-    return <Monopoly state={state} id={'1'} actions={{
+    // return <Monopoly state={state} id={'1'} actions={{
+    //     roll: () => setState(engine.roll(state))
+    // }} />;
+
+    return <MonopolyCanvas state={state} id={'1'} actions={{
         roll: () => setState(engine.roll(state))
     }} />;
 };
