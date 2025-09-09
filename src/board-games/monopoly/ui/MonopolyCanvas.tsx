@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import Canvas from "../../../util/ui/Canvas";
 import { MonopolyActions } from "../data/MonopolyActions";
 import { MonopolyState } from "../data/MonopolyState";
+import { drawBoard } from "../canvas/board";
+
+const PADDING = 2;
 
 interface MonopolyCanvasProps {
     state: MonopolyState;
@@ -30,8 +33,7 @@ const MonopolyCanvas: React.FC<MonopolyCanvasProps> = ({ state, actions, id }) =
         width={width}
         height={height}
         draw={(ctx) => {
-            ctx.fillStyle = 'magenta';
-            ctx.fillRect(5, 5, width - 10, height - 10);
+            drawBoard(ctx, { x: PADDING, y: PADDING, width: width - (PADDING * 2), height: height - (PADDING * 2) });
         }}
     />;
 };
