@@ -45,7 +45,7 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         }}>
             <Square data={square} />
 
-            {playersUi(index, state.players)}
+            {playerTokensUi(index, state.players)}
         </div>
     ));
 
@@ -68,6 +68,14 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         {text}
     </div>;
 
+    const playerUi = state.players.map((player, index) => <div key={index} style={{
+        border: `1px solid ${player.color}`,
+        padding: '5px',
+        borderRadius: '15px'
+    }}>
+        {player.name}: ${player.money}
+    </div>);
+
     return <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -76,10 +84,20 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         padding: '2px',
         boxSizing: 'border-box'
     }}>
-        <div style={{
+        {/* <div style={{
             height: '125px',
             overflow: 'auto'
-        }}>{log}</div>
+        }}>{log}</div> */}
+
+        <div style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(2, 1fr)`,
+            gap: '5px',
+            height: '125px',
+            padding: '5px'
+        }}>
+            {playerUi}
+        </div>
 
         <div style={{
             display: 'flex',
@@ -106,7 +124,7 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
     </div>;
 };
 
-function playersUi(index: number, players: Player[]): React.ReactNode {
+function playerTokensUi(index: number, players: Player[]): React.ReactNode {
     const player1 = players[0]?.position === index ? players[0]?.color : 'transparent';
     const player2 = players[1]?.position === index ? players[1]?.color : 'transparent';
     const player3 = players[2]?.position === index ? players[2]?.color : 'transparent';

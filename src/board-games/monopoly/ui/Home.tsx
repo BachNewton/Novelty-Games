@@ -62,7 +62,9 @@ const Home: React.FC<HomeProps> = ({ }) => {
         ],
         players: [
             { id: '1', name: 'Kyle', color: 'blue', position: 0, money: 1500 },
-            { id: '1', name: 'Eric', color: 'red', position: 0, money: 1500 }
+            { id: '1', name: 'Eric', color: 'red', position: 0, money: 1500 },
+            { id: '1', name: 'Megan', color: 'yellow', position: 0, money: 1500 },
+            { id: '1', name: 'Elliott', color: 'green', position: 0, money: 1500 }
         ],
         currentPlayerIndex: 0,
         log: []
