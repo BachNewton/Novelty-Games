@@ -5,6 +5,7 @@ import { MonopolyState } from "../data/MonopolyState";
 import { drawBoard } from "../canvas/board";
 import { createMonopolyIcons } from "../data/MonopolyIcons";
 
+const ACTION_DELAY_MS = 2000;
 const PADDING = 2;
 
 interface MonopolyCanvasProps {
@@ -30,6 +31,19 @@ const MonopolyCanvas: React.FC<MonopolyCanvasProps> = ({ state, actions, id }) =
 
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    useEffect(() => {
+        const currentPlayer = state.players[state.currentPlayerIndex];
+        let timeoutId: NodeJS.Timeout | undefined;
+
+        if (id === currentPlayer.id) {
+            timeoutId = setTimeout(() => {
+                actions.roll();
+            }, ACTION_DELAY_MS);
+        }
+
+        return () => clearTimeout(timeoutId);
+    }, [state]);
 
     return <Canvas
         width={width}

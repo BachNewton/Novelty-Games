@@ -1,15 +1,17 @@
 import { MonopolyIcons } from "../data/MonopolyIcons";
 import { MonopolyState } from "../data/MonopolyState";
 import { Street } from "../data/Square";
+import { drawPlayerTokens } from "./playerTokens";
 import { Rect } from "./Rect";
 
+const LINE_WIDTH = 2;
 const STREET_COLOR_SIZE = 1 / 5;
 
 export function drawSquare(ctx: CanvasRenderingContext2D, view: Rect, boardIndex: number, state: MonopolyState, icons: MonopolyIcons) {
     const square = state.board[boardIndex];
 
     ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = LINE_WIDTH;
     ctx.strokeRect(view.x, view.y, view.width, view.height);
 
     if (square.type === 'street') {
@@ -35,6 +37,8 @@ export function drawSquare(ctx: CanvasRenderingContext2D, view: Rect, boardIndex
     } else if (square.type === 'go-to-jail') {
         drawIcon(ctx, view, icons.goToJail);
     }
+
+    drawPlayerTokens(ctx, view, state, boardIndex);
 
     ctx.font = '15px Arial';
     ctx.fillStyle = 'white';
