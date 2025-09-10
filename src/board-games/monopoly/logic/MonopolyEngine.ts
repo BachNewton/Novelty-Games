@@ -30,7 +30,6 @@ export function createMonopolyEngine(): MonopolyEngine {
                 state.phase = { type: 'buy-property', property: square };
             } else {
                 moveToNextPlayer(state);
-                state.phase = { type: 'ready' };
             }
 
             return state;
@@ -48,7 +47,6 @@ export function createMonopolyEngine(): MonopolyEngine {
             property.ownedByPlayerIndex = state.currentPlayerIndex;
 
             moveToNextPlayer(state);
-            state.phase = { type: 'ready' };
 
             return state;
         }
@@ -75,4 +73,5 @@ export function isProperty(square: Square): square is Property {
 
 function moveToNextPlayer(state: MonopolyState) {
     state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
+    state.phase = { type: 'ready' };
 }
