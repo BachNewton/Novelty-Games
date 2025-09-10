@@ -47,6 +47,7 @@ const MonopolyCanvas: React.FC<MonopolyCanvasProps> = ({ state, actions, id }) =
                 console.log('Click in no');
             } else if (isPointInRect(click, clickableRects.yes)) {
                 console.log('click in yes');
+                actions.buyProperty();
             } else {
                 console.log('click on nothing');
             }

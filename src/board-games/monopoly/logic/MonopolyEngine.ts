@@ -1,4 +1,3 @@
-import { get } from "http";
 import { randomInt } from "../../../util/Randomizer";
 import { MonopolyState } from "../data/MonopolyState";
 import { Player } from "../data/Player";
@@ -6,6 +5,7 @@ import { Property, Square } from "../data/Square";
 
 export interface MonopolyEngine {
     roll: (formerState: MonopolyState) => MonopolyState;
+    buyProperty: (formerState: MonopolyState) => MonopolyState;
 }
 
 export function createMonopolyEngine(): MonopolyEngine {
@@ -32,6 +32,23 @@ export function createMonopolyEngine(): MonopolyEngine {
                 moveToNextPlayer(state);
                 state.phase = { type: 'ready' };
             }
+
+            return state;
+        },
+
+        buyProperty: (formerState) => {
+            const state = { ...formerState };
+
+            if (state.phase.type !== 'buy-property') return state;
+
+            const currentPlayer = getCurrentPlayer(state);
+            const property = state.phase.property;
+
+            currentPlayer.money -= property.price;
+            property.ownedByPlayerId = currentPlayer.id;
+
+            moveToNextPlayer(state);
+            state.phase = { type: 'ready' };
 
             return state;
         }

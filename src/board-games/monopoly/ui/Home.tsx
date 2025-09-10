@@ -82,7 +82,8 @@ const Home: React.FC<HomeProps> = ({ }) => {
     // }} />;
 
     return <MonopolyCanvas state={state} id={'1'} actions={{
-        roll: () => setState(engine.roll(state))
+        roll: () => setState(engine.roll(state)),
+        buyProperty: () => setState(engine.buyProperty(state)),
     }} />;
 };
 

@@ -9,28 +9,28 @@ export interface Street {
     name: string;
     color: string;
     price: number;
-    ownedByPlayerId: number | null;
+    ownedByPlayerId: string | null;
 }
 
 interface Railroad {
     type: 'railroad';
     name: string;
     price: number;
-    ownedByPlayerId: number | null;
+    ownedByPlayerId: string | null;
 }
 
 interface ElectricUtility {
     type: 'electric-utility';
     name: string;
     price: number;
-    ownedByPlayerId: number | null;
+    ownedByPlayerId: string | null;
 }
 
 interface WaterUtility {
     type: 'water-utility';
     name: string;
     price: number;
-    ownedByPlayerId: number | null;
+    ownedByPlayerId: string | null;
 }
 
 interface Chance {
