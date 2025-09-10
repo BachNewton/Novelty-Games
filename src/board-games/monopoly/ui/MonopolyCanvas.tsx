@@ -5,7 +5,7 @@ import { MonopolyState } from "../data/MonopolyState";
 import { drawBoard } from "../canvas/board";
 import { createMonopolyIcons } from "../data/MonopolyIcons";
 
-const ACTION_DELAY_MS = 2000;
+const ACTION_DELAY_MS = 1500;
 const PADDING = 2;
 
 interface MonopolyCanvasProps {
