@@ -25,7 +25,7 @@ export function createMonopolyEngine(): MonopolyEngine {
 
             console.log("Player laned on:", square.name);
 
-            if (isProperty(square) && square.ownedByPlayerId === null) {
+            if (isProperty(square) && square.ownedByPlayerIndex === null) {
                 console.log("Property is unowned, entering buy-property phase:", square.name);
                 state.phase = { type: 'buy-property', property: square };
             } else {
@@ -45,7 +45,7 @@ export function createMonopolyEngine(): MonopolyEngine {
             const property = state.phase.property;
 
             currentPlayer.money -= property.price;
-            property.ownedByPlayerId = currentPlayer.id;
+            property.ownedByPlayerIndex = state.currentPlayerIndex;
 
             moveToNextPlayer(state);
             state.phase = { type: 'ready' };
@@ -69,7 +69,7 @@ function rollAndMove(state: MonopolyState) {
     currentPlayer.position = (currentPlayer.position + roll) % state.board.length;
 }
 
-function isProperty(square: Square): square is Property {
+export function isProperty(square: Square): square is Property {
     return square.type === 'street' || square.type === 'railroad' || square.type === 'electric-utility' || square.type === 'water-utility';
 }
 

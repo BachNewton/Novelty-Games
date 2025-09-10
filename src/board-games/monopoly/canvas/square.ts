@@ -1,19 +1,35 @@
 import { MonopolyIcons } from "../data/MonopolyIcons";
 import { MonopolyState } from "../data/MonopolyState";
-import { Street } from "../data/Square";
+import { Square, Street } from "../data/Square";
+import { isProperty } from "../logic/MonopolyEngine";
 import { drawPlayerTokens } from "./playerTokens";
 import { Rect } from "./Rect";
 
-const LINE_WIDTH = 2;
 const STREET_COLOR_SIZE = 1 / 5;
 
 export function drawSquare(ctx: CanvasRenderingContext2D, view: Rect, boardIndex: number, state: MonopolyState, icons: MonopolyIcons) {
     const square = state.board[boardIndex];
 
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = LINE_WIDTH;
-    ctx.strokeRect(view.x, view.y, view.width, view.height);
+    const strokeStyle = isProperty(square) && square.ownedByPlayerIndex !== null
+        ? state.players[square.ownedByPlayerIndex].color
+        : 'white';
 
+    ctx.strokeStyle = strokeStyle;
+
+    const lineWidth = isProperty(square) && square.ownedByPlayerIndex !== null
+        ? 3
+        : 1;
+
+    ctx.lineWidth = lineWidth
+
+    ctx.strokeRect(view.x + lineWidth / 2, view.y + lineWidth / 2, view.width - lineWidth, view.height - lineWidth);
+
+    drawSquareContent(ctx, view, icons, square, boardIndex);
+
+    drawPlayerTokens(ctx, view, state, boardIndex);
+}
+
+function drawSquareContent(ctx: CanvasRenderingContext2D, view: Rect, icons: MonopolyIcons, square: Square, boardIndex: number) {
     if (square.type === 'street') {
         drawStreet(ctx, view, square, boardIndex);
     } else if (square.type === 'community-chest') {
@@ -37,17 +53,10 @@ export function drawSquare(ctx: CanvasRenderingContext2D, view: Rect, boardIndex
     } else if (square.type === 'go-to-jail') {
         drawIcon(ctx, view, icons.goToJail);
     }
-
-    drawPlayerTokens(ctx, view, state, boardIndex);
-
-    ctx.font = '15px Arial';
-    ctx.fillStyle = 'white';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    // ctx.fillText(boardIndex.toString(), view.x + (view.width / 2), view.y + (view.height / 2));
 }
 
 function drawStreet(ctx: CanvasRenderingContext2D, view: Rect, square: Street, boardIndex: number) {
+    return;
     const side = getSide(boardIndex);
 
     ctx.fillStyle = square.color;

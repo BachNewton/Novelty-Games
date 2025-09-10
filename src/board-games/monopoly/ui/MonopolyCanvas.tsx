@@ -6,7 +6,6 @@ import { drawBoard } from "../canvas/board";
 import { createMonopolyIcons, MonopolyIcons } from "../data/MonopolyIcons";
 import { isPointInRect, Rect } from "../canvas/Rect";
 import { drawCenter } from "../canvas/center";
-import { createMouseInput } from "../../../util/input/Mouse";
 import { ClickableRects } from "../canvas/DrawParams";
 
 const ACTION_DELAY_MS = 1500;
@@ -19,7 +18,6 @@ interface MonopolyCanvasProps {
 }
 
 const MonopolyCanvas: React.FC<MonopolyCanvasProps> = ({ state, actions, id }) => {
-    const mouseInput = useRef(createMouseInput()).current;
     const icons = useRef(createMonopolyIcons()).current;
     const clickableRects = useRef<ClickableRects>({}).current;
     const [width, setWidth] = useState(window.innerWidth);
@@ -42,7 +40,9 @@ const MonopolyCanvas: React.FC<MonopolyCanvasProps> = ({ state, actions, id }) =
         const currentPlayer = state.players[state.currentPlayerIndex];
         let timeoutId: NodeJS.Timeout | undefined;
 
-        mouseInput.addClickListener(click => {
+        const handleClick = (e: MouseEvent) => {
+            const click = { x: e.clientX, y: e.clientY };
+
             if (isPointInRect(click, clickableRects.no)) {
                 console.log('Click in no');
             } else if (isPointInRect(click, clickableRects.yes)) {
@@ -51,7 +51,9 @@ const MonopolyCanvas: React.FC<MonopolyCanvasProps> = ({ state, actions, id }) =
             } else {
                 console.log('click on nothing');
             }
-        });
+        }
+
+        window.addEventListener('click', handleClick);
 
         if (id === currentPlayer.id && state.phase.type === 'ready') {
             timeoutId = setTimeout(() => {
@@ -61,7 +63,7 @@ const MonopolyCanvas: React.FC<MonopolyCanvasProps> = ({ state, actions, id }) =
 
         return () => {
             clearTimeout(timeoutId);
-            mouseInput.cleanup();
+            window.removeEventListener('click', handleClick);
         }
     }, [state]);
 
