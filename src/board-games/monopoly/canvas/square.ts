@@ -6,9 +6,13 @@ import { drawPlayerTokens } from "./playerTokens";
 import { Rect } from "./Rect";
 
 const STREET_COLOR_SIZE = 1 / 5;
+const LINE_WIDTH_UNOWNED = 1;
+const LINE_WIDTH_OWNED = 3;
 
 export function drawSquare(ctx: CanvasRenderingContext2D, view: Rect, boardIndex: number, state: MonopolyState, icons: MonopolyIcons) {
     const square = state.board[boardIndex];
+
+    drawSquareContent(ctx, view, icons, square, boardIndex);
 
     const strokeStyle = isProperty(square) && square.ownedByPlayerIndex !== null
         ? state.players[square.ownedByPlayerIndex].color
@@ -17,14 +21,15 @@ export function drawSquare(ctx: CanvasRenderingContext2D, view: Rect, boardIndex
     ctx.strokeStyle = strokeStyle;
 
     const lineWidth = isProperty(square) && square.ownedByPlayerIndex !== null
-        ? 3
-        : 1;
+        ? LINE_WIDTH_OWNED
+        : LINE_WIDTH_UNOWNED;
 
     ctx.lineWidth = lineWidth
 
-    ctx.strokeRect(view.x + lineWidth / 2, view.y + lineWidth / 2, view.width - lineWidth, view.height - lineWidth);
+    const halfWidth = lineWidth / 2;
+    const offset = (lineWidth % 2) / 2;
 
-    drawSquareContent(ctx, view, icons, square, boardIndex);
+    ctx.strokeRect(view.x + halfWidth + offset, view.y + halfWidth + offset, view.width - lineWidth, view.height - lineWidth);
 
     drawPlayerTokens(ctx, view, state, boardIndex);
 }
@@ -56,7 +61,6 @@ function drawSquareContent(ctx: CanvasRenderingContext2D, view: Rect, icons: Mon
 }
 
 function drawStreet(ctx: CanvasRenderingContext2D, view: Rect, square: Street, boardIndex: number) {
-    return;
     const side = getSide(boardIndex);
 
     ctx.fillStyle = square.color;
