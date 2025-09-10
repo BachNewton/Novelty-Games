@@ -1,5 +1,5 @@
 import React from "react";
-import { Side, Square as SquareData } from "../data/Square";
+import { Square as SquareData } from "../data/Square";
 import GoIcon from '../icon/go.png';
 import ChanceIcon from '../icon/chance.png';
 import RailroadIcon from '../icon/railroad.png';
@@ -36,16 +36,18 @@ function getBorder(data: SquareData): React.CSSProperties {
 
     const border = `${STREET_COLOR_WIDTH}px solid ${data.color}`;
 
-    switch (data.side) {
-        case Side.BOTTOM:
-            return { borderTop: border };
-        case Side.LEFT:
-            return { borderRight: border };
-        case Side.TOP:
-            return { borderBottom: border };
-        case Side.RIGHT:
-            return { borderLeft: border };
-    }
+    // switch (data.side) {
+    //     case Side.BOTTOM:
+    //         return { borderTop: border };
+    //     case Side.LEFT:
+    //         return { borderRight: border };
+    //     case Side.TOP:
+    //         return { borderBottom: border };
+    //     case Side.RIGHT:
+    //         return { borderLeft: border };
+    // }
+
+    return {};
 }
 
 function getContent(data: SquareData): React.ReactNode {

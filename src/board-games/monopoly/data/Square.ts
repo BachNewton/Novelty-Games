@@ -4,76 +4,67 @@ type Property = Street | Railroad | Utility;
 
 type Utility = ElectricUtility | WaterUtility;
 
-export enum Side { BOTTOM, LEFT, TOP, RIGHT }
-
 export interface Street {
     type: 'street';
     name: string;
-    side: Side;
     color: string;
     price: number;
+    ownedByPlayerId: number | null;
 }
 
 interface Railroad {
     type: 'railroad';
     name: string;
-    side: Side;
     price: number;
+    ownedByPlayerId: number | null;
 }
 
 interface ElectricUtility {
     type: 'electric-utility';
     name: string;
-    side: Side;
     price: number;
+    ownedByPlayerId: number | null;
 }
 
 interface WaterUtility {
     type: 'water-utility';
     name: string;
-    side: Side;
     price: number;
+    ownedByPlayerId: number | null;
 }
 
 interface Chance {
     type: 'chance';
     name: string;
-    side: Side;
 }
 
 interface CommunityChest {
     type: 'community-chest';
     name: string;
-    side: Side;
 }
 
 interface Tax {
     type: 'tax';
     name: string;
-    side: Side;
     amount: number;
 }
 
 interface Jail {
     type: 'jail';
     name: string;
-    side: Side;
 }
 
 interface Go {
     type: 'go';
     name: string;
-    side: Side;
 }
 
 interface FreeParking {
     type: 'free-parking';
     name: string;
-    side: Side;
 }
 
 interface GoToJail {
     type: 'go-to-jail';
     name: string;
-    side: Side;
 }
