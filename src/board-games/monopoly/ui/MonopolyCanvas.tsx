@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Canvas from "../../../util/ui/Canvas";
 import { MonopolyActions } from "../data/MonopolyActions";
 import { MonopolyState } from "../data/MonopolyState";
 import { drawBoard } from "../canvas/board";
-import { createMonopolyIcons } from "../data/MonopolyIcons";
+import { createMonopolyIcons, MonopolyIcons } from "../data/MonopolyIcons";
+import { Rect } from "../canvas/Rect";
+import { drawCenter } from "../canvas/center";
 
 const ACTION_DELAY_MS = 1500;
 const PADDING = 2;
@@ -48,15 +50,26 @@ const MonopolyCanvas: React.FC<MonopolyCanvasProps> = ({ state, actions, id }) =
     return <Canvas
         width={width}
         height={height}
-        draw={(ctx) => {
-            drawBoard(
-                ctx,
-                { x: PADDING, y: PADDING, width: width - (PADDING * 2), height: height - (PADDING * 2) },
-                state,
-                icons
-            );
-        }}
+        draw={ctx => draw(ctx, width, height, state, icons)}
     />;
 };
+
+function draw(ctx: CanvasRenderingContext2D, width: number, height: number, state: MonopolyState, icons: MonopolyIcons) {
+    const view: Rect = {
+        x: PADDING,
+        y: PADDING,
+        width: width - (PADDING * 2),
+        height: height - (PADDING * 2)
+    };
+
+    const { centerView } = drawBoard(
+        ctx,
+        view,
+        state,
+        icons
+    );
+
+    drawCenter(ctx, centerView, state);
+}
 
 export default MonopolyCanvas;
