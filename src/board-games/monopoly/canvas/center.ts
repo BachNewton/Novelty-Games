@@ -1,11 +1,11 @@
-import { MonopolyState } from "../data/MonopolyState";
 import { drawButton } from "./button";
+import { DrawParams } from "./DrawParams";
 import { Rect } from "./Rect";
 
 const PADDING = 10;
 const BUTTON_SIZE = 75;
 
-export function drawCenter(ctx: CanvasRenderingContext2D, view: Rect, state: MonopolyState): void {
+export function drawCenter({ ctx, view, state, clickableRects }: DrawParams): void {
     ctx.fillStyle = 'green';
     ctx.fillRect(view.x, view.y, view.width, view.height);
 
@@ -31,6 +31,9 @@ export function drawCenter(ctx: CanvasRenderingContext2D, view: Rect, state: Mon
         };
 
         drawButton(ctx, bottomLeftView);
+        clickableRects.no = bottomLeftView;
+
         drawButton(ctx, bottomRightView);
+        clickableRects.yes = bottomRightView;
     }
 }

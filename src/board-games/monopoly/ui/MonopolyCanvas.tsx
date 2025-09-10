@@ -4,8 +4,10 @@ import { MonopolyActions } from "../data/MonopolyActions";
 import { MonopolyState } from "../data/MonopolyState";
 import { drawBoard } from "../canvas/board";
 import { createMonopolyIcons, MonopolyIcons } from "../data/MonopolyIcons";
-import { Rect } from "../canvas/Rect";
+import { isPointInRect, Rect } from "../canvas/Rect";
 import { drawCenter } from "../canvas/center";
+import { createMouseInput } from "../../../util/input/Mouse";
+import { ClickableRects } from "../canvas/DrawParams";
 
 const ACTION_DELAY_MS = 1500;
 const PADDING = 2;
@@ -17,7 +19,9 @@ interface MonopolyCanvasProps {
 }
 
 const MonopolyCanvas: React.FC<MonopolyCanvasProps> = ({ state, actions, id }) => {
+    const mouseInput = useRef(createMouseInput()).current;
     const icons = useRef(createMonopolyIcons()).current;
+    const clickableRects = useRef<ClickableRects>({}).current;
     const [width, setWidth] = useState(window.innerWidth);
     const [height, setHeight] = useState(window.innerHeight);
 
@@ -38,23 +42,43 @@ const MonopolyCanvas: React.FC<MonopolyCanvasProps> = ({ state, actions, id }) =
         const currentPlayer = state.players[state.currentPlayerIndex];
         let timeoutId: NodeJS.Timeout | undefined;
 
+        mouseInput.addClickListener(click => {
+            if (isPointInRect(click, clickableRects.no)) {
+                console.log('Click in no');
+            } else if (isPointInRect(click, clickableRects.yes)) {
+                console.log('click in yes');
+            } else {
+                console.log('click on nothing');
+            }
+        });
+
         if (id === currentPlayer.id && state.phase.type === 'ready') {
             timeoutId = setTimeout(() => {
                 actions.roll();
             }, ACTION_DELAY_MS);
         }
 
-        return () => clearTimeout(timeoutId);
+        return () => {
+            clearTimeout(timeoutId);
+            mouseInput.cleanup();
+        }
     }, [state]);
 
     return <Canvas
         width={width}
         height={height}
-        draw={ctx => draw(ctx, width, height, state, icons)}
+        draw={ctx => draw(ctx, width, height, state, icons, clickableRects)}
     />;
 };
 
-function draw(ctx: CanvasRenderingContext2D, width: number, height: number, state: MonopolyState, icons: MonopolyIcons) {
+function draw(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    state: MonopolyState,
+    icons: MonopolyIcons,
+    clickableRects: ClickableRects
+) {
     const view: Rect = {
         x: PADDING,
         y: PADDING,
@@ -69,7 +93,13 @@ function draw(ctx: CanvasRenderingContext2D, width: number, height: number, stat
         icons
     );
 
-    drawCenter(ctx, centerView, state);
+    drawCenter({
+        ctx,
+        view: centerView,
+        state,
+        icons,
+        clickableRects
+    });
 }
 
 export default MonopolyCanvas;
