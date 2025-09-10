@@ -1,6 +1,6 @@
 export type Square = Property | Chance | CommunityChest | Tax | Jail | Go | FreeParking | GoToJail;
 
-type Property = Street | Railroad | Utility;
+export type Property = Street | Railroad | Utility;
 
 type Utility = ElectricUtility | WaterUtility;
 

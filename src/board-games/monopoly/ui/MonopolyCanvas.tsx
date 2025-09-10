@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Canvas from "../../../util/ui/Canvas";
 import { MonopolyActions } from "../data/MonopolyActions";
 import { MonopolyState } from "../data/MonopolyState";
@@ -36,7 +36,7 @@ const MonopolyCanvas: React.FC<MonopolyCanvasProps> = ({ state, actions, id }) =
         const currentPlayer = state.players[state.currentPlayerIndex];
         let timeoutId: NodeJS.Timeout | undefined;
 
-        if (id === currentPlayer.id) {
+        if (id === currentPlayer.id && state.phase.type === 'ready') {
             timeoutId = setTimeout(() => {
                 actions.roll();
             }, ACTION_DELAY_MS);

@@ -70,6 +70,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
             // { id: '1', name: 'Grandma', color: 'silver', position: 0, money: 1500 },
             // { id: '1', name: 'James', color: 'orange', position: 0, money: 1500 }
         ],
+        phase: { type: 'ready' },
         currentPlayerIndex: 0,
         log: []
     });

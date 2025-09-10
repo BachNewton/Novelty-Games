@@ -1,11 +1,12 @@
 import { MonopolyIcons } from "../data/MonopolyIcons";
 import { MonopolyState } from "../data/MonopolyState";
+import { drawCenter } from "./center";
 import { Rect } from "./Rect";
 import { drawSquare } from "./square";
 
 const SQUARE_PER_SIDE = 11;
 
-export function drawBoard(ctx: CanvasRenderingContext2D, view: Rect, state: MonopolyState, icons: MonopolyIcons): void {
+export function drawBoard(ctx: CanvasRenderingContext2D, view: Rect, state: MonopolyState, icons: MonopolyIcons) {
     ctx.strokeStyle = 'white';
 
     const width = view.width / SQUARE_PER_SIDE;
@@ -61,4 +62,13 @@ export function drawBoard(ctx: CanvasRenderingContext2D, view: Rect, state: Mono
             height: height
         }, boardIndex++, state, icons);
     }
+
+    const centerView: Rect = {
+        x: view.x + width + 1,
+        y: view.y + height + 1,
+        width: view.width - (width * 2) - 2,
+        height: view.height - (height * 2) - 2
+    };
+
+    drawCenter(ctx, centerView, state);
 }

@@ -8,6 +8,11 @@ interface CanvasProps {
 
 const Canvas: React.FC<CanvasProps> = ({ width, height, draw }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const drawRef = useRef<(ctx: CanvasRenderingContext2D) => void>(() => { });
+
+    useEffect(() => {
+        drawRef.current = draw;
+    }, [draw]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -21,7 +26,7 @@ const Canvas: React.FC<CanvasProps> = ({ width, height, draw }) => {
         canvas.style.width = `${width}px`;
         canvas.style.height = `${height}px`;
 
-        const cleanupCanvas = initCanvas(canvas, ctx, () => draw(ctx));
+        const cleanupCanvas = initCanvas(canvas, ctx, () => drawRef.current(ctx));
 
         return cleanupCanvas;
     }, [height, width])
