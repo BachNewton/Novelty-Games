@@ -17,7 +17,7 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         const currentPlayer = state.players[state.currentPlayerIndex];
         let timeoutId: NodeJS.Timeout | undefined;
 
-        if (id === currentPlayer.id) {
+        if (id === currentPlayer.id && state.phase.type === 'ready') {
             timeoutId = setTimeout(() => {
                 actions.roll();
             }, ACTION_DELAY_MS);
@@ -39,13 +39,12 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         <div key={index} style={{
             ...getGridPosition(index),
             border: '1px solid white',
-            boxSizing: 'border-box',
-            aspectRatio: 1,
-            position: 'relative'
+            // boxSizing: 'border-box',
+            // position: 'relative'
         }}>
             <Square data={square} />
 
-            {playerTokensUi(index, state.players)}
+            {/* {playerTokensUi(index, state.players)} */}
         </div>
     ));
 
@@ -76,51 +75,66 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         {player.name}: ${player.money}
     </div>);
 
+    // return <div style={{
+    //     display: 'flex',
+    //     flexDirection: 'column',
+    //     justifyContent: 'space-between',
+    //     height: '100dvh',
+    //     padding: '2px',
+    //     boxSizing: 'border-box'
+    // }}>
+    //     {/* <div style={{
+    //         height: '125px',
+    //         overflow: 'auto'
+    //     }}>{log}</div> */}
+
+    //     <div style={{
+    //         display: 'grid',
+    //         gridTemplateColumns: `repeat(2, 1fr)`,
+    //         gap: '5px',
+    //         height: '125px',
+    //         padding: '5px'
+    //     }}>
+    //         {playerUi}
+    //     </div>
+
+    //     <div style={{
+    //         display: 'flex',
+    //         justifyContent: 'center',
+    //         alignItems: 'center'
+    //     }}>
+    //         <div style={{
+    //             display: 'grid',
+    //             gridTemplateColumns: 'repeat(11, 1fr)',
+    //             gridTemplateRows: 'repeat(11, 1fr)',
+    //             width: 'min(100dvw, calc(100dvh - 124px - 100px))'
+    //         }}>
+    //             {squares}
+    //             {center}
+    //         </div>
+    //     </div>
+
+    //     <div style={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', height: '100px' }}>
+    //         {actionButton('Action 1')}
+    //         {actionButton('Action 2')}
+    //         {actionButton('Action 3')}
+    //         {actionButton('Action 4')}
+    //     </div>
+    // </div>;
+
+    const numRows = 11;
+    const numCols = 11;
+
+    const rowHeight = `calc(100dvh / ${numRows})`;
+
     return <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        height: '100dvh',
-        padding: '2px',
-        boxSizing: 'border-box'
+        display: 'grid',
+        gridTemplateColumns: 'repeat(11, 1fr)',
+        gridTemplateRows: 'repeat(11, 1fr)',
+        height: '100dvh'
     }}>
-        {/* <div style={{
-            height: '125px',
-            overflow: 'auto'
-        }}>{log}</div> */}
-
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: `repeat(2, 1fr)`,
-            gap: '5px',
-            height: '125px',
-            padding: '5px'
-        }}>
-            {playerUi}
-        </div>
-
-        <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center'
-        }}>
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(11, 1fr)',
-                gridTemplateRows: 'repeat(11, 1fr)',
-                width: 'min(100dvw, calc(100dvh - 124px - 100px))'
-            }}>
-                {squares}
-                {center}
-            </div>
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', height: '100px' }}>
-            {actionButton('Action 1')}
-            {actionButton('Action 2')}
-            {actionButton('Action 3')}
-            {actionButton('Action 4')}
-        </div>
+        {squares}
+        {center}
     </div>;
 };
 

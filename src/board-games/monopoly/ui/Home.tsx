@@ -77,14 +77,15 @@ const Home: React.FC<HomeProps> = ({ }) => {
 
     useEffect(() => updateRoute(Route.MONOPOLY), []);
 
-    // return <Monopoly state={state} id={'1'} actions={{
-    //     roll: () => setState(engine.roll(state))
-    // }} />;
-
-    return <MonopolyCanvas state={state} id={'1'} actions={{
+    return <Monopoly state={state} id={'1'} actions={{
         roll: () => setState(engine.roll(state)),
-        buyProperty: () => setState(engine.buyProperty(state)),
+        buyProperty: () => setState(engine.buyProperty(state))
     }} />;
+
+    // return <MonopolyCanvas state={state} id={'1'} actions={{
+    //     roll: () => setState(engine.roll(state)),
+    //     buyProperty: () => setState(engine.buyProperty(state)),
+    // }} />;
 };
 
 export default Home;
