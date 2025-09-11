@@ -15,40 +15,46 @@ const STREET_COLOR_WIDTH = 10;
 
 interface SquareProps {
     data: SquareData;
+    boardIndex: number;
 }
 
-const Square: React.FC<SquareProps> = ({ data }) => {
+const Square: React.FC<SquareProps> = ({ data, boardIndex }) => {
     return <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        // alignItems: 'center',
-        width: '100%',
-        height: '100%'
+        border: '1px solid white',
+        ...getGridPosition(boardIndex)
     }}>
-        {getContent(data)}
+        <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            width: '100%',
+            height: '100%',
+            boxSizing: 'border-box',
+            ...getBorder(data, boardIndex)
+        }}>
+            {getContent(data, boardIndex)}
+        </div>
     </div>;
 };
 
-function getBorder(data: SquareData): React.CSSProperties {
+function getBorder(data: SquareData, boardIndex: number): React.CSSProperties {
     if (data.type !== 'street') return {};
 
+    const side = getSide(boardIndex);
     const border = `${STREET_COLOR_WIDTH}px solid ${data.color}`;
 
-    // switch (data.side) {
-    //     case Side.BOTTOM:
-    //         return { borderTop: border };
-    //     case Side.LEFT:
-    //         return { borderRight: border };
-    //     case Side.TOP:
-    //         return { borderBottom: border };
-    //     case Side.RIGHT:
-    //         return { borderLeft: border };
-    // }
-
-    return {};
+    switch (side) {
+        case 'bottom':
+            return { borderTop: border };
+        case 'left':
+            return { borderRight: border };
+        case 'top':
+            return { borderBottom: border };
+        case 'right':
+            return { borderLeft: border };
+    }
 }
 
-function getContent(data: SquareData): React.ReactNode {
+function getContent(data: SquareData, boardIndex: number): React.ReactNode {
     const style: React.CSSProperties = {
         height: '100%',
         width: '100%',
@@ -77,9 +83,40 @@ function getContent(data: SquareData): React.ReactNode {
             return <img src={ElectricUtilityIcon} alt="Electric Utility" style={style} />;
         case 'water-utility':
             return <img src={WaterUtilityIcon} alt="Water Utility" style={style} />;
-        case 'street':
-            return <div style={{ ...style, borderTop: '10px solid green', boxSizing: 'border-box' }}>Test</div>;
     }
 }
+
+function getSide(index: number): 'bottom' | 'left' | 'top' | 'right' {
+    if (index >= 0 && index <= 10) return 'bottom';
+    if (index >= 11 && index <= 19) return 'left';
+    if (index >= 20 && index <= 30) return 'top';
+    if (index >= 31 && index <= 39) return 'right';
+
+    throw new Error('Invalid index');
+}
+
+function getGridPosition(index: number): React.CSSProperties {
+    // Bottom Row (squares 0-10)
+    if (index <= 10) {
+        return { gridRow: 11, gridColumn: 11 - index };
+    }
+
+    // Left Column (squares 11-19)
+    if (index <= 19) {
+        return { gridRow: 21 - index, gridColumn: 1 };
+    }
+
+    // Top Row (squares 20-30)
+    if (index <= 30) {
+        return { gridRow: 1, gridColumn: index - 19 };
+    }
+
+    // Right Column (squares 31-39)
+    if (index <= 39) {
+        return { gridRow: index - 29, gridColumn: 11 };
+    }
+
+    throw new Error('Invalid index');
+};
 
 export default Square;

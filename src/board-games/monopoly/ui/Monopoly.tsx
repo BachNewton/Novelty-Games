@@ -4,7 +4,7 @@ import { Player } from "../data/Player";
 import Square from "./Square";
 import { MonopolyActions } from "../data/MonopolyActions";
 
-const ACTION_DELAY_MS = 2000;
+const ACTION_DELAY_MS = 1500;
 
 interface MonopolyProps {
     state: MonopolyState;
@@ -26,27 +26,20 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         return () => clearTimeout(timeoutId);
     }, [state]);
 
-    const log = state.log.map((_, index) => {
-        const entry = state.log[state.log.length - 1 - index];
+    // const log = state.log.map((_, index) => {
+    //     const entry = state.log[state.log.length - 1 - index];
 
-        return <div key={index} style={{
-            border: '1px solid grey',
-            padding: '2px'
-        }}>{entry}</div>;
-    });
+    //     return <div key={index} style={{
+    //         border: '1px solid grey',
+    //         padding: '2px'
+    //     }}>{entry}</div>;
+    // });
 
-    const squares = state.board.map((square, index) => (
-        <div key={index} style={{
-            ...getGridPosition(index),
-            border: '1px solid white',
-            // boxSizing: 'border-box',
-            // position: 'relative'
-        }}>
-            <Square data={square} />
-
-            {/* {playerTokensUi(index, state.players)} */}
-        </div>
-    ));
+    const squares = state.board.map((square, index) => <Square
+        key={index}
+        data={square}
+        boardIndex={index}
+    />);
 
     const center = <div style={{
         gridRow: '2 / span 9',
@@ -54,26 +47,26 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        fontSize: '1.5em'
+        fontSize: '1.25em'
     }}>
         This is the Monopoly board!
     </div>
 
-    const actionButton = (text: string) => <div style={{
-        border: '1px solid white',
-        padding: '10px',
-        borderRadius: '15px'
-    }}>
-        {text}
-    </div>;
+    // const actionButton = (text: string) => <div style={{
+    //     border: '1px solid white',
+    //     padding: '10px',
+    //     borderRadius: '15px'
+    // }}>
+    //     {text}
+    // </div>;
 
-    const playerUi = state.players.map((player, index) => <div key={index} style={{
-        border: `1px solid ${player.color}`,
-        padding: '5px',
-        borderRadius: '15px'
-    }}>
-        {player.name}: ${player.money}
-    </div>);
+    // const playerUi = state.players.map((player, index) => <div key={index} style={{
+    //     border: `1px solid ${player.color}`,
+    //     padding: '5px',
+    //     borderRadius: '15px'
+    // }}>
+    //     {player.name}: ${player.money}
+    // </div>);
 
     // return <div style={{
     //     display: 'flex',
@@ -122,11 +115,6 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
     //     </div>
     // </div>;
 
-    const numRows = 11;
-    const numCols = 11;
-
-    const rowHeight = `calc(100dvh / ${numRows})`;
-
     return <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(11, 1fr)',
@@ -166,29 +154,5 @@ function playerTokensUi(index: number, players: Player[]): React.ReactNode {
         </div>
     </div>;
 }
-
-function getGridPosition(index: number): React.CSSProperties {
-    // Bottom Row (squares 0-10)
-    if (index <= 10) {
-        return { gridRow: 11, gridColumn: 11 - index };
-    }
-
-    // Left Column (squares 11-19)
-    if (index <= 19) {
-        return { gridRow: 21 - index, gridColumn: 1 };
-    }
-
-    // Top Row (squares 20-30)
-    if (index <= 30) {
-        return { gridRow: 1, gridColumn: index - 19 };
-    }
-
-    // Right Column (squares 31-39)
-    if (index <= 39) {
-        return { gridRow: index - 29, gridColumn: 11 };
-    }
-
-    return {};
-};
 
 export default Monopoly;
