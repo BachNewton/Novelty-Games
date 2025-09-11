@@ -31,7 +31,7 @@ const Square: React.FC<SquareProps> = ({ data, boardIndex }) => {
             boxSizing: 'border-box',
             ...getBorder(data, boardIndex)
         }}>
-            {getContent(data, boardIndex)}
+            {iconUi(data)}
         </div>
     </div>;
 };
@@ -54,7 +54,7 @@ function getBorder(data: SquareData, boardIndex: number): React.CSSProperties {
     }
 }
 
-function getContent(data: SquareData, boardIndex: number): React.ReactNode {
+function iconUi(data: SquareData): React.ReactNode {
     const style: React.CSSProperties = {
         height: '100%',
         width: '100%',
