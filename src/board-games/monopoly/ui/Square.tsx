@@ -16,9 +16,10 @@ const STREET_COLOR_WIDTH = 10;
 interface SquareProps {
     data: SquareData;
     boardIndex: number;
+    children: React.ReactNode;
 }
 
-const Square: React.FC<SquareProps> = ({ data, boardIndex }) => {
+const Square: React.FC<SquareProps> = ({ data, boardIndex, children }) => {
     return <div style={{
         border: '1px solid white',
         ...getGridPosition(boardIndex)
@@ -29,9 +30,21 @@ const Square: React.FC<SquareProps> = ({ data, boardIndex }) => {
             alignItems: 'center',
             width: '100%',
             height: '100%',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            position: 'relative'
         }}>
             {iconUi(data, boardIndex)}
+
+            <div style={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+            }}>
+                {children}
+            </div>
         </div>
     </div>;
 };

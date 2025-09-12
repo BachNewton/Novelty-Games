@@ -4,6 +4,7 @@ import { Player } from "../data/Player";
 import Square from "./Square";
 import { MonopolyActions } from "../data/MonopolyActions";
 import Board from "./Board";
+import PlayerTokens from "./PlayerTokens";
 
 const ACTION_DELAY_MS = 1500;
 
@@ -40,7 +41,9 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         key={index}
         data={square}
         boardIndex={index}
-    />);
+    >
+        <PlayerTokens players={state.players.filter(player => player.position === index)} />
+    </Square>);
 
     const center = <div style={{
         gridRow: '2 / span 9',
@@ -127,34 +130,5 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         </Board>
     </div>;
 };
-
-function playerTokensUi(index: number, players: Player[]): React.ReactNode {
-    const player1 = players[0]?.position === index ? players[0]?.color : 'transparent';
-    const player2 = players[1]?.position === index ? players[1]?.color : 'transparent';
-    const player3 = players[2]?.position === index ? players[2]?.color : 'transparent';
-    const player4 = players[3]?.position === index ? players[3]?.color : 'transparent';
-
-    return <div style={{
-        position: 'absolute',
-        top: '0px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-        height: '100%'
-    }}>
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            width: '75%',
-            height: '75%'
-        }}>
-            <div style={{ borderRadius: '100%', backgroundColor: player1 }} />
-            <div style={{ borderRadius: '100%', backgroundColor: player2 }} />
-            <div style={{ borderRadius: '100%', backgroundColor: player3 }} />
-            <div style={{ borderRadius: '100%', backgroundColor: player4 }} />
-        </div>
-    </div>;
-}
 
 export default Monopoly;
