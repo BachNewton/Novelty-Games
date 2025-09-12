@@ -6,6 +6,7 @@ import Board from "./Board";
 import PlayerTokens from "./PlayerTokens";
 import CenterBoard from "./CenterBoard";
 import Button from "./Button";
+import Player from "./Player";
 
 const ACTION_DELAY_MS = 1500;
 
@@ -38,16 +39,6 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         <PlayerTokens players={state.players.filter(player => player.position === index)} />
     </Square>);
 
-    const center = <div></div>;
-
-    // const playerUi = state.players.map((player, index) => <div key={index} style={{
-    //     border: `1px solid ${player.color}`,
-    //     padding: '5px',
-    //     borderRadius: '15px'
-    // }}>
-    //     {player.name}: ${player.money}
-    // </div>);
-
     return <div style={{
         height: '100dvh',
         padding: '2px',
@@ -64,6 +55,29 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
 };
 
 function centerUi(state: MonopolyState, actions: MonopolyActions): React.ReactNode {
+    const players = state.players.map((player, index) => <Player key={index} data={player} />);
+
+    return <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%'
+    }}>
+        <div style={{
+            margin: '5px',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '5px'
+        }}>
+            {players}
+        </div>
+
+        <div style={{ flexGrow: 1 }}>
+            {tempUi(state, actions)}
+        </div>
+    </div>
+}
+
+function tempUi(state: MonopolyState, actions: MonopolyActions): React.ReactNode {
     switch (state.phase.type) {
         case 'buy-property':
             return <div style={{
@@ -72,7 +86,7 @@ function centerUi(state: MonopolyState, actions: MonopolyActions): React.ReactNo
                 alignItems: 'center',
                 flexDirection: 'column',
                 height: '100%',
-                fontSize: '1.25em',
+                fontSize: '1.5em',
                 position: 'relative'
             }}>
                 <div>Property for Sale</div>
