@@ -3,6 +3,7 @@ import { MonopolyState } from "../data/MonopolyState";
 import { Player } from "../data/Player";
 import Square from "./Square";
 import { MonopolyActions } from "../data/MonopolyActions";
+import Board from "./Board";
 
 const ACTION_DELAY_MS = 1500;
 
@@ -120,15 +121,10 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         padding: '2px',
         boxSizing: 'border-box'
     }}>
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(11, 1fr)',
-            gridTemplateRows: 'repeat(11, 1fr)',
-            height: '100%'
-        }}>
+        <Board>
             {squares}
             {center}
-        </div>
+        </Board>
     </div>;
 };
 
