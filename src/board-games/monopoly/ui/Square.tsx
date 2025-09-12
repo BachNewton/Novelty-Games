@@ -10,18 +10,24 @@ import FreeParkingIcon from '../icon/free-parking.svg';
 import GoToJailIcon from '../icon/go-to-jail.svg';
 import ElectricUtilityIcon from '../icon/electric-utility.svg';
 import WaterUtilityIcon from '../icon/water-utility.svg';
+import { isProperty } from "../logic/MonopolyEngine";
 
 const STREET_COLOR_WIDTH = 10;
 
 interface SquareProps {
     data: SquareData;
     boardIndex: number;
+    playerColors: string[];
     children: React.ReactNode;
 }
 
-const Square: React.FC<SquareProps> = ({ data, boardIndex, children }) => {
+const Square: React.FC<SquareProps> = ({ data, boardIndex, playerColors, children }) => {
+    const borderProps = isProperty(data) && data.ownedByPlayerIndex !== null
+        ? { color: playerColors[data.ownedByPlayerIndex], width: 3 }
+        : { color: 'white', width: 1 };
+
     return <div style={{
-        border: '1px solid white',
+        border: `${borderProps.width}px solid ${borderProps.color}`,
         ...getGridPosition(boardIndex)
     }}>
         <div style={{

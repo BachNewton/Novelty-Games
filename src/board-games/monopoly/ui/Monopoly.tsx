@@ -33,6 +33,7 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         key={index}
         data={square}
         boardIndex={index}
+        playerColors={state.players.map(player => player.color)}
     >
         <PlayerTokens players={state.players.filter(player => player.position === index)} />
     </Square>);
