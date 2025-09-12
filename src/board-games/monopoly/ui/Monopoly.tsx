@@ -8,7 +8,7 @@ import CenterBoard from "./CenterBoard";
 import Button from "./Button";
 import Player from "./Player";
 
-const ACTION_DELAY_MS = 1500;
+const ACTION_DELAY_MS = 1000;
 
 interface MonopolyProps {
     state: MonopolyState;

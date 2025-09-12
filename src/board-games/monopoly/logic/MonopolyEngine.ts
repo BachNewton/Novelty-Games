@@ -27,7 +27,7 @@ export function createMonopolyEngine(): MonopolyEngine {
                     state.phase = { type: 'buy-property', property: square };
                 } else {
                     const owner = state.players[square.ownedByPlayerIndex];
-                    const owed = getOwed(square);
+                    const owed = getOwed(square, state.board);
 
                     currentPlayer.money -= owed;
                     owner.money += owed;
@@ -85,14 +85,18 @@ function moveToNextPlayer(state: MonopolyState) {
     state.phase = { type: 'ready' };
 }
 
-function getOwed(property: Property): number {
+function getOwed(property: Property, board: Square[]): number {
     switch (property.type) {
         case 'street':
             return property.rent[0];
         case 'railroad':
-            return property.cost[0];
+            return property.cost[getRailroadsOwned(board, property.ownedByPlayerIndex) - 1];
         case 'electric-utility':
         case 'water-utility':
             return 1;
     }
+}
+
+function getRailroadsOwned(board: Square[], playerIndex: number | null): number {
+    return board.filter(square => square.type === 'railroad' && square.ownedByPlayerIndex === playerIndex).length;
 }
