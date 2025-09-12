@@ -10,6 +10,9 @@ export interface Street {
     color: string;
     price: number;
     ownedByPlayerIndex: number | null;
+    isMortgaged: boolean;
+    rent: number[];
+    houses: number;
 }
 
 interface Railroad {
@@ -17,6 +20,8 @@ interface Railroad {
     name: string;
     price: number;
     ownedByPlayerIndex: number | null;
+    isMortgaged: boolean;
+    cost: number[];
 }
 
 interface ElectricUtility {
@@ -24,6 +29,7 @@ interface ElectricUtility {
     name: string;
     price: number;
     ownedByPlayerIndex: number | null;
+    isMortgaged: boolean;
 }
 
 interface WaterUtility {
@@ -31,6 +37,7 @@ interface WaterUtility {
     name: string;
     price: number;
     ownedByPlayerIndex: number | null;
+    isMortgaged: boolean;
 }
 
 interface Chance {

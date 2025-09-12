@@ -14,20 +14,29 @@ export function createMonopolyEngine(): MonopolyEngine {
             const state = { ...formerState };
 
             const currentPlayer = getCurrentPlayer(state);
-
-            console.log("Rolling dice for player:", currentPlayer.name);
+            console.log(`It is ${currentPlayer.name}'s turn. Rolling the dice.`);
 
             rollAndMove(state);
 
-            console.log("Player moved to position:", currentPlayer.position);
-
             const square = state.board[currentPlayer.position];
+            console.log(`${currentPlayer.name} moved to "${square.name}"`);
 
-            console.log("Player laned on:", square.name);
+            if (isProperty(square)) {
+                if (square.ownedByPlayerIndex === null) {
+                    console.log("Property is unowned, entering buy-property phase:", square.name);
+                    state.phase = { type: 'buy-property', property: square };
+                } else {
+                    const owner = state.players[square.ownedByPlayerIndex];
+                    const owed = getOwed(square);
 
-            if (isProperty(square) && square.ownedByPlayerIndex === null) {
-                console.log("Property is unowned, entering buy-property phase:", square.name);
-                state.phase = { type: 'buy-property', property: square };
+                    currentPlayer.money -= owed;
+                    owner.money += owed;
+
+                    console.log("Property is owned by:", owner.name);
+                    console.log(`${currentPlayer.name} pays ${owner.name} ${owed}`);
+
+                    moveToNextPlayer(state);
+                }
             } else {
                 moveToNextPlayer(state);
             }
@@ -74,4 +83,16 @@ export function isProperty(square: Square): square is Property {
 function moveToNextPlayer(state: MonopolyState) {
     state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
     state.phase = { type: 'ready' };
+}
+
+function getOwed(property: Property): number {
+    switch (property.type) {
+        case 'street':
+            return property.rent[0];
+        case 'railroad':
+            return property.cost[0];
+        case 'electric-utility':
+        case 'water-utility':
+            return 1;
+    }
 }
