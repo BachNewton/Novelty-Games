@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { MonopolyState } from "../data/MonopolyState";
-import { Player } from "../data/Player";
 import Square from "./Square";
 import { MonopolyActions } from "../data/MonopolyActions";
 import Board from "./Board";
 import PlayerTokens from "./PlayerTokens";
+import CenterBoard from "./CenterBoard";
+import Button from "./Button";
 
 const ACTION_DELAY_MS = 1500;
 
@@ -28,15 +29,6 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         return () => clearTimeout(timeoutId);
     }, [state]);
 
-    // const log = state.log.map((_, index) => {
-    //     const entry = state.log[state.log.length - 1 - index];
-
-    //     return <div key={index} style={{
-    //         border: '1px solid grey',
-    //         padding: '2px'
-    //     }}>{entry}</div>;
-    // });
-
     const squares = state.board.map((square, index) => <Square
         key={index}
         data={square}
@@ -45,24 +37,7 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
         <PlayerTokens players={state.players.filter(player => player.position === index)} />
     </Square>);
 
-    const center = <div style={{
-        gridRow: '2 / span 9',
-        gridColumn: '2 / span 9',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: '1.25em'
-    }}>
-        This is the Monopoly board!
-    </div>
-
-    // const actionButton = (text: string) => <div style={{
-    //     border: '1px solid white',
-    //     padding: '10px',
-    //     borderRadius: '15px'
-    // }}>
-    //     {text}
-    // </div>;
+    const center = <div></div>;
 
     // const playerUi = state.players.map((player, index) => <div key={index} style={{
     //     border: `1px solid ${player.color}`,
@@ -72,53 +47,6 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
     //     {player.name}: ${player.money}
     // </div>);
 
-    // return <div style={{
-    //     display: 'flex',
-    //     flexDirection: 'column',
-    //     justifyContent: 'space-between',
-    //     height: '100dvh',
-    //     padding: '2px',
-    //     boxSizing: 'border-box'
-    // }}>
-    //     {/* <div style={{
-    //         height: '125px',
-    //         overflow: 'auto'
-    //     }}>{log}</div> */}
-
-    //     <div style={{
-    //         display: 'grid',
-    //         gridTemplateColumns: `repeat(2, 1fr)`,
-    //         gap: '5px',
-    //         height: '125px',
-    //         padding: '5px'
-    //     }}>
-    //         {playerUi}
-    //     </div>
-
-    //     <div style={{
-    //         display: 'flex',
-    //         justifyContent: 'center',
-    //         alignItems: 'center'
-    //     }}>
-    //         <div style={{
-    //             display: 'grid',
-    //             gridTemplateColumns: 'repeat(11, 1fr)',
-    //             gridTemplateRows: 'repeat(11, 1fr)',
-    //             width: 'min(100dvw, calc(100dvh - 124px - 100px))'
-    //         }}>
-    //             {squares}
-    //             {center}
-    //         </div>
-    //     </div>
-
-    //     <div style={{ display: 'flex', justifyContent: 'space-evenly', alignItems: 'center', height: '100px' }}>
-    //         {actionButton('Action 1')}
-    //         {actionButton('Action 2')}
-    //         {actionButton('Action 3')}
-    //         {actionButton('Action 4')}
-    //     </div>
-    // </div>;
-
     return <div style={{
         height: '100dvh',
         padding: '2px',
@@ -126,9 +54,42 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
     }}>
         <Board>
             {squares}
-            {center}
+
+            <CenterBoard>
+                {centerUi(state, actions)}
+            </CenterBoard>
         </Board>
     </div>;
 };
+
+function centerUi(state: MonopolyState, actions: MonopolyActions): React.ReactNode {
+    switch (state.phase.type) {
+        case 'buy-property':
+            return <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'column',
+                height: '100%',
+                fontSize: '1.25em',
+                position: 'relative'
+            }}>
+                <div>Property for Sale</div>
+                <div>{state.phase.property.name}</div>
+                <div>${state.phase.property.price}</div>
+                <div style={{
+                    position: 'absolute',
+                    bottom: '15px',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    width: '75%',
+                    gap: '15px'
+                }}>
+                    <Button text='Auction' />
+                    <Button text='Buy' onClick={actions.buyProperty} />
+                </div>
+            </div>;
+    }
+}
 
 export default Monopoly;
