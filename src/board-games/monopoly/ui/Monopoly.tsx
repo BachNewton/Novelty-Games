@@ -116,13 +116,19 @@ const Monopoly: React.FC<MonopolyProps> = ({ state, actions, id }) => {
     // </div>;
 
     return <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(11, 1fr)',
-        gridTemplateRows: 'repeat(11, 1fr)',
-        height: '100dvh'
+        height: '100dvh',
+        padding: '2px',
+        boxSizing: 'border-box'
     }}>
-        {squares}
-        {center}
+        <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(11, 1fr)',
+            gridTemplateRows: 'repeat(11, 1fr)',
+            height: '100%'
+        }}>
+            {squares}
+            {center}
+        </div>
     </div>;
 };
 

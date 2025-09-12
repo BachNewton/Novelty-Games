@@ -1,5 +1,5 @@
 import React from "react";
-import { Square as SquareData } from "../data/Square";
+import { Square as SquareData, Street } from "../data/Square";
 import GoIcon from '../icon/go.svg';
 import ChanceIcon from '../icon/chance.svg';
 import RailroadIcon from '../icon/railroad.svg';
@@ -26,39 +26,21 @@ const Square: React.FC<SquareProps> = ({ data, boardIndex }) => {
         <div style={{
             display: 'flex',
             justifyContent: 'center',
+            alignItems: 'center',
             width: '100%',
             height: '100%',
-            boxSizing: 'border-box',
-            ...getBorder(data, boardIndex)
+            boxSizing: 'border-box'
         }}>
-            {iconUi(data)}
+            {iconUi(data, boardIndex)}
         </div>
     </div>;
 };
 
-function getBorder(data: SquareData, boardIndex: number): React.CSSProperties {
-    if (data.type !== 'street') return {};
-
-    const side = getSide(boardIndex);
-    const border = `${STREET_COLOR_WIDTH}px solid ${data.color}`;
-
-    switch (side) {
-        case 'bottom':
-            return { borderTop: border };
-        case 'left':
-            return { borderRight: border };
-        case 'top':
-            return { borderBottom: border };
-        case 'right':
-            return { borderLeft: border };
-    }
-}
-
-function iconUi(data: SquareData): React.ReactNode {
+function iconUi(data: SquareData, boardIndex: number): React.ReactNode {
     const style: React.CSSProperties = {
         height: '100%',
         width: '100%',
-        maxHeight: window.innerHeight / 11,
+        maxHeight: (window.innerHeight / 11) * 1,
         maxWidth: window.innerWidth / 11
     };
 
@@ -83,6 +65,33 @@ function iconUi(data: SquareData): React.ReactNode {
             return <img src={ElectricUtilityIcon} alt="Electric Utility" style={style} />;
         case 'water-utility':
             return <img src={WaterUtilityIcon} alt="Water Utility" style={style} />;
+        case 'street':
+            return streetUi(data, boardIndex);
+    }
+}
+
+function streetUi(street: Street, boardIndex: number): React.ReactNode {
+    return <div style={{
+        width: '100%',
+        height: '100%',
+        boxSizing: 'border-box',
+        ...getBorder(street, boardIndex)
+    }} />;
+}
+
+function getBorder(street: Street, boardIndex: number): React.CSSProperties {
+    const side = getSide(boardIndex);
+    const border = `${STREET_COLOR_WIDTH}px solid ${street.color}`;
+
+    switch (side) {
+        case 'bottom':
+            return { borderTop: border };
+        case 'left':
+            return { borderRight: border };
+        case 'top':
+            return { borderBottom: border };
+        case 'right':
+            return { borderLeft: border };
     }
 }
 
