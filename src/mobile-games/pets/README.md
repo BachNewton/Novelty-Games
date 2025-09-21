@@ -4,7 +4,7 @@
 
 #### Things that should get done before the game is released.
 
-- [ ] Get pet content from pet owners and add it to game
+- [X] Get pet content from pet owners and add it to game
 - [X] Indicate which interactions have been used and seen by the player already
 - [X] Indicate the friendship level of the currently selected pet
 - [X] Indicate that the friendship level is increasing after an interaction is selected
