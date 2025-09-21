@@ -1,17 +1,12 @@
-import Button from "../../../util/ui/Button";
-import Dialog from "../../../util/ui/Dialog";
 import VerticalSpacer from "../../../util/ui/Spacer";
 import { COLORS } from "./Home";
 
-interface WelcomeProps {
-    show: boolean;
-    onClose: () => void;
-}
 
-const Welcome: React.FC<WelcomeProps> = ({ show, onClose }) => {
+const Welcome: React.FC = () => {
     const accent = (text: string) => <span style={{ fontWeight: 'bold', color: COLORS.secondary }}>{text}</span>;
+    const accent2 = (text: string) => <span style={{ fontWeight: 'bold', color: COLORS.primary }}>{text}</span>;
 
-    return <Dialog isOpen={show}>
+    return <div>
         <div style={{
             fontSize: '1.5em',
             fontWeight: 'bold',
@@ -23,7 +18,7 @@ const Welcome: React.FC<WelcomeProps> = ({ show, onClose }) => {
 
         <VerticalSpacer height={30} />
 
-        <div>This is a surprise video game gift for my animal loving spouse, {accent('Elliott')}!</div>
+        <div>This is a surprise video game gift for my animal loving spouse, {accent2('Elliott')}!</div>
 
         <VerticalSpacer height={15} />
 
@@ -33,7 +28,7 @@ const Welcome: React.FC<WelcomeProps> = ({ show, onClose }) => {
 
         <div style={{ fontWeight: 'bold' }}>How to play</div>
         <ul style={{ margin: '2px' }}>
-            <li>Travel to {accent('real')} locations to discover the hidden pets</li>
+            <li>Travel to {accent('real locations')} to discover the hidden pets</li>
             <li>Interact with pets to increase their {accent('friendship')}</li>
             <li>Come back to the game often because pets like to take {accent('naps')}</li>
             <li>{accent('Explore')} each and every thing a pet has to say</li>
@@ -42,12 +37,8 @@ const Welcome: React.FC<WelcomeProps> = ({ show, onClose }) => {
 
         <VerticalSpacer height={15} />
 
-        <div>Have fun, and I love you!</div>
-
-        <VerticalSpacer height={30} />
-
-        <div style={{ display: 'flex' }}><Button onClick={onClose}>Close</Button></div>
-    </Dialog>
+        <div>Have fun, and {accent2('I love you')}!</div>
+    </div>
 };
 
 export default Welcome;

@@ -13,6 +13,7 @@ import Welcome from "./Welcome";
 import { State } from "../data/PetSave";
 import PetContent from "./PetContent";
 import Content from "./Content";
+import Menu from "./Menu";
 
 export const COLORS = {
     primary: ' #FF2D95',
@@ -32,7 +33,6 @@ export interface InteractionSelection {
 
 const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const [hasLoaded, setHasLoaded] = useState(false);
-    const [showWelcome, setShowWelcome] = useState(false);
     const dataManager = useRef(createDataManager(database, createNavigator())).current;
     const [pets, setPets] = useState(dataManager.getDefaultPets());
     const [selectedTab, setSelectedTab] = useState<number | null>(null);
@@ -50,9 +50,6 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
 
             const updatedPetStates = dataManager.updatePetsState(updatedPets, 0);
             setPets(updatedPetStates);
-
-            // Show the Welcome screen only if the first pet, "Frog", hasn't been discovered yet
-            setShowWelcome(!updatedPets[0].discovered);
         });
 
         database.getSeenInteractions().then(
@@ -68,7 +65,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     };
 
     const content = selectedTab === null
-        ? <div>Menu</div>
+        ? <Menu />
         : <PetContent
             pets={pets}
             selectedPet={selectedPet}
@@ -105,8 +102,6 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         <Content>
             {content}
         </Content>
-
-        <Welcome show={showWelcome} onClose={() => setShowWelcome(false)} />
     </Scaffold>;
 };
 
