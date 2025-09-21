@@ -4,21 +4,18 @@ import PawIcon from "../icons/paw.svg";
 
 interface TabsProps {
     pets: Pet[];
-    selectedTab: number;
+    selectedTab: number | null;
     onTabSelected: (index: number | null) => void;
 }
 
 const Tabs: React.FC<TabsProps> = ({ pets, selectedTab, onTabSelected }) => {
-    return <div style={{ display: 'flex' }}>
-        {menuUi(selectedTab)}
-
-        <div style={{ display: 'flex', overflow: 'auto', backgroundColor: COLORS.surface }}>
-            {tabsUi(pets, selectedTab, onTabSelected)}
-        </div>
+    return <div style={{ display: 'flex', overflow: 'auto', backgroundColor: COLORS.surface }}>
+        {menuUi(selectedTab, onTabSelected)}
+        {tabsUi(pets, selectedTab, onTabSelected)}
     </div>;
 };
 
-function tabsUi(pets: Pet[], selectedTab: number, onTabSelected: (index: number | null) => void): JSX.Element[] {
+function tabsUi(pets: Pet[], selectedTab: number | null, onTabSelected: (index: number | null) => void): JSX.Element[] {
     return pets.map((pet, index) => {
         const name = pet.discovered ? pet.name : '???';
 
@@ -32,11 +29,19 @@ function tabsUi(pets: Pet[], selectedTab: number, onTabSelected: (index: number 
     });
 }
 
-function menuUi(selectedTab: number | null): JSX.Element {
-    return <div style={{ ...getTabStyle(selectedTab, null), backgroundColor: COLORS.surface }}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
-            <img src={PawIcon} alt="Menu" style={{ height: '1.5em' }} />
-        </div>
+function menuUi(selectedTab: number | null, onTabSelected: (index: number | null) => void): JSX.Element {
+    return <div
+        onClick={() => onTabSelected(null)}
+        style={{
+            ...getTabStyle(selectedTab, null),
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: '100%'
+        }}
+    >
+        <img src={PawIcon} alt="Menu" style={{ height: '1.5em' }} />
     </div>;
 }
 
@@ -45,12 +50,15 @@ function getTabStyle(selectedTab: number | null, index: number | null): React.CS
         ...getTabBorderStyle(selectedTab, index),
         padding: '7.5px',
         userSelect: 'none',
-        flex: index === null ? '0 0 2.5em' : '0 0 4em',
+        flex: index === null ? '0 0 2.25em' : '0 0 4em',
         textAlign: 'center'
     };
 }
 
 function getTabBorderStyle(selectedTab: number | null, tabIndex: number | null): React.CSSProperties {
+    selectedTab = selectedTab === null ? 0 : selectedTab + 1;
+    tabIndex = tabIndex === null ? 0 : tabIndex + 1;
+
     const borderRadius = '15px';
     const lightWidth = '2px';
     const strongWidth = '4px';
@@ -63,8 +71,6 @@ function getTabBorderStyle(selectedTab: number | null, tabIndex: number | null):
             background: `linear-gradient(0deg, ${COLORS.surface}, ${COLORS.primary})`,
             borderLeft: tabIndex === 0 ? strongBorder : undefined
         };
-    } else if (selectedTab === null) {
-        // return {};
     } else if (tabIndex === selectedTab - 1) {
         return {
             borderTop: lightBorder,
@@ -87,7 +93,7 @@ function getTabBorderStyle(selectedTab: number | null, tabIndex: number | null):
 
     return {
         borderTop: lightBorder,
-        borderRight: tabIndex === null && selectedTab === 0 ? undefined : lightBorder,
+        borderRight: lightBorder,
         borderBottom: strongBorder,
         borderLeft: lightBorder
     };

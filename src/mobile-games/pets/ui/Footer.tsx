@@ -7,7 +7,7 @@ import { INTERACTION_PER_CYCLE } from "../logic/DataManager";
 import SleepingIcon from "../icons/sleeping.png";
 
 interface FooterProps {
-    selectedTab: number;
+    selectedTab: number | null;
     interactionsEnabled: boolean;
     interactionsThisCycle: number;
     isDiscovered: boolean;
@@ -54,20 +54,22 @@ const Footer: React.FC<FooterProps> = ({
         setShowComeBackLaterMessage(hasReachedInteractionThreshold);
     }, [selectedTab]);
 
-    const footerContent = isDiscovered
-        ? showComeBackLaterMessage
-            ? comeBackLaterUi()
-            : getMenu(
-                menu,
-                selectedTab,
-                interactionsEnabled,
-                seenInteractions,
-                isSleeping,
-                () => setMenu(Menu.CHAT),
-                interactionSelected,
-                () => setMenu(Menu.MAIN)
-            )
-        : distanceUi(distance);
+    const footerContent = selectedTab === null
+        ? <div>Menu</div>
+        : isDiscovered
+            ? showComeBackLaterMessage
+                ? comeBackLaterUi()
+                : getMenu(
+                    menu,
+                    selectedTab,
+                    interactionsEnabled,
+                    seenInteractions,
+                    isSleeping,
+                    () => setMenu(Menu.CHAT),
+                    interactionSelected,
+                    () => setMenu(Menu.MAIN)
+                )
+            : distanceUi(distance);
 
     return <div style={{
         display: 'grid',
