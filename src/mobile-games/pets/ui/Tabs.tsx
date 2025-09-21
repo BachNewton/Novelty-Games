@@ -68,6 +68,7 @@ function getTabBorderStyle(selectedTab: number | null, tabIndex: number | null):
     if (tabIndex === selectedTab || (selectedTab === null && tabIndex === -1)) {
         return {
             borderTop: `${lightWidth} solid ${COLORS.secondary}`,
+            borderBottom: `${strongWidth} solid ${COLORS.surface}`,
             background: `linear-gradient(0deg, ${COLORS.surface}, ${COLORS.primary})`,
             borderLeft: tabIndex === 0 ? strongBorder : undefined
         };
