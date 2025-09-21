@@ -4,7 +4,7 @@ import { COLORS, InteractionSelection } from "./Home";
 import PetDiscovered from "./PetDiscovered";
 import Discover from "./Discover";
 import { Pet } from "../data/Pet";
-import { DataManager, PetTextAndImage } from "../logic/DataManager";
+import { DataManager } from "../logic/DataManager";
 import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
 
@@ -34,7 +34,7 @@ const PetContent: React.FC<PetContentProps> = ({
     setDistanceToPet
 }) => {
     const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
-    const [textAndImage, setTextAndImage] = useState<PetTextAndImage>({ text: '', image: null });
+    const [textAndImage, setTextAndImage] = useState(dataManager.getTextAndImage(selectedPet));
 
     const isDiscovered = selectedPet.discovered;
 

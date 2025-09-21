@@ -29,7 +29,6 @@
 
 ## Bugs / Improvements
 
-- GPS access isn't requested until a pet that is undiscovered is selected
 - Cloud save - so that the game can be played on multiple devices
 - Clicking on the pet image hide the text bubble so the full image can be appreciated
 
