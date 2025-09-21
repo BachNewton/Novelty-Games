@@ -91,14 +91,7 @@ const PetContent: React.FC<PetContentProps> = ({
             onDistanceUpdate={distance => setDistanceToPet(distance)}
         />;
 
-    return <div style={{
-        display: 'flex',
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)`
-    }}>
+    return <>
         {mainContent}
 
         {debugMenuButtonUi(() => setIsDebugMenuOpen(true))}
@@ -112,7 +105,7 @@ const PetContent: React.FC<PetContentProps> = ({
             forceNextCycle={() => onTabChange(true)}
             setHighFriendship={() => onTabChange()}
         />
-    </div>;
+    </>;
 };
 
 function debugMenuButtonUi(onDebugMenuButtonClicked: () => void): JSX.Element {

@@ -12,6 +12,7 @@ import Tabs from "./Tabs";
 import Welcome from "./Welcome";
 import { State } from "../data/PetSave";
 import PetContent from "./PetContent";
+import Content from "./Content";
 
 export const COLORS = {
     primary: ' #FF2D95',
@@ -67,7 +68,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     };
 
     const content = selectedTab === null
-        ? <div style={{ background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)` }}>Menu</div>
+        ? <div>Menu</div>
         : <PetContent
             pets={pets}
             selectedPet={selectedPet}
@@ -101,7 +102,9 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
 
         fontScale={1.35}
     >
-        {content}
+        <Content>
+            {content}
+        </Content>
 
         <Welcome show={showWelcome} onClose={() => setShowWelcome(false)} />
     </Scaffold>;
