@@ -1,11 +1,26 @@
 import Welcome from "./Welcome";
 
-interface MenuProps { }
+interface MenuProps {
+    selection: MenuOption;
+}
 
-const Menu: React.FC<MenuProps> = ({ }) => {
+export enum MenuOption {
+    WELCOME, OVERVIEW
+}
+
+const Menu: React.FC<MenuProps> = ({ selection }) => {
     return <div style={{ padding: '15px' }}>
-        <Welcome />
+        {contentUi(selection)}
     </div>;
 };
+
+function contentUi(selection: MenuOption): JSX.Element {
+    switch (selection) {
+        case MenuOption.WELCOME:
+            return <Welcome />;
+        case MenuOption.OVERVIEW:
+            return <div>Overview</div>;
+    }
+}
 
 export default Menu;

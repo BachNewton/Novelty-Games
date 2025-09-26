@@ -9,11 +9,10 @@ import { createNavigator } from "../../../util/geolocation/Navigator";
 import { Interactions, Interaction } from "../data/Interaction";
 import { createDataManager } from "../logic/DataManager";
 import Tabs from "./Tabs";
-import Welcome from "./Welcome";
 import { State } from "../data/PetSave";
 import PetContent from "./PetContent";
 import Content from "./Content";
-import Menu from "./Menu";
+import Menu, { MenuOption } from "./Menu";
 
 export const COLORS = {
     primary: ' #FF2D95',
@@ -39,6 +38,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     const [distanceToPet, setDistanceToPet] = useState<number | null>(null);
     const [seenInteractions, setSeenInteractions] = useState(new Set<string>());
     const [interteractionSelection, setInterteractionSelection] = useState<InteractionSelection | null>(null);
+    const [menuOptionSelection, setMenuOptionSelection] = useState<MenuOption>(MenuOption.WELCOME);
 
     const selectedPet = pets[selectedTab ?? 0];
 
@@ -65,7 +65,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     };
 
     const content = selectedTab === null
-        ? <Menu />
+        ? <Menu selection={menuOptionSelection} />
         : <PetContent
             pets={pets}
             selectedPet={selectedPet}
@@ -95,6 +95,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             distance={distanceToPet}
             seenInteractions={seenInteractions}
             interactionSelected={onInteractionSelected}
+            menuOptionSelected={selection => setMenuOptionSelection(selection)}
         />}
 
         fontScale={1.35}

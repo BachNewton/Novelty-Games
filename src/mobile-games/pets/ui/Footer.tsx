@@ -5,6 +5,7 @@ import { PET_DATA } from "../data/PetData";
 import { Interaction, Interactions } from "../data/Interaction";
 import { INTERACTION_PER_CYCLE } from "../logic/DataManager";
 import SleepingIcon from "../icons/sleeping.png";
+import { MenuOption } from "./Menu";
 
 interface FooterProps {
     selectedTab: number | null;
@@ -16,6 +17,7 @@ interface FooterProps {
     distance: number | null;
     seenInteractions: Set<string>;
     interactionSelected: (type: keyof Interactions, interaction: Interaction) => void;
+    menuOptionSelected: (selection: MenuOption) => void;
 }
 
 enum Menu {
@@ -31,7 +33,8 @@ const Footer: React.FC<FooterProps> = ({
     hasLoaded,
     distance,
     seenInteractions,
-    interactionSelected
+    interactionSelected,
+    menuOptionSelected
 }) => {
     const previousHasLoaded = useRef(hasLoaded);
     const [menu, setMenu] = useState<Menu>(Menu.MAIN);
@@ -55,7 +58,7 @@ const Footer: React.FC<FooterProps> = ({
     }, [selectedTab]);
 
     const footerContent = selectedTab === null
-        ? getMenuOptions()
+        ? getMenuOptions(menuOptionSelected)
         : isDiscovered
             ? showComeBackLaterMessage
                 ? comeBackLaterUi()
@@ -113,20 +116,20 @@ function formatDistance(distance: number | null): string {
     return distance.toFixed(3) + ' km';
 }
 
-function getMenuOptions(): JSX.Element {
+function getMenuOptions(menuOptionSelected: (selection: MenuOption) => void): JSX.Element {
     return <>
         <PetsButton
             interactionSeen={false}
             isEnabled={true}
             text='Welcome'
-            onClick={() => { }}
+            onClick={() => menuOptionSelected(MenuOption.WELCOME)}
             columns={2}
         />
         <PetsButton
             interactionSeen={false}
             isEnabled={true}
             text='Overview'
-            onClick={() => { }}
+            onClick={() => menuOptionSelected(MenuOption.OVERVIEW)}
             columns={2}
         />
     </>;
