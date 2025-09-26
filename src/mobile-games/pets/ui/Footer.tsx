@@ -55,11 +55,11 @@ const Footer: React.FC<FooterProps> = ({
     }, [selectedTab]);
 
     const footerContent = selectedTab === null
-        ? <div>Menu</div>
+        ? getMenuOptions()
         : isDiscovered
             ? showComeBackLaterMessage
                 ? comeBackLaterUi()
-                : getMenu(
+                : getInteractionsMenu(
                     menu,
                     selectedTab,
                     interactionsEnabled,
@@ -71,10 +71,12 @@ const Footer: React.FC<FooterProps> = ({
                 )
             : distanceUi(distance);
 
+    const rows = selectedTab === null ? 2 : 3;
+
     return <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        gridTemplateRows: 'repeat(3, minmax(2em, auto))',
+        gridTemplateRows: `repeat(${rows}, minmax(2em, auto))`,
         borderTop: `4px solid ${COLORS.secondary}`,
         padding: '10px',
         backgroundColor: COLORS.surface,
@@ -111,7 +113,26 @@ function formatDistance(distance: number | null): string {
     return distance.toFixed(3) + ' km';
 }
 
-function getMenu(
+function getMenuOptions(): JSX.Element {
+    return <>
+        <PetsButton
+            interactionSeen={false}
+            isEnabled={true}
+            text='Welcome'
+            onClick={() => { }}
+            columns={2}
+        />
+        <PetsButton
+            interactionSeen={false}
+            isEnabled={true}
+            text='Overview'
+            onClick={() => { }}
+            columns={2}
+        />
+    </>;
+}
+
+function getInteractionsMenu(
     menu: Menu,
     selectedTab: number,
     interactionsEnabled: boolean,
