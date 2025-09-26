@@ -65,7 +65,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     };
 
     const content = selectedTab === null
-        ? <Menu selection={menuOptionSelection} />
+        ? <Menu selection={menuOptionSelection} pets={pets} seenInteractions={seenInteractions} />
         : <PetContent
             pets={pets}
             selectedPet={selectedPet}
