@@ -15,6 +15,7 @@ export interface PetBreakdown {
     isBestFriend: boolean;
     maxInteractions: number;
     aquiredInteractions: number;
+    overallCompletion: number;
 }
 
 interface Summary {
@@ -64,6 +65,11 @@ export function createOverviewData(
         const aquiredInteractions = countAquiredInteractions(interactionIds, seenInteractions);
         totalInteractions += aquiredInteractions;
 
+        const overallCompletion =
+            ((isDiscovered ? 1 : 0) + (isBestFriend ? 1 : 0) + friendship + aquiredInteractions)
+            /
+            (1 + 1 + maxFriendship + maxInteractions);
+
         return {
             isDiscovered: isDiscovered,
             name: name,
@@ -71,7 +77,8 @@ export function createOverviewData(
             friendship: friendship,
             isBestFriend: isBestFriend,
             maxInteractions: maxInteractions,
-            aquiredInteractions: aquiredInteractions
+            aquiredInteractions: aquiredInteractions,
+            overallCompletion: overallCompletion * 100
         };
     });
 
@@ -84,7 +91,7 @@ export function createOverviewData(
     return {
         breakdowns: breakdowns,
         summary: {
-            overallCompletion: overallCompletion,
+            overallCompletion: overallCompletion * 100,
             totalPets: totalPets,
             discoveredPets: discoveredPets,
             totalFriendship: totalFriendship,

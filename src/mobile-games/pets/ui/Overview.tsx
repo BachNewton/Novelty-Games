@@ -17,7 +17,7 @@ const Overview: React.FC<OverviewProps> = ({ pets, seenInteractions }) => {
     const breakdownUi = breakdowns.map((breakdown, index) => <div key={index} style={{
         border: `1px solid ${COLORS.primary}`,
         borderRadius: '15px',
-        marginTop: '15px',
+        marginTop: '20px',
         padding: '10px',
         boxShadow: `0px 0px 10px ${COLORS.secondary}`
     }}>
@@ -28,22 +28,23 @@ const Overview: React.FC<OverviewProps> = ({ pets, seenInteractions }) => {
         <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            rowGap: '15px'
+            rowGap: '10px'
         }}>
             <div style={{
                 gridColumn: 'span 4',
                 fontSize: '2em',
                 fontWeight: 'bold',
                 textAlign: 'center',
-                marginBottom: '15px'
-            }}>100.00%</div>
+                marginBottom: '10px'
+            }}>{summary.overallCompletion.toFixed(2)}%</div>
 
-            {rowUi('Pets Discovered', summary.discoveredPets, summary.totalPets)}
-            {rowUi('Friendship Gained', summary.totalFriendship, summary.totalFriendship)}
-            {rowUi('Interactinons Seen', summary.totalInteractions, summary.maxTotalInteractions)}
+            {rowUi('Discoveries', summary.discoveredPets, summary.totalPets)}
+            {rowUi('Friendship', summary.totalFriendship, summary.maxTotalFriendship)}
+            {rowUi('Best Friends', summary.bestFriends, summary.totalPets)}
+            {rowUi('Interactions', summary.totalInteractions, summary.maxTotalInteractions)}
         </div>
 
-        <VerticalSpacer height={15} />
+        <VerticalSpacer height={20} />
 
         {breakdownUi}
     </>;
@@ -58,13 +59,20 @@ function rowUi(label: string, acquired: number, total: number): JSX.Element {
 }
 
 function petBreakdownUi(breakdown: PetBreakdown): JSX.Element {
+    const bestFriendText = breakdown.isBestFriend ? 'Best Friend!' : '';
+
     return <>
         <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             fontWeight: 'bold',
-            color: COLORS.secondary,
             fontSize: '1.2em',
             marginBottom: '15px'
-        }}>{breakdown.name}</div>
+        }}>
+            <div style={{ color: COLORS.primary }}>{breakdown.name}</div>
+            <div style={{ color: COLORS.secondary }}>{bestFriendText}</div>
+            <div>{breakdown.overallCompletion.toFixed(1)}%</div>
+        </div>
 
         <div style={{
             display: 'grid',
