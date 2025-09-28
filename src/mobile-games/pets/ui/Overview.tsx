@@ -1,10 +1,8 @@
 import VerticalSpacer from "../../../util/ui/Spacer";
-import { TOTAL_FIXED_INTERACTIONS } from "../data/Interaction";
 import { Pet } from "../data/Pet";
-import { PET_DATA } from "../data/PetData";
 import { createOverviewData, PetBreakdown } from "../logic/OverviewData";
-import { MAX_HEARTS } from "./FriendshipBar";
 import { COLORS } from "./Home";
+import { menuBannerUi } from "./Menu";
 
 interface OverviewProps {
     pets: Pet[];
@@ -14,30 +12,39 @@ interface OverviewProps {
 const Overview: React.FC<OverviewProps> = ({ pets, seenInteractions }) => {
     const { breakdowns, summary } = createOverviewData(pets, seenInteractions);
 
-    const breakdownUi = breakdowns.map((breakdown, index) => <div key={index} style={{
+    const cardStyle: React.CSSProperties = {
         border: `1px solid ${COLORS.primary}`,
         borderRadius: '15px',
-        marginTop: '20px',
         padding: '10px',
         boxShadow: `0px 0px 10px ${COLORS.secondary}`
+    };
+
+    const headerStyle: React.CSSProperties = {
+        marginBottom: '15px',
+        fontSize: '1.25em',
+        fontWeight: 'bold'
+    };
+
+    const breakdownUi = breakdowns.map((breakdown, index) => <div key={index} style={{
+        marginTop: '20px',
+        ...cardStyle
     }}>
         {petBreakdownUi(breakdown)}
     </div>);
 
     return <>
+        {menuBannerUi(`${summary.overallCompletion.toFixed(2)}%`, 2)}
+
+        <VerticalSpacer height={20} />
+
+        <div style={headerStyle}>Overview</div>
+
         <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            rowGap: '10px'
+            rowGap: '10px',
+            ...cardStyle
         }}>
-            <div style={{
-                gridColumn: 'span 4',
-                fontSize: '2em',
-                fontWeight: 'bold',
-                textAlign: 'center',
-                marginBottom: '10px'
-            }}>{summary.overallCompletion.toFixed(2)}%</div>
-
             {rowUi('Discoveries', summary.discoveredPets, summary.totalPets)}
             {rowUi('Friendship', summary.totalFriendship, summary.maxTotalFriendship)}
             {rowUi('Best Friends', summary.bestFriends, summary.totalPets)}
@@ -45,6 +52,8 @@ const Overview: React.FC<OverviewProps> = ({ pets, seenInteractions }) => {
         </div>
 
         <VerticalSpacer height={20} />
+
+        <div style={headerStyle}>Breakdown</div>
 
         {breakdownUi}
     </>;

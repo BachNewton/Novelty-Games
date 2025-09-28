@@ -1,4 +1,5 @@
 import { Pet } from "../data/Pet";
+import { COLORS } from "./Home";
 import Overview from "./Overview";
 import Welcome from "./Welcome";
 
@@ -25,6 +26,17 @@ function contentUi(selection: MenuOption, pets: Pet[], seenInteractions: Set<str
         case MenuOption.OVERVIEW:
             return <Overview pets={pets} seenInteractions={seenInteractions} />;
     }
+}
+
+export function menuBannerUi(text: string, fontScale: number): JSX.Element {
+    return <div style={{
+        fontSize: `${fontScale}em`,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        background: `linear-gradient(to right, ${COLORS.primary} 0%, ${COLORS.secondary} 50%, ${COLORS.primary} 100%)`,
+        padding: '5px',
+        borderRadius: '10px'
+    }}>{text}</div>
 }
 
 export default Menu;

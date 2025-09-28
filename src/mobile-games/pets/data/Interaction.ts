@@ -1,5 +1,3 @@
-export const TOTAL_FIXED_INTERACTIONS = 4;
-
 export interface Interaction {
     id: string;
     text: string;

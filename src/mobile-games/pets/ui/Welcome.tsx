@@ -1,20 +1,13 @@
 import VerticalSpacer from "../../../util/ui/Spacer";
 import { COLORS } from "./Home";
-
+import { menuBannerUi } from "./Menu";
 
 const Welcome: React.FC = () => {
     const accent = (text: string) => <span style={{ fontWeight: 'bold', color: COLORS.secondary }}>{text}</span>;
     const accent2 = (text: string) => <span style={{ fontWeight: 'bold', color: COLORS.primary }}>{text}</span>;
 
     return <div>
-        <div style={{
-            fontSize: '1.5em',
-            fontWeight: 'bold',
-            textAlign: 'center',
-            background: `linear-gradient(to right, ${COLORS.primary} 0%, ${COLORS.secondary} 50%, ${COLORS.primary} 100%)`,
-            padding: '5px',
-            borderRadius: '10px'
-        }}>Welcome Pets!</div>
+        {menuBannerUi('Welcome to Pets!', 1.5)}
 
         <VerticalSpacer height={30} />
 
