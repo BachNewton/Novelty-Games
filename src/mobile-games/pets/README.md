@@ -13,7 +13,7 @@
 - [X] _(optional)_ Indicate to the player that only one interaction is permitted per wake cycle
 - [X] _(optional)_ Add a "welcome to the game" pop-up that explains the game and is only shown the first time the game is launched
 - [ ] _(optional)_ Indicate to the player how much longer a pet might be awake or sleeping for
-- [ ] _(optional)_ Add an overview page that shows:
+- [X] _(optional)_ Add an overview page that shows:
     - Pets discoverd out of total
     - Interations seen out of total
     - Friendship level of each pet
