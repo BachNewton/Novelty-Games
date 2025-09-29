@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import Scaffold from "../../../util/ui/Scaffold";
 import { PetsDatabase } from "../logic/PetsDatabase";
-import { PetsDebugger } from "../logic/PetsDebugger";
+import { createPetsDebugger } from "../logic/PetsDebugger";
 import Footer from "./Footer";
 import { createNavigator } from "../../../util/geolocation/Navigator";
 import { Interactions, Interaction } from "../data/Interaction";
@@ -22,7 +22,6 @@ export const COLORS = {
 
 interface HomeProps {
     database: PetsDatabase;
-    petsDebugger: PetsDebugger;
 }
 
 export interface InteractionSelection {
@@ -30,7 +29,9 @@ export interface InteractionSelection {
     interaction: Interaction;
 }
 
-const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
+const Home: React.FC<HomeProps> = ({ database }) => {
+    const [isDebugMenuButtonVisible, setIsDebugMenuButtonVisible] = useState(false);
+    const petsDebugger = useRef(createPetsDebugger(database, () => setIsDebugMenuButtonVisible(true))).current;
     const [hasLoaded, setHasLoaded] = useState(false);
     const dataManager = useRef(createDataManager(database, createNavigator())).current;
     const [pets, setPets] = useState(dataManager.getDefaultPets());
@@ -76,6 +77,7 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             setPets={setPets}
             setDistanceToPet={distance => setDistanceToPet(distance)}
             petsDebugger={petsDebugger}
+            isDebugMenuButtonVisible={isDebugMenuButtonVisible}
         />;
 
     return <Scaffold

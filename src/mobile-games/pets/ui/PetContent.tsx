@@ -8,8 +8,6 @@ import { DataManager } from "../logic/DataManager";
 import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
 
-const SHOW_DEBUG_MENU_BUTTON = true;
-
 interface PetContentProps {
     pets: Pet[];
     selectedPet: Pet;
@@ -18,6 +16,7 @@ interface PetContentProps {
     interteractionSelection: InteractionSelection | null;
     dataManager: DataManager;
     petsDebugger: PetsDebugger;
+    isDebugMenuButtonVisible: boolean;
     setPets: (pets: Pet[]) => void;
     setDistanceToPet: (distance: number | null) => void;
 }
@@ -30,6 +29,7 @@ const PetContent: React.FC<PetContentProps> = ({
     interteractionSelection,
     dataManager,
     petsDebugger,
+    isDebugMenuButtonVisible,
     setPets,
     setDistanceToPet
 }) => {
@@ -100,7 +100,7 @@ const PetContent: React.FC<PetContentProps> = ({
     }}>
         {mainContent}
 
-        {debugMenuButtonUi(() => setIsDebugMenuOpen(true))}
+        {debugMenuButtonUi(isDebugMenuButtonVisible, () => setIsDebugMenuOpen(true))}
 
         <DebugMenu
             isOpen={isDebugMenuOpen}
@@ -114,8 +114,8 @@ const PetContent: React.FC<PetContentProps> = ({
     </div>;
 };
 
-function debugMenuButtonUi(onDebugMenuButtonClicked: () => void): JSX.Element {
-    if (!SHOW_DEBUG_MENU_BUTTON) return <></>;
+function debugMenuButtonUi(isDebugMenuButtonVisible: boolean, onDebugMenuButtonClicked: () => void): JSX.Element {
+    if (!isDebugMenuButtonVisible) return <></>;
 
     return <div style={{ position: 'absolute', top: '60px', right: '5px' }}>
         <Button fontScale={0.8} onClick={onDebugMenuButtonClicked}>Debug</Button>

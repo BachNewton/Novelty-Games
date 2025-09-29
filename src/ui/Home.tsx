@@ -21,7 +21,6 @@ import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/Laby
 import { APP_VERSION } from '../Versioning';
 import Button from '../util/ui/Button';
 import { createPetsDatabase } from '../mobile-games/pets/logic/PetsDatabase';
-import { createPetsDebugger } from '../mobile-games/pets/logic/PetsDebugger';
 
 const BUTTON_BORDER_RADIUS = 20;
 const BUTTON_MARGIN = '7px';
@@ -190,10 +189,7 @@ function mobileGamesUi(mobileGamesState: MobileGamesState, onClickHandlers: OnCl
     } else if (mobileGamesState instanceof PetsState) {
         const petsDatabase = createPetsDatabase();
 
-        return <Pets
-            database={petsDatabase}
-            petsDebugger={createPetsDebugger(petsDatabase)}
-        />;
+        return <Pets database={petsDatabase} />;
     } else if (mobileGamesState instanceof ToddlerTreasureHuntState) {
         return <ToddlerTreasureHunt />;
     }
