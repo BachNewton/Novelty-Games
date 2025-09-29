@@ -12,6 +12,14 @@ export function createPetsDebugger(
     database: PetsDatabase,
     setDebugMenuButtonToVisible: () => void
 ): PetsDebugger {
+    window.ontouchstart = (e) => {
+        const fingers = e.touches.length;
+
+        if (fingers === 5) {
+            setDebugMenuButtonToVisible();
+        }
+    };
+
     (window as any).debug = () => {
         setDebugMenuButtonToVisible();
 
