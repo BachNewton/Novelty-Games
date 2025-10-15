@@ -4,11 +4,25 @@ import Tabs from "./Tabs";
 import Content from "./Content";
 import { createStorer, StorageKey } from "../../../util/Storage";
 import { createDefaultSave, Save } from "../data/Save";
+import { NetworkService } from "../../../util/networking/NetworkService";
 
-interface HomeProps { }
+interface HomeProps {
+    networkService: NetworkService<void>;
+}
 
-const Home: React.FC<HomeProps> = ({ }) => {
+const Home: React.FC<HomeProps> = ({ networkService }) => {
     const storer = useRef(createStorer<Save>(StorageKey.WINTER_CYCLING)).current;
+
+    // networkService.saveFile({
+    //     folderName: "temp",
+    //     fileName: "temp",
+    //     content: "test"
+    // });
+
+    // networkService.getFile({
+    //     folderName: "temp",
+    //     fileName: "temp"
+    // });
 
     const [save, setSave] = useState(storer.loadSync() ?? createDefaultSave());
     const [selectedTab, setSelectedTab] = useState(0);

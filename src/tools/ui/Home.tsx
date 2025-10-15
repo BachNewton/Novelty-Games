@@ -43,6 +43,7 @@ interface DatabaseDebugUiState {
 
 interface WinterCylingUiState {
     type: 'WinterCycling';
+    networkService: NetworkService<void>;
 }
 
 interface OnClickHandlers {
@@ -86,7 +87,7 @@ function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
                 exampleDatabase={createDatabaseManager().exampleDatabase}
             />;
         case 'WinterCycling':
-            return <WinterCylingHome />;
+            return <WinterCylingHome networkService={uiState.networkService} />;
     }
 }
 
@@ -162,7 +163,8 @@ function createDatabaseDebugUiState(): DatabaseDebugUiState {
 
 function createWinterCyclingUiState(): WinterCylingUiState {
     return {
-        type: 'WinterCycling'
+        type: 'WinterCycling',
+        networkService: createNetworkService(NetworkedApplication.WINTER_CYCLING)
     };
 }
 
