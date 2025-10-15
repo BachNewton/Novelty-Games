@@ -1,4 +1,5 @@
 import { Save } from "../data/Save";
+import Settings from "./Settings";
 import Submission from "./Submission";
 
 interface ContentProps {
@@ -16,7 +17,7 @@ const Content: React.FC<ContentProps> = ({ selectedTab, save, onSaveChange }) =>
         case 2:
             return <div style={{ padding: '15px' }}>🗒️ Logbook coming soon!</div>;
         case 3:
-            return <div style={{ padding: '15px' }}>⚙️ Settings coming soon!</div>;
+            return <Settings save={save} onSaveChange={onSaveChange} />;
         default:
             throw new Error("Invalid tab index" + selectedTab);
     }

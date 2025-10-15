@@ -9,8 +9,8 @@ interface HomeProps { }
 
 const Home: React.FC<HomeProps> = ({ }) => {
     const storer = useRef(createStorer<Save>(StorageKey.WINTER_CYCLING)).current;
-    const save = useRef(storer.loadSync() ?? createDefaultSave()).current;
 
+    const [save, setSave] = useState(storer.loadSync() ?? createDefaultSave());
     const [selectedTab, setSelectedTab] = useState(0);
 
     useEffect(() => {
@@ -20,7 +20,10 @@ const Home: React.FC<HomeProps> = ({ }) => {
     return <div style={{ display: 'flex', height: '100dvh', flexDirection: 'column' }}>
         <Tabs selectedTab={selectedTab} onTabSelected={index => setSelectedTab(index)} />
         <div style={{ flexGrow: 1 }}>
-            <Content selectedTab={selectedTab} save={save} onSaveChange={newSave => storer.save(newSave)} />
+            <Content selectedTab={selectedTab} save={save} onSaveChange={newSave => {
+                storer.save(newSave);
+                setSave(newSave);
+            }} />
         </div>
     </div>;
 };

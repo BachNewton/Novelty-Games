@@ -99,7 +99,7 @@ function getRiderStyle(rider: Rider, selectedRider: Rider): React.CSSProperties 
     return {
         border: '1px solid white',
         borderRadius: '15px',
-        padding: '5px',
+        padding: '10px',
         cursor: 'pointer',
         textAlign: 'center',
         transform: selected ? 'scale(1.2)' : undefined,
