@@ -6,9 +6,10 @@ import { DistanceUnit, Rider, Save, TemperatureUnit } from "../data/Save";
 interface SubmissionProps {
     save: Save;
     onSaveChange: (save: Save) => void;
+    onSubmit: (rider: Rider, distance: number, temperature: number) => void;
 }
 
-const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange }) => {
+const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit }) => {
     const [selectedRider, setSelectedRider] = useState(save.rider);
     const [distance, setDistance] = useState(String(save.distance));
     const [temperature, setTemperature] = useState(String(save.temperature));
@@ -17,6 +18,7 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange }) => {
         const updated: Save = { ...save, rider: selectedRider, distance: Number(distance), temperature: Number(temperature) };
 
         onSaveChange(updated);
+        onSubmit(updated.rider, updated.distance, updated.temperature);
     };
 
     const distanceAbbr = save.distanceUnit === DistanceUnit.KM ? 'km' : 'mi';
