@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import Tabs from "./Tabs";
+import Content from "./Content";
 
 interface HomeProps { }
 
@@ -13,7 +14,9 @@ const Home: React.FC<HomeProps> = ({ }) => {
 
     return <div style={{ display: 'flex', height: '100dvh', flexDirection: 'column' }}>
         <Tabs selectedTab={selectedTab} onTabSelected={index => setSelectedTab(index)} />
-        <div style={{ flexGrow: 1 }}>Content</div>
+        <div style={{ flexGrow: 1 }}>
+            <Content selectedTab={selectedTab} />
+        </div>
     </div>;
 };
 
