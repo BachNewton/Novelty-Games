@@ -69,6 +69,11 @@ const Content: React.FC<ContentProps> = ({ selectedTab }) => {
                     value={temperature}
                     onChange={e => setTemperature(Number(e.target.value))}
                     onFocus={e => e.target.select()}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === 'Tab') {
+                            (e.target as HTMLInputElement).blur();
+                        }
+                    }}
                 />
 
                 <span>° C</span>
