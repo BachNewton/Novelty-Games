@@ -3,7 +3,7 @@ import { Route, updateRoute } from "../../../ui/Routing";
 import Tabs from "./Tabs";
 import Content from "./Content";
 import { createStorer, StorageKey } from "../../../util/Storage";
-import { createDefaultSave, Save } from "../data/Save";
+import { createDefaultSave, Save, Rider } from "../data/Save";
 import { NetworkService } from "../../../util/networking/NetworkService";
 import { Ride } from "../data/Ride";
 
@@ -38,6 +38,51 @@ const Home: React.FC<HomeProps> = ({ networkService }) => {
         updateRoute(Route.WINTER_CYCLING);
     }, []);
 
+    const handleSubmit = (rider: Rider, distance: number, temperature: number) => {
+        setSubmissionStatus(SubmissionStatus.SUBMITTING);
+
+        const ride: Ride = { rider, distance, temperature, date: Date.now() };
+
+        networkService.getFile({
+            folderName: 'rides',
+            fileName: 'debug-rides.json'
+        }).then(response => {
+            if (response.isSuccessful) {
+                const savedRides: Ride[] = JSON.parse(response.content as string);
+
+                savedRides.push(ride);
+
+                networkService.saveFile({
+                    folderName: 'rides',
+                    fileName: 'debug-rides.json',
+                    content: JSON.stringify(savedRides)
+                }).then(saveResponse => {
+                    if (saveResponse.isSuccessful) {
+                        setSubmissionStatus(SubmissionStatus.SUCCESS);
+                    } else {
+                        setSubmissionStatus(SubmissionStatus.ERROR);
+                    }
+                });
+            } else {
+                const savedRides: Ride[] = [];
+
+                savedRides.push(ride);
+
+                networkService.saveFile({
+                    folderName: 'rides',
+                    fileName: 'debug-rides.json',
+                    content: JSON.stringify(savedRides)
+                }).then(saveResponse => {
+                    if (saveResponse.isSuccessful) {
+                        setSubmissionStatus(SubmissionStatus.SUCCESS);
+                    } else {
+                        setSubmissionStatus(SubmissionStatus.ERROR);
+                    }
+                });
+            }
+        });
+    };
+
     return <div style={{ display: 'flex', height: '100dvh', flexDirection: 'column' }}>
         <Tabs selectedTab={selectedTab} onTabSelected={index => setSelectedTab(index)} />
 
@@ -45,50 +90,7 @@ const Home: React.FC<HomeProps> = ({ networkService }) => {
             <Content selectedTab={selectedTab} save={save} onSaveChange={newSave => {
                 storer.save(newSave);
                 setSave(newSave);
-            }} onSubmit={(rider, distance, temperature) => {
-                setSubmissionStatus(SubmissionStatus.SUBMITTING);
-
-                const ride: Ride = { rider, distance, temperature, date: Date.now() };
-
-                networkService.getFile({
-                    folderName: 'rides',
-                    fileName: 'debug-rides.json'
-                }).then(response => {
-                    if (response.isSuccessful) {
-                        const savedRides: Ride[] = JSON.parse(response.content as string);
-
-                        savedRides.push(ride);
-
-                        networkService.saveFile({
-                            folderName: 'rides',
-                            fileName: 'debug-rides.json',
-                            content: JSON.stringify(savedRides)
-                        }).then(saveResponse => {
-                            if (saveResponse.isSuccessful) {
-                                setSubmissionStatus(SubmissionStatus.SUCCESS);
-                            } else {
-                                setSubmissionStatus(SubmissionStatus.ERROR);
-                            }
-                        });
-                    } else {
-                        const savedRides: Ride[] = [];
-
-                        savedRides.push(ride);
-
-                        networkService.saveFile({
-                            folderName: 'rides',
-                            fileName: 'debug-rides.json',
-                            content: JSON.stringify(savedRides)
-                        }).then(saveResponse => {
-                            if (saveResponse.isSuccessful) {
-                                setSubmissionStatus(SubmissionStatus.SUCCESS);
-                            } else {
-                                setSubmissionStatus(SubmissionStatus.ERROR);
-                            }
-                        });
-                    }
-                });
-            }} />
+            }} onSubmit={handleSubmit} />
         </div>
     </div>;
 };
