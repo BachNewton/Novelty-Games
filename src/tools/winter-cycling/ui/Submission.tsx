@@ -1,12 +1,9 @@
 import { useState } from "react";
 import VerticalSpacer from "../../../util/ui/Spacer";
 import { FlameEffect } from "./FlameEffect";
+import { Rider } from "../data/Save";
 
 interface SubmissionProps { }
-
-enum Rider {
-    KYLE, NICK, LANDON
-}
 
 const Submission: React.FC<SubmissionProps> = ({ }) => {
     const [selectedRider, setSelectedRider] = useState<Rider>(Rider.KYLE);

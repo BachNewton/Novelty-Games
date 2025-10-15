@@ -1,10 +1,13 @@
+import { Save } from "../data/Save";
 import Submission from "./Submission";
 
 interface ContentProps {
     selectedTab: number;
+    save: Save;
+    onSaveChange: (save: Save) => void;
 }
 
-const Content: React.FC<ContentProps> = ({ selectedTab }) => {
+const Content: React.FC<ContentProps> = ({ selectedTab, save, onSaveChange }) => {
     switch (selectedTab) {
         case 0:
             return <Submission />;
