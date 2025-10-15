@@ -15,52 +15,65 @@ const Content: React.FC<ContentProps> = ({ selectedTab }) => {
     const [distance, setDistance] = useState(5);
     const [temperature, setTemperature] = useState(10);
 
-    return <div style={{ fontSize: '1.5em', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '5px' }}>
+    return <div style={{
+        fontSize: '1.5em',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '15px',
+        boxSizing: 'border-box'
+    }}>
         <div style={{ fontWeight: 'bold', fontSize: '1.25em' }}>🚲 Winter Cylcing ❄️</div>
 
-        <VerticalSpacer height={25} />
+        <div style={{
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '5px'
+        }}>
+            <div style={{ fontWeight: 'bold', fontSize: '1.25em' }}>Rider</div>
 
-        <div style={{ fontWeight: 'bold', fontSize: '1.25em' }}>Rider</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+                <div style={getRiderStyle(Rider.KYLE, selectedRider)} onClick={() => setSelectedRider(Rider.KYLE)}>Kyle</div>
+                <div style={getRiderStyle(Rider.NICK, selectedRider)} onClick={() => setSelectedRider(Rider.NICK)}>Nick</div>
+                <div style={getRiderStyle(Rider.LANDON, selectedRider)} onClick={() => setSelectedRider(Rider.LANDON)}>Landon</div>
+            </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
-            <div style={getRiderStyle(Rider.KYLE, selectedRider)} onClick={() => setSelectedRider(Rider.KYLE)}>Kyle</div>
-            <div style={getRiderStyle(Rider.NICK, selectedRider)} onClick={() => setSelectedRider(Rider.NICK)}>Nick</div>
-            <div style={getRiderStyle(Rider.LANDON, selectedRider)} onClick={() => setSelectedRider(Rider.LANDON)}>Landon</div>
+            <VerticalSpacer height={10} />
+
+            <div style={{ fontWeight: 'bold', fontSize: '1.25em' }}>Distance</div>
+
+            <div>
+                <input
+                    type="number"
+                    style={{ fontSize: '1em', textAlign: 'center', width: '5ch' }}
+                    value={distance}
+                    onChange={e => setDistance(Number(e.target.value))}
+                    onFocus={e => e.target.select()}
+                />
+
+                <span> km</span>
+            </div>
+
+            <VerticalSpacer height={10} />
+
+            <div style={{ fontWeight: 'bold', fontSize: '1.25em' }}>Tempeture</div>
+
+            <div>
+                <input
+                    type="number"
+                    style={{ fontSize: '1em', textAlign: 'center', width: '5ch' }}
+                    value={temperature}
+                    onChange={e => setTemperature(Number(e.target.value))}
+                    onFocus={e => e.target.select()}
+                />
+
+                <span>° C</span>
+            </div>
         </div>
-
-        <VerticalSpacer height={10} />
-
-        <div style={{ fontWeight: 'bold', fontSize: '1.25em' }}>Distance</div>
-
-        <div>
-            <input
-                type="number"
-                style={{ fontSize: '1em', textAlign: 'center', width: '5ch' }}
-                value={distance}
-                onChange={e => setDistance(Number(e.target.value))}
-                onFocus={e => e.target.select()}
-            />
-
-            <span> km</span>
-        </div>
-
-        <VerticalSpacer height={10} />
-
-        <div style={{ fontWeight: 'bold', fontSize: '1.25em' }}>Tempeture</div>
-
-        <div>
-            <input
-                type="number"
-                style={{ fontSize: '1em', textAlign: 'center', width: '5ch' }}
-                value={temperature}
-                onChange={e => setTemperature(Number(e.target.value))}
-                onFocus={e => e.target.select()}
-            />
-
-            <span>° C</span>
-        </div>
-
-        <VerticalSpacer height={10} />
 
         <div style={{ display: 'flex', gap: '25px' }}>
             <FlameEffect color="var(--novelty-blue)" intensity={5}>
@@ -76,7 +89,7 @@ const Content: React.FC<ContentProps> = ({ selectedTab }) => {
 
         <VerticalSpacer height={25} />
 
-        <button style={{ fontSize: '1.25em', borderRadius: '25px', padding: '10px' }}>Submit</button>
+        <button style={{ fontSize: '1.25em', borderRadius: '25px', padding: '10px', width: '80%' }}>Submit</button>
     </div>;
 };
 
