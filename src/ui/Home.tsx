@@ -10,7 +10,7 @@ import Pets from '../mobile-games/pets/ui/Home';
 import ToddlerTreasureHunt from '../mobile-games/toddler-treasure-hunt/ui/Home';
 import { NewtorkCommunicator as MilleBornesNetworkCommunicator } from '../board-games/mille-bornes/logic/NewtorkCommunicator';
 import { createFreeMarketCommunicator } from '../mobile-games/free-market/logic/FreeMarketCommunicator';
-import { createStorer } from '../util/Storage';
+import { createStorer, StorageKey } from '../util/Storage';
 import { FreeMarketSave } from '../mobile-games/free-market/data/FreeMarketSave';
 import SubMenu from './SubMenu';
 import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState, PetsState, MobileGamesState, ToddlerTreasureHuntState, MonopolyState } from './State';
@@ -237,7 +237,7 @@ function getInitialState(): State {
 
 function createFreeMarketState(): FreeMarketState {
     const communicator = createFreeMarketCommunicator();
-    const storer = createStorer<FreeMarketSave>();
+    const storer = createStorer<FreeMarketSave>(StorageKey.FREE_MARKET);
 
     return new FreeMarketState(communicator, storer);
 }

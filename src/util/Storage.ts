@@ -6,16 +6,16 @@ export enum StorageKey {
 }
 
 export interface Storer<T> {
-    save(key: StorageKey, data: T): void;
-    load(key: StorageKey): Promise<T>;
+    save(data: T): void;
+    load(): Promise<T>;
 }
 
-export function createStorer<T>(): Storer<T> {
+export function createStorer<T>(key: StorageKey): Storer<T> {
     return {
-        save: (key, data) => {
+        save: (data) => {
             localStorage.setItem(key, JSON.stringify(data));
         },
-        load: (key) => new Promise((resolve, reject) => {
+        load: () => new Promise((resolve, reject) => {
             const item = localStorage.getItem(key);
 
             if (item === null) {

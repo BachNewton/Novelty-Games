@@ -3,7 +3,7 @@ import { FreeMarketSave, SAVE_VERSION } from "../data/FreeMarketSave";
 import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
 import { createID } from "../../../util/ID";
 import { Inventor } from "../data/Inventor";
-import { StorageKey, Storer } from "../../../util/Storage";
+import { Storer } from "../../../util/Storage";
 import { RAW_MATERIALS } from "../data/Component";
 import Loading from "../../../util/ui/Loading";
 
@@ -33,7 +33,7 @@ const NewProfile: React.FC<NewProfileProps> = ({ communicator, storer, onComplet
             communicator.addInventor(inventor).then(() => {
                 const save = createNewSave(inventor);
 
-                storer.save(StorageKey.FREE_MARKET, save);
+                storer.save(save);
 
                 onComplete(save);
             });

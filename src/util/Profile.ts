@@ -9,20 +9,20 @@ export interface Profile {
 }
 
 export async function getProfile(): Promise<Profile> {
-    const storer = createStorer<Profile>();
+    const storer = createStorer<Profile>(StorageKey.PROFILE);
 
-    return storer.load(StorageKey.PROFILE).catch(() => {
+    return storer.load().catch(() => {
         const profile: Profile = {
             name: DEFAULT_USER_NAME,
             id: createID()
         };
 
-        storer.save(StorageKey.PROFILE, profile);
+        storer.save(profile);
 
         return profile;
     });
 }
 
 export function updateProfile(profile: Profile) {
-    createStorer<Profile>().save(StorageKey.PROFILE, profile);
+    createStorer<Profile>(StorageKey.PROFILE).save(profile);
 }
