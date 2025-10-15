@@ -11,7 +11,7 @@ interface ContentProps {
 const Content: React.FC<ContentProps> = ({ selectedTab, save, onSaveChange }) => {
     switch (selectedTab) {
         case 0:
-            return <Submission />;
+            return <Submission save={save} onSaveChange={onSaveChange} />;
         case 1:
             return <div style={{ padding: '15px' }}>🏅 Leaderboard coming soon!</div>
         case 2:

@@ -1,14 +1,20 @@
 import { useState } from "react";
 import VerticalSpacer from "../../../util/ui/Spacer";
 import { FlameEffect } from "./FlameEffect";
-import { Rider } from "../data/Save";
+import { DistanceUnit, Rider, Save, TemperatureUnit } from "../data/Save";
 
-interface SubmissionProps { }
+interface SubmissionProps {
+    save: Save;
+    onSaveChange: (save: Save) => void;
+}
 
-const Submission: React.FC<SubmissionProps> = ({ }) => {
-    const [selectedRider, setSelectedRider] = useState<Rider>(Rider.KYLE);
-    const [distance, setDistance] = useState(5);
-    const [temperature, setTemperature] = useState(10);
+const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange }) => {
+    const [selectedRider, setSelectedRider] = useState(save.rider);
+    const [distance, setDistance] = useState(save.distance);
+    const [temperature, setTemperature] = useState(save.temperature);
+
+    const distanceAbbr = save.distanceUnit === DistanceUnit.KM ? 'km' : 'mi';
+    const temperatureAbbr = save.temperatureUnit === TemperatureUnit.CELSIUS ? 'C' : 'F';
 
     return <div style={{
         fontSize: '1.5em',
@@ -50,7 +56,7 @@ const Submission: React.FC<SubmissionProps> = ({ }) => {
                     onFocus={e => e.target.select()}
                 />
 
-                <span> km</span>
+                <span> {distanceAbbr}</span>
             </div>
 
             <VerticalSpacer height={10} />
@@ -71,7 +77,7 @@ const Submission: React.FC<SubmissionProps> = ({ }) => {
                     }}
                 />
 
-                <span>° C</span>
+                <span>° {temperatureAbbr}</span>
             </div>
         </div>
 
