@@ -2,14 +2,16 @@ import { useState } from "react";
 import VerticalSpacer from "../../../util/ui/Spacer";
 import { FlameEffect } from "./FlameEffect";
 import { DistanceUnit, Rider, Save, TemperatureUnit } from "../data/Save";
+import { SubmissionStatus } from "./Home";
 
 interface SubmissionProps {
     save: Save;
     onSaveChange: (save: Save) => void;
     onSubmit: (rider: Rider, distance: number, temperature: number) => void;
+    submissionStatus: SubmissionStatus;
 }
 
-const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit }) => {
+const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, submissionStatus }) => {
     const [selectedRider, setSelectedRider] = useState(save.rider);
     const [distance, setDistance] = useState(String(save.distance));
     const [temperature, setTemperature] = useState(String(save.temperature));
@@ -23,6 +25,8 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit })
 
     const distanceAbbr = save.distanceUnit === DistanceUnit.KM ? 'km' : 'mi';
     const temperatureAbbr = save.temperatureUnit === TemperatureUnit.CELSIUS ? 'C' : 'F';
+
+    const isSubmitDisabled = submissionStatus !== SubmissionStatus.IDLE;
 
     return <div style={{
         fontSize: '1.5em',
@@ -103,9 +107,26 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit })
 
         <VerticalSpacer height={25} />
 
-        <button style={{ fontSize: '1.25em', borderRadius: '25px', padding: '10px', width: '80%' }} onClick={handleSubmit}>Submit</button>
+        <button
+            style={{ fontSize: '1.25em', borderRadius: '25px', padding: '10px', width: '80%' }}
+            onClick={handleSubmit}
+            disabled={isSubmitDisabled}
+        >{getSubmitButtonText(submissionStatus)}</button>
     </div>;
 };
+
+function getSubmitButtonText(submissionStatus: SubmissionStatus): React.ReactNode {
+    switch (submissionStatus) {
+        case SubmissionStatus.IDLE:
+            return 'Submit 🥶';
+        case SubmissionStatus.SUBMITTING:
+            return 'Submitting... ⏳';
+        case SubmissionStatus.SUCCESS:
+            return 'Success! ✅';
+        case SubmissionStatus.ERROR:
+            return 'Error! ❌';
+    }
+}
 
 function getRiderStyle(rider: Rider, selectedRider: Rider): React.CSSProperties {
     const selected = rider === selectedRider;

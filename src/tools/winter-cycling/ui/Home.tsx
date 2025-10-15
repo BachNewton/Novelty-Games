@@ -90,7 +90,7 @@ const Home: React.FC<HomeProps> = ({ networkService }) => {
             <Content selectedTab={selectedTab} save={save} onSaveChange={newSave => {
                 storer.save(newSave);
                 setSave(newSave);
-            }} onSubmit={handleSubmit} />
+            }} onSubmit={handleSubmit} submissionStatus={submissionStatus} />
         </div>
     </div>;
 };
