@@ -222,6 +222,7 @@ function getInitialState(): State {
             return new Game2DState();
         case Route.MUSIC_PLAYER:
         case Route.FORTNITE_FESTIVAL:
+        case Route.WINTER_CYCLING:
             return new ToolsState();
         case Route.PETS:
             return new PetsState();

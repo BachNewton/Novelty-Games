@@ -10,7 +10,8 @@ export enum Route {
     RPG = 'RPG',
     PETS = 'Pets',
     TODDLER_TREASURE_HUNT = 'Toddler-Treasure-Hunt',
-    MONOPOLY = 'Monopoly'
+    MONOPOLY = 'Monopoly',
+    WINTER_CYCLING = 'Winter-Cycling',
 }
 
 export function getRoute(): string | null {
