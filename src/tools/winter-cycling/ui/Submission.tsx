@@ -10,8 +10,14 @@ interface SubmissionProps {
 
 const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange }) => {
     const [selectedRider, setSelectedRider] = useState(save.rider);
-    const [distance, setDistance] = useState(save.distance);
-    const [temperature, setTemperature] = useState(save.temperature);
+    const [distance, setDistance] = useState(String(save.distance));
+    const [temperature, setTemperature] = useState(String(save.temperature));
+
+    const handleSubmit = () => {
+        const updated: Save = { ...save, rider: selectedRider, distance: Number(distance), temperature: Number(temperature) };
+
+        onSaveChange(updated);
+    };
 
     const distanceAbbr = save.distanceUnit === DistanceUnit.KM ? 'km' : 'mi';
     const temperatureAbbr = save.temperatureUnit === TemperatureUnit.CELSIUS ? 'C' : 'F';
@@ -52,7 +58,7 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange }) => {
                     type="number"
                     style={{ fontSize: '1em', textAlign: 'center', width: '5ch' }}
                     value={distance}
-                    onChange={e => setDistance(Number(e.target.value))}
+                    onChange={e => setDistance(e.target.value)}
                     onFocus={e => e.target.select()}
                 />
 
@@ -61,14 +67,14 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange }) => {
 
             <VerticalSpacer height={10} />
 
-            <div style={{ fontWeight: 'bold', fontSize: '1.25em' }}>Tempeture</div>
+            <div style={{ fontWeight: 'bold', fontSize: '1.25em' }}>Temperature</div>
 
             <div>
                 <input
                     type="number"
                     style={{ fontSize: '1em', textAlign: 'center', width: '5ch' }}
                     value={temperature}
-                    onChange={e => setTemperature(Number(e.target.value))}
+                    onChange={e => setTemperature(e.target.value)}
                     onFocus={e => e.target.select()}
                     onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === 'Tab') {
@@ -95,7 +101,7 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange }) => {
 
         <VerticalSpacer height={25} />
 
-        <button style={{ fontSize: '1.25em', borderRadius: '25px', padding: '10px', width: '80%' }}>Submit</button>
+        <button style={{ fontSize: '1.25em', borderRadius: '25px', padding: '10px', width: '80%' }} onClick={handleSubmit}>Submit</button>
     </div>;
 };
 
