@@ -1,0 +1,54 @@
+.flame-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.flame-container {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    /* width: 100px; <--- REMOVE THIS LINE */
+    height: 150px;
+    transform: translateX(-50%);
+    filter: blur(8px) contrast(1.5);
+    z-index: 0;
+    /* Ensures it's behind the content */
+    overflow: hidden;
+}
+
+.content-on-top {
+    position: relative;
+    z-index: 1;
+    /* A higher z-index keeps this on top and readable */
+}
+
+/* ... (flame-particle and @keyframes rules remain the same) ... */
+.flame-particle {
+    position: absolute;
+    bottom: 0;
+    width: 25px;
+    height: 25px;
+    background: var(--flame-color, #ff8c00);
+    border-radius: 50%;
+    box-shadow: 0 0 10px 5px var(--flame-color, #ff8c00);
+    animation-name: rise-and-flicker;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in;
+}
+
+@keyframes rise-and-flicker {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.9;
+    }
+
+    50% {
+        transform: translateY(-80px) scale(1.5);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-180px) scale(0);
+        opacity: 0;
+    }
+}

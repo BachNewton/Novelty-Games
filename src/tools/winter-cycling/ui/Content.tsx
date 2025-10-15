@@ -1,5 +1,6 @@
 import { useState } from "react";
 import VerticalSpacer from "../../../util/ui/Spacer";
+import { FlameEffect } from "./FlameEffect";
 
 interface ContentProps {
     selectedTab: number;
@@ -57,6 +58,20 @@ const Content: React.FC<ContentProps> = ({ selectedTab }) => {
             />
 
             <span>° C</span>
+        </div>
+
+        <VerticalSpacer height={10} />
+
+        <div style={{ display: 'flex', gap: '25px' }}>
+            <FlameEffect color="var(--novelty-blue)" intensity={5}>
+                <div style={{ border: '1px solid white', backgroundColor: 'blue' }}>thing</div>
+            </FlameEffect>
+
+            <div>X</div>
+
+            <FlameEffect color="var(--novelty-orange)" intensity={5}>
+                <div style={{ border: '1px solid white', backgroundColor: 'blue' }}>thing2</div>
+            </FlameEffect>
         </div>
 
         <VerticalSpacer height={25} />
