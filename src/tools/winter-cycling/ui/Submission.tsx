@@ -4,7 +4,7 @@ import { DistanceUnit, Rider, Save, TemperatureUnit } from "../data/Save";
 import { SubmissionStatus } from "./Home";
 import PixelFlame from "./PixelFlame";
 import Tally from "./Tally";
-import { calculateBase, calculateMultiplier, calculateScore } from "../logic/ScoreCalculator";
+import { calculateBase, calculateMultiplier, calculateScore, SCORE_FOR_MAX_INTENSITY } from "../logic/ScoreCalculator";
 
 interface SubmissionProps {
     save: Save;
@@ -17,6 +17,9 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, s
     const [selectedRider, setSelectedRider] = useState(save.rider);
     const [distance, setDistance] = useState(String(save.distance));
     const [temperature, setTemperature] = useState(String(save.temperature));
+
+    const score = calculateScore(Number(distance), Number(temperature), save.distanceUnit, save.temperatureUnit);
+    const intensity = Math.min(score / SCORE_FOR_MAX_INTENSITY, 1);
 
     const handleSubmit = () => {
         const updated: Save = { ...save, rider: selectedRider, distance: Number(distance), temperature: Number(temperature) };
@@ -96,9 +99,9 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, s
         </div>
 
         <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-            {flameUi(FlameType.DISTANCE, distance, save.distanceUnit, save.temperatureUnit)}
+            {flameUi(FlameType.DISTANCE, distance, save.distanceUnit, save.temperatureUnit, intensity)}
             <div>X</div>
-            {flameUi(FlameType.TEMPERATURE, temperature, save.distanceUnit, save.temperatureUnit)}
+            {flameUi(FlameType.TEMPERATURE, temperature, save.distanceUnit, save.temperatureUnit, intensity)}
         </div>
 
         <VerticalSpacer height={10} />
@@ -122,14 +125,14 @@ enum FlameType {
     TEMPERATURE
 }
 
-function flameUi(flameType: FlameType, amount: string, distanceUnit: DistanceUnit, temperatureUnit: TemperatureUnit): JSX.Element {
+function flameUi(flameType: FlameType, amount: string, distanceUnit: DistanceUnit, temperatureUnit: TemperatureUnit, intensity: number): JSX.Element {
     const color = flameType === FlameType.DISTANCE ? "#3498db" : "#ff8c00";
 
     const label = flameType === FlameType.DISTANCE
         ? calculateBase(Number(amount), distanceUnit).toFixed(0)
         : calculateMultiplier(Number(amount), temperatureUnit).toFixed(1);
 
-    return <PixelFlame color={color} intensity={1}>
+    return <PixelFlame color={color} intensity={intensity}>
         <div style={{
             border: `1px solid ${color}`,
             color: color,

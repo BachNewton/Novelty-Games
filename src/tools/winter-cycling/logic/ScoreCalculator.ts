@@ -1,6 +1,8 @@
 import { DistanceUnit, TemperatureUnit } from "../data/Save";
 import { toCelsius, toKilometers } from "./Converter";
 
+export const SCORE_FOR_MAX_INTENSITY = calculateScore(20, 0, DistanceUnit.KM, TemperatureUnit.CELSIUS);
+
 export function calculateScore(distance: number, temperature: number, distanceUnit: DistanceUnit, temperatureUnit: TemperatureUnit): number {
     const score = calculateBase(distance, distanceUnit) * calculateMultiplier(temperature, temperatureUnit);
 
