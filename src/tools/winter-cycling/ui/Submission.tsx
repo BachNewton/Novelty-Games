@@ -13,6 +13,11 @@ interface SubmissionProps {
     submissionStatus: SubmissionStatus;
 }
 
+enum FlameType {
+    DISTANCE,
+    TEMPERATURE
+}
+
 const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, submissionStatus }) => {
     const [selectedRider, setSelectedRider] = useState(save.rider);
     const [distance, setDistance] = useState(String(save.distance));
@@ -117,11 +122,6 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, s
         >{getSubmitButtonText(submissionStatus)}</button>
     </div>;
 };
-
-enum FlameType {
-    DISTANCE,
-    TEMPERATURE
-}
 
 function flameUi(flameType: FlameType, amount: string, distanceUnit: DistanceUnit, temperatureUnit: TemperatureUnit, intensity: number): JSX.Element {
     const color = flameType === FlameType.DISTANCE ? "#3498db" : "#ff8c00";
