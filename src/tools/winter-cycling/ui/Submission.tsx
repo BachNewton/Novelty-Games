@@ -44,18 +44,6 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, s
     }}>
         <div style={{ fontWeight: 'bold', fontSize: '1.25em' }}>🚲 Winter Cylcing ❄️</div>
 
-        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-            {flameUi(FlameType.DISTANCE, distance, save.distanceUnit, save.temperatureUnit, intensity)}
-            <div>X</div>
-            {flameUi(FlameType.TEMPERATURE, temperature, save.distanceUnit, save.temperatureUnit, intensity)}
-        </div>
-
-        <VerticalSpacer height={10} />
-
-        <div style={{ fontSize: '1.25em' }}>
-            = <Tally number={calculateScore(Number(distance), Number(temperature), save.distanceUnit, save.temperatureUnit)} />
-        </div>
-
         <div style={{
             flexGrow: 1,
             display: 'flex',
@@ -70,6 +58,16 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, s
                 <div style={getRiderStyle(Rider.KYLE, selectedRider)} onClick={() => setSelectedRider(Rider.KYLE)}>Kyle</div>
                 <div style={getRiderStyle(Rider.NICK, selectedRider)} onClick={() => setSelectedRider(Rider.NICK)}>Nick</div>
                 <div style={getRiderStyle(Rider.LANDON, selectedRider)} onClick={() => setSelectedRider(Rider.LANDON)}>Landon</div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                {flameUi(FlameType.DISTANCE, distance, save.distanceUnit, save.temperatureUnit, intensity)}
+                <div>X</div>
+                {flameUi(FlameType.TEMPERATURE, temperature, save.distanceUnit, save.temperatureUnit, intensity)}
+            </div>
+
+            <div style={{ fontSize: '1.25em' }}>
+                = <Tally number={calculateScore(Number(distance), Number(temperature), save.distanceUnit, save.temperatureUnit)} />
             </div>
 
             <VerticalSpacer height={10} />
@@ -108,6 +106,8 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, s
 
                 <span>° {temperatureAbbr}</span>
             </div>
+
+
         </div>
 
         <button
