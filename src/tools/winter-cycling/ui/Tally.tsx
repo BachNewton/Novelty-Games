@@ -42,7 +42,7 @@ const Tally: React.FC<TallyProps> = ({ number }) => {
         };
     }, [number]);
 
-    return <div>{number === null ? "???" : displayedNumber?.toLocaleString()}</div>;
+    return <span>{number === null ? "???" : displayedNumber?.toLocaleString()}</span>;
 };
 
 export default Tally;

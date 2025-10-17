@@ -44,6 +44,18 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, s
     }}>
         <div style={{ fontWeight: 'bold', fontSize: '1.25em' }}>🚲 Winter Cylcing ❄️</div>
 
+        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+            {flameUi(FlameType.DISTANCE, distance, save.distanceUnit, save.temperatureUnit, intensity)}
+            <div>X</div>
+            {flameUi(FlameType.TEMPERATURE, temperature, save.distanceUnit, save.temperatureUnit, intensity)}
+        </div>
+
+        <VerticalSpacer height={10} />
+
+        <div style={{ fontSize: '1.25em' }}>
+            = <Tally number={calculateScore(Number(distance), Number(temperature), save.distanceUnit, save.temperatureUnit)} />
+        </div>
+
         <div style={{
             flexGrow: 1,
             display: 'flex',
@@ -98,20 +110,6 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, s
             </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-            {flameUi(FlameType.DISTANCE, distance, save.distanceUnit, save.temperatureUnit, intensity)}
-            <div>X</div>
-            {flameUi(FlameType.TEMPERATURE, temperature, save.distanceUnit, save.temperatureUnit, intensity)}
-        </div>
-
-        <VerticalSpacer height={10} />
-
-        <div style={{ fontSize: '1.25em' }}>
-            <Tally number={calculateScore(Number(distance), Number(temperature), save.distanceUnit, save.temperatureUnit)} />
-        </div>
-
-        <VerticalSpacer height={25} />
-
         <button
             style={{ fontSize: '1.25em', borderRadius: '25px', padding: '10px', width: '80%' }}
             onClick={handleSubmit}
@@ -139,7 +137,9 @@ function flameUi(flameType: FlameType, amount: string, distanceUnit: DistanceUni
             backgroundColor: 'rgba(0,0,0,0.75)',
             padding: '7px',
             borderRadius: '15px',
-            marginBottom: '2px'
+            marginBottom: '2px',
+            minWidth: '3ch',
+            textAlign: 'center'
         }}>{label}</div>
     </PixelFlame>;
 }
