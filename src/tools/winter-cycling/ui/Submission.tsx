@@ -5,6 +5,7 @@ import { DistanceUnit, Rider, Save, TemperatureUnit } from "../data/Save";
 import { SubmissionStatus } from "./Home";
 import PixelFlame from "./PixelFlame";
 import Tally from "./Tally";
+import { calculateScore } from "../logic/ScoreCalculator";
 
 interface SubmissionProps {
     save: Save;
@@ -114,10 +115,10 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, s
             </PixelFlame>
         </div>
 
-        <VerticalSpacer height={25} />
+        <VerticalSpacer height={10} />
 
         <div style={{ fontSize: '1.25em' }}>
-            <Tally number={123456789} />
+            <Tally number={calculateScore(Number(distance), Number(temperature))} />
         </div>
 
         <VerticalSpacer height={25} />
