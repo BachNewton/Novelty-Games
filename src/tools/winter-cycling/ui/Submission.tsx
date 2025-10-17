@@ -3,6 +3,7 @@ import VerticalSpacer from "../../../util/ui/Spacer";
 import { FlameEffect } from "./FlameEffect";
 import { DistanceUnit, Rider, Save, TemperatureUnit } from "../data/Save";
 import { SubmissionStatus } from "./Home";
+import PixelFlame from "./PixelFlame";
 
 interface SubmissionProps {
     save: Save;
@@ -93,16 +94,17 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, s
             </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '25px' }}>
-            <FlameEffect color="var(--novelty-blue)" intensity={5}>
+        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+            <PixelFlame color="#3498db" intensity={1}>
                 <div style={{ border: '1px solid white', backgroundColor: 'blue' }}>thing</div>
-            </FlameEffect>
+            </PixelFlame>
 
             <div>X</div>
 
-            <FlameEffect color="var(--novelty-orange)" intensity={5}>
+            <PixelFlame color="#ff8c00" intensity={1}>
                 <div style={{ border: '1px solid white', backgroundColor: 'blue' }}>thing2</div>
-            </FlameEffect>
+            </PixelFlame>
+
         </div>
 
         <VerticalSpacer height={25} />
