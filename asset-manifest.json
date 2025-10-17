@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/Novelty-Games/static/css/main.cc1276ba.css",
-    "main.js": "/Novelty-Games/static/js/main.a98b836e.js",
+    "main.css": "/Novelty-Games/static/css/main.0185be53.css",
+    "main.js": "/Novelty-Games/static/js/main.c2874862.js",
     "static/js/453.68693753.chunk.js": "/Novelty-Games/static/js/453.68693753.chunk.js",
     "MusicIndex.js": "/Novelty-Games/static/js/MusicIndex.7371e6f9.chunk.js",
     "static/media/play.jpg": "/Novelty-Games/static/media/play.a2a36b11052e1df2e6c0.jpg",
@@ -103,13 +103,13 @@
     "static/media/go-to-jail.svg": "/Novelty-Games/static/media/go-to-jail.c4be435217ddcd780c844560d1c8375d.svg",
     "static/media/go.svg": "/Novelty-Games/static/media/go.9e3970ae0d583391baebfdde03a9d6de.svg",
     "static/media/sort.svg": "/Novelty-Games/static/media/sort.b890db8dc0b9cb16cc4a30a76538428f.svg",
-    "main.cc1276ba.css.map": "/Novelty-Games/static/css/main.cc1276ba.css.map",
-    "main.a98b836e.js.map": "/Novelty-Games/static/js/main.a98b836e.js.map",
+    "main.0185be53.css.map": "/Novelty-Games/static/css/main.0185be53.css.map",
+    "main.c2874862.js.map": "/Novelty-Games/static/js/main.c2874862.js.map",
     "453.68693753.chunk.js.map": "/Novelty-Games/static/js/453.68693753.chunk.js.map",
     "MusicIndex.7371e6f9.chunk.js.map": "/Novelty-Games/static/js/MusicIndex.7371e6f9.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.cc1276ba.css",
-    "static/js/main.a98b836e.js"
+    "static/css/main.0185be53.css",
+    "static/js/main.c2874862.js"
   ]
 }
