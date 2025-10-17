@@ -1,6 +1,5 @@
 import { useState } from "react";
 import VerticalSpacer from "../../../util/ui/Spacer";
-import { FlameEffect } from "./FlameEffect";
 import { DistanceUnit, Rider, Save, TemperatureUnit } from "../data/Save";
 import { SubmissionStatus } from "./Home";
 import PixelFlame from "./PixelFlame";
@@ -97,15 +96,15 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, s
         </div>
 
         <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-            {flameUi(FlameType.DISTANCE, distance)}
+            {flameUi(FlameType.DISTANCE, distance, save.distanceUnit, save.temperatureUnit)}
             <div>X</div>
-            {flameUi(FlameType.TEMPERATURE, temperature)}
+            {flameUi(FlameType.TEMPERATURE, temperature, save.distanceUnit, save.temperatureUnit)}
         </div>
 
         <VerticalSpacer height={10} />
 
         <div style={{ fontSize: '1.25em' }}>
-            <Tally number={calculateScore(Number(distance), Number(temperature))} />
+            <Tally number={calculateScore(Number(distance), Number(temperature), save.distanceUnit, save.temperatureUnit)} />
         </div>
 
         <VerticalSpacer height={25} />
@@ -123,9 +122,12 @@ enum FlameType {
     TEMPERATURE
 }
 
-function flameUi(flameType: FlameType, amount: string): JSX.Element {
+function flameUi(flameType: FlameType, amount: string, distanceUnit: DistanceUnit, temperatureUnit: TemperatureUnit): JSX.Element {
     const color = flameType === FlameType.DISTANCE ? "#3498db" : "#ff8c00";
-    const label = flameType === FlameType.DISTANCE ? calculateBase(Number(amount)) : calculateMultiplier(Number(amount)).toFixed(1);
+
+    const label = flameType === FlameType.DISTANCE
+        ? calculateBase(Number(amount), distanceUnit).toFixed(0)
+        : calculateMultiplier(Number(amount), temperatureUnit).toFixed(1);
 
     return <PixelFlame color={color} intensity={1}>
         <div style={{
