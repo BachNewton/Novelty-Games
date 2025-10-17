@@ -5,7 +5,7 @@ import { DistanceUnit, Rider, Save, TemperatureUnit } from "../data/Save";
 import { SubmissionStatus } from "./Home";
 import PixelFlame from "./PixelFlame";
 import Tally from "./Tally";
-import { calculateScore } from "../logic/ScoreCalculator";
+import { calculateBase, calculateMultiplier, calculateScore } from "../logic/ScoreCalculator";
 
 interface SubmissionProps {
     save: Save;
@@ -97,22 +97,9 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, s
         </div>
 
         <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-            <PixelFlame color="#3498db" intensity={1}>
-                <div style={{ border: '1px solid white', backgroundColor: 'blue' }}>thing</div>
-            </PixelFlame>
-
+            {flameUi(FlameType.DISTANCE, distance)}
             <div>X</div>
-
-            <PixelFlame color="#ff8c00" intensity={1}>
-                <div style={{
-                    border: '1px solid var(--novelty-orange)',
-                    color: 'var(--novelty-orange)',
-                    backgroundColor: 'rgba(0,0,0,0.7)',
-                    padding: '7px',
-                    borderRadius: '15px',
-                    marginBottom: '2px'
-                }}>thing2</div>
-            </PixelFlame>
+            {flameUi(FlameType.TEMPERATURE, temperature)}
         </div>
 
         <VerticalSpacer height={10} />
@@ -130,6 +117,27 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, s
         >{getSubmitButtonText(submissionStatus)}</button>
     </div>;
 };
+
+enum FlameType {
+    DISTANCE,
+    TEMPERATURE
+}
+
+function flameUi(flameType: FlameType, amount: string): JSX.Element {
+    const color = flameType === FlameType.DISTANCE ? "#3498db" : "#ff8c00";
+    const label = flameType === FlameType.DISTANCE ? calculateBase(Number(amount)) : calculateMultiplier(Number(amount)).toFixed(1);
+
+    return <PixelFlame color={color} intensity={1}>
+        <div style={{
+            border: `1px solid ${color}`,
+            color: color,
+            backgroundColor: 'rgba(0,0,0,0.75)',
+            padding: '7px',
+            borderRadius: '15px',
+            marginBottom: '2px'
+        }}>{label}</div>
+    </PixelFlame>;
+}
 
 function getSubmitButtonText(submissionStatus: SubmissionStatus): React.ReactNode {
     switch (submissionStatus) {

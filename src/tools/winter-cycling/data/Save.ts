@@ -20,10 +20,10 @@ export interface Save {
 
 export function createDefaultSave(): Save {
     return {
-        rider: Rider.KYLE,
-        distanceUnit: DistanceUnit.KM,
-        temperatureUnit: TemperatureUnit.CELSIUS,
-        distance: 5,
-        temperature: 10
+        rider: Rider.NICK,
+        distanceUnit: DistanceUnit.MILE,
+        temperatureUnit: TemperatureUnit.FAHRENHEIT,
+        distance: 0,
+        temperature: 45
     };
 }
