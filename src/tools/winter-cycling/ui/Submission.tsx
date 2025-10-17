@@ -4,6 +4,7 @@ import { FlameEffect } from "./FlameEffect";
 import { DistanceUnit, Rider, Save, TemperatureUnit } from "../data/Save";
 import { SubmissionStatus } from "./Home";
 import PixelFlame from "./PixelFlame";
+import Tally from "./Tally";
 
 interface SubmissionProps {
     save: Save;
@@ -102,9 +103,21 @@ const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, s
             <div>X</div>
 
             <PixelFlame color="#ff8c00" intensity={1}>
-                <div style={{ border: '1px solid white', backgroundColor: 'blue' }}>thing2</div>
+                <div style={{
+                    border: '1px solid var(--novelty-orange)',
+                    color: 'var(--novelty-orange)',
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    padding: '7px',
+                    borderRadius: '15px',
+                    marginBottom: '2px'
+                }}>thing2</div>
             </PixelFlame>
+        </div>
 
+        <VerticalSpacer height={25} />
+
+        <div style={{ fontSize: '1.25em' }}>
+            <Tally number={123456789} />
         </div>
 
         <VerticalSpacer height={25} />
