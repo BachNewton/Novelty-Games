@@ -17,26 +17,27 @@ export function calculateBase(distance: number, distanceUnit: DistanceUnit): num
     return distance * 10;
 }
 
-export function calculateMultiplier(temperature: number, temperatureUnit: TemperatureUnit): number {
+export function calculateMultiplier(
+    temperature: number,
+    temperatureUnit: TemperatureUnit
+): number {
     if (temperatureUnit === TemperatureUnit.FAHRENHEIT) {
         temperature = toCelsius(temperature);
     }
 
-    const maxTemp = 10;   // °C
-    const minTemp = -10;  // °C
-    const maxMultiplier = 4.0;
-    const minMultiplier = 1.0;
-
     let multiplier: number;
 
-    if (temperature >= maxTemp) {
-        multiplier = minMultiplier;
-    } else if (temperature <= minTemp) {
-        multiplier = maxMultiplier;
+    if (temperature >= 10) {
+        multiplier = 1.0;
+    } else if (temperature >= 0) {
+        // Between 0°C and 10°C → +0.1 per degree below 10
+        multiplier = 1.0 + (10 - temperature) * 0.1;
     } else {
-        const ratio = (maxTemp - temperature) / (maxTemp - minTemp); // from 0 → 1
-        multiplier = minMultiplier + ratio * (maxMultiplier - minMultiplier);
+        // Below 0°C → base 2.0 at 0°C, then +0.2 per degree below 0
+        multiplier = 2.0 + (0 - temperature) * 0.2;
     }
+
+    multiplier = Math.min(Math.max(multiplier, 1.0), 4.0);
 
     return multiplier;
 }
