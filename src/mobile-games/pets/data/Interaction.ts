@@ -391,6 +391,56 @@ export const graceInteractions: Interactions = {
     ])
 };
 
+export const tatoInteractions: Interactions = {
+    space: {
+        id: 'XXXXX',
+        text: "I am enjoying some solo perch time, you can adore me from afar."
+    },
+    pet: {
+        id: 'XXXXX',
+        text: "I love pets, you can pet me anywhere and everywhere. Try to see if you can find one of my itchy-spots and give it an extra scratch."
+    },
+    treat: {
+        id: 'XXXXX',
+        text: "Oh that was delicious, can I have more? I'll do every trick I know to earn it."
+    },
+    play: {
+        id: 'XXXXX',
+        text: "Are you going to throw that ball? I think I have energy for 5 fetches, let's go! Or we can play tug of war - brace yourself for I have a strong hold."
+    },
+    chat: new Map([
+        ['Owner', {
+            id: 'XXXXX',
+            text: "I was the runt of my litter, my mom picked me because I bit her finger which is what vicious puppies do but she thought it was a sign of love. A few months later, I met dad and bit his nose, he thought it was a sign of love too and we've all been a happy family ever since. Then a few years later, they brought home a vicious puppy and called her my sister. I wanted to be the only child, but such is life, I must tolerate her for the rest of my life."
+        }]
+    ])
+};
+
+export const tiaInteractions: Interactions = {
+    space: {
+        id: 'XXXXX',
+        text: "I am going to visit my nest to recharge, come adore me there."
+    },
+    pet: {
+        id: 'XXXXX',
+        text: "I love pets on my lower back and my belly but don't you dare touch my paws. I'll say thanks with my kisses."
+    },
+    treat: {
+        id: 'XXXXX',
+        text: "I don't know many tricks but I love treats. Keep em coming!"
+    },
+    play: {
+        id: 'XXXXX',
+        text: "you may want to stretch first, you'll be here a while throwing sticks"
+    },
+    chat: new Map([
+        ['Owner', {
+            id: 'XXXXX',
+            text: "I'm a daddy's girl through and through. But the most important being in my life is my brother Tato. I don't know life without Tato although I love to give him a hard time. We are inseparable."
+        }]
+    ])
+};
+
 export const templateInteractions: Interactions = {
     space: {
         id: 'XXXXX',

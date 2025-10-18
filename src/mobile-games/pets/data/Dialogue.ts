@@ -117,6 +117,24 @@ export const graceDialog: Dialogue = {
     sleeping: "Please don't make me move 😭!! I'm so cozy and sleep is my favorite thing besides hunting small rodents in my free time!"
 };
 
+export const tatoDialog: Dialogue = {
+    hidden: "My coat is blending in perfectly with the shadows under a big rock formation. It's like I'm a natural part of the Harakka landscape! You need to look where the trail forks—but don't get distracted by the view!",
+    greeting: {
+        lowFriendship: "Hello, my name is Potato or Tater Tot, but you can just call me Tato. I love people, like even more than other dogs, and I like to greet people with one of my toys. Can we be friends?",
+        highFriendship: "I'll be your shadow and accompany you anywhere from the bathroom to the wilderness. Can we sit on one of my perches and people watch together?"
+    },
+    sleeping: "My mom says I'm an old man, I like to rest a lot. One time I was taking a while to wake up from anesthesia, they held a treat over my nose and I sprung awake to eat it. Try a treat if you must wake me up from my slumber."
+};
+
+export const tiaDialog: Dialogue = {
+    hidden: "Whew, I picked the best spot! I'm hiding somewhere the afternoon sun hits. My copper fur is blending right in with the dry leaves and reddish dirt not far from the black blob that is my brother.",
+    greeting: {
+        lowFriendship: "Hi, my name is Tortilla but I go by Tia. I'm skittish, it may take me a moment to warm up to you yet I may still pee out of excitement of meeting you. Let's see how we get along!",
+        highFriendship: "I am going to shower you with kisses to express how much I love you, don't worry my teeth is brushed most days for fresh kisses."
+    },
+    sleeping: "I am getting my beauty sleep, being a pretty girl is hard work."
+};
+
 export const templateDialog: Dialogue = {
     hidden: "XXXXX",
     greeting: {
