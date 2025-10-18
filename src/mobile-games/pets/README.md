@@ -49,7 +49,7 @@
     - [X] 1 dog
     - [ ] 1 dog
 - [ ] Steven & Ellie ( ??? )
-- [ ] Matt & Emily (1 cat)
+- [X] Matt & Emily (1 cat)
 - [X] Evelin (2 dogs)
 - [ ] Andrew & Sri (2 dogs)
 - [ ] Klaus (1 dog)
