@@ -94,6 +94,14 @@ import walnut_play from '../images/walnut/play.jpeg';
 import walnut_sleep from '../images/walnut/sleep.jpeg';
 import walnut_space from '../images/walnut/space.jpeg';
 import walnut_treat from '../images/walnut/greet_low_friendship.jpeg'; // TODO: replace with correct image
+import grace_chat from '../images/grace/chat.jpeg';
+import grace_greet_high_friendship from '../images/grace/greet_high_friendship.jpeg';
+import grace_greet_low_friendship from '../images/grace/greet_low_friendship.jpeg';
+import grace_pet from '../images/grace/pet.jpeg';
+import grace_play from '../images/grace/play.jpeg';
+import grace_sleep from '../images/grace/sleep.jpeg';
+import grace_space from '../images/grace/space.jpeg';
+import grace_treat from '../images/grace/treat.jpeg';
 
 export interface PetImages {
     chat: string;
@@ -236,4 +244,15 @@ export const walnutImages: PetImages = {
     sleep: walnut_sleep,
     space: walnut_space,
     treat: walnut_treat
+};
+
+export const graceImages: PetImages = {
+    chat: grace_chat,
+    greetHighFriendShip: grace_greet_high_friendship,
+    greetLowFriendship: grace_greet_low_friendship,
+    pet: grace_pet,
+    play: grace_play,
+    sleep: grace_sleep,
+    space: grace_space,
+    treat: grace_treat
 };

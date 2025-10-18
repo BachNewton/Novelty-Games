@@ -45,9 +45,9 @@
     - [ ] 1 flock of chickens
 - [ ] Landon (1 robot)
 - [ ] Uncle Gary & Aunt Marta (1 dog)
-- [ ] Mallory & Chris (2 dogs)
+- [X] Mallory & Chris (2 dogs)
     - [X] 1 dog
-    - [ ] 1 dog
+    - [X] 1 dog
 - [ ] Steven & Ellie ( ??? )
 - [X] Matt & Emily (1 cat)
 - [X] Evelin (2 dogs)

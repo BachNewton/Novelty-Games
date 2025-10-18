@@ -362,6 +362,35 @@ export const walnutInteractions: Interactions = {
     ])
 };
 
+export const graceInteractions: Interactions = {
+    space: {
+        id: '23YB-W796-BUSX-QLPM',
+        text: "You know me better than I thought! Space rhymes with Grace!"
+    },
+    pet: {
+        id: 'GV6H-3W9F-RYOU-0K1F',
+        text: "I always hear about how soft my ears are! No paws though, I am ticklish."
+    },
+    treat: {
+        id: 'AYT8-FSQ6-0VH2-FVBN',
+        text: "Foooooooood!!!!!!!! Yes!!!!!!"
+    },
+    play: {
+        id: 'SRGV-W1G1-2VTG-O2KK',
+        text: "Play then nap then play then nap, how does that sound?"
+    },
+    chat: new Map([
+        ['Groundhog', {
+            id: '51YX-I8TH-X4X6-ZRP6',
+            text: "Once I caught a groundhog and we got in a fight. You should have seen him after!"
+        }],
+        ['Car', {
+            id: 'OF1Y-W5TG-N9PJ-SP52',
+            text: "I love car rides almost as much as I love any kind of beach.  I've been to the Pacific Ocean!"
+        }]
+    ])
+};
+
 export const templateInteractions: Interactions = {
     space: {
         id: 'XXXXX',

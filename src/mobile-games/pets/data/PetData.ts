@@ -1,8 +1,8 @@
 import { Location } from "../../../util/geolocation/LocationService";
-import { albyDialog, baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, lenoreDialog, lucaDialog, nikaDialog, nissaDialog, walnutDialog, ziggyDialog } from "./Dialogue";
-import { albyInteractions, baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, Interactions, lenoreInteractions, lucaInteractions, nikaInteractions, nissaInteractions, walnutInteractions, ziggyInteractions } from "./Interaction";
-import { bluePeter, cafeRegatta, helsinkiWinterGarden, jätkäsaariPark, lapinlahdenLähde, lauttasaariBeach, lionStatueHelsinki, oodi, rajasaariKoirapuisto, seurasaari } from "./Locations";
-import { albyImages, baxterImages, doryImages, ellaImages, frogImages, lenoreImages, lucaImages, nikaImages, nissaImages, PetImages, walnutImages, ziggyImages } from "./PetImages";
+import { albyDialog, baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, graceDialog, lenoreDialog, lucaDialog, nikaDialog, nissaDialog, walnutDialog, ziggyDialog } from "./Dialogue";
+import { albyInteractions, baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, graceInteractions, Interactions, lenoreInteractions, lucaInteractions, nikaInteractions, nissaInteractions, walnutInteractions, ziggyInteractions } from "./Interaction";
+import { bluePeter, cafeRegatta, helsinkiWinterGarden, jätkäsaariPark, kaisaniemiBotanicGarden, lapinlahdenLähde, lauttasaariBeach, lionStatueHelsinki, oodi, rajasaariKoirapuisto, seurasaari } from "./Locations";
+import { albyImages, baxterImages, doryImages, ellaImages, frogImages, graceImages, lenoreImages, lucaImages, nikaImages, nissaImages, PetImages, walnutImages, ziggyImages } from "./PetImages";
 
 export interface PetData {
     id: string;
@@ -101,6 +101,14 @@ export const PET_DATA: PetData[] = [
         dialogue: walnutDialog,
         interactions: walnutInteractions,
         images: walnutImages
+    },
+    {
+        id: '2U1K-CDBF-4RHV-O7DP',
+        name: 'Grace',
+        location: kaisaniemiBotanicGarden,
+        dialogue: graceDialog,
+        interactions: graceInteractions,
+        images: graceImages
     },
     // {
     //     id: 'FAFK-YR7G-YJKE-QZTG',

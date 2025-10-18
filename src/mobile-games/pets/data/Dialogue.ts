@@ -108,6 +108,15 @@ export const walnutDialog: Dialogue = {
     sleeping: "m dreaming of shrimp! If I don't eat enough my fur will lose its color!"
 };
 
+export const graceDialog: Dialogue = {
+    hidden: "Now this is the perfect spot to take a nap. For a few hours. Then again later too!",
+    greeting: {
+        lowFriendship: "Hi there, I'm Grace. I like people but for short amounts of time because I loooooove my alone time. Don't take it personal 💅",
+        highFriendship: "Now that we're besties can you take me on a car ride or to the beach?"
+    },
+    sleeping: "Please don't make me move 😭!! I'm so cozy and sleep is my favorite thing besides hunting small rodents in my free time!"
+};
+
 export const templateDialog: Dialogue = {
     hidden: "XXXXX",
     greeting: {

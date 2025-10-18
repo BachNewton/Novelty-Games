@@ -50,6 +50,11 @@ export const bluePeter: Location = {
     lon: 24.891481
 };
 
+export const kaisaniemiBotanicGarden: Location = {
+    lat: 60.175232,
+    lon: 24.945741
+};
+
 // ------------- Unused Locations -------------
 
 export const pihlajasaari: Location = {
