@@ -1,8 +1,8 @@
 import { Location } from "../../../util/geolocation/LocationService";
-import { albyDialog, baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, lenoreDialog, lucaDialog, nikaDialog, nissaDialog, ziggyDialog } from "./Dialogue";
-import { albyInteractions, baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, Interactions, lenoreInteractions, lucaInteractions, nikaInteractions, nissaInteractions, ziggyInteractions } from "./Interaction";
-import { cafeRegatta, helsinkiWinterGarden, jätkäsaariPark, lapinlahdenLähde, lauttasaariBeach, lionStatueHelsinki, oodi, rajasaariKoirapuisto, seurasaari } from "./Locations";
-import { albyImages, baxterImages, doryImages, ellaImages, frogImages, lenoreImages, lucaImages, nikaImages, nissaImages, PetImages, ziggyImages } from "./PetImages";
+import { albyDialog, baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, lenoreDialog, lucaDialog, nikaDialog, nissaDialog, walnutDialog, ziggyDialog } from "./Dialogue";
+import { albyInteractions, baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, Interactions, lenoreInteractions, lucaInteractions, nikaInteractions, nissaInteractions, walnutInteractions, ziggyInteractions } from "./Interaction";
+import { bluePeter, cafeRegatta, helsinkiWinterGarden, jätkäsaariPark, lapinlahdenLähde, lauttasaariBeach, lionStatueHelsinki, oodi, rajasaariKoirapuisto, seurasaari } from "./Locations";
+import { albyImages, baxterImages, doryImages, ellaImages, frogImages, lenoreImages, lucaImages, nikaImages, nissaImages, PetImages, walnutImages, ziggyImages } from "./PetImages";
 
 export interface PetData {
     id: string;
@@ -93,6 +93,14 @@ export const PET_DATA: PetData[] = [
         dialogue: nikaDialog,
         interactions: nikaInteractions,
         images: nikaImages
+    },
+    {
+        id: 'LAEG-Y790-52QU-Q8XG',
+        name: 'Walnut',
+        location: bluePeter,
+        dialogue: walnutDialog,
+        interactions: walnutInteractions,
+        images: walnutImages
     },
     // {
     //     id: 'FAFK-YR7G-YJKE-QZTG',

@@ -45,6 +45,11 @@ export const rajasaariKoirapuisto: Location = {
     lon: 24.904780
 };
 
+export const bluePeter: Location = {
+    lat: 60.151824,
+    lon: 24.891481
+};
+
 // ------------- Unused Locations -------------
 
 export const pihlajasaari: Location = {

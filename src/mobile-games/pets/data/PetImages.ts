@@ -86,6 +86,14 @@ import luca_play from '../images/luca/play.png';
 import luca_sleep from '../images/luca/sleep.png';
 import luca_space from '../images/luca/space.png';
 import luca_treat from '../images/luca/treat.png';
+import walnut_chat from '../images/walnut/chat.jpeg';
+import walnut_greet_high_friendship from '../images/walnut/greet_high_friendship.jpeg';
+import walnut_greet_low_friendship from '../images/walnut/greet_low_friendship.jpeg';
+import walnut_pet from '../images/walnut/pet.jpeg';
+import walnut_play from '../images/walnut/play.jpeg';
+import walnut_sleep from '../images/walnut/sleep.jpeg';
+import walnut_space from '../images/walnut/space.jpeg';
+import walnut_treat from '../images/walnut/greet_low_friendship.jpeg'; // TODO: replace with correct image
 
 export interface PetImages {
     chat: string;
@@ -217,4 +225,15 @@ export const lucaImages: PetImages = {
     sleep: luca_sleep,
     space: luca_space,
     treat: luca_treat
+};
+
+export const walnutImages: PetImages = {
+    chat: walnut_chat,
+    greetHighFriendShip: walnut_greet_high_friendship,
+    greetLowFriendship: walnut_greet_low_friendship,
+    pet: walnut_pet,
+    play: walnut_play,
+    sleep: walnut_sleep,
+    space: walnut_space,
+    treat: walnut_treat
 };

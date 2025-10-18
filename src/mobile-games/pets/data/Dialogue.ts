@@ -99,6 +99,15 @@ export const lucaDialog: Dialogue = {
     sleeping: "I'm sleeping even though my legs are moving it's just in my sleep I'm chasing birds."
 };
 
+export const walnutDialog: Dialogue = {
+    hidden: "I'm always looking for snacks and will act silly to get some shrimp or any kind of delicious treat from the sea!",
+    greeting: {
+        lowFriendship: "I'm Walnut! Gimme all your fish!",
+        highFriendship: "Did you bring treats?"
+    },
+    sleeping: "m dreaming of shrimp! If I don't eat enough my fur will lose its color!"
+};
+
 export const templateDialog: Dialogue = {
     hidden: "XXXXX",
     greeting: {

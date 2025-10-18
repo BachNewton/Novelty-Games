@@ -337,6 +337,31 @@ export const lucaInteractions: Interactions = {
     ])
 };
 
+export const walnutInteractions: Interactions = {
+    space: {
+        id: 'AOF6-HY0D-R5A9-1E2F',
+        text: "See, I believe in personal space—but only when my belly is full!"
+    },
+    pet: {
+        id: 'YCDA-DVU9-ULTJ-762C',
+        text: "I'll tolerate anything for a meal!"
+    },
+    treat: {
+        id: 'TCG2-E61D-I2GC-JPEU',
+        text: "I'll eat myself sick if you left these out—but don't let that stop you!?"
+    },
+    play: {
+        id: '88D7-ILEB-7AFQ-YEKY',
+        text: "I honestly would just rather you bring me a shrimp please"
+    },
+    chat: new Map([
+        ['Doorbell', {
+            id: 'PJSQ-G1PL-ZSFQ-BGVH',
+            text: "The doorbell means the little humans are about to attack! Run hide!!"
+        }]
+    ])
+};
+
 export const templateInteractions: Interactions = {
     space: {
         id: 'XXXXX',
