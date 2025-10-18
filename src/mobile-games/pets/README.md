@@ -51,5 +51,5 @@
 - [ ] Steven & Ellie ( ??? )
 - [X] Matt & Emily (1 cat)
 - [X] Evelin (2 dogs)
-- [ ] Andrew & Sri (2 dogs)
+- [X] Andrew & Sri (2 dogs)
 - [ ] Klaus (1 dog)

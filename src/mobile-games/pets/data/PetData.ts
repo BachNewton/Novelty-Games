@@ -1,8 +1,8 @@
 import { Location } from "../../../util/geolocation/LocationService";
-import { albyDialog, baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, graceDialog, lenoreDialog, lucaDialog, nikaDialog, nissaDialog, walnutDialog, ziggyDialog } from "./Dialogue";
-import { albyInteractions, baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, graceInteractions, Interactions, lenoreInteractions, lucaInteractions, nikaInteractions, nissaInteractions, walnutInteractions, ziggyInteractions } from "./Interaction";
-import { bluePeter, cafeRegatta, helsinkiWinterGarden, jätkäsaariPark, kaisaniemiBotanicGarden, lapinlahdenLähde, lauttasaariBeach, lionStatueHelsinki, oodi, rajasaariKoirapuisto, seurasaari } from "./Locations";
-import { albyImages, baxterImages, doryImages, ellaImages, frogImages, graceImages, lenoreImages, lucaImages, nikaImages, nissaImages, PetImages, walnutImages, ziggyImages } from "./PetImages";
+import { albyDialog, baxterDialog, Dialogue, doryDialog, ellaDialog, frogDialog, graceDialog, lenoreDialog, lucaDialog, nikaDialog, nissaDialog, tatoDialog, tiaDialog, walnutDialog, ziggyDialog } from "./Dialogue";
+import { albyInteractions, baxterInteractions, doryInteractions, ellaInteractions, frogInteractions, graceInteractions, Interactions, lenoreInteractions, lucaInteractions, nikaInteractions, nissaInteractions, tatoInteractions, tiaInteractions, walnutInteractions, ziggyInteractions } from "./Interaction";
+import { bluePeter, cafeRegatta, harakkaIsland, helsinkiWinterGarden, jätkäsaariPark, kaisaniemiBotanicGarden, lapinlahdenLähde, lauttasaariBeach, lionStatueHelsinki, oodi, rajasaariKoirapuisto, seurasaari, särkkäIsland } from "./Locations";
+import { albyImages, baxterImages, doryImages, ellaImages, frogImages, graceImages, lenoreImages, lucaImages, nikaImages, nissaImages, PetImages, tatoImages, tiaImages, walnutImages, ziggyImages } from "./PetImages";
 
 export interface PetData {
     id: string;
@@ -109,6 +109,22 @@ export const PET_DATA: PetData[] = [
         dialogue: graceDialog,
         interactions: graceInteractions,
         images: graceImages
+    },
+    {
+        id: 'MLDE-1KWJ-PIP1-AVNX',
+        name: 'Tato',
+        location: harakkaIsland,
+        dialogue: tatoDialog,
+        interactions: tatoInteractions,
+        images: tatoImages
+    },
+    {
+        id: '72TE-UML3-4R1X-QY3R',
+        name: 'Tia',
+        location: särkkäIsland,
+        dialogue: tiaDialog,
+        interactions: tiaInteractions,
+        images: tiaImages
     },
     // {
     //     id: 'FAFK-YR7G-YJKE-QZTG',

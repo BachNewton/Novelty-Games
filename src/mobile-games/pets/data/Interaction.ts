@@ -393,24 +393,24 @@ export const graceInteractions: Interactions = {
 
 export const tatoInteractions: Interactions = {
     space: {
-        id: 'XXXXX',
+        id: 'X77U-LE2Q-RXO0-PJ24',
         text: "I am enjoying some solo perch time, you can adore me from afar."
     },
     pet: {
-        id: 'XXXXX',
+        id: 'Q2IS-WRVW-ZCU3-4R39',
         text: "I love pets, you can pet me anywhere and everywhere. Try to see if you can find one of my itchy-spots and give it an extra scratch."
     },
     treat: {
-        id: 'XXXXX',
+        id: 'MQ98-K2N2-18VL-LLBI',
         text: "Oh that was delicious, can I have more? I'll do every trick I know to earn it."
     },
     play: {
-        id: 'XXXXX',
+        id: 'I6VK-WRGA-KBKV-T7S4',
         text: "Are you going to throw that ball? I think I have energy for 5 fetches, let's go! Or we can play tug of war - brace yourself for I have a strong hold."
     },
     chat: new Map([
         ['Owner', {
-            id: 'XXXXX',
+            id: 'ILE8-BIE8-XUHG-HQYP',
             text: "I was the runt of my litter, my mom picked me because I bit her finger which is what vicious puppies do but she thought it was a sign of love. A few months later, I met dad and bit his nose, he thought it was a sign of love too and we've all been a happy family ever since. Then a few years later, they brought home a vicious puppy and called her my sister. I wanted to be the only child, but such is life, I must tolerate her for the rest of my life."
         }]
     ])
@@ -418,24 +418,24 @@ export const tatoInteractions: Interactions = {
 
 export const tiaInteractions: Interactions = {
     space: {
-        id: 'XXXXX',
+        id: 'SZDP-I8AK-1YJT-Q37M',
         text: "I am going to visit my nest to recharge, come adore me there."
     },
     pet: {
-        id: 'XXXXX',
+        id: 'UFGI-OHRD-FIND-2GG0',
         text: "I love pets on my lower back and my belly but don't you dare touch my paws. I'll say thanks with my kisses."
     },
     treat: {
-        id: 'XXXXX',
+        id: 'PR9A-P1DD-SNZV-PQK6',
         text: "I don't know many tricks but I love treats. Keep em coming!"
     },
     play: {
-        id: 'XXXXX',
+        id: 'MO77-KD8O-CDDC-NJTE',
         text: "you may want to stretch first, you'll be here a while throwing sticks"
     },
     chat: new Map([
         ['Owner', {
-            id: 'XXXXX',
+            id: '6B0C-U8I3-X18T-Z118',
             text: "I'm a daddy's girl through and through. But the most important being in my life is my brother Tato. I don't know life without Tato although I love to give him a hard time. We are inseparable."
         }]
     ])

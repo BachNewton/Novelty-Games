@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Button from "../../../util/ui/Button";
-import { COLORS, InteractionSelection } from "./Home";
+import { InteractionSelection } from "./Home";
 import PetDiscovered from "./PetDiscovered";
 import Discover from "./Discover";
 import { Pet } from "../data/Pet";
