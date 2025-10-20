@@ -45,7 +45,7 @@ const Log: React.FC<LogProps> = ({ rides, save }) => {
             <div style={NUMBER_CELL_STYLE}>{temperature.toFixed(0)}</div>
             <div style={NUMBER_CELL_STYLE}>{calculateScore(ride.distance, ride.temperature, DistanceUnit.KM, TemperatureUnit.CELSIUS).toLocaleString()}</div>
         </React.Fragment>;
-    });
+    }).reverse();
 
     return <div style={{
         height: '100%',
