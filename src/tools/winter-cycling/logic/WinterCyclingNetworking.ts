@@ -3,7 +3,7 @@ import { Ride } from "../data/Ride";
 
 const FOLDER_NAME = 'rides';
 const DEV_FILE_NAME = 'dev-rides.json';
-const PROD_FILE_NAME = 'rides.json';
+// const PROD_FILE_NAME = 'rides.json';
 
 export interface WinterCyclingNetworking {
     getRides: () => Promise<Ride[]>;
