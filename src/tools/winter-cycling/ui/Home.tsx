@@ -15,6 +15,10 @@ export enum SubmissionStatus {
     IDLE, SUBMITTING, SUCCESS
 }
 
+export enum Tab {
+    SUBMISSION, LEADERBOARD, LOG, SETTINGS
+}
+
 const Home: React.FC<HomeProps> = ({ networking }) => {
     const storer = useRef(createStorer<Save>(StorageKey.WINTER_CYCLING)).current;
 

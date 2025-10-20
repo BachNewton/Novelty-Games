@@ -1,10 +1,10 @@
 import { Rider, Save } from "../data/Save";
-import { SubmissionStatus } from "./Home";
+import { SubmissionStatus, Tab } from "./Home";
 import Settings from "./Settings";
 import Submission from "./Submission";
 
 interface ContentProps {
-    selectedTab: number;
+    selectedTab: Tab;
     save: Save;
     onSaveChange: (save: Save) => void;
     onSubmit: (rider: Rider, distance: number, temperature: number) => void;
@@ -13,16 +13,14 @@ interface ContentProps {
 
 const Content: React.FC<ContentProps> = ({ selectedTab, save, onSaveChange, onSubmit, submissionStatus }) => {
     switch (selectedTab) {
-        case 0:
+        case Tab.SUBMISSION:
             return <Submission save={save} onSaveChange={onSaveChange} onSubmit={onSubmit} submissionStatus={submissionStatus} />;
-        case 1:
+        case Tab.LEADERBOARD:
             return <div style={{ padding: '15px' }}>🏅 Leaderboard coming soon!</div>
-        case 2:
+        case Tab.LOG:
             return <div style={{ padding: '15px' }}>🗒️ Logbook coming soon!</div>;
-        case 3:
+        case Tab.SETTINGS:
             return <Settings save={save} onSaveChange={onSaveChange} />;
-        default:
-            throw new Error("Invalid tab index" + selectedTab);
     }
 };
 

@@ -1,6 +1,8 @@
+import { Tab } from "./Home";
+
 interface TabsProps {
-    selectedTab: number;
-    onTabSelected: (index: number) => void;
+    selectedTab: Tab;
+    onTabSelected: (index: Tab) => void;
 }
 
 const Tabs: React.FC<TabsProps> = ({ selectedTab, onTabSelected }) => {
