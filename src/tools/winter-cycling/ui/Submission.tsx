@@ -152,8 +152,6 @@ function getSubmitButtonText(submissionStatus: SubmissionStatus): React.ReactNod
             return 'Submitting... ⏳';
         case SubmissionStatus.SUCCESS:
             return 'Success! ✅';
-        case SubmissionStatus.ERROR:
-            return 'Error! ❌';
     }
 }
 

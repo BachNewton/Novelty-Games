@@ -10,6 +10,7 @@ import { FestivalSong } from "../../trivia/data/Data";
 import { createDatabase } from "../../util/database/v1/DatabaseImpl";
 import { createDatabaseManager } from "../../util/database/v2/DatabaseManager";
 import { MusicIndex } from "../music-player/logic/MusicIndex";
+import { createWinterCyclingNetworking, WinterCyclingNetworking } from "../winter-cycling/logic/WinterCyclingNetworking";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
@@ -43,7 +44,7 @@ interface DatabaseDebugUiState {
 
 interface WinterCylingUiState {
     type: 'WinterCycling';
-    networkService: NetworkService<void>;
+    networking: WinterCyclingNetworking;
 }
 
 interface OnClickHandlers {
@@ -87,7 +88,7 @@ function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
                 exampleDatabase={createDatabaseManager().exampleDatabase}
             />;
         case 'WinterCycling':
-            return <WinterCylingHome networkService={uiState.networkService} />;
+            return <WinterCylingHome networking={uiState.networking} />;
     }
 }
 
@@ -164,7 +165,7 @@ function createDatabaseDebugUiState(): DatabaseDebugUiState {
 function createWinterCyclingUiState(): WinterCylingUiState {
     return {
         type: 'WinterCycling',
-        networkService: createNetworkService(NetworkedApplication.WINTER_CYCLING)
+        networking: createWinterCyclingNetworking()
     };
 }
 
