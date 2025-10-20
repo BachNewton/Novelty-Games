@@ -56,10 +56,18 @@ const Home: React.FC<HomeProps> = ({ networking }) => {
         <Tabs selectedTab={selectedTab} onTabSelected={index => setSelectedTab(index)} />
 
         <div style={{ flexGrow: 1, overflow: 'auto' }}>
-            <Content rides={rides} selectedTab={selectedTab} save={save} onSaveChange={newSave => {
-                storer.save(newSave);
-                setSave(newSave);
-            }} onSubmit={handleSubmit} submissionStatus={submissionStatus} />
+            <Content
+                rides={rides}
+                selectedTab={selectedTab}
+                save={save}
+                onSaveChange={newSave => {
+                    storer.save(newSave);
+                    setSave(newSave);
+                }}
+                onSubmit={handleSubmit}
+                submissionStatus={submissionStatus}
+                resetSubmissionStatus={() => setSubmissionStatus(SubmissionStatus.IDLE)}
+            />
         </div>
     </div>;
 };

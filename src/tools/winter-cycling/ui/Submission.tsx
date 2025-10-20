@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import VerticalSpacer from "../../../util/ui/Spacer";
 import { DistanceUnit, Rider, Save, TemperatureUnit } from "../data/Save";
 import { SubmissionStatus } from "./Home";
@@ -11,6 +11,7 @@ interface SubmissionProps {
     onSaveChange: (save: Save) => void;
     onSubmit: (rider: Rider, distance: number, temperature: number) => void;
     submissionStatus: SubmissionStatus;
+    resetSubmissionStatus: () => void;
 }
 
 enum FlameType {
@@ -18,10 +19,16 @@ enum FlameType {
     TEMPERATURE
 }
 
-const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, submissionStatus }) => {
+const Submission: React.FC<SubmissionProps> = ({ save, onSaveChange, onSubmit, submissionStatus, resetSubmissionStatus }) => {
     const [selectedRider, setSelectedRider] = useState(save.rider);
     const [distance, setDistance] = useState(String(save.distance));
     const [temperature, setTemperature] = useState(String(save.temperature));
+
+    useEffect(() => {
+        if (submissionStatus === SubmissionStatus.SUCCESS) {
+            resetSubmissionStatus();
+        }
+    }, [distance, temperature]);
 
     const score = calculateScore(Number(distance), Number(temperature), save.distanceUnit, save.temperatureUnit);
     const intensity = Math.min(score / SCORE_FOR_MAX_INTENSITY, 1);
