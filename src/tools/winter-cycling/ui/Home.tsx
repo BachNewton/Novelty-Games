@@ -3,9 +3,10 @@ import { Route, updateRoute } from "../../../ui/Routing";
 import Tabs from "./Tabs";
 import Content from "./Content";
 import { createStorer, StorageKey } from "../../../util/Storage";
-import { createDefaultSave, Save, Rider } from "../data/Save";
+import { createDefaultSave, Save, Rider, DistanceUnit, TemperatureUnit } from "../data/Save";
 import { Ride } from "../data/Ride";
 import { WinterCyclingNetworking } from "../logic/WinterCyclingNetworking";
+import { toKilometers, toCelsius } from "../logic/Converter";
 
 interface HomeProps {
     networking: WinterCyclingNetworking;
@@ -38,7 +39,10 @@ const Home: React.FC<HomeProps> = ({ networking }) => {
     const handleSubmit = (rider: Rider, distance: number, temperature: number) => {
         setSubmissionStatus(SubmissionStatus.SUBMITTING);
 
-        const ride: Ride = { rider, distance, temperature, date: Date.now() };
+        const distanceValue = save.distanceUnit === DistanceUnit.MILE ? toKilometers(distance) : distance;
+        const temperatureValue = save.temperatureUnit === TemperatureUnit.FAHRENHEIT ? toCelsius(temperature) : temperature;
+
+        const ride: Ride = { rider, distance: distanceValue, temperature: temperatureValue, date: Date.now() };
 
         setSubmissionStatus(SubmissionStatus.SUBMITTING);
 

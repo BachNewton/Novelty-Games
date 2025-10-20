@@ -21,7 +21,7 @@ const Content: React.FC<ContentProps> = ({ selectedTab, save, onSaveChange, onSu
         case Tab.LEADERBOARD:
             return <div style={{ padding: '15px' }}>🏅 Leaderboard coming soon!</div>
         case Tab.LOG:
-            return <Log rides={rides} />;
+            return <Log rides={rides} save={save} />;
         case Tab.SETTINGS:
             return <Settings save={save} onSaveChange={onSaveChange} />;
     }
