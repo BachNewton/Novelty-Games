@@ -1,4 +1,7 @@
+import React from "react";
 import { Ride } from "../data/Ride";
+import { calculateScore } from "../logic/ScoreCalculator";
+import { DistanceUnit, TemperatureUnit } from "../data/Save";
 
 interface LogProps {
     rides: Ride[];
@@ -6,7 +9,9 @@ interface LogProps {
 
 const HEADER_STYLE: React.CSSProperties = {
     fontWeight: 'bold',
-    textAlign: 'center'
+    textAlign: 'center',
+    position: 'sticky',
+    top: 0
 };
 
 const CELL_STYLE: React.CSSProperties = {
@@ -15,16 +20,13 @@ const CELL_STYLE: React.CSSProperties = {
 };
 
 const Log: React.FC<LogProps> = ({ rides }) => {
-    const rows = rides.map((ride, index) => <div key={index} style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(5, 1fr)'
-    }}>
+    const rows = rides.map((ride, index) => <React.Fragment key={index}>
         <div style={CELL_STYLE}>{ride.rider}</div>
         <div style={CELL_STYLE}>{new Date(ride.date).toLocaleDateString()}</div>
         <div style={CELL_STYLE}>{ride.distance}</div>
         <div style={CELL_STYLE}>{ride.temperature}</div>
-        <div style={CELL_STYLE}>{12345}</div>
-    </div>);
+        <div style={CELL_STYLE}>{calculateScore(ride.distance, ride.temperature, DistanceUnit.KM, TemperatureUnit.CELSIUS)}</div>
+    </React.Fragment>);
 
     return <div style={{
         height: '100%',
@@ -37,8 +39,9 @@ const Log: React.FC<LogProps> = ({ rides }) => {
             borderRadius: '15px',
             padding: '10px',
             boxSizing: 'border-box',
-            display: 'flex',
-            flexDirection: 'column'
+            overflow: 'auto',
+            // display: 'flex',
+            // flexDirection: 'column'
         }}>
             <div style={{
                 display: 'grid',
@@ -49,9 +52,25 @@ const Log: React.FC<LogProps> = ({ rides }) => {
                 <div style={HEADER_STYLE}>Distance</div>
                 <div style={HEADER_STYLE}>Temp</div>
                 <div style={HEADER_STYLE}>Score</div>
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
             </div>
 
-            <div style={{
+            {/* <div style={{
                 flexGrow: 1,
                 overflow: 'auto'
             }}>
@@ -71,7 +90,7 @@ const Log: React.FC<LogProps> = ({ rides }) => {
                 {rows}
                 {rows}
                 {rows}
-            </div>
+            </div> */}
         </div>
     </div>;
 };
