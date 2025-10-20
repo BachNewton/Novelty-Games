@@ -16,7 +16,8 @@ const HEADER_STYLE: React.CSSProperties = {
     top: 0,
     padding: '2px',
     border: '2px solid var(--novelty-blue)',
-    backgroundColor: 'var(--novelty-background)'
+    backgroundColor: 'var(--novelty-background)',
+    color: 'var(--novelty-orange)'
 };
 
 const CELL_STYLE: React.CSSProperties = {
@@ -39,7 +40,7 @@ const Log: React.FC<LogProps> = ({ rides, save }) => {
 
         return <React.Fragment key={index}>
             <div style={CELL_STYLE}>{riderDisplayName(ride.rider)}</div>
-            <div style={CELL_STYLE}>{new Date(ride.date).toLocaleDateString()}</div>
+            <div style={CELL_STYLE}>{new Date(ride.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
             <div style={NUMBER_CELL_STYLE}>{distance.toFixed(0)}</div>
             <div style={NUMBER_CELL_STYLE}>{temperature.toFixed(0)}</div>
             <div style={NUMBER_CELL_STYLE}>{calculateScore(ride.distance, ride.temperature, DistanceUnit.KM, TemperatureUnit.CELSIUS).toLocaleString()}</div>
@@ -52,7 +53,7 @@ const Log: React.FC<LogProps> = ({ rides, save }) => {
         boxSizing: 'border-box'
     }}>
         <div style={{
-            height: '100%',
+            maxHeight: '100%',
             boxSizing: 'border-box',
             border: '2px solid var(--novelty-blue)',
             borderRadius: '15px',
