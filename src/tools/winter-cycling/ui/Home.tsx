@@ -51,7 +51,7 @@ const Home: React.FC<HomeProps> = ({ networking }) => {
     return <div style={{ display: 'flex', height: '100dvh', flexDirection: 'column' }}>
         <Tabs selectedTab={selectedTab} onTabSelected={index => setSelectedTab(index)} />
 
-        <div style={{ flexGrow: 1 }}>
+        <div style={{ flexGrow: 1, overflow: 'auto' }}>
             <Content rides={rides} selectedTab={selectedTab} save={save} onSaveChange={newSave => {
                 storer.save(newSave);
                 setSave(newSave);

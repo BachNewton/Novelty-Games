@@ -56,6 +56,21 @@ const Log: React.FC<LogProps> = ({ rides }) => {
                 overflow: 'auto'
             }}>
                 {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
+                {rows}
             </div>
         </div>
     </div>;
