@@ -1,0 +1,14 @@
+{
+    "name": "holdem-ws-server",
+    "version": "1.0.0",
+    "type": "commonjs",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "poker-evaluator": "^2.1.1",
+        "uuid": "^9.0.0",
+        "ws": "^8.13.0"
+    }
+}

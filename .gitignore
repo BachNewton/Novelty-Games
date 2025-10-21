@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+ai-poker-server/node_modules
 /.pnp
 .pnp.js
 

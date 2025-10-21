@@ -1,4 +1,4 @@
-import { Table as TableData } from "../ui/Home";
+import { Table as TableData } from "./Home";
 
 interface TableProps {
     hostGame: boolean;
