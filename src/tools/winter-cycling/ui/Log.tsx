@@ -41,8 +41,8 @@ const Log: React.FC<LogProps> = ({ rides, save }) => {
         return <React.Fragment key={index}>
             <div style={CELL_STYLE}>{riderDisplayName(ride.rider)}</div>
             <div style={CELL_STYLE}>{new Date(ride.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
-            <div style={NUMBER_CELL_STYLE}>{distance.toFixed(0)}</div>
-            <div style={NUMBER_CELL_STYLE}>{temperature.toFixed(0)}</div>
+            <div style={NUMBER_CELL_STYLE}>{distance.toFixed(1)}</div>
+            <div style={NUMBER_CELL_STYLE}>{temperature.toFixed(1)}</div>
             <div style={NUMBER_CELL_STYLE}>{calculateScore(ride.distance, ride.temperature, DistanceUnit.KM, TemperatureUnit.CELSIUS).toLocaleString()}</div>
         </React.Fragment>;
     }).reverse();
