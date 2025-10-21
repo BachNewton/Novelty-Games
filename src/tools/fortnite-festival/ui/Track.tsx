@@ -58,7 +58,7 @@ const Track: React.FC<TrackProps> = ({ song, rank, selectedInstruments, selected
             </div>
         </div>
 
-        <VerticalSpacer height='5px' />
+        <VerticalSpacer height={5} />
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
             <img style={{ height: ALBUM_ART_SIZE }} alt='Album artwork' src={song.albumArt} />

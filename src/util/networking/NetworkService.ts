@@ -19,7 +19,8 @@ export enum NetworkedApplication {
     LABYRINTH = 'labyrinth',
     MUSIC_PLAYER = 'music-player',
     PLATFORMER = 'platformer',
-    POKER = 'poker'
+    POKER = 'poker',
+    WINTER_CYCLING = 'winter-cycling'
 }
 
 interface BroadcastEvent<T> {

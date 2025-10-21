@@ -11,3 +11,7 @@ export function createID(): string {
         ).join('')
     ).join(ID_DELIMITER);
 }
+
+(window as any).randomId = () => {
+    return createID();
+};

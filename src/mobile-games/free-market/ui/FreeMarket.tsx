@@ -5,7 +5,7 @@ import Tabs, { Tab } from "./Tabs";
 import Invent from "./Invent";
 import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
 import Patent from "./Patent";
-import { StorageKey, Storer } from "../../../util/Storage";
+import { Storer } from "../../../util/Storage";
 import { FreeMarketSave, SAVE_VERSION } from "../data/FreeMarketSave";
 import Dialog from "../../../util/ui/Dialog";
 import NewProfile from "./NewProfile";
@@ -40,7 +40,7 @@ const FreeMarket: React.FC<FreeMarketProps> = ({ communicator, storer }) => {
     useEffect(() => {
         updateRoute(Route.FREE_MARKET);
 
-        storer.load(StorageKey.FREE_MARKET)
+        storer.load()
             .then(save => {
                 if (save.version !== SAVE_VERSION) throw new Error();
 

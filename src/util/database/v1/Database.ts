@@ -4,6 +4,11 @@ export interface Database<Tables> {
         data: Tables[T]
     ) => Promise<void>;
 
+    addAll: <T extends keyof Tables>(
+        tableName: T,
+        data: Tables[T][]
+    ) => Promise<void>;
+
     getAll: <T extends keyof Tables>(
         tableName: T
     ) => Promise<Tables[T][]>;
@@ -12,6 +17,10 @@ export interface Database<Tables> {
         tableName: T,
         condition: (data: Tables[T]) => boolean
     ) => Promise<Tables[T]>;
+
+    deleteTable: <T extends keyof Tables>(
+        tableName: T,
+    ) => Promise<void>;
 
     delete: () => Promise<void>;
 }

@@ -1,10 +1,14 @@
+import { AnimationFrame } from "./Animator";
 import { Vector } from "./Vector";
 
 export interface Box {
     position: Vector;
     width: number;
     height: number;
-    color?: string | CanvasGradient | CanvasPattern
+    color?: string;
+    borderColor?: string;
+    borderWidth?: number;
+    getAnimationFrame?: () => AnimationFrame | null;
 }
 
 export interface MovingBox extends Box {

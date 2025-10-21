@@ -2,20 +2,23 @@ export enum StorageKey {
     PROFILE = 'PROFILE',
     MARBLE_AUTO_SAVE = 'MARBLE_AUTO_SAVE',
     MARBLE_QUICK_SAVE = 'MARBLE_QUICK_SAVE',
-    FREE_MARKET = 'FREE_MARKET'
+    FREE_MARKET = 'FREE_MARKET',
+    WINTER_CYCLING = 'WINTER_CYCLING'
 }
 
 export interface Storer<T> {
-    save(key: StorageKey, data: T): void;
-    load(key: StorageKey): Promise<T>;
+    save(data: T): void;
+    load(): Promise<T>;
+    loadSync(): T | null;
 }
 
-export function createStorer<T>(): Storer<T> {
+export function createStorer<T>(key: StorageKey): Storer<T> {
     return {
-        save: (key, data) => {
+        save: (data) => {
             localStorage.setItem(key, JSON.stringify(data));
         },
-        load: (key) => new Promise((resolve, reject) => {
+
+        load: () => new Promise((resolve, reject) => {
             const item = localStorage.getItem(key);
 
             if (item === null) {
@@ -25,6 +28,16 @@ export function createStorer<T>(): Storer<T> {
 
                 resolve(data);
             }
-        })
+        }),
+
+        loadSync: () => {
+            const item = localStorage.getItem(key);
+
+            if (item === null) {
+                return null;
+            }
+
+            return JSON.parse(item);
+        }
     };
-};
+}

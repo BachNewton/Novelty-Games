@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import Button from "../../../util/ui/Button";
-import { COLORS, InteractionSelection } from "./Home";
+import { InteractionSelection } from "./Home";
 import PetDiscovered from "./PetDiscovered";
 import Discover from "./Discover";
 import { Pet } from "../data/Pet";
-import { DataManager, PetTextAndImage } from "../logic/DataManager";
+import { DataManager } from "../logic/DataManager";
 import DebugMenu from "./DebugMenu";
 import { PetsDebugger } from "../logic/PetsDebugger";
-
-const SHOW_DEBUG_MENU_BUTTON = true;
 
 interface PetContentProps {
     pets: Pet[];
@@ -18,6 +16,7 @@ interface PetContentProps {
     interteractionSelection: InteractionSelection | null;
     dataManager: DataManager;
     petsDebugger: PetsDebugger;
+    isDebugMenuButtonVisible: boolean;
     setPets: (pets: Pet[]) => void;
     setDistanceToPet: (distance: number | null) => void;
 }
@@ -30,11 +29,12 @@ const PetContent: React.FC<PetContentProps> = ({
     interteractionSelection,
     dataManager,
     petsDebugger,
+    isDebugMenuButtonVisible,
     setPets,
     setDistanceToPet
 }) => {
     const [isDebugMenuOpen, setIsDebugMenuOpen] = useState(false);
-    const [textAndImage, setTextAndImage] = useState<PetTextAndImage>({ text: '', image: null });
+    const [textAndImage, setTextAndImage] = useState(dataManager.getTextAndImage(selectedPet));
 
     const isDiscovered = selectedPet.discovered;
 
@@ -67,7 +67,7 @@ const PetContent: React.FC<PetContentProps> = ({
     useEffect(() => {
         if (interteractionSelection === null) return;
 
-        const interactionTextAndImage = dataManager.handleInteraction(
+        const interactionTextAndImage = dataManager.getTextAndImageFromInteraction(
             interteractionSelection.type,
             interteractionSelection.interaction,
             selectedPet
@@ -92,16 +92,15 @@ const PetContent: React.FC<PetContentProps> = ({
         />;
 
     return <div style={{
-        display: 'flex',
         height: '100%',
+        display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        position: 'relative',
-        background: `linear-gradient(180deg, ${COLORS.surface} 0px, transparent 7.5px)`
+        position: 'relative'
     }}>
         {mainContent}
 
-        {debugMenuButtonUi(() => setIsDebugMenuOpen(true))}
+        {debugMenuButtonUi(isDebugMenuButtonVisible, () => setIsDebugMenuOpen(true))}
 
         <DebugMenu
             isOpen={isDebugMenuOpen}
@@ -115,8 +114,8 @@ const PetContent: React.FC<PetContentProps> = ({
     </div>;
 };
 
-function debugMenuButtonUi(onDebugMenuButtonClicked: () => void): JSX.Element {
-    if (!SHOW_DEBUG_MENU_BUTTON) return <></>;
+function debugMenuButtonUi(isDebugMenuButtonVisible: boolean, onDebugMenuButtonClicked: () => void): JSX.Element {
+    if (!isDebugMenuButtonVisible) return <></>;
 
     return <div style={{ position: 'absolute', top: '60px', right: '5px' }}>
         <Button fontScale={0.8} onClick={onDebugMenuButtonClicked}>Debug</Button>

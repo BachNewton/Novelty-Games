@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { GameMaterial } from './GameMaterial';
-import { createFile, FileType } from '../../../../util/File';
+import { createFile, FileType, loadFile } from '../../../../util/File';
 
 export interface Level {
     startingPosition: Position;
@@ -104,31 +104,5 @@ export function createLevelFile(level: Level) {
 }
 
 export function loadLevelFile(): Promise<Level> {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-
-    const fileReader = new FileReader();
-
-    input.addEventListener('change', _ => {
-        if (input.files === null || input.files.length === 0) return;
-
-        const file = input.files[0];
-
-        fileReader.readAsText(file);
-    });
-
-    input.click();
-
-    return new Promise((resolve, reject) => {
-        fileReader.addEventListener('load', e => {
-            const json = fileReader.result;
-
-            if (json === null || json instanceof ArrayBuffer) return reject();
-
-            console.log('Loaded Level JSON:', json);
-
-            resolve(JSON.parse(json));
-        });
-    });
+    return loadFile(FileType.JSON);
 }

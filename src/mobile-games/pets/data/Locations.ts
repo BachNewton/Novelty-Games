@@ -45,6 +45,26 @@ export const rajasaariKoirapuisto: Location = {
     lon: 24.904780
 };
 
+export const bluePeter: Location = {
+    lat: 60.151824,
+    lon: 24.891481
+};
+
+export const kaisaniemiBotanicGarden: Location = {
+    lat: 60.175232,
+    lon: 24.945741
+};
+
+export const harakkaIsland: Location = {
+    lat: 60.151918,
+    lon: 24.957645
+};
+
+export const särkkäIsland: Location = {
+    lat: 60.151406,
+    lon: 24.967009
+};
+
 // ------------- Unused Locations -------------
 
 export const pihlajasaari: Location = {

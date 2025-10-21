@@ -29,7 +29,9 @@ export interface DataManager {
 
     getTextAndImage: (pet: Pet) => PetTextAndImage;
 
-    handleInteraction: (type: keyof Interactions, interaction: Interaction, pet: Pet) => PetTextAndImage;
+    handleInteraction: (pet: Pet, interaction: Interaction) => void;
+
+    getTextAndImageFromInteraction: (type: keyof Interactions, interaction: Interaction, pet: Pet) => PetTextAndImage;
 
     areInteractionsEnabled: (pet: Pet) => boolean;
 
@@ -61,7 +63,9 @@ export function createDataManager(database: PetsDatabase, navigator: Navigator):
 
         getTextAndImage: getTextAndImage,
 
-        handleInteraction: (type, interaction, pet) => handleInteraction(type, interaction, pet, database),
+        handleInteraction: (pet, interaction) => handleInteraction(pet, interaction, database),
+
+        getTextAndImageFromInteraction: (type, interaction, pet) => getTextAndImageFromInteraction(type, interaction, pet),
 
         areInteractionsEnabled: areInteractionsEnabled,
 
@@ -203,11 +207,14 @@ function getTextAndImage(pet: Pet): PetTextAndImage {
     }
 }
 
-function handleInteraction(type: keyof Interactions, interaction: Interaction, pet: Pet, database: PetsDatabase): PetTextAndImage {
+function handleInteraction(pet: Pet, interaction: Interaction, database: PetsDatabase) {
     pet.friendship++; // For now friendship increases by just 1 after an interaction
     pet.interactionsThisCycle++;
     database.savePet(pet);
+    database.addSeenInteraction(interaction.id);
+}
 
+function getTextAndImageFromInteraction(type: keyof Interactions, interaction: Interaction, pet: Pet): PetTextAndImage {
     return {
         text: interaction.text,
         image: getInteractionImage(type, pet)

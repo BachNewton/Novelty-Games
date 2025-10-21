@@ -16,9 +16,9 @@ import SortIcon from "../icons/sort.svg";
 import { calculateOverallDifficulty } from "../logic/OverallDifficulty";
 import { RankedSong } from "../data/RankedSong";
 
-const INITIAL_VISIBLE_COUNT = 20; // Initial number of songs to show
+const INITIAL_VISIBLE_COUNT = 25; // Initial number of songs to show
 const SONGS_PER_PAGE = 25; // Number of songs to load on scroll
-const DISTANCE_FROM_BOTTOM_PX = 300; // Distance from the bottom of the page to trigger loading more songs
+const DISTANCE_FROM_BOTTOM_PX = 400; // Distance from the bottom of the page to trigger loading more songs
 const DIFFICULTY_WEIGHT_DEFAULT = 1.3;
 const DESCRIPTION_FONT_SIZE = '0.75em';
 
@@ -142,7 +142,9 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
                         setFilterEpicGamesSongs,
                         filterOwnedSongs,
                         setFilterOwnedSongs,
-                        fetchedSongs => setSongs(fetchedSongs)
+                        fetchedSongs => setSongs(fetchedSongs),
+                        () => database.importOwnedSongs().then(importedSongs => setOwnedSongs(importedSongs)),
+                        database.exportOwnedSongs
                     )}
                 </Widget>
 
@@ -165,7 +167,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
         </div>
 
         <HorizontalLine thickness='4px' color='var(--novelty-blue)' />
-        <VerticalSpacer height='15px' />
+        <VerticalSpacer height={15} />
 
         {songsUi(
             filteredSongs,
@@ -215,7 +217,9 @@ function toolsUi(
     setFilterEpicGamesSongs: (checked: boolean) => void,
     filterOwnedSongs: boolean,
     setFilterOwnedSongs: (checked: boolean) => void,
-    onSongsFetched: (fetchedSongs: FestivalSong[] | null) => void
+    onSongsFetched: (fetchedSongs: FestivalSong[] | null) => void,
+    onImport: () => void,
+    onExport: () => void
 ): JSX.Element {
     return <div style={{
         display: 'flex',
@@ -227,6 +231,14 @@ function toolsUi(
     }}>
         <div><Button borderRadius={15} onClick={() => fetchLatestSongs(onSongsFetched)}>
             <div style={{ padding: '5px' }}>Fetch Latest Songs</div>
+        </Button></div>
+
+        <div><Button borderRadius={15} onClick={onImport}>
+            <div style={{ padding: '5px' }}>Import Owned Songs</div>
+        </Button></div>
+
+        <div><Button borderRadius={15} onClick={onExport}>
+            <div style={{ padding: '5px' }}>Export Owned Songs</div>
         </Button></div>
 
         <div style={{ display: 'flex', gap: '10px' }}>

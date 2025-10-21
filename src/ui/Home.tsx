@@ -10,17 +10,17 @@ import Pets from '../mobile-games/pets/ui/Home';
 import ToddlerTreasureHunt from '../mobile-games/toddler-treasure-hunt/ui/Home';
 import { NewtorkCommunicator as MilleBornesNetworkCommunicator } from '../board-games/mille-bornes/logic/NewtorkCommunicator';
 import { createFreeMarketCommunicator } from '../mobile-games/free-market/logic/FreeMarketCommunicator';
-import { createStorer } from '../util/Storage';
+import { createStorer, StorageKey } from '../util/Storage';
 import { FreeMarketSave } from '../mobile-games/free-market/data/FreeMarketSave';
 import SubMenu from './SubMenu';
-import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState, PetsState, MobileGamesState, ToddlerTreasureHuntState, PokerState } from './State';
+import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState, PetsState, MobileGamesState, ToddlerTreasureHuntState, PokerState, MonopolyState } from './State';
 import Labyrinth from '../board-games/labyrinth/ui/Labyrinth';
+import Monopoly from '../board-games/monopoly/ui/Home';
 import ProfileUi from './Profile';
 import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/LabyrinthCommunicator';
 import { APP_VERSION } from '../Versioning';
 import Button from '../util/ui/Button';
 import { createPetsDatabase } from '../mobile-games/pets/logic/PetsDatabase';
-import { createPetsDebugger } from '../mobile-games/pets/logic/PetsDebugger';
 import Poker from "../board-games/poker/ui/Home";
 
 const BUTTON_BORDER_RADIUS = 20;
@@ -54,6 +54,7 @@ interface OnClickHandlers {
     onPokerClick: () => void;
     onPetsClick: () => void;
     onToddlerTreasureHuntClick: () => void;
+    onMonopolyClick: () => void;
 }
 
 const Home: React.FC<HomeProps> = ({ updateListener }) => {
@@ -93,7 +94,8 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         onLabyrinthClick: () => setState(createLabyrinthState()),
         onPokerClick: () => setState(new PokerState()),
         onPetsClick: () => setState(new PetsState()),
-        onToddlerTreasureHuntClick: () => setState(new ToddlerTreasureHuntState())
+        onToddlerTreasureHuntClick: () => setState(new ToddlerTreasureHuntState()),
+        onMonopolyClick: () => setState(new MonopolyState())
     };
 
     if (state instanceof TriviaState) {
@@ -171,6 +173,8 @@ function boardGamesUi(boardGamesState: BoardGamesState, onClickHandlers: OnClick
         return <Labyrinth communicator={boardGamesState.communicator} />;
     } else if (boardGamesState instanceof PokerState) {
         return <Poker />;
+    } else if (boardGamesState instanceof MonopolyState) {
+        return <Monopoly />;
     }
 
     return <SubMenu
@@ -179,7 +183,8 @@ function boardGamesUi(boardGamesState: BoardGamesState, onClickHandlers: OnClick
         menuItems={[
             { buttonText: 'Mille Bornes 🏎️', onClick: onClickHandlers.onMilleBornesClick },
             { buttonText: 'Labyrinth 🧩', onClick: onClickHandlers.onLabyrinthClick },
-            { buttonText: 'Poker ♠️', onClick: onClickHandlers.onPokerClick }
+            { buttonText: 'Poker ♠️', onClick: onClickHandlers.onPokerClick },
+            { buttonText: 'Monopoly 🏦', onClick: onClickHandlers.onMonopolyClick }
         ]}
     />;
 }
@@ -190,10 +195,7 @@ function mobileGamesUi(mobileGamesState: MobileGamesState, onClickHandlers: OnCl
     } else if (mobileGamesState instanceof PetsState) {
         const petsDatabase = createPetsDatabase();
 
-        return <Pets
-            database={petsDatabase}
-            petsDebugger={createPetsDebugger(petsDatabase)}
-        />;
+        return <Pets database={petsDatabase} />;
     } else if (mobileGamesState instanceof ToddlerTreasureHuntState) {
         return <ToddlerTreasureHunt />;
     }
@@ -224,14 +226,18 @@ function getInitialState(): State {
             return new PokerState();
         case Route.CAT:
         case Route.PLATFORMER:
+        case Route.RPG:
             return new Game2DState();
         case Route.MUSIC_PLAYER:
         case Route.FORTNITE_FESTIVAL:
+        case Route.WINTER_CYCLING:
             return new ToolsState();
         case Route.PETS:
             return new PetsState();
         case Route.TODDLER_TREASURE_HUNT:
             return new ToddlerTreasureHuntState();
+        case Route.MONOPOLY:
+            return new MonopolyState();
         default:
             return new HomeState();
     }
@@ -239,7 +245,7 @@ function getInitialState(): State {
 
 function createFreeMarketState(): FreeMarketState {
     const communicator = createFreeMarketCommunicator();
-    const storer = createStorer<FreeMarketSave>();
+    const storer = createStorer<FreeMarketSave>(StorageKey.FREE_MARKET);
 
     return new FreeMarketState(communicator, storer);
 }

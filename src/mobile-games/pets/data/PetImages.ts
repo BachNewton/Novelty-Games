@@ -86,6 +86,38 @@ import luca_play from '../images/luca/play.png';
 import luca_sleep from '../images/luca/sleep.png';
 import luca_space from '../images/luca/space.png';
 import luca_treat from '../images/luca/treat.png';
+import walnut_chat from '../images/walnut/chat.jpeg';
+import walnut_greet_high_friendship from '../images/walnut/greet_high_friendship.jpeg';
+import walnut_greet_low_friendship from '../images/walnut/greet_low_friendship.jpeg';
+import walnut_pet from '../images/walnut/pet.jpeg';
+import walnut_play from '../images/walnut/play.jpeg';
+import walnut_sleep from '../images/walnut/sleep.jpeg';
+import walnut_space from '../images/walnut/space.jpeg';
+import walnut_treat from '../images/walnut/greet_low_friendship.jpeg'; // TODO: replace with correct image
+import grace_chat from '../images/grace/chat.jpeg';
+import grace_greet_high_friendship from '../images/grace/greet_high_friendship.jpeg';
+import grace_greet_low_friendship from '../images/grace/greet_low_friendship.jpeg';
+import grace_pet from '../images/grace/pet.jpeg';
+import grace_play from '../images/grace/play.jpeg';
+import grace_sleep from '../images/grace/sleep.jpeg';
+import grace_space from '../images/grace/space.jpeg';
+import grace_treat from '../images/grace/treat.jpeg';
+import tato_chat from '../images/tato/chat.jpeg';
+import tato_greet_high_friendship from '../images/tato/greet_high_friendship.JPG';
+import tato_greet_low_friendship from '../images/tato/greet_low_friendship.JPG';
+import tato_pet from '../images/tato/pet.JPG';
+import tato_play from '../images/tato/play.JPG';
+import tato_sleep from '../images/tato/sleep.JPG';
+import tato_space from '../images/tato/space.JPG';
+import tato_treat from '../images/tato/treat.jpeg';
+import tia_chat from '../images/tia/chat.JPG';
+import tia_greet_high_friendship from '../images/tia/greet_high_friendship.jpeg';
+import tia_greet_low_friendship from '../images/tia/greet_low_friendship.JPG';
+import tia_pet from '../images/tia/pet.JPG';
+import tia_play from '../images/tia/play.jpg';
+import tia_sleep from '../images/tia/sleep.JPG';
+import tia_space from '../images/tia/space.jpg';
+import tia_treat from '../images/tia/treat.jpeg';
 
 export interface PetImages {
     chat: string;
@@ -217,4 +249,48 @@ export const lucaImages: PetImages = {
     sleep: luca_sleep,
     space: luca_space,
     treat: luca_treat
+};
+
+export const walnutImages: PetImages = {
+    chat: walnut_chat,
+    greetHighFriendShip: walnut_greet_high_friendship,
+    greetLowFriendship: walnut_greet_low_friendship,
+    pet: walnut_pet,
+    play: walnut_play,
+    sleep: walnut_sleep,
+    space: walnut_space,
+    treat: walnut_treat
+};
+
+export const graceImages: PetImages = {
+    chat: grace_chat,
+    greetHighFriendShip: grace_greet_high_friendship,
+    greetLowFriendship: grace_greet_low_friendship,
+    pet: grace_pet,
+    play: grace_play,
+    sleep: grace_sleep,
+    space: grace_space,
+    treat: grace_treat
+};
+
+export const tatoImages: PetImages = {
+    chat: tato_chat,
+    greetHighFriendShip: tato_greet_high_friendship,
+    greetLowFriendship: tato_greet_low_friendship,
+    pet: tato_pet,
+    play: tato_play,
+    sleep: tato_sleep,
+    space: tato_space,
+    treat: tato_treat
+};
+
+export const tiaImages: PetImages = {
+    chat: tia_chat,
+    greetHighFriendShip: tia_greet_high_friendship,
+    greetLowFriendship: tia_greet_low_friendship,
+    pet: tia_pet,
+    play: tia_play,
+    sleep: tia_sleep,
+    space: tia_space,
+    treat: tia_treat
 };

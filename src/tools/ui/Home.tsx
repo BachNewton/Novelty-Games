@@ -3,12 +3,14 @@ import HomeButton from "../../ui/HomeButton";
 import MusicPlayerHome from "../music-player/ui/Home";
 import FortniteFestivalHome, { getFestivalSongs } from "../fortnite-festival/ui/Home";
 import DatabaseDebugHome from "../database-debug/ui/Home";
+import WinterCylingHome from "../winter-cycling/ui/Home";
 import { getRoute, Route } from "../../ui/Routing";
 import { createNetworkService, NetworkedApplication, NetworkService } from "../../util/networking/NetworkService";
 import { FestivalSong } from "../../trivia/data/Data";
 import { createDatabase } from "../../util/database/v1/DatabaseImpl";
 import { createDatabaseManager } from "../../util/database/v2/DatabaseManager";
 import { MusicIndex } from "../music-player/logic/MusicIndex";
+import { createWinterCyclingNetworking, WinterCyclingNetworking } from "../winter-cycling/logic/WinterCyclingNetworking";
 
 interface HomeProps {
     onHomeButtonClicked: () => void;
@@ -18,7 +20,8 @@ type UiState =
     | MenuUiState
     | MusicPlayerUiState
     | FortniteFestivalUiState
-    | DatabaseDebugUiState;
+    | DatabaseDebugUiState
+    | WinterCylingUiState;
 
 interface MenuUiState {
     type: 'Menu';
@@ -39,12 +42,18 @@ interface DatabaseDebugUiState {
     type: 'DatabaseDebug';
 }
 
+interface WinterCylingUiState {
+    type: 'WinterCycling';
+    networking: WinterCyclingNetworking;
+}
+
 interface OnClickHandlers {
     onHomeButtonClicked: () => void;
     onForTheStats2Click: () => void;
     onMusicPlayerClick: () => void;
     onFortniteFestivalClick: () => void;
     onDatabaseDebugClick: () => void;
+    onWinterCyclingClick: () => void;
 }
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
@@ -55,7 +64,8 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
         onForTheStats2Click: () => window.alert('Work in progress!'),
         onMusicPlayerClick: () => setUiState(createMusicPlayerUiState()),
         onFortniteFestivalClick: () => setUiState(createFortniteFestivalUiState()),
-        onDatabaseDebugClick: () => setUiState(createDatabaseDebugUiState())
+        onDatabaseDebugClick: () => setUiState(createDatabaseDebugUiState()),
+        onWinterCyclingClick: () => setUiState(createWinterCyclingUiState())
     };
 
     return Ui(uiState, onClickHandlers);
@@ -77,6 +87,8 @@ function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
                 database={createDatabase('example', ['numbers', 'words'])}
                 exampleDatabase={createDatabaseManager().exampleDatabase}
             />;
+        case 'WinterCycling':
+            return <WinterCylingHome networking={uiState.networking} />;
     }
 }
 
@@ -104,6 +116,7 @@ function MenuUi(onClickHandlers: OnClickHandlers) {
         <button style={buttonStyle} onClick={onClickHandlers.onMusicPlayerClick}>Music Player 🎶</button>
         <button style={buttonStyle} onClick={onClickHandlers.onFortniteFestivalClick}>Fortnite Festival Difficulty Rankings 🎛️</button>
         <button style={buttonStyle} onClick={onClickHandlers.onDatabaseDebugClick}>Database Debug 📦</button>
+        <button style={buttonStyle} onClick={onClickHandlers.onWinterCyclingClick}>Winter Cycling ❄️</button>
     </div>;
 }
 
@@ -115,6 +128,8 @@ function getInitialState(): UiState {
             return createMusicPlayerUiState();
         case Route.FORTNITE_FESTIVAL:
             return createFortniteFestivalUiState();
+        case Route.WINTER_CYCLING:
+            return createWinterCyclingUiState();
         default:
             return createMenuUiState();
     }
@@ -144,6 +159,13 @@ function createFortniteFestivalUiState(): FortniteFestivalUiState {
 function createDatabaseDebugUiState(): DatabaseDebugUiState {
     return {
         type: 'DatabaseDebug'
+    };
+}
+
+function createWinterCyclingUiState(): WinterCylingUiState {
+    return {
+        type: 'WinterCycling',
+        networking: createWinterCyclingNetworking()
     };
 }
 

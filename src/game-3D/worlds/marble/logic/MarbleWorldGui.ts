@@ -45,7 +45,8 @@ export const marbleWorldGuiCreator: MarbleWorldGuiCreator = {
 };
 
 function createMarbleWorldGui(editor: Editor, callbacks: MarbleWorldGuiCallbacks): MarbleWorldGui {
-    const levelStorer = createStorer<Level>();
+    const quickStorer = createStorer<Level>(StorageKey.MARBLE_QUICK_SAVE);
+    const autoStorer = createStorer<Level>(StorageKey.MARBLE_AUTO_SAVE);
 
     const transformSpaceControllers = createTransformSpaceControllers();
     const levelMetadataControllers = createLevelMetadataControllers();
@@ -139,13 +140,13 @@ function createMarbleWorldGui(editor: Editor, callbacks: MarbleWorldGuiCallbacks
             createLevelFile(level);
         }
     }, 'Save to File');
-    guiEditModeFileFolder.add({ "'Tab' Quicksave": () => quicksave(editor, levelMetadata, levelStorer, loadControllers) }, "'Tab' Quicksave");
+    guiEditModeFileFolder.add({ "'Tab' Quicksave": () => quicksave(editor, levelMetadata, quickStorer, loadControllers) }, "'Tab' Quicksave");
     guiEditModeFileFolder.add({ 'Load from File': () => loadLevelFile().then(level => onLoadLevel(level)) }, 'Load from File');
     loadControllers.quicksave = guiEditModeFileFolder.add({
         'Load Quicksave': () => {
             if (!window.confirm('Are you sure you want to load the quicksave?\nThis will erase all your progress!')) return;
 
-            levelStorer.load(StorageKey.MARBLE_QUICK_SAVE).then(level => {
+            quickStorer.load().then(level => {
                 onLoadLevel(level);
             }).catch(() => {
                 window.alert('There is nothing quicksaved.');
@@ -154,7 +155,7 @@ function createMarbleWorldGui(editor: Editor, callbacks: MarbleWorldGuiCallbacks
     }, 'Load Quicksave');
     loadControllers.autosave = guiEditModeFileFolder.add({
         'Load Autosave': () => {
-            levelStorer.load(StorageKey.MARBLE_AUTO_SAVE).then(level => {
+            autoStorer.load().then(level => {
                 onLoadLevel(level);
             }).catch(() => {
                 window.alert('There is nothing autosaved.');
@@ -181,8 +182,8 @@ function createMarbleWorldGui(editor: Editor, callbacks: MarbleWorldGuiCallbacks
     return {
         getLevelMetadata: () => levelMetadata,
         toggleEditorSpace: () => toggleEditorSpace(editor, transformSpaceControllers),
-        quicksave: () => quicksave(editor, levelMetadata, levelStorer, loadControllers),
-        autosave: () => autosave(editor, levelMetadata, levelStorer, loadControllers)
+        quicksave: () => quicksave(editor, levelMetadata, quickStorer, loadControllers),
+        autosave: () => autosave(editor, levelMetadata, autoStorer, loadControllers)
     };
 }
 
@@ -212,7 +213,7 @@ function quicksave(
 ) {
     console.log('Creating quicksave');
     const level = editor.save(levelMetadata);
-    levelStorer.save(StorageKey.MARBLE_QUICK_SAVE, level);
+    levelStorer.save(level);
     console.log('Quicksaved Level:', level);
 
     loadControllers.quicksave?.name(`Load Quicksave - ${new Date().toLocaleTimeString()}`);
@@ -226,7 +227,7 @@ function autosave(
 ) {
     console.log('Creating autosave');
     const level = editor.save(levelMetadata);
-    levelStorer.save(StorageKey.MARBLE_AUTO_SAVE, level);
+    levelStorer.save(level);
     console.log('Autosaved level:', level);
 
     loadControllers.autosave?.name(`Load Autosave - ${new Date().toLocaleTimeString()}`);

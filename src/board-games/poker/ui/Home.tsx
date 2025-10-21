@@ -87,7 +87,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
         ? <>
             <div>Poker</div>
 
-            <VerticalSpacer height='15px' />
+            <VerticalSpacer height={15} />
 
             <div style={{ display: 'flex', gap: '5px' }}>
                 <div>Tables</div>
@@ -95,7 +95,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
             </div>
             {tablesUi}
 
-            <VerticalSpacer height='15px' />
+            <VerticalSpacer height={15} />
 
             <Button onClick={createTable}>Create Table</Button>
         </>

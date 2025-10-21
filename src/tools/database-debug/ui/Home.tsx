@@ -27,6 +27,16 @@ const Home: React.FC<HomeProps> = ({ database, exampleDatabase }) => {
         database.add('words', { name: 'Hello', definition: 'A greeting' }).then(() => console.log('Added words'));
     };
 
+    const testAddMultiple_v1 = () => {
+        database.addAll('numbers', [
+            { value: 1, description: 'The number one' },
+            { value: 2, description: 'The number two' },
+            { value: 3, description: 'The number three' },
+            { value: 4, description: 'The number four' },
+            { value: 5, description: 'The number five' }
+        ]).then(() => console.log('Added 5 numbers'));
+    };
+
     const testAddText_v1 = () => {
         database.add('words', { name: text, definition: 'Custom text' }).then(() => console.log('Added custom text'));
     };
@@ -35,6 +45,12 @@ const Home: React.FC<HomeProps> = ({ database, exampleDatabase }) => {
         database.deleteRow('words', data => data.name === text)
             .then((data) => console.log('Deleted:', data))
             .catch(() => console.warn('Failed to deleted!'));
+    };
+
+    const testDeleteTable_v1 = () => {
+        database.deleteTable('numbers').then(() => {
+            console.log('Numbers table deleted successfully');
+        });
     };
 
     const testDelete_v1 = () => {
@@ -71,12 +87,15 @@ const Home: React.FC<HomeProps> = ({ database, exampleDatabase }) => {
         <Button onClick={testGetAll_v1}>Test Get All</Button>
         <br />
         <Button onClick={testAdd_v1}>Test Add</Button>
+        <Button onClick={testAddMultiple_v1}>Test Add 5x</Button>
         <br />
         <Button onClick={testAddText_v1}>Test Add Text</Button>
         <Button onClick={testDeleteText_v1}>Test Delete Text</Button>
         <input placeholder='Text' onChange={e => setText(e.target.value)} />
         <br />
-        <Button onClick={testDelete_v1}>Test Delete</Button>
+        <Button onClick={testDeleteTable_v1}>Test Delete Numbers Table</Button>
+        <br />
+        <Button onClick={testDelete_v1}>Test Delete Database</Button>
 
         <h3>V2</h3>
         <Button onClick={testGetAll_v2}>Test Get All</Button>

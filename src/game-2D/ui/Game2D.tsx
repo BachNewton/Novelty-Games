@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GameWorld } from "../worlds/GameWorld";
 import { CarnivalWorld } from "../worlds/carnival/CarnivalWorld";
 import { WigglerWorld } from "../worlds/wigglers/WigglerWorld";
@@ -8,6 +8,8 @@ import { createPlatformerWorld } from "../worlds/platformer/PlatformerWorld";
 import { createDrawer } from "../worlds/Drawer";
 import { createCamera } from "../worlds/Camera";
 import { createKeyboardInput } from "../../util/input/Keyboard";
+import { createRpgWorld } from "../worlds/rpg/RpgWorld";
+import { createMouseInput } from "../../util/input/Mouse";
 
 interface Game2DProps {
     goHome: () => void;
@@ -16,6 +18,7 @@ interface Game2DProps {
 
 const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [overlay, setOverlay] = useState<JSX.Element | null>(null);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -35,6 +38,7 @@ const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
         window.addEventListener('resize', resizeCanvas);
 
         const gameWorld = createGameWorld(gameWorldType, canvas, ctx, goHome);
+        setOverlay(gameWorld.overlay ?? null);
 
         const cleanupAnimation = initCanvas(canvas, ctx, gameWorld);
 
@@ -44,12 +48,16 @@ const Game2D: React.FC<Game2DProps> = ({ goHome, gameWorldType }) => {
         };
     }, []);
 
-    return <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden' }}>
+    return <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', position: 'relative' }}>
         <canvas ref={canvasRef} />
+        <div style={{ position: 'absolute', height: '100%', width: '100%', pointerEvents: 'none' }}>{overlay}</div>
     </div>;
 };
 
 function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, goHome: () => void): GameWorld {
+    const camera = createCamera(canvas);
+    const drawer = createDrawer(ctx, camera);
+
     switch (gameWorldType) {
         case GameWorldType.CARNIVAL:
             return new CarnivalWorld(canvas, ctx, goHome);
@@ -58,11 +66,19 @@ function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement
         case GameWorldType.CAT:
             return createCatWorld(canvas, ctx);
         case GameWorldType.PLATFORMER:
-            const camera = createCamera(ctx);
             return createPlatformerWorld(
-                createDrawer(ctx, camera),
+                drawer,
                 camera,
                 createKeyboardInput()
+            );
+        case GameWorldType.RPG:
+            return createRpgWorld(
+                canvas,
+                ctx,
+                camera,
+                drawer,
+                createKeyboardInput(),
+                createMouseInput()
             );
         default:
             throw new Error(`GameWorldType not supported: ${gameWorldType}`);

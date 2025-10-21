@@ -4,7 +4,7 @@
 
 #### Things that should get done before the game is released.
 
-- [ ] Get pet content from pet owners and add it to game
+- [X] Get pet content from pet owners and add it to game
 - [X] Indicate which interactions have been used and seen by the player already
 - [X] Indicate the friendship level of the currently selected pet
 - [X] Indicate that the friendship level is increasing after an interaction is selected
@@ -13,7 +13,7 @@
 - [X] _(optional)_ Indicate to the player that only one interaction is permitted per wake cycle
 - [X] _(optional)_ Add a "welcome to the game" pop-up that explains the game and is only shown the first time the game is launched
 - [ ] _(optional)_ Indicate to the player how much longer a pet might be awake or sleeping for
-- [ ] _(optional)_ Add an overview page that shows:
+- [X] _(optional)_ Add an overview page that shows:
     - Pets discoverd out of total
     - Interations seen out of total
     - Friendship level of each pet
@@ -29,7 +29,6 @@
 
 ## Bugs / Improvements
 
-- GPS access isn't requested until a pet that is undiscovered is selected
 - Cloud save - so that the game can be played on multiple devices
 - Clicking on the pet image hide the text bubble so the full image can be appreciated
 
@@ -46,9 +45,11 @@
     - [ ] 1 flock of chickens
 - [ ] Landon (1 robot)
 - [ ] Uncle Gary & Aunt Marta (1 dog)
-- [ ] Mallory & Chris ( 2 dogs )
+- [X] Mallory & Chris (2 dogs)
     - [X] 1 dog
-    - [ ] 1 dog
+    - [X] 1 dog
 - [ ] Steven & Ellie ( ??? )
-- [ ] Matt & Emily (1 cat)
+- [X] Matt & Emily (1 cat)
 - [X] Evelin (2 dogs)
+- [X] Andrew & Sri (2 dogs)
+- [ ] Klaus (1 dog)

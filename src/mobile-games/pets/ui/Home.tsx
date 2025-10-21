@@ -3,15 +3,16 @@ import { useEffect, useRef, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import Scaffold from "../../../util/ui/Scaffold";
 import { PetsDatabase } from "../logic/PetsDatabase";
-import { PetsDebugger } from "../logic/PetsDebugger";
+import { createPetsDebugger } from "../logic/PetsDebugger";
 import Footer from "./Footer";
 import { createNavigator } from "../../../util/geolocation/Navigator";
 import { Interactions, Interaction } from "../data/Interaction";
 import { createDataManager } from "../logic/DataManager";
 import Tabs from "./Tabs";
-import Welcome from "./Welcome";
 import { State } from "../data/PetSave";
 import PetContent from "./PetContent";
+import Content from "./Content";
+import Menu, { MenuOption } from "./Menu";
 
 export const COLORS = {
     primary: ' #FF2D95',
@@ -21,7 +22,6 @@ export const COLORS = {
 
 interface HomeProps {
     database: PetsDatabase;
-    petsDebugger: PetsDebugger;
 }
 
 export interface InteractionSelection {
@@ -29,17 +29,19 @@ export interface InteractionSelection {
     interaction: Interaction;
 }
 
-const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
+const Home: React.FC<HomeProps> = ({ database }) => {
+    const [isDebugMenuButtonVisible, setIsDebugMenuButtonVisible] = useState(false);
+    const petsDebugger = useRef(createPetsDebugger(database, () => setIsDebugMenuButtonVisible(true))).current;
     const [hasLoaded, setHasLoaded] = useState(false);
-    const [showWelcome, setShowWelcome] = useState(false);
     const dataManager = useRef(createDataManager(database, createNavigator())).current;
     const [pets, setPets] = useState(dataManager.getDefaultPets());
-    const [selectedTab, setSelectedTab] = useState(0);
+    const [selectedTab, setSelectedTab] = useState<number | null>(null);
     const [distanceToPet, setDistanceToPet] = useState<number | null>(null);
     const [seenInteractions, setSeenInteractions] = useState(new Set<string>());
     const [interteractionSelection, setInterteractionSelection] = useState<InteractionSelection | null>(null);
+    const [menuOptionSelection, setMenuOptionSelection] = useState<MenuOption>(MenuOption.WELCOME);
 
-    const selectedPet = pets[selectedTab];
+    const selectedPet = pets[selectedTab ?? 0];
 
     useEffect(() => {
         updateRoute(Route.PETS);
@@ -47,11 +49,8 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
         dataManager.getPetsFromSave(pets).then(updatedPets => {
             setHasLoaded(true);
 
-            const updatedPetStates = dataManager.updatePetsState(updatedPets, selectedTab);
+            const updatedPetStates = dataManager.updatePetsState(updatedPets, 0);
             setPets(updatedPetStates);
-
-            // Show the Welcome screen only if the first pet, "Frog", hasn't been discovered yet
-            setShowWelcome(!updatedPets[0].discovered);
         });
 
         database.getSeenInteractions().then(
@@ -60,17 +59,32 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
     }, []);
 
     const onInteractionSelected = (type: keyof Interactions, interaction: Interaction) => {
-        database.addSeenInteraction(interaction.id);
         seenInteractions.add(interaction.id);
+        dataManager.handleInteraction(selectedPet, interaction);
 
         setInterteractionSelection({ type, interaction });
     };
+
+    const content = selectedTab === null
+        ? <Menu selection={menuOptionSelection} pets={pets} seenInteractions={seenInteractions} />
+        : <PetContent
+            pets={pets}
+            selectedPet={selectedPet}
+            selectedTab={selectedTab}
+            hasLoaded={hasLoaded}
+            dataManager={dataManager}
+            interteractionSelection={interteractionSelection}
+            setPets={setPets}
+            setDistanceToPet={distance => setDistanceToPet(distance)}
+            petsDebugger={petsDebugger}
+            isDebugMenuButtonVisible={isDebugMenuButtonVisible}
+        />;
 
     return <Scaffold
         header={<Tabs
             pets={pets}
             selectedTab={selectedTab}
-            onTabSelected={index => setSelectedTab(index ?? 0)}
+            onTabSelected={index => setSelectedTab(index)}
         />}
 
         footer={<Footer
@@ -83,23 +97,14 @@ const Home: React.FC<HomeProps> = ({ database, petsDebugger }) => {
             distance={distanceToPet}
             seenInteractions={seenInteractions}
             interactionSelected={onInteractionSelected}
+            menuOptionSelected={selection => setMenuOptionSelection(selection)}
         />}
 
         fontScale={1.35}
     >
-        <PetContent
-            pets={pets}
-            selectedPet={selectedPet}
-            selectedTab={selectedTab}
-            hasLoaded={hasLoaded}
-            dataManager={dataManager}
-            interteractionSelection={interteractionSelection}
-            setPets={setPets}
-            setDistanceToPet={distance => setDistanceToPet(distance)}
-            petsDebugger={petsDebugger}
-        />
-
-        <Welcome show={showWelcome} onClose={() => setShowWelcome(false)} />
+        <Content>
+            {content}
+        </Content>
     </Scaffold>;
 };
 

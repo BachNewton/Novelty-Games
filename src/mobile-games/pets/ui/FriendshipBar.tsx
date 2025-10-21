@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { COLORS } from "./Home";
 import { LOW_FRIENDSHIP_THRESHOLD } from "../logic/DataManager";
 
-const MAX_HEARTS = LOW_FRIENDSHIP_THRESHOLD;
+export const MAX_HEARTS = LOW_FRIENDSHIP_THRESHOLD;
 const BORDER_RADIUS = '20px';
 const ANIMATION_DELAY_MS = 200;
 const ANIMATION_SPEED = '1.5s';

@@ -8,7 +8,24 @@ export interface PetsDebugger {
     setHighFriendship: (pet: Pet) => void;
 }
 
-export function createPetsDebugger(database: PetsDatabase): PetsDebugger {
+export function createPetsDebugger(
+    database: PetsDatabase,
+    setDebugMenuButtonToVisible: () => void
+): PetsDebugger {
+    window.ontouchstart = (e) => {
+        const fingers = e.touches.length;
+
+        if (fingers === 5) {
+            setDebugMenuButtonToVisible();
+        }
+    };
+
+    (window as any).debug = () => {
+        setDebugMenuButtonToVisible();
+
+        return 'Pet game debug button has been enabled';
+    };
+
     return {
         resetAllData: async () => {
             await createDatabase('pets', []).delete();

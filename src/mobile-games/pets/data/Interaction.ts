@@ -337,6 +337,110 @@ export const lucaInteractions: Interactions = {
     ])
 };
 
+export const walnutInteractions: Interactions = {
+    space: {
+        id: 'AOF6-HY0D-R5A9-1E2F',
+        text: "See, I believe in personal space—but only when my belly is full!"
+    },
+    pet: {
+        id: 'YCDA-DVU9-ULTJ-762C',
+        text: "I'll tolerate anything for a meal!"
+    },
+    treat: {
+        id: 'TCG2-E61D-I2GC-JPEU',
+        text: "I'll eat myself sick if you left these out—but don't let that stop you!?"
+    },
+    play: {
+        id: '88D7-ILEB-7AFQ-YEKY',
+        text: "I honestly would just rather you bring me a shrimp please"
+    },
+    chat: new Map([
+        ['Doorbell', {
+            id: 'PJSQ-G1PL-ZSFQ-BGVH',
+            text: "The doorbell means the little humans are about to attack! Run hide!!"
+        }]
+    ])
+};
+
+export const graceInteractions: Interactions = {
+    space: {
+        id: '23YB-W796-BUSX-QLPM',
+        text: "You know me better than I thought! Space rhymes with Grace!"
+    },
+    pet: {
+        id: 'GV6H-3W9F-RYOU-0K1F',
+        text: "I always hear about how soft my ears are! No paws though, I am ticklish."
+    },
+    treat: {
+        id: 'AYT8-FSQ6-0VH2-FVBN',
+        text: "Foooooooood!!!!!!!! Yes!!!!!!"
+    },
+    play: {
+        id: 'SRGV-W1G1-2VTG-O2KK',
+        text: "Play then nap then play then nap, how does that sound?"
+    },
+    chat: new Map([
+        ['Groundhog', {
+            id: '51YX-I8TH-X4X6-ZRP6',
+            text: "Once I caught a groundhog and we got in a fight. You should have seen him after!"
+        }],
+        ['Car', {
+            id: 'OF1Y-W5TG-N9PJ-SP52',
+            text: "I love car rides almost as much as I love any kind of beach.  I've been to the Pacific Ocean!"
+        }]
+    ])
+};
+
+export const tatoInteractions: Interactions = {
+    space: {
+        id: 'X77U-LE2Q-RXO0-PJ24',
+        text: "I am enjoying some solo perch time, you can adore me from afar."
+    },
+    pet: {
+        id: 'Q2IS-WRVW-ZCU3-4R39',
+        text: "I love pets, you can pet me anywhere and everywhere. Try to see if you can find one of my itchy-spots and give it an extra scratch."
+    },
+    treat: {
+        id: 'MQ98-K2N2-18VL-LLBI',
+        text: "Oh that was delicious, can I have more? I'll do every trick I know to earn it."
+    },
+    play: {
+        id: 'I6VK-WRGA-KBKV-T7S4',
+        text: "Are you going to throw that ball? I think I have energy for 5 fetches, let's go! Or we can play tug of war - brace yourself for I have a strong hold."
+    },
+    chat: new Map([
+        ['Owner', {
+            id: 'ILE8-BIE8-XUHG-HQYP',
+            text: "I was the runt of my litter, my mom picked me because I bit her finger which is what vicious puppies do but she thought it was a sign of love. A few months later, I met dad and bit his nose, he thought it was a sign of love too and we've all been a happy family ever since. Then a few years later, they brought home a vicious puppy and called her my sister. I wanted to be the only child, but such is life, I must tolerate her for the rest of my life."
+        }]
+    ])
+};
+
+export const tiaInteractions: Interactions = {
+    space: {
+        id: 'SZDP-I8AK-1YJT-Q37M',
+        text: "I am going to visit my nest to recharge, come adore me there."
+    },
+    pet: {
+        id: 'UFGI-OHRD-FIND-2GG0',
+        text: "I love pets on my lower back and my belly but don't you dare touch my paws. I'll say thanks with my kisses."
+    },
+    treat: {
+        id: 'PR9A-P1DD-SNZV-PQK6',
+        text: "I don't know many tricks but I love treats. Keep em coming!"
+    },
+    play: {
+        id: 'MO77-KD8O-CDDC-NJTE',
+        text: "you may want to stretch first, you'll be here a while throwing sticks"
+    },
+    chat: new Map([
+        ['Owner', {
+            id: '6B0C-U8I3-X18T-Z118',
+            text: "I'm a daddy's girl through and through. But the most important being in my life is my brother Tato. I don't know life without Tato although I love to give him a hard time. We are inseparable."
+        }]
+    ])
+};
+
 export const templateInteractions: Interactions = {
     space: {
         id: 'XXXXX',

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { RAW_MATERIALS } from "../data/Component";
 import { ExtractionDetails, FreeMarketSave } from "../data/FreeMarketSave";
 import HorizontalLine from "./HorizontalLine";
-import { StorageKey, Storer } from "../../../util/Storage";
+import { Storer } from "../../../util/Storage";
 import { format } from '../logic/NumberFormatter';
 
 interface ExtractProps {
@@ -81,7 +81,7 @@ const Extract: React.FC<ExtractProps> = ({ save, storer }) => {
 
         setDetails(updatedDetials);
         save.extractionDetails = updatedDetials;
-        storer.save(StorageKey.FREE_MARKET, save);
+        storer.save(save);
     };
 
     const animatedBorderClassNameForLabor = details === null ? '' : details.id === null ? 'animated-border' : 'grey-out';
