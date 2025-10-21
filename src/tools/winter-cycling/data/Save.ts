@@ -10,12 +10,17 @@ export enum TemperatureUnit {
     CELSIUS, FAHRENHEIT
 }
 
+export enum ServerEnv {
+    DEVELOPMENT, PRODUCTION
+}
+
 export interface Save {
     rider: Rider;
     distanceUnit: DistanceUnit;
     temperatureUnit: TemperatureUnit;
     distance: number;
     temperature: number;
+    serverEnv?: ServerEnv;
 }
 
 export function createDefaultSave(): Save {
@@ -24,6 +29,7 @@ export function createDefaultSave(): Save {
         distanceUnit: DistanceUnit.MILE,
         temperatureUnit: TemperatureUnit.FAHRENHEIT,
         distance: 0,
-        temperature: 45
+        temperature: 45,
+        serverEnv: ServerEnv.DEVELOPMENT
     };
 }

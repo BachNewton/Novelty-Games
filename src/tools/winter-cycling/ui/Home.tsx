@@ -3,7 +3,7 @@ import { Route, updateRoute } from "../../../ui/Routing";
 import Tabs from "./Tabs";
 import Content from "./Content";
 import { createStorer, StorageKey } from "../../../util/Storage";
-import { createDefaultSave, Save, Rider, DistanceUnit, TemperatureUnit } from "../data/Save";
+import { createDefaultSave, Save, Rider, DistanceUnit, TemperatureUnit, ServerEnv } from "../data/Save";
 import { Ride } from "../data/Ride";
 import { WinterCyclingNetworking } from "../logic/WinterCyclingNetworking";
 import { toKilometers, toCelsius } from "../logic/Converter";
@@ -31,7 +31,7 @@ const Home: React.FC<HomeProps> = ({ networking }) => {
     useEffect(() => {
         updateRoute(Route.WINTER_CYCLING);
 
-        networking.getRides().then(fetchedRides => {
+        networking.setEnvironment(save.serverEnv ?? ServerEnv.DEVELOPMENT).then(fetchedRides => {
             setRides(fetchedRides);
         });
     }, []);
@@ -61,6 +61,12 @@ const Home: React.FC<HomeProps> = ({ networking }) => {
                 selectedTab={selectedTab}
                 save={save}
                 onSaveChange={newSave => {
+                    if (newSave.serverEnv !== save.serverEnv) {
+                        networking.setEnvironment(newSave.serverEnv!).then(fetchedRides => {
+                            setRides(fetchedRides);
+                        });
+                    }
+
                     storer.save(newSave);
                     setSave(newSave);
                 }}
