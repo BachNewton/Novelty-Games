@@ -1,6 +1,7 @@
 import { Ride } from "../data/Ride";
 import { Rider, Save } from "../data/Save";
 import { SubmissionStatus, Tab } from "./Home";
+import Leaderboards from "./Leaderboards";
 import Log from "./Log";
 import Settings from "./Settings";
 import Submission from "./Submission";
@@ -20,7 +21,7 @@ const Content: React.FC<ContentProps> = ({ selectedTab, save, onSaveChange, onSu
         case Tab.SUBMISSION:
             return <Submission save={save} onSaveChange={onSaveChange} onSubmit={onSubmit} submissionStatus={submissionStatus} resetSubmissionStatus={resetSubmissionStatus} />;
         case Tab.LEADERBOARD:
-            return <div style={{ padding: '15px' }}>🏅 Leaderboard coming soon!</div>
+            return <Leaderboards rides={rides} />;
         case Tab.LOG:
             return <Log rides={rides} save={save} />;
         case Tab.SETTINGS:
