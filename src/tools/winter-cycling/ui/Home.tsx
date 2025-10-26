@@ -26,7 +26,7 @@ const Home: React.FC<HomeProps> = ({ networking }) => {
     const [save, setSave] = useState(storer.loadSync() ?? createDefaultSave());
     const [selectedTab, setSelectedTab] = useState(0);
     const [submissionStatus, setSubmissionStatus] = useState(SubmissionStatus.IDLE);
-    const [rides, setRides] = useState<Ride[]>([]);
+    const [rides, setRides] = useState<Ride[] | null>(null);
 
     useEffect(() => {
         updateRoute(Route.WINTER_CYCLING);
@@ -62,6 +62,8 @@ const Home: React.FC<HomeProps> = ({ networking }) => {
                 save={save}
                 onSaveChange={newSave => {
                     if (newSave.serverEnv !== save.serverEnv) {
+                        setRides(null);
+
                         networking.setEnvironment(newSave.serverEnv!).then(fetchedRides => {
                             setRides(fetchedRides);
                         });

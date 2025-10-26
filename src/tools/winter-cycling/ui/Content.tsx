@@ -11,7 +11,7 @@ interface ContentProps {
     onSaveChange: (save: Save) => void;
     onSubmit: (rider: Rider, distance: number, temperature: number) => void;
     submissionStatus: SubmissionStatus;
-    rides: Ride[];
+    rides: Ride[] | null;
     resetSubmissionStatus: () => void;
 }
 
