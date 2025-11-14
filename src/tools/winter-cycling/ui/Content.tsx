@@ -14,16 +14,17 @@ interface ContentProps {
     submissionStatus: SubmissionStatus;
     rides: Ride[] | null;
     resetSubmissionStatus: () => void;
+    refresh: () => void;
 }
 
-const Content: React.FC<ContentProps> = ({ selectedTab, save, onSaveChange, onSubmit, submissionStatus, rides, resetSubmissionStatus }) => {
+const Content: React.FC<ContentProps> = ({ selectedTab, save, onSaveChange, onSubmit, submissionStatus, rides, resetSubmissionStatus, refresh }) => {
     switch (selectedTab) {
         case Tab.SUBMISSION:
             return <Submission save={save} onSaveChange={onSaveChange} onSubmit={onSubmit} submissionStatus={submissionStatus} resetSubmissionStatus={resetSubmissionStatus} />;
         case Tab.LEADERBOARD:
             return <Leaderboards rides={rides} />;
         case Tab.LOG:
-            return <Log rides={rides} save={save} />;
+            return <Log rides={rides} save={save} refresh={refresh} />;
         case Tab.SETTINGS:
             return <Settings save={save} onSaveChange={onSaveChange} />;
     }

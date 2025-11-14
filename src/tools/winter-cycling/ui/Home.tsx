@@ -75,6 +75,13 @@ const Home: React.FC<HomeProps> = ({ networking }) => {
                 onSubmit={handleSubmit}
                 submissionStatus={submissionStatus}
                 resetSubmissionStatus={() => setSubmissionStatus(SubmissionStatus.IDLE)}
+                refresh={() => {
+                    setRides(null);
+
+                    networking.getRides().then(fetchedRides => {
+                        setRides(fetchedRides);
+                    });
+                }}
             />
         </div>
     </div>;

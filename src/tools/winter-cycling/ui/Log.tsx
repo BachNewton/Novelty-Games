@@ -8,6 +8,7 @@ import Loading from "../../../util/ui/Loading";
 interface LogProps {
     rides: Ride[] | null;
     save: Save;
+    refresh: () => void;
 }
 
 const HEADER_STYLE: React.CSSProperties = {
@@ -31,7 +32,7 @@ const NUMBER_CELL_STYLE: React.CSSProperties = {
     textAlign: 'right'
 };
 
-const Log: React.FC<LogProps> = ({ rides, save }) => {
+const Log: React.FC<LogProps> = ({ rides, save, refresh }) => {
     const distanceUnitDisplay = save.distanceUnit === DistanceUnit.KM ? 'km' : 'mi';
     const temperatureUnitDisplay = save.temperatureUnit === TemperatureUnit.CELSIUS ? '°C' : '°F';
 
@@ -53,8 +54,17 @@ const Log: React.FC<LogProps> = ({ rides, save }) => {
     return <div style={{
         height: '100%',
         padding: '15px',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column'
     }}>
+        <button style={{
+            marginBottom: '10px',
+            fontSize: '1em',
+            padding: '5px',
+            borderRadius: '15px'
+        }} onClick={refresh}>Refresh</button>
+
         <div style={{
             maxHeight: '100%',
             boxSizing: 'border-box',
