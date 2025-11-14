@@ -1,19 +1,18 @@
-import { Tab } from "./Home";
-
 interface TabsProps {
-    selectedTab: Tab;
-    onTabSelected: (index: Tab) => void;
+    tabs: string[];
+    selectedTabIndex: number;
+    onTabSelected: (index: number) => void;
 }
 
-const Tabs: React.FC<TabsProps> = ({ selectedTab, onTabSelected }) => {
-    const tabs = ['🚴', '🏅', '🗒️', '⚙️'].map((text, index) => <div
+const Tabs: React.FC<TabsProps> = ({ tabs, selectedTabIndex: selectedTab, onTabSelected }) => {
+    const tabsUi = tabs.map((text, index) => <div
         key={index}
         style={getTabStyle(index, selectedTab)}
         onClick={() => onTabSelected(index)}
     >{text}</div>);
 
     return <div style={{ display: 'grid', gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
-        {tabs}
+        {tabsUi}
     </div>
 };
 

@@ -20,6 +20,8 @@ export enum Tab {
     SUBMISSION, LEADERBOARD, LOG, SETTINGS
 }
 
+const TAB_ICONS = ['🚴', '🏅', '🗒️', '⚙️'];
+
 const Home: React.FC<HomeProps> = ({ networking }) => {
     const storer = useRef(createStorer<Save>(StorageKey.WINTER_CYCLING)).current;
 
@@ -53,7 +55,7 @@ const Home: React.FC<HomeProps> = ({ networking }) => {
     };
 
     return <div style={{ display: 'flex', height: '100dvh', flexDirection: 'column' }}>
-        <Tabs selectedTab={selectedTab} onTabSelected={index => setSelectedTab(index)} />
+        <Tabs tabs={TAB_ICONS} selectedTabIndex={selectedTab} onTabSelected={index => setSelectedTab(index)} />
 
         <div style={{ flexGrow: 1, overflow: 'auto' }}>
             <Content
