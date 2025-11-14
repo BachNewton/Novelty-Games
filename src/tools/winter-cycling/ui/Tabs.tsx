@@ -1,13 +1,14 @@
 interface TabsProps {
     tabs: string[];
-    selectedTabIndex: number;
+    selectedTabIndex: number | null;
     onTabSelected: (index: number) => void;
+    fontScale: number;
 }
 
-const Tabs: React.FC<TabsProps> = ({ tabs, selectedTabIndex: selectedTab, onTabSelected }) => {
+const Tabs: React.FC<TabsProps> = ({ tabs, selectedTabIndex: selectedTab, onTabSelected, fontScale }) => {
     const tabsUi = tabs.map((text, index) => <div
         key={index}
-        style={getTabStyle(index, selectedTab)}
+        style={getTabStyle(index, selectedTab, fontScale)}
         onClick={() => onTabSelected(index)}
     >{text}</div>);
 
@@ -16,7 +17,7 @@ const Tabs: React.FC<TabsProps> = ({ tabs, selectedTabIndex: selectedTab, onTabS
     </div>
 };
 
-function getTabStyle(index: number, selectedTab: number): React.CSSProperties {
+function getTabStyle(index: number, selectedTab: number | null, fontScale: number): React.CSSProperties {
     const selected = index === selectedTab;
 
     return {
@@ -25,7 +26,7 @@ function getTabStyle(index: number, selectedTab: number): React.CSSProperties {
         padding: '5px',
         cursor: 'pointer',
         textAlign: 'center',
-        fontSize: '1.5em'
+        fontSize: `${fontScale}em`
     };
 }
 

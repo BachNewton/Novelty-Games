@@ -55,7 +55,7 @@ const Home: React.FC<HomeProps> = ({ networking }) => {
     };
 
     return <div style={{ display: 'flex', height: '100dvh', flexDirection: 'column' }}>
-        <Tabs tabs={TAB_ICONS} selectedTabIndex={selectedTab} onTabSelected={index => setSelectedTab(index)} />
+        <Tabs tabs={TAB_ICONS} selectedTabIndex={selectedTab} onTabSelected={index => setSelectedTab(index)} fontScale={1.5} />
 
         <div style={{ flexGrow: 1, overflow: 'auto' }}>
             <Content

@@ -3,6 +3,7 @@ import { Ride } from "../data/Ride";
 import { DistanceUnit, Rider, TemperatureUnit } from "../data/Save";
 import { calculateScore } from "../logic/ScoreCalculator";
 import { riderDisplayName } from "../logic/Converter";
+import Tabs from "./Tabs";
 
 interface LeaderboardsProps {
     rides: Ride[] | null;
@@ -13,8 +14,11 @@ interface Tally {
     score: number;
 }
 
+const MONTHS = ['November', 'December', 'January', 'February', 'March'];
+
 const Leaderboards: React.FC<LeaderboardsProps> = ({ rides }) => {
     const [finalTally, setFinalTally] = useState<Tally[] | null>(null);
+    const [monthIndex, setMonthIndex] = useState<number | null>(null);
 
     useEffect(() => {
         const tally: Tally[] = [
@@ -59,12 +63,21 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ rides }) => {
     return <div style={{
         display: 'flex',
         height: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'column',
-        gap: '50px'
+        flexDirection: 'column'
     }}>
-        {tallyUi}
+        <Tabs tabs={['All Winter']} selectedTabIndex={monthIndex === null ? 0 : null} onTabSelected={_ => setMonthIndex(null)} fontScale={1.25} />
+        <Tabs tabs={MONTHS} selectedTabIndex={monthIndex} onTabSelected={index => setMonthIndex(index)} fontScale={1} />
+
+        <div style={{
+            display: 'flex',
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'column',
+            gap: '50px'
+        }}>
+            {tallyUi}
+        </div>
     </div>;
 };
 
