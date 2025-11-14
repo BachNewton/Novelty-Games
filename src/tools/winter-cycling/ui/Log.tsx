@@ -3,10 +3,12 @@ import { Ride } from "../data/Ride";
 import { calculateScore } from "../logic/ScoreCalculator";
 import { DistanceUnit, Save, TemperatureUnit } from "../data/Save";
 import { riderDisplayName, toFahrenheit, toMiles } from "../logic/Converter";
+import Loading from "../../../util/ui/Loading";
 
 interface LogProps {
-    rides: Ride[];
+    rides: Ride[] | null;
     save: Save;
+    refresh: () => void;
 }
 
 const HEADER_STYLE: React.CSSProperties = {
@@ -30,11 +32,11 @@ const NUMBER_CELL_STYLE: React.CSSProperties = {
     textAlign: 'right'
 };
 
-const Log: React.FC<LogProps> = ({ rides, save }) => {
+const Log: React.FC<LogProps> = ({ rides, save, refresh }) => {
     const distanceUnitDisplay = save.distanceUnit === DistanceUnit.KM ? 'km' : 'mi';
     const temperatureUnitDisplay = save.temperatureUnit === TemperatureUnit.CELSIUS ? '°C' : '°F';
 
-    const rows = rides.map((ride, index) => {
+    const rows = rides?.map((ride, index) => {
         const distance = save.distanceUnit === DistanceUnit.MILE ? toMiles(ride.distance) : ride.distance;
         const temperature = save.temperatureUnit === TemperatureUnit.FAHRENHEIT ? toFahrenheit(ride.temperature) : ride.temperature;
 
@@ -45,13 +47,24 @@ const Log: React.FC<LogProps> = ({ rides, save }) => {
             <div style={NUMBER_CELL_STYLE}>{temperature.toFixed(1)}</div>
             <div style={NUMBER_CELL_STYLE}>{calculateScore(ride.distance, ride.temperature, DistanceUnit.KM, TemperatureUnit.CELSIUS).toLocaleString()}</div>
         </React.Fragment>;
-    }).reverse();
+    }).reverse() ?? <div style={{ gridColumn: 'span 5', padding: '15px' }}>
+            <Loading />
+        </div>;
 
     return <div style={{
         height: '100%',
         padding: '15px',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column'
     }}>
+        <button style={{
+            marginBottom: '10px',
+            fontSize: '1em',
+            padding: '5px',
+            borderRadius: '15px'
+        }} onClick={refresh}>Refresh</button>
+
         <div style={{
             maxHeight: '100%',
             boxSizing: 'border-box',

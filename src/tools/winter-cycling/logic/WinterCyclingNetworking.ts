@@ -3,8 +3,9 @@ import { Ride } from "../data/Ride";
 import { ServerEnv } from "../data/Save";
 
 const FOLDER_NAME = 'rides';
-const DEV_FILE_NAME = 'dev-rides.json';
-const PROD_FILE_NAME = 'rides.json';
+// const DEV_FILE_NAME = 'dev-rides.json';
+// const PROD_FILE_NAME = 'rides.json';
+const CHALLENGE_FILE_NAME = 'rides-offical-challenge.json';
 
 export interface WinterCyclingNetworking {
     getRides: () => Promise<Ride[]>;
@@ -14,7 +15,7 @@ export interface WinterCyclingNetworking {
 
 export function createWinterCyclingNetworking(): WinterCyclingNetworking {
     const networkService = createNetworkService<void>(NetworkedApplication.WINTER_CYCLING);
-    let fileName = DEV_FILE_NAME;
+    let fileName = CHALLENGE_FILE_NAME; // DEV_FILE_NAME;
 
     return {
         getRides: () => getRides(networkService, fileName),
@@ -39,7 +40,7 @@ export function createWinterCyclingNetworking(): WinterCyclingNetworking {
 
 
         setEnvironment: async (env) => {
-            fileName = env === ServerEnv.DEVELOPMENT ? DEV_FILE_NAME : PROD_FILE_NAME;
+            fileName = CHALLENGE_FILE_NAME; // env === ServerEnv.DEVELOPMENT ? DEV_FILE_NAME : PROD_FILE_NAME;
 
             return getRides(networkService, fileName);
         }

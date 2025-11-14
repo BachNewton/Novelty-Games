@@ -21,6 +21,7 @@ export interface Save {
     distance: number;
     temperature: number;
     serverEnv?: ServerEnv;
+    monthIndex?: number | null;
 }
 
 export function createDefaultSave(): Save {
@@ -30,6 +31,7 @@ export function createDefaultSave(): Save {
         temperatureUnit: TemperatureUnit.FAHRENHEIT,
         distance: 0,
         temperature: 45,
-        serverEnv: ServerEnv.DEVELOPMENT
+        serverEnv: ServerEnv.DEVELOPMENT,
+        monthIndex: null
     };
 }

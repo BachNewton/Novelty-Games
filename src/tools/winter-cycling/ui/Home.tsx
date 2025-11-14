@@ -20,13 +20,15 @@ export enum Tab {
     SUBMISSION, LEADERBOARD, LOG, SETTINGS
 }
 
+const TAB_ICONS = ['🚴', '🏅', '🗒️', '⚙️'];
+
 const Home: React.FC<HomeProps> = ({ networking }) => {
     const storer = useRef(createStorer<Save>(StorageKey.WINTER_CYCLING)).current;
 
     const [save, setSave] = useState(storer.loadSync() ?? createDefaultSave());
     const [selectedTab, setSelectedTab] = useState(0);
     const [submissionStatus, setSubmissionStatus] = useState(SubmissionStatus.IDLE);
-    const [rides, setRides] = useState<Ride[]>([]);
+    const [rides, setRides] = useState<Ride[] | null>(null);
 
     useEffect(() => {
         updateRoute(Route.WINTER_CYCLING);
@@ -53,7 +55,7 @@ const Home: React.FC<HomeProps> = ({ networking }) => {
     };
 
     return <div style={{ display: 'flex', height: '100dvh', flexDirection: 'column' }}>
-        <Tabs selectedTab={selectedTab} onTabSelected={index => setSelectedTab(index)} />
+        <Tabs tabs={TAB_ICONS} selectedTabIndex={selectedTab} onTabSelected={index => setSelectedTab(index)} fontScale={1.5} />
 
         <div style={{ flexGrow: 1, overflow: 'auto' }}>
             <Content
@@ -62,6 +64,8 @@ const Home: React.FC<HomeProps> = ({ networking }) => {
                 save={save}
                 onSaveChange={newSave => {
                     if (newSave.serverEnv !== save.serverEnv) {
+                        setRides(null);
+
                         networking.setEnvironment(newSave.serverEnv!).then(fetchedRides => {
                             setRides(fetchedRides);
                         });
@@ -73,6 +77,13 @@ const Home: React.FC<HomeProps> = ({ networking }) => {
                 onSubmit={handleSubmit}
                 submissionStatus={submissionStatus}
                 resetSubmissionStatus={() => setSubmissionStatus(SubmissionStatus.IDLE)}
+                refresh={() => {
+                    setRides(null);
+
+                    networking.getRides().then(fetchedRides => {
+                        setRides(fetchedRides);
+                    });
+                }}
             />
         </div>
     </div>;

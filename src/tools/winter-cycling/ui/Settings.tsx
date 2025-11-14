@@ -56,14 +56,14 @@ const Settings: React.FC<SettingsProps> = ({ save, onSaveChange }) => {
             <div style={getOptionStyle(TemperatureUnit.FAHRENHEIT, temperatureUnit)} onClick={() => handleTemperatureUnitClick(TemperatureUnit.FAHRENHEIT)}>Fahrenheit</div>
         </div>
 
-        <VerticalSpacer height={10} />
+        {/* <VerticalSpacer height={10} />
 
         <div style={{ fontWeight: 'bold', fontSize: '1.25em' }}>Server Environment</div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
             <div style={getOptionStyle(ServerEnv.DEVELOPMENT, serverEnv)} onClick={() => handleServerEnvClick(ServerEnv.DEVELOPMENT)}>Dev</div>
             <div style={getOptionStyle(ServerEnv.PRODUCTION, serverEnv)} onClick={() => handleServerEnvClick(ServerEnv.PRODUCTION)}>Prod</div>
-        </div>
+        </div> */}
     </div>
 };
 
