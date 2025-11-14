@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { Ride } from "../data/Ride";
-import { DistanceUnit, Rider, TemperatureUnit } from "../data/Save";
+import { DistanceUnit, Rider, Save, TemperatureUnit } from "../data/Save";
 import { calculateScore } from "../logic/ScoreCalculator";
 import { riderDisplayName } from "../logic/Converter";
 import Tabs from "./Tabs";
+import { MONTHS } from "../data/Months";
 
 interface LeaderboardsProps {
     rides: Ride[] | null;
+    save: Save;
+    onSaveChange: (save: Save) => void;
 }
 
 interface Tally {
@@ -14,11 +17,9 @@ interface Tally {
     score: number;
 }
 
-const MONTHS = ['November', 'December', 'January', 'February', 'March'];
-
-const Leaderboards: React.FC<LeaderboardsProps> = ({ rides }) => {
+const Leaderboards: React.FC<LeaderboardsProps> = ({ rides, save, onSaveChange }) => {
     const [finalTally, setFinalTally] = useState<Tally[] | null>(null);
-    const [monthIndex, setMonthIndex] = useState<number | null>(null);
+    const [monthIndex, setMonthIndex] = useState<number | null>(save.monthIndex ?? null);
 
     useEffect(() => {
         const tally: Tally[] = [
@@ -39,6 +40,11 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ rides }) => {
 
         setFinalTally(tally);
     }, [rides]);
+
+    const onMonthSelected = (monthIndex: number | null) => {
+        setMonthIndex(monthIndex);
+        onSaveChange({ ...save, monthIndex });
+    };
 
     const tallyUi = finalTally?.map((tallyEntry, index) => {
         const name = riderDisplayName(tallyEntry.rider);
@@ -65,8 +71,8 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ rides }) => {
         height: '100%',
         flexDirection: 'column'
     }}>
-        <Tabs tabs={['All Winter']} selectedTabIndex={monthIndex === null ? 0 : null} onTabSelected={_ => setMonthIndex(null)} fontScale={1.25} />
-        <Tabs tabs={MONTHS} selectedTabIndex={monthIndex} onTabSelected={index => setMonthIndex(index)} fontScale={1} />
+        <Tabs tabs={['All Winter']} selectedTabIndex={monthIndex === null ? 0 : null} onTabSelected={_ => onMonthSelected(null)} fontScale={1.25} />
+        <Tabs tabs={MONTHS} selectedTabIndex={monthIndex} onTabSelected={onMonthSelected} fontScale={1} />
 
         <div style={{
             display: 'flex',

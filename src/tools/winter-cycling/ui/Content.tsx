@@ -22,7 +22,7 @@ const Content: React.FC<ContentProps> = ({ selectedTab, save, onSaveChange, onSu
         case Tab.SUBMISSION:
             return <Submission save={save} onSaveChange={onSaveChange} onSubmit={onSubmit} submissionStatus={submissionStatus} resetSubmissionStatus={resetSubmissionStatus} />;
         case Tab.LEADERBOARD:
-            return <Leaderboards rides={rides} />;
+            return <Leaderboards rides={rides} save={save} onSaveChange={onSaveChange} />;
         case Tab.LOG:
             return <Log rides={rides} save={save} refresh={refresh} />;
         case Tab.SETTINGS:
