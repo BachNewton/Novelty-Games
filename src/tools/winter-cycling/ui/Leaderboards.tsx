@@ -28,7 +28,13 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ rides, save, onSaveChange }
             { rider: Rider.LANDON, score: 0 }
         ];
 
-        for (const ride of rides ?? []) {
+        const filteredRides = monthIndex !== null ? rides?.filter(ride => {
+            const rideDate = new Date(ride.date);
+            const rideMonth = rideDate.getMonth();
+            return rideMonth === (monthIndex + 10) % 12; // November is 10
+        }) : rides;
+
+        for (const ride of filteredRides ?? []) {
             const rideScore = calculateScore(ride.distance, ride.temperature, DistanceUnit.KM, TemperatureUnit.CELSIUS);
 
             const tallyEntry = tally.find(tallyEntry => tallyEntry.rider === ride.rider)!;
@@ -39,7 +45,7 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ rides, save, onSaveChange }
         tally.sort((a, b) => b.score - a.score);
 
         setFinalTally(tally);
-    }, [rides]);
+    }, [rides, monthIndex]);
 
     const onMonthSelected = (monthIndex: number | null) => {
         setMonthIndex(monthIndex);
