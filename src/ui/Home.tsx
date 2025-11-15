@@ -21,8 +21,7 @@ import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/Laby
 import { APP_VERSION } from '../Versioning';
 import Button from '../util/ui/Button';
 import { createPetsDatabase } from '../mobile-games/pets/logic/PetsDatabase';
-import Poker from "../board-games/poker/ui/Home";
-import { PokerTable } from '../board-games/poker/ui/PokerTable';
+import PokerTable from '../board-games/poker/ui/PokerTable';
 
 const BUTTON_BORDER_RADIUS = 20;
 const BUTTON_MARGIN = '7px';
