@@ -171,8 +171,8 @@ export const PokerTable: React.FC = () => {
                                 <div
                                     key={p.id}
                                     className={`p-2 rounded border ${state.currentTurnIndex === i
-                                            ? "border-yellow-400"
-                                            : "border-gray-500"
+                                        ? "border-yellow-400"
+                                        : "border-gray-500"
                                         } ${p.folded ? "opacity-50" : ""}`}
                                 >
                                     <div className="font-semibold">
@@ -248,3 +248,5 @@ export const PokerTable: React.FC = () => {
         </div>
     );
 };
+
+export default PokerTable;

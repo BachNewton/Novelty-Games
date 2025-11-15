@@ -4,7 +4,8 @@
     "type": "commonjs",
     "main": "server.js",
     "scripts": {
-        "start": "node server.js"
+        "start": "node server.js",
+        "test-client": "node test_client.js"
     },
     "dependencies": {
         "poker-evaluator": "^2.1.1",

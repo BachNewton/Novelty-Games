@@ -1,4 +1,5 @@
 import { Table as TableData } from "./Home";
+import PokerTable from './PokerTable';
 
 interface TableProps {
     hostGame: boolean;
@@ -6,7 +7,9 @@ interface TableProps {
 }
 
 const Table: React.FC<TableProps> = ({ hostGame, data }) => {
-    return <div>Table</div>;
+    return <div>
+        <PokerTable />
+    </div>;
 };
 
 export default Table;
