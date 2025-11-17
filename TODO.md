@@ -1,7 +1,7 @@
 ## Todo List
 
 ### Novelty Games
-- [ ] Move puppeteer to dev deps
+- [X] Move puppeteer to dev deps
 - [ ] Move server deps into their own package.json
 - [ ] Remove v2 of Database if we are going to be using v1
 
