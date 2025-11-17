@@ -40,7 +40,7 @@ export interface FestivalSong extends Data {
     name: string;
     artist: string;
     year: string;
-    length: string;
+    length: number;
     sampleMp3: string | null;
     albumArt: string;
     difficulties: FestivalSongDifficulty;
@@ -49,10 +49,10 @@ export interface FestivalSong extends Data {
 interface FestivalSongDifficulty {
     bass: number;
     drums: number;
-    guitar: number | null;
+    guitar: number;
     proBass: number;
     proDrums: number;
-    proGuitar: number | null;
+    proGuitar: number;
     vocals: number;
 }
 

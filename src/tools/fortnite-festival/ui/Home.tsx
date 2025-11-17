@@ -346,8 +346,8 @@ function songsUi(
             : bDifficulty - aDifficulty;
 
         if (compare === 0) {
-            const aSeconds = lengthToSeconds(a.length);
-            const bSeconds = lengthToSeconds(b.length);
+            const aSeconds = a.length;
+            const bSeconds = b.length;
 
             const subCompare = sortOrder === SortOrder.DESCENDING
                 ? aSeconds - bSeconds
@@ -417,12 +417,6 @@ async function fetchLatestSongs(onSongsFetched: (fetchedSongs: FestivalSong[] | 
     const songs = await getFestivalSongs();
 
     onSongsFetched(songs);
-}
-
-function lengthToSeconds(time: string): number {
-    const [min, sec] = time.split(':').map(Number);
-
-    return min * 60 + sec;
 }
 
 export default Home;
