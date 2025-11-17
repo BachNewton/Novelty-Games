@@ -6,29 +6,47 @@ const SCRIPT_CONTENT_REGEX = /<script id=\"__NEXT_DATA__\".+>(.+)<\/script>/g;
 (async () => {
     console.log('Opening:', BASE_URL);
     const response = await fetch(BASE_URL);
-    console.log(response);
     const text = await response.text();
+    console.log('Fetched festival page');
 
     const matches = text.matchAll(SCRIPT_CONTENT_REGEX);
     const json = matches.next().value[1];
     const object = JSON.parse(json);
-    const songs = object.props.pageProps.data.map(song => {
-        const guitarDifficulty = song.difficulties.gr !== undefined ? song.difficulties.gr : null;
-        const proGuitarDifficulty = song.difficulties.pg !== undefined ? song.difficulties.pg : null;
 
-        const bassDifficulty = song.difficulties.ba;
-        const drumsDifficulty = song.difficulties.ds;
-        const proBassDifficulty = song.difficulties.pb;
-        const proDrumsDifficulty = song.difficulties.pd;
-        const vocalsDifficulty = song.difficulties.vl;
+    const ids = object.props.pageProps.pageData.map(song => song.sn);
+    console.log('Song IDs:', ids);
+
+    const songDataNetworkCalls = ids.map(id => {
+        return async () => {
+            const response = await fetch(`https://fnzone.es/_next/data/e0ppCLoZ15RRgRyhKrmJt/en/festival/${id}.json`);
+            const text = await response.text();
+            const object = JSON.parse(text);
+            const songData = object.pageProps.songData;
+            return songData;
+        };
+    });
+
+    const songData = await Promise.all(songDataNetworkCalls.map(call => call()));
+    console.log('Song Data:', songData);
+
+    const songs = songData.map(song => {
+        console.log('Processing song:', song.tt, 'by', song.an);
+
+        const guitarDifficulty = song.in.gr;
+        const proGuitarDifficulty = song.in.pg;
+        const bassDifficulty = song.in.ba;
+        const drumsDifficulty = song.in.ds;
+        const proBassDifficulty = song.in.pb;
+        const proDrumsDifficulty = song.in.pd;
+        const vocalsDifficulty = song.in.vl;
 
         return {
-            name: song.title,
-            artist: song.artistName,
-            albumArt: song.image,
+            name: song.tt,
+            artist: song.an,
+            albumArt: song.au,
             year: song.ry,
             length: song.dn,
-            sampleMp3: song.previewUrl,
+            sampleMp3: null,
             difficulties: {
                 bass: bassDifficulty,
                 drums: drumsDifficulty,
