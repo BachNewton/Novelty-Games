@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Ride } from "../data/Ride";
 import { DistanceUnit, Rider, Save, TemperatureUnit } from "../data/Save";
 import { calculateScore } from "../logic/ScoreCalculator";
-import { riderDisplayName } from "../logic/Converter";
+import { riderDisplayName, toFahrenheit, toMiles } from "../logic/Converter";
 import Tabs from "./Tabs";
 import { MONTHS } from "../data/Months";
 
@@ -91,6 +91,7 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ rides, save, onSaveChange }
         const fontScale = index === 0 ? 3 : index === 1 ? 2.5 : 1.5;
         const medalColor = index === 0 ? "#FFD700" : index === 1 ? "#C0C0C0" : "#CD7F32";
 
+        const subtitleUi = getSubtitleUi(leaderboardIndex, tallyEntry, save);
 
         return <div key={index} style={{
             border: `3px solid ${medalColor}`,
@@ -101,7 +102,8 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ rides, save, onSaveChange }
             <div style={{ fontSize: `${fontScale}em`, fontWeight: 'bold' }}>
                 {medal} {name} {medal}
             </div>
-            <div style={{ textAlign: 'center' }}>Score: {tallyEntry.score.toLocaleString()}</div>
+
+            <div style={{ textAlign: 'center' }}>{subtitleUi}</div>
         </div>;
     });
 
@@ -146,6 +148,40 @@ function getSortingFunction(leaderboardIndex: number | null): (a: Tally, b: Tall
             }
         default: // Total Score
             return (a, b) => b.score - a.score;
+    }
+}
+
+function getSubtitleUi(leaderboardIndex: number | null, tallyEntry: Tally, save: Save): string {
+    const noRides = 'No rides';
+
+    if (leaderboardIndex === 0) { // Highest Score
+        const ride = tallyEntry.highestScoringRide;
+
+        if (!ride) return noRides;
+
+        const rideScore = calculateScore(ride.distance, ride.temperature, DistanceUnit.KM, TemperatureUnit.CELSIUS);
+
+        return `Highest Score: ${rideScore.toLocaleString()}`;
+    } else if (leaderboardIndex === 1) { // Longest Distance
+        const ride = tallyEntry.longestRide;
+
+        if (!ride) return noRides;
+
+        const distance = save.distanceUnit === DistanceUnit.MILE ? toMiles(ride.distance) : ride.distance;
+        const unit = save.distanceUnit === DistanceUnit.MILE ? 'miles' : 'km';
+
+        return `Longest Ride: ${distance.toFixed(1)} ${unit}`;
+    } else if (leaderboardIndex === 2) { // Coldest Temperature
+        const ride = tallyEntry.coldestRide;
+
+        if (!ride) return noRides;
+
+        const temperature = save.temperatureUnit === TemperatureUnit.FAHRENHEIT ? toFahrenheit(ride.temperature) : ride.temperature;
+        const unit = save.temperatureUnit === TemperatureUnit.FAHRENHEIT ? '°F' : '°C';
+
+        return `Coldest Ride: ${temperature.toFixed(1)} ${unit}`;
+    } else { // Total Score
+        return `Score: ${tallyEntry.score.toLocaleString()}`;
     }
 }
 
