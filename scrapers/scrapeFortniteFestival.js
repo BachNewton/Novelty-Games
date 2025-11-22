@@ -2,12 +2,16 @@ import fs from 'fs';
 
 const BASE_URL = 'https://fnzone.es/en/festival';
 const SCRIPT_CONTENT_REGEX = /<script id=\"__NEXT_DATA__\".+>(.+)<\/script>/g;
+const BUILD_ID_REGEX = /static\/(\w+)\/_buildManifest/g;
 
 (async () => {
     console.log('Opening:', BASE_URL);
     const response = await fetch(BASE_URL);
     const text = await response.text();
     console.log('Fetched festival page');
+
+    const buildIdMatches = text.matchAll(BUILD_ID_REGEX);
+    const buildId = buildIdMatches.next().value[1];
 
     const matches = text.matchAll(SCRIPT_CONTENT_REGEX);
     const json = matches.next().value[1];
@@ -18,7 +22,7 @@ const SCRIPT_CONTENT_REGEX = /<script id=\"__NEXT_DATA__\".+>(.+)<\/script>/g;
 
     const songDataNetworkCalls = ids.map(id => {
         return async () => {
-            const response = await fetch(`https://fnzone.es/_next/data/e0ppCLoZ15RRgRyhKrmJt/en/festival/${id}.json`);
+            const response = await fetch(`https://fnzone.es/_next/data/${buildId}/en/festival/${id}.json`);
             const text = await response.text();
             const object = JSON.parse(text);
             const songData = object.pageProps.songData;
