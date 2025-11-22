@@ -133,7 +133,11 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ rides, save, onSaveChange }
 function getSortingFunction(leaderboardIndex: number | null): (a: Tally, b: Tally) => number {
     switch (leaderboardIndex) {
         case 0: // Highest Score
-            return (a, b) => b.score - a.score;
+            return (a, b) => {
+                const aHighestScore = a.highestScoringRide ? calculateScore(a.highestScoringRide.distance, a.highestScoringRide.temperature, DistanceUnit.KM, TemperatureUnit.CELSIUS) : 0;
+                const bHighestScore = b.highestScoringRide ? calculateScore(b.highestScoringRide.distance, b.highestScoringRide.temperature, DistanceUnit.KM, TemperatureUnit.CELSIUS) : 0;
+                return bHighestScore - aHighestScore;
+            };
         case 1: // Longest Distance
             return (a, b) => {
                 const aDistance = a.longestRide ? a.longestRide.distance : 0;
