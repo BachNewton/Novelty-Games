@@ -20,6 +20,7 @@ interface Tally {
 const Leaderboards: React.FC<LeaderboardsProps> = ({ rides, save, onSaveChange }) => {
     const [finalTally, setFinalTally] = useState<Tally[] | null>(null);
     const [monthIndex, setMonthIndex] = useState<number | null>(save.monthIndex ?? null);
+    const [leaderboardIndex, setLeaderboardIndex] = useState<number | null>(save.leaderboardIndex ?? null);
 
     useEffect(() => {
         const tally: Tally[] = [
@@ -52,6 +53,11 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ rides, save, onSaveChange }
         onSaveChange({ ...save, monthIndex });
     };
 
+    const onLeaderboardSelected = (leaderboardIndex: number | null) => {
+        setLeaderboardIndex(leaderboardIndex);
+        onSaveChange({ ...save, leaderboardIndex });
+    };
+
     const tallyUi = finalTally?.map((tallyEntry, index) => {
         const name = riderDisplayName(tallyEntry.rider);
         const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
@@ -79,6 +85,8 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ rides, save, onSaveChange }
     }}>
         <Tabs tabs={['All Winter']} selectedTabIndex={monthIndex === null ? 0 : null} onTabSelected={_ => onMonthSelected(null)} fontScale={1.25} />
         <Tabs tabs={MONTHS} selectedTabIndex={monthIndex} onTabSelected={onMonthSelected} fontScale={1} />
+        <Tabs tabs={['Total Score']} selectedTabIndex={leaderboardIndex === null ? 0 : null} onTabSelected={_ => onLeaderboardSelected(null)} fontScale={1.25} useAltColor={true} />
+        <Tabs tabs={['Score', 'Distance', 'Temperature']} selectedTabIndex={leaderboardIndex} onTabSelected={onLeaderboardSelected} fontScale={1} useAltColor={true} />
 
         <div style={{
             display: 'flex',
