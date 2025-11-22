@@ -15,6 +15,9 @@ interface LeaderboardsProps {
 interface Tally {
     rider: Rider;
     score: number;
+    highestScoringRide: Ride | null;
+    coldestRide: Ride | null;
+    longestRide: Ride | null;
 }
 
 const Leaderboards: React.FC<LeaderboardsProps> = ({ rides, save, onSaveChange }) => {
@@ -24,9 +27,9 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ rides, save, onSaveChange }
 
     useEffect(() => {
         const tally: Tally[] = [
-            { rider: Rider.KYLE, score: 0 },
-            { rider: Rider.NICK, score: 0 },
-            { rider: Rider.LANDON, score: 0 }
+            { rider: Rider.KYLE, score: 0, highestScoringRide: null, coldestRide: null, longestRide: null },
+            { rider: Rider.NICK, score: 0, highestScoringRide: null, coldestRide: null, longestRide: null },
+            { rider: Rider.LANDON, score: 0, highestScoringRide: null, coldestRide: null, longestRide: null }
         ];
 
         const filteredRides = monthIndex !== null ? rides?.filter(ride => {
@@ -40,13 +43,37 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ rides, save, onSaveChange }
 
             const tallyEntry = tally.find(tallyEntry => tallyEntry.rider === ride.rider)!;
 
+            const currentHighestScoringRide = tallyEntry.highestScoringRide !== null
+                ? calculateScore(tallyEntry.highestScoringRide.distance, tallyEntry.highestScoringRide.temperature, DistanceUnit.KM, TemperatureUnit.CELSIUS)
+                : -1;
+
+            const currentColdestRideTemp = tallyEntry.coldestRide !== null
+                ? tallyEntry.coldestRide.temperature
+                : Infinity;
+
+            const currentLongestRideDistance = tallyEntry.longestRide !== null
+                ? tallyEntry.longestRide.distance
+                : -1;
+
+            if (rideScore > currentHighestScoringRide) {
+                tallyEntry.highestScoringRide = ride;
+            }
+
+            if (ride.temperature < currentColdestRideTemp) {
+                tallyEntry.coldestRide = ride;
+            }
+
+            if (ride.distance > currentLongestRideDistance) {
+                tallyEntry.longestRide = ride;
+            }
+
             tallyEntry.score += rideScore;
         }
 
-        tally.sort((a, b) => b.score - a.score);
+        tally.sort(getSortingFunction(leaderboardIndex));
 
         setFinalTally(tally);
-    }, [rides, monthIndex]);
+    }, [rides, monthIndex, leaderboardIndex]);
 
     const onMonthSelected = (monthIndex: number | null) => {
         setMonthIndex(monthIndex);
@@ -100,5 +127,26 @@ const Leaderboards: React.FC<LeaderboardsProps> = ({ rides, save, onSaveChange }
         </div>
     </div>;
 };
+
+function getSortingFunction(leaderboardIndex: number | null): (a: Tally, b: Tally) => number {
+    switch (leaderboardIndex) {
+        case 0: // Highest Score
+            return (a, b) => b.score - a.score;
+        case 1: // Longest Distance
+            return (a, b) => {
+                const aDistance = a.longestRide ? a.longestRide.distance : 0;
+                const bDistance = b.longestRide ? b.longestRide.distance : 0;
+                return bDistance - aDistance;
+            }
+        case 2: // Coldest Temperature
+            return (a, b) => {
+                const aTemp = a.coldestRide ? a.coldestRide.temperature : Infinity;
+                const bTemp = b.coldestRide ? b.coldestRide.temperature : Infinity;
+                return aTemp - bTemp; // Colder is better
+            }
+        default: // Total Score
+            return (a, b) => b.score - a.score;
+    }
+}
 
 export default Leaderboards;
