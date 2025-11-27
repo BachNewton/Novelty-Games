@@ -22,12 +22,10 @@ interface Actions {
 const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards }) => {
     const isTurn = data.player.isTurn;
 
-    const boardCardsUi = boardCards.map((card, index) => <Card key={index} data={card} />);
-
     return <div style={{
         margin: '10px'
     }}>
-        <Board pot={pot} cards={boardCards} />
+        <Board pot={pot} cards={boardCards} data={data} />
 
         <div>Pot size: {pot}</div>
         <div>Player: {data.player.name}</div>

@@ -1,14 +1,18 @@
 import VerticalSpacer from "../../../util/ui/Spacer";
 import { Card as CardData } from "../data/Card";
+import { GameData } from "../data/GameData";
 import Card from "./Card";
 
 interface BoardProps {
     pot: number;
     cards: CardData[];
+    data: GameData;
 }
 
-const Board: React.FC<BoardProps> = ({ pot, cards }) => {
-    const cardsUi = cards.map((card, index) => <Card key={index} data={card} />);
+const Board: React.FC<BoardProps> = ({ pot, cards, data }) => {
+    const playerUi = data.players.map((player, index) => <div key={index}>
+        {player.name}:
+    </div>);
 
     return <div style={{
         backgroundColor: 'darkgreen',
@@ -34,6 +38,10 @@ const Board: React.FC<BoardProps> = ({ pot, cards }) => {
             fontSize: '2em',
             textAlign: 'center'
         }}>Pot: {pot}</div>
+
+        <VerticalSpacer height={15} />
+
+        {playerUi}
     </div>;
 };
 

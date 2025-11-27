@@ -2,6 +2,7 @@ import io from 'socket.io-client';
 import { wait } from '../../../util/Async';
 import { GameData } from '../data/GameData';
 import { Card, toCard } from '../data/Card';
+import { toPlayer } from '../data/Player';
 
 const LOBBY_NAME = 'Novelty Games';
 
@@ -112,7 +113,8 @@ export function createPokerNetworking(): PokerNetworking {
                 card2: toCard(player.card2),
                 isTurn: player.isTurn,
                 stack: player.stack
-            }
+            },
+            players: players.map((p: any) => toPlayer(p))
         };
 
         callbacks.gameUpdate(gameData);
@@ -125,8 +127,6 @@ export function createPokerNetworking(): PokerNetworking {
     socket.on('potSize', pot => callbacks.potUpdate(pot));
 
     socket.on('dealBoard', cards => callbacks.dealBoard(cards.map((c: any) => toCard(c))));
-
-    socket.emit('test', 'Hello from PokerNetworking');
 
     instance = {
         connect: (name) => {

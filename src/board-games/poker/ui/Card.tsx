@@ -6,7 +6,7 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ data }) => {
     const content = data === null
-        ? <></>
+        ? <div>?</div>
         : <div style={{
             color: getColor(data)
         }}>{data.rank} {getSuitSymbol(data)}</div>;
