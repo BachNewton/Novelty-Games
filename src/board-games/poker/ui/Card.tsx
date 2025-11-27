@@ -16,7 +16,9 @@ const Card: React.FC<CardProps> = ({ data }) => {
         border: '1px solid black',
         borderRadius: '15px',
         padding: '10px',
-        backgroundColor: 'white'
+        backgroundColor: 'white',
+        width: '4ch',
+        textAlign: 'center'
     }}>
         {content}
     </div>;

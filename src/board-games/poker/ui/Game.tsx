@@ -1,3 +1,4 @@
+import { Card as CardData } from "../data/Card";
 import { GameData } from "../data/GameData";
 import Card from "./Card";
 
@@ -6,7 +7,7 @@ interface GameProps {
     isYourTurn: boolean;
     actions: Actions;
     pot: number;
-    boardCards: string[];
+    boardCards: CardData[];
 }
 
 interface Actions {
@@ -20,10 +21,19 @@ interface Actions {
 const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards }) => {
     const isTurn = data.player.isTurn;
 
+    const boardCardsUi = boardCards.map((card, index) => <Card key={index} data={card} />);
+
     return <div style={{
         margin: '10px'
     }}>
-        <div>Board cards: {boardCards.join(', ')}</div>
+        <div>Board cards:</div>
+        <div style={{
+            display: 'flex',
+            gap: '10px'
+        }}>
+            {boardCardsUi}
+        </div>
+
         <div>Pot size: {pot}</div>
         <div>Player: {data.player.name}</div>
         <div>Your cards:</div>

@@ -1,7 +1,7 @@
 import io from 'socket.io-client';
 import { wait } from '../../../util/Async';
 import { GameData } from '../data/GameData';
-import { toCard } from '../data/Card';
+import { Card, toCard } from '../data/Card';
 
 const LOBBY_NAME = 'Novelty Games';
 
@@ -14,7 +14,7 @@ export interface PokerNetworking {
     onGameUpdate: (callback: (data: GameData) => void) => void;
     onYourTurn: (callback: () => void) => void;
     onPotUpdate: (callback: (potSize: number) => void) => void;
-    onDealBoard: (callback: (cards: string[]) => void) => void;
+    onDealBoard: (callback: (cards: Card[]) => void) => void;
 }
 
 type Action = Check | Call;
@@ -30,7 +30,7 @@ interface Callbacks {
     gameUpdate: (data: GameData) => void;
     yourTurn: () => void;
     potUpdate: (potSize: number) => void;
-    dealBoard: (cards: string[]) => void;
+    dealBoard: (cards: Card[]) => void;
 }
 
 export function createPokerNetworking(): PokerNetworking {
@@ -123,7 +123,7 @@ export function createPokerNetworking(): PokerNetworking {
 
     socket.on('potSize', pot => callbacks.potUpdate(pot));
 
-    socket.on('dealBoard', cards => callbacks.dealBoard(cards));
+    socket.on('dealBoard', cards => callbacks.dealBoard(cards.map((c: any) => toCard(c))));
 
     socket.emit('test', 'Hello from PokerNetworking');
 

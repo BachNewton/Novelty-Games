@@ -4,6 +4,7 @@ import { createPokerNetworking } from "../logic/PokerNetworking";
 import Lobby from "./Lobby";
 import Game from "./Game";
 import { GameData } from "../data/GameData";
+import { Card } from "../data/Card";
 
 interface HomeProps { }
 
@@ -28,7 +29,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
     const [players, setPlayers] = useState<string[]>([]);
     const [isYourTurn, setIsYourTurn] = useState(false);
     const [pot, setPot] = useState(0);
-    const [boardCards, setBoardCards] = useState<string[]>([]);
+    const [boardCards, setBoardCards] = useState<Card[]>([]);
 
     useEffect(() => {
         updateRoute(Route.POKER);
