@@ -10,6 +10,7 @@ export interface PokerNetworking {
     onGameBegun: (callback: () => void) => void;
     onRoomUsers: (callback: (users: string[]) => void) => void;
     onGameUpdate: (callback: (data: GameData) => void) => void;
+    onYourTurn: (callback: () => void) => void;
 }
 
 let instance: PokerNetworking | null = null;
@@ -18,6 +19,7 @@ interface Callbacks {
     gameBegun: () => void;
     roomUsers: (users: string[]) => void;
     gameUpdate: (data: GameData) => void;
+    yourTurn: () => void;
 }
 
 export function createPokerNetworking(): PokerNetworking {
@@ -30,7 +32,8 @@ export function createPokerNetworking(): PokerNetworking {
     const callbacks: Callbacks = {
         gameBegun: () => { },
         roomUsers: () => { },
-        gameUpdate: () => { }
+        gameUpdate: () => { },
+        yourTurn: () => { }
     };
 
     socket.onAny((eventName, args) => {
@@ -89,6 +92,10 @@ export function createPokerNetworking(): PokerNetworking {
         callbacks.gameUpdate(gameData);
     });
 
+    socket.on('yourTurn', () => {
+        callbacks.yourTurn();
+    });
+
     socket.emit('test', 'Hello from PokerNetworking');
 
     instance = {
@@ -109,7 +116,8 @@ export function createPokerNetworking(): PokerNetworking {
 
         onGameBegun: callback => callbacks.gameBegun = callback,
         onRoomUsers: callback => callbacks.roomUsers = callback,
-        onGameUpdate: callback => callbacks.gameUpdate = callback
+        onGameUpdate: callback => callbacks.gameUpdate = callback,
+        onYourTurn: callback => callbacks.yourTurn = callback
     };
 
     return instance;

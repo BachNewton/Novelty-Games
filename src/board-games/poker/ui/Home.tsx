@@ -26,6 +26,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
     const [state, setState] = useState<State>(DEFAULT_STATE);
     const [username, setUsername] = useState('');
     const [players, setPlayers] = useState<string[]>([]);
+    const [isYourTurn, setIsYourTurn] = useState(false);
 
     useEffect(() => {
         updateRoute(Route.POKER);
@@ -44,6 +45,10 @@ const Home: React.FC<HomeProps> = ({ }) => {
             const gameState: GameState = { type: 'game', data: data };
             setState(gameState);
         });
+
+        networking.onYourTurn(() => {
+            setIsYourTurn(true);
+        });
     }, []);
 
     switch (state.type) {
@@ -58,6 +63,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
         case 'game':
             return <Game
                 data={state.data}
+                isYourTurn={isYourTurn}
             />;
     }
 };
