@@ -1,7 +1,9 @@
 import VerticalSpacer from "../../../util/ui/Spacer";
 import { Card as CardData } from "../data/Card";
 import { GameData } from "../data/GameData";
+// import { AutoCircleLayout, CircleItem } from "./AutoCircleLayout";
 import Card from "./Card";
+// import CircleLayout, { CircleItem } from "./CircleLayout";
 
 interface BoardProps {
     pot: number;
@@ -42,6 +44,38 @@ const Board: React.FC<BoardProps> = ({ pot, cards, data }) => {
         <VerticalSpacer height={15} />
 
         {playerUi}
+
+        {/* <AutoCircleLayout ringGap={0} itemGap={0}>
+            <CircleItem
+                center={<div>Kyle</div>}
+                middle={<div>Middle</div>}
+                outer={<div>123</div>}
+            />
+
+            <CircleItem
+                center={<div>Nick</div>}
+                middle={<div>Middle</div>}
+                outer={<div>456</div>}
+            />
+
+            <CircleItem
+                center={<div>Landon</div>}
+                middle={<div>Middle</div>}
+                outer={<div>789</div>}
+            />
+
+            <CircleItem
+                center={<div>Elliott</div>}
+                middle={<div>Middle</div>}
+                outer={<div>912</div>}
+            />
+
+            <CircleItem
+                center={<div>Eric</div>}
+                middle={<div>Middle</div>}
+                outer={<div>234</div>}
+            />
+        </AutoCircleLayout> */}
     </div>;
 };
 
