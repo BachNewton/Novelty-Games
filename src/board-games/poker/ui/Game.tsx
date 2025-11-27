@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card as CardData } from "../data/Card";
 import { GameData } from "../data/GameData";
 import Action from "./Action";
@@ -21,6 +22,8 @@ interface Actions {
 }
 
 const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards }) => {
+    const [raiseAmount, setRaiseAmount] = useState(0);
+
     const isTurn = data.player.isTurn;
 
     return <div style={{
@@ -51,13 +54,22 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards 
             // gridTemplateColumns: '1fr 1fr'
         }}>
             <Action isEnabled={isTurn} onClick={actions.fold}>Fold</Action>
-            <Action isEnabled={isTurn} onClick={actions.fold}>Check / Call</Action>
+            <Action isEnabled={isTurn} onClick={actions.check}>Check</Action>
+            <Action isEnabled={isTurn} onClick={actions.call}>Call</Action>
+            <Action isEnabled={isTurn} onClick={actions.fold}>{`Raise ${raiseAmount}`}</Action>
+            <input
+                type="range"
+                value={raiseAmount}
+                min={0}
+                max={data.player.stack}
+                onChange={e => setRaiseAmount(Number(e.target.value))}
+            />
 
-            <button disabled={!isTurn} onClick={actions.fold}>Fold</button>
-            <button disabled={!isTurn} onClick={actions.check}>Check</button>
-            <button disabled={!isTurn} onClick={actions.call}>Call</button>
-            <button disabled={!isTurn} onClick={() => actions.raise(10)}>Raise</button>
-            <button disabled={!isTurn} onClick={actions.allIn}>All In</button>
+            {/* <button disabled={!isTurn} onClick={actions.fold}>Fold</button> */}
+            {/* <button disabled={!isTurn} onClick={actions.check}>Check</button> */}
+            {/* <button disabled={!isTurn} onClick={actions.call}>Call</button> */}
+            {/* <button disabled={!isTurn} onClick={() => actions.raise(10)}>Raise</button> */}
+            {/* <button disabled={!isTurn} onClick={actions.allIn}>All In</button> */}
         </div>
     </div>;
 };

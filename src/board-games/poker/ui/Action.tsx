@@ -7,10 +7,15 @@ interface ActionProps {
 const Action: React.FC<ActionProps> = ({ isEnabled, children, onClick }) => {
     return <div style={{
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
-        border: '1px solid black',
+        border: `1px solid ${isEnabled ? 'black' : 'transparent'}`,
         borderRadius: '15px',
         padding: '10px',
-        boxShadow: '0px 0px 5px black'
+        boxShadow: isEnabled ? '0px 0px 5px black' : undefined,
+        color: isEnabled ? undefined : 'grey'
+    }} onClick={() => {
+        if (isEnabled) {
+            onClick();
+        }
     }}>{children}</div>;
 };
 
