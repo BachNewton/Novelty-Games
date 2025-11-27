@@ -106,6 +106,7 @@ export function createPokerNetworking(): PokerNetworking {
 
         const gameData: GameData = {
             player: {
+                name: player.name,
                 card1: player.card1,
                 card2: player.card2,
                 isTurn: player.isTurn
