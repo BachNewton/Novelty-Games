@@ -5,4 +5,5 @@ export interface Player {
     card1: Card | null;
     card2: Card | null;
     isTurn: boolean;
+    stack: number;
 }

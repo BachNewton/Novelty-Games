@@ -45,6 +45,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards 
             <Card data={data.player.card2} />
         </div>
         {isTurn ? <div>It's your turn!</div> : <div>Waiting for other players...</div>}
+        <div>Stack: {data.player.stack}</div>
         <button disabled={!isTurn} onClick={actions.fold}>Fold</button>
         <button disabled={!isTurn} onClick={actions.check}>Check</button>
         <button disabled={!isTurn} onClick={actions.call}>Call</button>

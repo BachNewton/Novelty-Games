@@ -110,7 +110,8 @@ export function createPokerNetworking(): PokerNetworking {
                 name: player.name,
                 card1: toCard(player.card1),
                 card2: toCard(player.card2),
-                isTurn: player.isTurn
+                isTurn: player.isTurn,
+                stack: player.stack
             }
         };
 
