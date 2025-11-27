@@ -58,6 +58,8 @@ export class LabyrinthState extends BoardGamesState {
 
 export class MonopolyState extends BoardGamesState { }
 
+export class PokerState extends BoardGamesState { }
+
 export enum VersionState {
     CURRENT,
     UNKNOWN,

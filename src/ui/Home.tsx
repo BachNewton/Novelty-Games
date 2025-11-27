@@ -13,9 +13,10 @@ import { createFreeMarketCommunicator } from '../mobile-games/free-market/logic/
 import { createStorer, StorageKey } from '../util/Storage';
 import { FreeMarketSave } from '../mobile-games/free-market/data/FreeMarketSave';
 import SubMenu from './SubMenu';
-import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState, PetsState, MobileGamesState, ToddlerTreasureHuntState, MonopolyState } from './State';
+import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState, PetsState, MobileGamesState, ToddlerTreasureHuntState, MonopolyState, PokerState } from './State';
 import Labyrinth from '../board-games/labyrinth/ui/Labyrinth';
 import Monopoly from '../board-games/monopoly/ui/Home';
+import Poker from '../board-games/poker/ui/Home';
 import ProfileUi from './Profile';
 import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/LabyrinthCommunicator';
 import { APP_VERSION } from '../Versioning';
@@ -53,6 +54,7 @@ interface OnClickHandlers {
     onPetsClick: () => void;
     onToddlerTreasureHuntClick: () => void;
     onMonopolyClick: () => void;
+    onPokerClick: () => void;
 }
 
 const Home: React.FC<HomeProps> = ({ updateListener }) => {
@@ -92,7 +94,8 @@ const Home: React.FC<HomeProps> = ({ updateListener }) => {
         onLabyrinthClick: () => setState(createLabyrinthState()),
         onPetsClick: () => setState(new PetsState()),
         onToddlerTreasureHuntClick: () => setState(new ToddlerTreasureHuntState()),
-        onMonopolyClick: () => setState(new MonopolyState())
+        onMonopolyClick: () => setState(new MonopolyState()),
+        onPokerClick: () => setState(new PokerState())
     };
 
     if (state instanceof TriviaState) {
@@ -170,6 +173,8 @@ function boardGamesUi(boardGamesState: BoardGamesState, onClickHandlers: OnClick
         return <Labyrinth communicator={boardGamesState.communicator} />;
     } else if (boardGamesState instanceof MonopolyState) {
         return <Monopoly />;
+    } else if (boardGamesState instanceof PokerState) {
+        return <Poker />;
     }
 
     return <SubMenu
@@ -178,7 +183,8 @@ function boardGamesUi(boardGamesState: BoardGamesState, onClickHandlers: OnClick
         menuItems={[
             { buttonText: 'Mille Bornes 🏎️', onClick: onClickHandlers.onMilleBornesClick },
             { buttonText: 'Labyrinth 🧩', onClick: onClickHandlers.onLabyrinthClick },
-            { buttonText: 'Monopoly 🏦', onClick: onClickHandlers.onMonopolyClick }
+            { buttonText: 'Monopoly 🏦', onClick: onClickHandlers.onMonopolyClick },
+            { buttonText: 'Poker ♠️', onClick: onClickHandlers.onPokerClick }
         ]}
     />;
 }
@@ -230,6 +236,8 @@ function getInitialState(): State {
             return new ToddlerTreasureHuntState();
         case Route.MONOPOLY:
             return new MonopolyState();
+        case Route.POKER:
+            return new PokerState();
         default:
             return new HomeState();
     }
