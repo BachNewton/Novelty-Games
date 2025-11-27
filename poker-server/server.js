@@ -146,7 +146,7 @@ io.on('connection', (sock) => {
     // }
 
 
-    console.log(username + " joined: " + lobbyname);
+    console.log(username + "(" + sock.id + ") joined: " + lobbyname);
 
 
     //check if the game has already started, if so  they cant click button
@@ -171,10 +171,14 @@ io.on('connection', (sock) => {
 
 
   sock.on('disconnect', () => {
+    console.log("someone disconnected, sock ID was: " + sock.id);
+
     //Going through array of games to see if the sock was in any of them
     var theGame = getGameFromSockID(sock.id);
+
     if (theGame != null) {
       const user = theGame.getCurrentUser(sock.id);
+
       if (user != null) {
         io.to(theGame.getGameID()).emit("message", theGame.getCurrentUser(sock.id).getName() + " has left the channel")
         console.log(theGame.getCurrentUser(sock.id).getName() + " has left the channel");
@@ -183,23 +187,16 @@ io.on('connection', (sock) => {
         io.to(user.getRoom()).emit('roomUsers', { room: user.getRoom(), users: theGame.getAllNames(), stacksizes: theGame.getAllStackSizes() });
       }
     }
-
-
   });
-
 
   sock.on('message', (text) => {
     var theGame = getGameFromSockID(sock.id);
     io.to(theGame.getGameID()).emit("message", text);
-
-
   });
 
   sock.on('audio', (name) => {
     var theGame = getGameFromSockID(sock.id);
     io.to(theGame.getGameID()).emit("audio", name);
-
-
   });
 
 
@@ -269,17 +266,8 @@ io.on('connection', (sock) => {
       console.log(player.getName() + " has chosen action: " + player.getValTurn());
       hand.playerTurn(turnVar);
     }
-    else {
-      sock.emit()
-    }
-
-
   });
-  //inside connect end ->
 });
-
-
-
 
 function getGameFromSockID(id) {
   for (var i = 0; i < listOfPokerRooms.length; i++) {
