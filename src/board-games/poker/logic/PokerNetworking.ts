@@ -1,5 +1,6 @@
 import io from 'socket.io-client';
 import { wait } from '../../../util/Async';
+import { GameData } from '../data/GameData';
 
 const LOBBY_NAME = 'Novelty Games';
 
@@ -8,6 +9,7 @@ export interface PokerNetworking {
     startGame: () => void;
     onGameBegun: (callback: () => void) => void;
     onRoomUsers: (callback: (users: string[]) => void) => void;
+    onGameUpdate: (callback: (data: GameData) => void) => void;
 }
 
 let instance: PokerNetworking | null = null;
@@ -15,6 +17,7 @@ let instance: PokerNetworking | null = null;
 interface Callbacks {
     gameBegun: () => void;
     roomUsers: (users: string[]) => void;
+    gameUpdate: (data: GameData) => void;
 }
 
 export function createPokerNetworking(): PokerNetworking {
@@ -26,7 +29,8 @@ export function createPokerNetworking(): PokerNetworking {
 
     const callbacks: Callbacks = {
         gameBegun: () => { },
-        roomUsers: () => { }
+        roomUsers: () => { },
+        gameUpdate: () => { }
     };
 
     socket.onAny((eventName, args) => {
@@ -69,6 +73,22 @@ export function createPokerNetworking(): PokerNetworking {
         callbacks.roomUsers(users);
     });
 
+    socket.on('roomPlayers', data => {
+        const dealerIndex = data[0] as number;
+
+        const players = data.splice(1);
+        const player = players.find((p: any) => p.name === username);
+
+        const gameData: GameData = {
+            player: {
+                card1: player.card1,
+                card2: player.card2
+            }
+        };
+
+        callbacks.gameUpdate(gameData);
+    });
+
     socket.emit('test', 'Hello from PokerNetworking');
 
     instance = {
@@ -88,7 +108,8 @@ export function createPokerNetworking(): PokerNetworking {
         },
 
         onGameBegun: callback => callbacks.gameBegun = callback,
-        onRoomUsers: callback => callbacks.roomUsers = callback
+        onRoomUsers: callback => callbacks.roomUsers = callback,
+        onGameUpdate: callback => callbacks.gameUpdate = callback
     };
 
     return instance;

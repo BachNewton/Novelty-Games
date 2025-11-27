@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Route, updateRoute } from "../../../ui/Routing";
 import { createPokerNetworking } from "../logic/PokerNetworking";
 import Lobby from "./Lobby";
+import Game from "./Game";
+import { GameData } from "../data/GameData";
 
 interface HomeProps { }
 
@@ -13,12 +15,14 @@ interface LobbyState {
 
 interface GameState {
     type: 'game';
+    data: GameData;
 }
 
 const DEFAULT_STATE: LobbyState = { type: 'lobby' };
 
 const Home: React.FC<HomeProps> = ({ }) => {
     const networking = useRef(createPokerNetworking()).current;
+    const hasGameStarted = useRef(false);
     const [state, setState] = useState<State>(DEFAULT_STATE);
     const [username, setUsername] = useState('');
     const [players, setPlayers] = useState<string[]>([]);
@@ -27,12 +31,18 @@ const Home: React.FC<HomeProps> = ({ }) => {
         updateRoute(Route.POKER);
 
         networking.onGameBegun(() => {
-            const gameState: GameState = { type: 'game' };
-            setState(gameState);
+            hasGameStarted.current = true;
         });
 
         networking.onRoomUsers(users => {
             setPlayers(users);
+        });
+
+        networking.onGameUpdate(data => {
+            if (!hasGameStarted.current) return;
+
+            const gameState: GameState = { type: 'game', data: data };
+            setState(gameState);
         });
     }, []);
 
@@ -46,7 +56,9 @@ const Home: React.FC<HomeProps> = ({ }) => {
                 startGame={networking.startGame}
             />;
         case 'game':
-            return <div>Game has started! Good luck, {username}!</div>;
+            return <Game
+                data={state.data}
+            />;
     }
 };
 
