@@ -1,5 +1,6 @@
 import { Card as CardData } from "../data/Card";
 import { GameData } from "../data/GameData";
+import Action from "./Action";
 import Board from "./Board";
 import Card from "./Card";
 
@@ -23,7 +24,11 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards 
     const isTurn = data.player.isTurn;
 
     return <div style={{
-        margin: '10px'
+        padding: '10px',
+        height: '100dvh',
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column'
     }}>
         <Board pot={pot} cards={boardCards} data={data} />
 
@@ -38,11 +43,22 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards 
             <Card data={data.player.card2} />
         </div>
         <div>Stack: {data.player.stack}</div>
-        <button disabled={!isTurn} onClick={actions.fold}>Fold</button>
-        <button disabled={!isTurn} onClick={actions.check}>Check</button>
-        <button disabled={!isTurn} onClick={actions.call}>Call</button>
-        <button disabled={!isTurn} onClick={() => actions.raise(10)}>Raise</button>
-        <button disabled={!isTurn} onClick={actions.allIn}>All In</button>
+        <div style={{ flexGrow: 1 }}></div>
+
+        <div style={{
+            display: 'grid',
+            gap: '10px'
+            // gridTemplateColumns: '1fr 1fr'
+        }}>
+            <Action isEnabled={isTurn} onClick={actions.fold}>Fold</Action>
+            <Action isEnabled={isTurn} onClick={actions.fold}>Check / Call</Action>
+
+            <button disabled={!isTurn} onClick={actions.fold}>Fold</button>
+            <button disabled={!isTurn} onClick={actions.check}>Check</button>
+            <button disabled={!isTurn} onClick={actions.call}>Call</button>
+            <button disabled={!isTurn} onClick={() => actions.raise(10)}>Raise</button>
+            <button disabled={!isTurn} onClick={actions.allIn}>All In</button>
+        </div>
     </div>;
 };
 
