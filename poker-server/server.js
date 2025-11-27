@@ -48,7 +48,7 @@ io.on('connection', (sock) => {
   });
 
   sock.on('joinAttempt', ({ username, stacksize, lobbyname, password }) => {
-    console.log(username + "is attempting to join lobby: " + lobbyname);
+    console.log(username + " is attempting to join lobby: " + lobbyname);
     var gameFound = false;
     for (var i = 0; i < listOfPokerRooms.length; i++) {
       if (listOfPokerRooms[i].getGameID() == lobbyname) {
