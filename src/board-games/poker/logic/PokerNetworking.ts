@@ -7,9 +7,15 @@ export interface PokerNetworking {
     connect: (username: string) => void;
     startGame: () => void;
     onGameBegun: (callback: () => void) => void;
+    onRoomUsers: (callback: (users: string[]) => void) => void;
 }
 
 let instance: PokerNetworking | null = null;
+
+interface Callbacks {
+    gameBegun: () => void;
+    roomUsers: (users: string[]) => void;
+}
 
 export function createPokerNetworking(): PokerNetworking {
     if (instance !== null) return instance;
@@ -17,7 +23,11 @@ export function createPokerNetworking(): PokerNetworking {
     const socket = io('localhost:8080');
 
     let username = 'username';
-    let gameBegunCallback = () => { };
+
+    const callbacks: Callbacks = {
+        gameBegun: () => { },
+        roomUsers: () => { }
+    };
 
     socket.onAny((eventName, args) => {
         console.log(`Received event: ${eventName}`, args);
@@ -51,7 +61,12 @@ export function createPokerNetworking(): PokerNetworking {
     });
 
     socket.on('gameBegun', () => {
-        gameBegunCallback();
+        callbacks.gameBegun();
+    });
+
+    socket.on('roomUsers', data => {
+        const users = data.users as string[];
+        callbacks.roomUsers(users);
     });
 
     socket.emit('test', 'Hello from PokerNetworking');
@@ -72,7 +87,8 @@ export function createPokerNetworking(): PokerNetworking {
             socket.emit('startGame');
         },
 
-        onGameBegun: callback => gameBegunCallback = callback
+        onGameBegun: callback => callbacks.gameBegun = callback,
+        onRoomUsers: callback => callbacks.roomUsers = callback
     };
 
     return instance;

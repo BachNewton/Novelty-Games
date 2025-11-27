@@ -21,6 +21,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
     const networking = useRef(createPokerNetworking()).current;
     const [state, setState] = useState<State>(DEFAULT_STATE);
     const [username, setUsername] = useState('');
+    const [players, setPlayers] = useState<string[]>([]);
 
     useEffect(() => {
         updateRoute(Route.POKER);
@@ -29,14 +30,20 @@ const Home: React.FC<HomeProps> = ({ }) => {
             const gameState: GameState = { type: 'game' };
             setState(gameState);
         });
+
+        networking.onRoomUsers(users => {
+            setPlayers(users);
+        });
     }, []);
 
     switch (state.type) {
         case 'lobby':
             return <Lobby
                 username={username}
+                players={players}
                 setUsername={setUsername}
                 connect={networking.connect}
+                startGame={networking.startGame}
             />;
         case 'game':
             return <div>Game has started! Good luck, {username}!</div>;
