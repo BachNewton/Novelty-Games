@@ -1,6 +1,7 @@
 import io from 'socket.io-client';
 import { wait } from '../../../util/Async';
 import { GameData } from '../data/GameData';
+import { toCard } from '../data/Card';
 
 const LOBBY_NAME = 'Novelty Games';
 
@@ -56,7 +57,7 @@ export function createPokerNetworking(): PokerNetworking {
         if (eventName === 'roomPlayers') return;
         if (eventName === 'yourTurn') return;
         if (eventName === 'potSize') return;
-        if (eventName === 'dealDoard') return;
+        if (eventName === 'dealBoard') return;
 
         console.log(`Unhandled event: ${eventName}`, args);
     });
@@ -107,8 +108,8 @@ export function createPokerNetworking(): PokerNetworking {
         const gameData: GameData = {
             player: {
                 name: player.name,
-                card1: player.card1,
-                card2: player.card2,
+                card1: toCard(player.card1),
+                card2: toCard(player.card2),
                 isTurn: player.isTurn
             }
         };

@@ -1,4 +1,5 @@
 import { GameData } from "../data/GameData";
+import Card from "./Card";
 
 interface GameProps {
     data: GameData;
@@ -19,11 +20,20 @@ interface Actions {
 const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards }) => {
     const isTurn = data.player.isTurn;
 
-    return <div>
+    return <div style={{
+        margin: '10px'
+    }}>
         <div>Board cards: {boardCards.join(', ')}</div>
         <div>Pot size: {pot}</div>
         <div>Player: {data.player.name}</div>
-        <div>Your cards: {data.player.card1}, {data.player.card2}</div>
+        <div>Your cards:</div>
+        <div style={{
+            display: 'flex',
+            gap: '10px'
+        }}>
+            <Card data={data.player.card1} />
+            <Card data={data.player.card2} />
+        </div>
         {isTurn ? <div>It's your turn!</div> : <div>Waiting for other players...</div>}
         <button disabled={!isTurn} onClick={actions.fold}>Fold</button>
         <button disabled={!isTurn} onClick={actions.check}>Check</button>
