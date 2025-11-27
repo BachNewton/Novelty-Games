@@ -57,7 +57,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
             <Action isEnabled={isTurn} onClick={actions.fold}>Fold</Action>
             <Action isEnabled={isTurn} onClick={actions.check}>Check</Action>
             <Action isEnabled={isTurn} onClick={actions.call}>Call</Action>
-            <Action isEnabled={isTurn} onClick={actions.fold}>{`Raise ${raiseAmount}`}</Action>
+            <Action isEnabled={isTurn} onClick={() => actions.raise(raiseAmount)}>{`Raise ${raiseAmount}`}</Action>
             <input
                 type="range"
                 value={raiseAmount}

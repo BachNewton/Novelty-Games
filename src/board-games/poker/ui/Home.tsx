@@ -76,7 +76,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
                     fold: () => networking.takeAction({ type: 'fold' }),
                     check: () => networking.takeAction({ type: 'check' }),
                     call: () => networking.takeAction({ type: 'call' }),
-                    raise: (amount) => { },
+                    raise: (amount) => networking.takeAction({ type: 'raise', amount: amount }),
                     allIn: () => { }
                 }}
                 pot={pot}

@@ -19,11 +19,12 @@ export interface PokerNetworking {
     onMessage: (callback: (message: string) => void) => void;
 }
 
-type Action = Check | Call | Fold;
+type Action = Check | Call | Fold | Raise;
 
 interface Check { type: 'check' }
 interface Call { type: 'call' }
 interface Fold { type: 'fold' }
+interface Raise { type: 'raise', amount: number }
 
 let instance: PokerNetworking | null = null;
 
@@ -64,6 +65,7 @@ export function createPokerNetworking(): PokerNetworking {
         if (eventName === 'potSize') return;
         if (eventName === 'dealBoard') return;
         if (eventName === 'message') return;
+        if (eventName === 'allIn') return;
 
         console.log(`Unhandled event: ${eventName}`, args);
     });
@@ -127,6 +129,8 @@ export function createPokerNetworking(): PokerNetworking {
 
     socket.on('message', message => callbacks.message(message));
 
+    socket.on('allIn', () => socket.emit('playerTurn', 'playerIsAllIn'));
+
     instance = {
         connect: (name) => {
             username = name;
@@ -159,7 +163,7 @@ export function createPokerNetworking(): PokerNetworking {
     return instance;
 }
 
-function getActionValue(action: Action): string {
+function getActionValue(action: Action): string | number {
     switch (action.type) {
         case 'check':
             return 'check';
@@ -167,5 +171,7 @@ function getActionValue(action: Action): string {
             return 'call';
         case 'fold':
             return 'fold'
+        case 'raise':
+            return action.amount;
     }
 }
