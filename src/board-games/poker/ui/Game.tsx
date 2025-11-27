@@ -4,6 +4,8 @@ interface GameProps {
     data: GameData;
     isYourTurn: boolean;
     actions: Actions;
+    pot: number;
+    boardCards: string[];
 }
 
 interface Actions {
@@ -14,10 +16,12 @@ interface Actions {
     allIn: () => void;
 }
 
-const Game: React.FC<GameProps> = ({ data, isYourTurn, actions }) => {
+const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards }) => {
     const isTurn = data.player.isTurn;
 
     return <div>
+        <div>Board cards: {boardCards.join(', ')}</div>
+        <div>Pot size: {pot}</div>
         <div>Your cards: {data.player.card1}, {data.player.card2}</div>
         {isTurn ? <div>It's your turn!</div> : <div>Waiting for other players...</div>}
         <button disabled={!isTurn} onClick={actions.fold}>Fold</button>

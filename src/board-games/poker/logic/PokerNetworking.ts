@@ -12,6 +12,8 @@ export interface PokerNetworking {
     onRoomUsers: (callback: (users: string[]) => void) => void;
     onGameUpdate: (callback: (data: GameData) => void) => void;
     onYourTurn: (callback: () => void) => void;
+    onPotUpdate: (callback: (potSize: number) => void) => void;
+    onDealBoard: (callback: (cards: string[]) => void) => void;
 }
 
 type Action = Check | Call;
@@ -26,6 +28,8 @@ interface Callbacks {
     roomUsers: (users: string[]) => void;
     gameUpdate: (data: GameData) => void;
     yourTurn: () => void;
+    potUpdate: (potSize: number) => void;
+    dealBoard: (cards: string[]) => void;
 }
 
 export function createPokerNetworking(): PokerNetworking {
@@ -39,7 +43,9 @@ export function createPokerNetworking(): PokerNetworking {
         gameBegun: () => { },
         roomUsers: () => { },
         gameUpdate: () => { },
-        yourTurn: () => { }
+        yourTurn: () => { },
+        potUpdate: () => { },
+        dealBoard: () => { }
     };
 
     socket.onAny((eventName, args) => {
@@ -49,8 +55,10 @@ export function createPokerNetworking(): PokerNetworking {
         if (eventName === 'roomUsers') return;
         if (eventName === 'roomPlayers') return;
         if (eventName === 'yourTurn') return;
+        if (eventName === 'potSize') return;
+        if (eventName === 'dealDoard') return;
 
-        console.log(`Received event: ${eventName}`, args);
+        console.log(`Unhandled event: ${eventName}`, args);
     });
 
     socket.on('badJoin', async _ => {
@@ -111,6 +119,10 @@ export function createPokerNetworking(): PokerNetworking {
         callbacks.yourTurn();
     });
 
+    socket.on('potSize', pot => callbacks.potUpdate(pot));
+
+    socket.on('dealBoard', cards => callbacks.dealBoard(cards));
+
     socket.emit('test', 'Hello from PokerNetworking');
 
     instance = {
@@ -136,7 +148,9 @@ export function createPokerNetworking(): PokerNetworking {
         onGameBegun: callback => callbacks.gameBegun = callback,
         onRoomUsers: callback => callbacks.roomUsers = callback,
         onGameUpdate: callback => callbacks.gameUpdate = callback,
-        onYourTurn: callback => callbacks.yourTurn = callback
+        onYourTurn: callback => callbacks.yourTurn = callback,
+        onPotUpdate: callback => callbacks.potUpdate = callback,
+        onDealBoard: callback => callbacks.dealBoard = callback
     };
 
     return instance;
