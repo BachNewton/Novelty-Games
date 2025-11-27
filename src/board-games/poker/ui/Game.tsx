@@ -1,5 +1,6 @@
 import { Card as CardData } from "../data/Card";
 import { GameData } from "../data/GameData";
+import Board from "./Board";
 import Card from "./Card";
 
 interface GameProps {
@@ -26,13 +27,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards 
     return <div style={{
         margin: '10px'
     }}>
-        <div>Board cards:</div>
-        <div style={{
-            display: 'flex',
-            gap: '10px'
-        }}>
-            {boardCardsUi}
-        </div>
+        <Board pot={pot} cards={boardCards} />
 
         <div>Pot size: {pot}</div>
         <div>Player: {data.player.name}</div>
