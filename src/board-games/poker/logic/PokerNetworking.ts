@@ -6,6 +6,7 @@ const LOBBY_NAME = 'Novelty Games';
 export interface PokerNetworking {
     connect: (username: string) => void;
     startGame: () => void;
+    onGameBegun: (callback: () => void) => void;
 }
 
 let instance: PokerNetworking | null = null;
@@ -16,6 +17,7 @@ export function createPokerNetworking(): PokerNetworking {
     const socket = io('localhost:8080');
 
     let username = 'username';
+    let gameBegunCallback = () => { };
 
     socket.onAny((eventName, args) => {
         console.log(`Received event: ${eventName}`, args);
@@ -48,6 +50,10 @@ export function createPokerNetworking(): PokerNetworking {
         ]);
     });
 
+    socket.on('gameBegun', () => {
+        gameBegunCallback();
+    });
+
     socket.emit('test', 'Hello from PokerNetworking');
 
     instance = {
@@ -64,7 +70,9 @@ export function createPokerNetworking(): PokerNetworking {
 
         startGame: () => {
             socket.emit('startGame');
-        }
+        },
+
+        onGameBegun: callback => gameBegunCallback = callback
     };
 
     return instance;
