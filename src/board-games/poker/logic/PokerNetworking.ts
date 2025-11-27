@@ -26,7 +26,7 @@ export function createPokerNetworking(): PokerNetworking {
             username: null,
             stacksize: 0,
             lobbyname: LOBBY_NAME,
-            smallBind: 1,
+            smallBlind: 1,
             bigBlind: 2,
             password: ''
         });
@@ -36,7 +36,7 @@ export function createPokerNetworking(): PokerNetworking {
         socket.emit('joinRoom', [
             LOBBY_NAME,
             username,
-            0
+            1000
         ]);
     });
 
@@ -44,7 +44,7 @@ export function createPokerNetworking(): PokerNetworking {
         socket.emit('joinRoom', [
             LOBBY_NAME,
             username,
-            0
+            1000
         ]);
     });
 
