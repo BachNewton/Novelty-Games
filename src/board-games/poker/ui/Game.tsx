@@ -11,6 +11,7 @@ interface GameProps {
     actions: Actions;
     pot: number;
     boardCards: CardData[];
+    message: string;
 }
 
 interface Actions {
@@ -21,7 +22,7 @@ interface Actions {
     allIn: () => void;
 }
 
-const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards }) => {
+const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards, message }) => {
     const [raiseAmount, setRaiseAmount] = useState(0);
 
     const isTurn = data.player.isTurn;
@@ -33,7 +34,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards 
         display: 'flex',
         flexDirection: 'column'
     }}>
-        <Board pot={pot} cards={boardCards} data={data} />
+        <Board pot={pot} cards={boardCards} data={data} message={message} />
 
         <div>Pot size: {pot}</div>
         <div>Player: {data.player.name}</div>

@@ -16,6 +16,7 @@ export interface PokerNetworking {
     onYourTurn: (callback: () => void) => void;
     onPotUpdate: (callback: (potSize: number) => void) => void;
     onDealBoard: (callback: (cards: Card[]) => void) => void;
+    onMessage: (callback: (message: string) => void) => void;
 }
 
 type Action = Check | Call | Fold;
@@ -33,6 +34,7 @@ interface Callbacks {
     yourTurn: () => void;
     potUpdate: (potSize: number) => void;
     dealBoard: (cards: Card[]) => void;
+    message: (message: string) => void;
 }
 
 export function createPokerNetworking(): PokerNetworking {
@@ -48,7 +50,8 @@ export function createPokerNetworking(): PokerNetworking {
         gameUpdate: () => { },
         yourTurn: () => { },
         potUpdate: () => { },
-        dealBoard: () => { }
+        dealBoard: () => { },
+        message: () => { }
     };
 
     socket.onAny((eventName, args) => {
@@ -60,6 +63,7 @@ export function createPokerNetworking(): PokerNetworking {
         if (eventName === 'yourTurn') return;
         if (eventName === 'potSize') return;
         if (eventName === 'dealBoard') return;
+        if (eventName === 'message') return;
 
         console.log(`Unhandled event: ${eventName}`, args);
     });
@@ -115,13 +119,13 @@ export function createPokerNetworking(): PokerNetworking {
         callbacks.gameUpdate(gameData);
     });
 
-    socket.on('yourTurn', () => {
-        callbacks.yourTurn();
-    });
+    socket.on('yourTurn', () => callbacks.yourTurn());
 
     socket.on('potSize', pot => callbacks.potUpdate(pot));
 
     socket.on('dealBoard', cards => callbacks.dealBoard(cards.map((c: any) => toCard(c))));
+
+    socket.on('message', message => callbacks.message(message));
 
     instance = {
         connect: (name) => {
@@ -148,7 +152,8 @@ export function createPokerNetworking(): PokerNetworking {
         onGameUpdate: callback => callbacks.gameUpdate = callback,
         onYourTurn: callback => callbacks.yourTurn = callback,
         onPotUpdate: callback => callbacks.potUpdate = callback,
-        onDealBoard: callback => callbacks.dealBoard = callback
+        onDealBoard: callback => callbacks.dealBoard = callback,
+        onMessage: callback => callbacks.message = callback
     };
 
     return instance;

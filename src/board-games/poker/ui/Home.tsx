@@ -30,6 +30,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
     const [isYourTurn, setIsYourTurn] = useState(false);
     const [pot, setPot] = useState(0);
     const [boardCards, setBoardCards] = useState<Card[]>([]);
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
         updateRoute(Route.POKER);
@@ -49,17 +50,13 @@ const Home: React.FC<HomeProps> = ({ }) => {
             setState(gameState);
         });
 
-        networking.onYourTurn(() => {
-            setIsYourTurn(true);
-        });
+        networking.onYourTurn(() => setIsYourTurn(true));
 
-        networking.onPotUpdate(potSize => {
-            setPot(potSize);
-        });
+        networking.onPotUpdate(potSize => setPot(potSize));
 
-        networking.onDealBoard(cards => {
-            setBoardCards(cards);
-        });
+        networking.onDealBoard(cards => setBoardCards(cards));
+
+        networking.onMessage(msg => setMessage(msg));
     }, []);
 
     switch (state.type) {
@@ -84,6 +81,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
                 }}
                 pot={pot}
                 boardCards={boardCards}
+                message={message}
             />;
     }
 };
