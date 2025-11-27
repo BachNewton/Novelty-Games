@@ -7,11 +7,17 @@ const LOBBY_NAME = 'Novelty Games';
 export interface PokerNetworking {
     connect: (username: string) => void;
     startGame: () => void;
+    takeAction: (action: Action) => void;
     onGameBegun: (callback: () => void) => void;
     onRoomUsers: (callback: (users: string[]) => void) => void;
     onGameUpdate: (callback: (data: GameData) => void) => void;
     onYourTurn: (callback: () => void) => void;
 }
+
+type Action = Check | Call;
+
+interface Check { type: 'check' }
+interface Call { type: 'call' }
 
 let instance: PokerNetworking | null = null;
 
@@ -37,6 +43,13 @@ export function createPokerNetworking(): PokerNetworking {
     };
 
     socket.onAny((eventName, args) => {
+        if (eventName === 'badJoin') return;
+        if (eventName === 'goodJoin') return;
+        if (eventName === 'gameBegun') return;
+        if (eventName === 'roomUsers') return;
+        if (eventName === 'roomPlayers') return;
+        if (eventName === 'yourTurn') return;
+
         console.log(`Received event: ${eventName}`, args);
     });
 
@@ -80,6 +93,7 @@ export function createPokerNetworking(): PokerNetworking {
         const dealerIndex = data[0] as number;
 
         const players = data.splice(1);
+        console.log('Players:', players);
         const player = players.find((p: any) => p.name === username);
 
         const gameData: GameData = {
@@ -114,6 +128,10 @@ export function createPokerNetworking(): PokerNetworking {
             socket.emit('startGame');
         },
 
+        takeAction: (action) => {
+            socket.emit('playerTurn', getActionValue(action));
+        },
+
         onGameBegun: callback => callbacks.gameBegun = callback,
         onRoomUsers: callback => callbacks.roomUsers = callback,
         onGameUpdate: callback => callbacks.gameUpdate = callback,
@@ -121,4 +139,13 @@ export function createPokerNetworking(): PokerNetworking {
     };
 
     return instance;
+}
+
+function getActionValue(action: Action): string {
+    switch (action.type) {
+        case 'check':
+            return 'call';
+        case 'call':
+            return 'call';
+    }
 }

@@ -64,6 +64,13 @@ const Home: React.FC<HomeProps> = ({ }) => {
             return <Game
                 data={state.data}
                 isYourTurn={isYourTurn}
+                actions={{
+                    fold: () => { },
+                    check: () => networking.takeAction({ type: 'check' }),
+                    call: () => networking.takeAction({ type: 'call' }),
+                    raise: (amount) => { },
+                    allIn: () => { }
+                }}
             />;
     }
 };
