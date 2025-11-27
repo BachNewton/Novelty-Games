@@ -136,7 +136,7 @@ io.on('connection', (sock) => {
       }
     }
 
-    const user = new player(username, stacksize, sock.id, lobbyname);
+    const user = new Player(username, stacksize, sock.id, lobbyname);
 
     // //Create new game
     // if(!isCreated)

@@ -1,11 +1,11 @@
 import DeckOfCards from './DeckOfCards.js';
-import player from './player.js';
+import Player from './player.js';
 import pokerHand from './pokerHand.js';
 
 //const DeckOfCards = require('./DeckOfCards');
 
-export default class pokerGame{
-    constructor(gameID){
+export default class pokerGame {
+    constructor(gameID) {
         this.gameHost;
         this.password;
         this.defaultStackSize;
@@ -21,78 +21,69 @@ export default class pokerGame{
         this.hand = null;
         this.handNumber = 0;
     }
-    newHand()
-    {
+    newHand() {
         this.hand = new pokerHand(this);
     }
-    returnHand()
-    {
+    returnHand() {
         return this.hand;
     }
-    getSB()
-    {
+    getSB() {
         return this.smallBlind;
     }
-    getBB()
-    {
+    getBB() {
         return this.bigBlind;
     }
-    getPassword()
-    {
+    getPassword() {
         return this.password;
     }
-    getHost()
-    {
+    getHost() {
         return this.gameHost;
     }
 
-    getDealerIdx(){
+    getDealerIdx() {
         return this.dealerIdx;
     }
-    
-    getTurnTime(){
+
+    getTurnTime() {
         return this.turnTime;
     }
-    getDeck(){
+    getDeck() {
         return this.deck;
     }
-    shuffle(){
+    shuffle() {
         this.deck.shuffle();
     }
-    getBegun(){
+    getBegun() {
         return this.begun;
     }
-    setBegun(hasit){
+    setBegun(hasit) {
         this.begun = hasit;
     }
 
     //add player object to array players
-    playerJoin(player){
-        if(this.gameHost == null)
-        {
+    playerJoin(player) {
+        if (this.gameHost == null) {
             this.gameHost = player;
         }
         this.players.push(player);
         this.totalPlayers++;
     }
-    
+
     //remove playr from array given a socket id
-    playerLeave(id){
-        for(var i = 0; i < this.totalPlayers; i++)
-        {
-            if(this.players[i].getSock() == id){
+    playerLeave(id) {
+        for (var i = 0; i < this.totalPlayers; i++) {
+            if (this.players[i].getSock() == id) {
                 let temp = this.players[i];
-                
+
                 this.players.splice(i, 1);
                 this.totalPlayers--;
-                if(this.players.length > 0)
-                {
+                if (this.players.length > 0) {
                     this.gameHost = this.players[0];
                 }
-                else{
+                else {
                     this.gameHost = null;
                 }
-               
+
                 return temp;
 
             }
@@ -100,130 +91,110 @@ export default class pokerGame{
     }
 
     //pass through socket id and return the player object
-    getCurrentUser(id){
-        for(var i = 0; i < this.totalPlayers; i++)
-        {
-            if(this.players[i].getSock() == id){
+    getCurrentUser(id) {
+        for (var i = 0; i < this.totalPlayers; i++) {
+            if (this.players[i].getSock() == id) {
                 return this.players[i];
             }
         }
     }
 
 
-    getAllPlayers(){
+    getAllPlayers() {
         return this.players;
     }
-    getTotalPlayers(){
+    getTotalPlayers() {
         return this.totalPlayers;
     }
-    getEligiblePlayers()
-    {
+    getEligiblePlayers() {
         var ePlayers = [];
-        for(var i = 0; i < this.players.length; i++)
-        {
-            if(this.players[i].getStackSize() > 0)
-            {
+        for (var i = 0; i < this.players.length; i++) {
+            if (this.players[i].getStackSize() > 0) {
                 ePlayers.push(this.players[i]);
             }
         }
         return ePlayers;
     }
-    getAllNames(){
+    getAllNames() {
         var names = [];
-        for(var i = 0; i < this.totalPlayers; i++)
-        {
+        for (var i = 0; i < this.totalPlayers; i++) {
             names.push(this.players[i].getName());
         }
         return names;
     }
-    getAllStackSizes(){
+    getAllStackSizes() {
         var stacks = [];
-        for(var i = 0; i < this.totalPlayers; i++)
-        {
+        for (var i = 0; i < this.totalPlayers; i++) {
             stacks.push(this.players[i].getStackSize());
         }
         return stacks;
     }
-    getGameID()
-    {
+    getGameID() {
         return this.gameID;
     }
 
-    checkIfNameIsInGame(name)
-    {
-        for(var i = 0; i < this.getAllPlayers().length; i++)
-        {
-            if(this.getAllPlayers()[i].getName() == name)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    checkIfSockIDisInGame(sockID)
-    {
-        for(var i = 0; i < this.totalPlayers; i++)
-        {
-            if(this.players[i].getSock() == sockID)
-            {
+    checkIfNameIsInGame(name) {
+        for (var i = 0; i < this.getAllPlayers().length; i++) {
+            if (this.getAllPlayers()[i].getName() == name) {
                 return true;
             }
         }
         return false;
     }
 
-    getPlayerFromSockID(sockID){
-        for(var i = 0; i < this.totalPlayers; i++)
-        {
-            if(this.players[i].getSock() == sockID)
-            {
+    checkIfSockIDisInGame(sockID) {
+        for (var i = 0; i < this.totalPlayers; i++) {
+            if (this.players[i].getSock() == sockID) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    getPlayerFromSockID(sockID) {
+        for (var i = 0; i < this.totalPlayers; i++) {
+            if (this.players[i].getSock() == sockID) {
                 return this.players[i];
             }
         }
         return null;
     }
 
-    getPlayerAt(i){
+    getPlayerAt(i) {
         return this.players[i];
     }
-    
-    
+
+
     //give each player in the hand a playerHand object
-    dealHands(){
-        for(var i = 0; i < this.getAllPlayers().length; i++)
-        {
-            if(this.getAllPlayers()[i].getStackSize() != 0 )
-            {
+    dealHands() {
+        for (var i = 0; i < this.getAllPlayers().length; i++) {
+            if (this.getAllPlayers()[i].getStackSize() != 0) {
                 this.getAllPlayers()[i].setHand(this.getDeck().deal(), this.getDeck().deal());
-            }   
+            }
         }
     }
-    
 
-    returnDisplayHands(){
+
+    returnDisplayHands() {
         var arr = [];
-       
-        for(var i = 0; i < this.totalPlayers; i++)
-        {
+
+        for (var i = 0; i < this.totalPlayers; i++) {
             //If they have a hand, display it to client side
-            if(this.players[i].getHand() != null)
-            {
-                var info = {name: this.players[i].getName(), hand: this.players[i].getHand().getPNGHand()}
+            if (this.players[i].getHand() != null) {
+                var info = { name: this.players[i].getName(), hand: this.players[i].getHand().getPNGHand() }
                 arr.push(info);
             }
             //else display no hand for them
-            else{
-                var info = {name: this.players[i].getName(), hand: null}
+            else {
+                var info = { name: this.players[i].getName(), hand: null }
                 arr.push(info);
             }
         }
         return arr;
-        
+
     }
 
-    increaseDealerPosition()
-    {
+    increaseDealerPosition() {
         this.dealerIdx += 1;
     }
 
@@ -231,45 +202,46 @@ export default class pokerGame{
     //deal the flop/turn/river depending on whats already been dealt
 
     //sets all players moves to u (undefined, havent gone yet)
-    
-    clearPlayersInfo(){
-        for(var i = 0; i < this.players.length; i++){
+
+    clearPlayersInfo() {
+        for (var i = 0; i < this.players.length; i++) {
             this.players[i].resetInfo();
         }
     }
-    
-    
-    emitPlayers(){
+
+
+    emitPlayers() {
         /*
         [dealerPosition, {name, stacksize, currMoneyInBettingRound, isFolded, card1, card2, isShown1, isShown2, isStraddled, isTurn}]
         */
 
         var returnArr = [];
-        var dealerIndex = this.dealerIdx%this.getTotalPlayers();
+        var dealerIndex = this.dealerIdx % this.getTotalPlayers();
         returnArr.push(dealerIndex);
         var currPerson;
-        for(var i = 0; i < this.getTotalPlayers(); i++){
+        for (var i = 0; i < this.getTotalPlayers(); i++) {
             currPerson = this.getPlayerAt(i);
             var holeCard1;
             var holeCard2;
-            if(currPerson.getHand() == null){
+            if (currPerson.getHand() == null) {
                 holeCard1 = "blue_back.png";
                 holeCard2 = "blue_back.png"
             }
-            else{
+            else {
                 holeCard1 = currPerson.getHand().getHoleCard1().cardToPNG();
                 holeCard2 = currPerson.getHand().getHoleCard2().cardToPNG();
             }
-            
-            returnArr.push({name: currPerson.getName(), stack:  currPerson.getStackSize(), moneyIn: currPerson.getCurrMoneyInBettingRound(), 
-            card1: holeCard1, card2: holeCard2, 
-            valTurn: currPerson.getValTurn(), isShown1: false, isShown2: false, isStraddled: false, isTurn: currPerson.getTurn()
+
+            returnArr.push({
+                name: currPerson.getName(), stack: currPerson.getStackSize(), moneyIn: currPerson.getCurrMoneyInBettingRound(),
+                card1: holeCard1, card2: holeCard2,
+                valTurn: currPerson.getValTurn(), isShown1: false, isShown2: false, isStraddled: false, isTurn: currPerson.getTurn()
             });
         }
-        return  returnArr;
+        return returnArr;
     }
     //clear the game for another hand, and starts the next hand in 5 seconds
-    clearGame(){
+    clearGame() {
         this.clearPlayersInfo();
         this.increaseDealerPosition();
         this.deck = new DeckOfCards();
@@ -278,14 +250,14 @@ export default class pokerGame{
         this.deck.shuffle();
         this.deck.shuffle();
 
-        
+
         this.hand = null;
-        
-        
+
+
         this.handNumber += 1;
         var self = this;
 
-        setTimeout(function() {
+        setTimeout(function () {
 
             self.newHand();
         }, 5000);
@@ -293,7 +265,3 @@ export default class pokerGame{
     }
 
 }
-
-
-
-

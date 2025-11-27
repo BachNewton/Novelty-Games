@@ -1,6 +1,6 @@
 import playerHand from './playerHand.js';
 
-class player {
+class Player {
   constructor(name, stacksize, s, room) {
     this.hand = null;
     this.stackSize = stacksize;
@@ -96,4 +96,4 @@ class player {
 
 }
 
-export default player;
+export default Player;

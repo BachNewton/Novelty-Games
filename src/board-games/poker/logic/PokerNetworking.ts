@@ -1,7 +1,12 @@
 import io from 'socket.io-client';
 import { wait } from '../../../util/Async';
 
-export interface PokerNetworking { }
+const LOBBY_NAME = 'Novelty Games';
+
+export interface PokerNetworking {
+    connect: (username: string) => void;
+    startGame: () => void;
+}
 
 let instance: PokerNetworking | null = null;
 
@@ -10,15 +15,17 @@ export function createPokerNetworking(): PokerNetworking {
 
     const socket = io('localhost:8080');
 
+    let username = 'username';
+
     socket.onAny((eventName, args) => {
         console.log(`Received event: ${eventName}`, args);
     });
 
     socket.on('badJoin', async _ => {
         socket.emit('createRoom', {
-            username: '',
-            stacksize: 1000,
-            lobbyname: 'Novelty Games',
+            username: null,
+            stacksize: 0,
+            lobbyname: LOBBY_NAME,
             smallBind: 1,
             bigBlind: 2,
             password: ''
@@ -27,26 +34,38 @@ export function createPokerNetworking(): PokerNetworking {
         await wait(1000);
 
         socket.emit('joinRoom', [
-            'Novelty Games',
-            'Kyle',
-            1000
+            LOBBY_NAME,
+            username,
+            0
         ]);
     });
 
-    socket.on('goodJoin', data => {
-        console.log('Successfully joined room:', data);
+    socket.on('goodJoin', _ => {
+        socket.emit('joinRoom', [
+            LOBBY_NAME,
+            username,
+            0
+        ]);
     });
 
     socket.emit('test', 'Hello from PokerNetworking');
 
-    socket.emit('joinAttempt', {
-        username: 'Kyle',
-        stackSize: 1000,
-        lobbyname: 'Novelty Games',
-        password: ''
-    });
+    instance = {
+        connect: (name) => {
+            username = name;
 
-    instance = {};
+            socket.emit('joinAttempt', {
+                username: username,
+                stackSize: 1000,
+                lobbyname: LOBBY_NAME,
+                password: ''
+            });
+        },
+
+        startGame: () => {
+            socket.emit('startGame');
+        }
+    };
 
     return instance;
 }
