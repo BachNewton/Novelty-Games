@@ -1,9 +1,7 @@
-const playerHand = require('./playerHand');
-
-
+import playerHand from './playerHand.js';
 
 class player {
-  constructor(name, stacksize, s, room){
+  constructor(name, stacksize, s, room) {
     this.hand = null;
     this.stackSize = stacksize;
     this.sockID = s;
@@ -17,100 +15,85 @@ class player {
     this.isTurn = false;
     this.hasHand = true;
   }
-  setHasHand(a){
+  setHasHand(a) {
     this.hasHand = a;
   }
-  getHasHand(){
+  getHasHand() {
     this.hasHand;
   }
-  setTurn(a){
+  setTurn(a) {
     this.isTurn = a;
   }
-  getTurn(){
+  getTurn() {
     return this.isTurn;
   }
-  isAllIn(){
+  isAllIn() {
     return this.allIn;
   }
-  setAllIn(){
+  setAllIn() {
     this.allIn = true;
   }
-  minusFromStack(num)
-  {
-    this.stackSize-=num;
+  minusFromStack(num) {
+    this.stackSize -= num;
   }
-  getStackSize(){
+  getStackSize() {
     return this.stackSize;
   }
-  addToStack(num)
-  {
-    this.stackSize+=Number(num);
+  addToStack(num) {
+    this.stackSize += Number(num);
   }
-  addCurrMoneyInPot(a){
+  addCurrMoneyInPot(a) {
     this.currMoneyInPot += a;
   }
-  getCurrMoneyInPot(){
+  getCurrMoneyInPot() {
     return this.currMoneyInPot;
   }
-  setCurrMoneyInPot(num){
-    this.currMoneyInPot=num;
+  setCurrMoneyInPot(num) {
+    this.currMoneyInPot = num;
   }
-  getCurrMoneyInBettingRound(){
+  getCurrMoneyInBettingRound() {
     return this.currMoneyInBettingRound;
   }
-  addCurrMoneyInBettingRound(num){
+  addCurrMoneyInBettingRound(num) {
     this.currMoneyInBettingRound += num;
   }
-  setCurrMoneyInBettingRound(num){
+  setCurrMoneyInBettingRound(num) {
     this.currMoneyInBettingRound = num;
   }
-  setValTurn(a){
+  setValTurn(a) {
     this.valTurn = a;
     console.log(this.getName() + "'s valTurn is now: " + this.getValTurn());
   }
-  getValTurn(){
+  getValTurn() {
     return this.valTurn;
   }
-  getRoom(){
+  getRoom() {
     return this.room;
   }
-  setName(name)
-  {
+  setName(name) {
     this.name = name;
   }
-  getName()
-  {
+  getName() {
     return this.name;
   }
-  getSock(){
+  getSock() {
     return this.sockID;
   }
-  getHand(){
+  getHand() {
     return this.hand;
   }
-  resetInfo(){
+  resetInfo() {
     this.currMoneyInPot = 0;
     this.valTurn = "undefined";
     this.currMoneyInBettingRound = 0;
     this.allIn = false;
   }
 
-  setHand(c1, c2){
+  setHand(c1, c2) {
     this.hand = new playerHand(c1, c2);
     console.log(this.name + " in " + this.room + " got dealt " + this.hand.getStringHand());
   }
 
 }
 
-
-module.exports = player;
-
-
-
-
-
-
-
-
-
-
+export default player;

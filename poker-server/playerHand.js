@@ -1,6 +1,3 @@
-const card = require('./card');
-
-
 class playerHand
 {
   constructor(c1, c2){
@@ -27,4 +24,4 @@ class playerHand
 }
 
 
-module.exports = playerHand;
+export default playerHand;

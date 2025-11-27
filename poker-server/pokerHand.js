@@ -1,13 +1,15 @@
-const pokerGame = require('./pokerGame');
-const player = require('./player');
-const e = require('express');
-const handEvaluator = require('./handEvaluator');
+import pokerGame from './pokerGame.js';
+import player from './player.js';
+import express from 'express';
+import handEvaluator from './handEvaluator.js';
+import { getio } from './server.js';
 
 class pokerHand
 {
     constructor(game){
     
-    this.io = require('./server').getio();
+    // get IO instance from server module
+    this.io = getio();
     this.theGame = game;
     this.communityCards = [];
     this.playersInHand = this.theGame.getEligiblePlayers();
@@ -951,4 +953,4 @@ class pokerHand
  */
 
 
-module.exports = pokerHand;
+export default pokerHand;

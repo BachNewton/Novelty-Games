@@ -1,6 +1,6 @@
-const Card = require('./card');
-const DeckOfCards = require('./DeckOfCards');
-const playerHand = require('./playerHand');
+import Card from './card.js';
+import DeckOfCards from './DeckOfCards.js';
+import playerHand from './playerHand.js';
 
 //Used for the numeric value of hands
 const tenNegTwo = .01;
@@ -913,7 +913,7 @@ returnArrayOfSortedBoardAndHandCards(hand1)
 
 
 
-module.exports = handEvaluator;
+export default handEvaluator;
 
 
 

@@ -1,4 +1,4 @@
-const card = require('./card');
+import Card from './card.js';
 
 
 class DeckOfCards{
@@ -15,7 +15,7 @@ class DeckOfCards{
     {
       for(var j = 2; j < 15; j++)
       {
-        this.deck[(i * 13) + (j - 2)] = new card(this.suits[i], j);
+        this.deck[(i * 13) + (j - 2)] = new Card(this.suits[i], j);
       }
     }
   }
@@ -49,4 +49,4 @@ class DeckOfCards{
 
 
 
-module.exports = DeckOfCards;
+export default DeckOfCards;

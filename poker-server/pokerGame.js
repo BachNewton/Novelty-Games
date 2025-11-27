@@ -1,10 +1,10 @@
-const DeckOfCards = require('./DeckOfCards');
-const player = require('./player');
-const pokerHand = require('./pokerHand');
+import DeckOfCards from './DeckOfCards.js';
+import player from './player.js';
+import pokerHand from './pokerHand.js';
 
 //const DeckOfCards = require('./DeckOfCards');
 
-class pokerGame{
+export default class pokerGame{
     constructor(gameID){
         this.gameHost;
         this.password;
@@ -297,4 +297,3 @@ class pokerGame{
 
 
 
-module.exports = {pokerGame};
