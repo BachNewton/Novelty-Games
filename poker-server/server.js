@@ -27,7 +27,11 @@ const app = express();
 const server = http.createServer(app);
 const listOfPokerRooms = [];
 
-const io = new SocketServer(server);
+const io = new SocketServer(server, {
+  cors: {
+    origin: ['https://bachnewton.github.io', 'http://localhost:3000']
+  }
+});
 
 //server setup
 
