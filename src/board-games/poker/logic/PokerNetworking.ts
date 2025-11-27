@@ -107,13 +107,7 @@ export function createPokerNetworking(): PokerNetworking {
         const player = players.find((p: any) => p.name === username);
 
         const gameData: GameData = {
-            player: {
-                name: player.name,
-                card1: toCard(player.card1),
-                card2: toCard(player.card2),
-                isTurn: player.isTurn,
-                stack: player.stack
-            },
+            player: toPlayer(player),
             players: players.map((p: any) => toPlayer(p))
         };
 

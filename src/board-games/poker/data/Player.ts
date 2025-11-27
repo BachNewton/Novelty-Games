@@ -6,6 +6,8 @@ export interface Player {
     card2: Card | null;
     isTurn: boolean;
     stack: number;
+    lastAction: string | null;
+    inPot: number;
 }
 
 export function toPlayer(data: any): Player {
@@ -14,6 +16,8 @@ export function toPlayer(data: any): Player {
         card1: toCard(data.card1),
         card2: toCard(data.card2),
         isTurn: data.isTurn,
-        stack: data.stack
+        stack: data.stack,
+        lastAction: data.valTurn === 'undefined' ? null : data.valTurn,
+        inPot: data.moneyIn
     };
 }

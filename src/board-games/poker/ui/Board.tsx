@@ -12,8 +12,11 @@ interface BoardProps {
 }
 
 const Board: React.FC<BoardProps> = ({ pot, cards, data }) => {
-    const playerUi = data.players.map((player, index) => <div key={index}>
-        {player.name}:
+    const playerUi = data.players.map((player, index) => <div key={index} style={{
+        color: player.isTurn ? 'yellow' : undefined,
+        fontWeight: player.isTurn ? 'bold' : undefined
+    }}>
+        {player.stack} - {player.name}: {player.lastAction} ({player.inPot})
     </div>);
 
     return <div style={{
