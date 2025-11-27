@@ -48,19 +48,6 @@ const Home: React.FC<HomeProps> = ({ }) => {
         case 'game':
             return <div>Game has started! Good luck, {username}!</div>;
     }
-
-    // return <div>
-    //     <input
-    //         type="text"
-    //         placeholder="Username"
-    //         value={username}
-    //         onChange={e => setUsername(e.target.value)}
-    //     />
-    //     <br />
-    //     <button onClick={() => networking.connect(username)}>Connect</button>
-    //     <br />
-    //     <button onClick={() => networking.startGame()}>Start Game</button>
-    // </div>;
 };
 
 export default Home;
