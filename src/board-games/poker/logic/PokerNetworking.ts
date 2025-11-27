@@ -99,7 +99,8 @@ export function createPokerNetworking(): PokerNetworking {
         const gameData: GameData = {
             player: {
                 card1: player.card1,
-                card2: player.card2
+                card2: player.card2,
+                isTurn: player.isTurn
             }
         };
 
@@ -144,7 +145,7 @@ export function createPokerNetworking(): PokerNetworking {
 function getActionValue(action: Action): string {
     switch (action.type) {
         case 'check':
-            return 'call';
+            return 'check';
         case 'call':
             return 'call';
     }

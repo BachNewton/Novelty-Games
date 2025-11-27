@@ -15,14 +15,16 @@ interface Actions {
 }
 
 const Game: React.FC<GameProps> = ({ data, isYourTurn, actions }) => {
+    const isTurn = data.player.isTurn;
+
     return <div>
         <div>Your cards: {data.player.card1}, {data.player.card2}</div>
-        {isYourTurn ? <div>It's your turn!</div> : <div>Waiting for other players...</div>}
-        <button onClick={actions.fold}>Fold</button>
-        <button onClick={actions.check}>Check</button>
-        <button onClick={actions.call}>Call</button>
-        <button onClick={() => actions.raise(10)}>Raise</button>
-        <button onClick={actions.allIn}>All In</button>
+        {isTurn ? <div>It's your turn!</div> : <div>Waiting for other players...</div>}
+        <button disabled={!isTurn} onClick={actions.fold}>Fold</button>
+        <button disabled={!isTurn} onClick={actions.check}>Check</button>
+        <button disabled={!isTurn} onClick={actions.call}>Call</button>
+        <button disabled={!isTurn} onClick={() => actions.raise(10)}>Raise</button>
+        <button disabled={!isTurn} onClick={actions.allIn}>All In</button>
     </div>;
 };
 
