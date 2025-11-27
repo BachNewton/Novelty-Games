@@ -76,7 +76,7 @@ const Home: React.FC<HomeProps> = ({ }) => {
                 data={state.data}
                 isYourTurn={isYourTurn}
                 actions={{
-                    fold: () => { },
+                    fold: () => networking.takeAction({ type: 'fold' }),
                     check: () => networking.takeAction({ type: 'check' }),
                     call: () => networking.takeAction({ type: 'call' }),
                     raise: (amount) => { },

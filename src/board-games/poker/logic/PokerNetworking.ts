@@ -18,10 +18,11 @@ export interface PokerNetworking {
     onDealBoard: (callback: (cards: Card[]) => void) => void;
 }
 
-type Action = Check | Call;
+type Action = Check | Call | Fold;
 
 interface Check { type: 'check' }
 interface Call { type: 'call' }
+interface Fold { type: 'fold' }
 
 let instance: PokerNetworking | null = null;
 
@@ -159,5 +160,7 @@ function getActionValue(action: Action): string {
             return 'check';
         case 'call':
             return 'call';
+        case 'fold':
+            return 'fold'
     }
 }
