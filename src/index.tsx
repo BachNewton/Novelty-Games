@@ -5,6 +5,26 @@ import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
 import Home from './ui/Home';
 
+// Fix viewport height for mobile devices (handles browser UI appearing/disappearing)
+function setViewportHeight() {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+// Set initial viewport height
+setViewportHeight();
+
+// Update on resize and orientation change
+window.addEventListener('resize', setViewportHeight);
+window.addEventListener('orientationchange', () => {
+  // Delay to ensure accurate height after orientation change
+  setTimeout(setViewportHeight, 100);
+});
+
+// Also update after a short delay to catch any initial browser UI changes
+setTimeout(setViewportHeight, 100);
+setTimeout(setViewportHeight, 500);
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );

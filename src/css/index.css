@@ -4,8 +4,16 @@
   --novelty-orange: #ff8c00;
 }
 
+html {
+  height: calc(var(--vh, 1vh) * 100);
+  width: 100%;
+}
+
 body {
   margin: 0;
+  padding: 0;
+  min-height: calc(var(--vh, 1vh) * 100);
+  width: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -13,4 +21,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--novelty-background);
   color: white;
+}
+
+#root {
+  min-height: calc(var(--vh, 1vh) * 100);
+  position: relative;
+  width: 100%;
 }
