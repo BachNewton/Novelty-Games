@@ -1,19 +1,11 @@
-import https from 'https';
-import express from 'express';
+import { createServer } from './createServer.js';
 import { Server as SocketServer } from 'socket.io';
-import fs from 'fs';
 import Player from './player.js';
 import PokerGame from './pokerGame.js';
 
 const port = process.env.PORT || 8080;
-const PRIVATE_KEY_FILE_PATH = '/etc/letsencrypt/live/novelty-games.mooo.com/privkey.pem';
-const CERTIFICATE_FILE_PATH = '/etc/letsencrypt/live/novelty-games.mooo.com/fullchain.pem';
-const privateKey = fs.readFileSync(PRIVATE_KEY_FILE_PATH, 'utf8');
-const certificate = fs.readFileSync(CERTIFICATE_FILE_PATH, 'utf8');
-const credentials = { key: privateKey, cert: certificate };
 
-const app = express();
-const server = https.createServer(credentials, app);
+const server = createServer();
 const listOfPokerRooms = [];
 
 const io = new SocketServer(server, {
@@ -262,9 +254,6 @@ function getGameFromSockID(id) {
   return null;
 }
 
-
-
-
 server.on('error', (err) => {
   console.log("error: ", err);
 });
@@ -272,7 +261,6 @@ server.on('error', (err) => {
 server.listen(port, () => {
   console.log("Server started on port", port);
 });
-
 
 export function getio() {
   return io;

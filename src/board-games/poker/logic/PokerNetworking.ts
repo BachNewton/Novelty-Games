@@ -3,6 +3,10 @@ import { wait } from '../../../util/Async';
 import { GameData } from '../data/GameData';
 import { Card, toCard } from '../data/Card';
 import { toPlayer } from '../data/Player';
+import { isLocalhost } from '../../../util/Localhost';
+
+const PROD_SERVER = 'https://novelty-games.mooo.com:8080';
+const DEV_SERVER = 'localhost:8080';
 
 const LOBBY_NAME = 'Novelty Games';
 const STARTING_CHIPS = 100;
@@ -42,7 +46,8 @@ interface Callbacks {
 export function createPokerNetworking(): PokerNetworking {
     if (instance !== null) return instance;
 
-    const socket = io('https://novelty-games.mooo.com:8080');
+    const url = isLocalhost() ? DEV_SERVER : PROD_SERVER;
+    const socket = io(url);
 
     let username = 'username';
 

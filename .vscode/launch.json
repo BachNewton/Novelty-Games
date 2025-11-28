@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Poker Server",
+            "program": "${workspaceFolder}/poker-server/server.js",
+            "env": {
+                "NODE_ENV": "development"
+            }
+        }
+    ]
+}
