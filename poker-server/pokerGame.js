@@ -21,6 +21,7 @@ export default class pokerGame {
         this.hand = null;
         this.handNumber = 0;
         this.clearGameTimeout = null;  // Store timeout ID so we can cancel it
+        this.wasStarted = false;  // Track if game was ever started (to know if we should restart after all players disconnect)
     }
     newHand() {
         this.hand = new pokerHand(this);
@@ -59,6 +60,9 @@ export default class pokerGame {
     }
     setBegun(hasit) {
         this.begun = hasit;
+        if (hasit) {
+            this.wasStarted = true;  // Mark that game was started at some point
+        }
     }
 
     //add player object to array players
@@ -327,6 +331,63 @@ export default class pokerGame {
         this.handNumber += 1;
 
         // Start new hand immediately
+        this.newHand();
+    }
+
+    // End the game when all players have disconnected
+    endGameDueToNoPlayers(io) {
+        console.log("All players have disconnected - ending the game");
+
+        // Cancel any pending timeout
+        if (this.clearGameTimeout != null) {
+            clearTimeout(this.clearGameTimeout);
+            this.clearGameTimeout = null;
+        }
+
+        // If there's an active hand, end it
+        if (this.hand != null && !this.hand.handComplete) {
+            this.hand.handComplete = true;
+            // Use the hand's io instance or the passed io
+            const handIo = this.hand.io || io;
+            handIo.to(this.getGameID()).emit('consoleLog', "All players have disconnected - game paused");
+            handIo.to(this.getGameID()).emit('message', "All players have disconnected - game paused");
+        } else if (io) {
+            // No hand but we have io, emit message
+            io.to(this.getGameID()).emit('consoleLog', "All players have disconnected - game paused");
+            io.to(this.getGameID()).emit('message', "All players have disconnected - game paused");
+        }
+
+        // Clear the hand
+        this.hand = null;
+
+        // Mark game as not begun so it can be restarted when someone joins
+        this.begun = false;
+
+        // Clear player info
+        this.clearPlayersInfo();
+    }
+
+    // Check if game should be restarted (was ended due to no players and someone just joined)
+    shouldRestartGame() {
+        // If game was previously started, is not currently begun, but there are now players, we should restart
+        if (this.wasStarted && !this.begun && this.totalPlayers > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    // Restart the game when a player joins after all players disconnected
+    restartGame(io) {
+        console.log("Restarting game - player(s) have rejoined");
+
+        // Mark game as begun
+        this.begun = true;
+
+        // Notify all players
+        io.to(this.getGameID()).emit('gameBegun');
+        io.to(this.getGameID()).emit('message', "Game restarted - a new hand will begin");
+
+        // Start a new hand
         this.newHand();
     }
 }
