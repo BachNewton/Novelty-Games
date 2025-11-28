@@ -20,7 +20,8 @@ const Player: React.FC<PlayerProps> = ({ data }) => {
 
         <div style={{
             display: 'flex',
-            gap: '5px'
+            gap: '5px',
+            justifyContent: 'center'
         }}>
             <Card data={data.showCards ? data.card1 : null} />
             <Card data={data.showCards ? data.card2 : null} />
