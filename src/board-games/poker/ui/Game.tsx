@@ -106,6 +106,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
         <input
             type="range"
             value={raiseAmount}
+            disabled={!data.player.isTurn}
             min={0}
             max={data.player.stack + data.player.inPot}
             onChange={e => setRaiseAmount(Number(e.target.value))}
