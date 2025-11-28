@@ -24,6 +24,7 @@ import Button from '../util/ui/Button';
 import { createPetsDatabase } from '../mobile-games/pets/logic/PetsDatabase';
 import { useVersionCheck } from '../hooks/useVersionCheck';
 import { VersionState } from './State';
+import { activateUpdate } from '../util/ServiceWorkerManager';
 
 const BUTTON_BORDER_RADIUS = 20;
 const BUTTON_MARGIN = '7px';
@@ -146,7 +147,7 @@ function versionStateUi(versionState: VersionState) {
             return <>✔️ Up-to-date</>;
         case VersionState.OUTDATED:
             return <Button
-                onClick={() => window.location.reload()}
+                onClick={() => activateUpdate()}
                 fontScale={1.25}
             >
                 <div style={{ padding: '2px' }}>🔄 Update App</div>
