@@ -96,7 +96,10 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
 
         <VerticalSpacer height={10} />
 
-        <Action isEnabled={isTurn} onClick={() => actions.raise(raiseAmount)}>{`Raise ${raiseAmount}`}</Action>
+        <Action isEnabled={isTurn} onClick={() => {
+            actions.raise(raiseAmount);
+            setRaiseAmount(0);
+        }}>{`Raise ${raiseAmount}`}</Action>
 
         <VerticalSpacer height={10} />
 
@@ -104,7 +107,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
             type="range"
             value={raiseAmount}
             min={0}
-            max={data.player.stack}
+            max={data.player.stack + data.player.inPot}
             onChange={e => setRaiseAmount(Number(e.target.value))}
         />
     </div>;
