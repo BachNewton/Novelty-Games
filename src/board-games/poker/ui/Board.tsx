@@ -9,10 +9,9 @@ interface BoardProps {
     pot: number;
     cards: CardData[];
     data: GameData;
-    message: string;
 }
 
-const Board: React.FC<BoardProps> = ({ pot, cards, data, message }) => {
+const Board: React.FC<BoardProps> = ({ pot, cards, data }) => {
     const playerUi = data.players.map((player, index) => <div key={index} style={{
         color: player.isTurn ? 'yellow' : undefined,
         fontWeight: player.isTurn ? 'bold' : undefined
@@ -44,11 +43,6 @@ const Board: React.FC<BoardProps> = ({ pot, cards, data, message }) => {
             fontSize: '2em',
             textAlign: 'center'
         }}>Pot: {pot}</div>
-
-        <div style={{
-            fontSize: '0.7em',
-            textAlign: 'center'
-        }}>{message}</div>
 
         <VerticalSpacer height={15} />
 

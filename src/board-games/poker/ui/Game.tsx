@@ -12,7 +12,7 @@ interface GameProps {
     actions: Actions;
     pot: number;
     boardCards: CardData[];
-    message: string;
+    messages: string[];
 }
 
 interface Actions {
@@ -23,10 +23,12 @@ interface Actions {
     allIn: () => void;
 }
 
-const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards, message }) => {
+const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards, messages }) => {
     const [raiseAmount, setRaiseAmount] = useState(0);
 
     const isTurn = data.player.isTurn;
+
+    const messgaesUi = messages.map((message, index) => <div key={index}>{message}</div>);
 
     return <div style={{
         padding: '10px',
@@ -35,11 +37,16 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
         display: 'flex',
         flexDirection: 'column'
     }}>
-        <Board pot={pot} cards={boardCards} data={data} message={message} />
+        <Board pot={pot} cards={boardCards} data={data} />
 
         <div>Player: {data.player.name}</div>
 
-        <div style={{ flexGrow: 1 }}></div>
+        <div style={{
+            flexGrow: 1,
+            overflow: 'auto'
+        }}>
+            {messgaesUi}
+        </div>
 
         <div style={{
             display: 'grid',
@@ -72,7 +79,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
 
             <div style={{
                 display: 'flex',
-                gap: '5px',
+                gap: '10px',
                 flexDirection: 'column'
             }}>
                 <Action isEnabled={isTurn} onClick={actions.check}>Check</Action>
