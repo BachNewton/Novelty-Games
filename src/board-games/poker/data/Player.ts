@@ -8,6 +8,7 @@ export interface Player {
     stack: number;
     lastAction: string | null;
     inPot: number;
+    showCards: boolean;
 }
 
 export function toPlayer(data: any): Player {
@@ -18,6 +19,7 @@ export function toPlayer(data: any): Player {
         isTurn: data.isTurn,
         stack: data.stack,
         lastAction: data.valTurn === 'undefined' ? null : data.valTurn,
-        inPot: data.moneyIn
+        inPot: data.moneyIn,
+        showCards: data.isShown1 || data.isShown2
     };
 }

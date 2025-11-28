@@ -12,11 +12,10 @@ const Card: React.FC<CardProps> = ({ data }) => {
         }}>{data.rank} {getSuitSymbol(data)}</div>;
 
     return <div style={{
-        fontSize: '1.1em',
         fontWeight: 'bold',
         border: '3px solid black',
         borderRadius: '15px',
-        padding: '10px',
+        padding: '7px',
         backgroundColor: data === null ? 'grey' : 'white',
         width: '4ch',
         textAlign: 'center'

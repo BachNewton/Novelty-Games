@@ -1,9 +1,8 @@
 import VerticalSpacer from "../../../util/ui/Spacer";
 import { Card as CardData } from "../data/Card";
 import { GameData } from "../data/GameData";
-// import { AutoCircleLayout, CircleItem } from "./AutoCircleLayout";
 import Card from "./Card";
-// import CircleLayout, { CircleItem } from "./CircleLayout";
+import Player from "./Player";
 
 interface BoardProps {
     pot: number;
@@ -12,12 +11,7 @@ interface BoardProps {
 }
 
 const Board: React.FC<BoardProps> = ({ pot, cards, data }) => {
-    const playerUi = data.players.map((player, index) => <div key={index} style={{
-        color: player.isTurn ? 'yellow' : undefined,
-        fontWeight: player.isTurn ? 'bold' : undefined
-    }}>
-        {player.stack} - {player.name}: {player.lastAction} ({player.inPot})
-    </div>);
+    const playerUi = data.players.map((player, index) => <Player key={index} data={player} />);
 
     return <div style={{
         backgroundColor: 'darkgreen',
@@ -38,48 +32,20 @@ const Board: React.FC<BoardProps> = ({ pot, cards, data }) => {
             <Card data={cards[4] ?? null} />
         </div>
 
-        <VerticalSpacer height={15} />
+        <VerticalSpacer height={10} />
 
         <div style={{
             fontSize: '2em',
             textAlign: 'center'
         }}>Pot: {pot}</div>
 
-        <VerticalSpacer height={15} />
+        <VerticalSpacer height={10} />
 
-        {playerUi}
-
-        {/* <AutoCircleLayout ringGap={0} itemGap={0}>
-            <CircleItem
-                center={<div>Kyle</div>}
-                middle={<div>Middle</div>}
-                outer={<div>123</div>}
-            />
-
-            <CircleItem
-                center={<div>Nick</div>}
-                middle={<div>Middle</div>}
-                outer={<div>456</div>}
-            />
-
-            <CircleItem
-                center={<div>Landon</div>}
-                middle={<div>Middle</div>}
-                outer={<div>789</div>}
-            />
-
-            <CircleItem
-                center={<div>Elliott</div>}
-                middle={<div>Middle</div>}
-                outer={<div>912</div>}
-            />
-
-            <CircleItem
-                center={<div>Eric</div>}
-                middle={<div>Middle</div>}
-                outer={<div>234</div>}
-            />
-        </AutoCircleLayout> */}
+        <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px'
+        }}>{playerUi}</div>
     </div>;
 };
 
