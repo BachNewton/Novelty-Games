@@ -15,7 +15,6 @@ const Action: React.FC<ActionProps> = ({ isEnabled, children, onClick }) => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        userSelect: 'none',
         cursor: isEnabled ? 'pointer' : undefined
     }} onClick={() => {
         if (isEnabled) {

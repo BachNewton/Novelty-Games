@@ -31,6 +31,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
     const messgaesUi = messages.map((message, index) => <div key={index} style={{ marginBottom: '5px' }}>{message}</div>);
 
     return <div style={{
+        userSelect: 'none',
         padding: '10px',
         height: '100dvh',
         boxSizing: 'border-box',
