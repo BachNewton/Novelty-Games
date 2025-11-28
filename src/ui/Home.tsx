@@ -123,7 +123,7 @@ function HomeUi(versionState: VersionState, onClickHandlers: OnClickHandlers) {
     return <div style={{ color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100dvh' }}>
         <div style={versionStateStyle}>{versionStateUi(versionState)}</div>
         <ProfileUi />
-        <code style={versionLabelStyle}>{APP_VERSION}</code>
+        <code style={versionLabelStyle}>{APP_VERSION} beta</code>
         <div style={{ fontSize: '2em', fontWeight: 'bold', marginBottom: '2px' }}>🕹️ Novelty Games 🎰</div>
         <div>Created by: Kyle Hutchinson</div>
         <div><br /></div>
