@@ -209,7 +209,6 @@ export default class pokerGame {
         }
     }
 
-
     emitPlayers() {
         /*
         [dealerPosition, {name, stacksize, currMoneyInBettingRound, isFolded, card1, card2, isShown1, isShown2, isStraddled, isTurn}]
@@ -233,13 +232,21 @@ export default class pokerGame {
             }
 
             returnArr.push({
-                name: currPerson.getName(), stack: currPerson.getStackSize(), moneyIn: currPerson.getCurrMoneyInBettingRound(),
-                card1: holeCard1, card2: holeCard2,
-                valTurn: currPerson.getValTurn(), isShown1: false, isShown2: false, isStraddled: false, isTurn: currPerson.getTurn()
+                name: currPerson.getName(),
+                stack: currPerson.getStackSize(),
+                moneyIn: currPerson.getCurrMoneyInBettingRound(),
+                card1: holeCard1,
+                card2: holeCard2,
+                valTurn: currPerson.getValTurn(),
+                isShown1: currPerson.getCardsShown(),
+                isShown2: currPerson.getCardsShown(),
+                isStraddled: false,
+                isTurn: currPerson.getTurn()
             });
         }
         return returnArr;
     }
+
     //clear the game for another hand, and starts the next hand in 5 seconds
     clearGame() {
         this.clearPlayersInfo();
@@ -250,18 +257,13 @@ export default class pokerGame {
         this.deck.shuffle();
         this.deck.shuffle();
 
-
         this.hand = null;
-
 
         this.handNumber += 1;
         var self = this;
 
         setTimeout(function () {
-
             self.newHand();
         }, 5000);
-
     }
-
 }

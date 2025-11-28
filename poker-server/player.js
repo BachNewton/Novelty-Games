@@ -14,6 +14,13 @@ class Player {
     this.allIn = false;
     this.isTurn = false;
     this.hasHand = true;
+    this.cardsShown = false;
+  }
+  setCardsShown(bool) {
+    this.cardsShown = bool;
+  }
+  getCardsShown() {
+    return this.cardsShown;
   }
   setHasHand(a) {
     this.hasHand = a;
@@ -87,6 +94,7 @@ class Player {
     this.valTurn = "undefined";
     this.currMoneyInBettingRound = 0;
     this.allIn = false;
+    this.cardsShown = false;
   }
 
   setHand(c1, c2) {

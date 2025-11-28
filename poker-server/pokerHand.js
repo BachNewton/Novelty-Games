@@ -69,9 +69,7 @@ class pokerHand {
             //this.io.to(this.theGame.getPlayerAt(this.theGame.getDealerIdx()).getSock()).emit('yourTurn', this.theGame.getTurnTime());
             //var preFlopBets = bettingRound()
         }
-
     }
-
 
     updateHand() {
         console.log("Current player is: " + this.getCurrPlayer().getName());
@@ -117,6 +115,7 @@ class pokerHand {
 
                     //Deal cards slower if everyone is all in/ only one person can play
                     if (this.lessThanTwoCanPlay()) {
+                        this.revealAllHands();
                         var self = this;
                         setTimeout(function () {
                             self.callTurnOnNextPlayer();
@@ -140,9 +139,10 @@ class pokerHand {
 
                     //Deal cards slower if everyone is all in/ only one person can play
                     if (this.lessThanTwoCanPlay()) {
+                        this.revealAllHands();
                         var self = this;
                         setTimeout(function () {
-                            self.callTurnOnNextPlayer(); 0
+                            self.callTurnOnNextPlayer();
                         }, 2000);
                     }
                     else {
@@ -164,6 +164,7 @@ class pokerHand {
 
                     //Deal cards slower if everyone is all in/ only one person can play
                     if (this.lessThanTwoCanPlay()) {
+                        this.revealAllHands();
                         var self = this;
                         setTimeout(function () {
                             self.callTurnOnNextPlayer();
@@ -202,7 +203,6 @@ class pokerHand {
 
                     this.calculateAndAwardPots();
 
-
                     //emit the winner string
                     /** 
                     this.io.to(this.theGame.getGameID()).emit("consoleLog", "\n \n" + winner.getName() + " has won the pot of: $ " + this.moneyInPot);
@@ -229,6 +229,9 @@ class pokerHand {
     }
 
     calculateAndAwardPots() {
+        // Reveal everyone's cards at showdown
+        this.revealAllHands();
+
         var handEval = new handEvaluator(this.communityCards);
 
         //Go through the players still in the hand, and make a list of the split pots there will be.
@@ -822,14 +825,17 @@ class pokerHand {
         return cardPNGS;
     }
 
-
-
-
-
-
+    revealAllHands() {
+        for (var i = 0; i < this.playersInHand.length; i++) {
+            // Check if player object has the method (safety check)
+            if (this.playersInHand[i].setCardsShown) {
+                this.playersInHand[i].setCardsShown(true);
+            }
+        }
+        // Force an update to frontend immediately
+        this.emitEverything();
+    }
 }
-
-
 
 /**
  * updatePokerHand()
