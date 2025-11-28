@@ -11,7 +11,10 @@ const Action: React.FC<ActionProps> = ({ isEnabled, children, onClick }) => {
         borderRadius: '15px',
         padding: '10px',
         boxShadow: isEnabled ? '0px 0px 5px black' : undefined,
-        color: isEnabled ? undefined : 'grey'
+        color: isEnabled ? undefined : 'grey',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
     }} onClick={() => {
         if (isEnabled) {
             onClick();

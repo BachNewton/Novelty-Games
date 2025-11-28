@@ -4,6 +4,7 @@ import { GameData } from "../data/GameData";
 import Action from "./Action";
 import Board from "./Board";
 import Card from "./Card";
+import VerticalSpacer from "../../../util/ui/Spacer";
 
 interface GameProps {
     data: GameData;
@@ -36,42 +37,62 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
     }}>
         <Board pot={pot} cards={boardCards} data={data} message={message} />
 
-        <div>Pot size: {pot}</div>
         <div>Player: {data.player.name}</div>
-        <div>Your cards:</div>
-        <div style={{
-            display: 'flex',
-            gap: '10px'
-        }}>
-            <Card data={data.player.card1} />
-            <Card data={data.player.card2} />
-        </div>
-        <div>Stack: {data.player.stack}</div>
+
         <div style={{ flexGrow: 1 }}></div>
 
         <div style={{
             display: 'grid',
-            gap: '10px'
-            // gridTemplateColumns: '1fr 1fr'
+            gap: '10px',
+            gridTemplateColumns: 'repeat(3, 1fr)'
         }}>
             <Action isEnabled={isTurn} onClick={actions.fold}>Fold</Action>
-            <Action isEnabled={isTurn} onClick={actions.check}>Check</Action>
-            <Action isEnabled={isTurn} onClick={actions.call}>Call</Action>
-            <Action isEnabled={isTurn} onClick={() => actions.raise(raiseAmount)}>{`Raise ${raiseAmount}`}</Action>
-            <input
-                type="range"
-                value={raiseAmount}
-                min={0}
-                max={data.player.stack}
-                onChange={e => setRaiseAmount(Number(e.target.value))}
-            />
 
-            {/* <button disabled={!isTurn} onClick={actions.fold}>Fold</button> */}
-            {/* <button disabled={!isTurn} onClick={actions.check}>Check</button> */}
-            {/* <button disabled={!isTurn} onClick={actions.call}>Call</button> */}
-            {/* <button disabled={!isTurn} onClick={() => actions.raise(10)}>Raise</button> */}
-            {/* <button disabled={!isTurn} onClick={actions.allIn}>All In</button> */}
+            <div style={{
+                display: 'flex',
+                gap: '5px',
+                flexDirection: 'column'
+            }}>
+                <div style={{
+                    display: 'flex',
+                    gap: '10px'
+                }}>
+                    <Card data={data.player.card1} />
+                    <Card data={data.player.card2} />
+                </div>
+                <div style={{
+                    flexGrow: 1,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }}>
+                    Stack: {data.player.stack}
+                </div>
+            </div>
+
+            <div style={{
+                display: 'flex',
+                gap: '5px',
+                flexDirection: 'column'
+            }}>
+                <Action isEnabled={isTurn} onClick={actions.check}>Check</Action>
+                <Action isEnabled={isTurn} onClick={actions.call}>Call</Action>
+            </div>
         </div>
+
+        <VerticalSpacer height={10} />
+
+        <Action isEnabled={isTurn} onClick={() => actions.raise(raiseAmount)}>{`Raise ${raiseAmount}`}</Action>
+
+        <VerticalSpacer height={10} />
+
+        <input
+            type="range"
+            value={raiseAmount}
+            min={0}
+            max={data.player.stack}
+            onChange={e => setRaiseAmount(Number(e.target.value))}
+        />
     </div>;
 };
 
