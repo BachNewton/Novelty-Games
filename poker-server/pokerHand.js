@@ -72,6 +72,36 @@ class pokerHand {
     }
 
     updateHand() {
+        // Safety check: ensure we have a valid current player
+        if (this.currPlayer == null || this.playersInHand.length == 0) {
+            console.log("ERROR: No valid current player in updateHand");
+            if (this.playersInHand.length > 0) {
+                this.currPlayer = this.playersInHand[0];
+            } else {
+                this.handComplete = true;
+                return;
+            }
+        }
+
+        // Verify currPlayer is still in playersInHand
+        var currPlayerInHand = false;
+        for (var i = 0; i < this.playersInHand.length; i++) {
+            if (this.playersInHand[i] == this.currPlayer) {
+                currPlayerInHand = true;
+                break;
+            }
+        }
+
+        if (!currPlayerInHand) {
+            console.log("WARNING: Current player no longer in hand, updating to first available player");
+            if (this.playersInHand.length > 0) {
+                this.currPlayer = this.playersInHand[0];
+            } else {
+                this.handComplete = true;
+                return;
+            }
+        }
+
         console.log("Current player is: " + this.getCurrPlayer().getName());
         console.log("Current player has: $" + this.getCurrPlayer().getCurrMoneyInPot() + " money in the pot currently");
         //Updates all players clients with currentStack Sizes, the current cards on board, and if players are folded or not
@@ -561,6 +591,36 @@ class pokerHand {
     }
 
     callTurnOnNextPlayer() {
+        // Safety check: ensure we have a valid current player
+        if (this.currPlayer == null || this.playersInHand.length == 0) {
+            console.log("ERROR: No valid current player or no players in hand");
+            if (this.playersInHand.length > 0) {
+                this.currPlayer = this.playersInHand[0];
+            } else {
+                this.handComplete = true;
+                return;
+            }
+        }
+
+        // Verify currPlayer is still in playersInHand
+        var currPlayerInHand = false;
+        for (var i = 0; i < this.playersInHand.length; i++) {
+            if (this.playersInHand[i] == this.currPlayer) {
+                currPlayerInHand = true;
+                break;
+            }
+        }
+
+        if (!currPlayerInHand) {
+            // Current player is no longer valid, use first available player
+            console.log("WARNING: Current player no longer in hand, updating to first available player");
+            if (this.playersInHand.length > 0) {
+                this.currPlayer = this.playersInHand[0];
+            } else {
+                this.handComplete = true;
+                return;
+            }
+        }
 
         console.log("Curr Player is: " + this.getCurrPlayer().getName() + " and valTurn == " + this.getCurrPlayer().getValTurn());
         if (this.getCurrPlayer().isAllIn()) {
@@ -746,6 +806,19 @@ class pokerHand {
     }
 
     checkIfPlayersLeftToAct() {
+        // Safety check: ensure we have valid players
+        if (this.playersInHand.length == 0) {
+            return false;
+        }
+
+        // Safety check: ensure currPlayer is valid
+        if (this.currPlayer == null) {
+            if (this.playersInHand.length > 0) {
+                this.currPlayer = this.playersInHand[0];
+            } else {
+                return false;
+            }
+        }
 
         var playersLeft = this.getPlayers();
         for (var i = 0; i < playersLeft.length; i++) {
@@ -768,8 +841,13 @@ class pokerHand {
 
     //Get the next in order player, assumes all players in this.playersInhand are still in the hand (as they should be).
     getNextPlayer(player) {
+        if (player == null || this.playersInHand.length == 0) {
+            console.log("WARNING: getNextPlayer called with null player or no players in hand");
+            return this.playersInHand.length > 0 ? this.playersInHand[0] : null;
+        }
+
         for (var i = 0; i < this.playersInHand.length; i++) {
-            if (this.playersInHand[i].getName() == player.getName()) {
+            if (this.playersInHand[i] == player || this.playersInHand[i].getName() == player.getName()) {
                 if (i == this.playersInHand.length - 1) {
                     return this.playersInHand[0];
                 }
@@ -778,6 +856,10 @@ class pokerHand {
                 }
             }
         }
+
+        // Player not found in playersInHand - return first available player as fallback
+        console.log("WARNING: Player not found in playersInHand, returning first available player");
+        return this.playersInHand.length > 0 ? this.playersInHand[0] : null;
     }
 
 
@@ -836,13 +918,15 @@ class pokerHand {
         this.emitEverything();
     }
 
-    // Handle player disconnection - automatically fold them if it's their turn
+    // Handle player disconnection - automatically fold them and update all references
     handlePlayerDisconnect(sockId) {
         // Find the player in playersInHand by socket ID
         var disconnectedPlayer = null;
+        var disconnectedPlayerIndex = -1;
         for (var i = 0; i < this.playersInHand.length; i++) {
             if (this.playersInHand[i].getSock() == sockId) {
                 disconnectedPlayer = this.playersInHand[i];
+                disconnectedPlayerIndex = i;
                 break;
             }
         }
@@ -852,20 +936,86 @@ class pokerHand {
             return;
         }
 
-        // If it's their turn, automatically fold them and continue the game
-        if (this.currPlayer == disconnectedPlayer && !this.handComplete) {
-            console.log(disconnectedPlayer.getName() + " disconnected during their turn - auto-folding");
-            this.io.to(this.theGame.getGameID()).emit('consoleLog', disconnectedPlayer.getName() + " has disconnected and automatically folded");
-            this.io.to(this.theGame.getGameID()).emit('message', disconnectedPlayer.getName() + " has disconnected and automatically folded");
+        var playerName = disconnectedPlayer.getName();
+        console.log(playerName + " disconnected from the hand");
 
-            // Set their turn to fold and process it - this will move to the next player
-            disconnectedPlayer.setValTurn("fold");
-            this.playerTurn("fold");
-        } else {
-            // Player is in hand but not their turn - set them to fold
-            // They'll be removed from playersInHand when updatePlayersLeftInHand() is called
-            disconnectedPlayer.setValTurn("fold");
-            console.log(disconnectedPlayer.getName() + " disconnected - will be folded when their turn comes");
+        // Set their turn to fold
+        disconnectedPlayer.setValTurn("fold");
+
+        // Immediately remove them from playersInHand
+        this.playersInHand.splice(disconnectedPlayerIndex, 1);
+
+        // Update key references if they point to the disconnected player
+        var needsToUpdateCurrPlayer = false;
+
+        if (this.currPlayer == disconnectedPlayer) {
+            // It's their turn - we need to move to the next player
+            needsToUpdateCurrPlayer = true;
+            console.log(playerName + " disconnected during their turn - auto-folding");
+            this.io.to(this.theGame.getGameID()).emit('consoleLog', playerName + " has disconnected and automatically folded");
+            this.io.to(this.theGame.getGameID()).emit('message', playerName + " has disconnected and automatically folded");
+        }
+
+        if (this.dealer == disconnectedPlayer) {
+            // Update dealer to next available player
+            if (this.playersInHand.length > 0) {
+                this.dealer = this.playersInHand[0];
+                console.log("Dealer updated to: " + this.dealer.getName());
+            }
+        }
+
+        if (this.bigBlind == disconnectedPlayer) {
+            // Update bigBlind reference
+            if (this.playersInHand.length > 0) {
+                this.bigBlind = this.playersInHand[0];
+            }
+        }
+
+        if (this.initialRaiser == disconnectedPlayer) {
+            // Clear initial raiser - it will be set again when someone raises
+            this.initialRaiser = null;
+        }
+
+        // If it was their turn, move to next player and continue the game
+        if (needsToUpdateCurrPlayer && !this.handComplete) {
+            if (this.playersInHand.length > 0) {
+                // Move to next player in turn order
+                // Since we removed the current player, the next player is at the same index
+                // (or index 0 if we removed the last player)
+                if (disconnectedPlayerIndex >= this.playersInHand.length) {
+                    this.currPlayer = this.playersInHand[0];
+                } else {
+                    this.currPlayer = this.playersInHand[disconnectedPlayerIndex];
+                }
+                // Continue the game - updateHand will handle calling the next player's turn
+                this.emitEverything();
+                this.updateHand();
+            } else {
+                // No players left - hand should end
+                this.handComplete = true;
+                this.updateHand();
+            }
+        } else if (!needsToUpdateCurrPlayer) {
+            // Player disconnected but it wasn't their turn
+            // Just emit the message and continue
+            this.io.to(this.theGame.getGameID()).emit('consoleLog', playerName + " has disconnected and automatically folded");
+            this.io.to(this.theGame.getGameID()).emit('message', playerName + " has disconnected and automatically folded");
+            this.emitEverything();
+
+            // Check if we need to update currPlayer if it's no longer valid
+            if (this.playersInHand.length > 0 && this.currPlayer != null) {
+                var currPlayerStillInHand = false;
+                for (var j = 0; j < this.playersInHand.length; j++) {
+                    if (this.playersInHand[j] == this.currPlayer) {
+                        currPlayerStillInHand = true;
+                        break;
+                    }
+                }
+                if (!currPlayerStillInHand) {
+                    // Current player reference is invalid, update it
+                    this.currPlayer = this.playersInHand[0];
+                }
+            }
         }
     }
 }
