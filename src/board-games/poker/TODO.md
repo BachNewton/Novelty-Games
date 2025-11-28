@@ -4,8 +4,6 @@
 
 - Raise should say "bet" if you're the first one.
 
-- Make when your turn more visible. Maybe yellow border on your turn.
-
 - Add credit unit to stack values
 
 - Player actions should be in the log
