@@ -20,6 +20,7 @@ export default class pokerGame {
         this.bigBlind;
         this.hand = null;
         this.handNumber = 0;
+        this.clearGameTimeout = null;  // Store timeout ID so we can cancel it
     }
     newHand() {
         this.hand = new pokerHand(this);
@@ -249,6 +250,12 @@ export default class pokerGame {
 
     //clear the game for another hand, and starts the next hand in 5 seconds
     clearGame() {
+        // Cancel any existing timeout
+        if (this.clearGameTimeout != null) {
+            clearTimeout(this.clearGameTimeout);
+            this.clearGameTimeout = null;
+        }
+
         this.clearPlayersInfo();
         this.increaseDealerPosition();
         this.deck = new DeckOfCards();
@@ -262,8 +269,64 @@ export default class pokerGame {
         this.handNumber += 1;
         var self = this;
 
-        setTimeout(function () {
+        this.clearGameTimeout = setTimeout(function () {
             self.newHand();
+            self.clearGameTimeout = null;
         }, 5000);
+    }
+
+    // Check if there's an active hand with only 1 player (needs restart)
+    shouldRestartHand() {
+        if (this.hand != null && !this.hand.handComplete) {
+            const playersInHand = this.hand.getPlayers();
+            if (playersInHand.length == 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Immediately restart the hand (used when a new player joins with only 1 player in hand)
+    restartHandImmediately() {
+        if (this.hand != null && !this.hand.handComplete) {
+            const playersInHand = this.hand.getPlayers();
+            if (playersInHand.length == 1) {
+                // Award the pot to the remaining player
+                const remainingPlayer = playersInHand[0];
+                const pot = this.hand.getPot();
+                remainingPlayer.addToStack(pot);
+
+                // Use the hand's io instance to emit messages
+                const io = this.hand.io;
+
+                io.to(this.getGameID()).emit('consoleLog', remainingPlayer.getName() + " has won the pot of: " + pot);
+                io.to(this.getGameID()).emit('message', remainingPlayer.getName() + " has won the pot of: " + pot);
+
+                // Mark hand as complete
+                this.hand.handComplete = true;
+                this.hand.emitEverything();
+            }
+        }
+
+        // Cancel any pending timeout and clear immediately
+        if (this.clearGameTimeout != null) {
+            clearTimeout(this.clearGameTimeout);
+            this.clearGameTimeout = null;
+        }
+
+        // Clear and start new hand immediately
+        this.clearPlayersInfo();
+        this.increaseDealerPosition();
+        this.deck = new DeckOfCards();
+        this.deck.shuffle();
+        this.deck.shuffle();
+        this.deck.shuffle();
+        this.deck.shuffle();
+
+        this.hand = null;
+        this.handNumber += 1;
+
+        // Start new hand immediately
+        this.newHand();
     }
 }

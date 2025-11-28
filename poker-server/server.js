@@ -136,6 +136,13 @@ io.on('connection', (sock) => {
     //console.log(user);
     theGame.playerJoin(user);
 
+    // Check if we need to restart the hand (active hand with only 1 player)
+    if (theGame.shouldRestartHand()) {
+      console.log("New player joined with only 1 player in hand - restarting hand immediately");
+      io.to(theGame.getGameID()).emit('message', "A new player has joined - restarting the hand");
+      theGame.restartHandImmediately();
+    }
+
     //Send users client the room name and info so it can display'
     io.to(user.getRoom()).emit('roomUsers', { room: user.getRoom(), users: theGame.getAllNames(), stacksizes: theGame.getAllStackSizes() });
     io.to(theGame.getGameID()).emit('roomPlayers', theGame.emitPlayers());
@@ -156,6 +163,12 @@ io.on('connection', (sock) => {
       const user = theGame.getCurrentUser(sock.id);
 
       if (user != null) {
+        // Check if there's an active hand and handle disconnection
+        const hand = theGame.returnHand();
+        if (hand != null && !hand.handComplete) {
+          hand.handlePlayerDisconnect(sock.id);
+        }
+
         io.to(theGame.getGameID()).emit("message", theGame.getCurrentUser(sock.id).getName() + " has left the channel")
         console.log(theGame.getCurrentUser(sock.id).getName() + " has left the channel");
         theGame.playerLeave(sock.id);

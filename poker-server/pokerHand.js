@@ -835,6 +835,39 @@ class pokerHand {
         // Force an update to frontend immediately
         this.emitEverything();
     }
+
+    // Handle player disconnection - automatically fold them if it's their turn
+    handlePlayerDisconnect(sockId) {
+        // Find the player in playersInHand by socket ID
+        var disconnectedPlayer = null;
+        for (var i = 0; i < this.playersInHand.length; i++) {
+            if (this.playersInHand[i].getSock() == sockId) {
+                disconnectedPlayer = this.playersInHand[i];
+                break;
+            }
+        }
+
+        // If player is not in the hand, nothing to do
+        if (disconnectedPlayer == null) {
+            return;
+        }
+
+        // If it's their turn, automatically fold them and continue the game
+        if (this.currPlayer == disconnectedPlayer && !this.handComplete) {
+            console.log(disconnectedPlayer.getName() + " disconnected during their turn - auto-folding");
+            this.io.to(this.theGame.getGameID()).emit('consoleLog', disconnectedPlayer.getName() + " has disconnected and automatically folded");
+            this.io.to(this.theGame.getGameID()).emit('message', disconnectedPlayer.getName() + " has disconnected and automatically folded");
+
+            // Set their turn to fold and process it - this will move to the next player
+            disconnectedPlayer.setValTurn("fold");
+            this.playerTurn("fold");
+        } else {
+            // Player is in hand but not their turn - set them to fold
+            // They'll be removed from playersInHand when updatePlayersLeftInHand() is called
+            disconnectedPlayer.setValTurn("fold");
+            console.log(disconnectedPlayer.getName() + " disconnected - will be folded when their turn comes");
+        }
+    }
 }
 
 /**
