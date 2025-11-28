@@ -1,29 +1,16 @@
-import http from 'http';
+import https from 'https';
 import express from 'express';
 import { Server as SocketServer } from 'socket.io';
+import Player from './player.js';
+import PokerGame from './pokerGame.js';
 
 const port = process.env.PORT || 8080;
+const PRIVATE_KEY_FILE_PATH = '/etc/letsencrypt/live/novelty-games.mooo.com/privkey.pem';
+const CERTIFICATE_FILE_PATH = '/etc/letsencrypt/live/novelty-games.mooo.com/fullchain.pem';
+const credentials = { key: PRIVATE_KEY_FILE_PATH, cert: CERTIFICATE_FILE_PATH };
 
-//sock.emit() // only emit to sock
-// io.emit() //emit to all sockets
-// sock.broadcast.emit() //emit to all sockets except sock
-
-
-//importing poker classes
-import Card from './card.js';
-import Player from './player.js';
-import PlayerHand from './playerHand.js';
-import DeckOfCards from './DeckOfCards.js';
-import PokerGame from './pokerGame.js';
-import PokerHand from './pokerHand.js';
-import HandEvaluator from './handEvaluator.js';
-
-
-
-
-//server setup
 const app = express();
-const server = http.createServer(app);
+const server = https.createServer(credentials, app);
 const listOfPokerRooms = [];
 
 const io = new SocketServer(server, {
@@ -31,12 +18,6 @@ const io = new SocketServer(server, {
     origin: ['https://bachnewton.github.io', 'http://localhost:3000']
   }
 });
-
-//server setup
-
-
-//on connection listening
-
 
 io.on('connection', (sock) => {
   //inside connect

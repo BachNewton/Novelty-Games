@@ -42,7 +42,7 @@ interface Callbacks {
 export function createPokerNetworking(): PokerNetworking {
     if (instance !== null) return instance;
 
-    const socket = io('localhost:8080');
+    const socket = io('https://novelty-games.mooo.com:8080');
 
     let username = 'username';
 
