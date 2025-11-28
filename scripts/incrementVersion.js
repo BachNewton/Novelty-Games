@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const VERSIONING_FILE_PATH = '../src/Versioning.ts';
+const VERSION_JSON_PATH = '../public/version.json';
 const VERSIONING_REGEX = /APP_VERSION = 'v((\d+)\.(\d+)\.(\d+))'/;
 
 export function incrementVersion(type) {
@@ -12,6 +13,7 @@ export function incrementVersion(type) {
     const __dirname = path.dirname(__filename);
 
     const filePath = path.join(__dirname, VERSIONING_FILE_PATH);
+    const versionJsonPath = path.join(__dirname, VERSION_JSON_PATH);
 
     const data = fs.readFileSync(filePath).toString();
 
@@ -26,9 +28,13 @@ export function incrementVersion(type) {
     const newVersion = getNewVersion(type, major, minor, patch);
     console.log(`New version: ${newVersion}`);
 
+    // Update Versioning.ts
     const updatedData = data.replace(version, newVersion);
-
     fs.writeFileSync(filePath, updatedData);
+
+    // Update version.json
+    const versionJson = { version: `v${newVersion}` };
+    fs.writeFileSync(versionJsonPath, JSON.stringify(versionJson, null, 2) + '\n');
 
     console.log('Done');
 }

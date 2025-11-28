@@ -9,11 +9,9 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-const updateListener = { onUpdateAvailable: () => { }, onNoUpdateFound: () => { } };
-
 root.render(
   <React.StrictMode>
-    <Home updateListener={updateListener} />
+    <Home />
   </React.StrictMode>
 );
 
@@ -22,10 +20,10 @@ root.render(
 // Learn more about service workers: https://cra.link/PWA
 serviceWorkerRegistration.register({
   onUpdate: (registration) => {
+    // When service worker detects an update, skip waiting to activate immediately
     registration.waiting?.postMessage({ type: "SKIP_WAITING" });
-    updateListener.onUpdateAvailable();
+    // The version check hook will detect the update via version.json comparison
   },
-  onNoUpdateFound: () => { updateListener.onNoUpdateFound(); }
 });
 
 // If you want to start measuring performance in your app, pass a function

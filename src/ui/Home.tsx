@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import MilleBornesHome from '../board-games/mille-bornes/ui/Home';
 import TriviaHome from '../trivia/ui/Home';
 import Games2DHome from '../game-2D/ui/Home';
@@ -13,7 +13,7 @@ import { createFreeMarketCommunicator } from '../mobile-games/free-market/logic/
 import { createStorer, StorageKey } from '../util/Storage';
 import { FreeMarketSave } from '../mobile-games/free-market/data/FreeMarketSave';
 import SubMenu from './SubMenu';
-import { State, VersionState, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState, PetsState, MobileGamesState, ToddlerTreasureHuntState, MonopolyState, PokerState } from './State';
+import { State, HomeState, MilleBornesState, TriviaState, Game2DState, Game3DState, ToolsState, BoardGamesState, FreeMarketState, LabyrinthState, PetsState, MobileGamesState, ToddlerTreasureHuntState, MonopolyState, PokerState } from './State';
 import Labyrinth from '../board-games/labyrinth/ui/Labyrinth';
 import Monopoly from '../board-games/monopoly/ui/Home';
 import Poker from '../board-games/poker/ui/Home';
@@ -22,6 +22,8 @@ import { createLabyrinthCommunicator } from '../board-games/labyrinth/logic/Laby
 import { APP_VERSION } from '../Versioning';
 import Button from '../util/ui/Button';
 import { createPetsDatabase } from '../mobile-games/pets/logic/PetsDatabase';
+import { useVersionCheck } from '../hooks/useVersionCheck';
+import { VersionState } from './State';
 
 const BUTTON_BORDER_RADIUS = 20;
 const BUTTON_MARGIN = '7px';
@@ -37,7 +39,8 @@ const BUTTON_STYLE: React.CSSProperties = {
 };
 
 interface HomeProps {
-    updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
+    // Legacy prop kept for backwards compatibility, but no longer used
+    updateListener?: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
 }
 
 interface OnClickHandlers {
@@ -57,26 +60,13 @@ interface OnClickHandlers {
     onPokerClick: () => void;
 }
 
-const Home: React.FC<HomeProps> = ({ updateListener }) => {
+const Home: React.FC<HomeProps> = () => {
     const [state, setState] = useState<State>(getInitialState());
-    const [versionState, setVersionSate] = useState(VersionState.CHECKING);
-
-    useEffect(() => {
-        updateListener.onUpdateAvailable = () => {
-            console.log('Newer version of the app is available');
-            setVersionSate(VersionState.OUTDATED);
-        };
-
-        updateListener.onNoUpdateFound = () => {
-            console.log('No update of the app has been found');
-            setVersionSate(VersionState.CURRENT);
-        };
-
-        if (!navigator.onLine) {
-            console.log('App if offline and can not check for updates');
-            setVersionSate(VersionState.UNKNOWN);
-        }
-    }, [state]);
+    const { versionState } = useVersionCheck({
+        checkOnMount: true,
+        // Check for updates every 5 minutes
+        checkInterval: 5 * 60 * 1000,
+    });
 
     const onClickHandlers: OnClickHandlers = {
         onHomeButtonClick: () => setState(new HomeState()),
