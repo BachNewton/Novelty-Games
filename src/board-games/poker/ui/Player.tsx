@@ -15,7 +15,7 @@ const Player: React.FC<PlayerProps> = ({ data }) => {
     }}>
         <div>
             <div>{data.name}</div>
-            <div>{data.stack}</div>
+            <div>${data.stack}</div>
         </div>
 
         <div style={{
@@ -28,7 +28,7 @@ const Player: React.FC<PlayerProps> = ({ data }) => {
         </div>
 
         <div style={{ textAlign: 'right' }}>
-            <div>{data.inPot}</div>
+            <div>${data.inPot}</div>
             <div>{data.lastAction}</div>
         </div>
     </div>;

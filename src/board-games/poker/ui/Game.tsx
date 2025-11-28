@@ -81,7 +81,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
                     justifyContent: 'center',
                     alignItems: 'center'
                 }}>
-                    Stack: {data.player.stack}
+                    Stack: ${data.player.stack}
                 </div>
             </div>
 
@@ -93,7 +93,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
         <Action isEnabled={isTurn} onClick={() => {
             actions.raise(raiseAmount);
             setRaiseAmount(0);
-        }}>{`Raise ${raiseAmount}`}</Action>
+        }}>{`Raise $${raiseAmount}`}</Action>
 
         <VerticalSpacer height={10} />
 
