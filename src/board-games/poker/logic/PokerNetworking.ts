@@ -5,6 +5,7 @@ import { Card, toCard } from '../data/Card';
 import { toPlayer } from '../data/Player';
 
 const LOBBY_NAME = 'Novelty Games';
+const STARTING_CHIPS = 100;
 
 export interface PokerNetworking {
     connect: (username: string) => void;
@@ -85,7 +86,7 @@ export function createPokerNetworking(): PokerNetworking {
         socket.emit('joinRoom', [
             LOBBY_NAME,
             username,
-            1000
+            STARTING_CHIPS
         ]);
     });
 
@@ -93,7 +94,7 @@ export function createPokerNetworking(): PokerNetworking {
         socket.emit('joinRoom', [
             LOBBY_NAME,
             username,
-            1000
+            STARTING_CHIPS
         ]);
     });
 
@@ -137,7 +138,7 @@ export function createPokerNetworking(): PokerNetworking {
 
             socket.emit('joinAttempt', {
                 username: username,
-                stackSize: 1000,
+                stackSize: STARTING_CHIPS,
                 lobbyname: LOBBY_NAME,
                 password: ''
             });
