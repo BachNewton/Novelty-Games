@@ -5,7 +5,7 @@ import fs from 'fs';
 import Player from './player.js';
 import PokerGame from './pokerGame.js';
 
-const port = 443; // process.env.PORT || 8080;
+const port = process.env.PORT || 8080;
 const PRIVATE_KEY_FILE_PATH = '/etc/letsencrypt/live/novelty-games.mooo.com/privkey.pem';
 const CERTIFICATE_FILE_PATH = '/etc/letsencrypt/live/novelty-games.mooo.com/fullchain.pem';
 const privateKey = fs.readFileSync(PRIVATE_KEY_FILE_PATH, 'utf8');
