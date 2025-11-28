@@ -1,13 +1,16 @@
 import https from 'https';
 import express from 'express';
 import { Server as SocketServer } from 'socket.io';
+import fs from 'fs';
 import Player from './player.js';
 import PokerGame from './pokerGame.js';
 
 const port = process.env.PORT || 8080;
 const PRIVATE_KEY_FILE_PATH = '/etc/letsencrypt/live/novelty-games.mooo.com/privkey.pem';
 const CERTIFICATE_FILE_PATH = '/etc/letsencrypt/live/novelty-games.mooo.com/fullchain.pem';
-const credentials = { key: PRIVATE_KEY_FILE_PATH, cert: CERTIFICATE_FILE_PATH };
+const privateKey = fs.readFileSync(PRIVATE_KEY_FILE_PATH, 'utf8');
+const certificate = fs.readFileSync(CERTIFICATE_FILE_PATH, 'utf8');
+const credentials = { key: privateKey, cert: certificate };
 
 const app = express();
 const server = https.createServer(credentials, app);
