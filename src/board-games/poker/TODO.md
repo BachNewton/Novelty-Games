@@ -8,8 +8,6 @@
 
 - Make when your turn more visible. Maybe yellow border on your turn.
 
-- Clubs can be green. Diamonds yellow?
-
 - Add credit unit to stack values
 
 - Player actions should be in the log
