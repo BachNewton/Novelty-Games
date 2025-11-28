@@ -35,7 +35,7 @@ const Board: React.FC<BoardProps> = ({ pot, cards, data }) => {
         <VerticalSpacer height={10} />
 
         <div style={{
-            fontSize: '2em',
+            fontSize: '1.75em',
             textAlign: 'center'
         }}>Pot: {pot}</div>
 

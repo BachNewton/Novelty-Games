@@ -84,14 +84,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
                 </div>
             </div>
 
-            <div style={{
-                display: 'flex',
-                gap: '10px',
-                flexDirection: 'column'
-            }}>
-                <Action isEnabled={isTurn} onClick={actions.check}>Check</Action>
-                <Action isEnabled={isTurn} onClick={actions.call}>Call</Action>
-            </div>
+            <Action isEnabled={isTurn} onClick={actions.check}>Check / Call</Action>
         </div>
 
         <VerticalSpacer height={10} />

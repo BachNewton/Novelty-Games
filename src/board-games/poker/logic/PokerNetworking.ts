@@ -67,6 +67,8 @@ export function createPokerNetworking(): PokerNetworking {
         if (eventName === 'dealBoard') return;
         if (eventName === 'message') return;
         if (eventName === 'allIn') return;
+        if (eventName === 'consoleLog') return;
+        if (eventName === 'hands') return;
 
         console.log(`Unhandled event: ${eventName}`, args);
     });
@@ -111,7 +113,6 @@ export function createPokerNetworking(): PokerNetworking {
         const dealerIndex = data[0] as number;
 
         const players = data.splice(1);
-        console.log('Players:', players);
         const player = players.find((p: any) => p.name === username);
 
         const gameData: GameData = {
@@ -131,6 +132,16 @@ export function createPokerNetworking(): PokerNetworking {
     socket.on('message', message => callbacks.message(message));
 
     socket.on('allIn', () => socket.emit('playerTurn', 'playerIsAllIn'));
+
+    socket.on('consoleLog', (text: string) => {
+        if (text.includes('You cannot check')) {
+            socket.emit('playerTurn', 'call');
+        } else {
+            console.log(text);
+        }
+    });
+
+    socket.on('hands', () => {/* Ignore */ });
 
     instance = {
         connect: (name) => {
