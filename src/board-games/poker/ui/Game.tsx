@@ -28,7 +28,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
 
     const isTurn = data.player.isTurn;
 
-    const messgaesUi = messages.map((message, index) => <div key={index}>{message}</div>);
+    const messgaesUi = messages.map((message, index) => <div key={index} style={{ marginBottom: '5px' }}>{message}</div>);
 
     return <div style={{
         padding: '10px',
@@ -39,14 +39,20 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
     }}>
         <Board pot={pot} cards={boardCards} data={data} />
 
-        <div>Player: {data.player.name}</div>
+        <VerticalSpacer height={10} />
 
         <div style={{
             flexGrow: 1,
-            overflow: 'auto'
+            overflow: 'auto',
+            border: '1px solid black',
+            borderRadius: '5px',
+            padding: '5px',
+            boxShadow: '0px 0px 5px black'
         }}>
             {messgaesUi}
         </div>
+
+        <VerticalSpacer height={10} />
 
         <div style={{
             display: 'grid',
@@ -62,7 +68,8 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
             }}>
                 <div style={{
                     display: 'flex',
-                    gap: '10px'
+                    gap: '10px',
+                    justifyContent: 'center'
                 }}>
                     <Card data={data.player.card1} />
                     <Card data={data.player.card2} />

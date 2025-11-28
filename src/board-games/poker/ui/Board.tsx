@@ -23,7 +23,8 @@ const Board: React.FC<BoardProps> = ({ pot, cards, data }) => {
         backgroundColor: 'darkgreen',
         padding: '15px',
         borderRadius: '25px',
-        border: '3px solid black'
+        border: '3px solid black',
+        boxShadow: '0px 0px 5px black'
     }}>
         <div style={{
             display: 'flex',
