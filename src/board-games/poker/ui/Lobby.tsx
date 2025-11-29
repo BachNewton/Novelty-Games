@@ -19,21 +19,40 @@ const Lobby: React.FC<LobbyProps> = ({ username, players, setUsername, connect, 
         {player}
     </div>);
 
-    return <div>
+    const handleConnect = () => {
+        setConnectClicked(true);
+        connect(username);
+    };
+
+    return <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '15px',
+        gap: '10px'
+    }}>
+        <div style={{ fontSize: '1.75em', fontWeight: 'bold' }}>Poker Lobby ♠ ♦ ♣ ♥</div>
+
         <input
+            style={{ fontSize: '1em' }}
             type="text"
             placeholder="Username"
             value={username}
             onChange={e => setUsername(e.target.value)}
+            onKeyDown={e => {
+                if (e.key === 'Enter') {
+                    handleConnect();
+                }
+            }}
         />
-        <br />
-        <button onClick={() => {
-            setConnectClicked(true);
-            connect(username);
-        }} disabled={connectClicked}>Connect</button>
-        <br />
+
+        <button
+            style={{ fontSize: '1em' }}
+            onClick={handleConnect}
+            disabled={connectClicked}
+        >Connect</button>
+
         {startGameButton}
-        <br />
+
         <div>Players:</div>
         {playersUi}
     </div>;
