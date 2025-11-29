@@ -276,7 +276,7 @@ export default class pokerGame {
         this.clearGameTimeout = setTimeout(function () {
             self.newHand();
             self.clearGameTimeout = null;
-        }, 5000);
+        }, 1200);
     }
 
     // Check if there's an active hand with only 1 player (needs restart)
