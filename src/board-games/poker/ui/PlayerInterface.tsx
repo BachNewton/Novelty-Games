@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import VerticalSpacer from "../../../util/ui/Spacer";
 import Action from "./Action";
 import Card from "./Card";
 import { GameData } from "../data/GameData";
+import { coerceToRange } from "../../../util/Math";
 
 interface PlayerInterfaceProps {
     data: GameData;
@@ -18,7 +19,18 @@ export interface Actions {
 }
 
 const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions }) => {
-    const [raiseAmount, setRaiseAmount] = useState(0);
+    const [minRaiseAmount, setMinRaiseAmount] = useState(data.toCall + 1);
+    const maxRaiseAmount = data.player.stack;
+    const [raiseAmount, setRaiseAmount] = useState(coerceToRange(0, minRaiseAmount, maxRaiseAmount));
+    const canRaise = minRaiseAmount < data.player.stack;
+    const raiseText = canRaise ? `Raise $${raiseAmount}` : 'Raise';
+
+    useEffect(() => {
+        const updatedMinRaiseAmount = data.toCall + 1;
+        const amount = coerceToRange(raiseAmount, updatedMinRaiseAmount, maxRaiseAmount);
+        setMinRaiseAmount(updatedMinRaiseAmount);
+        setRaiseAmount(amount);
+    }, [data]);
 
     const isTurn = data.player.isTurn;
 
@@ -62,19 +74,19 @@ const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions }) => {
 
         <VerticalSpacer height={10} />
 
-        <Action isEnabled={isTurn} onClick={() => {
-            actions.raise(raiseAmount);
-            setRaiseAmount(0);
-        }}>{`Raise $${raiseAmount}`}</Action>
+        <Action isEnabled={isTurn && canRaise} onClick={() => {
+            const amount = raiseAmount + data.player.inPot;
+            actions.raise(amount);
+        }}>{raiseText}</Action>
 
         <VerticalSpacer height={10} />
 
         <input
             type="range"
             value={raiseAmount}
-            disabled={!data.player.isTurn}
-            min={0}
-            max={data.player.stack + data.player.inPot}
+            disabled={!data.player.isTurn || !canRaise}
+            min={minRaiseAmount}
+            max={maxRaiseAmount}
             onChange={e => setRaiseAmount(Number(e.target.value))}
             style={{ width: '100%', accentColor: 'white' }}
         />
