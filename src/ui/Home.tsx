@@ -217,6 +217,7 @@ function getInitialState(): State {
     switch (route) {
         case Route.MARBLE_GAME:
         case Route.KNIGHT_GAME:
+        case Route.FORTUNA_GAME:
             return new Game3DState();
         case Route.FREE_MARKET:
             return createFreeMarketState();

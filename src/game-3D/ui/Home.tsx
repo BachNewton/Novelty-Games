@@ -20,7 +20,7 @@ class Game3DState implements UiState {
 }
 
 export enum Game {
-    MARBLE, KNIGHT
+    MARBLE, KNIGHT, FORTUNA
 }
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
@@ -34,16 +34,20 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
         setUiState(new Game3DState(Game.KNIGHT));
     };
 
+    const onFortunaClick = () => {
+        setUiState(new Game3DState(Game.FORTUNA));
+    };
+
     const onToddlerClick = () => {
         setUiState(new ToddlerState());
     };
 
-    return Ui(uiState, onHomeButtonClicked, onMarbleClick, onToddlerClick, onKnightClick);
+    return Ui(uiState, onHomeButtonClicked, onMarbleClick, onToddlerClick, onKnightClick, onFortunaClick);
 };
 
-function Ui(uiState: UiState, onHomeButtonClicked: () => void, onMarbleClick: () => void, onToddlerClick: () => void, onKnightClick: () => void) {
+function Ui(uiState: UiState, onHomeButtonClicked: () => void, onMarbleClick: () => void, onToddlerClick: () => void, onKnightClick: () => void, onFortunaClick: () => void) {
     if (uiState instanceof MenuUiState) {
-        return MenuUi(onHomeButtonClicked, onMarbleClick, onToddlerClick, onKnightClick);
+        return MenuUi(onHomeButtonClicked, onMarbleClick, onToddlerClick, onKnightClick, onFortunaClick);
     } else if (uiState instanceof Game3DState) {
         return <Game3D game={uiState.game} />;
     } else if (uiState instanceof ToddlerState) {
@@ -53,7 +57,7 @@ function Ui(uiState: UiState, onHomeButtonClicked: () => void, onMarbleClick: ()
     }
 }
 
-function MenuUi(onHomeButtonClicked: () => void, onMarbleClick: () => void, onToddlerClick: () => void, onKnightClick: () => void) {
+function MenuUi(onHomeButtonClicked: () => void, onMarbleClick: () => void, onToddlerClick: () => void, onKnightClick: () => void, onFortunaClick: () => void) {
     const containerStyle: React.CSSProperties = {
         color: 'white',
         display: 'flex',
@@ -76,6 +80,7 @@ function MenuUi(onHomeButtonClicked: () => void, onMarbleClick: () => void, onTo
         <button style={buttonStyle} onClick={onMarbleClick}>Marble 🌐</button>
         <button style={buttonStyle} onClick={onToddlerClick}>Toddler Companion App 👶</button>
         <button style={buttonStyle} onClick={onKnightClick}>Knight ⚔️</button>
+        <button style={buttonStyle} onClick={onFortunaClick}>Fortuna 🎯</button>
     </div>;
 }
 
@@ -87,6 +92,8 @@ function getInitialUiState(): UiState {
             return new Game3DState(Game.MARBLE);
         case Route.KNIGHT_GAME:
             return new Game3DState(Game.KNIGHT);
+        case Route.FORTUNA_GAME:
+            return new Game3DState(Game.FORTUNA);
         default:
             return new MenuUiState();
     }

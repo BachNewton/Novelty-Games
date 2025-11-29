@@ -1,6 +1,7 @@
 export enum Route {
     MARBLE_GAME = 'Marble',
     KNIGHT_GAME = 'Knight',
+    FORTUNA_GAME = 'Fortuna',
     FREE_MARKET = 'Free-Market',
     LABYRINTH = 'Labyrinth',
     CAT = 'Cat',

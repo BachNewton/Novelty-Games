@@ -5,6 +5,7 @@ import Stats from 'three/examples/jsm/libs/stats.module';
 import { GameWorld, GameWorldCreator } from "../worlds/GameWorld";
 import MarbleWorld from "../worlds/marble/logic/MarbleWorld";
 import { KnightWorld } from "../worlds/knight/KnightWorld";
+import { FortunaWorld } from "../worlds/fortuna/FortunaWorld";
 import { Game } from "./Home";
 
 const MINIUM_FRAME_RATE = 1000 / 25;
@@ -93,6 +94,8 @@ function getGameWorldCreator(game: Game): GameWorldCreator {
             return MarbleWorld;
         case Game.KNIGHT:
             return KnightWorld;
+        case Game.FORTUNA:
+            return FortunaWorld;
     }
 }
 
