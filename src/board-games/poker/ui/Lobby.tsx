@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 interface LobbyProps {
     username: string;
     players: string[];
@@ -7,6 +9,8 @@ interface LobbyProps {
 }
 
 const Lobby: React.FC<LobbyProps> = ({ username, players, setUsername, connect, startGame }) => {
+    const [connectClicked, setConnectClicked] = useState(false);
+
     const startGameButton = players.length < 2
         ? null
         : <button onClick={() => startGame()}>Start Game</button>;
@@ -23,7 +27,10 @@ const Lobby: React.FC<LobbyProps> = ({ username, players, setUsername, connect, 
             onChange={e => setUsername(e.target.value)}
         />
         <br />
-        <button onClick={() => connect(username)}>Connect</button>
+        <button onClick={() => {
+            setConnectClicked(true);
+            connect(username);
+        }} disabled={connectClicked}>Connect</button>
         <br />
         {startGameButton}
         <br />
