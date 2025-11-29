@@ -13,13 +13,16 @@ const Lobby: React.FC<LobbyProps> = ({ username, players, setUsername, connect, 
 
     const startGameButton = players.length < 2
         ? null
-        : <button onClick={() => startGame()}>Start Game</button>;
+        : <button style={{ fontSize: '1em' }} onClick={() => startGame()}>Start Game</button>;
 
     const playersUi = players.map((player, index) => <div key={index}>
         {player}
     </div>);
 
     const handleConnect = () => {
+        if (connectClicked) return;
+        if (username.trim() === '') return;
+
         setConnectClicked(true);
         connect(username);
     };
@@ -48,7 +51,7 @@ const Lobby: React.FC<LobbyProps> = ({ username, players, setUsername, connect, 
         <button
             style={{ fontSize: '1em' }}
             onClick={handleConnect}
-            disabled={connectClicked}
+            disabled={connectClicked || username.trim() === ''}
         >Connect</button>
 
         {startGameButton}

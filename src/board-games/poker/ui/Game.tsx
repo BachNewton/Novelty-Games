@@ -28,6 +28,10 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
 
     const isTurn = data.player.isTurn;
 
+    const checkCallUi = data.toCall === 0
+        ? <Action isEnabled={isTurn} onClick={actions.check}>Check</Action>
+        : <Action isEnabled={isTurn} onClick={actions.call}>{`Call $${data.toCall}`}</Action>;
+
     const messgaesUi = messages.map((message, index) => <div key={index} style={{ marginBottom: '5px' }}>{message}</div>);
 
     return <div style={{
@@ -85,7 +89,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
                 </div>
             </div>
 
-            <Action isEnabled={isTurn} onClick={actions.check}>Check / Call</Action>
+            {checkCallUi}
         </div>
 
         <VerticalSpacer height={10} />

@@ -2,7 +2,7 @@ import io from 'socket.io-client';
 import { wait } from '../../../util/Async';
 import { GameData } from '../data/GameData';
 import { Card, toCard } from '../data/Card';
-import { toPlayer } from '../data/Player';
+import { Player, toPlayer } from '../data/Player';
 import { isLocalhost } from '../../../util/Localhost';
 
 const PROD_SERVER = 'https://novelty-games.mooo.com:8080';
@@ -74,6 +74,7 @@ export function createPokerNetworking(): PokerNetworking {
         if (eventName === 'allIn') return;
         if (eventName === 'consoleLog') return;
         if (eventName === 'hands') return;
+        if (eventName === 'validOption') return;
 
         console.log(`Unhandled event: ${eventName}`, args);
     });
@@ -115,14 +116,18 @@ export function createPokerNetworking(): PokerNetworking {
     });
 
     socket.on('roomPlayers', data => {
-        const dealerIndex = data[0] as number;
+        // const dealerIndex = data[0] as number;
 
-        const players = data.splice(1);
-        const player = players.find((p: any) => p.name === username);
+        const players = data.splice(1).map((p: any) => toPlayer(p)) as Player[];
+        const player = players.find(p => p.name === username)!;
+
+        const maxInPot = Math.max(...players.map(p => p.inPot));
+        const toCall = maxInPot - player.inPot;
 
         const gameData: GameData = {
-            player: toPlayer(player),
-            players: players.map((p: any) => toPlayer(p))
+            player: player,
+            players: players,
+            toCall: toCall
         };
 
         callbacks.gameUpdate(gameData);
@@ -138,15 +143,10 @@ export function createPokerNetworking(): PokerNetworking {
 
     socket.on('allIn', () => socket.emit('playerTurn', 'playerIsAllIn'));
 
-    socket.on('consoleLog', (text: string) => {
-        if (text.includes('You cannot check')) {
-            socket.emit('playerTurn', 'call');
-        } else {
-            console.log(text);
-        }
-    });
+    socket.on('consoleLog', text => callbacks.message(text));
 
-    socket.on('hands', () => {/* Ignore */ });
+    socket.on('hands', () => { /* Ignore */ });
+    socket.on('validOption', () => { /* Ignore */ });
 
     instance = {
         connect: (name) => {
