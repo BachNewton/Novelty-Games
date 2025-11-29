@@ -109,7 +109,6 @@ class pokerHand {
         //If only one player left, that player wins the hand and receives money in their stack
 
         if (this.getPlayers().length == 1) {
-            this.io.to(this.theGame.getGameID()).emit('consoleLog', this.getPlayers()[0].getName() + " has won the pot of: " + this.getPot());
             this.io.to(this.theGame.getGameID()).emit('message', this.getPlayers()[0].getName() + " has won the pot of: " + this.getPot());
             this.getPlayers()[0].addToStack(this.moneyInPot);
             console.log("hand over");
@@ -952,7 +951,6 @@ class pokerHand {
             // It's their turn - we need to move to the next player
             needsToUpdateCurrPlayer = true;
             console.log(playerName + " disconnected during their turn - auto-folding");
-            this.io.to(this.theGame.getGameID()).emit('consoleLog', playerName + " has disconnected and automatically folded");
             this.io.to(this.theGame.getGameID()).emit('message', playerName + " has disconnected and automatically folded");
         }
 
@@ -998,7 +996,6 @@ class pokerHand {
         } else if (!needsToUpdateCurrPlayer) {
             // Player disconnected but it wasn't their turn
             // Just emit the message and continue
-            this.io.to(this.theGame.getGameID()).emit('consoleLog', playerName + " has disconnected and automatically folded");
             this.io.to(this.theGame.getGameID()).emit('message', playerName + " has disconnected and automatically folded");
             this.emitEverything();
 

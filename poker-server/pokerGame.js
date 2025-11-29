@@ -303,7 +303,6 @@ export default class pokerGame {
                 // Use the hand's io instance to emit messages
                 const io = this.hand.io;
 
-                io.to(this.getGameID()).emit('consoleLog', remainingPlayer.getName() + " has won the pot of: " + pot);
                 io.to(this.getGameID()).emit('message', remainingPlayer.getName() + " has won the pot of: " + pot);
 
                 // Mark hand as complete
@@ -349,11 +348,9 @@ export default class pokerGame {
             this.hand.handComplete = true;
             // Use the hand's io instance or the passed io
             const handIo = this.hand.io || io;
-            handIo.to(this.getGameID()).emit('consoleLog', "All players have disconnected - game paused");
             handIo.to(this.getGameID()).emit('message', "All players have disconnected - game paused");
         } else if (io) {
             // No hand but we have io, emit message
-            io.to(this.getGameID()).emit('consoleLog', "All players have disconnected - game paused");
             io.to(this.getGameID()).emit('message', "All players have disconnected - game paused");
         }
 

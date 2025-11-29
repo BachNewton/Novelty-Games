@@ -32,7 +32,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
         ? <Action isEnabled={isTurn} onClick={actions.check}>Check</Action>
         : <Action isEnabled={isTurn} onClick={actions.call}>{`Call $${data.toCall}`}</Action>;
 
-    const messgaesUi = messages.map((message, index) => <div key={index} style={{ marginBottom: '5px' }}>{message}</div>);
+    const messgaesUi = messages.map((message, index) => <div key={index} style={{ marginBottom: '7px' }}>{message}</div>);
 
     return <div style={{
         userSelect: 'none',
