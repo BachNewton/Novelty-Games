@@ -115,9 +115,11 @@ class pokerHand {
             this.emitEverything();
             this.handComplete = true;
 
-            //creates a new game in 5 seconds
-            this.io.to(this.theGame.getGameID()).emit('consoleLog', "A new hand is starting in 5 seconds");
-            this.theGame.clearGame();
+            // Hand ended due to folds - new hand starts after fold delay
+            var foldDelayMs = this.theGame.getFoldDelay();
+            var foldDelaySeconds = foldDelayMs / 1000;
+            this.io.to(this.theGame.getGameID()).emit('consoleLog', "A new hand is starting in " + foldDelaySeconds + " seconds");
+            this.theGame.clearGame(foldDelayMs);
             this.handComplete = true;
         }
 
@@ -244,8 +246,11 @@ class pokerHand {
                     //Clears all players Money in pot values, clears all turn vals and sets them all to undefined, and moves the dealer Index up by one for the next hand.
                     this.emitEverything();
                     //winner.addToStack(this.moneyInPot);
-                    this.io.to(this.theGame.getGameID()).emit('consoleLog', "A new hand is starting in 5 seconds");
-                    this.theGame.clearGame();
+                    // Showdown occurred (hands were revealed) - new hand starts after showdown delay
+                    var showdownDelayMs = this.theGame.getShowdownDelay();
+                    var showdownDelaySeconds = showdownDelayMs / 1000;
+                    this.io.to(this.theGame.getGameID()).emit('consoleLog', "A new hand is starting in " + showdownDelaySeconds + " seconds");
+                    this.theGame.clearGame(showdownDelayMs);
                     this.handComplete = true;
 
                 }

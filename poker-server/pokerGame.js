@@ -2,7 +2,9 @@ import DeckOfCards from './DeckOfCards.js';
 import Player from './player.js';
 import pokerHand from './pokerHand.js';
 
-//const DeckOfCards = require('./DeckOfCards');
+// Constants for delays between hands
+const DELAY_AFTER_FOLD = 5000;  // 5 seconds when hand ends due to folds
+const DELAY_AFTER_SHOWDOWN = 12000;  // 12 seconds when hand ends with showdown
 
 export default class pokerGame {
     constructor(gameID) {
@@ -138,6 +140,14 @@ export default class pokerGame {
         return this.gameID;
     }
 
+    getFoldDelay() {
+        return DELAY_AFTER_FOLD;
+    }
+
+    getShowdownDelay() {
+        return DELAY_AFTER_SHOWDOWN;
+    }
+
     checkIfNameIsInGame(name) {
         for (var i = 0; i < this.getAllPlayers().length; i++) {
             if (this.getAllPlayers()[i].getName() == name) {
@@ -252,8 +262,8 @@ export default class pokerGame {
         return returnArr;
     }
 
-    //clear the game for another hand, and starts the next hand in 5 seconds
-    clearGame() {
+    //clear the game for another hand, and starts the next hand after specified delay
+    clearGame(delayMs) {
         // Cancel any existing timeout
         if (this.clearGameTimeout != null) {
             clearTimeout(this.clearGameTimeout);
@@ -276,7 +286,7 @@ export default class pokerGame {
         this.clearGameTimeout = setTimeout(function () {
             self.newHand();
             self.clearGameTimeout = null;
-        }, 12000);
+        }, delayMs);
     }
 
     // Check if there's an active hand with only 1 player (needs restart)
