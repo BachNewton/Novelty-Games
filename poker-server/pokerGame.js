@@ -1,6 +1,7 @@
 import DeckOfCards from './DeckOfCards.js';
 import Player from './player.js';
 import pokerHand from './pokerHand.js';
+import handEvaluator from './handEvaluator.js';
 
 // Constants for delays between hands
 const DELAY_AFTER_FOLD = 5000;  // 5 seconds when hand ends due to folds
@@ -226,17 +227,26 @@ export default class pokerGame {
 
     emitPlayers() {
         /*
-        [dealerPosition, {name, stacksize, currMoneyInBettingRound, isFolded, card1, card2, isShown1, isShown2, isStraddled, isTurn}]
+        [dealerPosition, {name, stacksize, currMoneyInBettingRound, isFolded, card1, card2, isShown1, isShown2, isStraddled, isTurn, handEvaluation}]
         */
 
         var returnArr = [];
         var dealerIndex = this.dealerIdx % this.getTotalPlayers();
         returnArr.push(dealerIndex);
+
+        // Get hand evaluator if there's an active hand (can evaluate with just hole cards or with community cards)
+        var handEval = null;
+        if (this.hand != null) {
+            handEval = new handEvaluator(this.hand.communityCards);
+        }
+
         var currPerson;
         for (var i = 0; i < this.getTotalPlayers(); i++) {
             currPerson = this.getPlayerAt(i);
             var holeCard1;
             var holeCard2;
+            var handEvaluation = null;
+
             if (currPerson.getHand() == null) {
                 holeCard1 = "blue_back.png";
                 holeCard2 = "blue_back.png"
@@ -244,6 +254,11 @@ export default class pokerGame {
             else {
                 holeCard1 = currPerson.getHand().getHoleCard1().cardToPNG();
                 holeCard2 = currPerson.getHand().getHoleCard2().cardToPNG();
+
+                // Evaluate hand if we have community cards
+                if (handEval != null) {
+                    handEvaluation = handEval.evaluateHandForString(currPerson.getHand());
+                }
             }
 
             returnArr.push({
@@ -256,7 +271,8 @@ export default class pokerGame {
                 isShown1: currPerson.getCardsShown(),
                 isShown2: currPerson.getCardsShown(),
                 isStraddled: false,
-                isTurn: currPerson.getTurn()
+                isTurn: currPerson.getTurn(),
+                handEvaluation: handEvaluation
             });
         }
         return returnArr;
