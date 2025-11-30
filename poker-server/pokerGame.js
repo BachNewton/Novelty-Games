@@ -313,7 +313,7 @@ export default class pokerGame {
                 // Use the hand's io instance to emit messages
                 const io = this.hand.io;
 
-                io.to(this.getGameID()).emit('message', remainingPlayer.getName() + " has won the pot of: " + pot);
+                io.to(this.getGameID()).emit('message', remainingPlayer.getName() + " has won the pot of: $" + pot);
 
                 // Mark hand as complete
                 this.hand.handComplete = true;

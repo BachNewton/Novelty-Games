@@ -109,7 +109,7 @@ class pokerHand {
         //If only one player left, that player wins the hand and receives money in their stack
 
         if (this.getPlayers().length == 1) {
-            this.io.to(this.theGame.getGameID()).emit('message', this.getPlayers()[0].getName() + " has won the pot of: " + this.getPot());
+            this.io.to(this.theGame.getGameID()).emit('message', this.getPlayers()[0].getName() + " has won the pot of: $" + this.getPot());
             this.getPlayers()[0].addToStack(this.moneyInPot);
             console.log("hand over");
             this.emitEverything();
@@ -476,7 +476,7 @@ class pokerHand {
         //Raise/ bet section
         else {
             //valTurn = Number(valTurn + this.getCurrPlayer().getCurrMoneyInBettingRound());
-            this.io.to(this.theGame.getGameID()).emit('consoleLog', this.getCurrPlayer().getName() + " has raised to: " + valTurn);
+            this.io.to(this.theGame.getGameID()).emit('consoleLog', this.getCurrPlayer().getName() + " has raised to: $" + valTurn);
             this.getCurrPlayer().minusFromStack(valTurn - this.getCurrPlayer().getCurrMoneyInBettingRound());
             console.log("The player has put " + (valTurn - this.getCurrPlayer().getCurrMoneyInPot()) + " into the pot");
             this.currBet = Number(valTurn);
@@ -544,7 +544,7 @@ class pokerHand {
             }
             if (this.getCurrBet() != 0) {
                 //Tells player they cannot check, they must either call or raise
-                this.io.to(this.currPlayer.getSock()).emit('consoleLog', "You cannot check. The current bet is: " + this.getCurrBet() + ", you must either call or raise");
+                this.io.to(this.currPlayer.getSock()).emit('consoleLog', "You cannot check. The current bet is: $" + this.getCurrBet() + ", you must either call or raise");
                 return false;
             }
 
@@ -580,7 +580,7 @@ class pokerHand {
             }
             //If they try to bet less than currbet
             if (this.getCurrBet() > valTurn) {
-                this.io.to(this.currPlayer.getSock()).emit('consoleLog', "Invalid bet. You must at least call the current bet of: " + this.getCurrBet());
+                this.io.to(this.currPlayer.getSock()).emit('consoleLog', "Invalid bet. You must at least call the current bet of: $" + this.getCurrBet());
                 return false;
             }
             //Try to bet more than their stack size
@@ -677,7 +677,7 @@ class pokerHand {
             this.getNextPlayer(this.dealer).setAllIn();
         }
         //console.log("Collected small blind from: " + this.getNextPlayer(this.dealer).getName());
-        this.io.to(this.getNextPlayer(this.dealer).getSock()).emit('consoleLog', "You are assigned small blind and " + this.theGame.getSB() + " has been taken from your stack");
+        this.io.to(this.getNextPlayer(this.dealer).getSock()).emit('consoleLog', "You are assigned small blind and $" + this.theGame.getSB() + " has been taken from your stack");
     }
 
     collectBigBlind() {
@@ -696,7 +696,7 @@ class pokerHand {
             this.getNextPlayer(this.getNextPlayer(this.dealer)).setAllIn()
         }
         //console.log("Collected big blind from: " + this.getNextPlayer(this.getNextPlayer(this.dealer)).getName());
-        this.io.to(this.getNextPlayer(this.getNextPlayer(this.dealer)).getSock()).emit('consoleLog', "You are assigned big blind and " + this.theGame.getBB() + " has been taken from your stack");
+        this.io.to(this.getNextPlayer(this.getNextPlayer(this.dealer)).getSock()).emit('consoleLog', "You are assigned big blind and $" + this.theGame.getBB() + " has been taken from your stack");
     }
 
     dealFlop() {
