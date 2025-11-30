@@ -26,8 +26,14 @@ const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions }) => {
     const [raiseAmount, setRaiseAmount] = useState(coerceToRange(0, minRaiseAmount, maxRaiseAmount));
     const [actionsLocked, setActionsLocked] = useState(false);
     const actionLockTimeout = useRef<NodeJS.Timeout | null>(null);
+
     const canRaise = minRaiseAmount < data.player.stack;
-    const raiseText = canRaise ? `Raise $${raiseAmount}` : 'Raise';
+
+    const raiseText = canRaise
+        ? data.toCall > 0
+            ? `Raise $${raiseAmount}`
+            : `Bet $${raiseAmount}`
+        : 'Bet / Raise';
 
     const clearActionLock = () => {
         if (actionLockTimeout.current) clearTimeout(actionLockTimeout.current);
@@ -84,12 +90,10 @@ const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions }) => {
                     <Card data={data.player.card2} />
                 </div>
                 <div style={{
-                    flexGrow: 1,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center'
+                    textAlign: 'center',
+                    fontSize: '1.2em',
                 }}>
-                    Stack: ${data.player.stack}
+                    Stack ${data.player.stack}
                 </div>
             </div>
 
