@@ -42,7 +42,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
 
         <VerticalSpacer height={10} />
 
-        <PlayerInterface data={data} actions={actions} />
+        <PlayerInterface data={data} actions={actions} boardCards={boardCards} />
     </div>;
 };
 

@@ -2,14 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import VerticalSpacer from "../../../util/ui/Spacer";
 import Action from "./Action";
 import Card from "./Card";
+import { Card as CardData } from "../data/Card";
 import { GameData } from "../data/GameData";
 import { coerceToRange } from "../../../util/Math";
+import { createPokerOddsCalculator } from "../logic/PokerOddsCalculator";
 
 const ACTION_LOCK_TIME = 4000;
 
 interface PlayerInterfaceProps {
     data: GameData;
     actions: Actions;
+    boardCards: CardData[];
 }
 
 export interface Actions {
@@ -20,7 +23,8 @@ export interface Actions {
     allIn: () => void;
 }
 
-const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions }) => {
+const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions, boardCards }) => {
+    const oddsCalculator = useRef(createPokerOddsCalculator()).current;
     const [minRaiseAmount, setMinRaiseAmount] = useState(data.toCall + 1);
     const maxRaiseAmount = data.player.stack;
     const [raiseAmount, setRaiseAmount] = useState(coerceToRange(0, minRaiseAmount, maxRaiseAmount));
@@ -38,6 +42,8 @@ const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions }) => {
     const clearActionLock = () => {
         if (actionLockTimeout.current) clearTimeout(actionLockTimeout.current);
     };
+
+    oddsCalculator.calculate(data.player.card1, data.player.card2, boardCards, data.players);
 
     useEffect(() => {
         const updatedMinRaiseAmount = data.toCall + 1;
