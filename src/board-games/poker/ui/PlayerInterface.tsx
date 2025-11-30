@@ -43,7 +43,8 @@ const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions, boardC
         if (actionLockTimeout.current) clearTimeout(actionLockTimeout.current);
     };
 
-    oddsCalculator.calculate(data.player.card1, data.player.card2, boardCards, data.players);
+    const winPercent = oddsCalculator.calculate(data.player.card1, data.player.card2, boardCards, data.players);
+    console.log(winPercent);
 
     useEffect(() => {
         const updatedMinRaiseAmount = data.toCall + 1;
