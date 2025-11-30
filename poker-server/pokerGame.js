@@ -234,10 +234,10 @@ export default class pokerGame {
         var dealerIndex = this.dealerIdx % this.getTotalPlayers();
         returnArr.push(dealerIndex);
 
-        // Get hand evaluator if there's an active hand (can evaluate with just hole cards or with community cards)
-        var handEval = null;
-        if (this.hand != null) {
-            handEval = new handEvaluator(this.hand.communityCards);
+        // Get community cards from active hand if available
+        var communityCards = [];
+        if (this.hand != null && this.hand.communityCards != undefined) {
+            communityCards = this.hand.communityCards;
         }
 
         var currPerson;
@@ -255,9 +255,13 @@ export default class pokerGame {
                 holeCard1 = currPerson.getHand().getHoleCard1().cardToPNG();
                 holeCard2 = currPerson.getHand().getHoleCard2().cardToPNG();
 
-                // Evaluate hand if we have community cards
-                if (handEval != null) {
+                // Evaluate hand (works with just hole cards or with community cards)
+                try {
+                    var handEval = new handEvaluator(communityCards);
                     handEvaluation = handEval.evaluateHandForString(currPerson.getHand());
+                } catch (error) {
+                    console.log("Error evaluating hand for " + currPerson.getName() + ": " + error);
+                    handEvaluation = null;
                 }
             }
 
