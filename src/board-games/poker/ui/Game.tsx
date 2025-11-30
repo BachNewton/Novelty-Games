@@ -34,7 +34,8 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
             border: '1px solid black',
             borderRadius: '5px',
             padding: '5px',
-            boxShadow: '0px 0px 5px black'
+            boxShadow: '0px 0px 5px black',
+            overscrollBehaviorY: 'contain'
         }}>
             {messgaesUi}
         </div>
