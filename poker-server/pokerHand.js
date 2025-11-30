@@ -268,6 +268,14 @@ class pokerHand {
 
         var handEval = new handEvaluator(this.communityCards);
 
+        // Log all players' hands at showdown
+        for (var i = 0; i < this.playersInHand.length; i++) {
+            if (this.playersInHand[i].getHand() != null) {
+                var handString = handEval.evaluateHandForString(this.playersInHand[i].getHand());
+                this.io.to(this.theGame.getGameID()).emit('consoleLog', this.playersInHand[i].getName() + " has " + handString);
+            }
+        }
+
         //Go through the players still in the hand, and make a list of the split pots there will be.
 
         var pots = [];
