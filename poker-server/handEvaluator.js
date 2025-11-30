@@ -1,791 +1,595 @@
 import Card from './card.js';
 
-//Used for the numeric value of hands
-const tenNegTwo = .01;
-const tenNegFour = .0001;
-const tenNegSix = .000001;
-const tenNegEight = .00000001;
-const tenNegTen = .0000000001;
-
-
+/**
+ * handEvaluator - Evaluates and compares poker hands
+ * 
+ * Uses a robust ranking system where each hand is represented as:
+ * [handRank, ...tiebreakers]
+ * - handRank: 0-8 (High Card, Pair, Two Pair, Trips, Straight, Flush, Full House, Quads, Straight Flush)
+ * - tiebreakers: Array of card values used to break ties
+ * 
+ * This allows for clean lexicographic comparison.
+ */
 class handEvaluator {
     constructor(communityCards) {
-        this.cardsOnBoard = communityCards;
+        this.communityCards = communityCards || [];
     }
 
-    //Helper function to the main function of the class. Returns a number with the ones place being the type of hand
-    // (straight flush == 8, Quads == 7, Full House == 6, etc) and the tenths - ten thousandths place being the necessary part comparable if both players have the same type of 
-    //hand (Player A and Player B both have Quad A's but Player A has King high and Player B has 10 high) (for Example: 07.1413 vs 07.1410).
+    /**
+     * Evaluates a hand and returns a numeric value for comparison
+     * @param {playerHand} hand - The player's hand (hole cards)
+     * @returns {number|null} - Numeric value representing hand strength, or null if invalid
+     */
+    evaluateHandNumberValue(hand) {
+        const allCards = this._getAllCards(hand);
+        if (allCards.length < 2) {
+            return null;
+        }
 
-    evaluateHandNumberValue(hand1) {
-        //8
-        if (this.returnStraightFlushNumber(hand1) != null) {
-            return this.returnStraightFlushNumber(hand1);
+        // Get the best 5-card hand
+        const bestHand = this._getBestFiveCardHand(allCards);
+        if (!bestHand) {
+            return null;
         }
-        //7
-        if (this.returnQuadsNumber(hand1) != null) {
-            return this.returnQuadsNumber(hand1);
-        }
-        //6
-        if (this.returnFullHouseNumber(hand1) != null) {
-            return this.returnFullHouseNumber(hand1);
-        }
-        //5
-        if (this.returnFlushNumber(hand1) != null) {
-            return this.returnFlushNumber(hand1);
-        }
-        //4
-        if (this.returnStraightNumber(hand1) != null) {
-            return this.returnStraightNumber(hand1);
-        }
-        //3
-        if (this.returnTripsNumber(hand1) != null) {
-            return this.returnTripsNumber(hand1);
-        }
-        //2
-        if (this.returnTwoPairNumber(hand1) != null) {
-            return this.returnTwoPairNumber(hand1);
-        }
-        //1
-        if (this.returnPairNumber(hand1) != null) {
-            return this.returnPairNumber(hand1);
-        }
-        //0
-        if (this.returnHighCardNumber(hand1) != null) {
-            return this.returnHighCardNumber(hand1);
-        }
-        return null;
+
+        // Convert to numeric value for backward compatibility
+        return this._handRankToNumber(bestHand);
     }
 
-    //Main function of the class: Returns the better hand when two poker hands are entered into parameters of the method.
-    //Returns the better hand between the two
-
+    /**
+     * Returns the better hand between two hands
+     * @param {playerHand} hand1 - First hand
+     * @param {playerHand} hand2 - Second hand
+     * @returns {playerHand|null} - The better hand, or null if they're equal
+     */
     returnBestHand(hand1, hand2) {
-        var hand1number = this.evaluateHandNumberValue(hand1);
-        var hand2number = this.evaluateHandNumberValue(hand2);
+        const rank1 = this._evaluateHand(hand1);
+        const rank2 = this._evaluateHand(hand2);
 
-        // Ensure we have valid hand values
-        if (hand1number == null || hand2number == null) {
-            // If one is null, return the other, or null if both are null
-            if (hand1number != null) return hand1;
-            if (hand2number != null) return hand2;
-            return null;
-        }
+        if (!rank1 && !rank2) return null;
+        if (!rank1) return hand2;
+        if (!rank2) return hand1;
 
-        if (hand1number > hand2number) {
-            return hand1;
-        }
-        else if (hand2number > hand1number) {
-            return hand2;
-        }
-        //Both hands the same
-        else {
-            return null;
-        }
+        const comparison = this._compareHandRanks(rank1, rank2);
+        if (comparison > 0) return hand1;
+        if (comparison < 0) return hand2;
+        return null; // Equal hands
     }
 
-
-    //String function of class: returns the best 5 card hand of what you have (ex. One pair: 10's, Ace King Jack) (ex. Two Pair Queens and Fours)
-    evaluateHandForString(hand1) {
-        //If preflop (no cards on the board)
-        if (this.cardsOnBoard.length == 0) {
-            if (hand1.getHoleCard1().getNumber() > hand1.getHoleCard2().getNumber()) {
-                return "High Card: " + hand1.getHoleCard1().cardToString() + ", " + hand1.getHoleCard2().cardToString();
-            }
-            else if (hand1.getHoleCard1().getNumber() < hand1.getHoleCard2().getNumber()) {
-                return "High Card: " + hand1.getHoleCard2().cardToString() + ", " + hand1.getHoleCard1().cardToString();
-            }
-            else {
-                return "Pair of: " + Card.numberToString(hand1.getHoleCard1().getNumber()) + "'s";
-            }
+    /**
+     * Returns a string description of the hand
+     * @param {playerHand} hand - The player's hand
+     * @returns {string} - String description of the hand
+     */
+    evaluateHandForString(hand) {
+        // Preflop (no community cards)
+        if (this.communityCards.length === 0) {
+            return this._preflopString(hand);
         }
-        else {
-            var handNum = this.evaluateHandNumberValue(hand1);
 
-            //If Straight Flush
-            if (handNum > 8) {
-                var topOfStraight = Math.floor((handNum.toFixed(2) - Math.floor(handNum)) * 100);
-                //console.log(topOfStraight);
-                return "Straight Flush: " + Card.numberToString(topOfStraight) + " to " + Card.numberToString(topOfStraight - 4);
-            }
-            //If Quads
-            else if (handNum > 7) {
-                var QuadsNum = Math.round((handNum - Math.floor(handNum)) * 100);
-                var highCard = Math.round(((handNum * 10000) % 10000) / 100);
-                //console.log(highCard);
-                return "Four of a Kind: " + Card.numberToString(QuadsNum) + "'s, " + Card.numberToString(highCard) + " high";
-            }
-            //If Full House
-            else if (handNum > 6) {
-                var tripsNum = Math.round((handNum - Math.floor(handNum)) * 100);
-                var pairNum = Math.round((handNum * 10000) % 100);
-                //console.log(tripsNum + " " + pairNum);
-                return "Full House: " + Card.numberToString(tripsNum) + "'s full of " + Card.numberToString(pairNum) + "'s";
-            }
-            //If Flush
-            else if (handNum > 5) {
-                //console.log(handNum);
-                var highestFlushCard = ((handNum.toFixed(2) - Math.floor(handNum)) * 100).toFixed();
-                var secondFlushCard = ((handNum.toFixed(4) - handNum.toFixed(2)) * 10000).toFixed();
-                var thirdFlushCard = ((handNum.toFixed(6) - handNum.toFixed(4)) * 1000000).toFixed();
-                var fourthFlushCard = ((handNum.toFixed(8) - handNum.toFixed(6)) * 100000000).toFixed();
-                var fifthFlushCard = ((handNum.toFixed(10) - handNum.toFixed(8)) * 10000000000).toFixed();
-
-                return "Flush: " + Card.numberToString(highestFlushCard) + ", " + Card.numberToString(secondFlushCard) + ", " + Card.numberToString(thirdFlushCard) + ", " + Card.numberToString(fourthFlushCard) + ", " + Card.numberToString(fifthFlushCard);
-            }
-            //If Straight
-            else if (handNum > 4) {
-                //console.log(handNum);
-                var straightCard = ((handNum.toFixed(2) - Math.floor(handNum)) * 100).toFixed();
-                return "Straight: " + Card.numberToString(straightCard) + " to " + Card.numberToString(straightCard - 4);
-            }
-            //If Trips
-            else if (handNum > 3) {
-                //console.log(handNum);
-                var tripsNum = ((handNum.toFixed(2) - Math.floor(handNum)) * 100).toFixed();
-                var highCard = ((handNum.toFixed(4) - handNum.toFixed(2)) * 10000).toFixed();
-                var secondHighCard = ((handNum.toFixed(6) - handNum.toFixed(4)) * 1000000).toFixed();
-
-                return "Three of a Kind: " + Card.numberToString(tripsNum) + "'s, " + Card.numberToString(highCard) + ", " + Card.numberToString(secondHighCard) + " high";
-            }
-            //If TwoPair
-            else if (handNum > 2) {
-                var highPair = ((handNum.toFixed(2) - Math.floor(handNum)) * 100).toFixed();
-                var lowPair = ((handNum.toFixed(4) - handNum.toFixed(2)) * 10000).toFixed();
-                var highCard = ((handNum.toFixed(6) - handNum.toFixed(4)) * 1000000).toFixed();
-
-                return "Two Pair: " + Card.numberToString(highPair) + "'s & " + Card.numberToString(lowPair) + "'s, " + Card.numberToString(highCard) + " high";
-            }
-            //If Pair
-            else if (handNum > 1) {
-                //console.log(handNum);
-                var pair = ((handNum.toFixed(2) - Math.floor(handNum)) * 100).toFixed();
-                var highCard = ((handNum.toFixed(4) - handNum.toFixed(2)) * 10000).toFixed();
-                var secondHighCard = ((handNum.toFixed(6) - handNum.toFixed(4)) * 1000000).toFixed();
-                var thirdHighCard = ((handNum.toFixed(8) - handNum.toFixed(6)) * 100000000).toFixed();
-
-                return "Pair of: " + Card.numberToString(pair) + "'s, " + Card.numberToString(highCard) + ", " + Card.numberToString(secondHighCard) + ", " + Card.numberToString(thirdHighCard) + " high";
-            }
-            //If High Card
-            else {
-                var highCard = ((handNum.toFixed(2) - Math.floor(handNum)) * 100).toFixed();
-                var secondHighCard = ((handNum.toFixed(4) - handNum.toFixed(2)) * 10000).toFixed();
-                var thirdHighCard = ((handNum.toFixed(6) - handNum.toFixed(4)) * 1000000).toFixed();
-                var fourthHighCard = ((handNum.toFixed(8) - handNum.toFixed(6)) * 100000000).toFixed();
-                var fifthHighCard = ((handNum.toFixed(10) - handNum.toFixed(8)) * 10000000000).toFixed();
-
-                return "High Card: " + Card.numberToString(highCard) + ", " + Card.numberToString(secondHighCard) + ", " + Card.numberToString(thirdHighCard) + ", " + Card.numberToString(fourthHighCard) + ", " + Card.numberToString(fifthHighCard);
-            }
+        const rank = this._evaluateHand(hand);
+        if (!rank) {
+            return "Invalid Hand";
         }
+
+        return this._rankToString(rank);
     }
 
-
-    //////////
-    ///////////////// Return Functions for the main function of the class
-    //////////
-
-    returnHighCardNumber(hand1) {
-        var cards = this.returnArrayOfSortedBoardAndHandCards(hand1);
-
-        //Creating an array of the 5 highest cards
-        var highCard = [cards[cards.length - 1], cards[cards.length - 2], cards[cards.length - 3], cards[cards.length - 4], cards[cards.length - 5]];
-
-        var highCardNumber = 0 + highCard[0].getNumber() * tenNegTwo + highCard[1].getNumber() * tenNegFour + highCard[2].getNumber() * tenNegSix + highCard[3].getNumber() * tenNegEight + highCard[4].getNumber() * tenNegTen;
-        return highCardNumber;
-    }
-    returnPairNumber(hand1) {
-        var cards = this.returnArrayOfSortedBoardAndHandCards(hand1);
-
-        // Find the highest pair
-        var pairCard = 0;
-        var pairFound = false;
-
-        // Look for pairs starting from the highest cards
-        for (var i = cards.length - 2; i >= 0; i--) {
-            if (cards[i + 1].getNumber() == cards[i].getNumber()) {
-                pairCard = cards[i].getNumber();
-                pairFound = true;
-                break; // Found the highest pair
-            }
-        }
-
-        if (!pairFound) {
-            return null;
-        }
-
-        // Build the best 5-card hand: [pairCard1, pairCard2, kicker1, kicker2, kicker3]
-        var pairArr = [];
-        var pairCards = [];
-        var kickers = [];
-
-        // Separate pair cards from kickers
-        for (var i = cards.length - 1; i >= 0; i--) {
-            if (cards[i].getNumber() == pairCard) {
-                pairCards.push(cards[i]);
-            } else {
-                kickers.push(cards[i]);
-            }
-        }
-
-        // We need exactly 2 pair cards and at least 3 kickers
-        // Note: With 7 cards total (5 board + 2 hole), if we have a pair, we'll have 5 kickers
-        if (pairCards.length >= 2) {
-            // Use the 2 highest pair cards
-            pairArr[0] = pairCards[0]; // Highest pair card
-            pairArr[1] = pairCards[1]; // Second pair card (not used in calculation but kept for consistency)
-
-            // Use the 3 highest kickers (we may have more than 3, so take the top 3)
-            if (kickers.length >= 3) {
-                pairArr[2] = kickers[0]; // Highest kicker
-                pairArr[3] = kickers[1]; // Second kicker
-                pairArr[4] = kickers[2]; // Third kicker
-
-                // Calculate hand value: 1 + pairValue*0.01 + kicker1*0.0001 + kicker2*0.000001 + kicker3*0.00000001
-                var pairNumber = 1 + pairArr[0].getNumber() * tenNegTwo +
-                    pairArr[2].getNumber() * tenNegFour +
-                    pairArr[3].getNumber() * tenNegSix +
-                    pairArr[4].getNumber() * tenNegEight;
-                return pairNumber;
-            }
-        }
-
-        return null;
-    }
-    returnTwoPairNumber(hand1) {
-        var cards = this.returnArrayOfSortedBoardAndHandCards(hand1);
-
-        var twoPairCheck = 0;
-        var twoPairNumber1Index1 = 0;
-        var twoPairNumber1Index2 = 0;
-        var twoPairNumber2Index1 = 0;
-        var twoPairNumber2Index2 = 0;
-
-        var twoPair = false;
-        var TwoPair = [];
-
-        for (var i = cards.length - 2; i >= 0; i--) {
-            if (cards[i + 1].getNumber() == cards[i].getNumber()) {
-                twoPairCheck++;
-                if (twoPairNumber1Index1 == 0) {
-                    twoPairNumber1Index1 = i;
-                    twoPairNumber1Index2 = i + 1;
-                }
-                else if (twoPairNumber2Index1 == 0 && cards[i].getNumber() != cards[twoPairNumber1Index1].getNumber()) {
-                    twoPairNumber2Index1 = i;
-                    twoPairNumber2Index2 = i + 1;
-                    twoPair = true;
-                    break;
-                }
-            }
-        }
-
-        var twoPairNumber;
-        if (twoPair) {
-            var highCard = new Card('s', 0);
-            for (var i = cards.length - 1; i >= 0; i--) {
-                if (i != twoPairNumber1Index1 && i != twoPairNumber1Index2 && i != twoPairNumber2Index1 && i != twoPairNumber2Index2) {
-                    if (cards[i].getNumber() > highCard.getNumber()) {
-                        highCard = cards[i];
-                    }
-                }
-            }
-            TwoPair = [cards[twoPairNumber1Index1], cards[twoPairNumber1Index2], cards[twoPairNumber2Index1], cards[twoPairNumber2Index2], highCard];
-            twoPairNumber = 2 + TwoPair[0].getNumber() * tenNegTwo + TwoPair[2].getNumber() * tenNegFour + TwoPair[4].getNumber() * tenNegSix;
-        }
-
-        if (twoPairNumber != null) {
-            return twoPairNumber;
-        }
-        return null;
-    }
-    returnTripsNumber(hand1) {
-        var cards = this.returnArrayOfSortedBoardAndHandCards(hand1);
-        var tripCheck = 0;
-        var tripCard = 0;
-        var hasTrips = false;
-        var Trips;
-
-        for (var i = cards.length - 2; i >= 0; i--) {
-            if (cards[i + 1].getNumber() == cards[i].getNumber()) {
-                tripCheck++;
-                if (tripCheck == 2) {
-                    hasTrips = true;
-                    tripCard = cards[i].getNumber();
-                    break;
-                }
-            }
-            else {
-                tripCheck = 0;
-            }
-        }
-
-        //Number to be returned
-        var tripsNumber;
-        if (hasTrips) {
-            var highCard = new Card('s', 0);
-            var secondHighCard = new Card('s', 0);;
-            Trips = [];
-            var newArrCounter = 0;
-            for (var i = 0; i < cards.length; i++) {
-                if (cards[i].getNumber() > secondHighCard.getNumber() && cards[i].getNumber() != tripCard) {
-                    if (cards[i].getNumber() > highCard.getNumber()) {
-                        secondHighCard = highCard;
-                        highCard = cards[i];
-                    }
-                    else {
-                        secondHighCard = cards[i];
-                    }
-                }
-                if (cards[i].getNumber() == tripCard) {
-                    Trips[newArrCounter++] = cards[i];
-                }
-            }
-            Trips[newArrCounter++] = highCard;
-            Trips[newArrCounter] = secondHighCard;
-
-            tripsNumber = 3 + Trips[0].getNumber() * tenNegTwo + Trips[3].getNumber() * tenNegFour + Trips[4].getNumber() * tenNegSix;
-        }
-
-        if (tripsNumber != null) {
-            return tripsNumber;
-        }
-        return null;
-    }
-    returnStraightNumber(hand1) {
-        var cards = this.returnArrayOfSortedBoardAndHandCards(hand1);
-
-
-        var straightCounter = 0;
-        var isStraight = false;
-        var wheel = false;
-        var aceExists = false;
-        var acePosition = 0;
-        var straight = null;
-        var topOfStraight = null;
-        var topIndex = 0;
-
-        for (var i = cards.length - 2; i >= 0; i--) {
-            //Wheel Checker (A 2 3 4 5)
-            if (i == cards.length - 2) {
-                if (cards[cards.length - 1].getNumber() == 14) {
-                    aceExists = true;
-                    acePosition = cards.length - 1;
-                }
-
-            }
-
-            if (straightCounter == 4) {
-                isStraight = true;
-                break;
-            }
-            if (cards[i].getNumber() - cards[i + 1].getNumber() == -1) {
-                if (straightCounter == 0) {
-                    topOfStraight = cards[i + 1];
-                    topIndex = i + 1;
-                }
-                straightCounter++;
-            }
-            else if (cards[i].getNumber() == cards[i + 1].getNumber()) {
-                //Skip over if its the same number
-            }
-            else {
-                straightCounter = 0;
-            }
-
-            if (straightCounter == 3 && cards[i].getNumber() == 2 && aceExists) {
-                wheel = true;
-                isStraight = true;
-                break;
-            }
-        }
-
-        if (straightCounter == 4) {
-            isStraight = true;
-        }
-
-        //Number to return
-        var straightNumber = null;
-        if (isStraight) {
-            straight = [];
-            var b = 0;
-
-            if (wheel) {
-                b = 4;
-                straight[0] = cards[acePosition];
-                for (var i = topIndex; i > 0; i--) {
-                    straight[b--] = cards[i];
-                    if (b == 0) {
-                        break;
-                    }
-                    //Skip over if its the same number
-                    if (straight[b + 1].getNumber() == cards[i - 1].getNumber()) {
-                        i--;
-                    }
-
-                }
-
-            }
-            else {
-
-                for (var i = topIndex; i >= 0; i--) {
-                    straight[b++] = cards[i];
-                    if (b == 5) {
-                        break;
-                    }
-                    //Skip over if its the same number
-                    if (straight[b - 1].getNumber() == cards[i - 1].getNumber()) {
-                        i--;
-                    }
-
-                }
-            }
-
-            straightNumber = 4 + topOfStraight.getNumber() * tenNegTwo;
-        }
-
-        if (straightNumber != null) {
-            return straightNumber;
-        }
-        return null;
-
-    }
-
-    returnFlushNumber(hand1) {
-        var suits = ['s', 'c', 'd', 'h'];
-        var cards = this.returnArrayOfSortedBoardAndHandCards(hand1);
-
-        var flushCount = 0;
-        var currentSuit;
-        var isFlush = false;
-        var flush = null;
-
-        //Number to return
-        var flushNumber = null;
-        for (var i = 0; i < suits.length; i++) {
-            currentSuit = suits[i];
-            flushCount = 0;
-            for (var k = 0; k < cards.length; k++) {
-                if (cards[k].getSuit() == currentSuit) {
-                    flushCount++;
-
-                    if (flushCount == 5) {
-                        isFlush = true;
-                        break;
-                    }
-                }
-            }
-
-            if (isFlush) {
-                flush = [];
-                var flushArrayCounter = 0;
-                for (var b = cards.length - 1; b >= 0; b--) {
-                    if (cards[b].getSuit() == currentSuit) {
-                        flush[flushArrayCounter++] = cards[b];
-                    }
-                    if (flushArrayCounter == 5) {
-                        break;
-                    }
-                }
-                flushNumber = 5 + flush[0].getNumber() * tenNegTwo + flush[1].getNumber() * tenNegFour + flush[2].getNumber() * tenNegSix + flush[3].getNumber() * tenNegEight + flush[4].getNumber() * tenNegTen;
-                break;
-            }
-        }
-
-        if (flushNumber != null) {
-            return flushNumber;
-        }
-        return null;
-    }
-    returnFullHouseNumber(hand1) {
-        var cards = this.returnArrayOfSortedBoardAndHandCards(hand1);
-
-        var tripCheck = 0;
-        var trips = false;
-        var tripNumber = 0;
-
-        for (var i = cards.length - 2; i >= 0; i--) {
-            if (cards[i + 1].getNumber() == cards[i].getNumber()) {
-                tripCheck++;
-                if (tripCheck == 2) {
-                    trips = true;
-                    tripNumber = cards[i].getNumber();
-                    break;
-                }
-            }
-            else {
-                tripCheck = 0;
-            }
-        }
-
-        var House = null;
-        var house = false;
-        var pairNumber = 0;
-
-        if (trips) {
-            for (var i = cards.length - 2; i >= 0; i--) {
-                if (cards[i].getNumber() != tripNumber && cards[i + 1].getNumber() == cards[i].getNumber()) {
-                    house = true;
-                    pairNumber = cards[i].getNumber();
-                    break; // Found the pair, no need to continue
-                }
-            }
-        }
-
-        //Number to return
-        var fullHouseNumber = null;
-        if (house) {
-            House = [];
-            var tripCount = 0;
-            var pairCount = 3;
-            for (var i = 0; i < cards.length; i++) {
-                if (cards[i].getNumber() == tripNumber) {
-                    House[tripCount++] = cards[i];
-                }
-                if (cards[i].getNumber() == pairNumber) {
-                    House[pairCount++] = cards[i];
-                }
-            }
-            fullHouseNumber = 6 + House[0].getNumber() * tenNegTwo + House[3].getNumber() * tenNegFour;
-        }
-
-        if (fullHouseNumber != null) {
-            return fullHouseNumber;
-        }
-        return null;
-    }
-    returnQuadsNumber(hand1) {
-        var cards = this.returnArrayOfSortedBoardAndHandCards(hand1);
-
-        var quadCount = 0;
-        var hasQuads = false;
-        var quadCard = 0;
-        var Quads;
-
-        for (var i = cards.length - 2; i >= 0; i--) {
-            if (cards[i + 1].getNumber() == cards[i].getNumber()) {
-                quadCount++;
-                if (quadCount == 3) {
-                    hasQuads = true;
-                    quadCard = cards[i].getNumber();
-                    break;
-                }
-            }
-            else {
-                quadCount = 0;
-            }
-        }
-
-        //Number to return
-        var quadsNumber;
-
-        if (hasQuads) {
-            var arrCounter = 0;
-            var highCard = new Card('s', 0);
-            Quads = [];
-            for (var i = cards.length - 1; i >= 0; i--) {
-                if (cards[i].getNumber() == quadCard) {
-                    Quads[arrCounter++] = cards[i];
-                }
-                else if (cards[i].getNumber() > highCard.getNumber()) {
-                    highCard = cards[i];
-                }
-
-            }
-            Quads[arrCounter] = highCard;
-            quadsNumber = 7 + Quads[0].getNumber() * tenNegTwo + Quads[4].getNumber() * tenNegFour;
-        }
-
-        if (quadsNumber != null) {
-            return quadsNumber;
-        }
-        return null;
-    }
-    returnStraightFlushNumber(hand1) {
-        var suits = ['s', 'c', 'd', 'h'];
-        var cards = this.returnArrayOfSortedBoardAndHandCards(hand1);
-
-        var flush = false;
-        var flushSuit;
-        var flushCount = 0;
-        for (var i = 0; i < suits.length; i++) {
-            var currSuit = suits[i];
-            flushCount = 0;
-            for (var k = 0; k < cards.length; k++) {
-
-                if (cards[k].getSuit() == currSuit) {
-                    flushCount++;
-                }
-            }
-            if (flushCount >= 5) {
-                flush = true;
-                flushSuit = currSuit;
-                break;
-            }
-        }
-
-
-        var straight = null;
-        //Number to return
-        var straightFlushNumber;
-        if (flush) {
-            var cardsOfFlushSuit = [];
-            var p = 0;
-            for (var k = 0; k < cards.length; k++) {
-
-                if (cards[k].getSuit() == flushSuit) {
-                    cardsOfFlushSuit[p++] = cards[k];
-                }
-            }
-            cardsOfFlushSuit = this.insertionSort(cardsOfFlushSuit);
-
-            //console.log(cardsOfFlushSuit);
-
-            var straightCounter = 0;
-            var isStraight = false;
-            var wheel = false;
-            var aceExists = false;
-            var acePosition = 0;
-            var topOfStraight = null;
-            var topIndex = 0;
-            for (var i = cardsOfFlushSuit.length - 2; i >= 0; i--) {
-                if (cards[cards.length - 1].getNumber() == 14) {
-                    aceExists = true;
-                    acePosition = cards.length - 1;
-                }
-
-                if (straightCounter == 4) {
-                    isStraight = true;
-                    break;
-                }
-                if (cardsOfFlushSuit[i].getNumber() - cardsOfFlushSuit[i + 1].getNumber() == -1) {
-                    if (straightCounter == 0) {
-                        topOfStraight = cardsOfFlushSuit[i + 1];
-                        topIndex = i + 1;
-                    }
-                    straightCounter++;
-                }
-                else if (cardsOfFlushSuit[i].getNumber() == cardsOfFlushSuit[i + 1].getNumber()) {
-                    //Skip over if its the same number
-                }
-                else {
-                    straightCounter = 0;
-                }
-                if (straightCounter == 3 && cards[i].getNumber() == 2 && aceExists) {
-                    wheel = true;
-                    isStraight = true;
-                    break;
-                }
-            }
-            if (straightCounter == 4) {
-                isStraight = true;
-            }
-
-            if (isStraight) {
-                straight = [];
-                var b = 0;
-
-                if (wheel) {
-                    b = 4;
-                    straight[0] = cards[acePosition];
-                    for (var i = topIndex; i > 0; i--) {
-                        straight[b--] = cards[i];
-                        if (b == 0) {
-                            break;
-                        }
-                        //Skip over if its the same number
-                        if (straight[b + 1].getNumber() == cards[i - 1].getNumber()) {
-                            i--;
-                        }
-
-                    }
-                }
-                else {
-                    for (var i = topIndex; i >= 0; i--) {
-
-                        straight[b++] = cardsOfFlushSuit[i];
-                        if (b == 5) {
-                            break;
-                        }
-                        //Skip over if its the same number
-                        if (straight[b - 1].getNumber() == cardsOfFlushSuit[i - 1].getNumber()) {
-                            i--;
-                        }
-
-                    }
-                }
-
-                straightFlushNumber = 8 + topOfStraight.getNumber() * tenNegTwo;
-            }
-
-
-
-
-        }
-
-        if (straightFlushNumber != null) {
-            return straightFlushNumber;
-        }
-        return null;
-    }
-
-    ///////////
-    ///////////////// Return Functions for the main function of the class
-    //////////
-
-
-    //Helper functions
-
+    /**
+     * Gets the current number of cards on the board
+     * @returns {number}
+     */
     currentNumCardsOnBoard() {
-        if (this.cardsOnBoard == null) {
-            return 0;
-        }
-        return this.cardsOnBoard.length;
+        return this.communityCards ? this.communityCards.length : 0;
     }
-    cardNumberIsOnTheBoard() {
 
-    }
-    updateBoard(newBoard) {
-
-    }
+    /**
+     * Gets the current board
+     * @returns {Array<Card>}
+     */
     getCurrentBoard() {
-        return this.cardsOnBoard;
+        return this.communityCards;
     }
 
-    //Takes array of cards and sorts them
-    insertionSort(arr) {
-        for (var i = 0; i < arr.length; i++) {
-            var keyCard = arr[i];
-            var key = arr[i].getNumber();
-            var j = i - 1;
-
-
-
-            while (j >= 0 && arr[j].getNumber() > key) {
-                arr[j + 1] = arr[j];
-                j = j - 1;
-            }
-            arr[j + 1] = keyCard;
-        }
-
-        return arr;
+    /**
+     * Updates the board with new community cards
+     * @param {Array<Card>} newBoard - New community cards
+     */
+    updateBoard(newBoard) {
+        this.communityCards = newBoard || [];
     }
 
-    returnArrayOfSortedBoardAndHandCards(hand1) {
-        //Put community + hole cards in an array
-        var cards = [];
-        var j = 0;
-        for (var i = 0; i < this.currentNumCardsOnBoard(); i++) {
-            cards[i] = this.cardsOnBoard[i];
-            j++;
+    // ========== Private Methods ==========
+
+    /**
+     * Gets all cards (community + hole cards)
+     * @private
+     */
+    _getAllCards(hand) {
+        const cards = [...this.communityCards];
+        if (hand) {
+            cards.push(hand.getHoleCard1());
+            cards.push(hand.getHoleCard2());
         }
-        cards[j++] = hand1.getHoleCard1();
-        cards[j] = hand1.getHoleCard2();
-        //
-        cards = this.insertionSort(cards);
         return cards;
     }
 
+    /**
+     * Evaluates a hand and returns its rank
+     * @private
+     */
+    _evaluateHand(hand) {
+        const allCards = this._getAllCards(hand);
+        if (allCards.length < 2) {
+            return null;
+        }
+        return this._getBestFiveCardHand(allCards);
+    }
 
+    /**
+     * Finds the best 5-card hand from 2-7 cards
+     * @private
+     */
+    _getBestFiveCardHand(cards) {
+        // Need at least 5 cards to make a hand (or 2 for preflop)
+        if (cards.length < 2) return null;
+        if (cards.length < 5) {
+            // Preflop - just return high card or pair
+            return this._evaluatePreflop(cards);
+        }
+
+        // Try all combinations of 5 cards from the available cards
+        const combinations = this._getCombinations(cards, 5);
+        let bestRank = null;
+
+        for (const combo of combinations) {
+            const rank = this._evaluateFiveCards(combo);
+            if (!bestRank || this._compareHandRanks(rank, bestRank) > 0) {
+                bestRank = rank;
+            }
+        }
+
+        return bestRank;
+    }
+
+    /**
+     * Evaluates preflop (2 cards only)
+     * @private
+     */
+    _evaluatePreflop(cards) {
+        if (cards.length !== 2) return null;
+        const [card1, card2] = cards.sort((a, b) => b.getNumber() - a.getNumber());
+
+        if (card1.getNumber() === card2.getNumber()) {
+            // Pair
+            return [1, card1.getNumber()];
+        } else {
+            // High card
+            return [0, card1.getNumber(), card2.getNumber()];
+        }
+    }
+
+    /**
+     * Evaluates exactly 5 cards
+     * @private
+     */
+    _evaluateFiveCards(cards) {
+        // Sort cards by rank (descending)
+        const sorted = [...cards].sort((a, b) => b.getNumber() - a.getNumber());
+        const ranks = sorted.map(c => c.getNumber());
+        const suits = sorted.map(c => c.getSuit());
+
+        // Check for straight flush first (includes royal flush)
+        const straightFlush = this._checkStraightFlush(sorted);
+        if (straightFlush) return straightFlush;
+
+        // Check for four of a kind
+        const quads = this._checkFourOfAKind(ranks);
+        if (quads) return quads;
+
+        // Check for full house
+        const fullHouse = this._checkFullHouse(ranks);
+        if (fullHouse) return fullHouse;
+
+        // Check for flush
+        const flush = this._checkFlush(sorted, suits);
+        if (flush) return flush;
+
+        // Check for straight
+        const straight = this._checkStraight(ranks);
+        if (straight) return straight;
+
+        // Check for three of a kind
+        const trips = this._checkThreeOfAKind(ranks);
+        if (trips) return trips;
+
+        // Check for two pair
+        const twoPair = this._checkTwoPair(ranks);
+        if (twoPair) return twoPair;
+
+        // Check for pair
+        const pair = this._checkPair(ranks);
+        if (pair) return pair;
+
+        // High card
+        return [0, ...ranks];
+    }
+
+    /**
+     * Checks for straight flush
+     * @private
+     */
+    _checkStraightFlush(cards) {
+        // Group by suit
+        const suitGroups = {};
+        for (const card of cards) {
+            const suit = card.getSuit();
+            if (!suitGroups[suit]) {
+                suitGroups[suit] = [];
+            }
+            suitGroups[suit].push(card);
+        }
+
+        // Check each suit group for a straight
+        for (const suit in suitGroups) {
+            const suitCards = suitGroups[suit];
+            if (suitCards.length >= 5) {
+                // Sort by rank
+                suitCards.sort((a, b) => a.getNumber() - b.getNumber());
+                const straight = this._checkStraightInCards(suitCards);
+                if (straight) {
+                    return [8, straight]; // Straight flush rank 8
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Checks for straight in a set of cards (handles wheel A-2-3-4-5)
+     * Returns the highest straight found, or null if none
+     * @private
+     */
+    _checkStraightInCards(cards) {
+        const ranks = cards.map(c => c.getNumber());
+        const uniqueRanks = [...new Set(ranks)].sort((a, b) => a - b);
+
+        let highestStraight = null;
+
+        // Check for wheel (A-2-3-4-5) - Ace can be low
+        if (uniqueRanks.includes(14) && uniqueRanks.includes(2) &&
+            uniqueRanks.includes(3) && uniqueRanks.includes(4) && uniqueRanks.includes(5)) {
+            highestStraight = 5; // Wheel high card is 5
+        }
+
+        // Check for regular straight (need at least 5 unique ranks)
+        if (uniqueRanks.length >= 5) {
+            // Check all possible 5-card sequences, starting from the highest
+            for (let i = uniqueRanks.length - 5; i >= 0; i--) {
+                let consecutive = true;
+                for (let j = 1; j < 5; j++) {
+                    if (uniqueRanks[i + j] !== uniqueRanks[i] + j) {
+                        consecutive = false;
+                        break;
+                    }
+                }
+                if (consecutive) {
+                    const highCard = uniqueRanks[i + 4];
+                    if (!highestStraight || highCard > highestStraight) {
+                        highestStraight = highCard;
+                    }
+                    break; // Found highest straight, no need to check lower ones
+                }
+            }
+        }
+
+        // Also check for A-high straight (10-J-Q-K-A) - this is the highest
+        if (uniqueRanks.includes(10) && uniqueRanks.includes(11) &&
+            uniqueRanks.includes(12) && uniqueRanks.includes(13) && uniqueRanks.includes(14)) {
+            return 14; // Ace high straight (royal flush)
+        }
+
+        return highestStraight;
+    }
+
+    /**
+     * Checks for four of a kind
+     * @private
+     */
+    _checkFourOfAKind(ranks) {
+        const counts = this._countRanks(ranks);
+        for (const rank in counts) {
+            if (counts[rank] === 4) {
+                const quadRank = parseInt(rank);
+                const kicker = ranks.find(r => r !== quadRank);
+                return [7, quadRank, kicker];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Checks for full house
+     * @private
+     */
+    _checkFullHouse(ranks) {
+        const counts = this._countRanks(ranks);
+        let tripsRank = null;
+        let pairRank = null;
+
+        for (const rank in counts) {
+            const num = parseInt(rank);
+            if (counts[rank] === 3) {
+                if (!tripsRank || num > tripsRank) {
+                    tripsRank = num;
+                }
+            } else if (counts[rank] === 2) {
+                if (!pairRank || num > pairRank) {
+                    pairRank = num;
+                }
+            }
+        }
+
+        if (tripsRank && pairRank) {
+            return [6, tripsRank, pairRank];
+        }
+        return null;
+    }
+
+    /**
+     * Checks for flush
+     * @private
+     */
+    _checkFlush(cards, suits) {
+        const suitCounts = {};
+        for (const suit of suits) {
+            suitCounts[suit] = (suitCounts[suit] || 0) + 1;
+        }
+
+        for (const suit in suitCounts) {
+            if (suitCounts[suit] >= 5) {
+                const flushCards = cards.filter(c => c.getSuit() === suit)
+                    .sort((a, b) => b.getNumber() - a.getNumber())
+                    .slice(0, 5);
+                return [5, ...flushCards.map(c => c.getNumber())];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Checks for straight
+     * @private
+     */
+    _checkStraight(ranks) {
+        const highCard = this._checkStraightInCards(
+            ranks.map(r => ({ getNumber: () => r, getSuit: () => 's' }))
+        );
+        if (highCard) {
+            return [4, highCard];
+        }
+        return null;
+    }
+
+    /**
+     * Checks for three of a kind
+     * @private
+     */
+    _checkThreeOfAKind(ranks) {
+        const counts = this._countRanks(ranks);
+        let tripsRank = null;
+
+        for (const rank in counts) {
+            if (counts[rank] === 3) {
+                const num = parseInt(rank);
+                if (!tripsRank || num > tripsRank) {
+                    tripsRank = num;
+                }
+            }
+        }
+
+        if (tripsRank) {
+            const kickers = ranks.filter(r => r !== tripsRank)
+                .sort((a, b) => b - a)
+                .slice(0, 2);
+            return [3, tripsRank, ...kickers];
+        }
+        return null;
+    }
+
+    /**
+     * Checks for two pair
+     * @private
+     */
+    _checkTwoPair(ranks) {
+        const counts = this._countRanks(ranks);
+        const pairs = [];
+
+        for (const rank in counts) {
+            if (counts[rank] === 2) {
+                pairs.push(parseInt(rank));
+            }
+        }
+
+        if (pairs.length >= 2) {
+            pairs.sort((a, b) => b - a);
+            const highPair = pairs[0];
+            const lowPair = pairs[1];
+            const kicker = ranks.find(r => r !== highPair && r !== lowPair);
+            return [2, highPair, lowPair, kicker];
+        }
+        return null;
+    }
+
+    /**
+     * Checks for pair
+     * @private
+     */
+    _checkPair(ranks) {
+        const counts = this._countRanks(ranks);
+        let pairRank = null;
+
+        for (const rank in counts) {
+            if (counts[rank] === 2) {
+                const num = parseInt(rank);
+                if (!pairRank || num > pairRank) {
+                    pairRank = num;
+                }
+            }
+        }
+
+        if (pairRank) {
+            const kickers = ranks.filter(r => r !== pairRank)
+                .sort((a, b) => b - a)
+                .slice(0, 3);
+            return [1, pairRank, ...kickers];
+        }
+        return null;
+    }
+
+    /**
+     * Counts occurrences of each rank
+     * @private
+     */
+    _countRanks(ranks) {
+        const counts = {};
+        for (const rank of ranks) {
+            counts[rank] = (counts[rank] || 0) + 1;
+        }
+        return counts;
+    }
+
+    /**
+     * Generates all combinations of k elements from array
+     * @private
+     */
+    _getCombinations(arr, k) {
+        if (k === 0) return [[]];
+        if (k > arr.length) return [];
+        if (k === arr.length) return [arr];
+
+        const combinations = [];
+
+        function combine(start, combo) {
+            if (combo.length === k) {
+                combinations.push([...combo]);
+                return;
+            }
+            for (let i = start; i < arr.length; i++) {
+                combo.push(arr[i]);
+                combine(i + 1, combo);
+                combo.pop();
+            }
+        }
+
+        combine(0, []);
+        return combinations;
+    }
+
+    /**
+     * Compares two hand ranks lexicographically
+     * @private
+     */
+    _compareHandRanks(rank1, rank2) {
+        for (let i = 0; i < Math.max(rank1.length, rank2.length); i++) {
+            const val1 = rank1[i] || 0;
+            const val2 = rank2[i] || 0;
+            if (val1 > val2) return 1;
+            if (val1 < val2) return -1;
+        }
+        return 0;
+    }
+
+    /**
+     * Converts hand rank array to numeric value for backward compatibility
+     * @private
+     */
+    _handRankToNumber(rank) {
+        if (!rank || rank.length === 0) return null;
+
+        const handType = rank[0];
+        let value = handType;
+
+        // Add tiebreakers as decimal places
+        const multipliers = [0.01, 0.0001, 0.000001, 0.00000001, 0.0000000001];
+        for (let i = 1; i < rank.length && i <= multipliers.length; i++) {
+            value += rank[i] * multipliers[i - 1];
+        }
+
+        return value;
+    }
+
+    /**
+     * Converts hand rank to string description
+     * @private
+     */
+    _rankToString(rank) {
+        if (!rank || rank.length === 0) return "Invalid Hand";
+
+        const handType = rank[0];
+        const values = rank.slice(1);
+
+        switch (handType) {
+            case 8: // Straight Flush
+                const high = values[0];
+                if (high === 14) {
+                    return "Royal Flush";
+                }
+                const low = high === 5 ? 1 : high - 4; // Handle wheel
+                return `Straight Flush: ${Card.numberToString(high)} to ${Card.numberToString(low)}`;
+
+            case 7: // Four of a Kind
+                return `Four of a Kind: ${Card.numberToString(values[0])}'s, ${Card.numberToString(values[1])} high`;
+
+            case 6: // Full House
+                return `Full House: ${Card.numberToString(values[0])}'s full of ${Card.numberToString(values[1])}'s`;
+
+            case 5: // Flush
+                const flushCards = values.map(v => Card.numberToString(v)).join(", ");
+                return `Flush: ${flushCards}`;
+
+            case 4: // Straight
+                const straightHigh = values[0];
+                const straightLow = straightHigh === 5 ? 1 : straightHigh - 4;
+                return `Straight: ${Card.numberToString(straightHigh)} to ${Card.numberToString(straightLow)}`;
+
+            case 3: // Three of a Kind
+                return `Three of a Kind: ${Card.numberToString(values[0])}'s, ${Card.numberToString(values[1])}, ${Card.numberToString(values[2])} high`;
+
+            case 2: // Two Pair
+                return `Two Pair: ${Card.numberToString(values[0])}'s & ${Card.numberToString(values[1])}'s, ${Card.numberToString(values[2])} high`;
+
+            case 1: // Pair
+                return `Pair of: ${Card.numberToString(values[0])}'s, ${Card.numberToString(values[1])}, ${Card.numberToString(values[2])}, ${Card.numberToString(values[3])} high`;
+
+            case 0: // High Card
+                const highCards = values.map(v => Card.numberToString(v)).join(", ");
+                return `High Card: ${highCards}`;
+
+            default:
+                return "Invalid Hand";
+        }
+    }
+
+    /**
+     * Returns preflop string description
+     * @private
+     */
+    _preflopString(hand) {
+        const card1 = hand.getHoleCard1();
+        const card2 = hand.getHoleCard2();
+        const num1 = card1.getNumber();
+        const num2 = card2.getNumber();
+
+        if (num1 === num2) {
+            return `Pair of: ${Card.numberToString(num1)}'s`;
+        } else {
+            const high = num1 > num2 ? card1 : card2;
+            const low = num1 > num2 ? card2 : card1;
+            return `High Card: ${high.cardToString()}, ${low.cardToString()}`;
+        }
+    }
 }
 
 export default handEvaluator;

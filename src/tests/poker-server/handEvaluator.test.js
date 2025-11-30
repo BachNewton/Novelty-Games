@@ -320,7 +320,7 @@ describe('handEvaluator', () => {
             const handValue = evaluator.evaluateHandNumberValue(hand);
             expect(handValue).toBeGreaterThanOrEqual(8);
             const result = evaluator.evaluateHandForString(hand);
-            expect(result).toContain('Straight Flush');
+            expect(result).toContain('Royal Flush');
         });
 
         test('should compare straight flushes correctly - higher straight flush wins', () => {
