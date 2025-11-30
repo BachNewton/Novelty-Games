@@ -23,13 +23,13 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column'
-    }}>
+    }} onScroll={e => e.preventDefault()}>
         <Board pot={pot} cards={boardCards} data={data} />
 
         <VerticalSpacer height={10} />
 
         <div
-            onTouchMove={preventPullToRefresh}
+            // onTouchMove={preventPullToRefresh}
             style={{
                 flexGrow: 1,
                 overflow: 'auto',
@@ -37,7 +37,7 @@ const Game: React.FC<GameProps> = ({ data, isYourTurn, actions, pot, boardCards,
                 borderRadius: '5px',
                 padding: '5px',
                 boxShadow: '0px 0px 5px black',
-                overscrollBehaviorY: 'contain'
+                // overscrollBehaviorY: 'contain'
             }}
         >
             {messgaesUi}
