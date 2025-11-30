@@ -70,6 +70,19 @@ const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions }) => {
 
     return <div>
         <div style={{
+            border: '1px solid black',
+            borderRadius: '5px',
+            padding: '5px',
+            boxShadow: '0px 0px 5px black',
+            textAlign: 'center',
+            fontSize: '1.1em'
+        }}>
+            {data.player.handEvaluation}
+        </div>
+
+        <VerticalSpacer height={10} />
+
+        <div style={{
             display: 'grid',
             gap: '10px',
             gridTemplateColumns: 'repeat(3, 1fr)'
@@ -91,7 +104,7 @@ const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions }) => {
                 </div>
                 <div style={{
                     textAlign: 'center',
-                    fontSize: '1.2em',
+                    fontSize: '1.2em'
                 }}>
                     Stack ${data.player.stack}
                 </div>

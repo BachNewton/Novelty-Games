@@ -9,6 +9,7 @@ export interface Player {
     lastAction: string | null;
     inPot: number;
     showCards: boolean;
+    handEvaluation: string;
 }
 
 export function toPlayer(data: any): Player {
@@ -20,7 +21,8 @@ export function toPlayer(data: any): Player {
         stack: data.stack,
         lastAction: toLastAction(data.valTurn),
         inPot: data.moneyIn,
-        showCards: data.isShown1 || data.isShown2
+        showCards: data.isShown1 || data.isShown2,
+        handEvaluation: data.handEvaluation ?? '?'
     };
 }
 
