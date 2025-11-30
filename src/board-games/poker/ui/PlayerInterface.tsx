@@ -43,8 +43,8 @@ const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions, boardC
         if (actionLockTimeout.current) clearTimeout(actionLockTimeout.current);
     };
 
-    const winPercent = oddsCalculator.calculate(data.player.card1, data.player.card2, boardCards, data.players);
-    console.log(winPercent);
+    const winPercent = data.player.lastAction === 'Folded' ? 0 : oddsCalculator.calculate(data.player.card1, data.player.card2, boardCards, data.players);
+    const oddsText = winPercent !== null ? `${winPercent.toFixed(1)}%` : '?';
 
     useEffect(() => {
         const updatedMinRaiseAmount = data.toCall + 1;
@@ -77,14 +77,16 @@ const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions, boardC
 
     return <div>
         <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             border: '1px solid black',
             borderRadius: '5px',
-            padding: '5px',
+            padding: '7px',
             boxShadow: '0px 0px 5px black',
-            textAlign: 'center',
             fontSize: '1.1em'
         }}>
-            {data.player.handEvaluation}
+            <div>{data.player.handEvaluation}</div>
+            <div>{oddsText}</div>
         </div>
 
         <VerticalSpacer height={10} />

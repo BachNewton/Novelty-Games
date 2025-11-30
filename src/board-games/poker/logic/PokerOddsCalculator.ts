@@ -11,6 +11,7 @@ export interface PokerOddsCalculator {
 export function createPokerOddsCalculator(): PokerOddsCalculator {
     let lastHand = '';
     let lastBoard = '';
+    let lastNumPlayers = 0;
     let lastWinPercent: number | null = null;
 
     return {
@@ -24,10 +25,11 @@ export function createPokerOddsCalculator(): PokerOddsCalculator {
             const hand = toOddsCards([card1, card2]);
             const boardCards = toOddsCards(board);
 
-            if (lastHand === hand && lastBoard === boardCards) return lastWinPercent;
+            if (lastHand === hand && lastBoard === boardCards && lastNumPlayers === numPlayers) return lastWinPercent;
 
             lastHand = hand;
             lastBoard = boardCards;
+            lastNumPlayers = numPlayers;
 
             const simulation = new Calculator({
                 hands: [hand],
