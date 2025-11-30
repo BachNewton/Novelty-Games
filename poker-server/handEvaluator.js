@@ -64,6 +64,14 @@ class handEvaluator {
         var hand1number = this.evaluateHandNumberValue(hand1);
         var hand2number = this.evaluateHandNumberValue(hand2);
 
+        // Ensure we have valid hand values
+        if (hand1number == null || hand2number == null) {
+            // If one is null, return the other, or null if both are null
+            if (hand1number != null) return hand1;
+            if (hand2number != null) return hand2;
+            return null;
+        }
+
         if (hand1number > hand2number) {
             return hand1;
         }
@@ -102,15 +110,15 @@ class handEvaluator {
             }
             //If Quads
             else if (handNum > 7) {
-                var QuadsNum = Math.floor((handNum.toFixed(2) - Math.floor(handNum)) * 100);
-                var highCard = ((handNum.toFixed(4) - handNum.toFixed(2)) * 10000).toFixed();
+                var QuadsNum = Math.round((handNum - Math.floor(handNum)) * 100);
+                var highCard = Math.round(((handNum * 10000) % 10000) / 100);
                 //console.log(highCard);
                 return "Four of a Kind: " + Card.numberToString(QuadsNum) + "'s, " + Card.numberToString(highCard) + " high";
             }
             //If Full House
             else if (handNum > 6) {
-                var tripsNum = Math.floor((handNum.toFixed(2) - Math.floor(handNum)) * 100);
-                var pairNum = ((handNum.toFixed(4) - handNum.toFixed(2)) * 10000).toFixed();
+                var tripsNum = Math.round((handNum - Math.floor(handNum)) * 100);
+                var pairNum = Math.round((handNum * 10000) % 100);
                 //console.log(tripsNum + " " + pairNum);
                 return "Full House: " + Card.numberToString(tripsNum) + "'s full of " + Card.numberToString(pairNum) + "'s";
             }
@@ -188,39 +196,59 @@ class handEvaluator {
     returnPairNumber(hand1) {
         var cards = this.returnArrayOfSortedBoardAndHandCards(hand1);
 
-        var pair = false;
-        var pairArr = null;
+        // Find the highest pair
         var pairCard = 0;
+        var pairFound = false;
 
+        // Look for pairs starting from the highest cards
         for (var i = cards.length - 2; i >= 0; i--) {
             if (cards[i + 1].getNumber() == cards[i].getNumber()) {
-                pair = true;
                 pairCard = cards[i].getNumber();
-                break;
+                pairFound = true;
+                break; // Found the highest pair
             }
         }
 
-        var pairNumber = null;
-        if (pair) {
-            var arrCounter = 2;
-            var pairArrCounter = 0;
-            pairArr = [];
+        if (!pairFound) {
+            return null;
+        }
 
-            for (var i = cards.length - 1; i >= 0; i--) {
-                if (arrCounter <= 4 && cards[i].getNumber() != pairCard) {
-                    pairArr[arrCounter++] = cards[i];
-                }
-                if (cards[i].getNumber() == pairCard) {
-                    pairArr[pairArrCounter++] = cards[i];
-                }
+        // Build the best 5-card hand: [pairCard1, pairCard2, kicker1, kicker2, kicker3]
+        var pairArr = [];
+        var pairCards = [];
+        var kickers = [];
+
+        // Separate pair cards from kickers
+        for (var i = cards.length - 1; i >= 0; i--) {
+            if (cards[i].getNumber() == pairCard) {
+                pairCards.push(cards[i]);
+            } else {
+                kickers.push(cards[i]);
             }
-
-            pairNumber = 1 + pairArr[0].getNumber() * tenNegTwo + pairArr[2].getNumber() * tenNegFour + pairArr[3].getNumber() * tenNegSix + pairArr[4].getNumber() * tenNegEight;
         }
 
-        if (pairNumber != null) {
-            return pairNumber;
+        // We need exactly 2 pair cards and at least 3 kickers
+        // Note: With 7 cards total (5 board + 2 hole), if we have a pair, we'll have 5 kickers
+        if (pairCards.length >= 2) {
+            // Use the 2 highest pair cards
+            pairArr[0] = pairCards[0]; // Highest pair card
+            pairArr[1] = pairCards[1]; // Second pair card (not used in calculation but kept for consistency)
+
+            // Use the 3 highest kickers (we may have more than 3, so take the top 3)
+            if (kickers.length >= 3) {
+                pairArr[2] = kickers[0]; // Highest kicker
+                pairArr[3] = kickers[1]; // Second kicker
+                pairArr[4] = kickers[2]; // Third kicker
+
+                // Calculate hand value: 1 + pairValue*0.01 + kicker1*0.0001 + kicker2*0.000001 + kicker3*0.00000001
+                var pairNumber = 1 + pairArr[0].getNumber() * tenNegTwo +
+                    pairArr[2].getNumber() * tenNegFour +
+                    pairArr[3].getNumber() * tenNegSix +
+                    pairArr[4].getNumber() * tenNegEight;
+                return pairNumber;
+            }
         }
+
         return null;
     }
     returnTwoPairNumber(hand1) {
@@ -242,9 +270,9 @@ class handEvaluator {
                     twoPairNumber1Index1 = i;
                     twoPairNumber1Index2 = i + 1;
                 }
-                else if (twoPairNumber2Index1 == 0) {
+                else if (twoPairNumber2Index1 == 0 && cards[i].getNumber() != cards[twoPairNumber1Index1].getNumber()) {
                     twoPairNumber2Index1 = i;
-                    twoPairNumber2Index1 = i + 1;
+                    twoPairNumber2Index2 = i + 1;
                     twoPair = true;
                     break;
                 }
@@ -494,12 +522,11 @@ class handEvaluator {
         var pairNumber = 0;
 
         if (trips) {
-
-
             for (var i = cards.length - 2; i >= 0; i--) {
                 if (cards[i].getNumber() != tripNumber && cards[i + 1].getNumber() == cards[i].getNumber()) {
                     house = true;
                     pairNumber = cards[i].getNumber();
+                    break; // Found the pair, no need to continue
                 }
             }
         }
@@ -549,7 +576,7 @@ class handEvaluator {
         }
 
         //Number to return
-        var quadsNumber;;
+        var quadsNumber;
 
         if (hasQuads) {
             var arrCounter = 0;
@@ -578,7 +605,7 @@ class handEvaluator {
         var cards = this.returnArrayOfSortedBoardAndHandCards(hand1);
 
         var flush = false;
-        var flushSuit;;
+        var flushSuit;
         var flushCount = 0;
         for (var i = 0; i < suits.length; i++) {
             var currSuit = suits[i];
