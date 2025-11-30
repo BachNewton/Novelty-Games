@@ -18,8 +18,27 @@ export function toPlayer(data: any): Player {
         card2: toCard(data.card2),
         isTurn: data.isTurn,
         stack: data.stack,
-        lastAction: data.valTurn === 'undefined' ? null : data.valTurn,
+        lastAction: toLastAction(data.valTurn),
         inPot: data.moneyIn,
         showCards: data.isShown1 || data.isShown2
     };
+}
+
+function toLastAction(valTurn: string | number): string | null {
+    if (typeof valTurn === 'number') {
+        return 'Raised';
+    }
+
+    switch (valTurn) {
+        case 'check':
+            return 'Checked';
+        case 'call':
+            return 'Called';
+        case 'fold':
+            return 'Folded';
+        case 'playerIsAllIn':
+            return 'All In';
+        default:
+            return null;
+    }
 }
