@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import VerticalSpacer from "../../../util/ui/Spacer";
 import Action from "./Action";
 import Card from "./Card";
 import { GameData } from "../data/GameData";
 import { coerceToRange } from "../../../util/Math";
+
+const ACTION_LOCK_TIME = 4000;
 
 interface PlayerInterfaceProps {
     data: GameData;
@@ -22,21 +24,43 @@ const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions }) => {
     const [minRaiseAmount, setMinRaiseAmount] = useState(data.toCall + 1);
     const maxRaiseAmount = data.player.stack;
     const [raiseAmount, setRaiseAmount] = useState(coerceToRange(0, minRaiseAmount, maxRaiseAmount));
+    const [actionsLocked, setActionsLocked] = useState(false);
+    const actionLockTimeout = useRef<NodeJS.Timeout | null>(null);
     const canRaise = minRaiseAmount < data.player.stack;
     const raiseText = canRaise ? `Raise $${raiseAmount}` : 'Raise';
 
+    const clearActionLock = () => {
+        if (actionLockTimeout.current) clearTimeout(actionLockTimeout.current);
+    };
+
     useEffect(() => {
         const updatedMinRaiseAmount = data.toCall + 1;
-        const amount = coerceToRange(raiseAmount, updatedMinRaiseAmount, maxRaiseAmount);
+        const amount = coerceToRange(0, updatedMinRaiseAmount, maxRaiseAmount);
         setMinRaiseAmount(updatedMinRaiseAmount);
         setRaiseAmount(amount);
+
+        if (data.player.isTurn) {
+            setActionsLocked(false);
+            clearActionLock();
+        }
+
+        return () => {
+            clearActionLock();
+        };
     }, [data]);
 
     const isTurn = data.player.isTurn;
 
+    const handleAction = (action: () => void) => {
+        clearActionLock();
+        setActionsLocked(true);
+        action();
+        actionLockTimeout.current = setTimeout(() => setActionsLocked(false), ACTION_LOCK_TIME);
+    };
+
     const checkCallUi = data.toCall === 0
-        ? <Action isEnabled={isTurn} onClick={actions.check}>Check</Action>
-        : <Action isEnabled={isTurn} onClick={actions.call}>{`Call $${data.toCall}`}</Action>;
+        ? <Action isEnabled={isTurn && !actionsLocked} onClick={() => handleAction(actions.check)}>Check</Action>
+        : <Action isEnabled={isTurn && !actionsLocked} onClick={() => handleAction(actions.call)}>{`Call $${data.toCall}`}</Action>;
 
     return <div>
         <div style={{
@@ -44,7 +68,7 @@ const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions }) => {
             gap: '10px',
             gridTemplateColumns: 'repeat(3, 1fr)'
         }}>
-            <Action isEnabled={isTurn} onClick={actions.fold}>Fold</Action>
+            <Action isEnabled={isTurn && !actionsLocked} onClick={() => handleAction(actions.fold)}>Fold</Action>
 
             <div style={{
                 display: 'flex',
@@ -74,9 +98,9 @@ const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions }) => {
 
         <VerticalSpacer height={10} />
 
-        <Action isEnabled={isTurn && canRaise} onClick={() => {
+        <Action isEnabled={isTurn && canRaise && !actionsLocked} onClick={() => {
             const amount = raiseAmount + data.player.inPot;
-            actions.raise(amount);
+            handleAction(() => actions.raise(amount));
         }}>{raiseText}</Action>
 
         <VerticalSpacer height={10} />
@@ -84,7 +108,7 @@ const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions }) => {
         <input
             type="range"
             value={raiseAmount}
-            disabled={!data.player.isTurn || !canRaise}
+            disabled={!data.player.isTurn || !canRaise || actionsLocked}
             min={minRaiseAmount}
             max={maxRaiseAmount}
             onChange={e => setRaiseAmount(Number(e.target.value))}
