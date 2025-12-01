@@ -11,12 +11,16 @@ const root = ReactDOM.createRoot(
 
 // Create callbacks for update notifications
 let onUpdateAvailableCallback: () => void = () => { };
+let onUpdateReadyCallback: () => void = () => { };
 let onNoUpdateFoundCallback: () => void = () => { };
 let onOfflineCallback: () => void = () => { };
 
 const updateCallbacks = {
   setOnUpdateAvailable: (callback: () => void) => {
     onUpdateAvailableCallback = callback;
+  },
+  setOnUpdateReady: (callback: () => void) => {
+    onUpdateReadyCallback = callback;
   },
   setOnNoUpdateFound: (callback: () => void) => {
     onNoUpdateFoundCallback = callback;
@@ -39,6 +43,9 @@ serviceWorkerRegistration.register({
   versionCheckCallbacks: {
     onUpdateAvailable: () => {
       onUpdateAvailableCallback();
+    },
+    onUpdateReady: () => {
+      onUpdateReadyCallback();
     },
     onUpToDate: () => {
       onNoUpdateFoundCallback();

@@ -39,6 +39,7 @@ const BUTTON_STYLE: React.CSSProperties = {
 interface HomeProps {
     updateCallbacks: {
         setOnUpdateAvailable: (callback: () => void) => void;
+        setOnUpdateReady: (callback: () => void) => void;
         setOnNoUpdateFound: (callback: () => void) => void;
         setOnOffline: (callback: () => void) => void;
     };
@@ -68,7 +69,12 @@ const Home: React.FC<HomeProps> = ({ updateCallbacks }) => {
     useEffect(() => {
         // Set up update callbacks
         updateCallbacks.setOnUpdateAvailable(() => {
-            console.log('Newer version of the app is available');
+            console.log('Newer version of the app is available - installing...');
+            setVersionSate(VersionState.INSTALLING);
+        });
+
+        updateCallbacks.setOnUpdateReady(() => {
+            console.log('Update is ready to install');
             setVersionSate(VersionState.OUTDATED);
         });
 
@@ -159,6 +165,8 @@ function versionStateUi(versionState: VersionState) {
             return <>☁️ Checking for updates...</>;
         case VersionState.CURRENT:
             return <>✔️ Up-to-date</>;
+        case VersionState.INSTALLING:
+            return <>⬇️ Installing update...</>;
         case VersionState.OUTDATED:
             return <Button
                 onClick={() => window.location.reload()}

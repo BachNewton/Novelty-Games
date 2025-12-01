@@ -64,5 +64,6 @@ export enum VersionState {
     CURRENT,
     UNKNOWN,
     OUTDATED,
-    CHECKING
+    CHECKING,
+    INSTALLING
 }
