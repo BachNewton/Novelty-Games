@@ -3,7 +3,7 @@
 ### Novelty Games
 - [X] Move puppeteer to dev deps
 - [ ] Move server deps into their own package.json
-- [ ] Remove v2 of Database if we are going to be using v1
+- [X] Remove v2 of Database if we are going to be using v1
 
 ### Trivia
 - [ ] Cache images (for Flag Game and Pokemon)

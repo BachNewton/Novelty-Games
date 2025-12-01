@@ -7,8 +7,7 @@ import WinterCylingHome from "../winter-cycling/ui/Home";
 import { getRoute, Route } from "../../ui/Routing";
 import { createNetworkService, NetworkedApplication, NetworkService } from "../../util/networking/NetworkService";
 import { FestivalSong } from "../../trivia/data/Data";
-import { createDatabase } from "../../util/database/v1/DatabaseImpl";
-import { createDatabaseManager } from "../../util/database/v2/DatabaseManager";
+import { createDatabase } from "../../util/database/DatabaseImpl";
 import { MusicIndex } from "../music-player/logic/MusicIndex";
 import { createWinterCyclingNetworking, WinterCyclingNetworking } from "../winter-cycling/logic/WinterCyclingNetworking";
 
@@ -85,7 +84,6 @@ function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
         case 'DatabaseDebug':
             return <DatabaseDebugHome
                 database={createDatabase('example', ['numbers', 'words'])}
-                exampleDatabase={createDatabaseManager().exampleDatabase}
             />;
         case 'WinterCycling':
             return <WinterCylingHome networking={uiState.networking} />;

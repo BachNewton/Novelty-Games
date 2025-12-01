@@ -24,3 +24,4 @@ export interface Database<Tables> {
 
     delete: () => Promise<void>;
 }
+

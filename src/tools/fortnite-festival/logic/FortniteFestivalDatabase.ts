@@ -1,7 +1,7 @@
 import { FestivalSong } from "../../../trivia/data/Data";
-import { Database } from "../../../util/database/v1/Database";
-import { createDatabase } from "../../../util/database/v1/DatabaseImpl";
-import { FortniteFestivalTables } from "../../../util/database/v1/DatabaseSchemas";
+import { Database } from "../../../util/database/Database";
+import { createDatabase } from "../../../util/database/DatabaseImpl";
+import { FortniteFestivalTables } from "../../../util/database/DatabaseSchemas";
 import { createFile, FileType, loadFile } from "../../../util/File";
 
 export interface FortniteFestivalDatabase {

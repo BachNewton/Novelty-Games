@@ -1,4 +1,4 @@
-import { createIndexedDb } from "../IndexedDb";
+import { createIndexedDb } from "./IndexedDb";
 import { Database } from "./Database";
 import { DatabaseSchemas } from "./DatabaseSchemas";
 
@@ -22,3 +22,4 @@ export function createDatabase<Name extends keyof DatabaseSchemas>(
         delete: () => indexedDB.delete()
     };
 }
+

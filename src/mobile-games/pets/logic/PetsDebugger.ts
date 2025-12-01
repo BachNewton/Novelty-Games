@@ -1,4 +1,4 @@
-import { createDatabase } from "../../../util/database/v1/DatabaseImpl";
+import { createDatabase } from "../../../util/database/DatabaseImpl";
 import { Pet } from "../data/Pet";
 import { PetsDatabase } from "./PetsDatabase";
 

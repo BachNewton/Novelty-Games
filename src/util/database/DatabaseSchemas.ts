@@ -1,4 +1,4 @@
-import { PetSave } from "../../../mobile-games/pets/data/PetSave";
+import { PetSave } from "../../mobile-games/pets/data/PetSave";
 
 export type ExampleTables = {
     words: { name: string; definition: string };
@@ -11,7 +11,7 @@ export type PetsTables = {
 };
 
 export type FortniteFestivalTables = {
-    owned: { superKey: string; }
+    owned: { superKey: string; };
 };
 
 export type DatabaseSchemas = {
@@ -19,3 +19,4 @@ export type DatabaseSchemas = {
     pets: PetsTables;
     fortniteFestival: FortniteFestivalTables;
 };
+
