@@ -124,10 +124,27 @@ const PlayerInterface: React.FC<PlayerInterfaceProps> = ({ data, actions, boardC
 
         <VerticalSpacer height={10} />
 
-        <Action isEnabled={isTurn && canRaise && !actionsLocked} onClick={() => {
-            const amount = raiseAmount + data.player.inPot;
-            handleAction(() => actions.raise(amount));
-        }}>{raiseText}</Action>
+        <div style={{
+            display: 'flex',
+            gap: '10px'
+        }}>
+            <Action
+                isEnabled={isTurn && !actionsLocked && (raiseAmount - 1) >= minRaiseAmount}
+                onClick={() => setRaiseAmount(raiseAmount - 1)}
+            >- $1</Action>
+
+            <div style={{ flexGrow: 1 }}>
+                <Action isEnabled={isTurn && canRaise && !actionsLocked} onClick={() => {
+                    const amount = raiseAmount + data.player.inPot;
+                    handleAction(() => actions.raise(amount));
+                }}>{raiseText}</Action>
+            </div>
+
+            <Action
+                isEnabled={isTurn && !actionsLocked && (raiseAmount + 1) <= maxRaiseAmount}
+                onClick={() => setRaiseAmount(raiseAmount + 1)}
+            >+ $1</Action>
+        </div>
 
         <VerticalSpacer height={10} />
 
