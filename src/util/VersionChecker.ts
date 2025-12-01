@@ -34,205 +34,106 @@ async function fetchRemoteVersion(): Promise<string | null> {
 }
 
 /**
- * Waits for a service worker to be installed, activated, and ready
+ * Waits for a service worker update to be installed and activated
+ * Uses the standard PWA pattern: wait for installed -> skipWaiting -> controllerchange -> ready
  */
 function waitForServiceWorkerUpdate(registration: ServiceWorkerRegistration): Promise<void> {
-    return new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-            cleanup();
-            console.warn('Service worker update timeout - resolving anyway');
-            // Resolve even on timeout, as the update may still be in progress
-            resolve();
-        }, 20000); // 20 second timeout
-
-        const currentController = navigator.serviceWorker.controller;
-        const currentControllerUrl = currentController?.scriptURL || null;
-        let waitingWorkerUrl: string | null = null;
-        let swReadyReceived = false;
-
-        const cleanup = () => {
-            clearTimeout(timeout);
-            if (pollInterval) {
-                clearInterval(pollInterval);
-                pollInterval = null;
-            }
-            navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
-            navigator.serviceWorker.removeEventListener('message', handleMessage);
-            if (registration.installing) {
-                registration.installing.removeEventListener('statechange', handleInstallingStateChange);
-            }
-            if (registration.waiting) {
-                registration.waiting.removeEventListener('statechange', handleWaitingStateChange);
-            }
+    return new Promise((resolve) => {
+        // Wait for controller change (new service worker takes control)
+        const waitForControllerChange = (): Promise<void> => {
+            return new Promise((resolveController) => {
+                const handleControllerChange = () => {
+                    navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+                    resolveController();
+                };
+                navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+            });
         };
 
-        // Polling fallback to check if controller changed
-        let pollInterval: NodeJS.Timeout | null = null;
-        const startPolling = () => {
-            if (pollInterval) return; // Already polling
-            pollInterval = setInterval(() => {
-                const newController = navigator.serviceWorker.controller;
-                const newControllerUrl = newController?.scriptURL || null;
-                if (newControllerUrl && newControllerUrl !== currentControllerUrl) {
-                    console.log('Polling detected controller change');
-                    if (pollInterval) {
-                        clearInterval(pollInterval);
-                        pollInterval = null;
-                    }
-                    safeResolve();
-                }
-            }, 500); // Check every 500ms
-        };
-
-        // Track if we've already resolved
-        let resolved = false;
-        const safeResolve = () => {
-            if (!resolved) {
-                resolved = true;
-                if (pollInterval) {
-                    clearInterval(pollInterval);
-                    pollInterval = null;
-                }
-                cleanup();
-
-                // Verify the controller actually changed or we got confirmation
-                const newController = navigator.serviceWorker.controller;
-                const newControllerUrl = newController?.scriptURL || null;
-
-                const controllerChanged = newControllerUrl && newControllerUrl !== currentControllerUrl;
-                const isNewWorker = waitingWorkerUrl && newControllerUrl === waitingWorkerUrl;
-
-                if (controllerChanged || isNewWorker || swReadyReceived) {
-                    console.log('Service worker update confirmed, waiting for ready state...');
-                    // Wait for the service worker to be ready
-                    navigator.serviceWorker.ready.then(() => {
-                        console.log('Service worker is ready');
-                        // Give a small delay to ensure precaching is complete
-                        setTimeout(() => resolve(), 1000);
-                    }).catch(() => {
-                        // Even if ready fails, resolve after a delay
-                        console.log('Service worker ready check failed, resolving anyway');
-                        setTimeout(() => resolve(), 1500);
-                    });
-                } else {
-                    // Controller didn't change yet, but resolve anyway after delay
-                    console.log('Controller not changed yet, but resolving after delay');
-                    setTimeout(() => resolve(), 2000);
-                }
-            }
-        };
-
-        // Handle messages from service worker
-        const handleMessage = (event: MessageEvent) => {
-            if (event.data && event.data.type === 'SW_READY') {
-                console.log('Service worker confirmed it is ready');
-                swReadyReceived = true;
-                safeResolve();
-            }
-        };
-
-        // Handle controller change - this fires when a new service worker takes control
-        const handleControllerChange = () => {
-            console.log('Service worker controller changed');
-            const newController = navigator.serviceWorker.controller;
-            if (newController) {
-                console.log('New controller URL:', newController.scriptURL);
-                // Request confirmation from service worker
-                newController.postMessage({ type: 'CHECK_READY' });
-            }
-            // Resolve after a short delay
-            setTimeout(() => safeResolve(), 1000);
-        };
-
-        // Handle installing worker state changes
-        const handleInstallingStateChange = () => {
-            const installingWorker = registration.installing;
-            if (!installingWorker) return;
-
-            console.log(`Installing worker state: ${installingWorker.state}`);
-
-            if (installingWorker.state === 'installed') {
-                console.log('New service worker installed');
-                // Check if it's now waiting
-                if (registration.waiting) {
-                    const waitingWorker = registration.waiting;
-                    waitingWorkerUrl = waitingWorker.scriptURL;
-                    console.log('Sending SKIP_WAITING to waiting worker');
-                    waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-                }
-            }
-        };
-
-        // Handle waiting worker state changes
-        const handleWaitingStateChange = () => {
-            const waitingWorker = registration.waiting;
-            if (!waitingWorker) return;
-
-            console.log(`Waiting worker state: ${waitingWorker.state}`);
-
-            if (waitingWorker.state === 'activated') {
-                console.log('Waiting worker activated');
-                // Wait a moment for controller change, then check
-                setTimeout(() => {
-                    const newController = navigator.serviceWorker.controller;
-                    if (newController) {
-                        console.log('Controller after activation:', newController.scriptURL);
-                        newController.postMessage({ type: 'CHECK_READY' });
-                    }
-                    safeResolve();
-                }, 1000);
-            }
-        };
-
-        // Set up listeners
-        navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
-        navigator.serviceWorker.addEventListener('message', handleMessage);
-
-        // Start polling as fallback
-        startPolling();
-
-        // If there's already a waiting service worker, activate it
+        // If there's already a waiting worker, activate it and wait for controller change
         if (registration.waiting) {
-            const waitingWorker = registration.waiting;
-            waitingWorkerUrl = waitingWorker.scriptURL;
-            waitingWorker.addEventListener('statechange', handleWaitingStateChange);
-            console.log('Found waiting worker, sending SKIP_WAITING');
-            waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+            console.log('Found waiting worker, activating...');
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
 
-            // If already activated, resolve after checking controller
-            if (waitingWorker.state === 'activated') {
-                setTimeout(() => {
-                    const newController = navigator.serviceWorker.controller;
-                    if (newController) {
-                        newController.postMessage({ type: 'CHECK_READY' });
+            waitForControllerChange()
+                .then(() => navigator.serviceWorker.ready)
+                .then(() => {
+                    console.log('Service worker is ready');
+                    resolve();
+                })
+                .catch((error) => {
+                    console.warn('Error waiting for service worker update:', error);
+                    setTimeout(() => resolve(), 2000);
+                });
+            return;
+        }
+
+        // Wait for the service worker to be installed (goes to waiting state)
+        const waitForInstalled = (): Promise<void> => {
+            return new Promise((resolveInstalled) => {
+                if (registration.waiting) {
+                    resolveInstalled();
+                    return;
+                }
+
+                if (registration.installing) {
+                    const installingWorker = registration.installing;
+                    const handleStateChange = () => {
+                        if (installingWorker.state === 'installed') {
+                            installingWorker.removeEventListener('statechange', handleStateChange);
+                            resolveInstalled();
+                        }
+                    };
+                    installingWorker.addEventListener('statechange', handleStateChange);
+
+                    // Check if already installed
+                    if (installingWorker.state === 'installed') {
+                        installingWorker.removeEventListener('statechange', handleStateChange);
+                        resolveInstalled();
                     }
-                    safeResolve();
-                }, 1000);
-            }
-            return;
-        }
-
-        // If there's an installing worker, wait for it
-        if (registration.installing) {
-            const installingWorker = registration.installing;
-            installingWorker.addEventListener('statechange', handleInstallingStateChange);
-            // Check current state
-            if (installingWorker.state === 'installed' && registration.waiting) {
-                const waitingWorker: ServiceWorker = registration.waiting;
-                waitingWorkerUrl = waitingWorker.scriptURL;
-                waitingWorker.addEventListener('statechange', handleWaitingStateChange);
-                waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-            }
-            return;
-        }
-
-        // Set up listener for when update is found
-        registration.onupdatefound = () => {
-            const installingWorker = registration.installing;
-            if (installingWorker) {
-                installingWorker.addEventListener('statechange', handleInstallingStateChange);
-            }
+                } else {
+                    // Set up listener for when update is found
+                    registration.onupdatefound = () => {
+                        const installingWorker = registration.installing;
+                        if (installingWorker) {
+                            const handleStateChange = () => {
+                                if (installingWorker.state === 'installed') {
+                                    installingWorker.removeEventListener('statechange', handleStateChange);
+                                    resolveInstalled();
+                                }
+                            };
+                            installingWorker.addEventListener('statechange', handleStateChange);
+                        }
+                    };
+                }
+            });
         };
+
+        // Main flow: wait for installed -> activate -> controllerchange -> ready
+        waitForInstalled()
+            .then(() => {
+                // Service worker is installed, activate it
+                if (registration.waiting) {
+                    console.log('Activating waiting service worker...');
+                    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                }
+                // Wait for controller change
+                return waitForControllerChange();
+            })
+            .then(() => {
+                console.log('Service worker controller changed, waiting for ready...');
+                // Wait for service worker to be ready
+                return navigator.serviceWorker.ready;
+            })
+            .then(() => {
+                console.log('Service worker is ready');
+                resolve();
+            })
+            .catch((error) => {
+                console.warn('Error waiting for service worker update:', error);
+                // Resolve anyway after a delay - update may still work
+                setTimeout(() => resolve(), 2000);
+            });
     });
 }
 
@@ -268,24 +169,10 @@ export async function checkVersionAndForceUpdate(
             // Force service worker to check for updates
             await registration.update();
 
-            // Wait for the service worker to be installed and activated
-            try {
-                console.log('Waiting for service worker update to complete...');
-                await waitForServiceWorkerUpdate(registration);
-                console.log('Service worker update completed and activated');
-
-                // Wait for service worker to be ready (ensures precaching is done)
-                await navigator.serviceWorker.ready;
-                console.log('Service worker is ready');
-
-                // Give a small additional delay to ensure everything is cached
-                await new Promise(resolve => setTimeout(resolve, 500));
-            } catch (error) {
-                console.warn('Error waiting for service worker update:', error);
-                // Continue anyway - the update may still be in progress
-                // Wait a bit before showing the button
-                await new Promise(resolve => setTimeout(resolve, 2000));
-            }
+            // Wait for the service worker to be installed, activated, and ready
+            console.log('Waiting for service worker update to complete...');
+            await waitForServiceWorkerUpdate(registration);
+            console.log('Service worker update completed and ready');
 
             console.log('Registration updated and ready');
             callbacks.onUpdateReady();

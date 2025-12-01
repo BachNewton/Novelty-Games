@@ -75,18 +75,6 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-
-  // Respond to ready check from the page
-  if (event.data && event.data.type === 'CHECK_READY') {
-    // Respond immediately - precaching happens asynchronously but setup is complete
-    event.ports && event.ports[0] && event.ports[0].postMessage({ type: 'SW_READY' });
-    // Also send via clients for compatibility
-    self.clients.matchAll().then(clients => {
-      clients.forEach(client => {
-        client.postMessage({ type: 'SW_READY' });
-      });
-    });
-  }
 });
 
 // Any other custom service worker logic can go here.
