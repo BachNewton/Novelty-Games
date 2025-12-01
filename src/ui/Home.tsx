@@ -37,7 +37,11 @@ const BUTTON_STYLE: React.CSSProperties = {
 };
 
 interface HomeProps {
-    updateListener: { onUpdateAvailable: () => void, onNoUpdateFound: () => void };
+    updateCallbacks: {
+        setOnUpdateAvailable: (callback: () => void) => void;
+        setOnNoUpdateFound: (callback: () => void) => void;
+        setOnOffline: (callback: () => void) => void;
+    };
 }
 
 interface OnClickHandlers {
@@ -57,26 +61,27 @@ interface OnClickHandlers {
     onPokerClick: () => void;
 }
 
-const Home: React.FC<HomeProps> = ({ updateListener }) => {
+const Home: React.FC<HomeProps> = ({ updateCallbacks }) => {
     const [state, setState] = useState<State>(getInitialState());
     const [versionState, setVersionSate] = useState(VersionState.CHECKING);
 
     useEffect(() => {
-        updateListener.onUpdateAvailable = () => {
+        // Set up update callbacks
+        updateCallbacks.setOnUpdateAvailable(() => {
             console.log('Newer version of the app is available');
             setVersionSate(VersionState.OUTDATED);
-        };
+        });
 
-        updateListener.onNoUpdateFound = () => {
+        updateCallbacks.setOnNoUpdateFound(() => {
             console.log('No update of the app has been found');
             setVersionSate(VersionState.CURRENT);
-        };
+        });
 
-        if (!navigator.onLine) {
-            console.log('App if offline and can not check for updates');
+        updateCallbacks.setOnOffline(() => {
+            console.log('App is offline and can not check for updates');
             setVersionSate(VersionState.UNKNOWN);
-        }
-    }, [state]);
+        });
+    }, [updateCallbacks]);
 
     const onClickHandlers: OnClickHandlers = {
         onHomeButtonClick: () => setState(new HomeState()),

@@ -2,6 +2,7 @@
 // register() is not called by default.
 
 import { isLocalhost } from "./util/Localhost";
+import { checkVersionAndForceUpdate, VersionCheckCallbacks } from "./util/VersionChecker";
 
 // This lets the app load faster on subsequent visits in production, and gives
 // it offline capabilities. However, it also means that developers (and users)
@@ -12,15 +13,12 @@ import { isLocalhost } from "./util/Localhost";
 // To learn more about the benefits of this model and instructions on how to
 // opt-in, read https://cra.link/PWA
 
-const UPDATE_FOUND_WAIT_TIME = 3000; // 3 seconds
-
 type Config = {
   onSuccess?: (registration: ServiceWorkerRegistration) => void;
-  onUpdate?: (registration: ServiceWorkerRegistration) => void;
-  onNoUpdateFound?: () => void;
+  versionCheckCallbacks: VersionCheckCallbacks;
 };
 
-export function register(config?: Config) {
+export function register(config: Config) {
   if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
     // The URL constructor is available in all browsers that support SW.
     const publicUrl = new URL(process.env.PUBLIC_URL, window.location.href);
@@ -54,52 +52,33 @@ export function register(config?: Config) {
   }
 }
 
-function registerValidSW(swUrl: string, config?: Config) {
+function registerValidSW(swUrl: string, config: Config) {
   navigator.serviceWorker
     .register(swUrl)
     .then((registration) => {
-      const updateFoundTimeout = setTimeout(() => {
-        if (!navigator.onLine) return; // If not online, skip all this
+      // Check for version updates when the app loads
+      checkVersionAndForceUpdate(registration, config.versionCheckCallbacks);
 
-        console.log(`No update found after ${UPDATE_FOUND_WAIT_TIME / 1000} seconds of waiting`);
-        if (config && config.onNoUpdateFound) {
-          config.onNoUpdateFound();
-        }
-      }, UPDATE_FOUND_WAIT_TIME);
-
+      // Handle initial service worker installation (first time the app is visited)
       registration.onupdatefound = () => {
-        clearTimeout(updateFoundTimeout);
-
         const installingWorker = registration.installing;
         if (installingWorker == null) {
           return;
         }
         installingWorker.onstatechange = () => {
           if (installingWorker.state === 'installed') {
-            if (navigator.serviceWorker.controller) {
-              // At this point, the updated precached content has been fetched,
-              // but the previous service worker will still serve the older
-              // content until all client tabs are closed.
-              console.log(
-                'New content is available and will be used when all ' +
-                'tabs for this page are closed. See https://cra.link/PWA.'
-              );
-
-              // Execute callback
-              if (config && config.onUpdate) {
-                config.onUpdate(registration);
-              }
-            } else {
+            if (!navigator.serviceWorker.controller) {
               // At this point, everything has been precached.
               // It's the perfect time to display a
               // "Content is cached for offline use." message.
               console.log('Content is cached for offline use.');
 
               // Execute callback
-              if (config && config.onSuccess) {
+              if (config.onSuccess) {
                 config.onSuccess(registration);
               }
             }
+            // If there's already a controller, the version check handles updates
           }
         };
       };
@@ -109,7 +88,7 @@ function registerValidSW(swUrl: string, config?: Config) {
     });
 }
 
-function checkValidServiceWorker(swUrl: string, config?: Config) {
+function checkValidServiceWorker(swUrl: string, config: Config) {
   // Check if the service worker can be found. If it can't reload the page.
   fetch(swUrl, {
     headers: { 'Service-Worker': 'script' },

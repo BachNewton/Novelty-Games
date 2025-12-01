@@ -9,11 +9,26 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-const updateListener = { onUpdateAvailable: () => { }, onNoUpdateFound: () => { } };
+// Create callbacks for update notifications
+let onUpdateAvailableCallback: () => void = () => { };
+let onNoUpdateFoundCallback: () => void = () => { };
+let onOfflineCallback: () => void = () => { };
+
+const updateCallbacks = {
+  setOnUpdateAvailable: (callback: () => void) => {
+    onUpdateAvailableCallback = callback;
+  },
+  setOnNoUpdateFound: (callback: () => void) => {
+    onNoUpdateFoundCallback = callback;
+  },
+  setOnOffline: (callback: () => void) => {
+    onOfflineCallback = callback;
+  },
+};
 
 root.render(
   <React.StrictMode>
-    <Home updateListener={updateListener} />
+    <Home updateCallbacks={updateCallbacks} />
   </React.StrictMode>
 );
 
@@ -21,11 +36,21 @@ root.render(
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://cra.link/PWA
 serviceWorkerRegistration.register({
-  onUpdate: (registration) => {
-    registration.waiting?.postMessage({ type: "SKIP_WAITING" });
-    updateListener.onUpdateAvailable();
+  versionCheckCallbacks: {
+    onUpdateAvailable: () => {
+      onUpdateAvailableCallback();
+    },
+    onUpToDate: () => {
+      onNoUpdateFoundCallback();
+    },
+    onOffline: () => {
+      onOfflineCallback();
+    },
+    onCheckFailed: () => {
+      // If version check fails (network error, etc.), 
+      // we can't determine update status, so leave UI in checking state
+    },
   },
-  onNoUpdateFound: () => { updateListener.onNoUpdateFound(); }
 });
 
 // If you want to start measuring performance in your app, pass a function
