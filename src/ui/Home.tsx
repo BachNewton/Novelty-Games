@@ -159,6 +159,29 @@ function HomeUi(versionState: VersionState, onClickHandlers: OnClickHandlers) {
     </div>;
 }
 
+/**
+ * Handles the update app button click by ensuring the service worker is ready
+ * and then reloading the page to apply the update
+ */
+async function handleUpdateAppClick(): Promise<void> {
+    // Ensure service worker is ready before reloading
+    if ('serviceWorker' in navigator) {
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            // If there's still a waiting worker, activate it
+            if (registration.waiting) {
+                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                // Wait a moment for it to activate
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        } catch (error) {
+            console.warn('Error checking service worker before reload:', error);
+        }
+    }
+    // Force a hard reload
+    window.location.reload();
+}
+
 function versionStateUi(versionState: VersionState) {
     switch (versionState) {
         case VersionState.CHECKING:
@@ -169,7 +192,7 @@ function versionStateUi(versionState: VersionState) {
             return <>⬇️ Installing update...</>;
         case VersionState.OUTDATED:
             return <Button
-                onClick={() => window.location.reload()}
+                onClick={handleUpdateAppClick}
                 fontScale={1.25}
             >
                 <div style={{ padding: '2px' }}>🔄 Update App</div>
