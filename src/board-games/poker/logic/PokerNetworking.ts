@@ -121,7 +121,7 @@ export function createPokerNetworking(): PokerNetworking {
         const players = data.splice(1).map((p: any) => toPlayer(p)) as Player[];
         const player = players.find(p => p.name === username)!;
 
-        const maxInPot = Math.max(...players.map(p => p.inPot));
+        const maxInPot = Math.max(...players.filter(p => p.lastAction !== 'Folded').map(p => p.inPot));
         const toCall = maxInPot - player.inPot;
 
         const gameData: GameData = {
