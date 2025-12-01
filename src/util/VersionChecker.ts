@@ -15,8 +15,10 @@ export type VersionCheckCallbacks = {
  */
 async function fetchRemoteVersion(): Promise<string | null> {
     try {
-        const response = await fetch(REMOTE_VERSION_URL, {
-            cache: 'no-store', // Always fetch fresh version
+        // Cache-busting is CRITICAL here. 
+        // We append a timestamp so the browser never serves an old version.json from disk cache.
+        const response = await fetch(`${REMOTE_VERSION_URL}?t=${Date.now()}`, {
+            cache: 'no-store',
         });
 
         if (!response.ok) {
