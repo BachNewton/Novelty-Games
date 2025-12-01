@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+const MAX_USERNAME_LENGTH = 12;
+
 interface LobbyProps {
     username: string;
     players: string[];
@@ -39,6 +41,7 @@ const Lobby: React.FC<LobbyProps> = ({ username, players, setUsername, connect, 
             style={{ fontSize: '1em' }}
             type="text"
             placeholder="Username"
+            maxLength={MAX_USERNAME_LENGTH}
             value={username}
             onChange={e => setUsername(e.target.value)}
             onKeyDown={e => {
