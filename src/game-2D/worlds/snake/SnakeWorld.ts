@@ -30,8 +30,8 @@ const GRID_SIZE = 20; // 20x20 grid
 const INITIAL_SNAKE_LENGTH = 3;
 const GAME_SPEED_MS = 150; // milliseconds between moves
 const MIN_SPEED_MULTIPLIER = 0.5; // Half speed
-const MAX_SPEED_MULTIPLIER = 10; // 10x speed
-const SPEED_STEP = 0.5; // Speed increment/decrement
+const MAX_SPEED_MULTIPLIER = 100; // 100x speed - high enough for fast training without breaking game logic
+const SPEED_STEP = 0.5; // Speed increment/decrement (use larger steps at high speeds)
 
 export class SnakeWorld implements GameWorld {
     readonly canvas: HTMLCanvasElement;
@@ -189,16 +189,20 @@ export class SnakeWorld implements GameWorld {
     }
 
     private increaseSpeed(): void {
+        // Use larger steps at higher speeds for easier navigation
+        const step = this.speedMultiplier >= 10 ? 5 : SPEED_STEP;
         this.speedMultiplier = Math.min(
             MAX_SPEED_MULTIPLIER,
-            this.speedMultiplier + SPEED_STEP
+            this.speedMultiplier + step
         );
     }
 
     private decreaseSpeed(): void {
+        // Use larger steps at higher speeds for easier navigation
+        const step = this.speedMultiplier > 10 ? 5 : SPEED_STEP;
         this.speedMultiplier = Math.max(
             MIN_SPEED_MULTIPLIER,
-            this.speedMultiplier - SPEED_STEP
+            this.speedMultiplier - step
         );
     }
 
@@ -410,12 +414,18 @@ export class SnakeWorld implements GameWorld {
         // Draw speed indicator at bottom left
         const speedFontSize = this.canvas.height * 0.025;
         this.ctx.font = `${speedFontSize}px sans-serif`;
-        this.ctx.fillStyle = this.speedMultiplier > 1 ? '#fbbf24' : this.speedMultiplier < 1 ? '#60a5fa' : 'white';
-        const speedText = `Speed: ${this.speedMultiplier.toFixed(1)}x`;
+        // Color code: blue for slow, white for normal, yellow for fast, red for very fast
+        let speedColor = 'white';
+        if (this.speedMultiplier < 1) speedColor = '#60a5fa';
+        else if (this.speedMultiplier > 1 && this.speedMultiplier < 10) speedColor = '#fbbf24';
+        else if (this.speedMultiplier >= 10) speedColor = '#ef4444';
+
+        this.ctx.fillStyle = speedColor;
+        const speedText = `Speed: ${this.speedMultiplier >= 10 ? this.speedMultiplier.toFixed(0) : this.speedMultiplier.toFixed(1)}x`;
         this.ctx.fillText(speedText, 10, this.canvas.height - 50);
         this.ctx.fillStyle = '#9ca3af';
         this.ctx.font = `${speedFontSize * 0.7}px sans-serif`;
-        this.ctx.fillText(`+/- to change, 0 to reset`, 10, this.canvas.height - 30);
+        this.ctx.fillText(`+/- to change, 0 to reset (max: ${MAX_SPEED_MULTIPLIER}x)`, 10, this.canvas.height - 30);
     }
 
     private drawGameOver(): void {
@@ -488,17 +498,16 @@ export class SnakeWorld implements GameWorld {
     private updateAIRewards(): void {
         if (!this.ai || this.gameState.gameOver) return;
 
-        // Reward for staying alive (small positive reward each step)
-        this.ai.recordReward(0.1, this.gameState);
+        const head = this.gameState.snake[0];
+        let totalReward = 0;
 
-        // Reward for eating food
+        // Reward for eating food (largest reward)
         if (this.gameState.score > this.lastScore) {
-            this.ai.recordReward(10, this.gameState);
+            totalReward += 20; // Increased from 10
             this.lastScore = this.gameState.score;
         }
 
-        // Reward for moving closer to food
-        const head = this.gameState.snake[0];
+        // Reward for moving closer to food (more significant)
         const foodDx = Math.abs(this.gameState.food.x - head.x);
         const foodDy = Math.abs(this.gameState.food.y - head.y);
         const distanceToFood = foodDx + foodDy;
@@ -509,14 +518,42 @@ export class SnakeWorld implements GameWorld {
             const lastDistance = lastDx + lastDy;
 
             if (distanceToFood < lastDistance) {
-                // Moving closer to food
-                this.ai.recordReward(0.5, this.gameState);
+                // Moving closer to food - proportional reward
+                totalReward += 1.0; // Increased from 0.5
             } else if (distanceToFood > lastDistance) {
                 // Moving away from food
-                this.ai.recordReward(-0.5, this.gameState);
+                totalReward -= 0.5; // Slightly less penalty
             }
         }
 
+        // Small survival reward (encourages staying alive)
+        totalReward += 0.05; // Reduced from 0.1 to avoid diluting important rewards
+
+        // Danger avoidance reward (check if next move would be dangerous)
+        const currentDir = this.gameState.direction;
+        let dangerAhead = false;
+        let nextX = head.x;
+        let nextY = head.y;
+
+        switch (currentDir) {
+            case Direction.UP: nextY -= 1; break;
+            case Direction.DOWN: nextY += 1; break;
+            case Direction.LEFT: nextX -= 1; break;
+            case Direction.RIGHT: nextX += 1; break;
+        }
+
+        // Check if next position is dangerous
+        if (nextX < 0 || nextX >= this.gameState.gridSize ||
+            nextY < 0 || nextY >= this.gameState.gridSize ||
+            this.gameState.snake.some(segment => segment.x === nextX && segment.y === nextY)) {
+            dangerAhead = true;
+        }
+
+        if (!dangerAhead) {
+            totalReward += 0.1; // Small reward for not moving into danger
+        }
+
+        this.ai.recordReward(totalReward, this.gameState);
         this.lastFoodPosition = { ...this.gameState.food };
     }
 

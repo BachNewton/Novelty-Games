@@ -20,13 +20,15 @@ export class SnakeAI {
     private network: NeuralNetwork;
     private explorationRate: number = 0.3; // Start with 30% exploration
     private minExplorationRate: number = 0.05;
-    private explorationDecay: number = 0.9995; // Decay exploration over time
-    private learningRate: number = 0.01;
+    private explorationDecay: number = 0.998; // Faster decay - reaches ~5% after ~1500 games
+    private learningRate: number = 0.05; // Increased from 0.01 for faster learning
+    private discountFactor: number = 0.95; // Discount future rewards
     private gameHistory: GameExperience[] = [];
     private lastState: number[] | null = null;
     private lastAction: number | null = null;
     private lastProbabilities: number[] | null = null;
     private lastWasExploration: boolean = false;
+    private rewardHistory: number[] = []; // Track recent rewards for normalization
     private gamesPlayed: number = 0;
     private bestScore: number = 0;
     private scoreHistory: number[] = []; // Keep last 1000 scores
@@ -157,14 +159,30 @@ export class SnakeAI {
             return;
         }
 
+        // Normalize reward based on recent history (helps with learning stability)
+        this.rewardHistory.push(reward);
+        if (this.rewardHistory.length > 100) {
+            this.rewardHistory.shift();
+        }
+
+        // Calculate running average and std dev for normalization
+        const avg = this.rewardHistory.reduce((a, b) => a + b, 0) / this.rewardHistory.length;
+        const variance = this.rewardHistory.reduce((sum, r) => sum + Math.pow(r - avg, 2), 0) / this.rewardHistory.length;
+        const stdDev = Math.sqrt(variance);
+
+        // Normalize reward (clip to reasonable range)
+        const normalizedReward = stdDev > 0.1
+            ? Math.max(-2, Math.min(2, (reward - avg) / stdDev))
+            : reward;
+
         this.gameHistory.push({
             state: this.lastState,
             action: this.lastAction,
-            reward: reward
+            reward: normalizedReward
         });
 
         // Update network immediately (online learning)
-        this.network.updateWeights(this.lastState, this.lastAction, reward, this.learningRate);
+        this.network.updateWeights(this.lastState, this.lastAction, normalizedReward, this.learningRate);
     }
 
     // Called when game ends

@@ -115,40 +115,44 @@ export class NeuralNetwork {
         return probabilities.length - 1;
     }
 
-    // Update weights using gradient descent (simplified policy gradient)
+    // Update weights using gradient descent (improved policy gradient)
     public updateWeights(
         input: number[],
         action: number,
         reward: number,
         learningRate: number = 0.01
     ): void {
-        // Simplified policy gradient update
-        // This is a basic implementation - in practice, you'd want to accumulate gradients
-        // and update in batches, but this works for real-time learning
-
+        // Improved policy gradient with better gradient calculation
         const probabilities = this.forward(input);
         const actionProb = probabilities[action];
 
-        // Compute gradients (simplified)
-        // We want to increase the probability of good actions and decrease bad ones
-        const gradientScale = reward * (1 - actionProb);
+        // Policy gradient: log probability * advantage
+        // Use log probability for better numerical stability
+        const logProb = Math.log(Math.max(actionProb, 1e-8)); // Avoid log(0)
+        
+        // Advantage = reward (in this simple case, we use immediate reward)
+        // Scale gradient by reward magnitude
+        const gradientScale = reward * logProb * learningRate;
+
+        // Clip gradient to prevent exploding gradients
+        const clippedGradient = Math.max(-1, Math.min(1, gradientScale));
 
         // Update output layer weights
         const hidden = this.computeHidden(input);
         for (let i = 0; i < this.hiddenSize; i++) {
-            const delta = gradientScale * hidden[i] * learningRate;
+            const delta = clippedGradient * hidden[i];
             this.weights.hiddenToOutput[action][i] += delta;
         }
-        this.weights.outputBias[action] += gradientScale * learningRate;
+        this.weights.outputBias[action] += clippedGradient;
 
-        // Update hidden layer weights (backpropagation simplified)
+        // Update hidden layer weights (backpropagation)
         for (let i = 0; i < this.hiddenSize; i++) {
             if (hidden[i] > 0) { // ReLU derivative
-                const hiddenGradient = gradientScale * this.weights.hiddenToOutput[action][i];
+                const hiddenGradient = clippedGradient * this.weights.hiddenToOutput[action][i];
                 for (let j = 0; j < this.inputSize; j++) {
-                    this.weights.inputToHidden[i][j] += hiddenGradient * input[j] * learningRate;
+                    this.weights.inputToHidden[i][j] += hiddenGradient * input[j];
                 }
-                this.weights.hiddenBias[i] += hiddenGradient * learningRate;
+                this.weights.hiddenBias[i] += hiddenGradient;
             }
         }
     }
