@@ -48,6 +48,7 @@ export class SnakeWorld implements GameWorld {
     private aiMode: boolean = false;
     private lastScore: number = 0;
     private lastFoodPosition: Position | null = null;
+    private lastHeadPosition: Position | null = null; // Track previous head position for distance calculation
     private aiStorage = createSnakeAISorage();
     private saveInterval: number | null = null;
     private speedMultiplier: number = 1.0; // Game speed multiplier
@@ -292,6 +293,7 @@ export class SnakeWorld implements GameWorld {
         this.gameState = this.initializeGame();
         this.lastScore = 0;
         this.lastFoodPosition = null;
+        this.lastHeadPosition = null;
         this.lastMoveTime = 0;
         this.gameOverTime = 0;
     }
@@ -494,6 +496,10 @@ export class SnakeWorld implements GameWorld {
                 if (decisionInfo) {
                     this.lastStateBeforeMove = decisionInfo.features;
                     this.lastActionBeforeMove = decisionInfo.selectedAction;
+                    // Capture head position before move for distance calculation
+                    this.lastHeadPosition = this.gameState.snake.length > 0
+                        ? { ...this.gameState.snake[0] }
+                        : null;
                 }
             }
 
@@ -512,17 +518,31 @@ export class SnakeWorld implements GameWorld {
         }
 
         // Calculate reward
-        let reward = -0.01; // Step penalty (encourages finding food faster)
+        let reward = -0.01; // Base step penalty (encourages finding food faster)
 
-        // Reward for eating food
+        // Reward for eating food (increased to encourage food-seeking)
         if (this.gameState.score > this.lastScore) {
-            reward = 10; // Food reward
+            reward = 20; // Increased food reward (was 10) - makes food more valuable
             this.lastScore = this.gameState.score;
+        } else if (!this.gameState.gameOver && this.lastHeadPosition) {
+            // Distance-based reward: encourage moving closer to food
+            const head = this.gameState.snake[0];
+            const currentDistance = Math.abs(head.x - this.gameState.food.x) + Math.abs(head.y - this.gameState.food.y);
+            const previousDistance = Math.abs(this.lastHeadPosition.x - this.gameState.food.x) + Math.abs(this.lastHeadPosition.y - this.gameState.food.y);
+
+            // Reward for getting closer, small penalty for moving away
+            const distanceChange = previousDistance - currentDistance;
+            reward += distanceChange * 0.1; // Scale: +0.1 per step closer, -0.1 per step away
+
+            // Small bonus for being close to food (encourages risk-taking when near food)
+            if (currentDistance <= 3) {
+                reward += 0.05; // Small proximity bonus
+            }
         }
 
-        // Death penalty
+        // Death penalty (reduced relative to food reward to encourage risk-taking)
         if (this.gameState.gameOver) {
-            reward = -10; // Death penalty
+            reward = -15; // Death penalty (was -10, but food reward is now 20, so ratio is better)
         }
 
         // Capture state after move (for nextState)
@@ -544,6 +564,7 @@ export class SnakeWorld implements GameWorld {
         // Clear stored state/action
         this.lastStateBeforeMove = null;
         this.lastActionBeforeMove = null;
+        this.lastHeadPosition = null;
         this.lastFoodPosition = { ...this.gameState.food };
     }
 
