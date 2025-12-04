@@ -52,6 +52,8 @@ export class SnakeWorld implements GameWorld {
     private saveInterval: number | null = null;
     private speedMultiplier: number = 1.0; // Game speed multiplier
     private showVisualization: boolean = false;
+    private lastStateBeforeMove: number[] | null = null;
+    private lastActionBeforeMove: number | null = null;
 
     constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
         this.canvas = canvas;
@@ -486,74 +488,62 @@ export class SnakeWorld implements GameWorld {
         if (this.lastMoveTime >= GAME_SPEED_MS) {
             this.lastMoveTime = 0;
 
-            // Track rewards for AI learning
+            // Capture state before move for AI learning
             if (this.ai && this.aiMode) {
-                this.updateAIRewards();
+                const decisionInfo = this.ai.getDecisionInfo();
+                if (decisionInfo) {
+                    this.lastStateBeforeMove = decisionInfo.features;
+                    this.lastActionBeforeMove = decisionInfo.selectedAction;
+                }
             }
 
             this.moveSnake();
+
+            // Update AI rewards after move
+            if (this.ai && this.aiMode) {
+                this.updateAIRewards();
+            }
         }
     }
 
     private updateAIRewards(): void {
-        if (!this.ai || this.gameState.gameOver) return;
+        if (!this.ai || this.lastStateBeforeMove === null || this.lastActionBeforeMove === null) {
+            return;
+        }
 
-        const head = this.gameState.snake[0];
-        let totalReward = 0;
+        // Calculate reward
+        let reward = -0.01; // Step penalty (encourages finding food faster)
 
-        // Reward for eating food (largest reward)
+        // Reward for eating food
         if (this.gameState.score > this.lastScore) {
-            totalReward += 20; // Increased from 10
+            reward = 10; // Food reward
             this.lastScore = this.gameState.score;
         }
 
-        // Reward for moving closer to food (more significant)
-        const foodDx = Math.abs(this.gameState.food.x - head.x);
-        const foodDy = Math.abs(this.gameState.food.y - head.y);
-        const distanceToFood = foodDx + foodDy;
-
-        if (this.lastFoodPosition) {
-            const lastDx = Math.abs(this.lastFoodPosition.x - head.x);
-            const lastDy = Math.abs(this.lastFoodPosition.y - head.y);
-            const lastDistance = lastDx + lastDy;
-
-            if (distanceToFood < lastDistance) {
-                // Moving closer to food - proportional reward
-                totalReward += 1.0; // Increased from 0.5
-            } else if (distanceToFood > lastDistance) {
-                // Moving away from food
-                totalReward -= 0.5; // Slightly less penalty
-            }
+        // Death penalty
+        if (this.gameState.gameOver) {
+            reward = -10; // Death penalty
         }
 
-        // Small survival reward (encourages staying alive)
-        totalReward += 0.05; // Reduced from 0.1 to avoid diluting important rewards
+        // Capture state after move (for nextState)
+        const stateAfterMove = this.gameState.gameOver ? null : this.ai.stateToFeatures(this.gameState);
+        const done = this.gameState.gameOver;
 
-        // Danger avoidance reward (check if next move would be dangerous)
-        const currentDir = this.gameState.direction;
-        let dangerAhead = false;
-        let nextX = head.x;
-        let nextY = head.y;
+        // Store experience in replay buffer
+        this.ai.remember(
+            this.lastStateBeforeMove,
+            this.lastActionBeforeMove,
+            reward,
+            stateAfterMove,
+            done
+        );
 
-        switch (currentDir) {
-            case Direction.UP: nextY -= 1; break;
-            case Direction.DOWN: nextY += 1; break;
-            case Direction.LEFT: nextX -= 1; break;
-            case Direction.RIGHT: nextX += 1; break;
-        }
+        // Train periodically (every move)
+        this.ai.trainExperienceReplay();
 
-        // Check if next position is dangerous
-        if (nextX < 0 || nextX >= this.gameState.gridSize ||
-            nextY < 0 || nextY >= this.gameState.gridSize ||
-            this.gameState.snake.some(segment => segment.x === nextX && segment.y === nextY)) {
-            dangerAhead = true;
-        }
-
-        if (!dangerAhead) {
-            totalReward += 0.1; // Small reward for not moving into danger
-        }
-
-        this.ai.recordReward(totalReward, this.gameState);
+        // Clear stored state/action
+        this.lastStateBeforeMove = null;
+        this.lastActionBeforeMove = null;
         this.lastFoodPosition = { ...this.gameState.food };
     }
 
@@ -586,9 +576,8 @@ export class SnakeWorld implements GameWorld {
             newHead.y >= this.gameState.gridSize
         ) {
             this.gameState.gameOver = true;
-            // Record death penalty for AI
+            // Record death penalty for AI (handled in updateAIRewards)
             if (this.ai && this.aiMode) {
-                this.ai.recordReward(-10, this.gameState);
                 this.ai.onGameEnd(this.gameState.score);
             }
             return;
@@ -597,9 +586,8 @@ export class SnakeWorld implements GameWorld {
         // Check self collision
         if (this.gameState.snake.some(segment => segment.x === newHead.x && segment.y === newHead.y)) {
             this.gameState.gameOver = true;
-            // Record death penalty for AI
+            // Record death penalty for AI (handled in updateAIRewards)
             if (this.ai && this.aiMode) {
-                this.ai.recordReward(-10, this.gameState);
                 this.ai.onGameEnd(this.gameState.score);
             }
             return;

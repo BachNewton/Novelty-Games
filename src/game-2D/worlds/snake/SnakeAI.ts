@@ -1,19 +1,20 @@
 import { Direction, Position, SnakeGameState } from "./SnakeWorld";
 import { NeuralNetwork, NeuralNetworkWeights } from "./NeuralNetwork";
 
-export interface GameExperience {
+export interface Experience {
     state: number[];
     action: number;
     reward: number;
+    nextState: number[] | null; // null if game over
+    done: boolean;
 }
 
 // Input features for the neural network
-// 1-2: Relative food position (normalized)
-// 3-6: Danger in each direction (1 = danger, 0 = safe)
-// 7-10: Current direction (one-hot encoded)
-// 11-14: Distance to wall in each direction (normalized)
-const INPUT_SIZE = 14;
-const HIDDEN_SIZE = 16;
+// Vision rays in 4 directions (Up, Down, Left, Right)
+// Each direction has 3 features: [distanceToWall, distanceToFood, distanceToBody]
+// Total: 3 * 4 = 12 inputs
+const INPUT_SIZE = 12;
+const HIDDEN_SIZE = 24; // Increased hidden size
 const OUTPUT_SIZE = 4; // UP, DOWN, LEFT, RIGHT
 
 export class SnakeAI {
@@ -21,14 +22,15 @@ export class SnakeAI {
     private explorationRate: number = 0.3; // Start with 30% exploration
     private minExplorationRate: number = 0.05;
     private explorationDecay: number = 0.997; // Even faster decay - reaches ~5% after ~1000 games
-    private learningRate: number = 0.1; // Increased further for faster learning
-    private discountFactor: number = 0.95; // Discount future rewards
-    private gameHistory: GameExperience[] = [];
+    private learningRate: number = 0.01; // Learning rate for DQN
+    private discountFactor: number = 0.95; // Discount future rewards (gamma)
+    private replayBuffer: Experience[] = [];
+    private maxMemory: number = 2000;
+    private batchSize: number = 32;
     private lastState: number[] | null = null;
     private lastAction: number | null = null;
-    private lastProbabilities: number[] | null = null;
+    private lastQValues: number[] | null = null;
     private lastWasExploration: boolean = false;
-    private rewardHistory: number[] = []; // Track recent rewards for normalization
     private gamesPlayed: number = 0;
     private bestScore: number = 0;
     private scoreHistory: number[] = []; // Keep last 1000 scores
@@ -38,64 +40,68 @@ export class SnakeAI {
         this.network = new NeuralNetwork(INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, weights);
     }
 
-    // Convert game state to neural network input features
-    private stateToFeatures(gameState: SnakeGameState): number[] {
+    // Helper to look in a specific direction and return vision features
+    private lookInDirection(
+        head: Position,
+        xStep: number,
+        yStep: number,
+        gameState: SnakeGameState
+    ): number[] {
+        let distanceToWall = 0;
+        let distanceToBody = 0;
+        let foundBody = false;
+        let distanceToFood = 0;
+        let foundFood = false;
+
+        let currX = head.x;
+        let currY = head.y;
+
+        // Move outward until wall hit
+        let distance = 0;
+        while (true) {
+            currX += xStep;
+            currY += yStep;
+            distance++;
+
+            // Check Wall
+            if (currX < 0 || currX >= gameState.gridSize || currY < 0 || currY >= gameState.gridSize) {
+                distanceToWall = 1 / distance; // Inverse distance (closer = higher number)
+                break;
+            }
+
+            // Check Food
+            if (!foundFood && currX === gameState.food.x && currY === gameState.food.y) {
+                distanceToFood = 1; // Food is on this ray
+                foundFood = true;
+            }
+
+            // Check Body
+            if (!foundBody) {
+                const bodyX = currX;
+                const bodyY = currY;
+                if (gameState.snake.some(s => s.x === bodyX && s.y === bodyY)) {
+                    distanceToBody = 1 / distance;
+                    foundBody = true;
+                }
+            }
+        }
+
+        return [distanceToWall, distanceToFood, distanceToBody];
+    }
+
+    // Convert game state to neural network input features using vision rays
+    public stateToFeatures(gameState: SnakeGameState): number[] {
         const head = gameState.snake[0];
         const features: number[] = [];
 
-        // 1-2: Relative food position (normalized to -1 to 1)
-        const foodDx = (gameState.food.x - head.x) / gameState.gridSize;
-        const foodDy = (gameState.food.y - head.y) / gameState.gridSize;
-        features.push(foodDx);
-        features.push(foodDy);
+        // Look in 4 directions: [0,-1] (Up), [0,1] (Down), [-1,0] (Left), [1,0] (Right)
+        const directions = [[0, -1], [0, 1], [-1, 0], [1, 0]];
 
-        // 3-6: Danger in each direction (1 = danger, 0 = safe)
-        features.push(this.checkDanger(head, Direction.UP, gameState) ? 1 : 0);
-        features.push(this.checkDanger(head, Direction.DOWN, gameState) ? 1 : 0);
-        features.push(this.checkDanger(head, Direction.LEFT, gameState) ? 1 : 0);
-        features.push(this.checkDanger(head, Direction.RIGHT, gameState) ? 1 : 0);
-
-        // 7-10: Current direction (one-hot encoded)
-        features.push(gameState.direction === Direction.UP ? 1 : 0);
-        features.push(gameState.direction === Direction.DOWN ? 1 : 0);
-        features.push(gameState.direction === Direction.LEFT ? 1 : 0);
-        features.push(gameState.direction === Direction.RIGHT ? 1 : 0);
-
-        // 11-14: Distance to wall in each direction (normalized 0 to 1)
-        features.push(head.y / gameState.gridSize); // Distance to top wall
-        features.push((gameState.gridSize - 1 - head.y) / gameState.gridSize); // Distance to bottom wall
-        features.push(head.x / gameState.gridSize); // Distance to left wall
-        features.push((gameState.gridSize - 1 - head.x) / gameState.gridSize); // Distance to right wall
+        for (const [dx, dy] of directions) {
+            features.push(...this.lookInDirection(head, dx, dy, gameState));
+        }
 
         return features;
-    }
-
-    private checkDanger(head: Position, direction: Direction, gameState: SnakeGameState): boolean {
-        let nextX = head.x;
-        let nextY = head.y;
-
-        switch (direction) {
-            case Direction.UP:
-                nextY -= 1;
-                break;
-            case Direction.DOWN:
-                nextY += 1;
-                break;
-            case Direction.LEFT:
-                nextX -= 1;
-                break;
-            case Direction.RIGHT:
-                nextX += 1;
-                break;
-        }
-
-        // Check wall collision
-        if (nextX < 0 || nextX >= gameState.gridSize || nextY < 0 || nextY >= gameState.gridSize) {
-            return true;
-        }
-
-        // Check self collision
-        return gameState.snake.some(segment => segment.x === nextX && segment.y === nextY);
     }
 
     // Get the next action from the AI
@@ -103,41 +109,53 @@ export class SnakeAI {
         const features = this.stateToFeatures(gameState);
         this.lastState = features;
 
-        // Get probabilities from network
-        const probabilities = this.network.forward(features);
-        this.lastProbabilities = probabilities;
-
-        let actionIndex: number;
-
-        // Exploration vs exploitation
+        // Epsilon Greedy Strategy
         if (Math.random() < this.explorationRate) {
             // Explore: random action
-            actionIndex = Math.floor(Math.random() * OUTPUT_SIZE);
+            this.lastAction = Math.floor(Math.random() * OUTPUT_SIZE);
             this.lastWasExploration = true;
+            this.lastQValues = null; // Don't store Q-values for random actions
         } else {
-            // Exploit: use neural network
-            actionIndex = this.network.predict(features);
+            // Exploit: use neural network Q-values
+            const qValues = this.network.forward(features);
+            this.lastQValues = qValues;
             this.lastWasExploration = false;
+
+            // Argmax: find action with highest Q-value
+            let maxVal = -Infinity;
+            let maxIdx = 0;
+            for (let i = 0; i < qValues.length; i++) {
+                if (qValues[i] > maxVal) {
+                    maxVal = qValues[i];
+                    maxIdx = i;
+                }
+            }
+            this.lastAction = maxIdx;
         }
 
-        this.lastAction = actionIndex;
-        return this.indexToDirection(actionIndex);
+        return this.indexToDirection(this.lastAction);
     }
 
     // Get current decision information for visualization
     public getDecisionInfo(): {
         features: number[];
-        probabilities: number[];
+        qValues: number[];
         selectedAction: number;
         wasExploration: boolean;
     } | null {
-        if (this.lastState === null || this.lastProbabilities === null || this.lastAction === null) {
+        if (this.lastState === null || this.lastAction === null) {
             return null;
+        }
+
+        // If we don't have Q-values (exploration), compute them for visualization
+        let qValues = this.lastQValues;
+        if (!qValues) {
+            qValues = this.network.forward(this.lastState);
         }
 
         return {
             features: [...this.lastState],
-            probabilities: [...this.lastProbabilities],
+            qValues: [...qValues],
             selectedAction: this.lastAction,
             wasExploration: this.lastWasExploration
         };
@@ -153,30 +171,44 @@ export class SnakeAI {
         }
     }
 
-    // Record reward for the last action
-    public recordReward(reward: number, gameState: SnakeGameState): void {
-        if (this.lastState === null || this.lastAction === null) {
-            return;
+    // Store experience in replay buffer
+    public remember(state: number[], action: number, reward: number, nextState: number[] | null, done: boolean): void {
+        this.replayBuffer.push({ state, action, reward, nextState, done });
+        if (this.replayBuffer.length > this.maxMemory) {
+            this.replayBuffer.shift(); // Remove oldest
+        }
+    }
+
+    // Train the network using Experience Replay (DQN)
+    public trainExperienceReplay(): void {
+        if (this.replayBuffer.length < this.batchSize) return;
+
+        // Sample random batch
+        const batch: Experience[] = [];
+        for (let i = 0; i < this.batchSize; i++) {
+            const index = Math.floor(Math.random() * this.replayBuffer.length);
+            batch.push(this.replayBuffer[index]);
         }
 
-        // Track reward history for baseline (but don't normalize - it hurts learning)
-        this.rewardHistory.push(reward);
-        if (this.rewardHistory.length > 100) {
-            this.rewardHistory.shift();
+        for (const exp of batch) {
+            const currentQ = this.network.forward(exp.state);
+            let targetQ = [...currentQ]; // Copy current Q values
+
+            if (exp.done) {
+                // Terminal state: Q(s,a) = reward
+                targetQ[exp.action] = exp.reward;
+            } else {
+                // Bellman Equation: Q_new(s,a) = r + gamma * max(Q(s', a'))
+                if (exp.nextState) {
+                    const nextQ = this.network.forward(exp.nextState);
+                    const maxNextQ = Math.max(...nextQ);
+                    targetQ[exp.action] = exp.reward + this.discountFactor * maxNextQ;
+                }
+            }
+
+            // Train the network on this specific example
+            this.network.train(exp.state, targetQ, this.learningRate);
         }
-
-        // Use reward directly - normalization was hurting learning
-        // Just clip extreme values to prevent instability
-        const clippedReward = Math.max(-50, Math.min(50, reward));
-
-        this.gameHistory.push({
-            state: this.lastState,
-            action: this.lastAction,
-            reward: clippedReward
-        });
-
-        // Update network immediately (online learning)
-        this.network.updateWeights(this.lastState, this.lastAction, clippedReward, this.learningRate);
     }
 
     // Called when game ends
@@ -200,11 +232,10 @@ export class SnakeAI {
             this.explorationRate * this.explorationDecay
         );
 
-        // Clear history for next game
-        this.gameHistory = [];
+        // Clear last state/action for next game
         this.lastState = null;
         this.lastAction = null;
-        this.lastProbabilities = null;
+        this.lastQValues = null;
     }
 
     // Get AI statistics
@@ -257,11 +288,10 @@ export class SnakeAI {
         this.bestScore = 0;
         this.totalScore = 0;
         this.scoreHistory = [];
-        this.gameHistory = [];
-        this.rewardHistory = [];
+        this.replayBuffer = [];
         this.lastState = null;
         this.lastAction = null;
-        this.lastProbabilities = null;
+        this.lastQValues = null;
     }
 }
 

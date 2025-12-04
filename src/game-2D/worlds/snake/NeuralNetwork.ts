@@ -1,5 +1,5 @@
 // Simple feedforward neural network for Snake AI
-// Uses ReLU activation for hidden layers and softmax for output
+// Uses ReLU activation for hidden layers and linear output for Q-values (DQN)
 
 export interface NeuralNetworkWeights {
     inputToHidden: number[][];
@@ -58,6 +58,7 @@ export class NeuralNetwork {
     }
 
     // Forward pass: input -> hidden -> output
+    // Returns raw Q-values (no softmax for DQN)
     public forward(input: number[]): number[] {
         if (input.length !== this.inputSize) {
             throw new Error(`Input size mismatch: expected ${this.inputSize}, got ${input.length}`);
@@ -80,109 +81,66 @@ export class NeuralNetwork {
             for (let j = 0; j < this.hiddenSize; j++) {
                 sum += hidden[j] * this.weights.hiddenToOutput[i][j];
             }
-            output[i] = sum; // Raw logits
+            output[i] = sum; // Return raw Q-values (Linear activation)
         }
 
-        // Apply softmax to get probabilities
-        return this.softmax(output);
+        return output;
     }
 
-    // Predict the best action (returns index of highest probability)
-    public predict(input: number[]): number {
-        const probabilities = this.forward(input);
-        let maxIndex = 0;
-        let maxProb = probabilities[0];
-        for (let i = 1; i < probabilities.length; i++) {
-            if (probabilities[i] > maxProb) {
-                maxProb = probabilities[i];
-                maxIndex = i;
-            }
-        }
-        return maxIndex;
-    }
-
-    // Sample an action based on probabilities (for exploration)
-    public sample(input: number[]): number {
-        const probabilities = this.forward(input);
-        const rand = Math.random();
-        let cumulative = 0;
-        for (let i = 0; i < probabilities.length; i++) {
-            cumulative += probabilities[i];
-            if (rand <= cumulative) {
-                return i;
-            }
-        }
-        return probabilities.length - 1;
-    }
-
-    // Update weights using gradient descent (improved policy gradient)
-    public updateWeights(
-        input: number[],
-        action: number,
-        reward: number,
-        learningRate: number = 0.01
-    ): void {
-        // REINFORCE policy gradient: (reward - baseline) * gradient of log probability
-        const probabilities = this.forward(input);
-        const actionProb = probabilities[action];
-
-        // Use log probability for policy gradient
-        const logProb = Math.log(Math.max(actionProb, 1e-8)); // Avoid log(0)
-
-        // Policy gradient: reward * gradient(log π(a|s))
-        // The gradient of log π is: (1 - π(a|s)) for the chosen action
-        // This encourages actions that lead to positive rewards
-        const advantage = reward; // Simple case: use immediate reward as advantage
-
-        // Gradient scale: advantage * (1 - probability) for REINFORCE
-        // This makes the update stronger when the action was less likely (exploration bonus)
-        const gradientScale = advantage * (1 - actionProb) * learningRate;
-
-        // Clip gradient to prevent exploding gradients (but less aggressive)
-        const clippedGradient = Math.max(-5, Math.min(5, gradientScale));
-
-        // Update output layer weights
-        const hidden = this.computeHidden(input);
-        for (let i = 0; i < this.hiddenSize; i++) {
-            const delta = clippedGradient * hidden[i];
-            this.weights.hiddenToOutput[action][i] += delta;
-        }
-        this.weights.outputBias[action] += clippedGradient;
-
-        // Update hidden layer weights (backpropagation)
-        for (let i = 0; i < this.hiddenSize; i++) {
-            if (hidden[i] > 0) { // ReLU derivative
-                const hiddenGradient = clippedGradient * this.weights.hiddenToOutput[action][i];
-                for (let j = 0; j < this.inputSize; j++) {
-                    this.weights.inputToHidden[i][j] += hiddenGradient * input[j];
-                }
-                this.weights.hiddenBias[i] += hiddenGradient;
-            }
-        }
-    }
-
-    private computeHidden(input: number[]): number[] {
+    // Generic backpropagation training method
+    // Calculates gradients based on the difference between Prediction and Target (MSE Loss)
+    public train(input: number[], targetOutputs: number[], learningRate: number): void {
         const hidden: number[] = [];
+        const hiddenSums: number[] = [];
+
+        // Forward pass to get intermediate values
         for (let i = 0; i < this.hiddenSize; i++) {
             let sum = this.weights.hiddenBias[i];
             for (let j = 0; j < this.inputSize; j++) {
                 sum += input[j] * this.weights.inputToHidden[i][j];
             }
+            hiddenSums[i] = sum;
             hidden[i] = this.relu(sum);
         }
-        return hidden;
+
+        const currentOutputs = this.forward(input);
+
+        // Calculate Output Errors (Target - Output)
+        const outputErrors: number[] = [];
+        for (let i = 0; i < this.outputSize; i++) {
+            outputErrors[i] = targetOutputs[i] - currentOutputs[i];
+        }
+
+        // Backprop Output Layer
+        // For linear output, gradient is just 1 * error
+        for (let i = 0; i < this.outputSize; i++) {
+            const gradient = outputErrors[i] * learningRate;
+
+            this.weights.outputBias[i] += gradient;
+            for (let j = 0; j < this.hiddenSize; j++) {
+                this.weights.hiddenToOutput[i][j] += gradient * hidden[j];
+            }
+        }
+
+        // Backprop Hidden Layer
+        for (let i = 0; i < this.hiddenSize; i++) {
+            let error = 0;
+            for (let j = 0; j < this.outputSize; j++) {
+                error += outputErrors[j] * this.weights.hiddenToOutput[j][i];
+            }
+
+            // ReLU Derivative: 1 if x > 0, else 0
+            const gradient = (hiddenSums[i] > 0 ? 1 : 0) * error * learningRate;
+
+            this.weights.hiddenBias[i] += gradient;
+            for (let j = 0; j < this.inputSize; j++) {
+                this.weights.inputToHidden[i][j] += gradient * input[j];
+            }
+        }
     }
 
     private relu(x: number): number {
         return Math.max(0, x);
-    }
-
-    private softmax(logits: number[]): number[] {
-        // Subtract max for numerical stability
-        const max = Math.max(...logits);
-        const exp = logits.map(x => Math.exp(x - max));
-        const sum = exp.reduce((a, b) => a + b, 0);
-        return exp.map(x => x / sum);
     }
 
     public getWeights(): NeuralNetworkWeights {

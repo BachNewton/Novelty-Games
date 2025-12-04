@@ -11,20 +11,18 @@ interface AIVisualizationProps {
 }
 
 const FEATURE_NAMES = [
-    "Food X",
-    "Food Y",
-    "Danger Up",
-    "Danger Down",
-    "Danger Left",
-    "Danger Right",
-    "Dir Up",
-    "Dir Down",
-    "Dir Left",
-    "Dir Right",
-    "Wall Top",
-    "Wall Bottom",
-    "Wall Left",
-    "Wall Right"
+    "Up: Wall",
+    "Up: Food",
+    "Up: Body",
+    "Down: Wall",
+    "Down: Food",
+    "Down: Body",
+    "Left: Wall",
+    "Left: Food",
+    "Left: Body",
+    "Right: Wall",
+    "Right: Food",
+    "Right: Body"
 ];
 
 const DIRECTION_NAMES = ["UP", "DOWN", "LEFT", "RIGHT"];
@@ -183,33 +181,41 @@ export function AIVisualization({ getAI, getAIMode, getVisible, setVisible, onRe
                             <strong style={{ color: '#60a5fa' }}>Current Decision</strong>
                             <div style={{ marginTop: '10px' }}>
                                 <div style={{ marginBottom: '10px' }}>
-                                    <strong>Action Probabilities:</strong>
-                                    {decisionInfo.probabilities.map((prob, idx) => (
-                                        <div key={idx} style={{ marginTop: '5px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <span style={{ width: '60px' }}>{DIRECTION_NAMES[idx]}:</span>
-                                                <div style={{
-                                                    flex: 1,
-                                                    height: '20px',
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                                                    borderRadius: '4px',
-                                                    margin: '0 10px',
-                                                    position: 'relative',
-                                                    overflow: 'hidden'
-                                                }}>
+                                    <strong>Q-Values:</strong>
+                                    {decisionInfo.qValues.map((qValue, idx) => {
+                                        // Normalize Q-values for visualization (find min/max)
+                                        const minQ = Math.min(...decisionInfo.qValues);
+                                        const maxQ = Math.max(...decisionInfo.qValues);
+                                        const range = maxQ - minQ || 1;
+                                        const normalized = (qValue - minQ) / range;
+                                        
+                                        return (
+                                            <div key={idx} style={{ marginTop: '5px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                    <span style={{ width: '60px' }}>{DIRECTION_NAMES[idx]}:</span>
                                                     <div style={{
-                                                        width: `${prob * 100}%`,
-                                                        height: '100%',
-                                                        backgroundColor: idx === decisionInfo.selectedAction ? '#22c55e' : '#60a5fa',
-                                                        transition: 'width 0.1s'
-                                                    }} />
+                                                        flex: 1,
+                                                        height: '20px',
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                                        borderRadius: '4px',
+                                                        margin: '0 10px',
+                                                        position: 'relative',
+                                                        overflow: 'hidden'
+                                                    }}>
+                                                        <div style={{
+                                                            width: `${normalized * 100}%`,
+                                                            height: '100%',
+                                                            backgroundColor: idx === decisionInfo.selectedAction ? '#22c55e' : '#60a5fa',
+                                                            transition: 'width 0.1s'
+                                                        }} />
+                                                    </div>
+                                                    <span style={{ width: '60px', textAlign: 'right', fontSize: '10px' }}>
+                                                        {qValue.toFixed(2)}
+                                                    </span>
                                                 </div>
-                                                <span style={{ width: '50px', textAlign: 'right' }}>
-                                                    {(prob * 100).toFixed(1)}%
-                                                </span>
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                                 <div style={{ marginTop: '10px', fontSize: '11px', color: '#9ca3af' }}>
                                     Selected: <strong style={{ color: '#22c55e' }}>
