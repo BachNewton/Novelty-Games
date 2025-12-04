@@ -1,4 +1,6 @@
 import { GameWorld } from "../GameWorld";
+import { SnakeAI } from "./SnakeAI";
+import { createSnakeAISorage, SnakeAISaveData } from "./SnakeAISorage";
 
 export enum Direction {
     UP = 'UP',
@@ -33,15 +35,24 @@ export class SnakeWorld implements GameWorld {
 
     private gameState: SnakeGameState;
     private lastMoveTime: number = 0;
+    private gameOverTime: number = 0;
     private pressedKeys: Set<string> = new Set();
     private keyDownHandler: ((e: KeyboardEvent) => void) | null = null;
     private keyUpHandler: ((e: KeyboardEvent) => void) | null = null;
+
+    private ai: SnakeAI | null = null;
+    private aiMode: boolean = false;
+    private lastScore: number = 0;
+    private lastFoodPosition: Position | null = null;
+    private aiStorage = createSnakeAISorage();
+    private saveInterval: number | null = null;
 
     constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
         this.canvas = canvas;
         this.ctx = ctx;
         this.gameState = this.initializeGame();
         this.setupKeyboardListeners();
+        this.loadAI();
     }
 
     private initializeGame(): SnakeGameState {
@@ -103,13 +114,25 @@ export class SnakeWorld implements GameWorld {
         if (this.keyUpHandler) {
             window.removeEventListener('keyup', this.keyUpHandler);
         }
+        this.stopAITraining();
     }
 
     private handleKeyPress(keyCode: string): void {
+        // Toggle AI mode with 'A' key
+        if (keyCode === 'KeyA' || keyCode === 'Keya') {
+            this.toggleAIMode();
+            return;
+        }
+
         if (this.gameState.gameOver) {
             if (keyCode === 'Space') {
-                this.gameState = this.initializeGame();
+                this.restartGame();
             }
+            return;
+        }
+
+        // Don't process arrow keys if AI is controlling
+        if (this.aiMode && this.ai) {
             return;
         }
 
@@ -134,6 +157,77 @@ export class SnakeWorld implements GameWorld {
         if (newDirection !== null) {
             this.gameState.nextDirection = newDirection;
         }
+    }
+
+    private toggleAIMode(): void {
+        this.aiMode = !this.aiMode;
+
+        if (this.aiMode && !this.ai) {
+            // Initialize AI if it doesn't exist
+            this.loadAI();
+        }
+
+        if (this.aiMode && this.ai) {
+            // Start auto-restart when AI dies
+            this.startAITraining();
+        } else {
+            this.stopAITraining();
+        }
+    }
+
+    private loadAI(): void {
+        const saved = this.aiStorage.loadSync();
+        if (saved) {
+            this.ai = new SnakeAI(saved.weights);
+            // Restore AI stats
+            const stats = this.ai.getStats();
+            // Note: We can't directly set stats, but the AI will update them as it plays
+        } else {
+            this.ai = new SnakeAI();
+        }
+    }
+
+    private saveAI(): void {
+        if (!this.ai) return;
+
+        const stats = this.ai.getStats();
+        const saveData: SnakeAISaveData = {
+            weights: this.ai.getWeights(),
+            gamesPlayed: stats.gamesPlayed,
+            bestScore: stats.bestScore,
+            explorationRate: stats.explorationRate
+        };
+
+        this.aiStorage.save(saveData);
+    }
+
+    private startAITraining(): void {
+        // Auto-save every 10 seconds
+        this.saveInterval = window.setInterval(() => {
+            this.saveAI();
+        }, 10000);
+    }
+
+    private stopAITraining(): void {
+        if (this.saveInterval !== null) {
+            clearInterval(this.saveInterval);
+            this.saveInterval = null;
+        }
+        // Save one last time
+        this.saveAI();
+    }
+
+    private restartGame(): void {
+        // Save AI before restarting
+        if (this.ai) {
+            this.saveAI();
+        }
+
+        this.gameState = this.initializeGame();
+        this.lastScore = 0;
+        this.lastFoodPosition = null;
+        this.lastMoveTime = 0;
+        this.gameOverTime = 0;
     }
 
     public draw(): void {
@@ -225,6 +319,24 @@ export class SnakeWorld implements GameWorld {
         this.ctx.textAlign = 'left';
         this.ctx.textBaseline = 'top';
         this.ctx.fillText(`Score: ${this.gameState.score}`, 10, 10);
+
+        // Draw AI info if AI mode is on
+        if (this.aiMode && this.ai) {
+            const stats = this.ai.getStats();
+            const fontSize = this.canvas.height * 0.025;
+            this.ctx.font = `${fontSize}px sans-serif`;
+            this.ctx.fillStyle = '#60a5fa';
+            this.ctx.fillText(`AI Mode: ON`, 10, 40);
+            this.ctx.fillText(`Games: ${stats.gamesPlayed}`, 10, 40 + fontSize);
+            this.ctx.fillText(`Best: ${stats.bestScore}`, 10, 40 + fontSize * 2);
+            this.ctx.fillText(`Press 'A' to toggle AI`, 10, 40 + fontSize * 3);
+        } else if (this.ai) {
+            const stats = this.ai.getStats();
+            const fontSize = this.canvas.height * 0.02;
+            this.ctx.font = `${fontSize}px sans-serif`;
+            this.ctx.fillStyle = '#9ca3af';
+            this.ctx.fillText(`Press 'A' for AI (Games: ${stats.gamesPlayed}, Best: ${stats.bestScore})`, 10, 40);
+        }
     }
 
     private drawGameOver(): void {
@@ -259,7 +371,21 @@ export class SnakeWorld implements GameWorld {
             this.gameState.cellSize = newCellSize;
         }
 
+        // AI control
+        if (this.aiMode && this.ai && !this.gameState.gameOver) {
+            const aiDirection = this.ai.getAction(this.gameState);
+            this.setDirection(aiDirection);
+        }
+
         if (this.gameState.gameOver) {
+            // Auto-restart if AI mode is on
+            if (this.aiMode && this.ai) {
+                // Small delay before restart to see the game over state
+                this.gameOverTime += deltaTime;
+                if (this.gameOverTime >= 500) { // Wait 500ms
+                    this.restartGame();
+                }
+            }
             return;
         }
 
@@ -267,8 +393,49 @@ export class SnakeWorld implements GameWorld {
 
         if (this.lastMoveTime >= GAME_SPEED_MS) {
             this.lastMoveTime = 0;
+
+            // Track rewards for AI learning
+            if (this.ai && this.aiMode) {
+                this.updateAIRewards();
+            }
+
             this.moveSnake();
         }
+    }
+
+    private updateAIRewards(): void {
+        if (!this.ai || this.gameState.gameOver) return;
+
+        // Reward for staying alive (small positive reward each step)
+        this.ai.recordReward(0.1, this.gameState);
+
+        // Reward for eating food
+        if (this.gameState.score > this.lastScore) {
+            this.ai.recordReward(10, this.gameState);
+            this.lastScore = this.gameState.score;
+        }
+
+        // Reward for moving closer to food
+        const head = this.gameState.snake[0];
+        const foodDx = Math.abs(this.gameState.food.x - head.x);
+        const foodDy = Math.abs(this.gameState.food.y - head.y);
+        const distanceToFood = foodDx + foodDy;
+
+        if (this.lastFoodPosition) {
+            const lastDx = Math.abs(this.lastFoodPosition.x - head.x);
+            const lastDy = Math.abs(this.lastFoodPosition.y - head.y);
+            const lastDistance = lastDx + lastDy;
+
+            if (distanceToFood < lastDistance) {
+                // Moving closer to food
+                this.ai.recordReward(0.5, this.gameState);
+            } else if (distanceToFood > lastDistance) {
+                // Moving away from food
+                this.ai.recordReward(-0.5, this.gameState);
+            }
+        }
+
+        this.lastFoodPosition = { ...this.gameState.food };
     }
 
     private moveSnake(): void {
@@ -300,12 +467,22 @@ export class SnakeWorld implements GameWorld {
             newHead.y >= this.gameState.gridSize
         ) {
             this.gameState.gameOver = true;
+            // Record death penalty for AI
+            if (this.ai && this.aiMode) {
+                this.ai.recordReward(-10, this.gameState);
+                this.ai.onGameEnd(this.gameState.score);
+            }
             return;
         }
 
         // Check self collision
         if (this.gameState.snake.some(segment => segment.x === newHead.x && segment.y === newHead.y)) {
             this.gameState.gameOver = true;
+            // Record death penalty for AI
+            if (this.ai && this.aiMode) {
+                this.ai.recordReward(-10, this.gameState);
+                this.ai.onGameEnd(this.gameState.score);
+            }
             return;
         }
 
@@ -315,6 +492,7 @@ export class SnakeWorld implements GameWorld {
         if (newHead.x === this.gameState.food.x && newHead.y === this.gameState.food.y) {
             this.gameState.score += 10;
             this.gameState.food = this.generateFood(this.gameState.snake, this.gameState.gridSize);
+            // Food reward is handled in updateAIRewards
         } else {
             // Remove tail if no food eaten
             this.gameState.snake.pop();

@@ -3,7 +3,8 @@ export enum StorageKey {
     MARBLE_AUTO_SAVE = 'MARBLE_AUTO_SAVE',
     MARBLE_QUICK_SAVE = 'MARBLE_QUICK_SAVE',
     FREE_MARKET = 'FREE_MARKET',
-    WINTER_CYCLING = 'WINTER_CYCLING'
+    WINTER_CYCLING = 'WINTER_CYCLING',
+    SNAKE_AI = 'SNAKE_AI'
 }
 
 export interface Storer<T> {
