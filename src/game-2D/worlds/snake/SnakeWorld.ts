@@ -28,6 +28,9 @@ export interface SnakeGameState {
 const GRID_SIZE = 20; // 20x20 grid
 const INITIAL_SNAKE_LENGTH = 3;
 const GAME_SPEED_MS = 150; // milliseconds between moves
+const MIN_SPEED_MULTIPLIER = 0.5; // Half speed
+const MAX_SPEED_MULTIPLIER = 10; // 10x speed
+const SPEED_STEP = 0.5; // Speed increment/decrement
 
 export class SnakeWorld implements GameWorld {
     readonly canvas: HTMLCanvasElement;
@@ -46,6 +49,7 @@ export class SnakeWorld implements GameWorld {
     private lastFoodPosition: Position | null = null;
     private aiStorage = createSnakeAISorage();
     private saveInterval: number | null = null;
+    private speedMultiplier: number = 1.0; // Game speed multiplier
 
     constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
         this.canvas = canvas;
@@ -124,6 +128,23 @@ export class SnakeWorld implements GameWorld {
             return;
         }
 
+        // Speed controls
+        if (keyCode === 'Equal' || keyCode === 'NumpadAdd') {
+            // + key to increase speed
+            this.increaseSpeed();
+            return;
+        }
+        if (keyCode === 'Minus' || keyCode === 'NumpadSubtract') {
+            // - key to decrease speed
+            this.decreaseSpeed();
+            return;
+        }
+        if (keyCode === 'Digit0' || keyCode === 'Numpad0') {
+            // 0 key to reset speed to 1x
+            this.speedMultiplier = 1.0;
+            return;
+        }
+
         if (this.gameState.gameOver) {
             if (keyCode === 'Space') {
                 this.restartGame();
@@ -157,6 +178,20 @@ export class SnakeWorld implements GameWorld {
         if (newDirection !== null) {
             this.gameState.nextDirection = newDirection;
         }
+    }
+
+    private increaseSpeed(): void {
+        this.speedMultiplier = Math.min(
+            MAX_SPEED_MULTIPLIER,
+            this.speedMultiplier + SPEED_STEP
+        );
+    }
+
+    private decreaseSpeed(): void {
+        this.speedMultiplier = Math.max(
+            MIN_SPEED_MULTIPLIER,
+            this.speedMultiplier - SPEED_STEP
+        );
     }
 
     private toggleAIMode(): void {
@@ -320,23 +355,40 @@ export class SnakeWorld implements GameWorld {
         this.ctx.textBaseline = 'top';
         this.ctx.fillText(`Score: ${this.gameState.score}`, 10, 10);
 
+        let yOffset = 40;
+
         // Draw AI info if AI mode is on
         if (this.aiMode && this.ai) {
             const stats = this.ai.getStats();
             const fontSize = this.canvas.height * 0.025;
             this.ctx.font = `${fontSize}px sans-serif`;
             this.ctx.fillStyle = '#60a5fa';
-            this.ctx.fillText(`AI Mode: ON`, 10, 40);
-            this.ctx.fillText(`Games: ${stats.gamesPlayed}`, 10, 40 + fontSize);
-            this.ctx.fillText(`Best: ${stats.bestScore}`, 10, 40 + fontSize * 2);
-            this.ctx.fillText(`Press 'A' to toggle AI`, 10, 40 + fontSize * 3);
+            this.ctx.fillText(`AI Mode: ON`, 10, yOffset);
+            yOffset += fontSize;
+            this.ctx.fillText(`Games: ${stats.gamesPlayed}`, 10, yOffset);
+            yOffset += fontSize;
+            this.ctx.fillText(`Best: ${stats.bestScore}`, 10, yOffset);
+            yOffset += fontSize;
+            this.ctx.fillText(`Press 'A' to toggle AI`, 10, yOffset);
+            yOffset += fontSize * 1.5;
         } else if (this.ai) {
             const stats = this.ai.getStats();
             const fontSize = this.canvas.height * 0.02;
             this.ctx.font = `${fontSize}px sans-serif`;
             this.ctx.fillStyle = '#9ca3af';
-            this.ctx.fillText(`Press 'A' for AI (Games: ${stats.gamesPlayed}, Best: ${stats.bestScore})`, 10, 40);
+            this.ctx.fillText(`Press 'A' for AI (Games: ${stats.gamesPlayed}, Best: ${stats.bestScore})`, 10, yOffset);
+            yOffset += fontSize * 1.5;
         }
+
+        // Draw speed indicator at bottom left
+        const speedFontSize = this.canvas.height * 0.025;
+        this.ctx.font = `${speedFontSize}px sans-serif`;
+        this.ctx.fillStyle = this.speedMultiplier > 1 ? '#fbbf24' : this.speedMultiplier < 1 ? '#60a5fa' : 'white';
+        const speedText = `Speed: ${this.speedMultiplier.toFixed(1)}x`;
+        this.ctx.fillText(speedText, 10, this.canvas.height - 50);
+        this.ctx.fillStyle = '#9ca3af';
+        this.ctx.font = `${speedFontSize * 0.7}px sans-serif`;
+        this.ctx.fillText(`+/- to change, 0 to reset`, 10, this.canvas.height - 30);
     }
 
     private drawGameOver(): void {
@@ -380,16 +432,19 @@ export class SnakeWorld implements GameWorld {
         if (this.gameState.gameOver) {
             // Auto-restart if AI mode is on
             if (this.aiMode && this.ai) {
-                // Small delay before restart to see the game over state
-                this.gameOverTime += deltaTime;
-                if (this.gameOverTime >= 500) { // Wait 500ms
+                // Small delay before restart to see the game over state (adjusted for speed)
+                const adjustedDeltaTime = deltaTime * this.speedMultiplier;
+                this.gameOverTime += adjustedDeltaTime;
+                if (this.gameOverTime >= 500) { // Wait 500ms (at normal speed)
                     this.restartGame();
                 }
             }
             return;
         }
 
-        this.lastMoveTime += deltaTime;
+        // Apply speed multiplier to deltaTime
+        const adjustedDeltaTime = deltaTime * this.speedMultiplier;
+        this.lastMoveTime += adjustedDeltaTime;
 
         if (this.lastMoveTime >= GAME_SPEED_MS) {
             this.lastMoveTime = 0;
