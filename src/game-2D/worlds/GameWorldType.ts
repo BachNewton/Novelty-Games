@@ -3,5 +3,6 @@ export enum GameWorldType {
     WIGGLERS,
     CAT,
     PLATFORMER,
-    RPG
+    RPG,
+    SNAKE
 }

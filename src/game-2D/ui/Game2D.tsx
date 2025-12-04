@@ -10,6 +10,7 @@ import { createCamera } from "../worlds/Camera";
 import { createKeyboardInput } from "../../util/input/Keyboard";
 import { createRpgWorld } from "../worlds/rpg/RpgWorld";
 import { createMouseInput } from "../../util/input/Mouse";
+import { SnakeWorld } from "../worlds/snake/SnakeWorld";
 
 interface Game2DProps {
     goHome: () => void;
@@ -80,6 +81,8 @@ function createGameWorld(gameWorldType: GameWorldType, canvas: HTMLCanvasElement
                 createKeyboardInput(),
                 createMouseInput()
             );
+        case GameWorldType.SNAKE:
+            return new SnakeWorld(canvas, ctx);
         default:
             throw new Error(`GameWorldType not supported: ${gameWorldType}`);
     }

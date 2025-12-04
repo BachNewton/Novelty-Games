@@ -15,6 +15,7 @@ class WigglersState implements UiState { }
 class CatState implements UiState { }
 class PlatformerState implements UiState { }
 class RpgState implements UiState { }
+class SnakeState implements UiState { }
 
 interface ButtonClickedHandlers {
     onHomeButtonClicked: () => void;
@@ -23,6 +24,7 @@ interface ButtonClickedHandlers {
     onCatClick: () => void;
     onPlatformerClick: () => void;
     onRpgClick: () => void;
+    onSnakeClick: () => void;
 }
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
@@ -34,7 +36,8 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
         onCarnivalClick: () => setUiState(new CarnivalUiState()),
         onCatClick: () => setUiState(new CatState()),
         onPlatformerClick: () => setUiState(new PlatformerState()),
-        onRpgClick: () => setUiState(new RpgState())
+        onRpgClick: () => setUiState(new RpgState()),
+        onSnakeClick: () => setUiState(new SnakeState())
     };
 
     return Ui(uiState, buttonClickedHandlers);
@@ -59,6 +62,8 @@ function getGameWorldType(uiState: UiState): GameWorldType {
         return GameWorldType.PLATFORMER;
     } else if (uiState instanceof RpgState) {
         return GameWorldType.RPG;
+    } else if (uiState instanceof SnakeState) {
+        return GameWorldType.SNAKE;
     } else {
         throw new Error('UiState not supported: ' + uiState);
     }
@@ -89,6 +94,7 @@ function MenuUi(buttonClickedHandlers: ButtonClickedHandlers) {
         <button style={buttonStyle} onClick={buttonClickedHandlers.onCatClick}>Cat 🐈</button>
         <button style={buttonStyle} onClick={buttonClickedHandlers.onPlatformerClick}>Platformer 🦘</button>
         <button style={buttonStyle} onClick={buttonClickedHandlers.onRpgClick}>RPG 🗡️</button>
+        <button style={buttonStyle} onClick={buttonClickedHandlers.onSnakeClick}>Snake 🐍</button>
     </div>;
 }
 
