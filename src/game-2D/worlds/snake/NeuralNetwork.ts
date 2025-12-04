@@ -139,6 +139,90 @@ export class NeuralNetwork {
         }
     }
 
+    // Batch training method: accumulates gradients and updates once per batch
+    // This stabilizes learning significantly
+    public trainBatch(batch: { input: number[], target: number[] }[], learningRate: number): void {
+        const batchSize = batch.length;
+
+        // Accumulate gradients
+        const hiddenBiasGrads = new Array(this.hiddenSize).fill(0);
+        const outputBiasGrads = new Array(this.outputSize).fill(0);
+        const inputToHiddenGrads = this.weights.inputToHidden.map(row => new Array(this.inputSize).fill(0));
+        const hiddenToOutputGrads = this.weights.hiddenToOutput.map(row => new Array(this.hiddenSize).fill(0));
+
+        for (const sample of batch) {
+            const { input, target } = sample;
+
+            // 1. Forward pass (need hidden state)
+            const hidden: number[] = [];
+            const hiddenSums: number[] = [];
+            for (let i = 0; i < this.hiddenSize; i++) {
+                let sum = this.weights.hiddenBias[i];
+                for (let j = 0; j < this.inputSize; j++) {
+                    sum += input[j] * this.weights.inputToHidden[i][j];
+                }
+                hiddenSums[i] = sum;
+                hidden[i] = this.relu(sum);
+            }
+
+            const currentOutputs: number[] = [];
+            for (let i = 0; i < this.outputSize; i++) {
+                let sum = this.weights.outputBias[i];
+                for (let j = 0; j < this.hiddenSize; j++) {
+                    sum += hidden[j] * this.weights.hiddenToOutput[i][j];
+                }
+                currentOutputs[i] = sum;
+            }
+
+            // 2. Calculate Errors
+            const outputErrors: number[] = [];
+            for (let i = 0; i < this.outputSize; i++) {
+                outputErrors[i] = target[i] - currentOutputs[i];
+            }
+
+            // 3. Accumulate Gradients (Output Layer)
+            for (let i = 0; i < this.outputSize; i++) {
+                const gradient = outputErrors[i];
+                outputBiasGrads[i] += gradient;
+                for (let j = 0; j < this.hiddenSize; j++) {
+                    hiddenToOutputGrads[i][j] += gradient * hidden[j];
+                }
+            }
+
+            // 4. Accumulate Gradients (Hidden Layer)
+            for (let i = 0; i < this.hiddenSize; i++) {
+                let error = 0;
+                for (let j = 0; j < this.outputSize; j++) {
+                    error += outputErrors[j] * this.weights.hiddenToOutput[j][i];
+                }
+                const gradient = (hiddenSums[i] > 0 ? 1 : 0) * error;
+
+                hiddenBiasGrads[i] += gradient;
+                for (let j = 0; j < this.inputSize; j++) {
+                    inputToHiddenGrads[i][j] += gradient * input[j];
+                }
+            }
+        }
+
+        // 5. Apply Averaged Gradients
+        // Note: We divide by batchSize to average the error
+        const rate = learningRate / batchSize;
+
+        for (let i = 0; i < this.outputSize; i++) {
+            this.weights.outputBias[i] += outputBiasGrads[i] * rate;
+            for (let j = 0; j < this.hiddenSize; j++) {
+                this.weights.hiddenToOutput[i][j] += hiddenToOutputGrads[i][j] * rate;
+            }
+        }
+
+        for (let i = 0; i < this.hiddenSize; i++) {
+            this.weights.hiddenBias[i] += hiddenBiasGrads[i] * rate;
+            for (let j = 0; j < this.inputSize; j++) {
+                this.weights.inputToHidden[i][j] += inputToHiddenGrads[i][j] * rate;
+            }
+        }
+    }
+
     private relu(x: number): number {
         return Math.max(0, x);
     }

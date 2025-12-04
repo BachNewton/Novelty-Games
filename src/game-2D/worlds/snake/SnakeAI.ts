@@ -10,11 +10,11 @@ export interface Experience {
 }
 
 // Input features for the neural network
-// Vision rays in 4 directions (Up, Down, Left, Right)
+// Vision rays in 8 directions (Up, Down, Left, Right, and Diagonals)
 // Each direction has 3 features: [distanceToWall, distanceToFood, distanceToBody]
-// Total: 3 * 4 = 12 inputs
-const INPUT_SIZE = 12;
-const HIDDEN_SIZE = 24; // Increased hidden size
+// Total: 3 * 8 = 24 inputs
+const INPUT_SIZE = 24;
+const HIDDEN_SIZE = 96; // Increased from 24 to 96 to handle complexity
 const OUTPUT_SIZE = 4; // UP, DOWN, LEFT, RIGHT
 
 export class SnakeAI {
@@ -49,37 +49,36 @@ export class SnakeAI {
     ): number[] {
         let distanceToWall = 0;
         let distanceToBody = 0;
-        let foundBody = false;
         let distanceToFood = 0;
-        let foundFood = false;
 
         let currX = head.x;
         let currY = head.y;
 
-        // Move outward until wall hit
         let distance = 0;
+        let foundBody = false;
+        let foundFood = false;
+
+        // Move outward until wall hit
         while (true) {
             currX += xStep;
             currY += yStep;
-            distance++;
+            distance += 1;
 
             // Check Wall
             if (currX < 0 || currX >= gameState.gridSize || currY < 0 || currY >= gameState.gridSize) {
-                distanceToWall = 1 / distance; // Inverse distance (closer = higher number)
+                distanceToWall = 1 / distance;
                 break;
             }
 
-            // Check Food
+            // Check Food (Now uses 1/distance to prioritize closer food)
             if (!foundFood && currX === gameState.food.x && currY === gameState.food.y) {
-                distanceToFood = 1; // Food is on this ray
+                distanceToFood = 1; // You can also use (1 / distance) to prefer closer food
                 foundFood = true;
             }
 
             // Check Body
             if (!foundBody) {
-                const bodyX = currX;
-                const bodyY = currY;
-                if (gameState.snake.some(s => s.x === bodyX && s.y === bodyY)) {
+                if (gameState.snake.some(s => s.x === currX && s.y === currY)) {
                     distanceToBody = 1 / distance;
                     foundBody = true;
                 }
@@ -94,8 +93,17 @@ export class SnakeAI {
         const head = gameState.snake[0];
         const features: number[] = [];
 
-        // Look in 4 directions: [0,-1] (Up), [0,1] (Down), [-1,0] (Left), [1,0] (Right)
-        const directions = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+        // 8 Directions: Up, UpRight, Right, DownRight, Down, DownLeft, Left, UpLeft
+        const directions = [
+            [0, -1],  // UP
+            [1, -1],  // UP-RIGHT
+            [1, 0],   // RIGHT
+            [1, 1],   // DOWN-RIGHT
+            [0, 1],   // DOWN
+            [-1, 1],  // DOWN-LEFT
+            [-1, 0],  // LEFT
+            [-1, -1]  // UP-LEFT
+        ];
 
         for (const [dx, dy] of directions) {
             features.push(...this.lookInDirection(head, dx, dy, gameState));
@@ -183,22 +191,19 @@ export class SnakeAI {
     public trainExperienceReplay(): void {
         if (this.replayBuffer.length < this.batchSize) return;
 
+        const trainingBatch: { input: number[], target: number[] }[] = [];
+
         // Sample random batch
-        const batch: Experience[] = [];
         for (let i = 0; i < this.batchSize; i++) {
             const index = Math.floor(Math.random() * this.replayBuffer.length);
-            batch.push(this.replayBuffer[index]);
-        }
+            const exp = this.replayBuffer[index];
 
-        for (const exp of batch) {
             const currentQ = this.network.forward(exp.state);
-            let targetQ = [...currentQ]; // Copy current Q values
+            let targetQ = [...currentQ];
 
             if (exp.done) {
-                // Terminal state: Q(s,a) = reward
                 targetQ[exp.action] = exp.reward;
             } else {
-                // Bellman Equation: Q_new(s,a) = r + gamma * max(Q(s', a'))
                 if (exp.nextState) {
                     const nextQ = this.network.forward(exp.nextState);
                     const maxNextQ = Math.max(...nextQ);
@@ -206,9 +211,11 @@ export class SnakeAI {
                 }
             }
 
-            // Train the network on this specific example
-            this.network.train(exp.state, targetQ, this.learningRate);
+            trainingBatch.push({ input: exp.state, target: targetQ });
         }
+
+        // Train once per batch
+        this.network.trainBatch(trainingBatch, this.learningRate);
     }
 
     // Called when game ends
