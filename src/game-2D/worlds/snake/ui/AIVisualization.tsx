@@ -7,6 +7,7 @@ interface AIVisualizationProps {
     getAIMode: () => boolean;
     getVisible: () => boolean;
     setVisible: (visible: boolean) => void;
+    onResetAI: () => void;
 }
 
 const FEATURE_NAMES = [
@@ -28,7 +29,7 @@ const FEATURE_NAMES = [
 
 const DIRECTION_NAMES = ["UP", "DOWN", "LEFT", "RIGHT"];
 
-export function AIVisualization({ getAI, getAIMode, getVisible, setVisible }: AIVisualizationProps) {
+export function AIVisualization({ getAI, getAIMode, getVisible, setVisible, onResetAI }: AIVisualizationProps) {
     const [stats, setStats] = useState<ReturnType<SnakeAI['getStats']> | null>(null);
     const [decisionInfo, setDecisionInfo] = useState<ReturnType<SnakeAI['getDecisionInfo']> | null>(null);
     const [showFeatures, setShowFeatures] = useState(true);
@@ -147,7 +148,19 @@ export function AIVisualization({ getAI, getAIMode, getVisible, setVisible }: AI
                 <>
                     {/* Statistics Section */}
                     <div style={sectionStyle}>
-                        <strong style={{ color: '#60a5fa' }}>Statistics</strong>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                            <strong style={{ color: '#60a5fa' }}>Statistics</strong>
+                            <button
+                                style={{ ...buttonStyle, backgroundColor: '#ef4444', fontSize: '10px', padding: '3px 8px' }}
+                                onClick={() => {
+                                    if (window.confirm('Reset AI learning? This will clear all progress and start fresh.')) {
+                                        onResetAI();
+                                    }
+                                }}
+                            >
+                                Reset AI
+                            </button>
+                        </div>
                         <div>Games Played: {stats.gamesPlayed}</div>
                         <div>Best Score: {stats.bestScore}</div>
                         <div>Average Score: {stats.averageScore.toFixed(1)}</div>
@@ -331,8 +344,9 @@ export function createAIVisualizationOverlay(
     getAI: () => SnakeAI | null,
     getAIMode: () => boolean,
     getVisible: () => boolean,
-    setVisible: (visible: boolean) => void
+    setVisible: (visible: boolean) => void,
+    onResetAI: () => void
 ): JSX.Element {
-    return <AIVisualization getAI={getAI} getAIMode={getAIMode} getVisible={getVisible} setVisible={setVisible} />;
+    return <AIVisualization getAI={getAI} getAIMode={getAIMode} getVisible={getVisible} setVisible={setVisible} onResetAI={onResetAI} />;
 }
 

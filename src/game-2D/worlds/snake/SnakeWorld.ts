@@ -638,6 +638,21 @@ export class SnakeWorld implements GameWorld {
         }
     }
 
+    // Reset AI learning
+    public resetAI(): void {
+        if (this.ai) {
+            this.ai.reset();
+            this.aiStorage.save({
+                weights: this.ai.getWeights(),
+                gamesPlayed: 0,
+                bestScore: 0,
+                explorationRate: 0.3,
+                scoreHistory: [],
+                totalScore: 0
+            });
+        }
+    }
+
     // Overlay for AI visualization - always returns component, component handles visibility
     public get overlay(): JSX.Element | undefined {
         if (!this.ai) {
@@ -647,7 +662,8 @@ export class SnakeWorld implements GameWorld {
             () => this.ai,
             () => this.aiMode,
             () => this.showVisualization,
-            (visible: boolean) => { this.showVisualization = visible; }
+            (visible: boolean) => { this.showVisualization = visible; },
+            () => { this.resetAI(); }
         );
     }
 }

@@ -20,8 +20,8 @@ export class SnakeAI {
     private network: NeuralNetwork;
     private explorationRate: number = 0.3; // Start with 30% exploration
     private minExplorationRate: number = 0.05;
-    private explorationDecay: number = 0.998; // Faster decay - reaches ~5% after ~1500 games
-    private learningRate: number = 0.05; // Increased from 0.01 for faster learning
+    private explorationDecay: number = 0.997; // Even faster decay - reaches ~5% after ~1000 games
+    private learningRate: number = 0.1; // Increased further for faster learning
     private discountFactor: number = 0.95; // Discount future rewards
     private gameHistory: GameExperience[] = [];
     private lastState: number[] | null = null;
@@ -159,30 +159,24 @@ export class SnakeAI {
             return;
         }
 
-        // Normalize reward based on recent history (helps with learning stability)
+        // Track reward history for baseline (but don't normalize - it hurts learning)
         this.rewardHistory.push(reward);
         if (this.rewardHistory.length > 100) {
             this.rewardHistory.shift();
         }
 
-        // Calculate running average and std dev for normalization
-        const avg = this.rewardHistory.reduce((a, b) => a + b, 0) / this.rewardHistory.length;
-        const variance = this.rewardHistory.reduce((sum, r) => sum + Math.pow(r - avg, 2), 0) / this.rewardHistory.length;
-        const stdDev = Math.sqrt(variance);
-
-        // Normalize reward (clip to reasonable range)
-        const normalizedReward = stdDev > 0.1
-            ? Math.max(-2, Math.min(2, (reward - avg) / stdDev))
-            : reward;
+        // Use reward directly - normalization was hurting learning
+        // Just clip extreme values to prevent instability
+        const clippedReward = Math.max(-50, Math.min(50, reward));
 
         this.gameHistory.push({
             state: this.lastState,
             action: this.lastAction,
-            reward: normalizedReward
+            reward: clippedReward
         });
 
         // Update network immediately (online learning)
-        this.network.updateWeights(this.lastState, this.lastAction, normalizedReward, this.learningRate);
+        this.network.updateWeights(this.lastState, this.lastAction, clippedReward, this.learningRate);
     }
 
     // Called when game ends
@@ -253,6 +247,21 @@ export class SnakeAI {
     // Set network weights (for loading)
     public setWeights(weights: NeuralNetworkWeights): void {
         this.network.setWeights(weights);
+    }
+
+    // Reset AI to initial state (for starting fresh)
+    public reset(): void {
+        this.network = new NeuralNetwork(INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE);
+        this.explorationRate = 0.3;
+        this.gamesPlayed = 0;
+        this.bestScore = 0;
+        this.totalScore = 0;
+        this.scoreHistory = [];
+        this.gameHistory = [];
+        this.rewardHistory = [];
+        this.lastState = null;
+        this.lastAction = null;
+        this.lastProbabilities = null;
     }
 }
 

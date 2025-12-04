@@ -122,20 +122,24 @@ export class NeuralNetwork {
         reward: number,
         learningRate: number = 0.01
     ): void {
-        // Improved policy gradient with better gradient calculation
+        // REINFORCE policy gradient: (reward - baseline) * gradient of log probability
         const probabilities = this.forward(input);
         const actionProb = probabilities[action];
 
-        // Policy gradient: log probability * advantage
-        // Use log probability for better numerical stability
+        // Use log probability for policy gradient
         const logProb = Math.log(Math.max(actionProb, 1e-8)); // Avoid log(0)
-        
-        // Advantage = reward (in this simple case, we use immediate reward)
-        // Scale gradient by reward magnitude
-        const gradientScale = reward * logProb * learningRate;
 
-        // Clip gradient to prevent exploding gradients
-        const clippedGradient = Math.max(-1, Math.min(1, gradientScale));
+        // Policy gradient: reward * gradient(log π(a|s))
+        // The gradient of log π is: (1 - π(a|s)) for the chosen action
+        // This encourages actions that lead to positive rewards
+        const advantage = reward; // Simple case: use immediate reward as advantage
+
+        // Gradient scale: advantage * (1 - probability) for REINFORCE
+        // This makes the update stronger when the action was less likely (exploration bonus)
+        const gradientScale = advantage * (1 - actionProb) * learningRate;
+
+        // Clip gradient to prevent exploding gradients (but less aggressive)
+        const clippedGradient = Math.max(-5, Math.min(5, gradientScale));
 
         // Update output layer weights
         const hidden = this.computeHidden(input);
