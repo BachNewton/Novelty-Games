@@ -1,6 +1,7 @@
 import { GameWorld } from "../GameWorld";
 import { SnakeAI } from "./SnakeAI";
 import { createSnakeAISorage, SnakeAISaveData } from "./SnakeAISorage";
+import { createAIVisualizationOverlay } from "./ui/AIVisualization";
 
 export enum Direction {
     UP = 'UP',
@@ -50,6 +51,7 @@ export class SnakeWorld implements GameWorld {
     private aiStorage = createSnakeAISorage();
     private saveInterval: number | null = null;
     private speedMultiplier: number = 1.0; // Game speed multiplier
+    private showVisualization: boolean = false;
 
     constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
         this.canvas = canvas;
@@ -125,6 +127,12 @@ export class SnakeWorld implements GameWorld {
         // Toggle AI mode with 'A' key
         if (keyCode === 'KeyA' || keyCode === 'Keya') {
             this.toggleAIMode();
+            return;
+        }
+
+        // Toggle visualization with 'V' key
+        if (keyCode === 'KeyV' || keyCode === 'Keyv') {
+            this.showVisualization = !this.showVisualization;
             return;
         }
 
@@ -215,8 +223,18 @@ export class SnakeWorld implements GameWorld {
         if (saved) {
             this.ai = new SnakeAI(saved.weights);
             // Restore AI stats
-            const stats = this.ai.getStats();
-            // Note: We can't directly set stats, but the AI will update them as it plays
+            // Calculate totalScore from scoreHistory if not saved, otherwise use saved value
+            const totalScore = saved.totalScore !== undefined
+                ? saved.totalScore
+                : (saved.scoreHistory || []).reduce((sum, score) => sum + score, 0);
+
+            this.ai.setStats({
+                gamesPlayed: saved.gamesPlayed || 0,
+                bestScore: saved.bestScore || 0,
+                explorationRate: saved.explorationRate || 0.3,
+                scoreHistory: saved.scoreHistory || [],
+                totalScore: totalScore
+            });
         } else {
             this.ai = new SnakeAI();
         }
@@ -226,11 +244,18 @@ export class SnakeWorld implements GameWorld {
         if (!this.ai) return;
 
         const stats = this.ai.getStats();
+        // Calculate totalScore from scoreHistory if available, otherwise use average * games
+        const totalScore = stats.scoreHistory.length > 0
+            ? stats.scoreHistory.reduce((sum, score) => sum + score, 0)
+            : stats.averageScore * stats.gamesPlayed;
+
         const saveData: SnakeAISaveData = {
             weights: this.ai.getWeights(),
             gamesPlayed: stats.gamesPlayed,
             bestScore: stats.bestScore,
-            explorationRate: stats.explorationRate
+            explorationRate: stats.explorationRate,
+            scoreHistory: stats.scoreHistory,
+            totalScore: totalScore
         };
 
         this.aiStorage.save(saveData);
@@ -370,6 +395,8 @@ export class SnakeWorld implements GameWorld {
             this.ctx.fillText(`Best: ${stats.bestScore}`, 10, yOffset);
             yOffset += fontSize;
             this.ctx.fillText(`Press 'A' to toggle AI`, 10, yOffset);
+            yOffset += fontSize;
+            this.ctx.fillText(`Press 'V' for visualization`, 10, yOffset);
             yOffset += fontSize * 1.5;
         } else if (this.ai) {
             const stats = this.ai.getStats();
@@ -572,6 +599,19 @@ export class SnakeWorld implements GameWorld {
         ) {
             this.gameState.nextDirection = direction;
         }
+    }
+
+    // Overlay for AI visualization - always returns component, component handles visibility
+    public get overlay(): JSX.Element | undefined {
+        if (!this.ai) {
+            return undefined;
+        }
+        return createAIVisualizationOverlay(
+            () => this.ai,
+            () => this.aiMode,
+            () => this.showVisualization,
+            (visible: boolean) => { this.showVisualization = visible; }
+        );
     }
 }
 

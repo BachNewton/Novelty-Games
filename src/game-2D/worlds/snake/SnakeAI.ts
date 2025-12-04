@@ -25,8 +25,12 @@ export class SnakeAI {
     private gameHistory: GameExperience[] = [];
     private lastState: number[] | null = null;
     private lastAction: number | null = null;
+    private lastProbabilities: number[] | null = null;
+    private lastWasExploration: boolean = false;
     private gamesPlayed: number = 0;
     private bestScore: number = 0;
+    private scoreHistory: number[] = []; // Keep last 1000 scores
+    private totalScore: number = 0;
 
     constructor(weights?: NeuralNetworkWeights) {
         this.network = new NeuralNetwork(INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, weights);
@@ -97,19 +101,44 @@ export class SnakeAI {
         const features = this.stateToFeatures(gameState);
         this.lastState = features;
 
+        // Get probabilities from network
+        const probabilities = this.network.forward(features);
+        this.lastProbabilities = probabilities;
+
         let actionIndex: number;
 
         // Exploration vs exploitation
         if (Math.random() < this.explorationRate) {
             // Explore: random action
             actionIndex = Math.floor(Math.random() * OUTPUT_SIZE);
+            this.lastWasExploration = true;
         } else {
             // Exploit: use neural network
             actionIndex = this.network.predict(features);
+            this.lastWasExploration = false;
         }
 
         this.lastAction = actionIndex;
         return this.indexToDirection(actionIndex);
+    }
+
+    // Get current decision information for visualization
+    public getDecisionInfo(): {
+        features: number[];
+        probabilities: number[];
+        selectedAction: number;
+        wasExploration: boolean;
+    } | null {
+        if (this.lastState === null || this.lastProbabilities === null || this.lastAction === null) {
+            return null;
+        }
+
+        return {
+            features: [...this.lastState],
+            probabilities: [...this.lastProbabilities],
+            selectedAction: this.lastAction,
+            wasExploration: this.lastWasExploration
+        };
     }
 
     private indexToDirection(index: number): Direction {
@@ -141,9 +170,16 @@ export class SnakeAI {
     // Called when game ends
     public onGameEnd(finalScore: number): void {
         this.gamesPlayed++;
+        this.totalScore += finalScore;
 
         if (finalScore > this.bestScore) {
             this.bestScore = finalScore;
+        }
+
+        // Track score history (keep last 1000)
+        this.scoreHistory.push(finalScore);
+        if (this.scoreHistory.length > 1000) {
+            this.scoreHistory.shift();
         }
 
         // Decay exploration rate
@@ -156,15 +192,39 @@ export class SnakeAI {
         this.gameHistory = [];
         this.lastState = null;
         this.lastAction = null;
+        this.lastProbabilities = null;
     }
 
     // Get AI statistics
-    public getStats(): { gamesPlayed: number; bestScore: number; explorationRate: number } {
+    public getStats(): {
+        gamesPlayed: number;
+        bestScore: number;
+        explorationRate: number;
+        averageScore: number;
+        scoreHistory: number[];
+    } {
         return {
             gamesPlayed: this.gamesPlayed,
             bestScore: this.bestScore,
-            explorationRate: this.explorationRate
+            explorationRate: this.explorationRate,
+            averageScore: this.gamesPlayed > 0 ? this.totalScore / this.gamesPlayed : 0,
+            scoreHistory: [...this.scoreHistory]
         };
+    }
+
+    // Set stats (for loading from storage)
+    public setStats(stats: {
+        gamesPlayed: number;
+        bestScore: number;
+        explorationRate: number;
+        scoreHistory: number[];
+        totalScore: number;
+    }): void {
+        this.gamesPlayed = stats.gamesPlayed;
+        this.bestScore = stats.bestScore;
+        this.explorationRate = stats.explorationRate;
+        this.scoreHistory = [...stats.scoreHistory];
+        this.totalScore = stats.totalScore;
     }
 
     // Get network weights for saving
