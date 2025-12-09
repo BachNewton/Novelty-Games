@@ -517,32 +517,29 @@ export class SnakeWorld implements GameWorld {
             return;
         }
 
-        // Calculate reward with improved shaping
-        let reward = -0.01; // Small step penalty to encourage efficiency
+        // Calculate reward with improved shaping focused on food collection
+        let reward = -0.05; // Time penalty to discourage endless wandering
 
         // Reward for eating food
         if (this.gameState.score > this.lastScore) {
-            reward = 10.0; // Significant positive reward for eating food
+            reward = 50.0; // Large positive reward for eating food (increased from 10)
             this.lastScore = this.gameState.score;
         } else if (!this.gameState.gameOver && this.lastHeadPosition) {
-            // Distance-based reward: encourage moving closer to food (normalized)
+            // Distance-based reward: strong guidance toward food
             const head = this.gameState.snake[0];
             const currentDistance = Math.abs(head.x - this.gameState.food.x) + Math.abs(head.y - this.gameState.food.y);
             const previousDistance = Math.abs(this.lastHeadPosition.x - this.gameState.food.x) + Math.abs(this.lastHeadPosition.y - this.gameState.food.y);
 
-            // Normalized distance reward (scaled down to avoid dominating the learning signal)
-            const maxDistance = this.gameState.gridSize * 2; // Maximum possible Manhattan distance
+            // Stronger distance reward to guide the snake toward food
+            const maxDistance = this.gameState.gridSize * 2;
             const distanceChange = previousDistance - currentDistance;
-            reward += (distanceChange / maxDistance) * 0.5; // Normalized and scaled
-
-            // Small survival bonus (encourages staying alive)
-            reward += 0.001;
+            reward += (distanceChange / maxDistance) * 2.0; // Increased from 0.5 to provide stronger signal
         }
 
-        // Proportional death penalty (worse if you die after eating food)
+        // Reduced death penalty so AI is willing to take risks for food
         if (this.gameState.gameOver) {
-            // Base death penalty + penalty proportional to score
-            reward = -(10 + this.gameState.score * 0.5);
+            // Smaller base penalty, encourage the AI to try for food rather than just survive
+            reward = -5.0; // Reduced from -(10 + score * 0.5)
         }
 
         // Capture state after move (for nextState)
