@@ -32,7 +32,6 @@ const GAME_SPEED_MS = 150; // milliseconds between moves
 const MIN_SPEED_MULTIPLIER = 0.5; // Half speed
 const MAX_SPEED_MULTIPLIER = 1000; // 1000x speed for ultra-fast training
 const SPEED_STEP = 0.5; // Speed increment/decrement (use larger steps at high speeds)
-const PREVIEW_INTERVAL = 100; // Show a preview game every N games in headless mode
 
 export class SnakeWorld implements GameWorld {
     readonly canvas: HTMLCanvasElement;
@@ -61,6 +60,7 @@ export class SnakeWorld implements GameWorld {
     private headlessMode: boolean = false;
     private isPlayingPreview: boolean = false;
     private previewMoveHistory: Direction[] = [];
+    private previewInitialState: SnakeGameState | null = null; // Store initial state for replay
     private previewPlaybackIndex: number = 0;
     private lastPreviewScore: number = 0;
     private headlessTrainingHandle: number | null = null;
@@ -346,25 +346,6 @@ export class SnakeWorld implements GameWorld {
         }
     }
 
-    private shouldShowPreview(): boolean {
-        if (!this.ai || !this.headlessMode) return false;
-
-        const stats = this.ai.getStats();
-
-        // Show preview every PREVIEW_INTERVAL games
-        if (stats.gamesPlayed % PREVIEW_INTERVAL === 0) {
-            return true;
-        }
-
-        // Also show preview for new high scores
-        if (this.gameState.score > this.lastPreviewScore && this.gameState.score >= stats.bestScore) {
-            this.lastPreviewScore = this.gameState.score;
-            return true;
-        }
-
-        return false;
-    }
-
     private startPreview(): void {
         // Pause headless training during preview
         this.stopHeadlessTraining();
@@ -372,6 +353,9 @@ export class SnakeWorld implements GameWorld {
         // Reset the game to replay the recorded moves
         this.isPlayingPreview = true;
         this.previewPlaybackIndex = 0;
+
+        console.log(`[PREVIEW] Starting preview with ${this.previewMoveHistory.length} moves recorded`);
+
         this.restartGame();
 
         // Preview will run through normal update() loop at visible speed
@@ -383,15 +367,40 @@ export class SnakeWorld implements GameWorld {
             this.saveAI();
         }
 
-        this.gameState = this.initializeGame();
+        // If we're starting a preview replay, restore the saved initial state
+        if (this.isPlayingPreview && this.previewInitialState) {
+            // Deep copy the saved state to avoid mutations
+            this.gameState = {
+                ...this.previewInitialState,
+                snake: this.previewInitialState.snake.map(pos => ({ ...pos })),
+                food: { ...this.previewInitialState.food }
+            };
+        } else {
+            this.gameState = this.initializeGame();
+
+            // If in headless mode, save the initial state for potential preview
+            if (this.headlessMode) {
+                this.previewInitialState = {
+                    ...this.gameState,
+                    snake: this.gameState.snake.map(pos => ({ ...pos })),
+                    food: { ...this.gameState.food }
+                };
+            }
+        }
+
         this.lastScore = 0;
         this.lastFoodPosition = null;
         this.lastHeadPosition = null;
         this.lastMoveTime = 0;
         this.gameOverTime = 0;
 
-        // Clear move history if not in preview mode
-        if (!this.isPlayingPreview) {
+        // Clear move history when starting a NEW game (not when starting a preview replay)
+        // This ensures we only record moves from the current game, not accumulate across games
+        if (this.headlessMode && !this.isPlayingPreview) {
+            this.previewMoveHistory = [];
+            this.previewPlaybackIndex = 0;
+        } else if (!this.isPlayingPreview) {
+            // In normal (non-headless) mode, always clear
             this.previewMoveHistory = [];
             this.previewPlaybackIndex = 0;
         }
@@ -585,9 +594,9 @@ export class SnakeWorld implements GameWorld {
         this.ctx.fillText(`Exploration: ${(stats.explorationRate * 100).toFixed(1)}%`, this.canvas.width / 2, y);
         y += fontSize * 1.5;
 
-        const gamesUntilPreview = PREVIEW_INTERVAL - (stats.gamesPlayed % PREVIEW_INTERVAL);
+        // Show info about preview behavior
         this.ctx.fillStyle = '#fbbf24';
-        this.ctx.fillText(`Next preview in ${gamesUntilPreview} games`, this.canvas.width / 2, y);
+        this.ctx.fillText(`Preview on new high score`, this.canvas.width / 2, y);
 
         // Instructions
         this.ctx.font = `${fontSize * 0.6}px sans-serif`;
@@ -646,11 +655,9 @@ export class SnakeWorld implements GameWorld {
         if (this.gameState.gameOver) {
             // Handle game end
             if (this.aiMode && this.ai) {
-                // Check if we should show a preview
-                const shouldShowPreview = this.shouldShowPreview();
-
                 // If we were playing a preview, it's done - resume headless training
                 if (this.isPlayingPreview) {
+                    console.log(`[PREVIEW] Preview ended, resuming headless training`);
                     this.isPlayingPreview = false;
                     this.previewMoveHistory = [];
                     this.previewPlaybackIndex = 0;
@@ -659,10 +666,27 @@ export class SnakeWorld implements GameWorld {
                     if (this.headlessMode) {
                         this.startHeadlessTraining();
                     }
+                    this.restartGame();
+                    return;
+                }
+
+                // NOT in a preview - check if we should show one
+                // Capture scores to check if THIS game achieved a new high score
+                const currentScore = this.gameState.score;
+                const oldBestScore = this.ai.getStats().bestScore;
+
+                // Check if we should show a preview
+                const shouldShowPreview = this.headlessMode &&
+                    currentScore > oldBestScore &&
+                    currentScore > this.lastPreviewScore;
+
+                if (shouldShowPreview) {
+                    this.lastPreviewScore = currentScore;
+                    console.log(`[PREVIEW] New high score! Current: ${currentScore}, Old Best: ${oldBestScore}, Moves recorded: ${this.previewMoveHistory.length}`);
                 }
 
                 // In headless mode, restart immediately or start preview
-                if (shouldShowPreview && this.previewMoveHistory.length > 0 && !this.isPlayingPreview) {
+                if (shouldShowPreview && this.previewMoveHistory.length > 0) {
                     this.startPreview();
                 } else {
                     this.restartGame();
@@ -670,6 +694,9 @@ export class SnakeWorld implements GameWorld {
             }
             return;
         }
+
+        // Capture the old best score BEFORE the move (in case the move causes game over)
+        const oldBestScoreBeforeMove = this.ai ? this.ai.getStats().bestScore : 0;
 
         // Capture state before move for AI learning
         if (this.ai && this.aiMode) {
@@ -689,6 +716,25 @@ export class SnakeWorld implements GameWorld {
         // Update AI rewards after move
         if (this.ai && this.aiMode) {
             this.updateAIRewards();
+        }
+
+        // After the move, check if the game just ended with a new high score
+        // This catches the case where moveSnake() caused game over and called onGameEnd()
+        if (this.gameState.gameOver && this.ai && this.headlessMode && !this.isPlayingPreview) {
+            const currentScore = this.gameState.score;
+            const newBestScore = this.ai.getStats().bestScore;
+
+            // If bestScore changed and it's greater than last preview score, show preview
+            if (newBestScore > oldBestScoreBeforeMove && currentScore > this.lastPreviewScore) {
+                this.lastPreviewScore = currentScore;
+                console.log(`[PREVIEW] New high score detected after move! Current: ${currentScore}, Old Best: ${oldBestScoreBeforeMove}, New Best: ${newBestScore}, Moves recorded: ${this.previewMoveHistory.length}`);
+
+                // Start preview
+                if (this.previewMoveHistory.length > 0) {
+                    this.startPreview();
+                    return;
+                }
+            }
         }
     }
 
