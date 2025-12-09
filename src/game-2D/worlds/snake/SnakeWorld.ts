@@ -60,6 +60,8 @@ export class SnakeWorld implements GameWorld {
     private headlessMode: boolean = false;
     private isPlayingPreview: boolean = false;
     private previewMoveHistory: Direction[] = [];
+    private previewFoodHistory: Position[] = []; // Record food positions for accurate replay
+    private previewFoodIndex: number = 0; // Current position in food history during replay
     private previewInitialState: SnakeGameState | null = null; // Store initial state for replay
     private previewPlaybackIndex: number = 0;
     private lastPreviewScore: number = 0;
@@ -100,6 +102,14 @@ export class SnakeWorld implements GameWorld {
     }
 
     private generateFood(snake: Position[], gridSize: number): Position {
+        // During replay, use recorded food positions
+        if (this.isPlayingPreview && this.previewFoodIndex < this.previewFoodHistory.length) {
+            const food = this.previewFoodHistory[this.previewFoodIndex];
+            this.previewFoodIndex++;
+            return { ...food };
+        }
+
+        // Generate new random food position
         let food: Position;
         do {
             food = {
@@ -107,6 +117,11 @@ export class SnakeWorld implements GameWorld {
                 y: Math.floor(Math.random() * gridSize)
             };
         } while (snake.some(segment => segment.x === food.x && segment.y === food.y));
+
+        // Record food position during headless training (but not during replay)
+        if (this.headlessMode && !this.isPlayingPreview) {
+            this.previewFoodHistory.push({ ...food });
+        }
 
         return food;
     }
@@ -163,6 +178,8 @@ export class SnakeWorld implements GameWorld {
                     // When exiting headless mode, stop any preview
                     this.isPlayingPreview = false;
                     this.previewMoveHistory = [];
+                    this.previewFoodHistory = [];
+                    this.previewFoodIndex = 0;
                 }
             }
             return;
@@ -353,8 +370,9 @@ export class SnakeWorld implements GameWorld {
         // Reset the game to replay the recorded moves
         this.isPlayingPreview = true;
         this.previewPlaybackIndex = 0;
+        this.previewFoodIndex = 0; // Reset food index for replay
 
-        console.log(`[PREVIEW] Starting preview with ${this.previewMoveHistory.length} moves recorded`);
+        console.log(`[PREVIEW] Starting preview with ${this.previewMoveHistory.length} moves, ${this.previewFoodHistory.length} food positions recorded`);
 
         this.restartGame();
 
@@ -399,10 +417,14 @@ export class SnakeWorld implements GameWorld {
         if (this.headlessMode && !this.isPlayingPreview) {
             this.previewMoveHistory = [];
             this.previewPlaybackIndex = 0;
+            this.previewFoodHistory = [];
+            this.previewFoodIndex = 0;
         } else if (!this.isPlayingPreview) {
             // In normal (non-headless) mode, always clear
             this.previewMoveHistory = [];
             this.previewPlaybackIndex = 0;
+            this.previewFoodHistory = [];
+            this.previewFoodIndex = 0;
         }
     }
 
@@ -661,6 +683,8 @@ export class SnakeWorld implements GameWorld {
                     this.isPlayingPreview = false;
                     this.previewMoveHistory = [];
                     this.previewPlaybackIndex = 0;
+                    this.previewFoodHistory = [];
+                    this.previewFoodIndex = 0;
 
                     // Resume headless training after preview
                     if (this.headlessMode) {
