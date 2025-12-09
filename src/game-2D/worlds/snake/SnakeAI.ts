@@ -1,4 +1,4 @@
-import { Direction, Position, SnakeGameState } from "./SnakeWorld";
+import { Direction, Position, SnakeGameState } from "./types";
 import { NeuralNetwork, NeuralNetworkWeights } from "./NeuralNetwork";
 
 export interface Experience {
@@ -84,9 +84,7 @@ export class SnakeAI {
     private explorationRate: number = 0.3; // Start with 30% exploration
     private minExplorationRate: number = 0.05;
     private explorationDecay: number = 0.997;
-    private learningRate: number = 0.001; // Reduced for stability with Adam-like updates
-    private learningRateMomentum: number = 0.9; // Momentum for adaptive learning
-    private learningRateVelocity: number = 0.999; // Velocity for adaptive learning (Adam-like)
+    private learningRate: number = 0.001;
     private discountFactor: number = 0.95; // Discount future rewards (gamma)
     private maxMemory: number = 10000; // Increased for more diverse experiences
     private batchSize: number = 64; // Increased for more stable gradients
@@ -105,10 +103,6 @@ export class SnakeAI {
     private totalScore: number = 0;
     private targetUpdateFrequency: number = 100; // Update target network every 100 games
     private trainingStepsPerGame: number = 10; // Train multiple times per game end
-
-    // Adam-like optimizer state
-    private gradientMoments: Map<string, number> = new Map();
-    private gradientVelocities: Map<string, number> = new Map();
 
     constructor(weights?: NeuralNetworkWeights, targetWeights?: NeuralNetworkWeights) {
         this.network = new NeuralNetwork(INPUT_SIZE, HIDDEN_SIZE, HIDDEN2_SIZE, OUTPUT_SIZE, weights);
@@ -468,8 +462,6 @@ export class SnakeAI {
         this.lastAction = null;
         this.lastQValues = null;
         this.priorityBeta = 0.4;
-        this.gradientMoments.clear();
-        this.gradientVelocities.clear();
     }
 }
 

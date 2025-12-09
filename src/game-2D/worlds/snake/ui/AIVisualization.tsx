@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { SnakeAI } from "../SnakeAI";
-import { Direction } from "../SnakeWorld";
 
 interface AIVisualizationProps {
     getAI: () => SnakeAI | null;
@@ -10,19 +9,52 @@ interface AIVisualizationProps {
     onResetAI: () => void;
 }
 
+// 31 input features for the neural network:
+// Vision rays in 8 directions (3 features each: wall, food, body) = 24 features
+// Plus: tail direction (2), current direction one-hot (4), snake length (1) = 7 features
 const FEATURE_NAMES = [
+    // Up direction (index 0)
     "Up: Wall",
     "Up: Food",
     "Up: Body",
+    // Up-Right direction (index 1)
+    "Up-Right: Wall",
+    "Up-Right: Food",
+    "Up-Right: Body",
+    // Right direction (index 2)
+    "Right: Wall",
+    "Right: Food",
+    "Right: Body",
+    // Down-Right direction (index 3)
+    "Down-Right: Wall",
+    "Down-Right: Food",
+    "Down-Right: Body",
+    // Down direction (index 4)
     "Down: Wall",
     "Down: Food",
     "Down: Body",
+    // Down-Left direction (index 5)
+    "Down-Left: Wall",
+    "Down-Left: Food",
+    "Down-Left: Body",
+    // Left direction (index 6)
     "Left: Wall",
     "Left: Food",
     "Left: Body",
-    "Right: Wall",
-    "Right: Food",
-    "Right: Body"
+    // Up-Left direction (index 7)
+    "Up-Left: Wall",
+    "Up-Left: Food",
+    "Up-Left: Body",
+    // Tail direction relative to head
+    "Tail Dir X",
+    "Tail Dir Y",
+    // Current direction one-hot
+    "Dir: Up",
+    "Dir: Down",
+    "Dir: Left",
+    "Dir: Right",
+    // Snake length normalized
+    "Snake Length"
 ];
 
 const DIRECTION_NAMES = ["UP", "DOWN", "LEFT", "RIGHT"];
@@ -72,7 +104,6 @@ export function AIVisualization({ getAI, getAIMode, getVisible, setVisible, onRe
     }, [getAI, getAIMode, visible]);
 
     const ai = getAI();
-    const aiMode = getAIMode();
 
     if (!ai || !visible) {
         return null;
@@ -284,7 +315,6 @@ function ScoreGraph({ scores }: { scores: number[] }) {
     const maxScore = Math.max(...scores, 1);
     const width = 100;
     const height = 100;
-    const step = width / Math.max(scores.length - 1, 1);
 
     // Sample scores for display (show last 100 points)
     const displayScores = scores.slice(-100);

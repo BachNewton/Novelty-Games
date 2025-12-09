@@ -16,7 +16,6 @@ export interface SnakeAISaveData {
     version: number;
 }
 
-export function createSnakeAISorage() {
+export function createSnakeAIStorage() {
     return createStorer<SnakeAISaveData>(StorageKey.SNAKE_AI);
 }
-
