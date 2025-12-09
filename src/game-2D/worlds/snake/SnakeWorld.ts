@@ -30,7 +30,7 @@ const GRID_SIZE = 20; // 20x20 grid
 const INITIAL_SNAKE_LENGTH = 3;
 const GAME_SPEED_MS = 150; // milliseconds between moves
 const MIN_SPEED_MULTIPLIER = 0.5; // Half speed
-const MAX_SPEED_MULTIPLIER = 100; // 100x speed - high enough for fast training without breaking game logic
+const MAX_SPEED_MULTIPLIER = 1000; // 1000x speed for ultra-fast training
 const SPEED_STEP = 0.5; // Speed increment/decrement (use larger steps at high speeds)
 
 export class SnakeWorld implements GameWorld {
@@ -193,7 +193,10 @@ export class SnakeWorld implements GameWorld {
 
     private increaseSpeed(): void {
         // Use larger steps at higher speeds for easier navigation
-        const step = this.speedMultiplier >= 10 ? 5 : SPEED_STEP;
+        let step = SPEED_STEP;
+        if (this.speedMultiplier >= 100) step = 50;
+        else if (this.speedMultiplier >= 10) step = 5;
+
         this.speedMultiplier = Math.min(
             MAX_SPEED_MULTIPLIER,
             this.speedMultiplier + step
@@ -202,7 +205,10 @@ export class SnakeWorld implements GameWorld {
 
     private decreaseSpeed(): void {
         // Use larger steps at higher speeds for easier navigation
-        const step = this.speedMultiplier > 10 ? 5 : SPEED_STEP;
+        let step = SPEED_STEP;
+        if (this.speedMultiplier > 100) step = 50;
+        else if (this.speedMultiplier > 10) step = 5;
+
         this.speedMultiplier = Math.max(
             MIN_SPEED_MULTIPLIER,
             this.speedMultiplier - step
