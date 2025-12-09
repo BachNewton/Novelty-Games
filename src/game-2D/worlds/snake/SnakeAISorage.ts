@@ -1,5 +1,5 @@
 import { createStorer, StorageKey } from "../../../util/Storage";
-import { NeuralNetworkWeights } from "./NeuralNetwork";
+import { SerializedWeights } from "./NeuralNetwork";
 
 export interface GameRecord {
     score: number;
@@ -7,7 +7,7 @@ export interface GameRecord {
 }
 
 export interface SnakeAISaveData {
-    weights: { network: NeuralNetworkWeights, target: NeuralNetworkWeights };
+    weights: { network: SerializedWeights, target: SerializedWeights };
     gamesPlayed: number;
     bestScore: number;
     explorationRate: number;

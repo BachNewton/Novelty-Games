@@ -1,14 +1,49 @@
 // Simple feedforward neural network for Snake AI
 // Uses ReLU activation for hidden layers and linear output for Q-values (DQN)
 // Now with 2 hidden layers for better pattern recognition
+// Optimized with Float32Array for faster computation
 
 export interface NeuralNetworkWeights {
+    inputToHidden: Float32Array[];
+    hiddenBias: Float32Array;
+    hiddenToHidden2: Float32Array[];
+    hidden2Bias: Float32Array;
+    hidden2ToOutput: Float32Array[];
+    outputBias: Float32Array;
+}
+
+// JSON-serializable format for storage
+export interface SerializedWeights {
     inputToHidden: number[][];
     hiddenBias: number[];
     hiddenToHidden2: number[][];
     hidden2Bias: number[];
     hidden2ToOutput: number[][];
     outputBias: number[];
+}
+
+// Convert Float32Array weights to serializable format
+export function serializeWeights(weights: NeuralNetworkWeights): SerializedWeights {
+    return {
+        inputToHidden: weights.inputToHidden.map(row => Array.from(row)),
+        hiddenBias: Array.from(weights.hiddenBias),
+        hiddenToHidden2: weights.hiddenToHidden2.map(row => Array.from(row)),
+        hidden2Bias: Array.from(weights.hidden2Bias),
+        hidden2ToOutput: weights.hidden2ToOutput.map(row => Array.from(row)),
+        outputBias: Array.from(weights.outputBias)
+    };
+}
+
+// Convert serialized weights back to Float32Array format
+export function deserializeWeights(serialized: SerializedWeights): NeuralNetworkWeights {
+    return {
+        inputToHidden: serialized.inputToHidden.map(row => new Float32Array(row)),
+        hiddenBias: new Float32Array(serialized.hiddenBias),
+        hiddenToHidden2: serialized.hiddenToHidden2.map(row => new Float32Array(row)),
+        hidden2Bias: new Float32Array(serialized.hidden2Bias),
+        hidden2ToOutput: serialized.hidden2ToOutput.map(row => new Float32Array(row)),
+        outputBias: new Float32Array(serialized.outputBias)
+    };
 }
 
 export class NeuralNetwork {
@@ -34,35 +69,38 @@ export class NeuralNetwork {
 
     private initializeWeights(): NeuralNetworkWeights {
         // Xavier/He initialization for better convergence with ReLU
-        const inputToHidden: number[][] = [];
+        const inputToHidden: Float32Array[] = [];
+        const scale1 = Math.sqrt(2 / this.inputSize);
         for (let i = 0; i < this.hiddenSize; i++) {
-            inputToHidden[i] = [];
+            inputToHidden[i] = new Float32Array(this.inputSize);
             for (let j = 0; j < this.inputSize; j++) {
-                inputToHidden[i][j] = (Math.random() * 2 - 1) * Math.sqrt(2 / this.inputSize);
+                inputToHidden[i][j] = (Math.random() * 2 - 1) * scale1;
             }
         }
 
-        const hiddenBias: number[] = new Array(this.hiddenSize).fill(0);
+        const hiddenBias = new Float32Array(this.hiddenSize);
 
-        const hiddenToHidden2: number[][] = [];
+        const hiddenToHidden2: Float32Array[] = [];
+        const scale2 = Math.sqrt(2 / this.hiddenSize);
         for (let i = 0; i < this.hidden2Size; i++) {
-            hiddenToHidden2[i] = [];
+            hiddenToHidden2[i] = new Float32Array(this.hiddenSize);
             for (let j = 0; j < this.hiddenSize; j++) {
-                hiddenToHidden2[i][j] = (Math.random() * 2 - 1) * Math.sqrt(2 / this.hiddenSize);
+                hiddenToHidden2[i][j] = (Math.random() * 2 - 1) * scale2;
             }
         }
 
-        const hidden2Bias: number[] = new Array(this.hidden2Size).fill(0);
+        const hidden2Bias = new Float32Array(this.hidden2Size);
 
-        const hidden2ToOutput: number[][] = [];
+        const hidden2ToOutput: Float32Array[] = [];
+        const scale3 = Math.sqrt(2 / this.hidden2Size);
         for (let i = 0; i < this.outputSize; i++) {
-            hidden2ToOutput[i] = [];
+            hidden2ToOutput[i] = new Float32Array(this.hidden2Size);
             for (let j = 0; j < this.hidden2Size; j++) {
-                hidden2ToOutput[i][j] = (Math.random() * 2 - 1) * Math.sqrt(2 / this.hidden2Size);
+                hidden2ToOutput[i][j] = (Math.random() * 2 - 1) * scale3;
             }
         }
 
-        const outputBias: number[] = new Array(this.outputSize).fill(0);
+        const outputBias = new Float32Array(this.outputSize);
 
         return {
             inputToHidden,
@@ -316,12 +354,12 @@ export class NeuralNetwork {
     public getWeights(): NeuralNetworkWeights {
         // Return a deep copy
         return {
-            inputToHidden: this.weights.inputToHidden.map(row => [...row]),
-            hiddenBias: [...this.weights.hiddenBias],
-            hiddenToHidden2: this.weights.hiddenToHidden2.map(row => [...row]),
-            hidden2Bias: [...this.weights.hidden2Bias],
-            hidden2ToOutput: this.weights.hidden2ToOutput.map(row => [...row]),
-            outputBias: [...this.weights.outputBias]
+            inputToHidden: this.weights.inputToHidden.map(row => new Float32Array(row)),
+            hiddenBias: new Float32Array(this.weights.hiddenBias),
+            hiddenToHidden2: this.weights.hiddenToHidden2.map(row => new Float32Array(row)),
+            hidden2Bias: new Float32Array(this.weights.hidden2Bias),
+            hidden2ToOutput: this.weights.hidden2ToOutput.map(row => new Float32Array(row)),
+            outputBias: new Float32Array(this.weights.outputBias)
         };
     }
 

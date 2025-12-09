@@ -1,4 +1,5 @@
 import { GameWorld } from "../GameWorld";
+import { deserializeWeights, serializeWeights } from "./NeuralNetwork";
 import { SnakeAI } from "./SnakeAI";
 import { createSnakeAISorage, SnakeAISaveData } from "./SnakeAISorage";
 import { createAIVisualizationOverlay } from "./ui/AIVisualization";
@@ -280,7 +281,10 @@ export class SnakeWorld implements GameWorld {
     private loadAI(): void {
         const saved = this.aiStorage.loadSync();
         if (saved) {
-            this.ai = new SnakeAI(saved.weights.network, saved.weights.target);
+            // Deserialize weights from JSON format to Float32Array
+            const networkWeights = deserializeWeights(saved.weights.network);
+            const targetWeights = deserializeWeights(saved.weights.target);
+            this.ai = new SnakeAI(networkWeights, targetWeights);
             this.ai.setStats({
                 gamesPlayed: saved.gamesPlayed,
                 bestScore: saved.bestScore,
@@ -301,8 +305,13 @@ export class SnakeWorld implements GameWorld {
             ? stats.scoreHistory.reduce((sum, score) => sum + score, 0)
             : stats.averageScore * stats.gamesPlayed;
 
+        // Serialize weights to JSON-compatible format
+        const weights = this.ai.getWeights();
         const saveData: SnakeAISaveData = {
-            weights: this.ai.getWeights(),
+            weights: {
+                network: serializeWeights(weights.network),
+                target: serializeWeights(weights.target)
+            },
             gamesPlayed: stats.gamesPlayed,
             bestScore: stats.bestScore,
             explorationRate: stats.explorationRate,
@@ -933,8 +942,12 @@ export class SnakeWorld implements GameWorld {
     public resetAI(): void {
         if (this.ai) {
             this.ai.reset();
+            const weights = this.ai.getWeights();
             this.aiStorage.save({
-                weights: this.ai.getWeights(),
+                weights: {
+                    network: serializeWeights(weights.network),
+                    target: serializeWeights(weights.target)
+                },
                 gamesPlayed: 0,
                 bestScore: 0,
                 explorationRate: 0.3,

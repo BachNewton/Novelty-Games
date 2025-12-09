@@ -10,6 +10,64 @@ export interface Experience {
     priority: number; // For prioritized experience replay
 }
 
+// Ring buffer for O(1) insertions instead of O(n) shift()
+class RingBuffer<T> {
+    private buffer: (T | undefined)[];
+    private head: number = 0;  // Next write position
+    private _size: number = 0;
+    private capacity: number;
+
+    constructor(capacity: number) {
+        this.capacity = capacity;
+        this.buffer = new Array(capacity);
+    }
+
+    push(item: T): void {
+        this.buffer[this.head] = item;
+        this.head = (this.head + 1) % this.capacity;
+        if (this._size < this.capacity) {
+            this._size++;
+        }
+    }
+
+    get(index: number): T {
+        if (index >= this._size) {
+            throw new Error(`Index ${index} out of bounds (size: ${this._size})`);
+        }
+        // Calculate actual position in ring buffer
+        const start = this._size < this.capacity ? 0 : this.head;
+        const actualIndex = (start + index) % this.capacity;
+        return this.buffer[actualIndex] as T;
+    }
+
+    set(index: number, item: T): void {
+        if (index >= this._size) {
+            throw new Error(`Index ${index} out of bounds (size: ${this._size})`);
+        }
+        const start = this._size < this.capacity ? 0 : this.head;
+        const actualIndex = (start + index) % this.capacity;
+        this.buffer[actualIndex] = item;
+    }
+
+    get size(): number {
+        return this._size;
+    }
+
+    clear(): void {
+        this.buffer = new Array(this.capacity);
+        this.head = 0;
+        this._size = 0;
+    }
+
+    // For iteration (used in priority calculations)
+    *[Symbol.iterator](): Iterator<T> {
+        const start = this._size < this.capacity ? 0 : this.head;
+        for (let i = 0; i < this._size; i++) {
+            yield this.buffer[(start + i) % this.capacity] as T;
+        }
+    }
+}
+
 // Input features for the neural network
 // Vision rays in 8 directions (Up, Down, Left, Right, and Diagonals)
 // Each direction has 3 features: [distanceToWall, distanceToFood, distanceToBody]
@@ -30,13 +88,13 @@ export class SnakeAI {
     private learningRateMomentum: number = 0.9; // Momentum for adaptive learning
     private learningRateVelocity: number = 0.999; // Velocity for adaptive learning (Adam-like)
     private discountFactor: number = 0.95; // Discount future rewards (gamma)
-    private replayBuffer: Experience[] = [];
     private maxMemory: number = 10000; // Increased for more diverse experiences
     private batchSize: number = 64; // Increased for more stable gradients
     private minPriority: number = 0.01; // Minimum priority for all experiences
     private priorityAlpha: number = 0.6; // How much prioritization to use (0 = uniform, 1 = full priority)
     private priorityBeta: number = 0.4; // Importance sampling correction (increases to 1)
     private priorityBetaIncrement: number = 0.001; // Increase beta over time
+    private replayBuffer: RingBuffer<Experience> = new RingBuffer<Experience>(10000);
     private lastState: number[] | null = null;
     private lastAction: number | null = null;
     private lastQValues: number[] | null = null;
@@ -222,10 +280,17 @@ export class SnakeAI {
     // Store experience in replay buffer with priority
     public remember(state: number[], action: number, reward: number, nextState: number[] | null, done: boolean): void {
         // Calculate initial priority (use max priority for new experiences)
-        const maxPriority = this.replayBuffer.length > 0
-            ? Math.max(...this.replayBuffer.map(e => e.priority))
-            : 1.0;
+        let maxPriority = 1.0;
+        const bufferSize = this.replayBuffer.size;
+        if (bufferSize > 0) {
+            for (const exp of this.replayBuffer) {
+                if (exp.priority > maxPriority) {
+                    maxPriority = exp.priority;
+                }
+            }
+        }
 
+        // Ring buffer handles capacity automatically - no shift() needed
         this.replayBuffer.push({
             state,
             action,
@@ -234,19 +299,20 @@ export class SnakeAI {
             done,
             priority: maxPriority // New experiences get high priority
         });
-
-        if (this.replayBuffer.length > this.maxMemory) {
-            this.replayBuffer.shift(); // Remove oldest
-        }
     }
 
     // Train the network using Prioritized Experience Replay (DQN with target network)
     public trainExperienceReplay(): void {
-        if (this.replayBuffer.length < this.batchSize) return;
+        if (this.replayBuffer.size < this.batchSize) return;
 
         // Calculate sampling probabilities based on priorities
-        const priorities = this.replayBuffer.map(e => Math.pow(e.priority, this.priorityAlpha));
-        const totalPriority = priorities.reduce((sum, p) => sum + p, 0);
+        const priorities: number[] = [];
+        let totalPriority = 0;
+        for (const exp of this.replayBuffer) {
+            const p = Math.pow(exp.priority, this.priorityAlpha);
+            priorities.push(p);
+            totalPriority += p;
+        }
         const probabilities = priorities.map(p => p / totalPriority);
 
         const trainingBatch: { input: number[], target: number[], index: number, tdError: number }[] = [];
@@ -258,12 +324,12 @@ export class SnakeAI {
             let index = 0;
             let cumProb = probabilities[0];
 
-            while (rand > cumProb && index < this.replayBuffer.length - 1) {
+            while (rand > cumProb && index < this.replayBuffer.size - 1) {
                 index++;
                 cumProb += probabilities[index];
             }
 
-            const exp = this.replayBuffer[index];
+            const exp = this.replayBuffer.get(index);
 
             // Use target network for stable Q-value targets
             const currentQ = this.network.forward(exp.state);
@@ -289,7 +355,9 @@ export class SnakeAI {
 
         // Update priorities based on TD errors
         for (const batch of trainingBatch) {
-            this.replayBuffer[batch.index].priority = Math.abs(batch.tdError) + this.minPriority;
+            const exp = this.replayBuffer.get(batch.index);
+            exp.priority = Math.abs(batch.tdError) + this.minPriority;
+            this.replayBuffer.set(batch.index, exp);
         }
 
         // Train network with batch
@@ -395,7 +463,7 @@ export class SnakeAI {
         this.bestScore = 0;
         this.totalScore = 0;
         this.scoreHistory = [];
-        this.replayBuffer = [];
+        this.replayBuffer.clear();
         this.lastState = null;
         this.lastAction = null;
         this.lastQValues = null;
