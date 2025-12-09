@@ -32,6 +32,7 @@ const GAME_SPEED_MS = 150; // milliseconds between moves
 const MIN_SPEED_MULTIPLIER = 0.5; // Half speed
 const MAX_SPEED_MULTIPLIER = 1000; // 1000x speed for ultra-fast training
 const SPEED_STEP = 0.5; // Speed increment/decrement (use larger steps at high speeds)
+const PREVIEW_INTERVAL = 100; // Show a preview game every N games in headless mode
 
 export class SnakeWorld implements GameWorld {
     readonly canvas: HTMLCanvasElement;
@@ -55,6 +56,15 @@ export class SnakeWorld implements GameWorld {
     private showVisualization: boolean = false;
     private lastStateBeforeMove: number[] | null = null;
     private lastActionBeforeMove: number | null = null;
+
+    // Headless training mode
+    private headlessMode: boolean = false;
+    private isPlayingPreview: boolean = false;
+    private previewMoveHistory: Direction[] = [];
+    private previewPlaybackIndex: number = 0;
+    private lastPreviewScore: number = 0;
+    private headlessTrainingHandle: number | null = null;
+    private headlessStepsPerFrame: number = 100; // Process 100 game steps per animation frame in headless mode
 
     constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
         this.canvas = canvas;
@@ -124,6 +134,7 @@ export class SnakeWorld implements GameWorld {
             window.removeEventListener('keyup', this.keyUpHandler);
         }
         this.stopAITraining();
+        this.stopHeadlessTraining();
     }
 
     private handleKeyPress(keyCode: string): void {
@@ -136,6 +147,24 @@ export class SnakeWorld implements GameWorld {
         // Toggle visualization with 'V' key
         if (keyCode === 'KeyV' || keyCode === 'Keyv') {
             this.showVisualization = !this.showVisualization;
+            return;
+        }
+
+        // Toggle headless mode with 'H' key (only in AI mode)
+        if (keyCode === 'KeyH' || keyCode === 'Keyh') {
+            if (this.aiMode) {
+                this.headlessMode = !this.headlessMode;
+                if (this.headlessMode) {
+                    // Start headless training loop
+                    this.startHeadlessTraining();
+                } else {
+                    // Stop headless training
+                    this.stopHeadlessTraining();
+                    // When exiting headless mode, stop any preview
+                    this.isPlayingPreview = false;
+                    this.previewMoveHistory = [];
+                }
+            }
             return;
         }
 
@@ -284,6 +313,70 @@ export class SnakeWorld implements GameWorld {
         this.saveAI();
     }
 
+    private startHeadlessTraining(): void {
+        // Headless training runs in a separate loop for maximum speed
+        // We'll process multiple game steps per animation frame
+        const runTrainingStep = () => {
+            if (!this.headlessMode || this.isPlayingPreview) {
+                return; // Exit if headless mode disabled or playing preview
+            }
+
+            // Run multiple game steps per frame for maximum speed
+            for (let i = 0; i < this.headlessStepsPerFrame; i++) {
+                this.processGameStep();
+
+                // If we need to show a preview, break out
+                if (this.isPlayingPreview) {
+                    break;
+                }
+            }
+
+            // Continue the loop
+            this.headlessTrainingHandle = requestAnimationFrame(runTrainingStep);
+        };
+
+        // Start the training loop
+        this.headlessTrainingHandle = requestAnimationFrame(runTrainingStep);
+    }
+
+    private stopHeadlessTraining(): void {
+        if (this.headlessTrainingHandle !== null) {
+            cancelAnimationFrame(this.headlessTrainingHandle);
+            this.headlessTrainingHandle = null;
+        }
+    }
+
+    private shouldShowPreview(): boolean {
+        if (!this.ai || !this.headlessMode) return false;
+
+        const stats = this.ai.getStats();
+
+        // Show preview every PREVIEW_INTERVAL games
+        if (stats.gamesPlayed % PREVIEW_INTERVAL === 0) {
+            return true;
+        }
+
+        // Also show preview for new high scores
+        if (this.gameState.score > this.lastPreviewScore && this.gameState.score >= stats.bestScore) {
+            this.lastPreviewScore = this.gameState.score;
+            return true;
+        }
+
+        return false;
+    }
+
+    private startPreview(): void {
+        // Pause headless training during preview
+        this.stopHeadlessTraining();
+
+        // Reset the game to replay the recorded moves
+        this.isPlayingPreview = true;
+        this.previewPlaybackIndex = 0;
+        this.restartGame();
+
+        // Preview will run through normal update() loop at visible speed
+    }
+
     private restartGame(): void {
         // Save AI before restarting
         if (this.ai) {
@@ -296,9 +389,22 @@ export class SnakeWorld implements GameWorld {
         this.lastHeadPosition = null;
         this.lastMoveTime = 0;
         this.gameOverTime = 0;
+
+        // Clear move history if not in preview mode
+        if (!this.isPlayingPreview) {
+            this.previewMoveHistory = [];
+            this.previewPlaybackIndex = 0;
+        }
     }
 
     public draw(): void {
+        // In headless mode, skip rendering unless playing a preview
+        if (this.headlessMode && !this.isPlayingPreview) {
+            // Draw headless status screen
+            this.drawHeadlessStatus();
+            return;
+        }
+
         if (this.gameState.gameOver) {
             this.drawGameOver();
             return;
@@ -390,19 +496,35 @@ export class SnakeWorld implements GameWorld {
 
         let yOffset = 40;
 
+        // Draw preview banner if in preview mode
+        if (this.isPlayingPreview) {
+            const bannerHeight = this.canvas.height * 0.08;
+            this.ctx.fillStyle = 'rgba(251, 191, 36, 0.9)'; // Yellow banner
+            this.ctx.fillRect(0, 0, this.canvas.width, bannerHeight);
+            this.ctx.fillStyle = '#000';
+            this.ctx.font = `bold ${bannerHeight * 0.4}px sans-serif`;
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText('PREVIEW REPLAY', this.canvas.width / 2, bannerHeight / 2);
+            this.ctx.textAlign = 'left';
+            yOffset = bannerHeight + 10;
+        }
+
         // Draw AI info if AI mode is on
         if (this.aiMode && this.ai) {
             const stats = this.ai.getStats();
             const fontSize = this.canvas.height * 0.025;
             this.ctx.font = `${fontSize}px sans-serif`;
             this.ctx.fillStyle = '#60a5fa';
-            this.ctx.fillText(`AI Mode: ON`, 10, yOffset);
+            this.ctx.fillText(`AI Mode: ON ${this.headlessMode ? '(Headless)' : ''}`, 10, yOffset);
             yOffset += fontSize;
             this.ctx.fillText(`Games: ${stats.gamesPlayed}`, 10, yOffset);
             yOffset += fontSize;
             this.ctx.fillText(`Best: ${stats.bestScore}`, 10, yOffset);
             yOffset += fontSize;
             this.ctx.fillText(`Press 'A' to toggle AI`, 10, yOffset);
+            yOffset += fontSize;
+            this.ctx.fillText(`Press 'H' for headless mode`, 10, yOffset);
             yOffset += fontSize;
             this.ctx.fillText(`Press 'V' for visualization`, 10, yOffset);
             yOffset += fontSize * 1.5;
@@ -432,6 +554,47 @@ export class SnakeWorld implements GameWorld {
         this.ctx.fillText(`+/- to change, 0 to reset (max: ${MAX_SPEED_MULTIPLIER}x)`, 10, this.canvas.height - 30);
     }
 
+    private drawHeadlessStatus(): void {
+        // Clear canvas
+        this.ctx.fillStyle = '#0f0f23';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        if (!this.ai) return;
+
+        const stats = this.ai.getStats();
+
+        // Title
+        this.ctx.fillStyle = '#60a5fa';
+        this.ctx.font = `bold ${this.canvas.height * 0.06}px sans-serif`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('HEADLESS TRAINING MODE', this.canvas.width / 2, this.canvas.height * 0.15);
+
+        // Stats
+        const fontSize = this.canvas.height * 0.04;
+        this.ctx.font = `${fontSize}px sans-serif`;
+        this.ctx.fillStyle = 'white';
+
+        let y = this.canvas.height * 0.35;
+        this.ctx.fillText(`Games Played: ${stats.gamesPlayed}`, this.canvas.width / 2, y);
+        y += fontSize * 1.5;
+        this.ctx.fillText(`Best Score: ${stats.bestScore}`, this.canvas.width / 2, y);
+        y += fontSize * 1.5;
+        this.ctx.fillText(`Avg Score: ${stats.averageScore.toFixed(1)}`, this.canvas.width / 2, y);
+        y += fontSize * 1.5;
+        this.ctx.fillText(`Exploration: ${(stats.explorationRate * 100).toFixed(1)}%`, this.canvas.width / 2, y);
+        y += fontSize * 1.5;
+
+        const gamesUntilPreview = PREVIEW_INTERVAL - (stats.gamesPlayed % PREVIEW_INTERVAL);
+        this.ctx.fillStyle = '#fbbf24';
+        this.ctx.fillText(`Next preview in ${gamesUntilPreview} games`, this.canvas.width / 2, y);
+
+        // Instructions
+        this.ctx.font = `${fontSize * 0.6}px sans-serif`;
+        this.ctx.fillStyle = '#9ca3af';
+        this.ctx.fillText(`Press 'H' to exit headless mode`, this.canvas.width / 2, this.canvas.height * 0.85);
+    }
+
     private drawGameOver(): void {
         this.drawBackground();
         this.drawSnake();
@@ -457,6 +620,78 @@ export class SnakeWorld implements GameWorld {
         this.ctx.fillText('Press SPACE to restart', this.canvas.width / 2, this.canvas.height / 2 + 40);
     }
 
+    // Process a single game step (used by both normal and headless modes)
+    private processGameStep(): void {
+        // AI control
+        if (this.aiMode && this.ai && !this.gameState.gameOver) {
+            let aiDirection: Direction;
+
+            // During preview playback, use recorded moves
+            if (this.isPlayingPreview && this.previewPlaybackIndex < this.previewMoveHistory.length) {
+                aiDirection = this.previewMoveHistory[this.previewPlaybackIndex];
+                this.previewPlaybackIndex++;
+            } else {
+                // Normal AI decision-making
+                aiDirection = this.ai.getAction(this.gameState);
+
+                // Record moves in headless mode (but not during playback)
+                if (this.headlessMode && !this.isPlayingPreview) {
+                    this.previewMoveHistory.push(aiDirection);
+                }
+            }
+
+            this.setDirection(aiDirection);
+        }
+
+        if (this.gameState.gameOver) {
+            // Handle game end
+            if (this.aiMode && this.ai) {
+                // Check if we should show a preview
+                const shouldShowPreview = this.shouldShowPreview();
+
+                // If we were playing a preview, it's done - resume headless training
+                if (this.isPlayingPreview) {
+                    this.isPlayingPreview = false;
+                    this.previewMoveHistory = [];
+                    this.previewPlaybackIndex = 0;
+
+                    // Resume headless training after preview
+                    if (this.headlessMode) {
+                        this.startHeadlessTraining();
+                    }
+                }
+
+                // In headless mode, restart immediately or start preview
+                if (shouldShowPreview && this.previewMoveHistory.length > 0 && !this.isPlayingPreview) {
+                    this.startPreview();
+                } else {
+                    this.restartGame();
+                }
+            }
+            return;
+        }
+
+        // Capture state before move for AI learning
+        if (this.ai && this.aiMode) {
+            const decisionInfo = this.ai.getDecisionInfo();
+            if (decisionInfo) {
+                this.lastStateBeforeMove = decisionInfo.features;
+                this.lastActionBeforeMove = decisionInfo.selectedAction;
+                // Capture head position before move for distance calculation
+                this.lastHeadPosition = this.gameState.snake.length > 0
+                    ? { ...this.gameState.snake[0] }
+                    : null;
+            }
+        }
+
+        this.moveSnake();
+
+        // Update AI rewards after move
+        if (this.ai && this.aiMode) {
+            this.updateAIRewards();
+        }
+    }
+
     public update(deltaTime: number): void {
         // Recalculate cell size on resize
         const newCellSize = Math.min(this.canvas.width, this.canvas.height) / GRID_SIZE;
@@ -464,21 +699,20 @@ export class SnakeWorld implements GameWorld {
             this.gameState.cellSize = newCellSize;
         }
 
-        // AI control
-        if (this.aiMode && this.ai && !this.gameState.gameOver) {
-            const aiDirection = this.ai.getAction(this.gameState);
-            this.setDirection(aiDirection);
+        // In headless mode (not preview), the game logic runs in its own loop
+        // Only process updates for preview mode or normal mode
+        if (this.headlessMode && !this.isPlayingPreview) {
+            return; // Headless training handled by separate loop
         }
 
-        if (this.gameState.gameOver) {
-            // Auto-restart if AI mode is on
-            if (this.aiMode && this.ai) {
-                // Small delay before restart to see the game over state (adjusted for speed)
-                const adjustedDeltaTime = deltaTime * this.speedMultiplier;
-                this.gameOverTime += adjustedDeltaTime;
-                if (this.gameOverTime >= 500) { // Wait 500ms (at normal speed)
-                    this.restartGame();
-                }
+        // Handle game over delay for preview mode
+        if (this.gameState.gameOver && this.isPlayingPreview) {
+            const adjustedDeltaTime = deltaTime * this.speedMultiplier;
+            this.gameOverTime += adjustedDeltaTime;
+
+            if (this.gameOverTime >= 500) {
+                this.gameOverTime = 0;
+                this.processGameStep();
             }
             return;
         }
@@ -489,26 +723,7 @@ export class SnakeWorld implements GameWorld {
 
         if (this.lastMoveTime >= GAME_SPEED_MS) {
             this.lastMoveTime = 0;
-
-            // Capture state before move for AI learning
-            if (this.ai && this.aiMode) {
-                const decisionInfo = this.ai.getDecisionInfo();
-                if (decisionInfo) {
-                    this.lastStateBeforeMove = decisionInfo.features;
-                    this.lastActionBeforeMove = decisionInfo.selectedAction;
-                    // Capture head position before move for distance calculation
-                    this.lastHeadPosition = this.gameState.snake.length > 0
-                        ? { ...this.gameState.snake[0] }
-                        : null;
-                }
-            }
-
-            this.moveSnake();
-
-            // Update AI rewards after move
-            if (this.ai && this.aiMode) {
-                this.updateAIRewards();
-            }
+            this.processGameStep();
         }
     }
 
