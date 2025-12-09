@@ -7,37 +7,54 @@ export interface Experience {
     reward: number;
     nextState: number[] | null; // null if game over
     done: boolean;
+    priority: number; // For prioritized experience replay
 }
 
 // Input features for the neural network
 // Vision rays in 8 directions (Up, Down, Left, Right, and Diagonals)
 // Each direction has 3 features: [distanceToWall, distanceToFood, distanceToBody]
-// Total: 3 * 8 = 24 inputs
-const INPUT_SIZE = 24;
-const HIDDEN_SIZE = 96; // Increased from 24 to 96 to handle complexity
+// Plus additional features: tail direction (2), current direction (4), snake length normalized (1)
+// Total: 3 * 8 + 2 + 4 + 1 = 31 inputs
+const INPUT_SIZE = 31;
+const HIDDEN_SIZE = 96;
+const HIDDEN2_SIZE = 48; // Second hidden layer
 const OUTPUT_SIZE = 4; // UP, DOWN, LEFT, RIGHT
 
 export class SnakeAI {
     private network: NeuralNetwork;
+    private targetNetwork: NeuralNetwork; // Target network for stable learning
     private explorationRate: number = 0.3; // Start with 30% exploration
     private minExplorationRate: number = 0.05;
-    private explorationDecay: number = 0.997; // Even faster decay - reaches ~5% after ~1000 games
-    private learningRate: number = 0.01; // Learning rate for DQN
+    private explorationDecay: number = 0.997;
+    private learningRate: number = 0.001; // Reduced for stability with Adam-like updates
+    private learningRateMomentum: number = 0.9; // Momentum for adaptive learning
+    private learningRateVelocity: number = 0.999; // Velocity for adaptive learning (Adam-like)
     private discountFactor: number = 0.95; // Discount future rewards (gamma)
     private replayBuffer: Experience[] = [];
-    private maxMemory: number = 2000;
-    private batchSize: number = 32;
+    private maxMemory: number = 10000; // Increased for more diverse experiences
+    private batchSize: number = 64; // Increased for more stable gradients
+    private minPriority: number = 0.01; // Minimum priority for all experiences
+    private priorityAlpha: number = 0.6; // How much prioritization to use (0 = uniform, 1 = full priority)
+    private priorityBeta: number = 0.4; // Importance sampling correction (increases to 1)
+    private priorityBetaIncrement: number = 0.001; // Increase beta over time
     private lastState: number[] | null = null;
     private lastAction: number | null = null;
     private lastQValues: number[] | null = null;
     private lastWasExploration: boolean = false;
     private gamesPlayed: number = 0;
     private bestScore: number = 0;
-    private scoreHistory: number[] = []; // Keep last 1000 scores
+    private scoreHistory: number[] = [];
     private totalScore: number = 0;
+    private targetUpdateFrequency: number = 100; // Update target network every 100 games
+    private trainingStepsPerGame: number = 10; // Train multiple times per game end
 
-    constructor(weights?: NeuralNetworkWeights) {
-        this.network = new NeuralNetwork(INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE, weights);
+    // Adam-like optimizer state
+    private gradientMoments: Map<string, number> = new Map();
+    private gradientVelocities: Map<string, number> = new Map();
+
+    constructor(weights?: NeuralNetworkWeights, targetWeights?: NeuralNetworkWeights) {
+        this.network = new NeuralNetwork(INPUT_SIZE, HIDDEN_SIZE, HIDDEN2_SIZE, OUTPUT_SIZE, weights);
+        this.targetNetwork = new NeuralNetwork(INPUT_SIZE, HIDDEN_SIZE, HIDDEN2_SIZE, OUTPUT_SIZE, targetWeights || weights);
     }
 
     // Helper to look in a specific direction and return vision features
@@ -105,9 +122,32 @@ export class SnakeAI {
             [-1, -1]  // UP-LEFT
         ];
 
+        // Vision rays (24 features)
         for (const [dx, dy] of directions) {
             features.push(...this.lookInDirection(head, dx, dy, gameState));
         }
+
+        // Tail direction relative to head (2 features: normalized x, y)
+        if (gameState.snake.length > 1) {
+            const tail = gameState.snake[gameState.snake.length - 1];
+            const tailDx = (tail.x - head.x) / gameState.gridSize;
+            const tailDy = (tail.y - head.y) / gameState.gridSize;
+            features.push(tailDx, tailDy);
+        } else {
+            features.push(0, 0);
+        }
+
+        // Current direction one-hot encoding (4 features)
+        features.push(
+            gameState.direction === Direction.UP ? 1 : 0,
+            gameState.direction === Direction.DOWN ? 1 : 0,
+            gameState.direction === Direction.LEFT ? 1 : 0,
+            gameState.direction === Direction.RIGHT ? 1 : 0
+        );
+
+        // Snake length normalized (1 feature)
+        const maxPossibleLength = gameState.gridSize * gameState.gridSize;
+        features.push(gameState.snake.length / maxPossibleLength);
 
         return features;
     }
@@ -179,46 +219,90 @@ export class SnakeAI {
         }
     }
 
-    // Store experience in replay buffer
+    // Store experience in replay buffer with priority
     public remember(state: number[], action: number, reward: number, nextState: number[] | null, done: boolean): void {
-        this.replayBuffer.push({ state, action, reward, nextState, done });
+        // Calculate initial priority (use max priority for new experiences)
+        const maxPriority = this.replayBuffer.length > 0
+            ? Math.max(...this.replayBuffer.map(e => e.priority))
+            : 1.0;
+
+        this.replayBuffer.push({
+            state,
+            action,
+            reward,
+            nextState,
+            done,
+            priority: maxPriority // New experiences get high priority
+        });
+
         if (this.replayBuffer.length > this.maxMemory) {
             this.replayBuffer.shift(); // Remove oldest
         }
     }
 
-    // Train the network using Experience Replay (DQN)
+    // Train the network using Prioritized Experience Replay (DQN with target network)
     public trainExperienceReplay(): void {
         if (this.replayBuffer.length < this.batchSize) return;
 
-        const trainingBatch: { input: number[], target: number[] }[] = [];
+        // Calculate sampling probabilities based on priorities
+        const priorities = this.replayBuffer.map(e => Math.pow(e.priority, this.priorityAlpha));
+        const totalPriority = priorities.reduce((sum, p) => sum + p, 0);
+        const probabilities = priorities.map(p => p / totalPriority);
 
-        // Sample random batch
+        const trainingBatch: { input: number[], target: number[], index: number, tdError: number }[] = [];
+
+        // Sample batch using priorities
         for (let i = 0; i < this.batchSize; i++) {
-            const index = Math.floor(Math.random() * this.replayBuffer.length);
+            // Weighted random sampling
+            let rand = Math.random();
+            let index = 0;
+            let cumProb = probabilities[0];
+
+            while (rand > cumProb && index < this.replayBuffer.length - 1) {
+                index++;
+                cumProb += probabilities[index];
+            }
+
             const exp = this.replayBuffer[index];
 
+            // Use target network for stable Q-value targets
             const currentQ = this.network.forward(exp.state);
             let targetQ = [...currentQ];
 
+            let tdError = 0;
             if (exp.done) {
+                tdError = Math.abs(exp.reward - currentQ[exp.action]);
                 targetQ[exp.action] = exp.reward;
             } else {
                 if (exp.nextState) {
-                    const nextQ = this.network.forward(exp.nextState);
+                    // Use target network for next Q-values (Double DQN style)
+                    const nextQ = this.targetNetwork.forward(exp.nextState);
                     const maxNextQ = Math.max(...nextQ);
-                    targetQ[exp.action] = exp.reward + this.discountFactor * maxNextQ;
+                    const targetValue = exp.reward + this.discountFactor * maxNextQ;
+                    tdError = Math.abs(targetValue - currentQ[exp.action]);
+                    targetQ[exp.action] = targetValue;
                 }
             }
 
-            trainingBatch.push({ input: exp.state, target: targetQ });
+            trainingBatch.push({ input: exp.state, target: targetQ, index, tdError });
         }
 
-        // Train once per batch
-        this.network.trainBatch(trainingBatch, this.learningRate);
+        // Update priorities based on TD errors
+        for (const batch of trainingBatch) {
+            this.replayBuffer[batch.index].priority = Math.abs(batch.tdError) + this.minPriority;
+        }
+
+        // Train network with batch
+        this.network.trainBatch(
+            trainingBatch.map(b => ({ input: b.input, target: b.target })),
+            this.learningRate
+        );
+
+        // Increase beta over time for importance sampling
+        this.priorityBeta = Math.min(1.0, this.priorityBeta + this.priorityBetaIncrement);
     }
 
-    // Called when game ends
+    // Called when game ends - now with batch training
     public onGameEnd(finalScore: number): void {
         this.gamesPlayed++;
         this.totalScore += finalScore;
@@ -231,6 +315,16 @@ export class SnakeAI {
         this.scoreHistory.push(finalScore);
         if (this.scoreHistory.length > 1000) {
             this.scoreHistory.shift();
+        }
+
+        // Train multiple times at game end for better learning
+        for (let i = 0; i < this.trainingStepsPerGame; i++) {
+            this.trainExperienceReplay();
+        }
+
+        // Update target network periodically
+        if (this.gamesPlayed % this.targetUpdateFrequency === 0) {
+            this.targetNetwork.copyWeightsFrom(this.network);
         }
 
         // Decay exploration rate
@@ -278,18 +372,31 @@ export class SnakeAI {
     }
 
     // Get network weights for saving
-    public getWeights(): NeuralNetworkWeights {
-        return this.network.getWeights();
+    public getWeights(): { network: NeuralNetworkWeights, target: NeuralNetworkWeights } {
+        return {
+            network: this.network.getWeights(),
+            target: this.targetNetwork.getWeights()
+        };
     }
 
     // Set network weights (for loading)
-    public setWeights(weights: NeuralNetworkWeights): void {
-        this.network.setWeights(weights);
+    public setWeights(weights: { network: NeuralNetworkWeights, target: NeuralNetworkWeights } | NeuralNetworkWeights): void {
+        if ('network' in weights && 'target' in weights) {
+            // New format with target network
+            this.network.setWeights(weights.network);
+            this.targetNetwork.setWeights(weights.target);
+        } else {
+            // Old format - backward compatibility
+            this.network.setWeights(weights);
+            this.targetNetwork.setWeights(weights);
+        }
     }
 
     // Reset AI to initial state (for starting fresh)
     public reset(): void {
-        this.network = new NeuralNetwork(INPUT_SIZE, HIDDEN_SIZE, OUTPUT_SIZE);
+        this.network = new NeuralNetwork(INPUT_SIZE, HIDDEN_SIZE, HIDDEN2_SIZE, OUTPUT_SIZE);
+        this.targetNetwork = new NeuralNetwork(INPUT_SIZE, HIDDEN_SIZE, HIDDEN2_SIZE, OUTPUT_SIZE);
+        this.targetNetwork.copyWeightsFrom(this.network);
         this.explorationRate = 0.3;
         this.gamesPlayed = 0;
         this.bestScore = 0;
@@ -299,6 +406,9 @@ export class SnakeAI {
         this.lastState = null;
         this.lastAction = null;
         this.lastQValues = null;
+        this.priorityBeta = 0.4;
+        this.gradientMoments.clear();
+        this.gradientVelocities.clear();
     }
 }
 

@@ -228,9 +228,16 @@ export class SnakeWorld implements GameWorld {
     private loadAI(): void {
         const saved = this.aiStorage.loadSync();
         if (saved) {
-            this.ai = new SnakeAI(saved.weights);
+            // Handle both old and new weight formats
+            if ('network' in saved.weights && 'target' in saved.weights) {
+                // New format with separate network and target weights
+                this.ai = new SnakeAI(saved.weights.network, saved.weights.target);
+            } else {
+                // Old format - use same weights for both networks
+                this.ai = new SnakeAI(saved.weights, saved.weights);
+            }
+
             // Restore AI stats
-            // Calculate totalScore from scoreHistory if not saved, otherwise use saved value
             const totalScore = saved.totalScore !== undefined
                 ? saved.totalScore
                 : (saved.scoreHistory || []).reduce((sum, score) => sum + score, 0);
@@ -257,12 +264,13 @@ export class SnakeWorld implements GameWorld {
             : stats.averageScore * stats.gamesPlayed;
 
         const saveData: SnakeAISaveData = {
-            weights: this.ai.getWeights(),
+            weights: this.ai.getWeights(), // Now returns { network, target }
             gamesPlayed: stats.gamesPlayed,
             bestScore: stats.bestScore,
             explorationRate: stats.explorationRate,
             scoreHistory: stats.scoreHistory,
-            totalScore: totalScore
+            totalScore: totalScore,
+            version: 2 // Mark as new version with target network
         };
 
         this.aiStorage.save(saveData);
@@ -517,32 +525,32 @@ export class SnakeWorld implements GameWorld {
             return;
         }
 
-        // Calculate reward
-        let reward = -0.01; // Base step penalty (encourages finding food faster)
+        // Calculate reward with improved shaping
+        let reward = -0.01; // Small step penalty to encourage efficiency
 
-        // Reward for eating food (increased to encourage food-seeking)
+        // Reward for eating food
         if (this.gameState.score > this.lastScore) {
-            reward = 20; // Increased food reward (was 10) - makes food more valuable
+            reward = 10.0; // Significant positive reward for eating food
             this.lastScore = this.gameState.score;
         } else if (!this.gameState.gameOver && this.lastHeadPosition) {
-            // Distance-based reward: encourage moving closer to food
+            // Distance-based reward: encourage moving closer to food (normalized)
             const head = this.gameState.snake[0];
             const currentDistance = Math.abs(head.x - this.gameState.food.x) + Math.abs(head.y - this.gameState.food.y);
             const previousDistance = Math.abs(this.lastHeadPosition.x - this.gameState.food.x) + Math.abs(this.lastHeadPosition.y - this.gameState.food.y);
 
-            // Reward for getting closer, small penalty for moving away
+            // Normalized distance reward (scaled down to avoid dominating the learning signal)
+            const maxDistance = this.gameState.gridSize * 2; // Maximum possible Manhattan distance
             const distanceChange = previousDistance - currentDistance;
-            reward += distanceChange * 0.1; // Scale: +0.1 per step closer, -0.1 per step away
+            reward += (distanceChange / maxDistance) * 0.5; // Normalized and scaled
 
-            // Small bonus for being close to food (encourages risk-taking when near food)
-            if (currentDistance <= 3) {
-                reward += 0.05; // Small proximity bonus
-            }
+            // Small survival bonus (encourages staying alive)
+            reward += 0.001;
         }
 
-        // Death penalty (reduced relative to food reward to encourage risk-taking)
+        // Proportional death penalty (worse if you die after eating food)
         if (this.gameState.gameOver) {
-            reward = -15; // Death penalty (was -10, but food reward is now 20, so ratio is better)
+            // Base death penalty + penalty proportional to score
+            reward = -(10 + this.gameState.score * 0.5);
         }
 
         // Capture state after move (for nextState)
@@ -558,8 +566,8 @@ export class SnakeWorld implements GameWorld {
             done
         );
 
-        // Train periodically (every move)
-        this.ai.trainExperienceReplay();
+        // Training now happens at game end, not every step
+        // This is handled in SnakeAI.onGameEnd()
 
         // Clear stored state/action
         this.lastStateBeforeMove = null;
