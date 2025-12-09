@@ -7,13 +7,13 @@ export interface GameRecord {
 }
 
 export interface SnakeAISaveData {
-    weights: { network: NeuralNetworkWeights, target: NeuralNetworkWeights } | NeuralNetworkWeights; // Support both old and new format
+    weights: { network: NeuralNetworkWeights, target: NeuralNetworkWeights };
     gamesPlayed: number;
     bestScore: number;
     explorationRate: number;
-    scoreHistory: number[]; // Last 1000 scores for visualization
+    scoreHistory: number[];
     totalScore: number;
-    version?: number; // Version for future compatibility
+    version: number;
 }
 
 export function createSnakeAISorage() {

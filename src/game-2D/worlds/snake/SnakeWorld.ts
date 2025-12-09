@@ -228,26 +228,13 @@ export class SnakeWorld implements GameWorld {
     private loadAI(): void {
         const saved = this.aiStorage.loadSync();
         if (saved) {
-            // Handle both old and new weight formats
-            if ('network' in saved.weights && 'target' in saved.weights) {
-                // New format with separate network and target weights
-                this.ai = new SnakeAI(saved.weights.network, saved.weights.target);
-            } else {
-                // Old format - use same weights for both networks
-                this.ai = new SnakeAI(saved.weights, saved.weights);
-            }
-
-            // Restore AI stats
-            const totalScore = saved.totalScore !== undefined
-                ? saved.totalScore
-                : (saved.scoreHistory || []).reduce((sum, score) => sum + score, 0);
-
+            this.ai = new SnakeAI(saved.weights.network, saved.weights.target);
             this.ai.setStats({
-                gamesPlayed: saved.gamesPlayed || 0,
-                bestScore: saved.bestScore || 0,
-                explorationRate: saved.explorationRate || 0.3,
-                scoreHistory: saved.scoreHistory || [],
-                totalScore: totalScore
+                gamesPlayed: saved.gamesPlayed,
+                bestScore: saved.bestScore,
+                explorationRate: saved.explorationRate,
+                scoreHistory: saved.scoreHistory,
+                totalScore: saved.totalScore
             });
         } else {
             this.ai = new SnakeAI();
@@ -258,19 +245,18 @@ export class SnakeWorld implements GameWorld {
         if (!this.ai) return;
 
         const stats = this.ai.getStats();
-        // Calculate totalScore from scoreHistory if available, otherwise use average * games
         const totalScore = stats.scoreHistory.length > 0
             ? stats.scoreHistory.reduce((sum, score) => sum + score, 0)
             : stats.averageScore * stats.gamesPlayed;
 
         const saveData: SnakeAISaveData = {
-            weights: this.ai.getWeights(), // Now returns { network, target }
+            weights: this.ai.getWeights(),
             gamesPlayed: stats.gamesPlayed,
             bestScore: stats.bestScore,
             explorationRate: stats.explorationRate,
             scoreHistory: stats.scoreHistory,
             totalScore: totalScore,
-            version: 2 // Mark as new version with target network
+            version: 2
         };
 
         this.aiStorage.save(saveData);
@@ -665,7 +651,8 @@ export class SnakeWorld implements GameWorld {
                 bestScore: 0,
                 explorationRate: 0.3,
                 scoreHistory: [],
-                totalScore: 0
+                totalScore: 0,
+                version: 2
             });
         }
     }

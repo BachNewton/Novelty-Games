@@ -380,16 +380,9 @@ export class SnakeAI {
     }
 
     // Set network weights (for loading)
-    public setWeights(weights: { network: NeuralNetworkWeights, target: NeuralNetworkWeights } | NeuralNetworkWeights): void {
-        if ('network' in weights && 'target' in weights) {
-            // New format with target network
-            this.network.setWeights(weights.network);
-            this.targetNetwork.setWeights(weights.target);
-        } else {
-            // Old format - backward compatibility
-            this.network.setWeights(weights);
-            this.targetNetwork.setWeights(weights);
-        }
+    public setWeights(weights: { network: NeuralNetworkWeights, target: NeuralNetworkWeights }): void {
+        this.network.setWeights(weights.network);
+        this.targetNetwork.setWeights(weights.target);
     }
 
     // Reset AI to initial state (for starting fresh)
