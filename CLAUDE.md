@@ -57,6 +57,11 @@ game-name/
 - `src/service-worker.ts` - PWA offline/caching logic
 - `src/util/Storage.ts` - localStorage abstraction layer
 
+## Coding Philosophy
+
+### Evolution Over Rigid Consistency
+Consistency matters, but this codebase evolves. If an existing pattern is inefficient, confusing, or outdated, propose something better rather than perpetuating it. New projects can introduce improved systems to set an example—older projects using legacy patterns can be refactored later. Don't let "that's how it's done elsewhere" justify a suboptimal approach.
+
 ## Deployment
 
 - Build output: `build/`
