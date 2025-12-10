@@ -68,14 +68,13 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
         const rect = canvas.getBoundingClientRect();
         if (rect.width === 0 || rect.height === 0) return;
 
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
+        // Use actual pixel dimensions (no DPR scaling for simplicity)
+        // This gives 1:1 pixel mapping for crisp fractal rendering
+        const canvasWidth = Math.floor(rect.width);
+        const canvasHeight = Math.floor(rect.height);
 
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-            ctx.scale(dpr, dpr);
-        }
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
 
         const props = propsRef.current;
         const config = FRACTAL_CONFIGS[props.fractalType];
@@ -86,14 +85,14 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
                 config.defaultCenter.real,
                 config.defaultCenter.imag,
                 config.defaultZoom,
-                rect.width,
-                rect.height
+                canvasWidth,
+                canvasHeight
             );
         } else {
             viewportRef.current = resizeViewport(
                 viewportRef.current,
-                rect.width,
-                rect.height
+                canvasWidth,
+                canvasHeight
             );
         }
 
