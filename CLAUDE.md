@@ -13,7 +13,7 @@ No separate lint command - uses Create React App's built-in linting. ESLint conf
 
 ## Project Overview
 
-A React PWA serving as a multi-game hub with 16+ games. Hosted on GitHub Pages at `https://bachnewton.github.io/Novelty-Games/`.
+A React PWA providing a single-app hub for a growing collection of games, tools, and experiments. Hosted on GitHub Pages at `https://bachnewton.github.io/Novelty-Games/`.
 
 **Tech Stack:** React 18 + TypeScript, Three.js (3D games), Socket.io (multiplayer), cannon-es (physics), Workbox (PWA/service worker)
 
