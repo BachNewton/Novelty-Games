@@ -27,7 +27,7 @@ async function fetchRemoteVersion(): Promise<string | null> {
         }
 
         const text = await response.text();
-        const match = text.match(/export const APP_VERSION = \'(.+)\';/);
+        const match = text.match(/export const APP_VERSION = '(.+)';/);
         return match ? match[1] : null;
     } catch (error) {
         console.warn('Error fetching remote version:', error);

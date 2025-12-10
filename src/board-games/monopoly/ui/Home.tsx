@@ -3,11 +3,10 @@ import { Route, updateRoute } from "../../../ui/Routing";
 import { MonopolyState } from "../data/MonopolyState";
 import Monopoly from "./Monopoly";
 import { createMonopolyEngine } from "../logic/MonopolyEngine";
-import MonopolyCanvas from "./MonopolyCanvas";
 
 interface HomeProps { }
 
-const Home: React.FC<HomeProps> = ({ }) => {
+const Home: React.FC<HomeProps> = () => {
     const engine = useRef(createMonopolyEngine()).current;
 
     const [state, setState] = useState<MonopolyState>({
