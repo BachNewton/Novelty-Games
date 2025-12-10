@@ -42,11 +42,19 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
         const props = propsRef.current;
         const config = FRACTAL_CONFIGS[props.fractalType];
 
+        // Dynamically increase iterations based on zoom level for deeper detail
+        // More zoom = more iterations needed to see the fine structure
+        const zoomLevel = Math.log10(viewportRef.current.zoom);
+        const dynamicIterations = Math.min(
+            10000,
+            Math.max(props.maxIterations, Math.floor(props.maxIterations * (1 + zoomLevel * 0.5)))
+        );
+
         rendererRef.current.render({
             centerReal: viewportRef.current.centerReal,
             centerImag: viewportRef.current.centerImag,
             zoom: viewportRef.current.zoom,
-            maxIterations: props.maxIterations,
+            maxIterations: dynamicIterations,
             fractalType: props.fractalType,
             paletteId: props.paletteId,
             juliaReal: props.juliaReal ?? config.juliaC?.real ?? -0.7,
