@@ -13,7 +13,8 @@ export enum Route {
     TODDLER_TREASURE_HUNT = 'Toddler-Treasure-Hunt',
     MONOPOLY = 'Monopoly',
     WINTER_CYCLING = 'Winter-Cycling',
-    POKER = 'Poker'
+    POKER = 'Poker',
+    FRACTAL_EXPLORER = 'Fractal-Explorer'
 }
 
 export function getRoute(): string | null {

@@ -4,6 +4,7 @@ import MusicPlayerHome from "../music-player/ui/Home";
 import FortniteFestivalHome, { getFestivalSongs } from "../fortnite-festival/ui/Home";
 import DatabaseDebugHome from "../database-debug/ui/Home";
 import WinterCylingHome from "../winter-cycling/ui/Home";
+import FractalExplorerHome from "../fractal-explorer/ui/Home";
 import { getRoute, Route } from "../../ui/Routing";
 import { createNetworkService, NetworkedApplication, NetworkService } from "../../util/networking/NetworkService";
 import { FestivalSong } from "../../trivia/data/Data";
@@ -20,7 +21,8 @@ type UiState =
     | MusicPlayerUiState
     | FortniteFestivalUiState
     | DatabaseDebugUiState
-    | WinterCylingUiState;
+    | WinterCylingUiState
+    | FractalExplorerUiState;
 
 interface MenuUiState {
     type: 'Menu';
@@ -46,6 +48,10 @@ interface WinterCylingUiState {
     networking: WinterCyclingNetworking;
 }
 
+interface FractalExplorerUiState {
+    type: 'FractalExplorer';
+}
+
 interface OnClickHandlers {
     onHomeButtonClicked: () => void;
     onForTheStats2Click: () => void;
@@ -53,6 +59,7 @@ interface OnClickHandlers {
     onFortniteFestivalClick: () => void;
     onDatabaseDebugClick: () => void;
     onWinterCyclingClick: () => void;
+    onFractalExplorerClick: () => void;
 }
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
@@ -64,7 +71,8 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
         onMusicPlayerClick: () => setUiState(createMusicPlayerUiState()),
         onFortniteFestivalClick: () => setUiState(createFortniteFestivalUiState()),
         onDatabaseDebugClick: () => setUiState(createDatabaseDebugUiState()),
-        onWinterCyclingClick: () => setUiState(createWinterCyclingUiState())
+        onWinterCyclingClick: () => setUiState(createWinterCyclingUiState()),
+        onFractalExplorerClick: () => setUiState(createFractalExplorerUiState())
     };
 
     return Ui(uiState, onClickHandlers);
@@ -87,6 +95,8 @@ function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
             />;
         case 'WinterCycling':
             return <WinterCylingHome networking={uiState.networking} />;
+        case 'FractalExplorer':
+            return <FractalExplorerHome onHomeButtonClicked={onClickHandlers.onHomeButtonClicked} />;
     }
 }
 
@@ -115,6 +125,7 @@ function MenuUi(onClickHandlers: OnClickHandlers) {
         <button style={buttonStyle} onClick={onClickHandlers.onFortniteFestivalClick}>Fortnite Festival Difficulty Rankings 🎛️</button>
         <button style={buttonStyle} onClick={onClickHandlers.onDatabaseDebugClick}>Database Debug 📦</button>
         <button style={buttonStyle} onClick={onClickHandlers.onWinterCyclingClick}>Winter Cycling ❄️</button>
+        <button style={buttonStyle} onClick={onClickHandlers.onFractalExplorerClick}>Fractal Explorer</button>
     </div>;
 }
 
@@ -128,6 +139,8 @@ function getInitialState(): UiState {
             return createFortniteFestivalUiState();
         case Route.WINTER_CYCLING:
             return createWinterCyclingUiState();
+        case Route.FRACTAL_EXPLORER:
+            return createFractalExplorerUiState();
         default:
             return createMenuUiState();
     }
@@ -170,6 +183,12 @@ function createWinterCyclingUiState(): WinterCylingUiState {
 function createMenuUiState(): MenuUiState {
     return {
         type: 'Menu'
+    };
+}
+
+function createFractalExplorerUiState(): FractalExplorerUiState {
+    return {
+        type: 'FractalExplorer'
     };
 }
 
