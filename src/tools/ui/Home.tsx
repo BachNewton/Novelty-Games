@@ -96,7 +96,7 @@ function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
         case 'WinterCycling':
             return <WinterCylingHome networking={uiState.networking} />;
         case 'FractalExplorer':
-            return <FractalExplorerHome onHomeButtonClicked={onClickHandlers.onHomeButtonClicked} />;
+            return <FractalExplorerHome />;
     }
 }
 
@@ -125,7 +125,7 @@ function MenuUi(onClickHandlers: OnClickHandlers) {
         <button style={buttonStyle} onClick={onClickHandlers.onFortniteFestivalClick}>Fortnite Festival Difficulty Rankings 🎛️</button>
         <button style={buttonStyle} onClick={onClickHandlers.onDatabaseDebugClick}>Database Debug 📦</button>
         <button style={buttonStyle} onClick={onClickHandlers.onWinterCyclingClick}>Winter Cycling ❄️</button>
-        <button style={buttonStyle} onClick={onClickHandlers.onFractalExplorerClick}>Fractal Explorer</button>
+        <button style={buttonStyle} onClick={onClickHandlers.onFractalExplorerClick}>Fractal Explorer 🌀</button>
     </div>;
 }
 

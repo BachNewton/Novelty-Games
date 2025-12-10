@@ -2,13 +2,8 @@ import { useState } from 'react';
 import { FractalCanvas } from './FractalCanvas';
 import { ControlPanel } from './ControlPanel';
 import { FractalType } from '../data/FractalTypes';
-import HomeButton from '../../../ui/HomeButton';
 
-interface FractalExplorerHomeProps {
-    onHomeButtonClicked: () => void;
-}
-
-const FractalExplorerHome: React.FC<FractalExplorerHomeProps> = ({ onHomeButtonClicked }) => {
+const FractalExplorerHome: React.FC = () => {
     const [fractalType, setFractalType] = useState<FractalType>('mandelbrot');
     const [paletteId, setPaletteId] = useState('classic');
     const [showControls, setShowControls] = useState(false);
@@ -42,13 +37,6 @@ const FractalExplorerHome: React.FC<FractalExplorerHomeProps> = ({ onHomeButtonC
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
-        zIndex: 10
-    };
-
-    const homeButtonContainerStyle: React.CSSProperties = {
-        position: 'absolute',
-        bottom: 10,
-        left: 10,
         zIndex: 10
     };
 
@@ -89,10 +77,6 @@ const FractalExplorerHome: React.FC<FractalExplorerHomeProps> = ({ onHomeButtonC
                     onClose={() => setShowControls(false)}
                 />
             )}
-
-            <div style={homeButtonContainerStyle}>
-                <HomeButton onClick={onHomeButtonClicked} />
-            </div>
 
             <div style={titleStyle}>
                 Fractal Explorer
