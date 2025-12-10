@@ -18,12 +18,20 @@ export class SnakeInput {
     private pressedKeys: Set<string> = new Set();
     private keyDownHandler: ((e: KeyboardEvent) => void) | null = null;
     private keyUpHandler: ((e: KeyboardEvent) => void) | null = null;
+    private touchStartHandler: ((e: TouchEvent) => void) | null = null;
+    private touchMoveHandler: ((e: TouchEvent) => void) | null = null;
+    private touchEndHandler: ((e: TouchEvent) => void) | null = null;
     private callbacks: InputCallbacks;
     private speedMultiplier: number = 1.0;
+    private touchStartX: number = 0;
+    private touchStartY: number = 0;
+    private isTouchingGame: boolean = false;
+    private static readonly SWIPE_THRESHOLD = 30;
 
     constructor(callbacks: InputCallbacks) {
         this.callbacks = callbacks;
         this.setupKeyboardListeners();
+        this.setupTouchListeners();
     }
 
     private setupKeyboardListeners(): void {
@@ -38,6 +46,89 @@ export class SnakeInput {
 
         window.addEventListener('keydown', this.keyDownHandler);
         window.addEventListener('keyup', this.keyUpHandler);
+    }
+
+    private setupTouchListeners(): void {
+        this.touchStartHandler = (e: TouchEvent) => {
+            // Ignore if touch started on a UI element (button, menu, etc.)
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'BUTTON' || target.closest('button') || target.closest('[data-mobile-controls]')) {
+                this.isTouchingGame = false;
+                return;
+            }
+
+            this.isTouchingGame = true;
+            const touch = e.touches[0];
+            this.touchStartX = touch.clientX;
+            this.touchStartY = touch.clientY;
+        };
+
+        this.touchMoveHandler = (e: TouchEvent) => {
+            // Prevent pull-to-refresh and other browser gestures when playing
+            if (this.isTouchingGame) {
+                e.preventDefault();
+            }
+        };
+
+        this.touchEndHandler = (e: TouchEvent) => {
+            if (!this.isTouchingGame) {
+                return;
+            }
+
+            this.isTouchingGame = false;
+            const touch = e.changedTouches[0];
+            const deltaX = touch.clientX - this.touchStartX;
+            const deltaY = touch.clientY - this.touchStartY;
+
+            this.handleSwipe(deltaX, deltaY);
+        };
+
+        window.addEventListener('touchstart', this.touchStartHandler, { passive: true });
+        window.addEventListener('touchmove', this.touchMoveHandler, { passive: false });
+        window.addEventListener('touchend', this.touchEndHandler, { passive: true });
+    }
+
+    private handleSwipe(deltaX: number, deltaY: number): void {
+        const absX = Math.abs(deltaX);
+        const absY = Math.abs(deltaY);
+
+        // Check if swipe is long enough
+        if (absX < SnakeInput.SWIPE_THRESHOLD && absY < SnakeInput.SWIPE_THRESHOLD) {
+            // Tap - treat as restart if game over
+            if (this.callbacks.isGameOver()) {
+                this.callbacks.onRestart();
+            }
+            return;
+        }
+
+        // Don't process swipes if AI is controlling
+        if (this.callbacks.isAIMode()) {
+            return;
+        }
+
+        const currentDir = this.callbacks.getCurrentDirection();
+        let newDirection: Direction | null = null;
+
+        // Determine swipe direction based on larger delta
+        if (absX > absY) {
+            // Horizontal swipe
+            if (deltaX > 0 && currentDir !== Direction.LEFT) {
+                newDirection = Direction.RIGHT;
+            } else if (deltaX < 0 && currentDir !== Direction.RIGHT) {
+                newDirection = Direction.LEFT;
+            }
+        } else {
+            // Vertical swipe
+            if (deltaY > 0 && currentDir !== Direction.UP) {
+                newDirection = Direction.DOWN;
+            } else if (deltaY < 0 && currentDir !== Direction.DOWN) {
+                newDirection = Direction.UP;
+            }
+        }
+
+        if (newDirection !== null) {
+            this.callbacks.onDirectionChange(newDirection);
+        }
     }
 
     private handleKeyPress(keyCode: string): void {
@@ -149,6 +240,15 @@ export class SnakeInput {
         }
         if (this.keyUpHandler) {
             window.removeEventListener('keyup', this.keyUpHandler);
+        }
+        if (this.touchStartHandler) {
+            window.removeEventListener('touchstart', this.touchStartHandler);
+        }
+        if (this.touchMoveHandler) {
+            window.removeEventListener('touchmove', this.touchMoveHandler);
+        }
+        if (this.touchEndHandler) {
+            window.removeEventListener('touchend', this.touchEndHandler);
         }
     }
 }

@@ -3,7 +3,8 @@ import { deserializeWeights, serializeWeights } from "./NeuralNetwork";
 import { SnakeAI } from "./SnakeAI";
 import { createSnakeAIStorage, SnakeAISaveData } from "./SnakeAIStorage";
 import { createAIVisualizationOverlay } from "./ui/AIVisualization";
-import { Direction, Position, SnakeGameState, GAME_SPEED_MS } from "./types";
+import { createMobileControlsOverlay, createCombinedOverlay, MobileControlsCallbacks } from "./ui/MobileControls";
+import { Direction, Position, SnakeGameState, GAME_SPEED_MS, MIN_SPEED_MULTIPLIER, MAX_SPEED_MULTIPLIER, SPEED_STEP } from "./types";
 import { SnakeGame, FoodGenerator, RandomFoodGenerator } from "./SnakeGame";
 import { SnakeRenderer, RenderContext } from "./SnakeRenderer";
 import { SnakeInput, InputCallbacks } from "./SnakeInput";
@@ -126,7 +127,7 @@ export class SnakeWorld implements GameWorld {
         this.stopHeadlessTraining();
     }
 
-    private toggleAIMode(): void {
+    public toggleAIMode(): void {
         this.aiMode = !this.aiMode;
 
         if (this.aiMode && !this.ai) {
@@ -140,7 +141,7 @@ export class SnakeWorld implements GameWorld {
         }
     }
 
-    private toggleHeadlessMode(): void {
+    public toggleHeadlessMode(): void {
         if (!this.aiMode) return;
 
         this.headlessMode = !this.headlessMode;
@@ -151,6 +152,49 @@ export class SnakeWorld implements GameWorld {
             this.isPlayingPreview = false;
             this.clearRecording();
         }
+    }
+
+    public toggleVisualization(): void {
+        this.showVisualization = !this.showVisualization;
+    }
+
+    public getAIMode(): boolean {
+        return this.aiMode;
+    }
+
+    public getHeadlessMode(): boolean {
+        return this.headlessMode;
+    }
+
+    public getSpeedMultiplier(): number {
+        return this.speedMultiplier;
+    }
+
+    public increaseSpeed(): void {
+        let step = SPEED_STEP;
+        if (this.speedMultiplier >= 100) step = 50;
+        else if (this.speedMultiplier >= 10) step = 5;
+
+        this.speedMultiplier = Math.min(MAX_SPEED_MULTIPLIER, this.speedMultiplier + step);
+        this.input.setSpeedMultiplier(this.speedMultiplier);
+    }
+
+    public decreaseSpeed(): void {
+        let step = SPEED_STEP;
+        if (this.speedMultiplier > 100) step = 50;
+        else if (this.speedMultiplier > 10) step = 5;
+
+        this.speedMultiplier = Math.max(MIN_SPEED_MULTIPLIER, this.speedMultiplier - step);
+        this.input.setSpeedMultiplier(this.speedMultiplier);
+    }
+
+    public resetSpeed(): void {
+        this.speedMultiplier = 1.0;
+        this.input.setSpeedMultiplier(this.speedMultiplier);
+    }
+
+    public restart(): void {
+        this.restartGame();
     }
 
     private loadAI(): void {
@@ -507,15 +551,30 @@ export class SnakeWorld implements GameWorld {
     }
 
     public get overlay(): JSX.Element | undefined {
-        if (!this.ai) {
-            return undefined;
-        }
-        return createAIVisualizationOverlay(
+        const mobileCallbacks: MobileControlsCallbacks = {
+            onToggleAI: () => this.toggleAIMode(),
+            onToggleVisualization: () => this.toggleVisualization(),
+            onToggleHeadless: () => this.toggleHeadlessMode(),
+            onRestart: () => this.restart(),
+            onIncreaseSpeed: () => this.increaseSpeed(),
+            onDecreaseSpeed: () => this.decreaseSpeed(),
+            onResetSpeed: () => this.resetSpeed(),
+            onResetAI: () => this.resetAI(),
+            getAIMode: () => this.getAIMode(),
+            getHeadlessMode: () => this.getHeadlessMode(),
+            getSpeedMultiplier: () => this.getSpeedMultiplier()
+        };
+
+        const aiVisualization = this.ai ? createAIVisualizationOverlay(
             () => this.ai,
             () => this.aiMode,
             () => this.showVisualization,
             (visible: boolean) => { this.showVisualization = visible; },
             () => { this.resetAI(); }
-        );
+        ) : null;
+
+        const mobileControls = createMobileControlsOverlay(mobileCallbacks);
+
+        return createCombinedOverlay(aiVisualization, mobileControls);
     }
 }
