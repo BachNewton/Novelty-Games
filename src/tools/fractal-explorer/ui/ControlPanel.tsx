@@ -4,24 +4,16 @@ import { ColorPalette, COLOR_PALETTES } from '../data/ColorPalettes';
 interface ControlPanelProps {
     fractalType: FractalType;
     paletteId: string;
-    showWorkerOverlay: boolean;
-    showStats: boolean;
     onFractalTypeChange: (type: FractalType) => void;
     onPaletteChange: (paletteId: string) => void;
-    onWorkerOverlayToggle: () => void;
-    onStatsToggle: () => void;
     onClose: () => void;
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
     fractalType,
     paletteId,
-    showWorkerOverlay,
-    showStats,
     onFractalTypeChange,
     onPaletteChange,
-    onWorkerOverlayToggle,
-    onStatsToggle,
     onClose
 }) => {
     const overlayStyle: React.CSSProperties = {
@@ -89,34 +81,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         cursor: 'pointer'
     };
 
-    const toggleContainerStyle: React.CSSProperties = {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '10px 0'
-    };
-
-    const toggleStyle = (isOn: boolean): React.CSSProperties => ({
-        width: '50px',
-        height: '26px',
-        backgroundColor: isOn ? '#4ECDC4' : '#444',
-        borderRadius: '13px',
-        position: 'relative',
-        cursor: 'pointer',
-        transition: 'background-color 0.2s'
-    });
-
-    const toggleKnobStyle = (isOn: boolean): React.CSSProperties => ({
-        width: '22px',
-        height: '22px',
-        backgroundColor: 'white',
-        borderRadius: '50%',
-        position: 'absolute',
-        top: '2px',
-        left: isOn ? '26px' : '2px',
-        transition: 'left 0.2s'
-    });
-
     const descriptionStyle: React.CSSProperties = {
         fontSize: '0.8em',
         color: '#888',
@@ -169,36 +133,16 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     </select>
                 </div>
 
-                <div style={sectionStyle}>
-                    <div style={toggleContainerStyle}>
-                        <span>Show Worker Overlay</span>
-                        <div style={toggleStyle(showWorkerOverlay)} onClick={onWorkerOverlayToggle}>
-                            <div style={toggleKnobStyle(showWorkerOverlay)} />
-                        </div>
-                    </div>
-                    <div style={descriptionStyle}>
-                        Color-code tiles by which worker computed them
-                    </div>
-                </div>
-
-                <div style={sectionStyle}>
-                    <div style={toggleContainerStyle}>
-                        <span>Show Statistics</span>
-                        <div style={toggleStyle(showStats)} onClick={onStatsToggle}>
-                            <div style={toggleKnobStyle(showStats)} />
-                        </div>
-                    </div>
-                    <div style={descriptionStyle}>
-                        Display worker utilization and progress
-                    </div>
-                </div>
-
                 <div style={{ ...sectionStyle, marginTop: '40px', color: '#666', fontSize: '0.85em' }}>
                     <div style={{ marginBottom: '8px' }}>
                         <strong>Controls:</strong>
                     </div>
                     <div>Drag to pan</div>
                     <div>Scroll/pinch to zoom</div>
+                </div>
+
+                <div style={{ ...sectionStyle, color: '#4a4', fontSize: '0.8em' }}>
+                    GPU Accelerated
                 </div>
             </div>
         </>

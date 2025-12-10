@@ -1,66 +1,71 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { FractalType, FRACTAL_CONFIGS } from '../data/FractalTypes';
-import { WORKER_COLORS } from '../data/ColorPalettes';
-import { TileManager } from '../logic/TileManager';
-import {
-    ViewportState,
-    createViewportState,
-    panViewport,
-    zoomViewport,
-    resizeViewport
-} from '../logic/ViewportState';
-import { WorkerStats } from '../logic/WorkerPool';
+import { WebGLRenderer } from '../logic/WebGLRenderer';
 
 interface FractalCanvasProps {
     fractalType: FractalType;
     paletteId: string;
     maxIterations: number;
-    showWorkerOverlay: boolean;
     juliaReal?: number;
     juliaImag?: number;
-    onStatsUpdate?: (stats: {
-        workerStats: WorkerStats[];
-        tilesCompleted: number;
-        totalTiles: number;
-        workerCount: number;
-    }) => void;
+}
+
+interface ViewportState {
+    centerReal: number;
+    centerImag: number;
+    zoom: number;
 }
 
 export const FractalCanvas: React.FC<FractalCanvasProps> = ({
     fractalType,
     paletteId,
     maxIterations,
-    showWorkerOverlay,
     juliaReal,
-    juliaImag,
-    onStatsUpdate
+    juliaImag
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const tileManagerRef = useRef<TileManager | null>(null);
+    const rendererRef = useRef<WebGLRenderer | null>(null);
     const viewportRef = useRef<ViewportState | null>(null);
     const isDraggingRef = useRef(false);
     const lastMousePosRef = useRef({ x: 0, y: 0 });
     const lastTouchDistanceRef = useRef(0);
-    const renderTimeoutRef = useRef<number | null>(null);
-    const isInitializedRef = useRef(false);
+    const animationFrameRef = useRef<number | null>(null);
 
-    // Store current props in refs so callbacks don't need dependencies
-    const propsRef = useRef({ fractalType, paletteId, maxIterations, showWorkerOverlay, juliaReal, juliaImag });
-    propsRef.current = { fractalType, paletteId, maxIterations, showWorkerOverlay, juliaReal, juliaImag };
+    // Store props in ref for use in callbacks
+    const propsRef = useRef({ fractalType, paletteId, maxIterations, juliaReal, juliaImag });
+    propsRef.current = { fractalType, paletteId, maxIterations, juliaReal, juliaImag };
 
-    const updateStats = useCallback(() => {
-        if (!tileManagerRef.current || !onStatsUpdate) return;
+    // Render the fractal
+    const render = useCallback(() => {
+        if (!rendererRef.current || !viewportRef.current) return;
 
-        const pool = tileManagerRef.current.getWorkerPool();
-        onStatsUpdate({
-            workerStats: pool.getWorkerStats(),
-            tilesCompleted: tileManagerRef.current.getCompletedTileCount(),
-            totalTiles: tileManagerRef.current.getTileCount(),
-            workerCount: pool.getWorkerCount()
+        const props = propsRef.current;
+        const config = FRACTAL_CONFIGS[props.fractalType];
+
+        rendererRef.current.render({
+            centerReal: viewportRef.current.centerReal,
+            centerImag: viewportRef.current.centerImag,
+            zoom: viewportRef.current.zoom,
+            maxIterations: props.maxIterations,
+            fractalType: props.fractalType,
+            paletteId: props.paletteId,
+            juliaReal: props.juliaReal ?? config.juliaC?.real ?? -0.7,
+            juliaImag: props.juliaImag ?? config.juliaC?.imag ?? 0.27015
         });
-    }, [onStatsUpdate]);
+    }, []);
 
-    // Initialize canvas and tile manager
+    // Schedule render on next animation frame (debounced)
+    const scheduleRender = useCallback(() => {
+        if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current);
+        }
+        animationFrameRef.current = requestAnimationFrame(() => {
+            render();
+            animationFrameRef.current = null;
+        });
+    }, [render]);
+
+    // Initialize canvas and WebGL renderer
     const initCanvas = useCallback(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -68,96 +73,96 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
         const rect = canvas.getBoundingClientRect();
         if (rect.width === 0 || rect.height === 0) return;
 
-        // Use actual pixel dimensions (no DPR scaling for simplicity)
-        // This gives 1:1 pixel mapping for crisp fractal rendering
-        const canvasWidth = Math.floor(rect.width);
-        const canvasHeight = Math.floor(rect.height);
+        const width = Math.floor(rect.width);
+        const height = Math.floor(rect.height);
 
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
+        // Initialize or resize renderer
+        if (!rendererRef.current) {
+            try {
+                rendererRef.current = new WebGLRenderer(canvas);
+            } catch (e) {
+                console.error('Failed to initialize WebGL:', e);
+                return;
+            }
+        }
 
+        rendererRef.current.resize(width, height);
+
+        // Initialize viewport if needed
         const props = propsRef.current;
         const config = FRACTAL_CONFIGS[props.fractalType];
 
-        // Create or update viewport
         if (!viewportRef.current) {
-            viewportRef.current = createViewportState(
-                config.defaultCenter.real,
-                config.defaultCenter.imag,
-                config.defaultZoom,
-                canvasWidth,
-                canvasHeight
-            );
-        } else {
-            viewportRef.current = resizeViewport(
-                viewportRef.current,
-                canvasWidth,
-                canvasHeight
-            );
+            viewportRef.current = {
+                centerReal: config.defaultCenter.real,
+                centerImag: config.defaultCenter.imag,
+                zoom: config.defaultZoom
+            };
         }
 
-        // Clean up old tile manager
-        if (tileManagerRef.current) {
-            tileManagerRef.current.terminate();
-            tileManagerRef.current = null;
-        }
+        render();
+    }, [render]);
 
-        // Create new tile manager
-        tileManagerRef.current = new TileManager(
-            canvas,
-            viewportRef.current,
-            {
-                fractalType: props.fractalType,
-                maxIterations: props.maxIterations,
-                paletteId: props.paletteId,
-                juliaReal: props.juliaReal ?? config.juliaC?.real,
-                juliaImag: props.juliaImag ?? config.juliaC?.imag
-            },
-            () => {
-                // Render complete callback
-                if (propsRef.current.showWorkerOverlay && tileManagerRef.current) {
-                    tileManagerRef.current.drawWorkerOverlay(WORKER_COLORS);
-                }
-                updateStats();
-            }
-        );
+    // Pan the viewport
+    const pan = useCallback((deltaX: number, deltaY: number) => {
+        if (!viewportRef.current) return;
 
-        // Initial render
-        tileManagerRef.current.render();
-        isInitializedRef.current = true;
-    }, [updateStats]);
+        viewportRef.current = {
+            ...viewportRef.current,
+            centerReal: viewportRef.current.centerReal - deltaX / viewportRef.current.zoom,
+            // Flip Y because WebGL Y is inverted
+            centerImag: viewportRef.current.centerImag + deltaY / viewportRef.current.zoom
+        };
 
-    // Debounced re-render after viewport changes
-    const scheduleRender = useCallback(() => {
-        if (renderTimeoutRef.current) {
-            window.clearTimeout(renderTimeoutRef.current);
-        }
+        scheduleRender();
+    }, [scheduleRender]);
 
-        renderTimeoutRef.current = window.setTimeout(() => {
-            if (tileManagerRef.current && viewportRef.current) {
-                tileManagerRef.current.updateViewport(viewportRef.current);
-                tileManagerRef.current.render();
-            }
-        }, 50);
-    }, []);
+    // Zoom the viewport
+    const zoom = useCallback((factor: number, screenX: number, screenY: number) => {
+        if (!viewportRef.current || !canvasRef.current) return;
 
-    // Mouse event handlers
+        const canvas = canvasRef.current;
+        const rect = canvas.getBoundingClientRect();
+
+        // Get position in canvas coordinates
+        const canvasX = screenX - rect.left;
+        const canvasY = screenY - rect.top;
+
+        // Convert to complex plane coordinates before zoom
+        const complexX = viewportRef.current.centerReal + (canvasX - rect.width / 2) / viewportRef.current.zoom;
+        const complexY = viewportRef.current.centerImag - (canvasY - rect.height / 2) / viewportRef.current.zoom;
+
+        // Apply zoom
+        const newZoom = Math.max(10, Math.min(viewportRef.current.zoom * factor, 1e14));
+
+        // Adjust center to keep point under cursor stationary
+        const newCenterReal = complexX - (canvasX - rect.width / 2) / newZoom;
+        const newCenterImag = complexY + (canvasY - rect.height / 2) / newZoom;
+
+        viewportRef.current = {
+            centerReal: newCenterReal,
+            centerImag: newCenterImag,
+            zoom: newZoom
+        };
+
+        scheduleRender();
+    }, [scheduleRender]);
+
+    // Mouse handlers
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
         isDraggingRef.current = true;
         lastMousePosRef.current = { x: e.clientX, y: e.clientY };
     }, []);
 
     const handleMouseMove = useCallback((e: React.MouseEvent) => {
-        if (!isDraggingRef.current || !viewportRef.current) return;
+        if (!isDraggingRef.current) return;
 
         const deltaX = e.clientX - lastMousePosRef.current.x;
         const deltaY = e.clientY - lastMousePosRef.current.y;
-
-        viewportRef.current = panViewport(viewportRef.current, deltaX, deltaY);
         lastMousePosRef.current = { x: e.clientX, y: e.clientY };
 
-        scheduleRender();
-    }, [scheduleRender]);
+        pan(deltaX, deltaY);
+    }, [pan]);
 
     const handleMouseUp = useCallback(() => {
         isDraggingRef.current = false;
@@ -165,20 +170,11 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
 
     const handleWheel = useCallback((e: WheelEvent) => {
         e.preventDefault();
-        if (!viewportRef.current || !canvasRef.current) return;
+        const factor = e.deltaY < 0 ? 1.2 : 1 / 1.2;
+        zoom(factor, e.clientX, e.clientY);
+    }, [zoom]);
 
-        const rect = canvasRef.current.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-
-        // Zoom factor based on scroll direction
-        const zoomFactor = e.deltaY < 0 ? 1.2 : 1 / 1.2;
-
-        viewportRef.current = zoomViewport(viewportRef.current, zoomFactor, mouseX, mouseY);
-        scheduleRender();
-    }, [scheduleRender]);
-
-    // Touch event handlers
+    // Touch handlers
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
         if (e.touches.length === 1) {
             isDraggingRef.current = true;
@@ -187,7 +183,6 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
                 y: e.touches[0].clientY
             };
         } else if (e.touches.length === 2) {
-            // Pinch zoom start
             const dx = e.touches[0].clientX - e.touches[1].clientX;
             const dy = e.touches[0].clientY - e.touches[1].clientY;
             lastTouchDistanceRef.current = Math.sqrt(dx * dx + dy * dy);
@@ -196,133 +191,85 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
 
     const handleTouchMove = useCallback((e: React.TouchEvent) => {
         e.preventDefault();
-        if (!viewportRef.current || !canvasRef.current) return;
 
         if (e.touches.length === 1 && isDraggingRef.current) {
-            // Pan
             const deltaX = e.touches[0].clientX - lastMousePosRef.current.x;
             const deltaY = e.touches[0].clientY - lastMousePosRef.current.y;
-
-            viewportRef.current = panViewport(viewportRef.current, deltaX, deltaY);
             lastMousePosRef.current = {
                 x: e.touches[0].clientX,
                 y: e.touches[0].clientY
             };
-
-            scheduleRender();
+            pan(deltaX, deltaY);
         } else if (e.touches.length === 2) {
-            // Pinch zoom
             const dx = e.touches[0].clientX - e.touches[1].clientX;
             const dy = e.touches[0].clientY - e.touches[1].clientY;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
             if (lastTouchDistanceRef.current > 0) {
-                const zoomFactor = distance / lastTouchDistanceRef.current;
-                const rect = canvasRef.current.getBoundingClientRect();
-                const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
-                const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
-
-                viewportRef.current = zoomViewport(viewportRef.current, zoomFactor, centerX, centerY);
-                scheduleRender();
+                const factor = distance / lastTouchDistanceRef.current;
+                const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                zoom(factor, centerX, centerY);
             }
 
             lastTouchDistanceRef.current = distance;
         }
-    }, [scheduleRender]);
+    }, [pan, zoom]);
 
     const handleTouchEnd = useCallback(() => {
         isDraggingRef.current = false;
         lastTouchDistanceRef.current = 0;
     }, []);
 
-    // Initialize on mount only
+    // Initialize on mount
     useEffect(() => {
         initCanvas();
 
-        const handleResize = () => {
-            initCanvas();
-        };
-
+        const handleResize = () => initCanvas();
         window.addEventListener('resize', handleResize);
 
-        // Add wheel listener with passive: false to allow preventDefault
+        // Add wheel listener with passive: false
         const canvas = canvasRef.current;
         if (canvas) {
             canvas.addEventListener('wheel', handleWheel, { passive: false });
         }
-
-        // Stats update interval
-        const statsInterval = setInterval(updateStats, 100);
 
         return () => {
             window.removeEventListener('resize', handleResize);
             if (canvas) {
                 canvas.removeEventListener('wheel', handleWheel);
             }
-            clearInterval(statsInterval);
-            if (renderTimeoutRef.current) {
-                window.clearTimeout(renderTimeoutRef.current);
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
             }
-            if (tileManagerRef.current) {
-                tileManagerRef.current.terminate();
-                tileManagerRef.current = null;
+            if (rendererRef.current) {
+                rendererRef.current.dispose();
+                rendererRef.current = null;
             }
-            isInitializedRef.current = false;
         };
-    }, [initCanvas, updateStats, handleWheel]);
+    }, [initCanvas, handleWheel]);
 
-    // Handle fractal type changes - reset viewport and re-render
+    // Re-render when fractal type changes (reset viewport)
     useEffect(() => {
-        if (!isInitializedRef.current || !tileManagerRef.current) return;
-
         const config = FRACTAL_CONFIGS[fractalType];
+        viewportRef.current = {
+            centerReal: config.defaultCenter.real,
+            centerImag: config.defaultCenter.imag,
+            zoom: config.defaultZoom
+        };
+        scheduleRender();
+    }, [fractalType, scheduleRender]);
 
-        // Reset viewport to default for this fractal
-        if (viewportRef.current) {
-            viewportRef.current = {
-                ...viewportRef.current,
-                centerReal: config.defaultCenter.real,
-                centerImag: config.defaultCenter.imag,
-                zoom: config.defaultZoom
-            };
-        }
-
-        tileManagerRef.current.updateRenderParams({
-            fractalType,
-            juliaReal: juliaReal ?? config.juliaC?.real,
-            juliaImag: juliaImag ?? config.juliaC?.imag
-        });
-
-        if (viewportRef.current) {
-            tileManagerRef.current.updateViewport(viewportRef.current);
-        }
-
-        tileManagerRef.current.render();
-    }, [fractalType, juliaReal, juliaImag]);
-
-    // Handle palette/iterations changes
+    // Re-render when other params change
     useEffect(() => {
-        if (!isInitializedRef.current || !tileManagerRef.current) return;
-
-        tileManagerRef.current.updateRenderParams({ paletteId, maxIterations });
-        tileManagerRef.current.render();
-    }, [paletteId, maxIterations]);
-
-    // Handle overlay toggle
-    useEffect(() => {
-        if (!isInitializedRef.current || !tileManagerRef.current) return;
-
-        tileManagerRef.current.redrawTiles();
-        if (showWorkerOverlay) {
-            tileManagerRef.current.drawWorkerOverlay(WORKER_COLORS);
-        }
-    }, [showWorkerOverlay]);
+        scheduleRender();
+    }, [paletteId, maxIterations, juliaReal, juliaImag, scheduleRender]);
 
     const canvasStyle: React.CSSProperties = {
         width: '100%',
         height: '100%',
         display: 'block',
-        cursor: 'grab',
+        cursor: isDraggingRef.current ? 'grabbing' : 'grab',
         touchAction: 'none'
     };
 

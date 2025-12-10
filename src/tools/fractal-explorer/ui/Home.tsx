@@ -1,38 +1,17 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { FractalCanvas } from './FractalCanvas';
 import { ControlPanel } from './ControlPanel';
-import { WorkerStats } from './WorkerStats';
 import { FractalType } from '../data/FractalTypes';
-import { WorkerStats as WorkerStatsData } from '../logic/WorkerPool';
 import HomeButton from '../../../ui/HomeButton';
 
 interface FractalExplorerHomeProps {
     onHomeButtonClicked: () => void;
 }
 
-interface Stats {
-    workerStats: WorkerStatsData[];
-    tilesCompleted: number;
-    totalTiles: number;
-    workerCount: number;
-}
-
 const FractalExplorerHome: React.FC<FractalExplorerHomeProps> = ({ onHomeButtonClicked }) => {
     const [fractalType, setFractalType] = useState<FractalType>('mandelbrot');
     const [paletteId, setPaletteId] = useState('classic');
-    const [showWorkerOverlay, setShowWorkerOverlay] = useState(false);
-    const [showStats, setShowStats] = useState(true);
     const [showControls, setShowControls] = useState(false);
-    const [stats, setStats] = useState<Stats>({
-        workerStats: [],
-        tilesCompleted: 0,
-        totalTiles: 0,
-        workerCount: 0
-    });
-
-    const handleStatsUpdate = useCallback((newStats: Stats) => {
-        setStats(newStats);
-    }, []);
 
     const containerStyle: React.CSSProperties = {
         position: 'fixed',
@@ -90,8 +69,6 @@ const FractalExplorerHome: React.FC<FractalExplorerHomeProps> = ({ onHomeButtonC
                     fractalType={fractalType}
                     paletteId={paletteId}
                     maxIterations={256}
-                    showWorkerOverlay={showWorkerOverlay}
-                    onStatsUpdate={handleStatsUpdate}
                 />
             </div>
 
@@ -103,25 +80,12 @@ const FractalExplorerHome: React.FC<FractalExplorerHomeProps> = ({ onHomeButtonC
                 <span>Settings</span>
             </button>
 
-            {showStats && (
-                <WorkerStats
-                    workerStats={stats.workerStats}
-                    tilesCompleted={stats.tilesCompleted}
-                    totalTiles={stats.totalTiles}
-                    workerCount={stats.workerCount}
-                />
-            )}
-
             {showControls && (
                 <ControlPanel
                     fractalType={fractalType}
                     paletteId={paletteId}
-                    showWorkerOverlay={showWorkerOverlay}
-                    showStats={showStats}
                     onFractalTypeChange={setFractalType}
                     onPaletteChange={setPaletteId}
-                    onWorkerOverlayToggle={() => setShowWorkerOverlay(!showWorkerOverlay)}
-                    onStatsToggle={() => setShowStats(!showStats)}
                     onClose={() => setShowControls(false)}
                 />
             )}
