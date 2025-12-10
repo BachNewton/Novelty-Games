@@ -62,6 +62,45 @@ game-name/
 ### Evolution Over Rigid Consistency
 Consistency matters, but this codebase evolves. If an existing pattern is inefficient, confusing, or outdated, propose something better rather than perpetuating it. New projects can introduce improved systems to set an example—older projects using legacy patterns can be refactored later. Don't let "that's how it's done elsewhere" justify a suboptimal approach.
 
+### Preferred Patterns
+
+**React Components:** Use `React.FC`. Only define a Props interface if the component actually has props:
+```tsx
+// With props
+interface NameProps { someProp: string; }
+
+const Name: React.FC<NameProps> = ({ someProp }) => {
+    return <div>{someProp}</div>;
+};
+
+// Without props
+const Name: React.FC = () => {
+    return <div></div>;
+};
+
+export default Name;
+```
+
+**Objects over Classes:** Prefer interfaces + factory functions instead of classes. Use function scope to manage public/private visibility. Since the interface defines parameter types, omit redundant type annotations in the factory function:
+```ts
+export interface Thing {
+    getValue: () => number;
+    increment: () => void;
+}
+
+export function createThing(): Thing {
+    // Private state and functions live here (closure scope)
+    let count = 0;
+
+    return {
+        getValue: () => count,
+        increment: () => { count++; }
+    };
+}
+```
+
+**Prefer `const`:** Use `const` by default; only use `let` when reassignment is necessary.
+
 ## Deployment
 
 - Build output: `build/`
