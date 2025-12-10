@@ -130,6 +130,7 @@ function drawGrid(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, came
     // drawGridNumbers(ctx, camera, canvas);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function drawGridNumbers(ctx: CanvasRenderingContext2D, camera: Camera, canvas: HTMLCanvasElement) {
     ctx.fillStyle = 'grey';
     ctx.font = '11px monospace';

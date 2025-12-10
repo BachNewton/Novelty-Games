@@ -34,14 +34,14 @@ function createFortunaWorld(
     const scoringHoles: ScoringHole[] = [];
 
     // Create game board with pins and scoring holes
-    const boardBody = createBoard(scene, world, scoringHoles);
+    createBoard(scene, world, scoringHoles);
 
     // Create launcher position (right side, bottom) - shoot up the right side
     const launcherPosition = new THREE.Vector3(4.2, 2.3, -6.5);
     createLauncher(scene, launcherPosition);
 
     // Input handling
-    const keyboardInput = keyboardInputCreator.create((key: Key) => {
+    keyboardInputCreator.create((key: Key) => {
         if (key === Key.SPACE && marblesLaunched < TOTAL_MARBLES) {
             const marble = createMarble(scene, world, launcherPosition, scoringHoles, () => {
                 // Callback to update score

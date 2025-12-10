@@ -17,12 +17,15 @@ export interface FoodGenerator {
 export class RandomFoodGenerator implements FoodGenerator {
     generateFood(snake: Position[], gridSize: number): Position {
         let food: Position;
+        let isOnSnake: boolean;
         do {
             food = {
                 x: Math.floor(Math.random() * gridSize),
                 y: Math.floor(Math.random() * gridSize)
             };
-        } while (snake.some(segment => segment.x === food.x && segment.y === food.y));
+            const checkFood = food;
+            isOnSnake = snake.some(segment => segment.x === checkFood.x && segment.y === checkFood.y);
+        } while (isOnSnake);
         return food;
     }
 }

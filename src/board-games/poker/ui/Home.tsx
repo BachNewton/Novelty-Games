@@ -21,7 +21,7 @@ interface GameState {
 
 const DEFAULT_STATE: LobbyState = { type: 'lobby' };
 
-const Home: React.FC<HomeProps> = ({ }) => {
+const Home: React.FC<HomeProps> = () => {
     const networking = useRef(createPokerNetworking()).current;
     const hasGameStarted = useRef(false);
     const [state, setState] = useState<State>(DEFAULT_STATE);

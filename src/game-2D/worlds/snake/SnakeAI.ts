@@ -147,7 +147,9 @@ export class SnakeAI {
 
             // Check Body
             if (!foundBody) {
-                if (gameState.snake.some(s => s.x === currX && s.y === currY)) {
+                const checkX = currX;
+                const checkY = currY;
+                if (gameState.snake.some(s => s.x === checkX && s.y === checkY)) {
                     distanceToBody = 1 / distance;
                     foundBody = true;
                 }
