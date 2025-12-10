@@ -5,15 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build & Development Commands
 
 ```bash
-npm start          # Development server (port 3000)
 npm run build      # Production build
 npm test           # Run tests in watch mode
-npm run test-all   # Run all tests (CI mode)
-npm run check-size # Analyze bundle size
-npm run deploy     # Deploy to GitHub Pages
-npm run patch      # Bump patch version + deploy
-npm run minor      # Bump minor version + deploy
-npm run major      # Bump major version + deploy
 ```
 
 No separate lint command - uses Create React App's built-in linting. ESLint config disables `react-hooks/exhaustive-deps`.
