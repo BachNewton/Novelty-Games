@@ -164,7 +164,7 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
         isDraggingRef.current = false;
     }, []);
 
-    const handleWheel = useCallback((e: React.WheelEvent) => {
+    const handleWheel = useCallback((e: WheelEvent) => {
         e.preventDefault();
         if (!viewportRef.current || !canvasRef.current) return;
 
@@ -246,11 +246,20 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
 
         window.addEventListener('resize', handleResize);
 
+        // Add wheel listener with passive: false to allow preventDefault
+        const canvas = canvasRef.current;
+        if (canvas) {
+            canvas.addEventListener('wheel', handleWheel, { passive: false });
+        }
+
         // Stats update interval
         const statsInterval = setInterval(updateStats, 100);
 
         return () => {
             window.removeEventListener('resize', handleResize);
+            if (canvas) {
+                canvas.removeEventListener('wheel', handleWheel);
+            }
             clearInterval(statsInterval);
             if (renderTimeoutRef.current) {
                 window.clearTimeout(renderTimeoutRef.current);
@@ -261,7 +270,7 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
             }
             isInitializedRef.current = false;
         };
-    }, [initCanvas, updateStats]);
+    }, [initCanvas, updateStats, handleWheel]);
 
     // Handle fractal type changes - reset viewport and re-render
     useEffect(() => {
@@ -326,7 +335,6 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            onWheel={handleWheel}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
