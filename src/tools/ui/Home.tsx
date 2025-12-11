@@ -5,6 +5,7 @@ import FortniteFestivalHome, { getFestivalSongs } from "../fortnite-festival/ui/
 import DatabaseDebugHome from "../database-debug/ui/Home";
 import WinterCylingHome from "../winter-cycling/ui/Home";
 import FractalExplorerHome from "../fractal-explorer/ui/Home";
+import PrimeFinderHome from "../prime-finder/ui/Home";
 import { getRoute, Route } from "../../ui/Routing";
 import { createNetworkService, NetworkedApplication, NetworkService } from "../../util/networking/NetworkService";
 import { FestivalSong } from "../../trivia/data/Data";
@@ -22,7 +23,8 @@ type UiState =
     | FortniteFestivalUiState
     | DatabaseDebugUiState
     | WinterCylingUiState
-    | FractalExplorerUiState;
+    | FractalExplorerUiState
+    | PrimeFinderUiState;
 
 interface MenuUiState {
     type: 'Menu';
@@ -52,6 +54,10 @@ interface FractalExplorerUiState {
     type: 'FractalExplorer';
 }
 
+interface PrimeFinderUiState {
+    type: 'PrimeFinder';
+}
+
 interface OnClickHandlers {
     onHomeButtonClicked: () => void;
     onForTheStats2Click: () => void;
@@ -60,6 +66,7 @@ interface OnClickHandlers {
     onDatabaseDebugClick: () => void;
     onWinterCyclingClick: () => void;
     onFractalExplorerClick: () => void;
+    onPrimeFinderClick: () => void;
 }
 
 const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
@@ -72,7 +79,8 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
         onFortniteFestivalClick: () => setUiState(createFortniteFestivalUiState()),
         onDatabaseDebugClick: () => setUiState(createDatabaseDebugUiState()),
         onWinterCyclingClick: () => setUiState(createWinterCyclingUiState()),
-        onFractalExplorerClick: () => setUiState(createFractalExplorerUiState())
+        onFractalExplorerClick: () => setUiState(createFractalExplorerUiState()),
+        onPrimeFinderClick: () => setUiState(createPrimeFinderUiState())
     };
 
     return Ui(uiState, onClickHandlers);
@@ -97,6 +105,8 @@ function Ui(uiState: UiState, onClickHandlers: OnClickHandlers) {
             return <WinterCylingHome networking={uiState.networking} />;
         case 'FractalExplorer':
             return <FractalExplorerHome />;
+        case 'PrimeFinder':
+            return <PrimeFinderHome />;
     }
 }
 
@@ -126,6 +136,7 @@ function MenuUi(onClickHandlers: OnClickHandlers) {
         <button style={buttonStyle} onClick={onClickHandlers.onDatabaseDebugClick}>Database Debug 📦</button>
         <button style={buttonStyle} onClick={onClickHandlers.onWinterCyclingClick}>Winter Cycling ❄️</button>
         <button style={buttonStyle} onClick={onClickHandlers.onFractalExplorerClick}>Fractal Explorer 🌀</button>
+        <button style={buttonStyle} onClick={onClickHandlers.onPrimeFinderClick}>Prime Number Finder 🔢</button>
     </div>;
 }
 
@@ -141,6 +152,8 @@ function getInitialState(): UiState {
             return createWinterCyclingUiState();
         case Route.FRACTAL_EXPLORER:
             return createFractalExplorerUiState();
+        case Route.PRIME_FINDER:
+            return createPrimeFinderUiState();
         default:
             return createMenuUiState();
     }
@@ -189,6 +202,12 @@ function createMenuUiState(): MenuUiState {
 function createFractalExplorerUiState(): FractalExplorerUiState {
     return {
         type: 'FractalExplorer'
+    };
+}
+
+function createPrimeFinderUiState(): PrimeFinderUiState {
+    return {
+        type: 'PrimeFinder'
     };
 }
 
