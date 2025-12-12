@@ -6,14 +6,146 @@ import { FractalType } from '../data/FractalTypes';
 const ctx: Worker = self as unknown as Worker;
 let workerId = -1;
 
-// Configure Decimal.js for arbitrary precision
-function configurePrecision(zoomStr: string): void {
+// Cached precision to avoid redundant configuration
+let cachedZoomStr: string | null = null;
+
+// Configure Decimal.js for arbitrary precision (only when zoom changes)
+function configurePrecisionIfNeeded(zoomStr: string): void {
+    if (zoomStr === cachedZoomStr) return;
+
+    cachedZoomStr = zoomStr;
     const zoom = new Decimal(zoomStr);
     // Calculate needed precision: roughly log10(zoom) * 1.5 + buffer
     const zoomDigits = zoom.abs().log(10).toNumber();
     const neededPrecision = Math.max(30, Math.ceil(zoomDigits * 1.5) + 20);
     Decimal.set({ precision: neededPrecision });
 }
+
+// Threshold for using fast float mode (64-bit float has ~15-16 significant digits)
+const FLOAT_PRECISION_THRESHOLD = 1e14;
+
+// ==================== FAST FLOAT IMPLEMENTATIONS ====================
+// These use native JavaScript numbers for 10-100x speedup at moderate zoom levels
+
+function computeMandelbrotFloat(cReal: number, cImag: number, maxIterations: number): number {
+    let zr = 0;
+    let zi = 0;
+    let zr2 = 0;
+    let zi2 = 0;
+
+    for (let i = 0; i < maxIterations; i++) {
+        if (zr2 + zi2 > 4) {
+            return i;
+        }
+
+        zi = 2 * zr * zi + cImag;
+        zr = zr2 - zi2 + cReal;
+        zr2 = zr * zr;
+        zi2 = zi * zi;
+    }
+
+    return maxIterations;
+}
+
+function computeJuliaFloat(
+    zReal: number,
+    zImag: number,
+    cReal: number,
+    cImag: number,
+    maxIterations: number
+): number {
+    let zr = zReal;
+    let zi = zImag;
+    let zr2 = zr * zr;
+    let zi2 = zi * zi;
+
+    for (let i = 0; i < maxIterations; i++) {
+        if (zr2 + zi2 > 4) {
+            return i;
+        }
+
+        zi = 2 * zr * zi + cImag;
+        zr = zr2 - zi2 + cReal;
+        zr2 = zr * zr;
+        zi2 = zi * zi;
+    }
+
+    return maxIterations;
+}
+
+function computeBurningShipFloat(cReal: number, cImag: number, maxIterations: number): number {
+    let zr = 0;
+    let zi = 0;
+    let zr2 = 0;
+    let zi2 = 0;
+
+    for (let i = 0; i < maxIterations; i++) {
+        if (zr2 + zi2 > 4) {
+            return i;
+        }
+
+        const absZr = Math.abs(zr);
+        const absZi = Math.abs(zi);
+        zi = 2 * absZr * absZi + cImag;
+        zr = zr2 - zi2 + cReal;
+        zr2 = zr * zr;
+        zi2 = zi * zi;
+    }
+
+    return maxIterations;
+}
+
+function computeTricornFloat(cReal: number, cImag: number, maxIterations: number): number {
+    let zr = 0;
+    let zi = 0;
+    let zr2 = 0;
+    let zi2 = 0;
+
+    for (let i = 0; i < maxIterations; i++) {
+        if (zr2 + zi2 > 4) {
+            return i;
+        }
+
+        zi = -2 * zr * zi + cImag;
+        zr = zr2 - zi2 + cReal;
+        zr2 = zr * zr;
+        zi2 = zi * zi;
+    }
+
+    return maxIterations;
+}
+
+function computePixelFloat(
+    pixelX: number,
+    pixelY: number,
+    canvasWidth: number,
+    canvasHeight: number,
+    centerReal: number,
+    centerImag: number,
+    zoom: number,
+    maxIterations: number,
+    fractalType: FractalType,
+    juliaReal: number,
+    juliaImag: number
+): number {
+    const real = centerReal + (pixelX - canvasWidth / 2) / zoom;
+    const imag = centerImag + (canvasHeight / 2 - pixelY) / zoom;
+
+    switch (fractalType) {
+        case 'mandelbrot':
+            return computeMandelbrotFloat(real, imag, maxIterations);
+        case 'julia':
+            return computeJuliaFloat(real, imag, juliaReal, juliaImag, maxIterations);
+        case 'burningShip':
+            return computeBurningShipFloat(real, imag, maxIterations);
+        case 'tricorn':
+            return computeTricornFloat(real, imag, maxIterations);
+        default:
+            return computeMandelbrotFloat(real, imag, maxIterations);
+    }
+}
+
+// ==================== ARBITRARY PRECISION IMPLEMENTATIONS ====================
 
 function computeMandelbrot(
     cReal: Decimal,
@@ -157,44 +289,90 @@ function computePixel(
 function processPixels(msg: ComputePixelsMessage): void {
     const startTime = performance.now();
 
-    configurePrecision(msg.zoomStr);
-
-    const centerReal = new Decimal(msg.centerRealStr);
-    const centerImag = new Decimal(msg.centerImagStr);
-    const zoom = new Decimal(msg.zoomStr);
-    const juliaReal = new Decimal(msg.juliaRealStr);
-    const juliaImag = new Decimal(msg.juliaImagStr);
-
     const results: number[] = [];
     const totalPixels = msg.pixels.length / 2;
     let pixelsCompleted = 0;
+    let lastProgressTime = startTime;
+    const PROGRESS_INTERVAL_MS = 200;
 
-    for (let i = 0; i < msg.pixels.length; i += 2) {
-        const pixelX = msg.pixels[i];
-        const pixelY = msg.pixels[i + 1];
+    // Check if we can use fast float mode (zoom below precision threshold)
+    const zoomNum = parseFloat(msg.zoomStr);
+    const useFloatMode = zoomNum < FLOAT_PRECISION_THRESHOLD;
 
-        const iterations = computePixel(
-            pixelX, pixelY,
-            msg.canvasWidth, msg.canvasHeight,
-            centerReal, centerImag, zoom,
-            msg.maxIterations,
-            msg.fractalType,
-            juliaReal, juliaImag
-        );
+    if (useFloatMode) {
+        // Fast path: use native JavaScript numbers (10-100x faster)
+        const centerReal = parseFloat(msg.centerRealStr);
+        const centerImag = parseFloat(msg.centerImagStr);
+        const juliaReal = parseFloat(msg.juliaRealStr);
+        const juliaImag = parseFloat(msg.juliaImagStr);
 
-        results.push(pixelX, pixelY, iterations);
-        pixelsCompleted++;
+        for (let i = 0; i < msg.pixels.length; i += 2) {
+            const pixelX = msg.pixels[i];
+            const pixelY = msg.pixels[i + 1];
 
-        // Send progress every 100 pixels
-        if (pixelsCompleted % 100 === 0) {
-            ctx.postMessage({
-                type: 'PROGRESS',
-                workerId,
-                renderId: msg.renderId,
-                pixelsCompleted,
-                totalPixels,
-                passNumber: msg.passNumber
-            } as WorkerMessage);
+            const iterations = computePixelFloat(
+                pixelX, pixelY,
+                msg.canvasWidth, msg.canvasHeight,
+                centerReal, centerImag, zoomNum,
+                msg.maxIterations,
+                msg.fractalType,
+                juliaReal, juliaImag
+            );
+
+            results.push(pixelX, pixelY, iterations);
+            pixelsCompleted++;
+
+            const now = performance.now();
+            if (now - lastProgressTime >= PROGRESS_INTERVAL_MS) {
+                lastProgressTime = now;
+                ctx.postMessage({
+                    type: 'PROGRESS',
+                    workerId,
+                    renderId: msg.renderId,
+                    pixelsCompleted,
+                    totalPixels,
+                    passNumber: msg.passNumber
+                } as WorkerMessage);
+            }
+        }
+    } else {
+        // Slow path: use Decimal.js for arbitrary precision (extreme zoom levels)
+        configurePrecisionIfNeeded(msg.zoomStr);
+
+        const centerReal = new Decimal(msg.centerRealStr);
+        const centerImag = new Decimal(msg.centerImagStr);
+        const zoom = new Decimal(msg.zoomStr);
+        const juliaReal = new Decimal(msg.juliaRealStr);
+        const juliaImag = new Decimal(msg.juliaImagStr);
+
+        for (let i = 0; i < msg.pixels.length; i += 2) {
+            const pixelX = msg.pixels[i];
+            const pixelY = msg.pixels[i + 1];
+
+            const iterations = computePixel(
+                pixelX, pixelY,
+                msg.canvasWidth, msg.canvasHeight,
+                centerReal, centerImag, zoom,
+                msg.maxIterations,
+                msg.fractalType,
+                juliaReal, juliaImag
+            );
+
+            results.push(pixelX, pixelY, iterations);
+            pixelsCompleted++;
+
+            const now = performance.now();
+            if (now - lastProgressTime >= PROGRESS_INTERVAL_MS) {
+                lastProgressTime = now;
+                ctx.postMessage({
+                    type: 'PROGRESS',
+                    workerId,
+                    renderId: msg.renderId,
+                    pixelsCompleted,
+                    totalPixels,
+                    passNumber: msg.passNumber
+                } as WorkerMessage);
+            }
         }
     }
 

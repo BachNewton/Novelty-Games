@@ -1,6 +1,6 @@
 import { RenderParams, ArbitraryPrecisionRenderParams, RenderMode, RenderProgress } from './FractalRenderer';
 import { CoordinatorMessage, WorkerMessage, ComputePixelsMessage } from '../workers/FractalWorkerMessages';
-import { getColorForIteration } from './ColorUtils';
+import { ColorLUT, createColorLUT } from './ColorUtils';
 
 export interface ArbitraryPrecisionRenderer {
     resize: (width: number, height: number) => void;
@@ -59,6 +59,72 @@ export function createArbitraryPrecisionRenderer(
     // Track if we're actively rendering (workers are computing)
     let isRendering = false;
 
+    // Color lookup table for fast color retrieval
+    let colorLUT: ColorLUT | null = null;
+
+    // Track previous render params for pan carryover optimization
+    let lastCenterRealStr: string | null = null;
+    let lastCenterImagStr: string | null = null;
+    let lastZoomStr: string | null = null;
+    let lastMaxIterations: number | null = null;
+    let lastFractalType: string | null = null;
+
+    // Check if we can reuse the buffer (pan without zoom change)
+    const canReuseBuffer = (params: ArbitraryPrecisionRenderParams): { dx: number; dy: number } | null => {
+        // Can't reuse if params that affect computation changed
+        if (!lastZoomStr || lastZoomStr !== params.zoomStr) return null;
+        if (!lastMaxIterations || lastMaxIterations !== params.maxIterations) return null;
+        if (!lastFractalType || lastFractalType !== params.fractalType) return null;
+        if (!iterationBuffer) return null;
+
+        // Calculate pixel offset from center change
+        const zoom = parseFloat(params.zoomStr);
+        const dxWorld = parseFloat(params.centerRealStr) - parseFloat(lastCenterRealStr!);
+        const dyWorld = parseFloat(params.centerImagStr) - parseFloat(lastCenterImagStr!);
+
+        const dxPixels = Math.round(dxWorld * zoom);
+        const dyPixels = Math.round(-dyWorld * zoom); // Y is inverted
+
+        // Only reuse if pan is reasonable (not more than half the screen)
+        if (Math.abs(dxPixels) > canvas.width / 2 || Math.abs(dyPixels) > canvas.height / 2) {
+            return null;
+        }
+
+        // Don't bother for tiny movements
+        if (dxPixels === 0 && dyPixels === 0) {
+            return null;
+        }
+
+        return { dx: dxPixels, dy: dyPixels };
+    };
+
+    // Shift the iteration buffer for pan reuse
+    const shiftBuffer = (dx: number, dy: number) => {
+        if (!iterationBuffer) return;
+
+        const width = canvas.width;
+        const height = canvas.height;
+        const newBuffer = new Int32Array(width * height);
+        newBuffer.fill(-1);
+
+        // Copy shifted pixels
+        for (let y = 0; y < height; y++) {
+            const srcY = y + dy;
+            if (srcY < 0 || srcY >= height) continue;
+
+            for (let x = 0; x < width; x++) {
+                const srcX = x + dx;
+                if (srcX < 0 || srcX >= width) continue;
+
+                const srcIdx = srcY * width + srcX;
+                const dstIdx = y * width + x;
+                newBuffer[dstIdx] = iterationBuffer[srcIdx];
+            }
+        }
+
+        iterationBuffer = newBuffer;
+    };
+
     const initializeWorkers = () => {
         for (let i = 0; i < workerCount; i++) {
             const worker = new Worker(
@@ -90,15 +156,35 @@ export function createArbitraryPrecisionRenderer(
         currentRenderId++;
         isRendering = true;
 
-        // Clear iteration buffer
-        if (!iterationBuffer || iterationBuffer.length !== canvas.width * canvas.height) {
-            iterationBuffer = new Int32Array(canvas.width * canvas.height);
+        // Create/update color LUT if palette or maxIterations changed
+        if (!colorLUT || colorLUT.maxIterations !== params.maxIterations || colorLUT.paletteId !== params.paletteId) {
+            colorLUT = createColorLUT(params.maxIterations, params.paletteId);
         }
-        iterationBuffer.fill(-1);
 
-        // Clear canvas with black
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Check if we can reuse pixels from the previous render (pan optimization)
+        const reuseOffset = canReuseBuffer(params);
+
+        if (reuseOffset) {
+            // Pan detected - shift buffer and only compute new edge pixels
+            shiftBuffer(reuseOffset.dx, reuseOffset.dy);
+        } else {
+            // Full clear for zoom change, param change, or large pan
+            if (!iterationBuffer || iterationBuffer.length !== canvas.width * canvas.height) {
+                iterationBuffer = new Int32Array(canvas.width * canvas.height);
+            }
+            iterationBuffer.fill(-1);
+
+            // Clear canvas with black
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Update tracking for next render
+        lastCenterRealStr = params.centerRealStr;
+        lastCenterImagStr = params.centerImagStr;
+        lastZoomStr = params.zoomStr;
+        lastMaxIterations = params.maxIterations;
+        lastFractalType = params.fractalType;
 
         // Start first pass
         startPass(0);
@@ -123,7 +209,8 @@ export function createArbitraryPrecisionRenderer(
             // Ignore progress from old renders
             if (message.renderId !== currentRenderId) return;
 
-            pixelsCompletedInPass += 100; // Approximate since we send every 100
+            // Use actual pixels completed from worker (more accurate with time-based reporting)
+            pixelsCompletedInPass = message.pixelsCompleted;
             if (onProgressCallback && !renderCancelled) {
                 onProgressCallback({
                     mode: 'cpu',
@@ -173,76 +260,120 @@ export function createArbitraryPrecisionRenderer(
 
             // Check if all workers completed this pass
             if (workersCompletedInPass >= totalWorkersInPass) {
-                // Render the completed pass
-                renderToCanvas();
-
-                // Move to next pass
-                const nextPass = currentPass + 1;
-                if (nextPass < PASSES.length && !renderCancelled) {
-                    startPass(nextPass);
-                } else {
-                    // All passes complete
-                    isRendering = false;
-                    if (onProgressCallback) {
-                        onProgressCallback({
-                            mode: 'cpu',
-                            percentComplete: 100,
-                            currentPass: PASSES.length,
-                            totalPasses: PASSES.length
-                        });
+                // Render the completed pass (async to prevent UI freeze)
+                renderToCanvas(() => {
+                    // Move to next pass after canvas update completes
+                    const nextPass = currentPass + 1;
+                    if (nextPass < PASSES.length && !renderCancelled) {
+                        startPass(nextPass);
+                    } else {
+                        // All passes complete
+                        isRendering = false;
+                        if (onProgressCallback) {
+                            onProgressCallback({
+                                mode: 'cpu',
+                                percentComplete: 100,
+                                currentPass: PASSES.length,
+                                totalPasses: PASSES.length
+                            });
+                        }
+                        // Check if a new render was requested while we were working
+                        checkPendingRender();
                     }
-                    // Check if a new render was requested while we were working
-                    checkPendingRender();
-                }
+                });
             }
         }
     };
 
-    const renderToCanvas = () => {
-        if (!iterationBuffer || !currentParams) return;
+    // Chunked canvas rendering to prevent UI freezes
+    const CHUNK_SIZE = 20000; // Pixels per chunk - balances responsiveness vs overhead
 
-        const imageData = ctx.createImageData(canvas.width, canvas.height);
+    const renderToCanvas = (onComplete: () => void) => {
+        if (!iterationBuffer || !currentParams || !colorLUT) {
+            onComplete();
+            return;
+        }
+
+        const width = canvas.width;
+        const height = canvas.height;
+        const totalPixels = width * height;
+        const imageData = ctx.createImageData(width, height);
         const data = imageData.data;
+        const lutData = colorLUT.data;
+        const maxIter = currentParams.maxIterations;
+        const step = currentStepForRender;
+        const buffer = iterationBuffer;
+        let currentPixel = 0;
+        const renderIdAtStart = currentRenderId;
 
-        for (let y = 0; y < canvas.height; y++) {
-            for (let x = 0; x < canvas.width; x++) {
-                const idx = y * canvas.width + x;
-                let iter = iterationBuffer[idx];
+        const processChunk = () => {
+            // Check if render was cancelled
+            if (renderCancelled || currentRenderId !== renderIdAtStart) {
+                onComplete();
+                return;
+            }
+
+            const endPixel = Math.min(currentPixel + CHUNK_SIZE, totalPixels);
+
+            for (let idx = currentPixel; idx < endPixel; idx++) {
+                let iter = buffer[idx];
 
                 // If this pixel hasn't been computed yet, sample from nearest computed pixel
                 if (iter === -1) {
-                    // Find nearest computed pixel by rounding down to current step grid
-                    const sampleX = Math.floor(x / currentStepForRender) * currentStepForRender;
-                    const sampleY = Math.floor(y / currentStepForRender) * currentStepForRender;
-                    const sampleIdx = sampleY * canvas.width + sampleX;
-                    iter = iterationBuffer[sampleIdx];
+                    const x = idx % width;
+                    const y = Math.floor(idx / width);
+                    const sampleX = Math.floor(x / step) * step;
+                    const sampleY = Math.floor(y / step) * step;
+                    const sampleIdx = sampleY * width + sampleX;
+                    iter = buffer[sampleIdx];
                     if (iter === -1) iter = 0; // Fallback to black
                 }
 
-                const [r, g, b] = getColorForIteration(
-                    iter,
-                    currentParams.maxIterations,
-                    currentParams.paletteId
-                );
-
                 const pixelIdx = idx * 4;
-                data[pixelIdx] = r;
-                data[pixelIdx + 1] = g;
-                data[pixelIdx + 2] = b;
+                if (iter >= maxIter) {
+                    // In the set - black
+                    data[pixelIdx] = 0;
+                    data[pixelIdx + 1] = 0;
+                    data[pixelIdx + 2] = 0;
+                } else {
+                    // Use LUT for fast color lookup
+                    const lutIdx = iter * 3;
+                    data[pixelIdx] = lutData[lutIdx];
+                    data[pixelIdx + 1] = lutData[lutIdx + 1];
+                    data[pixelIdx + 2] = lutData[lutIdx + 2];
+                }
                 data[pixelIdx + 3] = 255;
             }
-        }
 
-        ctx.putImageData(imageData, 0, 0);
+            currentPixel = endPixel;
+
+            if (currentPixel < totalPixels) {
+                // More chunks to process - yield to event loop
+                requestAnimationFrame(processChunk);
+            } else {
+                // All chunks done - update canvas and notify
+                ctx.putImageData(imageData, 0, 0);
+                onComplete();
+            }
+        };
+
+        // Start processing
+        requestAnimationFrame(processChunk);
     };
 
     const getPixelsForPass = (passIndex: number): number[][] => {
         const step = PASSES[passIndex].step;
         const allPixels: number[] = [];
+        const width = canvas.width;
 
         // Compute all pixels that are on this pass's grid but weren't on any previous grid
         for (let y = 0; y < canvas.height; y += step) {
-            for (let x = 0; x < canvas.width; x += step) {
+            for (let x = 0; x < width; x += step) {
+                // Skip if already computed (from buffer reuse during pan)
+                if (iterationBuffer && iterationBuffer[y * width + x] !== -1) {
+                    continue;
+                }
+
                 // Check if this pixel was already computed in a previous pass
                 let alreadyComputed = false;
                 for (let p = 0; p < passIndex; p++) {

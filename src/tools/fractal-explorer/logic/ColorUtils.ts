@@ -94,3 +94,23 @@ function hslToRgb(h: number, s: number, l: number): [number, number, number] {
         Math.floor((b + m) * 255)
     ];
 }
+
+// Color Lookup Table for fast color retrieval
+export interface ColorLUT {
+    data: Uint8Array; // R,G,B for each iteration (size: maxIterations * 3)
+    maxIterations: number;
+    paletteId: string;
+}
+
+export function createColorLUT(maxIterations: number, paletteId: string): ColorLUT {
+    const data = new Uint8Array(maxIterations * 3);
+
+    for (let i = 0; i < maxIterations; i++) {
+        const [r, g, b] = getColorForIteration(i, maxIterations, paletteId);
+        data[i * 3] = r;
+        data[i * 3 + 1] = g;
+        data[i * 3 + 2] = b;
+    }
+
+    return { data, maxIterations, paletteId };
+}
