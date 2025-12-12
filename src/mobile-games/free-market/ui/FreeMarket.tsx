@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import HorizontalLine from "./HorizontalLine";
-import { Route, updateRoute } from "../../../ui/Routing";
 import Tabs, { Tab } from "./Tabs";
 import Invent from "./Invent";
 import { FreeMarketCommunicator } from "../logic/FreeMarketCommunicator";
@@ -38,8 +37,6 @@ const FreeMarket: React.FC<FreeMarketProps> = ({ communicator, storer }) => {
     const [state, setState] = useState<State>(new LoadingState());
 
     useEffect(() => {
-        updateRoute(Route.FREE_MARKET);
-
         storer.load()
             .then(save => {
                 if (save.version !== SAVE_VERSION) throw new Error();

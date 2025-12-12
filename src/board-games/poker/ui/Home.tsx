@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Route, updateRoute } from "../../../ui/Routing";
 import { createPokerNetworking } from "../logic/PokerNetworking";
 import Lobby from "./Lobby";
 import Game from "./Game";
@@ -33,8 +32,6 @@ const Home: React.FC<HomeProps> = () => {
     const [messages, setMessages] = useState<string[]>([]);
 
     useEffect(() => {
-        updateRoute(Route.POKER);
-
         networking.onGameBegun(() => {
             hasGameStarted.current = true;
         });

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Route, updateRoute } from "../../../ui/Routing";
 import Tabs from "./Tabs";
 import Content from "./Content";
 import { createStorer, StorageKey } from "../../../util/Storage";
@@ -31,8 +30,6 @@ const Home: React.FC<HomeProps> = ({ networking }) => {
     const [rides, setRides] = useState<Ride[] | null>(null);
 
     useEffect(() => {
-        updateRoute(Route.WINTER_CYCLING);
-
         networking.setEnvironment(save.serverEnv ?? ServerEnv.DEVELOPMENT).then(fetchedRides => {
             setRides(fetchedRides);
         });

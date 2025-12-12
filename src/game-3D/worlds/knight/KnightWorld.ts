@@ -3,7 +3,6 @@ import * as CANNON from 'cannon-es';
 import { GameWorld, GameWorldCreator } from "../GameWorld";
 import { FBXLoader, OrbitControls } from 'three/examples/jsm/Addons';
 import KnightRunAnimationFbx from './models/Lite Sword and Shield Pack/sword and shield run.fbx';
-import { updateRoute, Route } from '../../../ui/Routing';
 
 const KNIGHT_MODEL_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/main/models/knight/Paladin%20WProp%20J%20Nordstrom.fbx';
 
@@ -19,8 +18,6 @@ function createKnightWorld(
     updateHUD: (text: string) => void,
     updateSummary: (element: JSX.Element) => void
 ): GameWorld {
-    updateRoute(Route.KNIGHT_GAME);
-
     addLight(scene);
     addSkybox(scene);
     addGround(scene);

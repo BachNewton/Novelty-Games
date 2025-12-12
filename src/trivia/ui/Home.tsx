@@ -11,10 +11,6 @@ import HomeButton from '../../ui/HomeButton';
 import SettingsPage from './SettingsPage';
 import PokemonSettings, { PokemonQuestionType, PokemonSettingsQuestionTypeGetter, savePokemonQuestionTypeSelection } from './PokemonSettings';
 
-interface HomeProps {
-    onHomeButtonClicked: () => void;
-}
-
 interface State {
     ui: UiState;
     data: Promise<Array<Data>>;
@@ -30,7 +26,7 @@ enum UiState {
 
 const progressUpdater = new ProgressUpdater();
 
-const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
+const Home: React.FC = () => {
     const [state, setState] = useState({ ui: UiState.HOME, isDataStored: new Map() } as State);
     const [refreshDataStoredNeeded, setRefreshDataStoredNeeded] = useState(true);
 
@@ -79,8 +75,7 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked }) => {
             return HomeUi(
                 state.isDataStored,
                 state,
-                setState,
-                onHomeButtonClicked
+                setState
             );
         case UiState.GAME:
             return <Game
@@ -132,8 +127,7 @@ function getSettingsUi(
 function HomeUi(
     isDataStored: Map<DataType, boolean>,
     state: State,
-    setState: React.Dispatch<React.SetStateAction<State>>,
-    onHomeButtonClicked: () => void
+    setState: React.Dispatch<React.SetStateAction<State>>
 ) {
     const gameOptionsUi = [
         DataType.ROLLERCOASTERS,
@@ -195,7 +189,7 @@ function HomeUi(
     });
 
     return <div className='Home'>
-        <HomeButton onClick={onHomeButtonClicked} />
+        <HomeButton />
         <h2>🤔 Kyle's Trivia Games 🤯</h2>
         <div><br /></div>
         {gameOptionsUi}

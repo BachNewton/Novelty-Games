@@ -1,4 +1,3 @@
-import { Route, updateRoute } from "../../../ui/Routing";
 import { KeyboardInput } from "../../../util/input/Keyboard";
 import { Camera } from "../Camera";
 import { Drawer } from "../Drawer";
@@ -15,8 +14,6 @@ export function createPlatformerWorld(
     camera: Camera,
     keyboardInput: KeyboardInput
 ): GameWorld {
-    updateRoute(Route.PLATFORMER);
-
     const gravity = createVector(0, -GRAVITY);
 
     const obstacles: Box[] = [

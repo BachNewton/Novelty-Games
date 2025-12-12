@@ -9,7 +9,6 @@ interface LobbyProps {
     communicator: Communicator;
     startGame: (lobbyTeams: Array<LobbyTeam>) => void;
     localId: string;
-    onHomeButtonClicked: () => void;
 }
 
 export interface LobbyTeam {
@@ -39,7 +38,7 @@ class DialogOpenState implements DialogOpenState {
 class DialogOpenComputerState extends DialogOpenState { }
 class DialogOpenHumanState extends DialogOpenState { }
 
-const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeButtonClicked }) => {
+const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId }) => {
     const [lobbyTeams, setLobbyTeams] = useState<Array<LobbyTeam>>([]);
     const [dialogState, setDialogState] = useState<DialogState>(new DialogClosedState());
 
@@ -108,7 +107,7 @@ const Lobby: React.FC<LobbyProps> = ({ communicator, startGame, localId, onHomeB
 
     return <>
         <div style={{ color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100dvh', flexDirection: 'column' }}>
-            <HomeButton onClick={onHomeButtonClicked} />
+            <HomeButton />
             <div style={{ fontSize: '1.75em', marginBottom: '1em' }}>🏎️ Mille Bornes Lobby 🏁</div>
             <div>
                 {addTeamButton}

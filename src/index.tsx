@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import './css/index.css';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
-import Home from './ui/Home';
+import App from './ui/App';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -32,7 +33,9 @@ const updateCallbacks = {
 
 root.render(
   <React.StrictMode>
-    <Home updateCallbacks={updateCallbacks} />
+    <BrowserRouter basename="/Novelty-Games">
+      <App updateCallbacks={updateCallbacks} />
+    </BrowserRouter>
   </React.StrictMode>
 );
 

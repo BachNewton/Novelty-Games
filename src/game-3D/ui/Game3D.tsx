@@ -6,7 +6,10 @@ import { GameWorld, GameWorldCreator } from "../worlds/GameWorld";
 import MarbleWorld from "../worlds/marble/logic/MarbleWorld";
 import { KnightWorld } from "../worlds/knight/KnightWorld";
 import { FortunaWorld } from "../worlds/fortuna/FortunaWorld";
-import { Game } from "./Home";
+
+export enum Game {
+    MARBLE, KNIGHT, FORTUNA
+}
 
 const MINIUM_FRAME_RATE = 1000 / 25;
 

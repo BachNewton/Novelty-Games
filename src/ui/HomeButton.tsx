@@ -1,8 +1,9 @@
-interface HomeButtonProps {
-    onClick: () => void;
-}
+import { useNavigate } from 'react-router-dom';
+import { HOME } from '../routes/routes';
 
-const HomeButton: React.FC<HomeButtonProps> = ({ onClick }) => {
+const HomeButton: React.FC = () => {
+    const navigate = useNavigate();
+
     const homeButtonStyle: React.CSSProperties = {
         position: 'fixed',
         top: 0,
@@ -12,7 +13,7 @@ const HomeButton: React.FC<HomeButtonProps> = ({ onClick }) => {
         fontSize: '1em'
     };
 
-    return <button style={homeButtonStyle} onClick={onClick}>🏠</button>;
+    return <button style={homeButtonStyle} onClick={() => navigate(HOME.fullPath)}>🏠</button>;
 };
 
 export default HomeButton;

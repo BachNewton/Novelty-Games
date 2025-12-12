@@ -1,6 +1,5 @@
 import "../css/font.css";
 import { useEffect, useRef, useState } from "react";
-import { Route, updateRoute } from "../../../ui/Routing";
 import Scaffold from "../../../util/ui/Scaffold";
 import { PetsDatabase } from "../logic/PetsDatabase";
 import { createPetsDebugger } from "../logic/PetsDebugger";
@@ -44,8 +43,6 @@ const Home: React.FC<HomeProps> = ({ database }) => {
     const selectedPet = pets[selectedTab ?? 0];
 
     useEffect(() => {
-        updateRoute(Route.PETS);
-
         dataManager.getPetsFromSave(pets).then(updatedPets => {
             setHasLoaded(true);
 

@@ -1,11 +1,8 @@
-import { Route, updateRoute } from "../../../ui/Routing";
 import { GameWorld } from "../GameWorld";
 import { createAnimator, Animation } from "./Animator";
 import CAT_SPRITE_SHEET from "./sprites/cat-sheet.png";
 
 export function createCatWorld(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): GameWorld {
-    updateRoute(Route.CAT);
-
     const image = new Image();
     image.src = CAT_SPRITE_SHEET;
 
