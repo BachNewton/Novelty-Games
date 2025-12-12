@@ -5,9 +5,6 @@ import { createArbitraryPrecisionRenderer, ArbitraryPrecisionRenderer } from './
 // Threshold where GPU precision starts to degrade (single precision float limit)
 const GPU_PRECISION_THRESHOLD = 1e7;
 
-// Hysteresis to prevent flickering when zooming around threshold
-const SWITCH_HYSTERESIS = 0.5; // Orders of magnitude
-
 export interface RendererManager {
     resize: (width: number, height: number) => void;
     render: (params: RenderParams | ArbitraryPrecisionRenderParams) => void;
@@ -51,13 +48,7 @@ export function createRendererManager(
     };
 
     const shouldUseGPU = (zoom: number): boolean => {
-        // Add hysteresis to prevent flickering
-        if (currentMode === 'gpu') {
-            return zoom < GPU_PRECISION_THRESHOLD;
-        } else {
-            // Require zoom to drop significantly before switching back to GPU
-            return zoom < GPU_PRECISION_THRESHOLD * Math.pow(10, -SWITCH_HYSTERESIS);
-        }
+        return zoom < GPU_PRECISION_THRESHOLD;
     };
 
     const switchMode = (newMode: RenderMode) => {
