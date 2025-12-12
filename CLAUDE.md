@@ -19,11 +19,30 @@ A React PWA providing a single-app hub for a growing collection of games, tools,
 
 ## Architecture
 
-### Custom Routing
-Uses a custom routing system (no React Router). See `src/ui/Routing.ts` for route definitions and navigation logic via `window.history.pushState()`.
+### Routing (React Router v6)
+Uses React Router v6 with `BrowserRouter` and a hierarchical route configuration. GitHub Pages SPA support via `public/404.html` redirect trick.
+
+**Key files:**
+- `src/routes/routes.ts` - Hierarchical route tree with `RouteNode` interface
+- `src/ui/App.tsx` - Main router with all `<Route>` definitions
+- `public/404.html` - GitHub Pages SPA redirect script
+
+**Route configuration pattern:**
+```ts
+// Routes are defined hierarchically - paths computed from segments
+export const BOARD_GAMES = createRoute('board-games');
+export const MILLE_BORNES = createRoute('mille-bornes', BOARD_GAMES);
+// Results in: MILLE_BORNES.fullPath === '/board-games/mille-bornes'
+```
+
+**Navigation:** Use `useNavigate()` hook with `ROUTE.fullPath`:
+```tsx
+const navigate = useNavigate();
+navigate(MILLE_BORNES.fullPath);
+```
 
 ### State Management
-Class-based state objects (HomeState, Game2DState, etc.) rather than Redux/Zustand. Each state class manages its feature's state.
+Component-local state with React hooks. Page wrapper components handle dependency injection (communicators, storers) via `useMemo()`.
 
 ### Game Organization Pattern
 Each game follows this structure:
