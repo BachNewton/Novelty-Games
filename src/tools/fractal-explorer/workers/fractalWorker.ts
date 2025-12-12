@@ -21,8 +21,9 @@ function configurePrecisionIfNeeded(zoomStr: string): void {
     Decimal.set({ precision: neededPrecision });
 }
 
-// Threshold for using fast float mode (64-bit float has ~15-16 significant digits)
-const FLOAT_PRECISION_THRESHOLD = 1e14;
+// Threshold for using fast float mode (64-bit float has 53-bit mantissa ≈ 9e15 precision)
+// Set conservatively below observed artifact threshold (~3e16)
+const FLOAT_PRECISION_THRESHOLD = 1e16;
 
 // Result type for smooth coloring support
 interface FractalResult {

@@ -60,7 +60,7 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
 
         // Update zoom level and precision mode for UI
         setZoomLevel(zoomNum);
-        setPrecisionMode(zoomNum >= 1e14 ? 'arbitrary' : 'float');
+        setPrecisionMode(zoomNum >= 1e16 ? 'arbitrary' : 'float');
         const dynamicIterations = Math.min(
             10000,
             Math.max(props.maxIterations, Math.floor(props.maxIterations * (1 + zoomLevel * 0.5)))
