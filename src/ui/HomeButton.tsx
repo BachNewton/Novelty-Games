@@ -13,7 +13,7 @@ const HomeButton: React.FC = () => {
         fontSize: '1em'
     };
 
-    return <button style={homeButtonStyle} onClick={() => navigate(HOME.fullPath)}>Home</button>;
+    return <button style={homeButtonStyle} onClick={() => navigate(HOME.fullPath)}>🏠</button>;
 };
 
 export default HomeButton;
