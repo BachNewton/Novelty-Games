@@ -1,13 +1,7 @@
 import ToddlerCompanionApp from '../toddler/ToddlerCompanionApp';
-import HomeButton from '../../ui/HomeButton';
 
 const ToddlerCompanionPage: React.FC = () => {
-    return (
-        <>
-            <HomeButton />
-            <ToddlerCompanionApp />
-        </>
-    );
+    return <ToddlerCompanionApp />;
 };
 
 export default ToddlerCompanionPage;

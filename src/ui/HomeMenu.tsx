@@ -80,17 +80,17 @@ const HomeMenu: React.FC<HomeMenuProps> = ({ updateCallbacks }) => {
             <div style={versionStateStyle}>{versionStateUi(versionState)}</div>
             <ProfileUi />
             <code style={versionLabelStyle}>{APP_VERSION}</code>
-            <div style={{ fontSize: '2em', fontWeight: 'bold', marginBottom: '2px' }}>Novelty Games</div>
+            <div style={{ fontSize: '2em', fontWeight: 'bold', marginBottom: '2px' }}>🕹️ Novelty Games 🎰</div>
             <div>Created by: Kyle Hutchinson</div>
             <div><br /></div>
-            <button style={BUTTON_STYLE} onClick={() => navigate(R.TRIVIA.fullPath)}>Trivia</button>
-            <button style={BUTTON_STYLE} onClick={() => navigate(R.BOARD_GAMES.fullPath)}>Board Games</button>
+            <button style={BUTTON_STYLE} onClick={() => navigate(R.TRIVIA.fullPath)}>Trivia 🤔</button>
+            <button style={BUTTON_STYLE} onClick={() => navigate(R.BOARD_GAMES.fullPath)}>Board Games 🎲</button>
             <div style={{ display: 'flex', width: BUTTON_WIDTH, height: '4.5em', gap: '10px', margin: BUTTON_MARGIN }}>
-                <Button fontScale={1.5} borderRadius={BUTTON_BORDER_RADIUS} onClick={() => navigate(R.GAMES_2D.fullPath)}>2D Games</Button>
-                <Button fontScale={1.5} borderRadius={BUTTON_BORDER_RADIUS} onClick={() => navigate(R.GAMES_3D.fullPath)}>3D Games</Button>
+                <Button fontScale={1.5} borderRadius={BUTTON_BORDER_RADIUS} onClick={() => navigate(R.GAMES_2D.fullPath)}>2D Games 🟦</Button>
+                <Button fontScale={1.5} borderRadius={BUTTON_BORDER_RADIUS} onClick={() => navigate(R.GAMES_3D.fullPath)}>3D Games 🧊</Button>
             </div>
-            <button style={BUTTON_STYLE} onClick={() => navigate(R.MOBILE_GAMES.fullPath)}>Mobile Games</button>
-            <button style={BUTTON_STYLE} onClick={() => navigate(R.TOOLS.fullPath)}>Tools</button>
+            <button style={BUTTON_STYLE} onClick={() => navigate(R.MOBILE_GAMES.fullPath)}>Mobile Games 📱</button>
+            <button style={BUTTON_STYLE} onClick={() => navigate(R.TOOLS.fullPath)}>Tools 🔨</button>
         </div>
     );
 };
@@ -113,20 +113,20 @@ async function handleUpdateAppClick(): Promise<void> {
 function versionStateUi(versionState: VersionState) {
     switch (versionState) {
         case VersionState.CHECKING:
-            return <>Checking for updates...</>;
+            return <>☁️ Checking for updates...</>;
         case VersionState.CURRENT:
-            return <>Up-to-date</>;
+            return <>✔️ Up-to-date</>;
         case VersionState.INSTALLING:
-            return <>Installing update...</>;
+            return <>⬇️ Installing update...</>;
         case VersionState.OUTDATED:
             return <Button
                 onClick={handleUpdateAppClick}
                 fontScale={1.25}
             >
-                <div style={{ padding: '2px' }}>Update App</div>
+                <div style={{ padding: '2px' }}>🔄 Update App</div>
             </Button>;
         case VersionState.UNKNOWN:
-            return <>Offline</>;
+            return <>✖️ Offline</>;
     }
 }
 

@@ -1,5 +1,4 @@
 import Game3D, { Game } from './Game3D';
-import HomeButton from '../../ui/HomeButton';
 
 interface Game3DPageProps {
     game: 'marble' | 'knight' | 'fortuna';
@@ -12,12 +11,7 @@ const gameMap: Record<string, Game> = {
 };
 
 const Game3DPage: React.FC<Game3DPageProps> = ({ game }) => {
-    return (
-        <>
-            <HomeButton />
-            <Game3D game={gameMap[game]} />
-        </>
-    );
+    return <Game3D game={gameMap[game]} />;
 };
 
 export default Game3DPage;
