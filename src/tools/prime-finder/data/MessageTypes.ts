@@ -68,3 +68,13 @@ export interface PrimeStatistics {
     elapsedTimeMs: number;
     totalNumbersChecked: number;
 }
+
+// Unified data structure for canvas rendering - updated by coordinator, read by canvas
+export interface PrimeFinderData {
+    latestPrime: number;
+    totalPrimesFound: number;
+    highestNumberChecked: number;
+    primesPerSecond: number;
+    startTime: number;
+    workerStates: WorkerStateInfo[];
+}

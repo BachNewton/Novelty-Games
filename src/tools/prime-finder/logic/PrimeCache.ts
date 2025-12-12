@@ -1,14 +1,19 @@
 export interface PrimeCache {
-    getPrimes: () => number[];
     getPrimesUpTo: (max: number) => number[];
     addPrimes: (newPrimes: number[]) => void;
     getCount: () => number;
     getLargest: () => number;
 }
 
+// Only store primes up to this value for trial division
+// sqrt(10^12) ≈ 10^6, so 2M should cover numbers up to 4 trillion
+const MAX_STORED_PRIME = 2_000_000;
+
 export function createPrimeCache(): PrimeCache {
     // Bootstrap with small primes for initial batches
-    let primes: number[] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
+    let storedPrimes: number[] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
+    let totalCount = storedPrimes.length;
+    let largestPrime = storedPrimes[storedPrimes.length - 1];
 
     const binarySearchUpperBound = (arr: number[], target: number): number => {
         let left = 0;
@@ -24,36 +29,31 @@ export function createPrimeCache(): PrimeCache {
         return left;
     };
 
-    const mergeSorted = (a: number[], b: number[]): number[] => {
-        if (b.length === 0) return a;
-        if (a.length === 0) return b;
-
-        // Filter out any primes from b that are already in a
-        const lastInA = a[a.length - 1];
-        const newPrimes = b.filter(p => p > lastInA);
-
-        if (newPrimes.length === 0) return a;
-
-        // Since newPrimes are all larger than anything in a, just concat
-        return [...a, ...newPrimes];
-    };
-
     return {
-        getPrimes: () => [...primes],
-
         getPrimesUpTo: (max) => {
-            const idx = binarySearchUpperBound(primes, max);
-            return primes.slice(0, idx);
+            const idx = binarySearchUpperBound(storedPrimes, max);
+            return storedPrimes.slice(0, idx);
         },
 
         addPrimes: (newPrimes) => {
             if (newPrimes.length === 0) return;
-            const sorted = [...newPrimes].sort((a, b) => a - b);
-            primes = mergeSorted(primes, sorted);
+
+            // Update count and largest
+            totalCount += newPrimes.length;
+            const maxNew = Math.max(...newPrimes);
+            if (maxNew > largestPrime) {
+                largestPrime = maxNew;
+            }
+
+            // Only store primes up to MAX_STORED_PRIME for trial division
+            const primesToStore = newPrimes.filter(p => p <= MAX_STORED_PRIME);
+            if (primesToStore.length === 0) return;
+
+            storedPrimes.push(...primesToStore);
         },
 
-        getCount: () => primes.length,
+        getCount: () => totalCount,
 
-        getLargest: () => primes.length > 0 ? primes[primes.length - 1] : 0
+        getLargest: () => largestPrime
     };
 }

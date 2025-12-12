@@ -1,27 +1,22 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { PrimeStatistics, WorkerStateInfo } from '../data/MessageTypes';
+import { PrimeFinderData } from '../data/MessageTypes';
 import { createPrimeCoordinator, PrimeCoordinator } from '../logic/PrimeCoordinator';
-import StatisticsPanel from './StatisticsPanel';
-import WorkerActivityPanel from './WorkerActivityPanel';
-import UlamSpiralCanvas from './UlamSpiralCanvas';
+import PrimeCanvas from './PrimeCanvas';
 import { updateRoute, Route } from '../../../ui/Routing';
 
-const initialStatistics: PrimeStatistics = {
+const initialData: PrimeFinderData = {
+    latestPrime: 0,
     totalPrimesFound: 0,
-    largestPrime: 0,
     highestNumberChecked: 0,
     primesPerSecond: 0,
-    elapsedTimeMs: 0,
-    totalNumbersChecked: 0
+    startTime: 0,
+    workerStates: []
 };
 
 const PrimeFinderHome: React.FC = () => {
     const [isRunning, setIsRunning] = useState(false);
-    const [statistics, setStatistics] = useState<PrimeStatistics>(initialStatistics);
-    const [workerStates, setWorkerStates] = useState<WorkerStateInfo[]>([]);
 
-    // Use a ref for primes to avoid re-renders on every batch
-    const primesRef = useRef<Set<number>>(new Set());
+    const dataRef = useRef<PrimeFinderData>({ ...initialData });
     const coordinatorRef = useRef<PrimeCoordinator | null>(null);
 
     useEffect(() => {
@@ -31,17 +26,7 @@ const PrimeFinderHome: React.FC = () => {
     const handleStart = useCallback(() => {
         if (coordinatorRef.current) return;
 
-        const coordinator = createPrimeCoordinator({
-            onPrimesDiscovered: (newPrimes) => {
-                // Add to ref without triggering re-render
-                for (const prime of newPrimes) {
-                    primesRef.current.add(prime);
-                }
-            },
-            onStatisticsUpdate: setStatistics,
-            onWorkerStatesUpdate: setWorkerStates
-        });
-
+        const coordinator = createPrimeCoordinator(dataRef);
         coordinatorRef.current = coordinator;
         coordinator.start();
         setIsRunning(true);
@@ -95,42 +80,9 @@ const PrimeFinderHome: React.FC = () => {
         color: 'white'
     };
 
-    const mainContentStyle: React.CSSProperties = {
-        display: 'flex',
+    const canvasContainerStyle: React.CSSProperties = {
         flex: 1,
         overflow: 'hidden'
-    };
-
-    const leftPanelStyle: React.CSSProperties = {
-        width: '240px',
-        padding: '16px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '16px',
-        overflowY: 'auto'
-    };
-
-    const spiralContainerStyle: React.CSSProperties = {
-        flex: 1,
-        position: 'relative',
-        margin: '16px',
-        marginLeft: 0,
-        borderRadius: '8px',
-        overflow: 'hidden',
-        border: '1px solid rgba(255, 255, 255, 0.1)'
-    };
-
-    const bottomPanelStyle: React.CSSProperties = {
-        padding: '16px',
-        paddingTop: 0
-    };
-
-    const instructionsStyle: React.CSSProperties = {
-        color: 'rgba(255, 255, 255, 0.5)',
-        fontSize: '0.8em',
-        fontFamily: 'monospace',
-        textAlign: 'center',
-        padding: '8px'
     };
 
     return (
@@ -145,21 +97,8 @@ const PrimeFinderHome: React.FC = () => {
                 </button>
             </div>
 
-            <div style={mainContentStyle}>
-                <div style={leftPanelStyle}>
-                    <StatisticsPanel statistics={statistics} />
-                    <div style={instructionsStyle}>
-                        Drag to pan, scroll to zoom
-                    </div>
-                </div>
-
-                <div style={spiralContainerStyle}>
-                    <UlamSpiralCanvas primesRef={primesRef} />
-                </div>
-            </div>
-
-            <div style={bottomPanelStyle}>
-                <WorkerActivityPanel workerStates={workerStates} />
+            <div style={canvasContainerStyle}>
+                <PrimeCanvas dataRef={dataRef} isRunning={isRunning} />
             </div>
         </div>
     );

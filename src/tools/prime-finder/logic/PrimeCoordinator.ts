@@ -1,19 +1,11 @@
-import { CoordinatorMessage, WorkerMessage, WorkerStateInfo, PrimeStatistics } from '../data/MessageTypes';
-import { createPrimeCache, PrimeCache } from './PrimeCache';
-
-export interface PrimeCoordinatorCallbacks {
-    onPrimesDiscovered: (primes: number[]) => void;
-    onStatisticsUpdate: (stats: PrimeStatistics) => void;
-    onWorkerStatesUpdate: (states: WorkerStateInfo[]) => void;
-}
+import { CoordinatorMessage, WorkerMessage, PrimeFinderData } from '../data/MessageTypes';
+import { createPrimeCache } from './PrimeCache';
+import { MutableRefObject } from 'react';
 
 export interface PrimeCoordinator {
     start: () => void;
     stop: () => void;
     isRunning: () => boolean;
-    getStatistics: () => PrimeStatistics;
-    getWorkerStates: () => WorkerStateInfo[];
-    getPrimeCache: () => PrimeCache;
 }
 
 const INITIAL_BATCH_SIZE = 10000;
@@ -21,32 +13,35 @@ const MIN_BATCH_SIZE = 1000;
 const MAX_BATCH_SIZE = 100000;
 const TARGET_BATCH_TIME_MS = 500;
 
-export function createPrimeCoordinator(callbacks: PrimeCoordinatorCallbacks): PrimeCoordinator {
+export function createPrimeCoordinator(dataRef: MutableRefObject<PrimeFinderData>): PrimeCoordinator {
     const workerCount = navigator.hardwareConcurrency || 4;
     const workers: Worker[] = [];
-    const workerStates: Map<number, WorkerStateInfo> = new Map();
     const workerBatchSizes: Map<number, number> = new Map();
 
     let running = false;
     let nextNumberToAssign = 2;
-    let startTime = 0;
-    let totalNumbersChecked = 0;
     let primesPerSecondSamples: number[] = [];
     let lastSampleTime = 0;
     let lastSamplePrimeCount = 0;
 
     const primeCache = createPrimeCache();
 
-    const createWorkerState = (workerId: number): WorkerStateInfo => ({
-        workerId,
-        status: 'idle',
-        currentBatchStart: 0,
-        currentBatchEnd: 0,
-        primesFoundTotal: 0,
-        numbersCheckedTotal: 0,
-        numbersPerSecond: 0,
-        progress: 0
-    });
+    // Initialize worker states in the data ref
+    const initWorkerStates = () => {
+        dataRef.current.workerStates = [];
+        for (let i = 0; i < workerCount; i++) {
+            dataRef.current.workerStates.push({
+                workerId: i,
+                status: 'idle',
+                currentBatchStart: 0,
+                currentBatchEnd: 0,
+                primesFoundTotal: 0,
+                numbersCheckedTotal: 0,
+                numbersPerSecond: 0,
+                progress: 0
+            });
+        }
+    };
 
     const calculateBatchSize = (workerId: number, lastBatchTimeMs: number): number => {
         const currentSize = workerBatchSizes.get(workerId) || INITIAL_BATCH_SIZE;
@@ -73,7 +68,8 @@ export function createPrimeCoordinator(callbacks: PrimeCoordinatorCallbacks): Pr
         const sqrtBatchEnd = Math.ceil(Math.sqrt(batchStart + batchSize));
         const knownPrimes = primeCache.getPrimesUpTo(sqrtBatchEnd);
 
-        const state = workerStates.get(workerId);
+        // Update worker state directly in ref
+        const state = dataRef.current.workerStates[workerId];
         if (state) {
             state.status = 'working';
             state.currentBatchStart = batchStart;
@@ -89,7 +85,6 @@ export function createPrimeCoordinator(callbacks: PrimeCoordinatorCallbacks): Pr
         };
 
         worker.postMessage(message);
-        notifyWorkerStatesUpdate();
     };
 
     const handleWorkerMessage = (workerId: number, message: WorkerMessage) => {
@@ -103,7 +98,7 @@ export function createPrimeCoordinator(callbacks: PrimeCoordinatorCallbacks): Pr
                 break;
 
             case 'BATCH_RESULT': {
-                const state = workerStates.get(workerId);
+                const state = dataRef.current.workerStates[workerId];
                 if (state) {
                     state.primesFoundTotal += message.foundPrimes.length;
                     state.numbersCheckedTotal += message.numbersChecked;
@@ -113,16 +108,17 @@ export function createPrimeCoordinator(callbacks: PrimeCoordinatorCallbacks): Pr
                     state.progress = 1;
                 }
 
-                totalNumbersChecked += message.numbersChecked;
-
-                // Add discovered primes to cache
+                // Add discovered primes to cache and update data ref
                 if (message.foundPrimes.length > 0) {
                     primeCache.addPrimes(message.foundPrimes);
-                    callbacks.onPrimesDiscovered(message.foundPrimes);
+                    dataRef.current.latestPrime = primeCache.getLargest();
+                    dataRef.current.totalPrimesFound = primeCache.getCount();
                 }
 
-                // Update statistics
-                updateStatistics();
+                dataRef.current.highestNumberChecked = nextNumberToAssign - 1;
+
+                // Update primes per second
+                updatePrimesPerSecond();
 
                 // Assign next batch
                 if (running) {
@@ -132,23 +128,20 @@ export function createPrimeCoordinator(callbacks: PrimeCoordinatorCallbacks): Pr
             }
 
             case 'PROGRESS': {
-                const state = workerStates.get(workerId);
+                const state = dataRef.current.workerStates[workerId];
                 if (state) {
                     const batchSize = state.currentBatchEnd - state.currentBatchStart + 1;
                     const processed = message.currentNumber - state.currentBatchStart;
                     state.progress = processed / batchSize;
                 }
-                notifyWorkerStatesUpdate();
                 break;
             }
         }
     };
 
-    const updateStatistics = () => {
+    const updatePrimesPerSecond = () => {
         const now = performance.now();
-        const elapsed = now - startTime;
 
-        // Calculate rolling primes per second
         if (now - lastSampleTime >= 1000) {
             const currentCount = primeCache.getCount();
             const primesInInterval = currentCount - lastSamplePrimeCount;
@@ -162,29 +155,17 @@ export function createPrimeCoordinator(callbacks: PrimeCoordinatorCallbacks): Pr
 
             lastSampleTime = now;
             lastSamplePrimeCount = currentCount;
+
+            // Update the ref
+            dataRef.current.primesPerSecond = primesPerSecondSamples.length > 0
+                ? Math.round(primesPerSecondSamples.reduce((a, b) => a + b, 0) / primesPerSecondSamples.length)
+                : 0;
         }
-
-        const avgPrimesPerSecond = primesPerSecondSamples.length > 0
-            ? primesPerSecondSamples.reduce((a, b) => a + b, 0) / primesPerSecondSamples.length
-            : 0;
-
-        const stats: PrimeStatistics = {
-            totalPrimesFound: primeCache.getCount(),
-            largestPrime: primeCache.getLargest(),
-            highestNumberChecked: nextNumberToAssign - 1,
-            primesPerSecond: Math.round(avgPrimesPerSecond),
-            elapsedTimeMs: elapsed,
-            totalNumbersChecked
-        };
-
-        callbacks.onStatisticsUpdate(stats);
-    };
-
-    const notifyWorkerStatesUpdate = () => {
-        callbacks.onWorkerStatesUpdate(Array.from(workerStates.values()));
     };
 
     const initializeWorkers = () => {
+        initWorkerStates();
+
         for (let i = 0; i < workerCount; i++) {
             const worker = new Worker(
                 new URL('../workers/primeWorker.ts', import.meta.url)
@@ -199,7 +180,6 @@ export function createPrimeCoordinator(callbacks: PrimeCoordinatorCallbacks): Pr
             };
 
             workers.push(worker);
-            workerStates.set(i, createWorkerState(i));
             workerBatchSizes.set(i, INITIAL_BATCH_SIZE);
 
             // Initialize worker
@@ -209,8 +189,6 @@ export function createPrimeCoordinator(callbacks: PrimeCoordinatorCallbacks): Pr
             };
             worker.postMessage(initMessage);
         }
-
-        notifyWorkerStatesUpdate();
     };
 
     const terminateWorkers = () => {
@@ -219,7 +197,7 @@ export function createPrimeCoordinator(callbacks: PrimeCoordinatorCallbacks): Pr
             worker.postMessage(stopMessage);
             worker.terminate();
 
-            const state = workerStates.get(i);
+            const state = dataRef.current.workerStates[i];
             if (state) {
                 state.status = 'idle';
                 state.progress = 0;
@@ -227,7 +205,6 @@ export function createPrimeCoordinator(callbacks: PrimeCoordinatorCallbacks): Pr
         });
 
         workers.length = 0;
-        notifyWorkerStatesUpdate();
     };
 
     return {
@@ -235,10 +212,16 @@ export function createPrimeCoordinator(callbacks: PrimeCoordinatorCallbacks): Pr
             if (running) return;
 
             running = true;
-            startTime = performance.now();
-            lastSampleTime = startTime;
+            dataRef.current.startTime = performance.now();
+            lastSampleTime = dataRef.current.startTime;
             lastSamplePrimeCount = primeCache.getCount();
             primesPerSecondSamples = [];
+
+            // Reset data
+            dataRef.current.latestPrime = primeCache.getLargest();
+            dataRef.current.totalPrimesFound = primeCache.getCount();
+            dataRef.current.highestNumberChecked = 0;
+            dataRef.current.primesPerSecond = 0;
 
             initializeWorkers();
         },
@@ -250,21 +233,6 @@ export function createPrimeCoordinator(callbacks: PrimeCoordinatorCallbacks): Pr
             terminateWorkers();
         },
 
-        isRunning: () => running,
-
-        getStatistics: () => ({
-            totalPrimesFound: primeCache.getCount(),
-            largestPrime: primeCache.getLargest(),
-            highestNumberChecked: nextNumberToAssign - 1,
-            primesPerSecond: primesPerSecondSamples.length > 0
-                ? Math.round(primesPerSecondSamples.reduce((a, b) => a + b, 0) / primesPerSecondSamples.length)
-                : 0,
-            elapsedTimeMs: running ? performance.now() - startTime : 0,
-            totalNumbersChecked
-        }),
-
-        getWorkerStates: () => Array.from(workerStates.values()),
-
-        getPrimeCache: () => primeCache
+        isRunning: () => running
     };
 }
