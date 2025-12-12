@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { Route, updateRoute } from "../../../ui/Routing";
+import { useRef, useState } from "react";
 import { MonopolyState } from "../data/MonopolyState";
 import Monopoly from "./Monopoly";
 import { createMonopolyEngine } from "../logic/MonopolyEngine";
@@ -73,8 +72,6 @@ const Home: React.FC<HomeProps> = () => {
         currentPlayerIndex: 0,
         log: []
     });
-
-    useEffect(() => updateRoute(Route.MONOPOLY), []);
 
     return <Monopoly state={state} id={'1'} actions={{
         roll: () => setState(engine.roll(state)),

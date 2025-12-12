@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { get } from "../../../trivia/logic/Repository";
 import { DataType, FestivalSong } from "../../../trivia/data/Data";
 import Loading from "../../../util/ui/Loading";
-import { Route, updateRoute } from "../../../ui/Routing";
 import React from "react";
 import ToggleSwitch from "../../../util/ui/ToggleSwitch";
 import { deleteData } from "../../../trivia/logic/Database";
@@ -66,8 +65,6 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
 
     useEffect(() => {
-        updateRoute(Route.FORTNITE_FESTIVAL);
-
         loadingSongs.then(songs => setSongs(songs));
 
         database.getOwnedSongs().then(savedOwnedSongs => setOwnedSongs(savedOwnedSongs));

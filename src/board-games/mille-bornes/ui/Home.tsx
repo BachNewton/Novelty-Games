@@ -9,7 +9,6 @@ import Scoreboard from "./Scoreboard";
 import { GameEvent } from "../logic/NewtorkCommunicator";
 
 interface HomeProps {
-    onHomeButtonClicked: () => void;
     communicator: Communicator;
 }
 
@@ -35,7 +34,7 @@ class ScoreboardState implements State {
 
 const LOCAL_ID = Math.random().toString();
 
-const Home: React.FC<HomeProps> = ({ onHomeButtonClicked, communicator }) => {
+const Home: React.FC<HomeProps> = ({ communicator }) => {
     const [state, setState] = useState<State>(new LobbyState());
 
     useEffect(() => {
@@ -83,7 +82,7 @@ const Home: React.FC<HomeProps> = ({ onHomeButtonClicked, communicator }) => {
     } else if (state instanceof ScoreboardState) {
         return <Scoreboard game={state.game} onBackToLobby={onBackToLobby} onPlayNextRound={onPlayNextRound} />;
     } else {
-        return <Lobby onHomeButtonClicked={onHomeButtonClicked} communicator={communicator} startGame={onStartGame} localId={LOCAL_ID} />;
+        return <Lobby communicator={communicator} startGame={onStartGame} localId={LOCAL_ID} />;
     }
 }
 

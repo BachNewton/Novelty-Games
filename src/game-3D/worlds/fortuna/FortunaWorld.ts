@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { GameWorld, GameWorldCreator } from "../GameWorld";
-import { updateRoute, Route } from '../../../ui/Routing';
 import { keyboardInputCreator, Key } from '../../input/Keyboard';
 import { Marble, ScoringHole, TOTAL_MARBLES } from './types';
 import { createBoard } from './Board';
@@ -21,8 +20,6 @@ function createFortunaWorld(
     updateHUD: (text: string) => void,
     updateSummary: (element: JSX.Element) => void
 ): GameWorld {
-    updateRoute(Route.FORTUNA_GAME);
-
     addLight(scene);
     addSkybox(scene);
     addGround(scene);

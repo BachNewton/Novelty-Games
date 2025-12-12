@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import MusicPlayer from "./MusicPlayer";
-import { Route, updateRoute } from "../../../ui/Routing";
 import { NetworkService } from "../../../util/networking/NetworkService";
 import { createSongParser } from "../logic/SongParser";
 import { MusicIndex } from "../logic/MusicIndex";
@@ -15,8 +14,6 @@ const Home: React.FC<HomeProps> = ({ networkService, musicIndexPromise }) => {
     const [musicIndex, setMusicIndex] = useState<MusicIndex | null>(null);
 
     useEffect(() => {
-        updateRoute(Route.MUSIC_PLAYER);
-
         musicIndexPromise.then(loadedMusicIndex => setMusicIndex(loadedMusicIndex));
     }, []);
 

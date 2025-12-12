@@ -1,4 +1,3 @@
-import { Route, updateRoute } from "../../../ui/Routing";
 import { createFile, FileType } from "../../../util/File";
 import { KeyboardInput } from "../../../util/input/Keyboard";
 import { MouseInput, MouseScroll } from "../../../util/input/Mouse";
@@ -22,8 +21,6 @@ export function createRpgWorld(
     keyboardInput: KeyboardInput,
     mouseInput: MouseInput
 ): GameWorld {
-    updateRoute(Route.RPG);
-
     const tiles = new Map<string, Tile>();
 
     TestZone.forEach(t => {

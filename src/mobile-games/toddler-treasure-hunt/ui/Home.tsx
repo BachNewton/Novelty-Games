@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Route, updateRoute } from "../../../ui/Routing";
 import { createCompass, getDirection } from "../../../util/geolocation/Compass";
 
 const Home: React.FC = () => {
@@ -7,8 +6,6 @@ const Home: React.FC = () => {
     const compass = useRef(createCompass(updatedHeading => setHeading(updatedHeading)));
 
     useEffect(() => {
-        updateRoute(Route.TODDLER_TREASURE_HUNT);
-
         compass.current.start();
 
         return () => compass.current.stop();

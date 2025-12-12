@@ -1,8 +1,7 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { PrimeFinderData } from '../data/MessageTypes';
 import { createPrimeCoordinator, PrimeCoordinator } from '../logic/PrimeCoordinator';
 import PrimeCanvas from './PrimeCanvas';
-import { updateRoute, Route } from '../../../ui/Routing';
 
 const initialData: PrimeFinderData = {
     latestPrime: 0,
@@ -18,10 +17,6 @@ const PrimeFinderHome: React.FC = () => {
 
     const dataRef = useRef<PrimeFinderData>({ ...initialData });
     const coordinatorRef = useRef<PrimeCoordinator | null>(null);
-
-    useEffect(() => {
-        updateRoute(Route.PRIME_FINDER);
-    }, []);
 
     const handleStart = useCallback(() => {
         if (coordinatorRef.current) return;

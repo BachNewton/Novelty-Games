@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { Route, updateRoute } from "../../../ui/Routing";
+import { useState } from "react";
 import Game from "./Game";
 import Lobby from "./Lobby";
 import { LabyrinthCommunicator } from "../logic/LabyrinthCommunicator";
@@ -25,8 +24,6 @@ class GameState implements State {
 
 const Labyrinth: React.FC<LabyrinthProps> = ({ communicator }) => {
     const [state, setState] = useState<State>(new LobbyState());
-
-    useEffect(() => updateRoute(Route.LABYRINTH), []);
 
     const onStartGame = (lobby: LobbyData) => {
         const game = createStartingGame(lobby);
