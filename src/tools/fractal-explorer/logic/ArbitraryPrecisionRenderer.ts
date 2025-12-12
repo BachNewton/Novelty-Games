@@ -26,7 +26,7 @@ const PASSES = [
 export function createArbitraryPrecisionRenderer(
     canvas: HTMLCanvasElement
 ): ArbitraryPrecisionRenderer {
-    const ctx = canvas.getContext('2d')!;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
     const workerCount = navigator.hardwareConcurrency || 4;
     const workers: Worker[] = [];
     const workersReady: boolean[] = [];
@@ -46,6 +46,10 @@ export function createArbitraryPrecisionRenderer(
     // Iteration buffer: stores computed iterations for each pixel
     // -1 means not yet computed
     let iterationBuffer: Int32Array | null = null;
+
+    // Magnitude buffer: stores escape magnitude for smooth coloring
+    // 0 means in set or not yet computed
+    let magnitudeBuffer: Float32Array | null = null;
 
     // Track pixels completed per pass
     let pixelsCompletedInPass = 0;
@@ -68,6 +72,91 @@ export function createArbitraryPrecisionRenderer(
     let lastZoomStr: string | null = null;
     let lastMaxIterations: number | null = null;
     let lastFractalType: string | null = null;
+
+    // Captured canvas for preview during pan/zoom
+    let capturedImage: ImageData | null = null;
+
+    // Capture current canvas content for preview
+    const captureCanvas = () => {
+        if (canvas.width > 0 && canvas.height > 0) {
+            capturedImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        }
+    };
+
+    // Draw transformed preview (pan)
+    const drawPanPreview = (dx: number, dy: number) => {
+        if (!capturedImage) return;
+
+        // Clear canvas
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw the captured image shifted by the pan offset
+        // Note: dx/dy are the buffer shift amounts (source to dest mapping)
+        // For visual preview, we draw at the negative offset
+        ctx.putImageData(capturedImage, -dx, -dy);
+    };
+
+    // Draw transformed preview (zoom)
+    const drawZoomPreview = (scale: number, centerX: number, centerY: number) => {
+        if (!capturedImage) return;
+
+        // Create temporary canvas to hold captured image
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const tempCtx = tempCanvas.getContext('2d')!;
+        tempCtx.putImageData(capturedImage, 0, 0);
+
+        // Clear main canvas
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw scaled image centered on zoom point
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.scale(scale, scale);
+        ctx.translate(-centerX, -centerY);
+        ctx.drawImage(tempCanvas, 0, 0);
+        ctx.restore();
+    };
+
+    // Calculate zoom transform parameters
+    // Back-calculates the cursor position where zoom occurred from center/zoom changes
+    const getZoomTransform = (params: ArbitraryPrecisionRenderParams): { scale: number; centerX: number; centerY: number } | null => {
+        if (!lastZoomStr || !lastCenterRealStr || !lastCenterImagStr) return null;
+        if (lastZoomStr === params.zoomStr) return null; // No zoom change
+
+        const oldZoom = parseFloat(lastZoomStr);
+        const newZoom = parseFloat(params.zoomStr);
+        const scale = newZoom / oldZoom;
+
+        const oldCenterReal = parseFloat(lastCenterRealStr);
+        const oldCenterImag = parseFloat(lastCenterImagStr);
+        const newCenterReal = parseFloat(params.centerRealStr);
+        const newCenterImag = parseFloat(params.centerImagStr);
+
+        const zoomDiff = newZoom - oldZoom;
+
+        // Avoid division by zero (shouldn't happen since we checked zoom changed)
+        if (Math.abs(zoomDiff) < 1e-10) {
+            return { scale, centerX: canvas.width / 2, centerY: canvas.height / 2 };
+        }
+
+        // Back-calculate the zoom center point in canvas coordinates
+        // The zoom center is the point whose world position didn't change
+        // Derivation: worldX = centerReal + (px - W/2) / zoom
+        // Setting old and new equal and solving for px gives:
+        // px = W/2 + (newCenterReal - oldCenterReal) * oldZoom * newZoom / (newZoom - oldZoom)
+        const dxWorld = newCenterReal - oldCenterReal;
+        const dyWorld = newCenterImag - oldCenterImag;
+
+        const zoomCenterX = canvas.width / 2 + dxWorld * oldZoom * newZoom / zoomDiff;
+        // Y is inverted: canvas Y increases downward, imaginary increases upward
+        const zoomCenterY = canvas.height / 2 - dyWorld * oldZoom * newZoom / zoomDiff;
+
+        return { scale, centerX: zoomCenterX, centerY: zoomCenterY };
+    };
 
     // Check if we can reuse the buffer (pan without zoom change)
     const canReuseBuffer = (params: ArbitraryPrecisionRenderParams): { dx: number; dy: number } | null => {
@@ -98,14 +187,16 @@ export function createArbitraryPrecisionRenderer(
         return { dx: dxPixels, dy: dyPixels };
     };
 
-    // Shift the iteration buffer for pan reuse
+    // Shift the iteration and magnitude buffers for pan reuse
     const shiftBuffer = (dx: number, dy: number) => {
-        if (!iterationBuffer) return;
+        if (!iterationBuffer || !magnitudeBuffer) return;
 
         const width = canvas.width;
         const height = canvas.height;
-        const newBuffer = new Int32Array(width * height);
-        newBuffer.fill(-1);
+        const newIterBuffer = new Int32Array(width * height);
+        const newMagBuffer = new Float32Array(width * height);
+        newIterBuffer.fill(-1);
+        // magnitudeBuffer defaults to 0 (Float32Array is zero-initialized)
 
         // Copy shifted pixels
         for (let y = 0; y < height; y++) {
@@ -118,11 +209,13 @@ export function createArbitraryPrecisionRenderer(
 
                 const srcIdx = srcY * width + srcX;
                 const dstIdx = y * width + x;
-                newBuffer[dstIdx] = iterationBuffer[srcIdx];
+                newIterBuffer[dstIdx] = iterationBuffer[srcIdx];
+                newMagBuffer[dstIdx] = magnitudeBuffer[srcIdx];
             }
         }
 
-        iterationBuffer = newBuffer;
+        iterationBuffer = newIterBuffer;
+        magnitudeBuffer = newMagBuffer;
     };
 
     const initializeWorkers = () => {
@@ -161,22 +254,39 @@ export function createArbitraryPrecisionRenderer(
             colorLUT = createColorLUT(params.maxIterations, params.paletteId);
         }
 
-        // Check if we can reuse pixels from the previous render (pan optimization)
+        // Check transforms before capturing (need old params for calculations)
         const reuseOffset = canReuseBuffer(params);
+        const zoomTransform = getZoomTransform(params);
 
+        // Capture current canvas for preview before modifying anything
+        captureCanvas();
+
+        // Draw immediate preview while computation runs
         if (reuseOffset) {
-            // Pan detected - shift buffer and only compute new edge pixels
+            // Pan preview - draw shifted image
+            drawPanPreview(reuseOffset.dx, reuseOffset.dy);
+            // Shift data buffer for computation reuse
             shiftBuffer(reuseOffset.dx, reuseOffset.dy);
-        } else {
-            // Full clear for zoom change, param change, or large pan
-            if (!iterationBuffer || iterationBuffer.length !== canvas.width * canvas.height) {
-                iterationBuffer = new Int32Array(canvas.width * canvas.height);
+        } else if (zoomTransform) {
+            // Zoom preview - draw scaled image
+            drawZoomPreview(zoomTransform.scale, zoomTransform.centerX, zoomTransform.centerY);
+            // Full buffer clear for zoom
+            const bufferSize = canvas.width * canvas.height;
+            if (!iterationBuffer || iterationBuffer.length !== bufferSize) {
+                iterationBuffer = new Int32Array(bufferSize);
+                magnitudeBuffer = new Float32Array(bufferSize);
             }
             iterationBuffer.fill(-1);
-
-            // Clear canvas with black
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            magnitudeBuffer!.fill(0);
+        } else {
+            // Full clear for param change or first render
+            const bufferSize = canvas.width * canvas.height;
+            if (!iterationBuffer || iterationBuffer.length !== bufferSize) {
+                iterationBuffer = new Int32Array(bufferSize);
+                magnitudeBuffer = new Float32Array(bufferSize);
+            }
+            iterationBuffer.fill(-1);
+            magnitudeBuffer!.fill(0);
         }
 
         // Update tracking for next render
@@ -245,14 +355,18 @@ export function createArbitraryPrecisionRenderer(
 
             const { results } = message;
 
-            // Update iteration buffer
-            for (let i = 0; i < results.length; i += 3) {
+            // Update iteration and magnitude buffers
+            // Format: [x0, y0, iter0, mag0, x1, y1, iter1, mag1, ...]
+            for (let i = 0; i < results.length; i += 4) {
                 const x = results[i];
                 const y = results[i + 1];
                 const iter = results[i + 2];
+                const mag = results[i + 3];
 
                 if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
-                    iterationBuffer![y * canvas.width + x] = iter;
+                    const idx = y * canvas.width + x;
+                    iterationBuffer![idx] = iter;
+                    magnitudeBuffer![idx] = mag;
                 }
             }
 
@@ -289,7 +403,7 @@ export function createArbitraryPrecisionRenderer(
     const CHUNK_SIZE = 20000; // Pixels per chunk - balances responsiveness vs overhead
 
     const renderToCanvas = (onComplete: () => void) => {
-        if (!iterationBuffer || !currentParams || !colorLUT) {
+        if (!iterationBuffer || !magnitudeBuffer || !currentParams || !colorLUT) {
             onComplete();
             return;
         }
@@ -302,7 +416,8 @@ export function createArbitraryPrecisionRenderer(
         const lutData = colorLUT.data;
         const maxIter = currentParams.maxIterations;
         const step = currentStepForRender;
-        const buffer = iterationBuffer;
+        const iterBuffer = iterationBuffer;
+        const magBuffer = magnitudeBuffer;
         let currentPixel = 0;
         const renderIdAtStart = currentRenderId;
 
@@ -316,7 +431,8 @@ export function createArbitraryPrecisionRenderer(
             const endPixel = Math.min(currentPixel + CHUNK_SIZE, totalPixels);
 
             for (let idx = currentPixel; idx < endPixel; idx++) {
-                let iter = buffer[idx];
+                let iter = iterBuffer[idx];
+                let mag = magBuffer[idx];
 
                 // If this pixel hasn't been computed yet, sample from nearest computed pixel
                 if (iter === -1) {
@@ -325,7 +441,8 @@ export function createArbitraryPrecisionRenderer(
                     const sampleX = Math.floor(x / step) * step;
                     const sampleY = Math.floor(y / step) * step;
                     const sampleIdx = sampleY * width + sampleX;
-                    iter = buffer[sampleIdx];
+                    iter = iterBuffer[sampleIdx];
+                    mag = magBuffer[sampleIdx];
                     if (iter === -1) iter = 0; // Fallback to black
                 }
 
@@ -336,11 +453,28 @@ export function createArbitraryPrecisionRenderer(
                     data[pixelIdx + 1] = 0;
                     data[pixelIdx + 2] = 0;
                 } else {
-                    // Use LUT for fast color lookup
-                    const lutIdx = iter * 3;
-                    data[pixelIdx] = lutData[lutIdx];
-                    data[pixelIdx + 1] = lutData[lutIdx + 1];
-                    data[pixelIdx + 2] = lutData[lutIdx + 2];
+                    // Apply smooth iteration formula for anti-aliased color gradients
+                    // Same formula as GPU shader: smoothIter = iter - log2(log2(mag)) + 4
+                    let smoothIter = iter;
+                    if (mag > 0) {
+                        // mag is already zr² + zi², same as GPU's mag2
+                        smoothIter = iter - Math.log2(Math.log2(mag)) + 4;
+                    }
+
+                    // Get fractional part for interpolation
+                    const t = smoothIter - Math.floor(smoothIter);
+                    const baseIter = Math.floor(smoothIter);
+
+                    // Clamp to valid LUT range
+                    const iter1 = Math.max(0, Math.min(maxIter - 1, baseIter));
+                    const iter2 = Math.max(0, Math.min(maxIter - 1, baseIter + 1));
+
+                    // Interpolate between two adjacent colors for smooth gradient
+                    const lutIdx1 = iter1 * 3;
+                    const lutIdx2 = iter2 * 3;
+                    data[pixelIdx] = Math.round(lutData[lutIdx1] * (1 - t) + lutData[lutIdx2] * t);
+                    data[pixelIdx + 1] = Math.round(lutData[lutIdx1 + 1] * (1 - t) + lutData[lutIdx2 + 1] * t);
+                    data[pixelIdx + 2] = Math.round(lutData[lutIdx1 + 2] * (1 - t) + lutData[lutIdx2 + 2] * t);
                 }
                 data[pixelIdx + 3] = 255;
             }
@@ -468,7 +602,9 @@ export function createArbitraryPrecisionRenderer(
         resize: (width: number, height: number) => {
             canvas.width = width;
             canvas.height = height;
-            iterationBuffer = new Int32Array(width * height).fill(-1);
+            const bufferSize = width * height;
+            iterationBuffer = new Int32Array(bufferSize).fill(-1);
+            magnitudeBuffer = new Float32Array(bufferSize);
         },
 
         render: (params: RenderParams | ArbitraryPrecisionRenderParams) => {

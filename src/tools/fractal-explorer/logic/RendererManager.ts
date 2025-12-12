@@ -2,8 +2,8 @@ import { RenderParams, ArbitraryPrecisionRenderParams, RenderMode, RenderProgres
 import { WebGLRenderer } from './WebGLRenderer';
 import { createArbitraryPrecisionRenderer, ArbitraryPrecisionRenderer } from './ArbitraryPrecisionRenderer';
 
-// Threshold where GPU precision starts to degrade
-const GPU_PRECISION_THRESHOLD = 3e7;
+// Threshold where GPU precision starts to degrade (single precision float limit)
+const GPU_PRECISION_THRESHOLD = 1e7;
 
 // Hysteresis to prevent flickering when zooming around threshold
 const SWITCH_HYSTERESIS = 0.5; // Orders of magnitude

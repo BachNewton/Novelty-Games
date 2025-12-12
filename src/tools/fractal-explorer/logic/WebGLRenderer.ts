@@ -10,15 +10,13 @@ void main() {
 }
 `;
 
-// Fragment shader with emulated double precision for deep zooms
-// Uses the "double-single" technique: each double is stored as two floats (hi, lo)
+// Fragment shader with single precision floats
 const FRAGMENT_SHADER = `
 precision highp float;
 
 uniform vec2 u_resolution;
-// Double precision center stored as (hi, lo) pairs
-uniform vec2 u_centerRealDS;  // (high, low) parts of real center
-uniform vec2 u_centerImagDS;  // (high, low) parts of imag center
+uniform float u_centerReal;
+uniform float u_centerImag;
 uniform float u_zoom;
 uniform int u_maxIterations;
 uniform int u_fractalType;
@@ -26,55 +24,6 @@ uniform int u_paletteType;
 uniform vec2 u_juliaC;
 
 // Fractal types: 0=Mandelbrot, 1=Julia, 2=BurningShip, 3=Tricorn
-
-// Double-single arithmetic functions
-// A double-single number is represented as (hi, lo) where value = hi + lo
-
-// Split a float into high and low parts for multiplication
-vec2 ds_split(float a) {
-    float t = a * 4097.0;  // 2^12 + 1
-    float hi = t - (t - a);
-    float lo = a - hi;
-    return vec2(hi, lo);
-}
-
-// Create a double-single from a single float
-vec2 ds_set(float a) {
-    return vec2(a, 0.0);
-}
-
-// Add two double-single numbers
-vec2 ds_add(vec2 a, vec2 b) {
-    float s = a.x + b.x;
-    float v = s - a.x;
-    float e = (a.x - (s - v)) + (b.x - v) + a.y + b.y;
-    return vec2(s + e, e - (s + e - s));
-}
-
-// Subtract two double-single numbers
-vec2 ds_sub(vec2 a, vec2 b) {
-    return ds_add(a, vec2(-b.x, -b.y));
-}
-
-// Multiply two double-single numbers
-vec2 ds_mul(vec2 a, vec2 b) {
-    float p = a.x * b.x;
-    vec2 as = ds_split(a.x);
-    vec2 bs = ds_split(b.x);
-    float err = ((as.x * bs.x - p) + as.x * bs.y + as.y * bs.x) + as.y * bs.y;
-    err += a.x * b.y + a.y * b.x;
-    return vec2(p + err, err - (p + err - p));
-}
-
-// Compare double-single to float
-bool ds_gt(vec2 a, float b) {
-    return a.x > b || (a.x == b && a.y > 0.0);
-}
-
-// Get single float approximation from double-single
-float ds_to_float(vec2 a) {
-    return a.x + a.y;
-}
 
 vec3 getClassicColor(float t) {
     float r = 9.0 * (1.0 - t) * t * t * t;
@@ -141,68 +90,60 @@ vec3 getColor(float t, int paletteType) {
 }
 
 void main() {
-    // Convert pixel coordinates to offset from center
-    // At very high zoom levels, we need careful handling of the offset
     vec2 uv = gl_FragCoord.xy;
 
     // Calculate pixel offset from center
     float pixelOffsetX = uv.x - u_resolution.x / 2.0;
     float pixelOffsetY = uv.y - u_resolution.y / 2.0;
 
-    // Divide by zoom - for deep zooms this will be a very small number
-    // We compute this as multiplication by inverse for better precision
+    // Divide by zoom
     float invZoom = 1.0 / u_zoom;
-    float offsetX = pixelOffsetX * invZoom;
-    float offsetY = pixelOffsetY * invZoom;
+    float real = u_centerReal + pixelOffsetX * invZoom;
+    float imag = u_centerImag + pixelOffsetY * invZoom;
 
-    // Add offset to center using double-single precision
-    vec2 real = ds_add(u_centerRealDS, ds_set(offsetX));
-    vec2 imag = ds_add(u_centerImagDS, ds_set(offsetY));
-
-    // Initial values as double-single
-    vec2 zr, zi, cr, ci;
+    // Initial values
+    float zr, zi, cr, ci;
 
     if (u_fractalType == 1) {
         // Julia: z starts at pixel, c is constant
         zr = real;
         zi = imag;
-        cr = ds_set(u_juliaC.x);
-        ci = ds_set(u_juliaC.y);
+        cr = u_juliaC.x;
+        ci = u_juliaC.y;
     } else {
         // Mandelbrot, BurningShip, Tricorn: z starts at 0, c is pixel
-        zr = ds_set(0.0);
-        zi = ds_set(0.0);
+        zr = 0.0;
+        zi = 0.0;
         cr = real;
         ci = imag;
     }
 
     int iterations = 0;
-    vec2 zr2 = ds_mul(zr, zr);
-    vec2 zi2 = ds_mul(zi, zi);
+    float zr2 = zr * zr;
+    float zi2 = zi * zi;
 
     for (int i = 0; i < 10000; i++) {
         if (i >= u_maxIterations) break;
-        if (ds_to_float(ds_add(zr2, zi2)) > 4.0) break;
+        if (zr2 + zi2 > 4.0) break;
 
-        vec2 zrzi = ds_mul(zr, zi);
+        float zrzi = zr * zi;
 
         if (u_fractalType == 2) {
             // Burning Ship: use absolute values
-            float absZrZi = abs(ds_to_float(zrzi));
-            zi = ds_add(ds_set(2.0 * absZrZi), ci);
-            zr = ds_add(ds_sub(zr2, zi2), cr);
+            zi = 2.0 * abs(zrzi) + ci;
+            zr = zr2 - zi2 + cr;
         } else if (u_fractalType == 3) {
             // Tricorn: conjugate z (negate imaginary in multiplication)
-            zi = ds_add(ds_set(-2.0 * ds_to_float(zrzi)), ci);
-            zr = ds_add(ds_sub(zr2, zi2), cr);
+            zi = -2.0 * zrzi + ci;
+            zr = zr2 - zi2 + cr;
         } else {
             // Mandelbrot or Julia
-            zi = ds_add(ds_add(zrzi, zrzi), ci);
-            zr = ds_add(ds_sub(zr2, zi2), cr);
+            zi = 2.0 * zrzi + ci;
+            zr = zr2 - zi2 + cr;
         }
 
-        zr2 = ds_mul(zr, zr);
-        zi2 = ds_mul(zi, zi);
+        zr2 = zr * zr;
+        zi2 = zi * zi;
         iterations++;
     }
 
@@ -210,7 +151,7 @@ void main() {
         gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
     } else {
         // Smooth coloring
-        float mag2 = ds_to_float(ds_add(zr2, zi2));
+        float mag2 = zr2 + zi2;
         float smoothIter = float(iterations) - log2(log2(mag2)) + 4.0;
         float t = smoothIter / float(u_maxIterations);
         t = clamp(t, 0.0, 1.0);
@@ -247,13 +188,6 @@ const PALETTE_TYPE_MAP: Record<string, number> = {
     monochrome: 4
 };
 
-// Split a JavaScript number into high and low float parts for double-single precision
-function splitDouble(value: number): [number, number] {
-    const hi = Math.fround(value);
-    const lo = value - hi;
-    return [hi, lo];
-}
-
 export class WebGLRenderer {
     private gl: WebGLRenderingContext;
     private program: WebGLProgram;
@@ -273,8 +207,8 @@ export class WebGLRenderer {
         // Get uniform locations
         this.uniforms = {
             u_resolution: gl.getUniformLocation(this.program, 'u_resolution')!,
-            u_centerRealDS: gl.getUniformLocation(this.program, 'u_centerRealDS')!,
-            u_centerImagDS: gl.getUniformLocation(this.program, 'u_centerImagDS')!,
+            u_centerReal: gl.getUniformLocation(this.program, 'u_centerReal')!,
+            u_centerImag: gl.getUniformLocation(this.program, 'u_centerImag')!,
             u_zoom: gl.getUniformLocation(this.program, 'u_zoom')!,
             u_maxIterations: gl.getUniformLocation(this.program, 'u_maxIterations')!,
             u_fractalType: gl.getUniformLocation(this.program, 'u_fractalType')!,
@@ -350,14 +284,10 @@ export class WebGLRenderer {
     render(params: RenderParams): void {
         const gl = this.gl;
 
-        // Split center coordinates into double-single format
-        const [realHi, realLo] = splitDouble(params.centerReal);
-        const [imagHi, imagLo] = splitDouble(params.centerImag);
-
         // Set uniforms
         gl.uniform2f(this.uniforms.u_resolution, gl.canvas.width, gl.canvas.height);
-        gl.uniform2f(this.uniforms.u_centerRealDS, realHi, realLo);
-        gl.uniform2f(this.uniforms.u_centerImagDS, imagHi, imagLo);
+        gl.uniform1f(this.uniforms.u_centerReal, params.centerReal);
+        gl.uniform1f(this.uniforms.u_centerImag, params.centerImag);
         gl.uniform1f(this.uniforms.u_zoom, params.zoom);
         gl.uniform1i(this.uniforms.u_maxIterations, params.maxIterations);
         gl.uniform1i(this.uniforms.u_fractalType, FRACTAL_TYPE_MAP[params.fractalType]);

@@ -52,7 +52,9 @@ export interface PixelsResultMessage {
     type: 'PIXELS_RESULT';
     workerId: number;
     renderId: number;
-    // Pixel coordinates and their iteration counts (flat: [x0, y0, iter0, x1, y1, iter1, ...])
+    // Pixel data with escape magnitude for smooth coloring
+    // Format: [x0, y0, iter0, mag0, x1, y1, iter1, mag1, ...]
+    // mag = escape magnitude (zr² + zi²) when escaped, 0 for points in set
     results: number[];
     passNumber: number;
     computeTimeMs: number;

@@ -24,10 +24,16 @@ function configurePrecisionIfNeeded(zoomStr: string): void {
 // Threshold for using fast float mode (64-bit float has ~15-16 significant digits)
 const FLOAT_PRECISION_THRESHOLD = 1e14;
 
+// Result type for smooth coloring support
+interface FractalResult {
+    iter: number;
+    mag: number;  // Escape magnitude (zr² + zi²), 0 for points in set
+}
+
 // ==================== FAST FLOAT IMPLEMENTATIONS ====================
 // These use native JavaScript numbers for 10-100x speedup at moderate zoom levels
 
-function computeMandelbrotFloat(cReal: number, cImag: number, maxIterations: number): number {
+function computeMandelbrotFloat(cReal: number, cImag: number, maxIterations: number): FractalResult {
     let zr = 0;
     let zi = 0;
     let zr2 = 0;
@@ -35,7 +41,7 @@ function computeMandelbrotFloat(cReal: number, cImag: number, maxIterations: num
 
     for (let i = 0; i < maxIterations; i++) {
         if (zr2 + zi2 > 4) {
-            return i;
+            return { iter: i, mag: zr2 + zi2 };
         }
 
         zi = 2 * zr * zi + cImag;
@@ -44,7 +50,7 @@ function computeMandelbrotFloat(cReal: number, cImag: number, maxIterations: num
         zi2 = zi * zi;
     }
 
-    return maxIterations;
+    return { iter: maxIterations, mag: 0 };
 }
 
 function computeJuliaFloat(
@@ -53,7 +59,7 @@ function computeJuliaFloat(
     cReal: number,
     cImag: number,
     maxIterations: number
-): number {
+): FractalResult {
     let zr = zReal;
     let zi = zImag;
     let zr2 = zr * zr;
@@ -61,7 +67,7 @@ function computeJuliaFloat(
 
     for (let i = 0; i < maxIterations; i++) {
         if (zr2 + zi2 > 4) {
-            return i;
+            return { iter: i, mag: zr2 + zi2 };
         }
 
         zi = 2 * zr * zi + cImag;
@@ -70,10 +76,10 @@ function computeJuliaFloat(
         zi2 = zi * zi;
     }
 
-    return maxIterations;
+    return { iter: maxIterations, mag: 0 };
 }
 
-function computeBurningShipFloat(cReal: number, cImag: number, maxIterations: number): number {
+function computeBurningShipFloat(cReal: number, cImag: number, maxIterations: number): FractalResult {
     let zr = 0;
     let zi = 0;
     let zr2 = 0;
@@ -81,7 +87,7 @@ function computeBurningShipFloat(cReal: number, cImag: number, maxIterations: nu
 
     for (let i = 0; i < maxIterations; i++) {
         if (zr2 + zi2 > 4) {
-            return i;
+            return { iter: i, mag: zr2 + zi2 };
         }
 
         const absZr = Math.abs(zr);
@@ -92,10 +98,10 @@ function computeBurningShipFloat(cReal: number, cImag: number, maxIterations: nu
         zi2 = zi * zi;
     }
 
-    return maxIterations;
+    return { iter: maxIterations, mag: 0 };
 }
 
-function computeTricornFloat(cReal: number, cImag: number, maxIterations: number): number {
+function computeTricornFloat(cReal: number, cImag: number, maxIterations: number): FractalResult {
     let zr = 0;
     let zi = 0;
     let zr2 = 0;
@@ -103,7 +109,7 @@ function computeTricornFloat(cReal: number, cImag: number, maxIterations: number
 
     for (let i = 0; i < maxIterations; i++) {
         if (zr2 + zi2 > 4) {
-            return i;
+            return { iter: i, mag: zr2 + zi2 };
         }
 
         zi = -2 * zr * zi + cImag;
@@ -112,7 +118,7 @@ function computeTricornFloat(cReal: number, cImag: number, maxIterations: number
         zi2 = zi * zi;
     }
 
-    return maxIterations;
+    return { iter: maxIterations, mag: 0 };
 }
 
 function computePixelFloat(
@@ -127,7 +133,7 @@ function computePixelFloat(
     fractalType: FractalType,
     juliaReal: number,
     juliaImag: number
-): number {
+): FractalResult {
     const real = centerReal + (pixelX - canvasWidth / 2) / zoom;
     const imag = centerImag + (canvasHeight / 2 - pixelY) / zoom;
 
@@ -151,7 +157,7 @@ function computeMandelbrot(
     cReal: Decimal,
     cImag: Decimal,
     maxIterations: number
-): number {
+): FractalResult {
     let zr = new Decimal(0);
     let zi = new Decimal(0);
     let zr2 = new Decimal(0);
@@ -159,8 +165,9 @@ function computeMandelbrot(
     const four = new Decimal(4);
 
     for (let i = 0; i < maxIterations; i++) {
-        if (zr2.plus(zi2).gt(four)) {
-            return i;
+        const mag = zr2.plus(zi2);
+        if (mag.gt(four)) {
+            return { iter: i, mag: mag.toNumber() };
         }
 
         zi = zr.times(zi).times(2).plus(cImag);
@@ -169,7 +176,7 @@ function computeMandelbrot(
         zi2 = zi.times(zi);
     }
 
-    return maxIterations;
+    return { iter: maxIterations, mag: 0 };
 }
 
 function computeJulia(
@@ -178,7 +185,7 @@ function computeJulia(
     cReal: Decimal,
     cImag: Decimal,
     maxIterations: number
-): number {
+): FractalResult {
     let zr = zReal;
     let zi = zImag;
     let zr2 = zr.times(zr);
@@ -186,8 +193,9 @@ function computeJulia(
     const four = new Decimal(4);
 
     for (let i = 0; i < maxIterations; i++) {
-        if (zr2.plus(zi2).gt(four)) {
-            return i;
+        const mag = zr2.plus(zi2);
+        if (mag.gt(four)) {
+            return { iter: i, mag: mag.toNumber() };
         }
 
         zi = zr.times(zi).times(2).plus(cImag);
@@ -196,14 +204,14 @@ function computeJulia(
         zi2 = zi.times(zi);
     }
 
-    return maxIterations;
+    return { iter: maxIterations, mag: 0 };
 }
 
 function computeBurningShip(
     cReal: Decimal,
     cImag: Decimal,
     maxIterations: number
-): number {
+): FractalResult {
     let zr = new Decimal(0);
     let zi = new Decimal(0);
     let zr2 = new Decimal(0);
@@ -211,8 +219,9 @@ function computeBurningShip(
     const four = new Decimal(4);
 
     for (let i = 0; i < maxIterations; i++) {
-        if (zr2.plus(zi2).gt(four)) {
-            return i;
+        const mag = zr2.plus(zi2);
+        if (mag.gt(four)) {
+            return { iter: i, mag: mag.toNumber() };
         }
 
         // Burning Ship uses absolute values
@@ -224,14 +233,14 @@ function computeBurningShip(
         zi2 = zi.times(zi);
     }
 
-    return maxIterations;
+    return { iter: maxIterations, mag: 0 };
 }
 
 function computeTricorn(
     cReal: Decimal,
     cImag: Decimal,
     maxIterations: number
-): number {
+): FractalResult {
     let zr = new Decimal(0);
     let zi = new Decimal(0);
     let zr2 = new Decimal(0);
@@ -239,8 +248,9 @@ function computeTricorn(
     const four = new Decimal(4);
 
     for (let i = 0; i < maxIterations; i++) {
-        if (zr2.plus(zi2).gt(four)) {
-            return i;
+        const mag = zr2.plus(zi2);
+        if (mag.gt(four)) {
+            return { iter: i, mag: mag.toNumber() };
         }
 
         // Tricorn: conjugate z (negate imaginary in multiplication)
@@ -250,7 +260,7 @@ function computeTricorn(
         zi2 = zi.times(zi);
     }
 
-    return maxIterations;
+    return { iter: maxIterations, mag: 0 };
 }
 
 function computePixel(
@@ -265,7 +275,7 @@ function computePixel(
     fractalType: FractalType,
     juliaReal: Decimal,
     juliaImag: Decimal
-): number {
+): FractalResult {
     // Convert pixel to complex coordinate
     const offsetX = new Decimal(pixelX - canvasWidth / 2).div(zoom);
     const offsetY = new Decimal(canvasHeight / 2 - pixelY).div(zoom);
@@ -310,7 +320,7 @@ function processPixels(msg: ComputePixelsMessage): void {
             const pixelX = msg.pixels[i];
             const pixelY = msg.pixels[i + 1];
 
-            const iterations = computePixelFloat(
+            const result = computePixelFloat(
                 pixelX, pixelY,
                 msg.canvasWidth, msg.canvasHeight,
                 centerReal, centerImag, zoomNum,
@@ -319,7 +329,7 @@ function processPixels(msg: ComputePixelsMessage): void {
                 juliaReal, juliaImag
             );
 
-            results.push(pixelX, pixelY, iterations);
+            results.push(pixelX, pixelY, result.iter, result.mag);
             pixelsCompleted++;
 
             const now = performance.now();
@@ -349,7 +359,7 @@ function processPixels(msg: ComputePixelsMessage): void {
             const pixelX = msg.pixels[i];
             const pixelY = msg.pixels[i + 1];
 
-            const iterations = computePixel(
+            const result = computePixel(
                 pixelX, pixelY,
                 msg.canvasWidth, msg.canvasHeight,
                 centerReal, centerImag, zoom,
@@ -358,7 +368,7 @@ function processPixels(msg: ComputePixelsMessage): void {
                 juliaReal, juliaImag
             );
 
-            results.push(pixelX, pixelY, iterations);
+            results.push(pixelX, pixelY, result.iter, result.mag);
             pixelsCompleted++;
 
             const now = performance.now();

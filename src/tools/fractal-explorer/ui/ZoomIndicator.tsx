@@ -5,24 +5,21 @@ interface ZoomIndicatorProps {
     zoom: number;
     renderMode: RenderMode;
     renderProgress: RenderProgress | null;
+    precisionMode?: 'float' | 'arbitrary';
 }
 
 function formatZoom(zoom: number): string {
     if (zoom < 1000) {
         return `${zoom.toFixed(1)}x`;
     }
-
-    const exponent = Math.log10(zoom);
-    const mantissa = Math.pow(10, exponent - Math.floor(exponent));
-
-    // Show as "1.23 x 10^4" format for precision
-    return `${mantissa.toFixed(2)} x 10^${Math.floor(exponent)}`;
+    return `${Math.round(zoom).toLocaleString()}x`;
 }
 
 export const ZoomIndicator: React.FC<ZoomIndicatorProps> = ({
     zoom,
     renderMode,
-    renderProgress
+    renderProgress,
+    precisionMode
 }) => {
     const containerStyle: React.CSSProperties = {
         position: 'absolute',
@@ -55,6 +52,15 @@ export const ZoomIndicator: React.FC<ZoomIndicatorProps> = ({
         color: renderMode === 'gpu' ? '#fff' : '#000'
     };
 
+    const precisionStyle: React.CSSProperties = {
+        padding: '2px 6px',
+        borderRadius: 3,
+        fontSize: 10,
+        fontWeight: 'bold',
+        backgroundColor: precisionMode === 'arbitrary' ? '#a44' : '#44a',
+        color: '#fff'
+    };
+
     const progressStyle: React.CSSProperties = {
         ...badgeStyle,
         flexDirection: 'column',
@@ -82,6 +88,11 @@ export const ZoomIndicator: React.FC<ZoomIndicatorProps> = ({
             <div style={badgeStyle}>
                 <span>Zoom: {formatZoom(zoom)}</span>
                 <span style={modeStyle}>{renderMode.toUpperCase()}</span>
+                {renderMode === 'cpu' && precisionMode && (
+                    <span style={precisionStyle}>
+                        {precisionMode === 'arbitrary' ? 'Arbitrary' : 'Float'}
+                    </span>
+                )}
             </div>
 
             {renderMode === 'cpu' && renderProgress && (

@@ -40,6 +40,7 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
     const [renderMode, setRenderMode] = useState<RenderMode>('gpu');
     const [renderProgress, setRenderProgress] = useState<RenderProgress | null>(null);
     const [zoomLevel, setZoomLevel] = useState(1);
+    const [precisionMode, setPrecisionMode] = useState<'float' | 'arbitrary'>('float');
 
     // Store props in ref for use in callbacks
     const propsRef = useRef({ fractalType, paletteId, maxIterations, juliaReal, juliaImag });
@@ -53,12 +54,13 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
         const config = FRACTAL_CONFIGS[props.fractalType];
         const viewport = viewportRef.current;
 
-        // Update zoom level for UI
-        setZoomLevel(viewport.zoom.toNumber());
-
         // Dynamic iterations based on zoom
         const zoomNum = viewport.zoom.toNumber();
         const zoomLevel = Math.log10(zoomNum);
+
+        // Update zoom level and precision mode for UI
+        setZoomLevel(zoomNum);
+        setPrecisionMode(zoomNum >= 1e14 ? 'arbitrary' : 'float');
         const dynamicIterations = Math.min(
             10000,
             Math.max(props.maxIterations, Math.floor(props.maxIterations * (1 + zoomLevel * 0.5)))
@@ -322,6 +324,7 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
                 zoom={zoomLevel}
                 renderMode={renderMode}
                 renderProgress={renderProgress}
+                precisionMode={precisionMode}
             />
         </div>
     );
