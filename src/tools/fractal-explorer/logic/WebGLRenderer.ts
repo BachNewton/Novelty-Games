@@ -1,4 +1,5 @@
 import { FractalType } from '../data/FractalTypes';
+import { RenderMode } from './FractalRenderer';
 
 // Vertex shader - simple fullscreen quad
 const VERTEX_SHADER = `
@@ -370,5 +371,9 @@ export class WebGLRenderer {
     dispose(): void {
         const gl = this.gl;
         gl.deleteProgram(this.program);
+    }
+
+    getMode(): RenderMode {
+        return 'gpu';
     }
 }

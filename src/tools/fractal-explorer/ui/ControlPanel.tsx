@@ -141,9 +141,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     <div>Scroll/pinch to zoom</div>
                 </div>
 
-                <div style={{ ...sectionStyle, color: '#4a4', fontSize: '0.8em' }}>
-                    GPU Accelerated
-                </div>
             </div>
         </>
     );

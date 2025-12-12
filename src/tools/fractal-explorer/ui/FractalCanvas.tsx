@@ -1,6 +1,16 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { FractalType, FRACTAL_CONFIGS } from '../data/FractalTypes';
-import { WebGLRenderer } from '../logic/WebGLRenderer';
+import { createRendererManager, RendererManager } from '../logic/RendererManager';
+import {
+    ArbitraryCoordinate,
+    createArbitraryCoordinate,
+    pan as panCoord,
+    zoomAt,
+    toNumbers,
+    toStrings
+} from '../logic/ArbitraryCoordinate';
+import { RenderMode, RenderProgress } from '../logic/FractalRenderer';
+import { ZoomIndicator } from './ZoomIndicator';
 
 interface FractalCanvasProps {
     fractalType: FractalType;
@@ -10,12 +20,6 @@ interface FractalCanvasProps {
     juliaImag?: number;
 }
 
-interface ViewportState {
-    centerReal: number;
-    centerImag: number;
-    zoom: number;
-}
-
 export const FractalCanvas: React.FC<FractalCanvasProps> = ({
     fractalType,
     paletteId,
@@ -23,13 +27,19 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
     juliaReal,
     juliaImag
 }) => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const rendererRef = useRef<WebGLRenderer | null>(null);
-    const viewportRef = useRef<ViewportState | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const gpuCanvasRef = useRef<HTMLCanvasElement>(null);
+    const cpuCanvasRef = useRef<HTMLCanvasElement>(null);
+    const rendererRef = useRef<RendererManager | null>(null);
+    const viewportRef = useRef<ArbitraryCoordinate | null>(null);
     const isDraggingRef = useRef(false);
     const lastMousePosRef = useRef({ x: 0, y: 0 });
     const lastTouchDistanceRef = useRef(0);
     const animationFrameRef = useRef<number | null>(null);
+
+    const [renderMode, setRenderMode] = useState<RenderMode>('gpu');
+    const [renderProgress, setRenderProgress] = useState<RenderProgress | null>(null);
+    const [zoomLevel, setZoomLevel] = useState(1);
 
     // Store props in ref for use in callbacks
     const propsRef = useRef({ fractalType, paletteId, maxIterations, juliaReal, juliaImag });
@@ -37,23 +47,29 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
 
     // Render the fractal
     const render = useCallback(() => {
-        if (!rendererRef.current || !viewportRef.current) return;
+        if (!rendererRef.current || !viewportRef.current || !gpuCanvasRef.current) return;
 
         const props = propsRef.current;
         const config = FRACTAL_CONFIGS[props.fractalType];
+        const viewport = viewportRef.current;
 
-        // Dynamically increase iterations based on zoom level for deeper detail
-        // More zoom = more iterations needed to see the fine structure
-        const zoomLevel = Math.log10(viewportRef.current.zoom);
+        // Update zoom level for UI
+        setZoomLevel(viewport.zoom.toNumber());
+
+        // Dynamic iterations based on zoom
+        const zoomNum = viewport.zoom.toNumber();
+        const zoomLevel = Math.log10(zoomNum);
         const dynamicIterations = Math.min(
             10000,
             Math.max(props.maxIterations, Math.floor(props.maxIterations * (1 + zoomLevel * 0.5)))
         );
 
+        const numbers = toNumbers(viewport);
+        const strings = toStrings(viewport);
+
         rendererRef.current.render({
-            centerReal: viewportRef.current.centerReal,
-            centerImag: viewportRef.current.centerImag,
-            zoom: viewportRef.current.zoom,
+            ...numbers,
+            ...strings,
             maxIterations: dynamicIterations,
             fractalType: props.fractalType,
             paletteId: props.paletteId,
@@ -73,12 +89,14 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
         });
     }, [render]);
 
-    // Initialize canvas and WebGL renderer
+    // Initialize canvas and renderer
     const initCanvas = useCallback(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
+        const container = containerRef.current;
+        const gpuCanvas = gpuCanvasRef.current;
+        const cpuCanvas = cpuCanvasRef.current;
+        if (!container || !gpuCanvas || !cpuCanvas) return;
 
-        const rect = canvas.getBoundingClientRect();
+        const rect = container.getBoundingClientRect();
         if (rect.width === 0 || rect.height === 0) return;
 
         const width = Math.floor(rect.width);
@@ -87,9 +105,11 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
         // Initialize or resize renderer
         if (!rendererRef.current) {
             try {
-                rendererRef.current = new WebGLRenderer(canvas);
+                rendererRef.current = createRendererManager(gpuCanvas, cpuCanvas);
+                rendererRef.current.setOnModeChange(setRenderMode);
+                rendererRef.current.setOnProgress(setRenderProgress);
             } catch (e) {
-                console.error('Failed to initialize WebGL:', e);
+                console.error('Failed to initialize renderer:', e);
                 return;
             }
         }
@@ -101,11 +121,11 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
         const config = FRACTAL_CONFIGS[props.fractalType];
 
         if (!viewportRef.current) {
-            viewportRef.current = {
-                centerReal: config.defaultCenter.real,
-                centerImag: config.defaultCenter.imag,
-                zoom: config.defaultZoom
-            };
+            viewportRef.current = createArbitraryCoordinate(
+                config.defaultCenter.real,
+                config.defaultCenter.imag,
+                config.defaultZoom
+            );
         }
 
         render();
@@ -115,44 +135,38 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
     const pan = useCallback((deltaX: number, deltaY: number) => {
         if (!viewportRef.current) return;
 
-        viewportRef.current = {
-            ...viewportRef.current,
-            centerReal: viewportRef.current.centerReal - deltaX / viewportRef.current.zoom,
-            // Flip Y because WebGL Y is inverted
-            centerImag: viewportRef.current.centerImag + deltaY / viewportRef.current.zoom
-        };
-
+        viewportRef.current = panCoord(viewportRef.current, deltaX, deltaY);
         scheduleRender();
     }, [scheduleRender]);
 
     // Zoom the viewport
     const zoom = useCallback((factor: number, screenX: number, screenY: number) => {
-        if (!viewportRef.current || !canvasRef.current) return;
+        if (!viewportRef.current || !containerRef.current) return;
 
-        const canvas = canvasRef.current;
-        const rect = canvas.getBoundingClientRect();
+        const container = containerRef.current;
+        const rect = container.getBoundingClientRect();
 
         // Get position in canvas coordinates
         const canvasX = screenX - rect.left;
         const canvasY = screenY - rect.top;
 
-        // Convert to complex plane coordinates before zoom
-        const complexX = viewportRef.current.centerReal + (canvasX - rect.width / 2) / viewportRef.current.zoom;
-        const complexY = viewportRef.current.centerImag - (canvasY - rect.height / 2) / viewportRef.current.zoom;
+        // Apply zoom using arbitrary precision
+        const newViewport = zoomAt(
+            viewportRef.current,
+            factor,
+            canvasX,
+            canvasY,
+            rect.width,
+            rect.height
+        );
 
-        // Apply zoom
-        const newZoom = Math.max(10, Math.min(viewportRef.current.zoom * factor, 1e14));
+        // Enforce minimum zoom of 10
+        const newZoomNum = newViewport.zoom.toNumber();
+        if (newZoomNum < 10) {
+            return;
+        }
 
-        // Adjust center to keep point under cursor stationary
-        const newCenterReal = complexX - (canvasX - rect.width / 2) / newZoom;
-        const newCenterImag = complexY + (canvasY - rect.height / 2) / newZoom;
-
-        viewportRef.current = {
-            centerReal: newCenterReal,
-            centerImag: newCenterImag,
-            zoom: newZoom
-        };
-
+        viewportRef.current = newViewport;
         scheduleRender();
     }, [scheduleRender]);
 
@@ -236,16 +250,16 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
         const handleResize = () => initCanvas();
         window.addEventListener('resize', handleResize);
 
-        // Add wheel listener with passive: false
-        const canvas = canvasRef.current;
-        if (canvas) {
-            canvas.addEventListener('wheel', handleWheel, { passive: false });
+        // Add wheel listener with passive: false to container
+        const container = containerRef.current;
+        if (container) {
+            container.addEventListener('wheel', handleWheel, { passive: false });
         }
 
         return () => {
             window.removeEventListener('resize', handleResize);
-            if (canvas) {
-                canvas.removeEventListener('wheel', handleWheel);
+            if (container) {
+                container.removeEventListener('wheel', handleWheel);
             }
             if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current);
@@ -260,11 +274,11 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
     // Re-render when fractal type changes (reset viewport)
     useEffect(() => {
         const config = FRACTAL_CONFIGS[fractalType];
-        viewportRef.current = {
-            centerReal: config.defaultCenter.real,
-            centerImag: config.defaultCenter.imag,
-            zoom: config.defaultZoom
-        };
+        viewportRef.current = createArbitraryCoordinate(
+            config.defaultCenter.real,
+            config.defaultCenter.imag,
+            config.defaultZoom
+        );
         scheduleRender();
     }, [fractalType, scheduleRender]);
 
@@ -273,18 +287,27 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
         scheduleRender();
     }, [paletteId, maxIterations, juliaReal, juliaImag, scheduleRender]);
 
-    const canvasStyle: React.CSSProperties = {
+    const containerStyle: React.CSSProperties = {
         width: '100%',
         height: '100%',
-        display: 'block',
+        position: 'relative',
         cursor: isDraggingRef.current ? 'grabbing' : 'grab',
         touchAction: 'none'
     };
 
+    const canvasStyle: React.CSSProperties = {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        display: 'block'
+    };
+
     return (
-        <canvas
-            ref={canvasRef}
-            style={canvasStyle}
+        <div
+            ref={containerRef}
+            style={containerStyle}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -292,6 +315,14 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-        />
+        >
+            <canvas ref={gpuCanvasRef} style={canvasStyle} />
+            <canvas ref={cpuCanvasRef} style={{ ...canvasStyle, display: 'none' }} />
+            <ZoomIndicator
+                zoom={zoomLevel}
+                renderMode={renderMode}
+                renderProgress={renderProgress}
+            />
+        </div>
     );
 };
