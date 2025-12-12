@@ -36,6 +36,13 @@ export function createArbitraryPrecisionRenderer(
     let onProgressCallback: ((progress: RenderProgress) => void) | null = null;
     let renderCancelled = false;
 
+    // Unique ID for each render request to ignore stale worker results
+    let currentRenderId = 0;
+
+    // Track pending render - if a render is requested while workers are busy,
+    // we store it here and start it when the current render completes or is abandoned
+    let pendingRenderParams: ArbitraryPrecisionRenderParams | null = null;
+
     // Iteration buffer: stores computed iterations for each pixel
     // -1 means not yet computed
     let iterationBuffer: Int32Array | null = null;
@@ -48,6 +55,9 @@ export function createArbitraryPrecisionRenderer(
 
     // Track which step we're currently rendering at (for upscaling)
     let currentStepForRender = PASSES[0].step;
+
+    // Track if we're actively rendering (workers are computing)
+    let isRendering = false;
 
     const initializeWorkers = () => {
         for (let i = 0; i < workerCount; i++) {
@@ -71,6 +81,38 @@ export function createArbitraryPrecisionRenderer(
         }
     };
 
+    // Start the actual rendering process with given params
+    const startRender = (params: ArbitraryPrecisionRenderParams) => {
+        currentParams = params;
+        renderCancelled = false;
+        currentPass = 0;
+        currentStepForRender = PASSES[0].step;
+        currentRenderId++;
+        isRendering = true;
+
+        // Clear iteration buffer
+        if (!iterationBuffer || iterationBuffer.length !== canvas.width * canvas.height) {
+            iterationBuffer = new Int32Array(canvas.width * canvas.height);
+        }
+        iterationBuffer.fill(-1);
+
+        // Clear canvas with black
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Start first pass
+        startPass(0);
+    };
+
+    // Check if there's a pending render and start it
+    const checkPendingRender = () => {
+        if (pendingRenderParams) {
+            const params = pendingRenderParams;
+            pendingRenderParams = null;
+            startRender(params);
+        }
+    };
+
     const handleWorkerMessage = (workerIdx: number, message: WorkerMessage) => {
         if (message.type === 'READY') {
             workersReady[workerIdx] = true;
@@ -78,6 +120,9 @@ export function createArbitraryPrecisionRenderer(
         }
 
         if (message.type === 'PROGRESS') {
+            // Ignore progress from old renders
+            if (message.renderId !== currentRenderId) return;
+
             pixelsCompletedInPass += 100; // Approximate since we send every 100
             if (onProgressCallback && !renderCancelled) {
                 onProgressCallback({
@@ -91,7 +136,25 @@ export function createArbitraryPrecisionRenderer(
         }
 
         if (message.type === 'PIXELS_RESULT') {
-            if (renderCancelled) return;
+            // Ignore results from old renders
+            if (message.renderId !== currentRenderId) {
+                // Old render result - check if there's a pending render we should start
+                // (This means workers have finished processing old work)
+                if (pendingRenderParams && !isRendering) {
+                    checkPendingRender();
+                }
+                return;
+            }
+
+            if (renderCancelled) {
+                // Current render was cancelled - mark as not rendering and check for pending
+                workersCompletedInPass++;
+                if (workersCompletedInPass >= totalWorkersInPass) {
+                    isRendering = false;
+                    checkPendingRender();
+                }
+                return;
+            }
 
             const { results } = message;
 
@@ -119,6 +182,7 @@ export function createArbitraryPrecisionRenderer(
                     startPass(nextPass);
                 } else {
                     // All passes complete
+                    isRendering = false;
                     if (onProgressCallback) {
                         onProgressCallback({
                             mode: 'cpu',
@@ -127,6 +191,8 @@ export function createArbitraryPrecisionRenderer(
                             totalPasses: PASSES.length
                         });
                     }
+                    // Check if a new render was requested while we were working
+                    checkPendingRender();
                 }
             }
         }
@@ -245,6 +311,7 @@ export function createArbitraryPrecisionRenderer(
 
             const msg: ComputePixelsMessage = {
                 type: 'COMPUTE_PIXELS',
+                renderId: currentRenderId,
                 canvasWidth: canvas.width,
                 canvasHeight: canvas.height,
                 pixels,
@@ -285,23 +352,16 @@ export function createArbitraryPrecisionRenderer(
                     || String(params.zoom)
             };
 
-            currentParams = apParams;
-            renderCancelled = false;
-            currentPass = 0;
-            currentStepForRender = PASSES[0].step;
-
-            // Clear iteration buffer
-            if (!iterationBuffer || iterationBuffer.length !== canvas.width * canvas.height) {
-                iterationBuffer = new Int32Array(canvas.width * canvas.height);
+            if (isRendering) {
+                // Workers are busy - store this as pending and cancel current render
+                // The pending render will start when workers finish their current work
+                pendingRenderParams = apParams;
+                renderCancelled = true;
+                return;
             }
-            iterationBuffer.fill(-1);
 
-            // Clear canvas with black
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Start first pass
-            startPass(0);
+            // No render in progress - start immediately
+            startRender(apParams);
         },
 
         dispose: () => {

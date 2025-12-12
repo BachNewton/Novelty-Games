@@ -42,6 +42,8 @@ export function createRendererManager(
     const initCPU = () => {
         if (!apRenderer) {
             apRenderer = createArbitraryPrecisionRenderer(cpuCanvas);
+            // Ensure the new renderer is sized to match the canvas
+            apRenderer.resize(cpuCanvas.width, cpuCanvas.height);
             if (onProgressCallback) {
                 apRenderer.setOnProgress(onProgressCallback);
             }

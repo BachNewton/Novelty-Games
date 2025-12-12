@@ -13,6 +13,8 @@ export interface InitMessage {
 
 export interface ComputePixelsMessage {
     type: 'COMPUTE_PIXELS';
+    // Unique ID for this render request (to discard stale results)
+    renderId: number;
     // Canvas dimensions
     canvasWidth: number;
     canvasHeight: number;
@@ -49,6 +51,7 @@ export interface ReadyMessage {
 export interface PixelsResultMessage {
     type: 'PIXELS_RESULT';
     workerId: number;
+    renderId: number;
     // Pixel coordinates and their iteration counts (flat: [x0, y0, iter0, x1, y1, iter1, ...])
     results: number[];
     passNumber: number;
@@ -58,6 +61,7 @@ export interface PixelsResultMessage {
 export interface ProgressMessage {
     type: 'PROGRESS';
     workerId: number;
+    renderId: number;
     pixelsCompleted: number;
     totalPixels: number;
     passNumber: number;

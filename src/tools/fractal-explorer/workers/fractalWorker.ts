@@ -190,6 +190,7 @@ function processPixels(msg: ComputePixelsMessage): void {
             ctx.postMessage({
                 type: 'PROGRESS',
                 workerId,
+                renderId: msg.renderId,
                 pixelsCompleted,
                 totalPixels,
                 passNumber: msg.passNumber
@@ -200,6 +201,7 @@ function processPixels(msg: ComputePixelsMessage): void {
     ctx.postMessage({
         type: 'PIXELS_RESULT',
         workerId,
+        renderId: msg.renderId,
         results,
         passNumber: msg.passNumber,
         computeTimeMs: performance.now() - startTime
