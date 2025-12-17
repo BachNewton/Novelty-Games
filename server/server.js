@@ -14,6 +14,21 @@ const ANSI_YELLOW = '\x1b[93m';
 const ANSI_CYAN = '\x1b[96m';
 const ANSI_GREEN = '\x1b[92m';
 
+function logError(type, error) {
+    const timestamp = new Date().toISOString();
+    const message = `[${timestamp}] ${type}: ${error.stack || error}\n`;
+    fs.appendFileSync('error.log', message);
+}
+
+process.on('uncaughtException', (error) => {
+    logError('UncaughtException', error);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+    logError('UnhandledRejection', reason);
+});
+
 function startServer() {
     const privateKey = fs.readFileSync(PRIVATE_KEY_FILE_PATH, 'utf8');
     const certificate = fs.readFileSync(CERTIFICATE_FILE_PATH, 'utf8');
