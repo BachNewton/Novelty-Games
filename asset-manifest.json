@@ -1,11 +1,12 @@
 {
   "files": {
     "main.css": "/Novelty-Games/static/css/main.df20779e.css",
-    "main.js": "/Novelty-Games/static/js/main.8fec4fe8.js",
+    "main.js": "/Novelty-Games/static/js/main.b1739543.js",
     "static/js/453.68693753.chunk.js": "/Novelty-Games/static/js/453.68693753.chunk.js",
     "MusicIndex.js": "/Novelty-Games/static/js/MusicIndex.7371e6f9.chunk.js",
     "static/js/919.ce43f416.chunk.js": "/Novelty-Games/static/js/919.ce43f416.chunk.js",
     "static/js/300.52ef7f0e.chunk.js": "/Novelty-Games/static/js/300.52ef7f0e.chunk.js",
+    "static/js/744.4713af4b.chunk.js": "/Novelty-Games/static/js/744.4713af4b.chunk.js",
     "static/js/217.50e13ff1.chunk.js": "/Novelty-Games/static/js/217.50e13ff1.chunk.js",
     "static/media/sleep.jpg": "/Novelty-Games/static/media/sleep.71f566b84fa6e497c137.jpg",
     "static/media/space.jpeg": "/Novelty-Games/static/media/space.17a42bd301449d92ae22.jpeg",
@@ -114,15 +115,16 @@
     "static/media/go.svg": "/Novelty-Games/static/media/go.9e3970ae0d583391baebfdde03a9d6de.svg",
     "static/media/sort.svg": "/Novelty-Games/static/media/sort.b890db8dc0b9cb16cc4a30a76538428f.svg",
     "main.df20779e.css.map": "/Novelty-Games/static/css/main.df20779e.css.map",
-    "main.8fec4fe8.js.map": "/Novelty-Games/static/js/main.8fec4fe8.js.map",
+    "main.b1739543.js.map": "/Novelty-Games/static/js/main.b1739543.js.map",
     "453.68693753.chunk.js.map": "/Novelty-Games/static/js/453.68693753.chunk.js.map",
     "MusicIndex.7371e6f9.chunk.js.map": "/Novelty-Games/static/js/MusicIndex.7371e6f9.chunk.js.map",
     "919.ce43f416.chunk.js.map": "/Novelty-Games/static/js/919.ce43f416.chunk.js.map",
     "300.52ef7f0e.chunk.js.map": "/Novelty-Games/static/js/300.52ef7f0e.chunk.js.map",
+    "744.4713af4b.chunk.js.map": "/Novelty-Games/static/js/744.4713af4b.chunk.js.map",
     "217.50e13ff1.chunk.js.map": "/Novelty-Games/static/js/217.50e13ff1.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.df20779e.css",
-    "static/js/main.8fec4fe8.js"
+    "static/js/main.b1739543.js"
   ]
 }
