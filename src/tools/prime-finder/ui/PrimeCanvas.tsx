@@ -56,7 +56,20 @@ const PrimeCanvas: React.FC<PrimeCanvasProps> = ({ dataRef, isRunning }) => {
             ctx.fillStyle = '#1a1a2e';
             ctx.fillRect(0, 0, width, height);
 
-            const padding = 30;
+            // Responsive scaling based on canvas dimensions
+            const BASE_DESKTOP_WIDTH = 800;
+            const BASE_DESKTOP_HEIGHT = 600;
+            // Scale based on width, but also cap by height to prevent overflow on ultrawide screens
+            const widthScale = width / BASE_DESKTOP_WIDTH;
+            const heightScale = height / BASE_DESKTOP_HEIGHT;
+            const scaleFactor = Math.max(0.5, Math.min(1.5, widthScale, heightScale));
+
+            const scale = (baseValue: number, min?: number): number => {
+                const scaled = baseValue * scaleFactor;
+                return min !== undefined ? Math.max(min, scaled) : scaled;
+            };
+
+            const padding = scale(30, 15);
             const centerX = width / 2;
 
             // Calculate elapsed time
@@ -66,76 +79,89 @@ const PrimeCanvas: React.FC<PrimeCanvasProps> = ({ dataRef, isRunning }) => {
 
             // Title
             ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-            ctx.font = '16px monospace';
+            ctx.font = `${scale(16, 10)}px monospace`;
             ctx.textAlign = 'center';
-            ctx.fillText('LATEST PRIME FOUND', centerX, padding + 20);
+            ctx.fillText('LATEST PRIME FOUND', centerX, padding + scale(20, 12));
 
             // Large prime number display
             ctx.fillStyle = '#00ff88';
-            ctx.font = 'bold 64px monospace';
+            ctx.font = `bold ${scale(64, 28)}px monospace`;
             ctx.textAlign = 'center';
             const primeText = data.latestPrime > 0 ? formatNumber(data.latestPrime) : '---';
-            ctx.fillText(primeText, centerX, padding + 90);
+            ctx.fillText(primeText, centerX, padding + scale(90, 50));
 
             // Divider line
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(padding, padding + 120);
-            ctx.lineTo(width - padding, padding + 120);
+            ctx.moveTo(padding, padding + scale(120, 70));
+            ctx.lineTo(width - padding, padding + scale(120, 70));
             ctx.stroke();
 
             // Statistics section
-            const statsY = padding + 160;
-            ctx.font = '14px monospace';
+            const statsY = padding + scale(160, 90);
+            ctx.font = `${scale(14, 10)}px monospace`;
             ctx.textAlign = 'left';
 
             // Left column
             ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
             ctx.fillText('Total Primes:', padding, statsY);
             ctx.fillStyle = '#4fc3f7';
-            ctx.fillText(formatNumber(data.totalPrimesFound), padding + 120, statsY);
+            ctx.fillText(formatNumber(data.totalPrimesFound), padding + scale(120, 80), statsY);
 
             ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-            ctx.fillText('Highest Checked:', padding, statsY + 25);
+            ctx.fillText('Highest Checked:', padding, statsY + scale(25, 16));
             ctx.fillStyle = '#4fc3f7';
-            ctx.fillText(formatNumber(data.highestNumberChecked), padding + 140, statsY + 25);
+            ctx.fillText(formatNumber(data.highestNumberChecked), padding + scale(140, 90), statsY + scale(25, 16));
 
             // Right column
-            const rightCol = width / 2 + 20;
+            const rightCol = width / 2 + scale(20, 10);
             ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
             ctx.fillText('Rate:', rightCol, statsY);
             ctx.fillStyle = '#4fc3f7';
-            ctx.fillText(formatRate(data.primesPerSecond) + '/s', rightCol + 50, statsY);
+            ctx.fillText(formatRate(data.primesPerSecond) + '/s', rightCol + scale(50, 35), statsY);
 
             ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-            ctx.fillText('Time:', rightCol, statsY + 25);
+            ctx.fillText('Time:', rightCol, statsY + scale(25, 16));
             ctx.fillStyle = '#4fc3f7';
-            ctx.fillText(formatTime(elapsed), rightCol + 50, statsY + 25);
+            ctx.fillText(formatTime(elapsed), rightCol + scale(50, 35), statsY + scale(25, 16));
 
             // Divider line
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
             ctx.beginPath();
-            ctx.moveTo(padding, statsY + 50);
-            ctx.lineTo(width - padding, statsY + 50);
+            ctx.moveTo(padding, statsY + scale(50, 32));
+            ctx.lineTo(width - padding, statsY + scale(50, 32));
             ctx.stroke();
 
             // Worker activity section
-            const workersY = statsY + 80;
+            const workersY = statsY + scale(80, 50);
             const workerStates = data.workerStates;
             const workerCount = workerStates.length;
 
             ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-            ctx.font = '14px monospace';
+            ctx.font = `${scale(14, 10)}px monospace`;
             ctx.textAlign = 'left';
             ctx.fillText(`Workers (${workerCount} threads)`, padding, workersY);
 
-            // Draw worker bars
-            const barStartY = workersY + 20;
-            const barHeight = 20;
-            const barGap = 8;
-            const barWidth = width - padding * 2 - 120;
-            const labelWidth = 40;
+            // Draw worker bars - dynamically sized to fit available space
+            const bottomMargin = scale(40, 25);
+            const barStartY = workersY + scale(20, 12);
+            const availableHeight = height - barStartY - bottomMargin - scale(10, 5);
+
+            // Calculate bar dimensions to fit all workers
+            const idealBarHeight = scale(20, 12);
+            const idealBarGap = scale(8, 4);
+            const idealTotalPerWorker = idealBarHeight + idealBarGap;
+
+            // If workers would overflow, shrink to fit
+            const totalNeeded = workerCount * idealTotalPerWorker;
+            const shrinkFactor = totalNeeded > availableHeight ? availableHeight / totalNeeded : 1;
+            const barHeight = Math.max(8, idealBarHeight * shrinkFactor);
+            const barGap = Math.max(2, idealBarGap * shrinkFactor);
+
+            const labelWidth = scale(40, 25);
+            const rateColumnWidth = scale(80, 50);
+            const barWidth = width - padding * 2 - labelWidth - rateColumnWidth;
 
             for (let i = 0; i < workerCount; i++) {
                 const worker = workerStates[i];
@@ -143,9 +169,9 @@ const PrimeCanvas: React.FC<PrimeCanvasProps> = ({ dataRef, isRunning }) => {
 
                 // Worker label
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                ctx.font = '12px monospace';
+                ctx.font = `${Math.max(8, scale(12, 8) * shrinkFactor)}px monospace`;
                 ctx.textAlign = 'left';
-                ctx.fillText(`W${i}`, padding, y + 14);
+                ctx.fillText(`W${i}`, padding, y + barHeight * 0.7);
 
                 // Progress bar background
                 const barX = padding + labelWidth;
@@ -161,21 +187,22 @@ const PrimeCanvas: React.FC<PrimeCanvasProps> = ({ dataRef, isRunning }) => {
 
                 // Rate
                 ctx.fillStyle = '#4fc3f7';
+                ctx.font = `${Math.max(8, scale(12, 8) * shrinkFactor)}px monospace`;
                 ctx.textAlign = 'right';
-                ctx.fillText(formatRate(worker.numbersPerSecond) + '/s', width - padding, y + 14);
+                ctx.fillText(formatRate(worker.numbersPerSecond) + '/s', width - padding, y + barHeight * 0.7);
             }
 
             // Status indicator
             if (!isRunning && data.latestPrime === 0) {
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                ctx.font = '18px monospace';
+                ctx.font = `${scale(18, 12)}px monospace`;
                 ctx.textAlign = 'center';
-                ctx.fillText('Press Start to begin', centerX, height - 40);
+                ctx.fillText('Press Start to begin', centerX, height - bottomMargin);
             } else if (!isRunning) {
                 ctx.fillStyle = 'rgba(255, 200, 100, 0.6)';
-                ctx.font = '14px monospace';
+                ctx.font = `${scale(14, 10)}px monospace`;
                 ctx.textAlign = 'center';
-                ctx.fillText('Stopped', centerX, height - 40);
+                ctx.fillText('Stopped', centerX, height - bottomMargin);
             }
 
             // Schedule next frame

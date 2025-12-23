@@ -64,7 +64,8 @@ const PrimeFinderHome: React.FC = () => {
     };
 
     const buttonStyle: React.CSSProperties = {
-        padding: '10px 24px',
+        padding: '12px 24px',
+        minHeight: '44px',
         fontSize: '1em',
         fontWeight: 'bold',
         border: 'none',
@@ -72,7 +73,8 @@ const PrimeFinderHome: React.FC = () => {
         cursor: 'pointer',
         transition: 'all 0.2s ease',
         backgroundColor: isRunning ? '#ef5350' : '#4caf50',
-        color: 'white'
+        color: 'white',
+        touchAction: 'manipulation'
     };
 
     const canvasContainerStyle: React.CSSProperties = {
