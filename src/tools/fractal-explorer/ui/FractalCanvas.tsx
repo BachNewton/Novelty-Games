@@ -12,12 +12,18 @@ import {
 import { RenderMode, RenderProgress } from '../logic/FractalRenderer';
 import { ZoomIndicator } from './ZoomIndicator';
 
+export interface ViewportControls {
+    setViewport: (coord: ArbitraryCoordinate) => void;
+    getViewport: () => ArbitraryCoordinate | null;
+}
+
 interface FractalCanvasProps {
     fractalType: FractalType;
     paletteId: string;
     maxIterations: number;
     juliaReal?: number;
     juliaImag?: number;
+    onViewportReady?: (controls: ViewportControls) => void;
 }
 
 export const FractalCanvas: React.FC<FractalCanvasProps> = ({
@@ -25,7 +31,8 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
     paletteId,
     maxIterations,
     juliaReal,
-    juliaImag
+    juliaImag,
+    onViewportReady
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const gpuCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -278,6 +285,19 @@ export const FractalCanvas: React.FC<FractalCanvasProps> = ({
             }
         };
     }, [initCanvas, handleWheel, handleTouchStart, handleTouchMove, handleTouchEnd]);
+
+    // Expose viewport controls to parent
+    useEffect(() => {
+        if (onViewportReady) {
+            onViewportReady({
+                setViewport: (coord: ArbitraryCoordinate) => {
+                    viewportRef.current = coord;
+                    scheduleRender();
+                },
+                getViewport: () => viewportRef.current
+            });
+        }
+    }, [onViewportReady, scheduleRender]);
 
     // Re-render when fractal type changes (reset viewport)
     useEffect(() => {

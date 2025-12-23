@@ -8,19 +8,24 @@ An interactive fractal visualization tool with dual-renderer architecture suppor
 fractal-explorer/
 ├── data/
 │   ├── FractalTypes.ts           # Fractal configurations & defaults
-│   └── ColorPalettes.ts          # Color palette definitions
+│   ├── ColorPalettes.ts          # Color palette definitions
+│   └── TourData.ts               # Guided tour waypoints
 ├── logic/
 │   ├── ArbitraryCoordinate.ts    # High-precision coordinate system (Decimal.js)
 │   ├── ArbitraryPrecisionRenderer.ts  # CPU-based multi-pass renderer
 │   ├── ColorUtils.ts             # Color calculation & LUT generation
+│   ├── Easing.ts                 # Animation easing functions
 │   ├── FractalRenderer.ts        # Render interfaces & types
 │   ├── RendererManager.ts        # GPU/CPU renderer switching
+│   ├── TourAnimator.ts           # Three-phase animation engine
+│   ├── TourController.ts         # Tour state management
 │   └── WebGLRenderer.ts          # WebGL-based GPU renderer
 ├── ui/
 │   ├── FractalExplorerPage.tsx   # Entry point (route wrapper)
 │   ├── Home.tsx                  # Main UI with settings state
 │   ├── FractalCanvas.tsx         # Canvas & interaction handler
 │   ├── ControlPanel.tsx          # Settings sidebar
+│   ├── TourControls.tsx          # Tour navigation HUD
 │   └── ZoomIndicator.tsx         # HUD (zoom, mode, progress)
 └── workers/
     ├── FractalWorkerMessages.ts  # Worker message types
@@ -148,6 +153,7 @@ interface RendererManager {
 | **Pinch** | Zoom at center (mobile) |
 | **Fractal selector** | Switch type, resets to default view |
 | **Palette selector** | Change colors, re-renders |
+| **Tour button** | Start guided tour through famous fractal locations |
 
 ## Performance Characteristics
 
@@ -165,6 +171,60 @@ interface RendererManager {
 - **Rainbow**: Full spectrum cycle
 - **Ocean**: Blue-cyan-white
 - **Monochrome**: Grayscale
+
+## Guided Tour
+
+A guided tour feature takes users on a "math adventure" through famous locations in the Mandelbrot set, demonstrating both GPU and CPU rendering capabilities.
+
+### Tour Stops (Mandelbrot Journey)
+
+| # | Name | Coordinates | Zoom | Renderer |
+|---|------|-------------|------|----------|
+| 1 | The Full Set | (-0.5, 0) | 250 | GPU |
+| 2 | Seahorse Valley | (-0.75, 0.1) | 2,000 | GPU |
+| 3 | Seahorse Tail | (-0.7463, 0.1102) | 50,000 | GPU |
+| 4 | Elephant Valley | (0.27205, 0.00612) | 3,000 | GPU |
+| 5 | Elephant Deep | (0.272172, 0.005725) | 5e6 | GPU |
+| 6 | Deep Spiral | (-0.7436439, 0.1318259) | 5e8 | CPU (float) |
+| 7 | Hidden Minibrot | (-1.749024499891772, 0.0) | 1e12 | CPU (float) |
+| 8 | Infinite Depth | (-0.7436438870371587, 0.1318259042053119) | 1e17 | CPU (Decimal.js) |
+
+### Animation System
+
+The tour uses a three-phase "Google Earth" style animation between stops:
+
+```
+Phase 1 - Zoom Out (1s):
+  Logarithmic zoom decrease to transit level
+  Position stays at start
+
+Phase 2 - Pan (1.5s):
+  Linear position interpolation
+  Zoom stays at transit level
+
+Phase 3 - Zoom In (1.5s):
+  Logarithmic zoom increase to destination
+  Position stays at end
+```
+
+Zoom is interpolated logarithmically for perceptually uniform speed:
+```typescript
+currentZoom = exp(lerp(log(fromZoom), log(toZoom), t))
+```
+
+### Tour Controls
+
+- **Previous/Next buttons**: Navigate between stops
+- **Dot navigation**: Click any dot to jump to that stop
+- **Auto-advance**: Automatically proceed after 5 seconds at each stop
+- **Full interactivity**: Pan/zoom freely during tour; tour provides waypoints
+
+### Animation During CPU Rendering
+
+Animation runs at 60fps regardless of renderer mode. During transitions to deep-zoom stops:
+- GPU renders keep up with every frame
+- CPU renders show progressive/incomplete results during fast animation
+- When animation stops at a waypoint, CPU completes the full-quality render
 
 ## Implementation Details
 
