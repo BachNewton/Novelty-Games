@@ -11,7 +11,8 @@ const ToolsMenu: React.FC = () => {
                 { buttonText: 'Database Debug 📦', to: R.DATABASE_DEBUG },
                 { buttonText: 'Winter Cycling ❄️', to: R.WINTER_CYCLING },
                 { buttonText: 'Fractal Explorer 🌀', to: R.FRACTAL_EXPLORER },
-                { buttonText: 'Prime Number Finder 🔢', to: R.PRIME_FINDER }
+                { buttonText: 'Prime Number Finder 🔢', to: R.PRIME_FINDER },
+                { buttonText: 'World Explorer 🗺️', to: R.WORLD_EXPLORER }
             ]}
         />
     );

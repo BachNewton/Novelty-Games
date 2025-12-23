@@ -23,6 +23,7 @@ import DatabaseDebugPage from '../tools/database-debug/ui/DatabaseDebugPage';
 import WinterCyclingPage from '../tools/winter-cycling/ui/WinterCyclingPage';
 import FractalExplorerPage from '../tools/fractal-explorer/ui/FractalExplorerPage';
 import PrimeFinderPage from '../tools/prime-finder/ui/PrimeFinderPage';
+import WorldExplorerPage from '../tools/world-explorer/ui/WorldExplorerPage';
 
 interface AppProps {
     updateCallbacks: {
@@ -79,6 +80,7 @@ const App: React.FC<AppProps> = ({ updateCallbacks }) => {
             <Route path={R.WINTER_CYCLING.fullPath} element={<WinterCyclingPage />} />
             <Route path={R.FRACTAL_EXPLORER.fullPath} element={<FractalExplorerPage />} />
             <Route path={R.PRIME_FINDER.fullPath} element={<PrimeFinderPage />} />
+            <Route path={R.WORLD_EXPLORER.fullPath} element={<WorldExplorerPage />} />
         </Routes>
     );
 };
