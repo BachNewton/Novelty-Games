@@ -75,7 +75,7 @@ const PrimeCanvas: React.FC<PrimeCanvasProps> = ({ dataRef, isRunning }) => {
             // Calculate elapsed time
             const elapsed = isRunning && data.startTime > 0
                 ? performance.now() - data.startTime
-                : 0;
+                : data.pausedElapsedTime;
 
             // Title
             ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
@@ -202,7 +202,7 @@ const PrimeCanvas: React.FC<PrimeCanvasProps> = ({ dataRef, isRunning }) => {
                 ctx.fillStyle = 'rgba(255, 200, 100, 0.6)';
                 ctx.font = `${scale(14, 10)}px monospace`;
                 ctx.textAlign = 'center';
-                ctx.fillText('Stopped', centerX, height - bottomMargin);
+                ctx.fillText('Paused', centerX, height - bottomMargin);
             }
 
             // Schedule next frame

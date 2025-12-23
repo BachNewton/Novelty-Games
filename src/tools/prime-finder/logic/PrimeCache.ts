@@ -3,6 +3,7 @@ export interface PrimeCache {
     addPrimes: (newPrimes: number[]) => void;
     getCount: () => number;
     getLargest: () => number;
+    clear: () => void;
 }
 
 // Only store primes up to this value for trial division
@@ -54,6 +55,12 @@ export function createPrimeCache(): PrimeCache {
 
         getCount: () => totalCount,
 
-        getLargest: () => largestPrime
+        getLargest: () => largestPrime,
+
+        clear: () => {
+            storedPrimes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
+            totalCount = storedPrimes.length;
+            largestPrime = storedPrimes[storedPrimes.length - 1];
+        }
     };
 }

@@ -76,5 +76,6 @@ export interface PrimeFinderData {
     highestNumberChecked: number;
     primesPerSecond: number;
     startTime: number;
+    pausedElapsedTime: number;
     workerStates: WorkerStateInfo[];
 }

@@ -43,12 +43,20 @@ const workerCount = navigator.hardwareConcurrency || 4;
 4. **Worker responds with READY** message
 5. **Coordinator assigns first batch** to each ready worker
 
-### Termination
+### Pause/Resume
 
-When stopped, the coordinator:
+The coordinator supports pausing and resuming:
+
+- **Pause**: Sets `running = false`, workers complete current batches but receive no new work. State is preserved (accumulated time, prime cache, next number to check).
+- **Resume**: Sets `running = true`, re-assigns batches to all workers, elapsed time continues from where it left off.
+
+### Restart
+
+When restarting, the coordinator:
 1. Sends a `STOP` message to each worker
 2. Calls `worker.terminate()` to clean up resources
-3. Updates worker states to 'idle'
+3. Clears the prime cache and resets all counters to initial state
+4. Returns to the pre-start state (user can click Start again)
 
 ## Message Protocol
 
@@ -235,6 +243,12 @@ addPrimes: (newPrimes) => {
     const primesToStore = newPrimes.filter(p => p <= MAX_STORED_PRIME);
     storedPrimes.push(...primesToStore);
 }
+
+clear: () => {
+    // Reset to bootstrap primes (used by restart)
+    storedPrimes = [2, 3, 5, 7, ...];
+    totalCount = storedPrimes.length;
+}
 ```
 
 ### Why This Works
@@ -297,6 +311,43 @@ The rate decreases as numbers grow because:
 - More trial divisions required (√n increases)
 - Primes become less dense (Prime Number Theorem)
 
+## Responsive UI
+
+The canvas visualization adapts to different screen sizes:
+
+### Dynamic Font Scaling
+
+Font sizes scale based on canvas dimensions:
+
+```typescript
+const BASE_DESKTOP_WIDTH = 800;
+const BASE_DESKTOP_HEIGHT = 600;
+const widthScale = width / BASE_DESKTOP_WIDTH;
+const heightScale = height / BASE_DESKTOP_HEIGHT;
+const scaleFactor = Math.max(0.5, Math.min(1.5, widthScale, heightScale));
+
+const scale = (baseValue: number, min?: number): number => {
+    const scaled = baseValue * scaleFactor;
+    return min !== undefined ? Math.max(min, scaled) : scaled;
+};
+```
+
+- **Mobile (320-500px)**: Scale factor ~0.5, fonts shrink to minimum readable sizes
+- **Desktop (800px+)**: Scale factor 1.0, normal sizes
+- **Ultrawide**: Capped by height to prevent vertical overflow
+
+### Dynamic Worker Bars
+
+Worker progress bars resize to fit available vertical space when many workers are present:
+
+```typescript
+const availableHeight = height - barStartY - bottomMargin;
+const totalNeeded = workerCount * (idealBarHeight + idealBarGap);
+const shrinkFactor = totalNeeded > availableHeight ? availableHeight / totalNeeded : 1;
+```
+
+This ensures 16+ workers fit on screen without overflow.
+
 ## Summary
 
 The Prime Finder demonstrates effective use of web workers for CPU-intensive tasks:
@@ -306,3 +357,4 @@ The Prime Finder demonstrates effective use of web workers for CPU-intensive tas
 - **Message-based communication** keeps workers isolated and thread-safe
 - **Prime caching** optimizes the mathematical algorithm
 - **Progress updates** maintain UI responsiveness without sacrificing throughput
+- **Responsive design** adapts to mobile, desktop, and ultrawide screens

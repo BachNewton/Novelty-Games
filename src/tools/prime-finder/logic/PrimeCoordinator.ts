@@ -4,8 +4,11 @@ import { MutableRefObject } from 'react';
 
 export interface PrimeCoordinator {
     start: () => void;
-    stop: () => void;
+    pause: () => void;
+    resume: () => void;
+    restart: () => void;
     isRunning: () => boolean;
+    hasStarted: () => boolean;
 }
 
 const INITIAL_BATCH_SIZE = 10000;
@@ -19,10 +22,13 @@ export function createPrimeCoordinator(dataRef: MutableRefObject<PrimeFinderData
     const workerBatchSizes: Map<number, number> = new Map();
 
     let running = false;
+    let started = false;
     let nextNumberToAssign = 2;
     let primesPerSecondSamples: number[] = [];
     let lastSampleTime = 0;
     let lastSamplePrimeCount = 0;
+    let accumulatedTime = 0;
+    let lastRunStartTime = 0;
 
     const primeCache = createPrimeCache();
 
@@ -191,29 +197,16 @@ export function createPrimeCoordinator(dataRef: MutableRefObject<PrimeFinderData
         }
     };
 
-    const terminateWorkers = () => {
-        workers.forEach((worker, i) => {
-            const stopMessage: CoordinatorMessage = { type: 'STOP' };
-            worker.postMessage(stopMessage);
-            worker.terminate();
-
-            const state = dataRef.current.workerStates[i];
-            if (state) {
-                state.status = 'idle';
-                state.progress = 0;
-            }
-        });
-
-        workers.length = 0;
-    };
-
     return {
         start: () => {
-            if (running) return;
+            if (started) return;
 
+            started = true;
             running = true;
-            dataRef.current.startTime = performance.now();
-            lastSampleTime = dataRef.current.startTime;
+            accumulatedTime = 0;
+            lastRunStartTime = performance.now();
+            dataRef.current.startTime = lastRunStartTime;
+            lastSampleTime = lastRunStartTime;
             lastSamplePrimeCount = primeCache.getCount();
             primesPerSecondSamples = [];
 
@@ -226,13 +219,79 @@ export function createPrimeCoordinator(dataRef: MutableRefObject<PrimeFinderData
             initializeWorkers();
         },
 
-        stop: () => {
+        pause: () => {
             if (!running) return;
 
             running = false;
-            terminateWorkers();
+            // Accumulate the time spent in this run
+            accumulatedTime += performance.now() - lastRunStartTime;
+            // Store elapsed time for canvas to display while paused
+            dataRef.current.pausedElapsedTime = accumulatedTime;
+
+            // Update worker states to show paused
+            for (let i = 0; i < workerCount; i++) {
+                const state = dataRef.current.workerStates[i];
+                if (state) {
+                    state.status = 'idle';
+                }
+            }
         },
 
-        isRunning: () => running
+        resume: () => {
+            if (running || !started) return;
+
+            running = true;
+            lastRunStartTime = performance.now();
+            // Adjust startTime so elapsed calculation accounts for accumulated time
+            dataRef.current.startTime = lastRunStartTime - accumulatedTime;
+            lastSampleTime = lastRunStartTime;
+            lastSamplePrimeCount = primeCache.getCount();
+            primesPerSecondSamples = [];
+
+            // Re-assign batches to all workers
+            for (let i = 0; i < workerCount; i++) {
+                assignBatch(i);
+            }
+        },
+
+        restart: () => {
+            // Terminate existing workers
+            workers.forEach((worker, i) => {
+                const stopMessage: CoordinatorMessage = { type: 'STOP' };
+                worker.postMessage(stopMessage);
+                worker.terminate();
+
+                const state = dataRef.current.workerStates[i];
+                if (state) {
+                    state.status = 'idle';
+                    state.progress = 0;
+                }
+            });
+            workers.length = 0;
+
+            // Reset all state
+            started = false;
+            running = false;
+            nextNumberToAssign = 2;
+            primesPerSecondSamples = [];
+            lastSampleTime = 0;
+            lastSamplePrimeCount = 0;
+            accumulatedTime = 0;
+            lastRunStartTime = 0;
+            primeCache.clear();
+            workerBatchSizes.clear();
+
+            // Reset data ref
+            dataRef.current.latestPrime = 0;
+            dataRef.current.totalPrimesFound = 0;
+            dataRef.current.highestNumberChecked = 0;
+            dataRef.current.primesPerSecond = 0;
+            dataRef.current.startTime = 0;
+            dataRef.current.pausedElapsedTime = 0;
+            dataRef.current.workerStates = [];
+        },
+
+        isRunning: () => running,
+        hasStarted: () => started
     };
 }

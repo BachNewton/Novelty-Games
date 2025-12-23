@@ -9,29 +9,46 @@ const initialData: PrimeFinderData = {
     highestNumberChecked: 0,
     primesPerSecond: 0,
     startTime: 0,
+    pausedElapsedTime: 0,
     workerStates: []
 };
 
 const PrimeFinderHome: React.FC = () => {
     const [isRunning, setIsRunning] = useState(false);
+    const [hasStarted, setHasStarted] = useState(false);
 
     const dataRef = useRef<PrimeFinderData>({ ...initialData });
     const coordinatorRef = useRef<PrimeCoordinator | null>(null);
 
     const handleStart = useCallback(() => {
-        if (coordinatorRef.current) return;
+        if (!coordinatorRef.current) {
+            coordinatorRef.current = createPrimeCoordinator(dataRef);
+        }
 
-        const coordinator = createPrimeCoordinator(dataRef);
-        coordinatorRef.current = coordinator;
-        coordinator.start();
+        coordinatorRef.current.start();
+        setIsRunning(true);
+        setHasStarted(true);
+    }, []);
+
+    const handlePause = useCallback(() => {
+        if (!coordinatorRef.current) return;
+
+        coordinatorRef.current.pause();
+        setIsRunning(false);
+    }, []);
+
+    const handleResume = useCallback(() => {
+        if (!coordinatorRef.current) return;
+
+        coordinatorRef.current.resume();
         setIsRunning(true);
     }, []);
 
-    const handleStop = useCallback(() => {
+    const handleRestart = useCallback(() => {
         if (!coordinatorRef.current) return;
 
-        coordinatorRef.current.stop();
-        coordinatorRef.current = null;
+        coordinatorRef.current.restart();
+        setHasStarted(false);
         setIsRunning(false);
     }, []);
 
@@ -63,7 +80,7 @@ const PrimeFinderHome: React.FC = () => {
         fontWeight: 'bold'
     };
 
-    const buttonStyle: React.CSSProperties = {
+    const baseButtonStyle: React.CSSProperties = {
         padding: '12px 24px',
         minHeight: '44px',
         fontSize: '1em',
@@ -72,9 +89,18 @@ const PrimeFinderHome: React.FC = () => {
         borderRadius: '6px',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
-        backgroundColor: isRunning ? '#ef5350' : '#4caf50',
         color: 'white',
         touchAction: 'manipulation'
+    };
+
+    const primaryButtonStyle: React.CSSProperties = {
+        ...baseButtonStyle,
+        backgroundColor: isRunning ? '#ff9800' : '#4caf50'
+    };
+
+    const restartButtonStyle: React.CSSProperties = {
+        ...baseButtonStyle,
+        backgroundColor: '#ef5350'
     };
 
     const canvasContainerStyle: React.CSSProperties = {
@@ -86,12 +112,22 @@ const PrimeFinderHome: React.FC = () => {
         <div style={containerStyle}>
             <div style={headerStyle}>
                 <div style={titleStyle}>Prime Number Finder</div>
-                <button
-                    style={buttonStyle}
-                    onClick={isRunning ? handleStop : handleStart}
-                >
-                    {isRunning ? 'Stop' : 'Start'}
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    {hasStarted && !isRunning && (
+                        <button
+                            style={restartButtonStyle}
+                            onClick={handleRestart}
+                        >
+                            Restart
+                        </button>
+                    )}
+                    <button
+                        style={primaryButtonStyle}
+                        onClick={isRunning ? handlePause : (hasStarted ? handleResume : handleStart)}
+                    >
+                        {isRunning ? 'Pause' : (hasStarted ? 'Resume' : 'Start')}
+                    </button>
+                </div>
             </div>
 
             <div style={canvasContainerStyle}>
