@@ -2,7 +2,7 @@ import fs from 'fs';
 
 const BASE_URL = 'https://fnzone.es/en/festival';
 const SCRIPT_CONTENT_REGEX = /<script id=\"__NEXT_DATA__\".+>(.+)<\/script>/g;
-const BUILD_ID_REGEX = /static\/(\w+)\/_buildManifest/g;
+const BUILD_ID_REGEX = /(?<=static\/)[^/]+(?=\/_buildManifest\.js)/;
 
 (async () => {
     console.log('Opening:', BASE_URL);
@@ -10,8 +10,7 @@ const BUILD_ID_REGEX = /static\/(\w+)\/_buildManifest/g;
     const text = await response.text();
     console.log('Fetched festival page');
 
-    const buildIdMatches = text.matchAll(BUILD_ID_REGEX);
-    const buildId = buildIdMatches.next().value[1];
+    const buildId = text.match(BUILD_ID_REGEX)[0];
 
     const matches = text.matchAll(SCRIPT_CONTENT_REGEX);
     const json = matches.next().value[1];
