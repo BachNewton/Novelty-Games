@@ -1,54 +1,93 @@
-const ROOT_URL = 'https://en.wikipedia.org/wiki/Finland';
+const ROOT_TITLE = 'Finland';
+const ACTION_API = 'https://en.wikipedia.org/w/api.php';
+const SUMMARY_API = 'https://en.wikipedia.org/api/rest_v1/page/summary/';
 
-// extract, normalize, filter and dedupe links from HTML
-function getLinks(html, base = ROOT_URL) {
-    const anchorRegex = /<a\s[^>]*href=(["'])(.*?)\1/gi;
+// fetch all links from a Wikipedia article using Action API (handles pagination)
+async function getLinks(title) {
     const links = new Set();
-    let match;
+    let plcontinue = null;
 
-    // helper to determine if a URL is an article link
-    function isArticleLink(absUrl) {
-        // require en.wikipedia.org host
-        if (!absUrl.hostname || !absUrl.hostname.includes('en.wikipedia.org')) return false;
-        // must be under /wiki/
-        if (!absUrl.pathname.startsWith('/wiki/')) return false;
-        const title = decodeURIComponent(absUrl.pathname.slice('/wiki/'.length));
-        // exclude main page and any titles that contain ':' (namespaces)
-        if (!title || title === 'Main_Page' || title.includes(':')) return false;
-        return true;
-    }
+    do {
+        const params = new URLSearchParams({
+            action: 'query',
+            titles: title,
+            prop: 'links',
+            pllimit: '500',
+            plnamespace: '0', // only main namespace (articles)
+            format: 'json'
+        });
+        if (plcontinue) params.set('plcontinue', plcontinue);
 
-    while ((match = anchorRegex.exec(html)) !== null) {
-        let href = match[2].trim();
-        if (!href) continue;
-        // Skip fragments and javascript/mailto/tel links
-        if (href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) continue;
-        try {
-            const abs = new URL(href, base);
-            // only include http(s) article links on en.wikipedia.org
-            if ((abs.protocol === 'http:' || abs.protocol === 'https:') && isArticleLink(abs)) {
-                links.add(abs.href);
-            }
-        } catch (e) {
-            // ignore invalid URLs
+        const response = await fetch(`${ACTION_API}?${params}`);
+        const data = await response.json();
+
+        const pages = data.query.pages;
+        const pageId = Object.keys(pages)[0];
+        const pageLinks = pages[pageId].links || [];
+
+        for (const link of pageLinks) {
+            links.add(link.title);
         }
-    }
 
-    // return as array for easier consumption
+        plcontinue = data.continue?.plcontinue;
+    } while (plcontinue);
+
     return Array.from(links);
 }
 
-(async () => {
-    console.log('Starting wiki search script...');
-
-    const response = await fetch(ROOT_URL);
-    const html = await response.text();
-
-    // use the new helper
-    const links = getLinks(html, ROOT_URL);
-
-    console.log(`Found ${links.length} unique links:`);
-    for (const url of links) {
-        console.log(url);
+// fetch article summary using REST API
+async function fetchArticleSummary(title) {
+    try {
+        const response = await fetch(SUMMARY_API + encodeURIComponent(title));
+        if (!response.ok) {
+            return { error: `HTTP ${response.status}` };
+        }
+        return await response.json();
+    } catch (e) {
+        return { error: `Network error: ${e.message}` };
     }
+}
+
+// process links in batches to avoid rate limiting
+async function processBatch(titles, batchSize = 20, delayMs = 100) {
+    const results = [];
+    const seen = new Set();
+
+    for (let i = 0; i < titles.length; i += batchSize) {
+        const batch = titles.slice(i, i + batchSize);
+        const batchResults = await Promise.all(
+            batch.map(async (title) => {
+                const summary = await fetchArticleSummary(title);
+                return { title, summary };
+            })
+        );
+
+        for (const { title, summary } of batchResults) {
+            if (summary.error) {
+                console.log(`${summary.error} - ${title}`);
+                results.push({ title, summary });
+            } else if (!seen.has(summary.title)) {
+                seen.add(summary.title);
+                console.log(`${summary.title} - ${summary.description || 'No description'}`);
+                results.push({ title, summary });
+            }
+        }
+
+        // delay between batches
+        if (i + batchSize < titles.length) {
+            await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+    }
+    return results;
+}
+
+(async () => {
+    console.log(`Starting wiki search for "${ROOT_TITLE}"...\n`);
+
+    const links = await getLinks(ROOT_TITLE);
+    console.log(`Found ${links.length} links\n`);
+
+    await processBatch(links);
+
+    console.log('\nDone!');
 })();
