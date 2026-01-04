@@ -54,3 +54,4 @@ export const WINTER_CYCLING = createRoute('winter-cycling', TOOLS);
 export const FRACTAL_EXPLORER = createRoute('fractal-explorer', TOOLS);
 export const PRIME_FINDER = createRoute('prime-finder', TOOLS);
 export const WORLD_EXPLORER = createRoute('world-explorer', TOOLS);
+export const WIKI_GRAPH = createRoute('wiki-graph', TOOLS);
