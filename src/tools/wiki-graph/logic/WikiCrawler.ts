@@ -25,6 +25,7 @@ export interface WikiCrawler {
 
 interface WikiApiResponse {
     query?: {
+        redirects?: Array<{ from: string; to: string }>;
         pages?: Record<string, {
             title: string;
             description?: string;
@@ -33,8 +34,15 @@ interface WikiApiResponse {
         }>;
     };
     continue?: {
+        continue?: string;
         plcontinue?: string;
+        clcontinue?: string;
     };
+}
+
+interface FetchResult {
+    articles: WikiArticle[];
+    redirects: Map<string, string>;  // from → to
 }
 
 interface QueueItem {
@@ -59,7 +67,7 @@ export function createWikiCrawler(): WikiCrawler {
     let running = false;
     let activeRequests = 0;
     let lastRequestTime = 0;
-    let linkLimit = 10;
+    let linkLimit = 4;
 
     const articleCallbacks: Array<(article: WikiArticle) => void> = [];
     const linkCallbacks: Array<(source: string, target: string) => void> = [];
@@ -78,47 +86,79 @@ export function createWikiCrawler(): WikiCrawler {
         lastRequestTime = Date.now();
     }
 
-    async function fetchArticles(titles: string[]): Promise<WikiArticle[]> {
-        await waitForRateLimit();
-
-        const params = new URLSearchParams({
-            action: 'query',
-            titles: titles.join('|'),
-            prop: 'links|description|categories',
-            pllimit: 'max',
-            plnamespace: '0',
-            clshow: '!hidden',
-            cllimit: 'max',
-            format: 'json',
-            origin: '*'
-        });
+    async function fetchArticles(titles: string[]): Promise<FetchResult> {
+        const articleMap = new Map<string, WikiArticle>();
+        const redirectMap = new Map<string, string>();
+        let continueParams: Record<string, string> | undefined;
 
         activeRequests++;
         requestCallbacks.forEach(cb => cb(activeRequests));
 
         try {
-            const response = await fetch(`${API_BASE}?${params}`);
-            const data: WikiApiResponse = await response.json();
+            // Keep fetching until all data is retrieved (handle pagination)
+            do {
+                await waitForRateLimit();
 
-            const results: WikiArticle[] = [];
+                const params = new URLSearchParams({
+                    action: 'query',
+                    titles: titles.join('|'),
+                    prop: 'links|description|categories',
+                    pllimit: 'max',
+                    plnamespace: '0',
+                    clshow: '!hidden',
+                    cllimit: 'max',
+                    redirects: '1',
+                    format: 'json',
+                    origin: '*',
+                    ...continueParams
+                });
 
-            if (data.query?.pages) {
-                for (const page of Object.values(data.query.pages)) {
-                    if ('missing' in page) continue;
+                const response = await fetch(`${API_BASE}?${params}`);
+                const data: WikiApiResponse = await response.json();
 
-                    const article: WikiArticle = {
-                        title: normalizeTitle(page.title),
-                        description: page.description ?? '',
-                        categories: (page.categories ?? []).map(c => c.title.replace('Category:', '')),
-                        links: (page.links ?? []).map(l => normalizeTitle(l.title)),
-                        depth: 0  // Will be set correctly in processQueue
-                    };
-
-                    results.push(article);
+                // Parse redirects (only on first request)
+                if (!continueParams && data.query?.redirects) {
+                    for (const redirect of data.query.redirects) {
+                        redirectMap.set(normalizeTitle(redirect.from), normalizeTitle(redirect.to));
+                    }
                 }
-            }
 
-            return results;
+                if (data.query?.pages) {
+                    for (const page of Object.values(data.query.pages)) {
+                        if ('missing' in page) continue;
+
+                        const title = normalizeTitle(page.title);
+                        const existing = articleMap.get(title);
+
+                        if (existing) {
+                            // Merge links from continuation
+                            const newLinks = (page.links ?? []).map(l => normalizeTitle(l.title));
+                            existing.links.push(...newLinks);
+                            // Merge categories
+                            const newCategories = (page.categories ?? []).map(c => c.title.replace('Category:', ''));
+                            existing.categories.push(...newCategories);
+                        } else {
+                            articleMap.set(title, {
+                                title,
+                                description: page.description ?? '',
+                                categories: (page.categories ?? []).map(c => c.title.replace('Category:', '')),
+                                links: (page.links ?? []).map(l => normalizeTitle(l.title)),
+                                depth: 0
+                            });
+                        }
+                    }
+                }
+
+                // Check for continuation
+                continueParams = data.continue ? {
+                    continue: data.continue.continue ?? '',
+                    ...(data.continue.plcontinue && { plcontinue: data.continue.plcontinue }),
+                    ...(data.continue.clcontinue && { clcontinue: data.continue.clcontinue })
+                } : undefined;
+
+            } while (continueParams);
+
+            return { articles: Array.from(articleMap.values()), redirects: redirectMap };
         } finally {
             activeRequests--;
             requestCallbacks.forEach(cb => cb(activeRequests));
@@ -159,16 +199,49 @@ export function createWikiCrawler(): WikiCrawler {
             try {
                 const titles = batch.map(item => item.title);
                 const depthMap = new Map(batch.map(item => [normalizeTitle(item.title), item.depth]));
-                const fetched = await fetchArticles(titles);
+                const { articles: fetched, redirects } = await fetchArticles(titles);
+
+                // Build reverse redirect map: canonical → [original titles]
+                const reverseRedirects = new Map<string, string[]>();
+                for (const [from, to] of redirects) {
+                    if (!reverseRedirects.has(to)) {
+                        reverseRedirects.set(to, []);
+                    }
+                    reverseRedirects.get(to)!.push(from);
+                }
 
                 for (const article of fetched) {
                     if (articles.has(article.title)) continue;
 
-                    const articleDepth = depthMap.get(article.title) ?? 0;
+                    // Check depth from canonical title or any redirect source
+                    let articleDepth = depthMap.get(article.title);
+                    if (articleDepth === undefined) {
+                        const redirectSources = reverseRedirects.get(article.title) ?? [];
+                        for (const source of redirectSources) {
+                            const sourceDepth = depthMap.get(source);
+                            if (sourceDepth !== undefined) {
+                                articleDepth = sourceDepth;
+                                break;
+                            }
+                        }
+                    }
+                    articleDepth = articleDepth ?? 0;
                     article.depth = articleDepth;
 
+                    // Include redirect aliases in the article
+                    const redirectSources = reverseRedirects.get(article.title) ?? [];
+                    article.aliases = redirectSources.length > 0 ? redirectSources : undefined;
+
                     articles.set(article.title, article);
+
+                    // Also store under redirect source titles so crawler can find it
+                    for (const source of redirectSources) {
+                        articles.set(source, article);
+                        console.log(`REDIRECT: ${source} → ${article.title}`);
+                    }
+
                     articleCallbacks.forEach(cb => cb(article));
+                    console.log(`FETCHED: ${article.title} (depth ${articleDepth}, ${article.links.length} total links)`);
 
                     // Randomly select limited links
                     const selectedLinks = shuffleArray(article.links).slice(0, linkLimit);
@@ -180,6 +253,7 @@ export function createWikiCrawler(): WikiCrawler {
                             if (!links.has(linkKey)) {
                                 links.add(linkKey);
                                 linkCallbacks.forEach(cb => cb(article.title, linkTitle));
+                                console.log(`${article.title} --> ${linkTitle} (depth ${articleDepth})`);
 
                                 const normalizedLink = normalizeTitle(linkTitle);
                                 const inPending = pendingQueue.some(q => normalizeTitle(q.title) === normalizedLink);
@@ -197,6 +271,7 @@ export function createWikiCrawler(): WikiCrawler {
                             if (!links.has(linkKey)) {
                                 links.add(linkKey);
                                 linkCallbacks.forEach(cb => cb(article.title, linkTitle));
+                                console.log(`${article.title} --> ${linkTitle} (depth ${articleDepth}, not queued)`);
                             }
                         }
                     }
@@ -229,18 +304,50 @@ export function createWikiCrawler(): WikiCrawler {
 
         prioritize: (title) => {
             const article = articles.get(normalizeTitle(title));
-            if (article && article.depth < MAX_DEPTH) {
-                for (const linkTitle of article.links) {
+            if (article) {
+                // Reset this node as the new root (depth 0)
+                article.depth = 0;
+
+                // Find links whose targets haven't been fetched yet
+                const unfetchedLinks = article.links.filter(linkTitle => {
+                    const normalizedLink = normalizeTitle(linkTitle);
+                    return !articles.has(normalizedLink);
+                });
+
+                // Randomly select limited links from unfetched ones
+                const selectedLinks = shuffleArray(unfetchedLinks).slice(0, linkLimit);
+
+                console.log(`Prioritizing ${title}: ${unfetchedLinks.length} unfetched, selecting ${selectedLinks.length}`);
+
+                for (const linkTitle of selectedLinks) {
                     const normalizedLink = normalizeTitle(linkTitle);
                     const inPriority = priorityQueue.some(q => normalizeTitle(q.title) === normalizedLink);
+                    const inPending = pendingQueue.some(q => normalizeTitle(q.title) === normalizedLink);
 
-                    if (!articles.has(normalizedLink) && !inPriority) {
-                        const pendingIndex = pendingQueue.findIndex(q => normalizeTitle(q.title) === normalizedLink);
-                        if (pendingIndex !== -1) {
-                            pendingQueue.splice(pendingIndex, 1);
-                        }
-                        priorityQueue.push({ title: linkTitle, depth: article.depth + 1 });
+                    // Report the link (creates line when target is fetched)
+                    const linkKey = `${article.title}|${linkTitle}`;
+                    if (!links.has(linkKey)) {
+                        links.add(linkKey);
+                        linkCallbacks.forEach(cb => cb(article.title, linkTitle));
+                        console.log(`${article.title} --> ${linkTitle} (link reported)`);
                     }
+
+                    if (!inPriority && !inPending) {
+                        // Queue unfetched articles
+                        priorityQueue.push({ title: linkTitle, depth: 1 });
+                        console.log(`${linkTitle} (queued for fetch)`);
+                    } else {
+                        console.log(`${linkTitle} (already in queue)`);
+                    }
+                }
+
+                // Trigger request state change to update UI
+                requestCallbacks.forEach(cb => cb(activeRequests));
+
+                // Ensure crawler is running to process the queue
+                if (!running && priorityQueue.length > 0) {
+                    running = true;
+                    processQueue();
                 }
             }
         },

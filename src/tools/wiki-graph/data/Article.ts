@@ -7,6 +7,7 @@ export interface WikiArticle {
     categories: string[];
     links: string[];
     depth: number;
+    aliases?: string[];  // Redirect source titles that point to this article
 }
 
 export interface ArticleNode {

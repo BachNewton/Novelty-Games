@@ -41,7 +41,7 @@ const Home: React.FC = () => {
     const [activeRequests, setActiveRequests] = useState(0);
     const [priorityQueueSize, setPriorityQueueSize] = useState(0);
     const [pendingQueueSize, setPendingQueueSize] = useState(0);
-    const [linkLimit, setLinkLimit] = useState(10);
+    const [linkLimit, setLinkLimit] = useState(4);
     const [isRunning, setIsRunning] = useState(true);
     const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -257,12 +257,25 @@ const Home: React.FC = () => {
             articlesRef.current.set(article.title, node);
             simulationRef.current.addNode(article.title);
 
-            const pending = pendingLinksRef.current.get(article.title);
-            if (pending) {
-                for (const sourceTitle of pending) {
-                    createLink(sourceTitle, article.title);
+            // Also store under alias titles (redirect sources)
+            if (article.aliases) {
+                for (const alias of article.aliases) {
+                    articlesRef.current.set(alias, node);
                 }
-                pendingLinksRef.current.delete(article.title);
+            }
+
+            // Check pending links for canonical title and all aliases
+            const titlesToCheck = [article.title, ...(article.aliases ?? [])];
+            for (const title of titlesToCheck) {
+                const pending = pendingLinksRef.current.get(title);
+                if (pending) {
+                    console.log(`RESOLVING ${pending.size} pending links for: ${title}`);
+                    for (const sourceTitle of pending) {
+                        console.log(`LINK RESOLVED: ${sourceTitle} → ${article.title}`);
+                        createLink(sourceTitle, article.title);
+                    }
+                    pendingLinksRef.current.delete(title);
+                }
             }
 
             setArticleCount(articlesRef.current.size);
@@ -270,12 +283,14 @@ const Home: React.FC = () => {
 
         crawler.onLinkDiscovered((source: string, target: string) => {
             if (articlesRef.current.has(target)) {
+                console.log(`LINK IMMEDIATE: ${source} → ${target}`);
                 createLink(source, target);
             } else {
                 if (!pendingLinksRef.current.has(target)) {
                     pendingLinksRef.current.set(target, new Set());
                 }
                 pendingLinksRef.current.get(target)!.add(source);
+                console.log(`LINK PENDING: ${source} → ${target} (waiting for target)`);
             }
         });
 
@@ -299,11 +314,17 @@ const Home: React.FC = () => {
         const existing = linksRef.current.find(
             l => l.source === source && l.target === target
         );
-        if (existing) return;
+        if (existing) {
+            console.log(`LINE SKIPPED (exists): ${source} → ${target}`);
+            return;
+        }
 
         const sourceNode = articlesRef.current.get(source);
         const targetNode = articlesRef.current.get(target);
-        if (!sourceNode || !targetNode) return;
+        if (!sourceNode || !targetNode) {
+            console.log(`LINE FAILED (missing node): ${source} → ${target} | source=${!!sourceNode}, target=${!!targetNode}`);
+            return;
+        }
 
         const geometry = new LineGeometry();
         geometry.setPositions([0, 0, 0, 0, 0, 0]);
@@ -322,6 +343,7 @@ const Home: React.FC = () => {
 
         linksRef.current.push({ source, target, line });
         simulationRef.current.addLink(source, target);
+        console.log(`LINE CREATED: ${source} → ${target}`);
 
         setLinkCount(linksRef.current.length);
     }
