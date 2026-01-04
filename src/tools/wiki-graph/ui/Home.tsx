@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
 import { Line2 } from 'three/examples/jsm/lines/Line2';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
@@ -21,6 +22,7 @@ const Home: React.FC = () => {
         scene: THREE.Scene;
         camera: THREE.PerspectiveCamera;
         renderer: THREE.WebGLRenderer;
+        labelRenderer: CSS2DRenderer;
         controls: OrbitControls;
         raycaster: THREE.Raycaster;
         mouse: THREE.Vector2;
@@ -70,6 +72,13 @@ const Home: React.FC = () => {
         renderer.setSize(window.innerWidth, window.innerHeight);
         containerRef.current.appendChild(renderer.domElement);
 
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        containerRef.current.appendChild(labelRenderer.domElement);
+
         const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.6);
         scene.add(ambientLight);
 
@@ -89,7 +98,7 @@ const Home: React.FC = () => {
         const stats = new Stats();
         containerRef.current.appendChild(stats.dom);
 
-        sceneRef.current = { scene, camera, renderer, controls, raycaster, mouse, stats };
+        sceneRef.current = { scene, camera, renderer, labelRenderer, controls, raycaster, mouse, stats };
         crawlerRef.current = crawler;
         simulationRef.current = simulation;
         categoryTrackerRef.current = categoryTracker;
@@ -97,10 +106,11 @@ const Home: React.FC = () => {
 
         function onWindowResize() {
             if (!sceneRef.current) return;
-            const { camera, renderer } = sceneRef.current;
+            const { camera, renderer, labelRenderer } = sceneRef.current;
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
 
             // Update line material resolutions
             for (const link of linksRef.current) {
@@ -181,7 +191,7 @@ const Home: React.FC = () => {
             previousTime = time;
 
             if (!sceneRef.current) return;
-            const { scene, camera, renderer, controls } = sceneRef.current;
+            const { scene, camera, renderer, labelRenderer, controls } = sceneRef.current;
 
             simulationRef.current?.update(deltaTime);
 
@@ -190,6 +200,24 @@ const Home: React.FC = () => {
                 if (pos) {
                     node.mesh.position.copy(pos);
                     node.position.copy(pos);
+
+                    // Adjust label based on distance from camera
+                    const distance = camera.position.distanceTo(pos);
+
+                    // Scale inversely with distance, baseline at default camera distance (30)
+                    const baseDistance = 30;
+                    const scale = baseDistance / distance;
+
+                    // Fog-like opacity starting from baseline distance
+                    const fogDensity = 0.003;
+                    const distanceBeyondBase = Math.max(0, distance - baseDistance);
+                    const opacity = Math.exp(-distanceBeyondBase * distanceBeyondBase * fogDensity);
+
+                    const label = node.mesh.children[0] as CSS2DObject;
+                    if (label?.element) {
+                        label.element.style.opacity = String(opacity);
+                        label.element.style.transform = `scale(${scale}) translateY(-20px)`;
+                    }
                 }
             }
 
@@ -208,6 +236,7 @@ const Home: React.FC = () => {
             cameraAnimatorRef.current?.update(deltaTime);
             controls.update();
             renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
             sceneRef.current?.stats.update();
         }
 
@@ -220,6 +249,7 @@ const Home: React.FC = () => {
             renderer.setAnimationLoop(null);
             renderer.dispose();
             containerRef.current?.removeChild(renderer.domElement);
+            containerRef.current?.removeChild(labelRenderer.domElement);
             containerRef.current?.removeChild(stats.dom);
         };
     }, [crawler, simulation, categoryTracker]);
@@ -242,6 +272,18 @@ const Home: React.FC = () => {
             });
             const mesh = new THREE.Mesh(geometry, material);
             mesh.userData = { title: article.title };
+
+            // Create label
+            const labelDiv = document.createElement('div');
+            labelDiv.textContent = article.title;
+            labelDiv.style.color = 'white';
+            labelDiv.style.fontSize = '12px';
+            labelDiv.style.fontFamily = 'sans-serif';
+            labelDiv.style.textShadow = '1px 1px 2px black';
+            labelDiv.style.whiteSpace = 'nowrap';
+            const label = new CSS2DObject(labelDiv);
+            label.position.set(0, 0.75, 0);
+            mesh.add(label);
 
             scene.add(mesh);
 
