@@ -3,7 +3,7 @@ import { useState } from 'react';
 interface ProgressPanelProps {
     articleCount: number;
     linkCount: number;
-    activeRequests: number;
+    fetchingCount: number;
     priorityQueueSize: number;
     pendingQueueSize: number;
     linkLimit: number;
@@ -19,7 +19,7 @@ interface ProgressPanelProps {
 const ProgressPanel: React.FC<ProgressPanelProps> = ({
     articleCount,
     linkCount,
-    activeRequests,
+    fetchingCount,
     priorityQueueSize,
     pendingQueueSize,
     linkLimit,
@@ -98,10 +98,11 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
             <div style={{ marginBottom: '8px' }}>
                 <span style={{ color: '#88D8B0' }}>Links:</span> {linkCount}
             </div>
-            <div style={{ marginBottom: '8px' }}>
-                <span style={{ color: '#88D8B0' }}>Requests:</span> {activeRequests}
-                {activeRequests > 0 && <span style={{ marginLeft: '8px' }}>...</span>}
-            </div>
+            {fetchingCount > 0 && (
+                <div style={{ marginBottom: '8px', color: '#88D8B0' }}>
+                    Fetching {fetchingCount} article{fetchingCount !== 1 ? 's' : ''}...
+                </div>
+            )}
             <div style={{ marginBottom: '8px' }}>
                 <span style={{ color: '#FF6B6B' }}>Priority:</span> {priorityQueueSize}
             </div>

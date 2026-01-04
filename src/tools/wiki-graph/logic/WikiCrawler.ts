@@ -21,7 +21,9 @@ export interface WikiCrawler {
     getPendingQueueSize: () => number;
     onArticleFetched: (callback: (article: WikiArticle) => void) => void;
     onLinkDiscovered: (callback: (source: string, target: string) => void) => void;
-    onRequestStateChange: (callback: (activeCount: number) => void) => void;
+    onRequestStateChange: (callback: (activeCount: number, batchSize: number) => void) => void;
+    onLinksQueued: (callback: (sourceTitle: string, queuedTitles: string[]) => void) => void;
+    onFetchFailed: (callback: (failedTitles: string[]) => void) => void;
 }
 
 interface WikiApiResponse {
@@ -73,7 +75,10 @@ export function createWikiCrawler(): WikiCrawler {
 
     const articleCallbacks: Array<(article: WikiArticle) => void> = [];
     const linkCallbacks: Array<(source: string, target: string) => void> = [];
-    const requestCallbacks: Array<(count: number) => void> = [];
+    const requestCallbacks: Array<(activeCount: number, batchSize: number) => void> = [];
+    const linksQueuedCallbacks: Array<(sourceTitle: string, queuedTitles: string[]) => void> = [];
+    const fetchFailedCallbacks: Array<(failedTitles: string[]) => void> = [];
+    let currentBatchSize = 0;
 
     function normalizeTitle(title: string): string {
         return title.replace(/_/g, ' ');
@@ -94,7 +99,8 @@ export function createWikiCrawler(): WikiCrawler {
         let continueParams: Record<string, string> | undefined;
 
         activeRequests++;
-        requestCallbacks.forEach(cb => cb(activeRequests));
+        currentBatchSize = titles.length;
+        requestCallbacks.forEach(cb => cb(activeRequests, currentBatchSize));
 
         try {
             // Keep fetching until all data is retrieved (handle pagination)
@@ -163,7 +169,8 @@ export function createWikiCrawler(): WikiCrawler {
             return { articles: Array.from(articleMap.values()), redirects: redirectMap };
         } finally {
             activeRequests--;
-            requestCallbacks.forEach(cb => cb(activeRequests));
+            currentBatchSize = 0;
+            requestCallbacks.forEach(cb => cb(activeRequests, currentBatchSize));
         }
     }
 
@@ -212,6 +219,16 @@ export function createWikiCrawler(): WikiCrawler {
                     reverseRedirects.get(to)!.push(from);
                 }
 
+                // Track which requested titles were successfully fetched
+                const fetchedTitles = new Set<string>();
+                for (const article of fetched) {
+                    fetchedTitles.add(article.title);
+                }
+                // Also count redirects as fetched (the source title resolved to a canonical title)
+                for (const [from] of redirects) {
+                    fetchedTitles.add(from);
+                }
+
                 for (const article of fetched) {
                     if (articles.has(article.title)) continue;
 
@@ -248,6 +265,7 @@ export function createWikiCrawler(): WikiCrawler {
 
                     // Only add links to queue if we haven't reached max depth
                     if (articleDepth < maxDepth) {
+                        const queuedLinks: string[] = [];
                         for (const linkTitle of selectedLinks) {
                             const linkKey = `${article.title}|${linkTitle}`;
                             if (!links.has(linkKey)) {
@@ -260,8 +278,12 @@ export function createWikiCrawler(): WikiCrawler {
 
                                 if (!articles.has(normalizedLink) && !inPending && !inPriority) {
                                     pendingQueue.push({ title: linkTitle, depth: articleDepth + 1 });
+                                    queuedLinks.push(normalizedLink);
                                 }
                             }
+                        }
+                        if (queuedLinks.length > 0) {
+                            linksQueuedCallbacks.forEach(cb => cb(article.title, queuedLinks));
                         }
                     } else {
                         // Still report links for visualization, but don't queue them
@@ -274,8 +296,19 @@ export function createWikiCrawler(): WikiCrawler {
                         }
                     }
                 }
+
+                // Report any missing articles (requested but not returned by API)
+                const missingTitles = batch
+                    .map(item => normalizeTitle(item.title))
+                    .filter(title => !fetchedTitles.has(title));
+                if (missingTitles.length > 0) {
+                    console.warn(`Missing Wikipedia articles: [${missingTitles.join(', ')}]`);
+                    fetchFailedCallbacks.forEach(cb => cb(missingTitles));
+                }
             } catch (error) {
-                console.error(`Failed to fetch batch:`, error);
+                const failedTitles = batch.map(item => normalizeTitle(item.title));
+                console.error(`Failed to fetch batch [${failedTitles.join(', ')}]:`, error);
+                fetchFailedCallbacks.forEach(cb => cb(failedTitles));
             }
         }
     }
@@ -315,6 +348,7 @@ export function createWikiCrawler(): WikiCrawler {
                 // Randomly select limited links from unfetched ones
                 const selectedLinks = shuffleArray(unfetchedLinks).slice(0, linkLimit);
 
+                const queuedLinks: string[] = [];
                 for (const linkTitle of selectedLinks) {
                     const normalizedLink = normalizeTitle(linkTitle);
                     const inPriority = priorityQueue.some(q => normalizeTitle(q.title) === normalizedLink);
@@ -329,11 +363,16 @@ export function createWikiCrawler(): WikiCrawler {
 
                     if (!inPriority && !inPending) {
                         priorityQueue.push({ title: linkTitle, depth: 1 });
+                        queuedLinks.push(normalizedLink);
                     }
                 }
 
+                if (queuedLinks.length > 0) {
+                    linksQueuedCallbacks.forEach(cb => cb(article.title, queuedLinks));
+                }
+
                 // Trigger request state change to update UI
-                requestCallbacks.forEach(cb => cb(activeRequests));
+                requestCallbacks.forEach(cb => cb(activeRequests, currentBatchSize));
 
                 // Ensure crawler is running to process the queue
                 if (!running && priorityQueue.length > 0) {
@@ -368,6 +407,14 @@ export function createWikiCrawler(): WikiCrawler {
 
         onRequestStateChange: (callback) => {
             requestCallbacks.push(callback);
+        },
+
+        onLinksQueued: (callback) => {
+            linksQueuedCallbacks.push(callback);
+        },
+
+        onFetchFailed: (callback) => {
+            fetchFailedCallbacks.push(callback);
         }
     };
 }

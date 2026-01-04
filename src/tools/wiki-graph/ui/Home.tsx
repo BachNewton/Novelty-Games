@@ -37,10 +37,12 @@ const Home: React.FC = () => {
     const linksRef = useRef<ArticleLink[]>([]);
     const pendingLinksRef = useRef<Map<string, Set<string>>>(new Map());
     const hoveredMeshRef = useRef<THREE.Mesh | null>(null);
+    const loadingIndicatorsRef = useRef<Map<string, { ring: THREE.Mesh, pending: Set<string> }>>(new Map());
 
     const [articleCount, setArticleCount] = useState(0);
     const [linkCount, setLinkCount] = useState(0);
     const [activeRequests, setActiveRequests] = useState(0);
+    const [fetchingCount, setFetchingCount] = useState(0);
     const [priorityQueueSize, setPriorityQueueSize] = useState(0);
     const [pendingQueueSize, setPendingQueueSize] = useState(0);
     const [linkLimit, setLinkLimit] = useState(4);
@@ -233,6 +235,16 @@ const Home: React.FC = () => {
                 }
             }
 
+            // Rotate loading indicators
+            for (const [title, indicator] of loadingIndicatorsRef.current) {
+                const node = articlesRef.current.get(title);
+                if (node) {
+                    indicator.ring.position.copy(node.position);
+                    indicator.ring.rotation.x += deltaTime * 0.002;
+                    indicator.ring.rotation.y += deltaTime * 0.003;
+                }
+            }
+
             cameraAnimatorRef.current?.update(deltaTime);
             controls.update();
             renderer.render(scene, camera);
@@ -258,6 +270,20 @@ const Home: React.FC = () => {
         crawler.onArticleFetched((article: WikiArticle) => {
             if (!sceneRef.current || !simulationRef.current || !categoryTrackerRef.current) return;
             const { scene } = sceneRef.current;
+
+            // Remove this article from all loading indicators
+            const fetchedTitles = [article.title, ...(article.aliases ?? [])];
+            for (const [sourceTitle, indicator] of loadingIndicatorsRef.current) {
+                for (const fetchedTitle of fetchedTitles) {
+                    indicator.pending.delete(fetchedTitle);
+                }
+                if (indicator.pending.size === 0) {
+                    scene.remove(indicator.ring);
+                    indicator.ring.geometry.dispose();
+                    (indicator.ring.material as THREE.Material).dispose();
+                    loadingIndicatorsRef.current.delete(sourceTitle);
+                }
+            }
 
             if (articlesRef.current.has(article.title)) return;
 
@@ -333,10 +359,57 @@ const Home: React.FC = () => {
             }
         });
 
-        crawler.onRequestStateChange((count: number) => {
+        crawler.onRequestStateChange((count: number, batchSize: number) => {
             setActiveRequests(count);
+            setFetchingCount(batchSize);
             setPriorityQueueSize(crawler.getPriorityQueueSize());
             setPendingQueueSize(crawler.getPendingQueueSize());
+        });
+
+        crawler.onLinksQueued((sourceTitle: string, queuedTitles: string[]) => {
+            if (!sceneRef.current) return;
+            const { scene } = sceneRef.current;
+
+            const existing = loadingIndicatorsRef.current.get(sourceTitle);
+            if (existing) {
+                // Add new pending links to existing indicator
+                for (const title of queuedTitles) {
+                    existing.pending.add(title);
+                }
+            } else {
+                // Create new loading indicator ring
+                const ringGeometry = new THREE.TorusGeometry(0.6, 0.05, 8, 32);
+                const ringMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x4ECDC4,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                scene.add(ring);
+
+                loadingIndicatorsRef.current.set(sourceTitle, {
+                    ring,
+                    pending: new Set(queuedTitles)
+                });
+            }
+        });
+
+        crawler.onFetchFailed((failedTitles: string[]) => {
+            if (!sceneRef.current) return;
+            const { scene } = sceneRef.current;
+
+            // Remove failed titles from all loading indicators
+            for (const [sourceTitle, indicator] of loadingIndicatorsRef.current) {
+                for (const failedTitle of failedTitles) {
+                    indicator.pending.delete(failedTitle);
+                }
+                if (indicator.pending.size === 0) {
+                    scene.remove(indicator.ring);
+                    indicator.ring.geometry.dispose();
+                    (indicator.ring.material as THREE.Material).dispose();
+                    loadingIndicatorsRef.current.delete(sourceTitle);
+                }
+            }
         });
 
         crawler.start(START_ARTICLE);
@@ -406,7 +479,7 @@ const Home: React.FC = () => {
             <ProgressPanel
                 articleCount={articleCount}
                 linkCount={linkCount}
-                activeRequests={activeRequests}
+                fetchingCount={fetchingCount}
                 priorityQueueSize={priorityQueueSize}
                 pendingQueueSize={pendingQueueSize}
                 linkLimit={linkLimit}
