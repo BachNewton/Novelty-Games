@@ -7,11 +7,13 @@ interface ProgressPanelProps {
     priorityQueueSize: number;
     pendingQueueSize: number;
     linkLimit: number;
+    maxDepth: number;
     isRunning: boolean;
     selectedArticle: string | null;
     selectedCategory: string | null;
     onToggle: () => void;
     onLinkLimitChange: (limit: number) => void;
+    onMaxDepthChange: (depth: number) => void;
 }
 
 const ProgressPanel: React.FC<ProgressPanelProps> = ({
@@ -21,11 +23,13 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
     priorityQueueSize,
     pendingQueueSize,
     linkLimit,
+    maxDepth,
     isRunning,
     selectedArticle,
     selectedCategory,
     onToggle,
-    onLinkLimitChange
+    onLinkLimitChange,
+    onMaxDepthChange
 }) => {
     const [minimized, setMinimized] = useState(false);
 
@@ -105,7 +109,7 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
                 <span style={{ color: '#888' }}>Pending:</span> {pendingQueueSize}
             </div>
 
-            <div style={{ marginBottom: '12px' }}>
+            <div style={{ marginBottom: '8px' }}>
                 <label style={{ display: 'block', marginBottom: '4px' }}>
                     Links per node: {linkLimit}
                 </label>
@@ -115,6 +119,20 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
                     max="50"
                     value={linkLimit}
                     onChange={(e) => onLinkLimitChange(parseInt(e.target.value))}
+                    style={{ width: '100%' }}
+                />
+            </div>
+
+            <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', marginBottom: '4px' }}>
+                    Max depth: {maxDepth}
+                </label>
+                <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    value={maxDepth}
+                    onChange={(e) => onMaxDepthChange(parseInt(e.target.value))}
                     style={{ width: '100%' }}
                 />
             </div>

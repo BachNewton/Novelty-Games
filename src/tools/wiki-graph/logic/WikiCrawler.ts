@@ -3,7 +3,6 @@ import { WikiArticle } from '../data/Article';
 const API_BASE = 'https://en.wikipedia.org/w/api.php';
 const RATE_LIMIT_MS = 1000;
 const BATCH_SIZE = 20;
-const MAX_DEPTH = 1;
 
 export interface WikiCrawler {
     start: (startTitle: string) => void;
@@ -12,6 +11,8 @@ export interface WikiCrawler {
     prioritize: (title: string) => void;
     setLinkLimit: (limit: number) => void;
     getLinkLimit: () => number;
+    setMaxDepth: (depth: number) => void;
+    getMaxDepth: () => number;
     isRunning: () => boolean;
     getArticleCount: () => number;
     getLinkCount: () => number;
@@ -68,6 +69,7 @@ export function createWikiCrawler(): WikiCrawler {
     let activeRequests = 0;
     let lastRequestTime = 0;
     let linkLimit = 4;
+    let maxDepth = 1;
 
     const articleCallbacks: Array<(article: WikiArticle) => void> = [];
     const linkCallbacks: Array<(source: string, target: string) => void> = [];
@@ -237,23 +239,20 @@ export function createWikiCrawler(): WikiCrawler {
                     // Also store under redirect source titles so crawler can find it
                     for (const source of redirectSources) {
                         articles.set(source, article);
-                        console.log(`REDIRECT: ${source} → ${article.title}`);
                     }
 
                     articleCallbacks.forEach(cb => cb(article));
-                    console.log(`FETCHED: ${article.title} (depth ${articleDepth}, ${article.links.length} total links)`);
 
                     // Randomly select limited links
                     const selectedLinks = shuffleArray(article.links).slice(0, linkLimit);
 
                     // Only add links to queue if we haven't reached max depth
-                    if (articleDepth < MAX_DEPTH) {
+                    if (articleDepth < maxDepth) {
                         for (const linkTitle of selectedLinks) {
                             const linkKey = `${article.title}|${linkTitle}`;
                             if (!links.has(linkKey)) {
                                 links.add(linkKey);
                                 linkCallbacks.forEach(cb => cb(article.title, linkTitle));
-                                console.log(`${article.title} --> ${linkTitle} (depth ${articleDepth})`);
 
                                 const normalizedLink = normalizeTitle(linkTitle);
                                 const inPending = pendingQueue.some(q => normalizeTitle(q.title) === normalizedLink);
@@ -271,7 +270,6 @@ export function createWikiCrawler(): WikiCrawler {
                             if (!links.has(linkKey)) {
                                 links.add(linkKey);
                                 linkCallbacks.forEach(cb => cb(article.title, linkTitle));
-                                console.log(`${article.title} --> ${linkTitle} (depth ${articleDepth}, not queued)`);
                             }
                         }
                     }
@@ -317,8 +315,6 @@ export function createWikiCrawler(): WikiCrawler {
                 // Randomly select limited links from unfetched ones
                 const selectedLinks = shuffleArray(unfetchedLinks).slice(0, linkLimit);
 
-                console.log(`Prioritizing ${title}: ${unfetchedLinks.length} unfetched, selecting ${selectedLinks.length}`);
-
                 for (const linkTitle of selectedLinks) {
                     const normalizedLink = normalizeTitle(linkTitle);
                     const inPriority = priorityQueue.some(q => normalizeTitle(q.title) === normalizedLink);
@@ -329,15 +325,10 @@ export function createWikiCrawler(): WikiCrawler {
                     if (!links.has(linkKey)) {
                         links.add(linkKey);
                         linkCallbacks.forEach(cb => cb(article.title, linkTitle));
-                        console.log(`${article.title} --> ${linkTitle} (link reported)`);
                     }
 
                     if (!inPriority && !inPending) {
-                        // Queue unfetched articles
                         priorityQueue.push({ title: linkTitle, depth: 1 });
-                        console.log(`${linkTitle} (queued for fetch)`);
-                    } else {
-                        console.log(`${linkTitle} (already in queue)`);
                     }
                 }
 
@@ -356,6 +347,10 @@ export function createWikiCrawler(): WikiCrawler {
             linkLimit = limit;
         },
         getLinkLimit: () => linkLimit,
+        setMaxDepth: (depth: number) => {
+            maxDepth = depth;
+        },
+        getMaxDepth: () => maxDepth,
         isRunning: () => running,
         getArticleCount: () => articles.size,
         getLinkCount: () => links.size,

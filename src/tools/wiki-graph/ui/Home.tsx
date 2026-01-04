@@ -42,6 +42,7 @@ const Home: React.FC = () => {
     const [priorityQueueSize, setPriorityQueueSize] = useState(0);
     const [pendingQueueSize, setPendingQueueSize] = useState(0);
     const [linkLimit, setLinkLimit] = useState(4);
+    const [maxDepth, setMaxDepth] = useState(1);
     const [isRunning, setIsRunning] = useState(true);
     const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -108,7 +109,7 @@ const Home: React.FC = () => {
             }
         }
 
-        function onClick(event: MouseEvent) {
+        function onPointerDown(event: PointerEvent) {
             if (!sceneRef.current) return;
             const { camera, raycaster, mouse } = sceneRef.current;
 
@@ -170,7 +171,7 @@ const Home: React.FC = () => {
         }
 
         window.addEventListener('resize', onWindowResize);
-        renderer.domElement.addEventListener('click', onClick);
+        renderer.domElement.addEventListener('pointerdown', onPointerDown);
         renderer.domElement.addEventListener('mousemove', onMouseMove);
 
         let previousTime = 0;
@@ -214,7 +215,7 @@ const Home: React.FC = () => {
 
         return () => {
             window.removeEventListener('resize', onWindowResize);
-            renderer.domElement.removeEventListener('click', onClick);
+            renderer.domElement.removeEventListener('pointerdown', onPointerDown);
             renderer.domElement.removeEventListener('mousemove', onMouseMove);
             renderer.setAnimationLoop(null);
             renderer.dispose();
@@ -269,9 +270,7 @@ const Home: React.FC = () => {
             for (const title of titlesToCheck) {
                 const pending = pendingLinksRef.current.get(title);
                 if (pending) {
-                    console.log(`RESOLVING ${pending.size} pending links for: ${title}`);
                     for (const sourceTitle of pending) {
-                        console.log(`LINK RESOLVED: ${sourceTitle} → ${article.title}`);
                         createLink(sourceTitle, article.title);
                     }
                     pendingLinksRef.current.delete(title);
@@ -283,14 +282,12 @@ const Home: React.FC = () => {
 
         crawler.onLinkDiscovered((source: string, target: string) => {
             if (articlesRef.current.has(target)) {
-                console.log(`LINK IMMEDIATE: ${source} → ${target}`);
                 createLink(source, target);
             } else {
                 if (!pendingLinksRef.current.has(target)) {
                     pendingLinksRef.current.set(target, new Set());
                 }
                 pendingLinksRef.current.get(target)!.add(source);
-                console.log(`LINK PENDING: ${source} → ${target} (waiting for target)`);
             }
         });
 
@@ -314,17 +311,11 @@ const Home: React.FC = () => {
         const existing = linksRef.current.find(
             l => l.source === source && l.target === target
         );
-        if (existing) {
-            console.log(`LINE SKIPPED (exists): ${source} → ${target}`);
-            return;
-        }
+        if (existing) return;
 
         const sourceNode = articlesRef.current.get(source);
         const targetNode = articlesRef.current.get(target);
-        if (!sourceNode || !targetNode) {
-            console.log(`LINE FAILED (missing node): ${source} → ${target} | source=${!!sourceNode}, target=${!!targetNode}`);
-            return;
-        }
+        if (!sourceNode || !targetNode) return;
 
         const geometry = new LineGeometry();
         geometry.setPositions([0, 0, 0, 0, 0, 0]);
@@ -343,7 +334,6 @@ const Home: React.FC = () => {
 
         linksRef.current.push({ source, target, line });
         simulationRef.current.addLink(source, target);
-        console.log(`LINE CREATED: ${source} → ${target}`);
 
         setLinkCount(linksRef.current.length);
     }
@@ -363,6 +353,11 @@ const Home: React.FC = () => {
         crawler.setLinkLimit(limit);
     }
 
+    function handleMaxDepthChange(depth: number) {
+        setMaxDepth(depth);
+        crawler.setMaxDepth(depth);
+    }
+
     return (
         <div style={{ width: '100%', height: '100vh', overflow: 'hidden' }}>
             <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
@@ -373,11 +368,13 @@ const Home: React.FC = () => {
                 priorityQueueSize={priorityQueueSize}
                 pendingQueueSize={pendingQueueSize}
                 linkLimit={linkLimit}
+                maxDepth={maxDepth}
                 isRunning={isRunning}
                 selectedArticle={selectedArticle}
                 selectedCategory={selectedCategory}
                 onToggle={handleToggle}
                 onLinkLimitChange={handleLinkLimitChange}
+                onMaxDepthChange={handleMaxDepthChange}
             />
         </div>
     );
