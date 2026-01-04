@@ -8,7 +8,13 @@
       "Bash(sort:*)",
       "Bash(npm test:*)",
       "WebSearch",
-      "Bash(node scripts/wikiSearch.js:*)"
+      "Bash(node scripts/wiki/index.js:*)",
+      "Bash(node -e:*)",
+      "Bash(node:*)",
+      "WebFetch(domain:en.wikipedia.org)",
+      "Bash(curl:*)",
+      "WebFetch(domain:www.mediawiki.org)",
+      "Bash(ls:*)"
     ]
   }
 }
