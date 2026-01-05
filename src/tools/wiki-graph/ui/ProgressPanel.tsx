@@ -4,7 +4,6 @@ interface ProgressPanelProps {
     articleCount: number;
     linkCount: number;
     fetchingCount: number;
-    priorityQueueSize: number;
     pendingQueueSize: number;
     linkLimit: number;
     maxDepth: number;
@@ -20,7 +19,6 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
     articleCount,
     linkCount,
     fetchingCount,
-    priorityQueueSize,
     pendingQueueSize,
     linkLimit,
     maxDepth,
@@ -103,9 +101,6 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
                     Fetching {fetchingCount} article{fetchingCount !== 1 ? 's' : ''}...
                 </div>
             )}
-            <div style={{ marginBottom: '8px' }}>
-                <span style={{ color: '#FF6B6B' }}>Priority:</span> {priorityQueueSize}
-            </div>
             <div style={{ marginBottom: '12px' }}>
                 <span style={{ color: '#888' }}>Pending:</span> {pendingQueueSize}
             </div>

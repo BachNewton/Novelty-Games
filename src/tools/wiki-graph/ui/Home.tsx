@@ -38,17 +38,18 @@ const Home: React.FC = () => {
     const pendingLinksRef = useRef<Map<string, Set<string>>>(new Map());
     const hoveredMeshRef = useRef<THREE.Mesh | null>(null);
     const loadingIndicatorsRef = useRef<Map<string, { ring: THREE.Mesh, pending: Set<string> }>>(new Map());
+    const statsLabelRef = useRef<CSS2DObject | null>(null);
+    const selectedArticleRef = useRef<string | null>(START_ARTICLE);
+    const linkCountsRef = useRef<Map<string, { count: number, isComplete: boolean }>>(new Map());
 
     const [articleCount, setArticleCount] = useState(0);
     const [linkCount, setLinkCount] = useState(0);
-    const [activeRequests, setActiveRequests] = useState(0);
     const [fetchingCount, setFetchingCount] = useState(0);
-    const [priorityQueueSize, setPriorityQueueSize] = useState(0);
     const [pendingQueueSize, setPendingQueueSize] = useState(0);
     const [linkLimit, setLinkLimit] = useState(4);
     const [maxDepth, setMaxDepth] = useState(1);
     const [isRunning, setIsRunning] = useState(true);
-    const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
+    const [selectedArticle, setSelectedArticle] = useState<string | null>(START_ARTICLE);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
     const crawler = useMemo(() => createWikiCrawler(), []);
@@ -135,17 +136,22 @@ const Home: React.FC = () => {
 
             if (intersects.length > 0) {
                 const title = intersects[0].object.userData.title as string;
+
                 setSelectedArticle(title);
+                selectedArticleRef.current = title;
 
                 const category = categoryTrackerRef.current?.getOptimalCategory(title) ?? null;
                 setSelectedCategory(category);
 
-                crawlerRef.current?.prioritize(title);
+                crawlerRef.current?.expand(title);
 
                 const node = articlesRef.current.get(title);
                 if (node && cameraAnimatorRef.current) {
                     cameraAnimatorRef.current.animateTo(node.position.clone());
                 }
+
+                // Update stats label after a short delay to allow prioritize to queue links
+                setTimeout(() => updateStatsLabel(title), 50);
             }
         }
 
@@ -360,9 +366,7 @@ const Home: React.FC = () => {
         });
 
         crawler.onRequestStateChange((count: number, batchSize: number) => {
-            setActiveRequests(count);
             setFetchingCount(batchSize);
-            setPriorityQueueSize(crawler.getPriorityQueueSize());
             setPendingQueueSize(crawler.getPendingQueueSize());
         });
 
@@ -412,6 +416,48 @@ const Home: React.FC = () => {
             }
         });
 
+        crawler.onFetchProgress((title: string, linkCount: number, isComplete: boolean) => {
+            linkCountsRef.current.set(title, { count: linkCount, isComplete });
+
+            // Update stats label if this is the selected article
+            if (selectedArticleRef.current === title) {
+                updateStatsLabel(title);
+            }
+
+            // Show loading ring on the node while paginating
+            if (!sceneRef.current) return;
+            const { scene } = sceneRef.current;
+            const node = articlesRef.current.get(title);
+
+            if (node && !isComplete && !loadingIndicatorsRef.current.has(title)) {
+                // Create loading indicator ring for pagination
+                const ringGeometry = new THREE.TorusGeometry(0.6, 0.05, 8, 32);
+                const ringMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x4ECDC4,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                scene.add(ring);
+
+                loadingIndicatorsRef.current.set(title, {
+                    ring,
+                    pending: new Set(['__pagination__']) // Special marker for pagination
+                });
+            } else if (isComplete && loadingIndicatorsRef.current.has(title)) {
+                const indicator = loadingIndicatorsRef.current.get(title)!;
+                // Remove pagination marker
+                indicator.pending.delete('__pagination__');
+                // If no other pending items, remove the ring
+                if (indicator.pending.size === 0) {
+                    scene.remove(indicator.ring);
+                    indicator.ring.geometry.dispose();
+                    (indicator.ring.material as THREE.Material).dispose();
+                    loadingIndicatorsRef.current.delete(title);
+                }
+            }
+        });
+
         crawler.start(START_ARTICLE);
 
         return () => {
@@ -432,14 +478,27 @@ const Home: React.FC = () => {
         const targetNode = articlesRef.current.get(target);
         if (!sourceNode || !targetNode) return;
 
+        // Check if reverse link exists (bidirectional)
+        const reverseLink = linksRef.current.find(
+            l => l.source === target && l.target === source
+        );
+
         const geometry = new LineGeometry();
         geometry.setPositions([0, 0, 0, 0, 0, 0]);
 
+        // Set vertex colors: grey (0.4, 0.4, 0.5) to blue (0.3, 0.8, 0.77)
+        // If bidirectional, both ends are blue
+        const grey = [0.4, 0.4, 0.5];
+        const blue = [0.3, 0.8, 0.77];
+        const startColor = reverseLink ? blue : grey;
+        const endColor = blue;
+        geometry.setColors([...startColor, ...endColor]);
+
         const material = new LineMaterial({
-            color: 0x666688,
+            vertexColors: true,
             linewidth: 1,
             transparent: true,
-            opacity: 0.4,
+            opacity: 0.6,
             resolution: new THREE.Vector2(window.innerWidth, window.innerHeight)
         });
 
@@ -450,7 +509,71 @@ const Home: React.FC = () => {
         linksRef.current.push({ source, target, line });
         simulationRef.current.addLink(source, target);
 
+        // If reverse link exists, update its colors to be blue on both ends
+        if (reverseLink) {
+            const reverseGeometry = reverseLink.line.geometry as LineGeometry;
+            reverseGeometry.setColors([...blue, ...blue]);
+        }
+
         setLinkCount(linksRef.current.length);
+
+        // Update stats label if this link involves the selected article
+        if (selectedArticleRef.current && source === selectedArticleRef.current) {
+            updateStatsLabel(selectedArticleRef.current);
+        }
+    }
+
+    function updateStatsLabel(title: string | null) {
+        if (!sceneRef.current) return;
+
+        // Remove existing stats label
+        if (statsLabelRef.current) {
+            statsLabelRef.current.parent?.remove(statsLabelRef.current);
+            statsLabelRef.current.element.remove();
+            statsLabelRef.current = null;
+        }
+
+        if (!title) return;
+
+        const node = articlesRef.current.get(title);
+
+        // Count outgoing lines from this node (visualized links)
+        const visualizedLinks = linksRef.current.filter(link => link.source === title).length;
+
+        // Get total link count - either from progress tracking or completed article
+        let totalLinks: number;
+        let isComplete: boolean;
+        const progress = linkCountsRef.current.get(title);
+        if (progress) {
+            totalLinks = progress.count;
+            isComplete = progress.isComplete;
+        } else if (node) {
+            totalLinks = node.article.links.length;
+            isComplete = true;
+        } else {
+            // Node doesn't exist yet, show what we know from progress
+            return;
+        }
+
+        // Format: (visualized/total) or (visualized/total+) if still loading
+        const totalStr = isComplete ? String(totalLinks) : `${totalLinks}+`;
+
+        // Create stats label
+        const statsDiv = document.createElement('div');
+        statsDiv.textContent = `(${visualizedLinks}/${totalStr})`;
+        statsDiv.style.color = '#4ECDC4';
+        statsDiv.style.fontSize = '10px';
+        statsDiv.style.fontFamily = 'sans-serif';
+        statsDiv.style.textShadow = '1px 1px 2px black';
+        statsDiv.style.whiteSpace = 'nowrap';
+
+        const statsLabel = new CSS2DObject(statsDiv);
+        statsLabel.position.set(0, 1.1, 0);
+
+        if (node) {
+            node.mesh.add(statsLabel);
+        }
+        statsLabelRef.current = statsLabel;
     }
 
     function handleToggle() {
@@ -480,7 +603,6 @@ const Home: React.FC = () => {
                 articleCount={articleCount}
                 linkCount={linkCount}
                 fetchingCount={fetchingCount}
-                priorityQueueSize={priorityQueueSize}
                 pendingQueueSize={pendingQueueSize}
                 linkLimit={linkLimit}
                 maxDepth={maxDepth}

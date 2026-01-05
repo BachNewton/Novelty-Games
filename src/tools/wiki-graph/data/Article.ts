@@ -3,7 +3,6 @@ import { Line2 } from 'three/examples/jsm/lines/Line2';
 
 export interface WikiArticle {
     title: string;
-    description: string;
     categories: string[];
     links: string[];
     depth: number;
@@ -26,7 +25,6 @@ export interface ArticleLink {
 export interface CrawlState {
     articles: Map<string, WikiArticle>;
     pendingQueue: string[];
-    priorityQueue: string[];
     currentDepth: number;
     isRunning: boolean;
     activeRequests: number;
