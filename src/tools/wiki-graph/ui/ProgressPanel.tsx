@@ -7,10 +7,8 @@ interface ProgressPanelProps {
     pendingQueueSize: number;
     linkLimit: number;
     maxDepth: number;
-    isRunning: boolean;
     selectedArticle: string | null;
     selectedCategory: string | null;
-    onToggle: () => void;
     onLinkLimitChange: (limit: number) => void;
     onMaxDepthChange: (depth: number) => void;
 }
@@ -22,10 +20,8 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
     pendingQueueSize,
     linkLimit,
     maxDepth,
-    isRunning,
     selectedArticle,
     selectedCategory,
-    onToggle,
     onLinkLimitChange,
     onMaxDepthChange
 }) => {
@@ -152,23 +148,6 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
                     )}
                 </div>
             )}
-
-            <button
-                onClick={onToggle}
-                style={{
-                    width: '100%',
-                    padding: '8px',
-                    backgroundColor: isRunning ? '#FF6B6B' : '#4ECDC4',
-                    border: 'none',
-                    borderRadius: '4px',
-                    color: 'white',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    fontSize: '14px'
-                }}
-            >
-                {isRunning ? 'Pause' : 'Resume'}
-            </button>
 
             <div style={{
                 marginTop: '12px',

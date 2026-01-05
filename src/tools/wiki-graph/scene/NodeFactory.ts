@@ -9,13 +9,16 @@ export interface LoadingIndicator {
 
 export interface NodeFactory {
     createNode: (article: WikiArticle, color: number) => THREE.Mesh;
+    createLeafNode: (title: string) => THREE.Mesh;
     createLoadingIndicator: () => THREE.Mesh;
     updateLabelForDistance: (mesh: THREE.Mesh, cameraPosition: THREE.Vector3) => void;
     highlightNode: (mesh: THREE.Mesh, highlighted: boolean) => void;
+    orientLeafToward: (mesh: THREE.Mesh, sourcePosition: THREE.Vector3) => void;
     rotateIndicator: (ring: THREE.Mesh, deltaTime: number) => void;
 }
 
 const MISSING_COLOR = 0x666666;  // Grey for missing articles
+const LEAF_COLOR = 0xffffff;     // White for leaf nodes
 
 export function createNodeFactory(): NodeFactory {
     const baseDistance = 30;
@@ -34,7 +37,7 @@ export function createNodeFactory(): NodeFactory {
                 metalness: 0.3
             });
             const mesh = new THREE.Mesh(geometry, material);
-            mesh.userData = { title: article.title, missing: isMissing };
+            mesh.userData = { title: article.title, missing: isMissing, leaf: false };
 
             const labelDiv = document.createElement('div');
             labelDiv.textContent = article.title;
@@ -47,6 +50,33 @@ export function createNodeFactory(): NodeFactory {
             const label = new CSS2DObject(labelDiv);
             label.position.set(0, 0.75, 0);
             mesh.add(label);
+
+            return mesh;
+        },
+
+        createLeafNode: (title) => {
+            // Cone pointing in -Z direction (will use lookAt to orient toward source)
+            const geometry = new THREE.ConeGeometry(0.3, 0.6, 4);
+            geometry.rotateX(Math.PI / 2);  // Point cone in -Z direction
+            const material = new THREE.MeshStandardMaterial({
+                color: LEAF_COLOR,
+                roughness: 0.5,
+                metalness: 0.3
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.userData = { title, leaf: true };
+
+            // Label is NOT added as child - will be positioned separately in world space
+            const labelDiv = document.createElement('div');
+            labelDiv.textContent = title;
+            labelDiv.style.color = '#cccccc';
+            labelDiv.style.fontSize = '12px';
+            labelDiv.style.fontFamily = 'sans-serif';
+            labelDiv.style.textShadow = '1px 1px 2px black';
+            labelDiv.style.whiteSpace = 'nowrap';
+
+            const label = new CSS2DObject(labelDiv);
+            mesh.userData.label = label;  // Store reference but don't parent
 
             return mesh;
         },
@@ -84,6 +114,11 @@ export function createNodeFactory(): NodeFactory {
                 material.emissive.setHex(0x000000);
                 mesh.scale.setScalar(1);
             }
+        },
+
+        orientLeafToward: (mesh, sourcePosition) => {
+            // Point the cone toward the source node using lookAt
+            mesh.lookAt(sourcePosition);
         },
 
         rotateIndicator: (ring, deltaTime) => {

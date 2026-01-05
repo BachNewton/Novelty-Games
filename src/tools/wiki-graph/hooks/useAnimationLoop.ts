@@ -1,4 +1,5 @@
 import { useEffect, useRef, RefObject } from 'react';
+import * as THREE from 'three';
 import { SceneManager } from '../scene/SceneManager';
 import { ForceSimulation } from '../logic/ForceSimulation';
 import { CameraAnimator } from '../logic/CameraAnimator';
@@ -49,6 +50,24 @@ export function useAnimationLoop(deps: AnimationDeps): void {
                     node.mesh.position.copy(pos);
                     node.position.copy(pos);
                     nodeFactory.updateLabelForDistance(node.mesh, camera.position);
+
+                    // Handle leaf nodes specially
+                    if (node.article.leaf) {
+                        // Position leaf label in world space (above the mesh, not rotating with it)
+                        const label = node.mesh.userData.label as THREE.Object3D;
+                        if (label) {
+                            label.position.set(pos.x, pos.y + 0.75, pos.z);
+                        }
+
+                        // Orient leaf toward its source
+                        const incomingLink = links.find(l => l.target === title);
+                        if (incomingLink) {
+                            const sourceNode = articles.get(incomingLink.source);
+                            if (sourceNode) {
+                                nodeFactory.orientLeafToward(node.mesh, sourceNode.position);
+                            }
+                        }
+                    }
                 }
             }
 

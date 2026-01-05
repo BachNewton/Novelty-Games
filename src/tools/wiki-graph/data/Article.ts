@@ -7,6 +7,7 @@ export interface WikiArticle {
     depth: number;
     aliases?: string[];  // Redirect source titles that point to this article
     missing?: boolean;   // True if Wikipedia API didn't return this article
+    leaf?: boolean;      // True if this is a leaf node (not yet fetched, just a placeholder)
 }
 
 export interface ArticleNode {

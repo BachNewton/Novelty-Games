@@ -9,6 +9,7 @@ export interface WikiCrawler {
     stop: () => void;
     resume: () => void;
     expand: (title: string) => void;
+    promoteLeaf: (title: string) => void;
     setLinkLimit: (limit: number) => void;
     getLinkLimit: () => number;
     setMaxDepth: (depth: number) => void;
@@ -291,8 +292,9 @@ export function createWikiCrawler(): WikiCrawler {
                 for (const article of fetched) {
                     const selectedLinks = shuffleArray(article.links).slice(0, linkLimit);
 
-                    // BFS depth check: only queue children if we haven't reached maxDepth
-                    const shouldQueueChildren = article.depth < maxDepth;
+                    // BFS depth check: only queue children if they would be below maxDepth
+                    const childDepth = article.depth + 1;
+                    const shouldQueueChildren = childDepth < maxDepth;
 
                     if (shouldQueueChildren) {
                         const queuedLinks: string[] = [];
@@ -312,12 +314,25 @@ export function createWikiCrawler(): WikiCrawler {
                             linksQueuedCallbacks.forEach(cb => cb(article.title, queuedLinks));
                         }
                     } else {
-                        // At max depth: report links for visualization only, don't queue
+                        // At max depth: create leaf nodes (no API call, just placeholders)
                         for (const linkTitle of selectedLinks) {
                             const linkKey = `${article.title}|${linkTitle}`;
                             if (!links.has(linkKey)) {
                                 links.add(linkKey);
                                 linkCallbacks.forEach(cb => cb(article.title, linkTitle));
+
+                                // Create leaf if not already tracked
+                                if (!articles.has(linkTitle)) {
+                                    const leafArticle: WikiArticle = {
+                                        title: linkTitle,
+                                        categories: [],
+                                        links: [],
+                                        depth: childDepth,
+                                        leaf: true
+                                    };
+                                    articles.set(linkTitle, leafArticle);
+                                    articleCallbacks.forEach(cb => cb(leafArticle));
+                                }
                             }
                         }
                     }
@@ -379,7 +394,7 @@ export function createWikiCrawler(): WikiCrawler {
 
         expand: (title) => {
             const article = articles.get(title);
-            if (!article) return;
+            if (!article || article.leaf) return;  // Can't expand a leaf
 
             // Find unfetched links from this article
             const unfetchedLinks = article.links.filter(linkTitle => {
@@ -412,6 +427,26 @@ export function createWikiCrawler(): WikiCrawler {
 
             // Ensure crawler is running to process the queue
             if (!running && pendingQueue.length > 0) {
+                running = true;
+                processQueue();
+            }
+        },
+
+        promoteLeaf: (title) => {
+            const article = articles.get(title);
+            if (!article || !article.leaf) return;  // Not a leaf
+
+            // Remove from articles so it can be re-fetched
+            articles.delete(title);
+
+            // Queue for fetching at depth 0 (fresh BFS from this point)
+            pendingQueue.push({ title, depth: 0 });
+
+            // Trigger request state change to update UI
+            requestCallbacks.forEach(cb => cb(activeRequests, currentBatchSize));
+
+            // Ensure crawler is running to process the queue
+            if (!running) {
                 running = true;
                 processQueue();
             }

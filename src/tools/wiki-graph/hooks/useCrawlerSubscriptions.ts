@@ -102,12 +102,90 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
             const fetchedTitles = [article.title, ...(article.aliases ?? [])];
             removeFromLoadingIndicators(fetchedTitles);
 
-            if (articles.has(article.title)) return;
+            // Check for existing node by canonical title OR any alias (handles redirects)
+            let existingNode = articles.get(article.title);
+            let existingLeafTitle: string | null = null;
+            if (!existingNode && article.aliases) {
+                for (const alias of article.aliases) {
+                    const node = articles.get(alias);
+                    if (node?.article.leaf) {
+                        existingNode = node;
+                        existingLeafTitle = alias;
+                        break;
+                    }
+                }
+            }
 
-            categoryTracker.registerArticle(article.title, article.categories);
-            const color = categoryTracker.getArticleColor(article.title);
+            // Check if this is a leaf being promoted to a full node
+            if (existingNode && existingNode.article.leaf && !article.leaf) {
+                // Replace the leaf mesh with a full node mesh
+                // Remove the leaf's separate label from scene
+                const oldLabel = existingNode.mesh.userData.label as THREE.Object3D & { element?: HTMLElement };
+                if (oldLabel) {
+                    scene.remove(oldLabel);
+                    if (oldLabel.element) {
+                        oldLabel.element.remove();
+                    }
+                }
+                scene.remove(existingNode.mesh);
+                existingNode.mesh.geometry.dispose();
+                (existingNode.mesh.material as THREE.Material).dispose();
 
-            const mesh = nodeFactory.createNode(article, color);
+                categoryTracker.registerArticle(article.title, article.categories);
+                const color = categoryTracker.getArticleColor(article.title);
+                const newMesh = nodeFactory.createNode(article, color);
+                newMesh.position.copy(existingNode.position);
+                scene.add(newMesh);
+
+                existingNode.article = article;
+                existingNode.mesh = newMesh;
+
+                // Clean up old leaf entry if it was stored under a different title (redirect case)
+                if (existingLeafTitle && existingLeafTitle !== article.title) {
+                    articles.delete(existingLeafTitle);
+                    simulation.removeNode(existingLeafTitle);
+                }
+
+                // Store under canonical title and aliases
+                articles.set(article.title, existingNode);
+                simulation.addNode(article.title);
+                if (article.aliases) {
+                    for (const alias of article.aliases) {
+                        articles.set(alias, existingNode);
+                    }
+                }
+
+                // Resolve pending links for this newly promoted node
+                const titlesToCheck = [article.title, ...(article.aliases ?? [])];
+                for (const title of titlesToCheck) {
+                    const pending = pendingLinks.get(title);
+                    if (pending) {
+                        for (const sourceTitle of pending) {
+                            createLink(sourceTitle, article.title);
+                        }
+                        pendingLinks.delete(title);
+                    }
+                }
+                return;
+            }
+
+            // Skip if already exists (and not a leaf promotion)
+            if (existingNode) return;
+
+            // Create new node (leaf or full)
+            let mesh: THREE.Mesh;
+            if (article.leaf) {
+                mesh = nodeFactory.createLeafNode(article.title);
+                // Add leaf label to scene separately (not as child of mesh)
+                const label = mesh.userData.label;
+                if (label) {
+                    scene.add(label);
+                }
+            } else {
+                categoryTracker.registerArticle(article.title, article.categories);
+                const color = categoryTracker.getArticleColor(article.title);
+                mesh = nodeFactory.createNode(article, color);
+            }
             scene.add(mesh);
 
             const position = new THREE.Vector3();

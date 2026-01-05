@@ -40,7 +40,6 @@ const Home: React.FC = () => {
     const [pendingQueueSize, setPendingQueueSize] = useState(0);
     const [linkLimit, setLinkLimit] = useState(4);
     const [maxDepth, setMaxDepth] = useState(1);
-    const [isRunning, setIsRunning] = useState(true);
     const [selectedArticle, setSelectedArticle] = useState<string | null>(START_ARTICLE);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
@@ -115,17 +114,23 @@ const Home: React.FC = () => {
         setSelectedArticle(title);
         selectedArticleRef.current = title;
 
-        const category = categoryTracker.getOptimalCategory(title) ?? null;
-        setSelectedCategory(category);
-
-        crawler.expand(title);
-
         const node = articlesRef.current.get(title);
+
+        // Check if this is a leaf node
+        if (node?.article.leaf) {
+            // Promote the leaf to a full node - stats will show after promotion via onFetchProgress
+            crawler.promoteLeaf(title);
+        } else {
+            // Expand an existing full node
+            const category = categoryTracker.getOptimalCategory(title) ?? null;
+            setSelectedCategory(category);
+            crawler.expand(title);
+            updateStatsLabel(title);
+        }
+
         if (node && cameraAnimatorRef.current) {
             cameraAnimatorRef.current.animateTo(node.position.clone());
         }
-
-        setTimeout(() => updateStatsLabel(title), 50);
     }, [categoryTracker, crawler, updateStatsLabel]);
 
     // Mouse interaction
@@ -171,16 +176,6 @@ const Home: React.FC = () => {
     });
 
     // UI handlers
-    function handleToggle() {
-        if (isRunning) {
-            crawler.stop();
-            setIsRunning(false);
-        } else {
-            crawler.resume();
-            setIsRunning(true);
-        }
-    }
-
     function handleLinkLimitChange(limit: number) {
         setLinkLimit(limit);
         crawler.setLinkLimit(limit);
@@ -201,10 +196,8 @@ const Home: React.FC = () => {
                 pendingQueueSize={pendingQueueSize}
                 linkLimit={linkLimit}
                 maxDepth={maxDepth}
-                isRunning={isRunning}
                 selectedArticle={selectedArticle}
                 selectedCategory={selectedCategory}
-                onToggle={handleToggle}
                 onLinkLimitChange={handleLinkLimitChange}
                 onMaxDepthChange={handleMaxDepthChange}
             />
