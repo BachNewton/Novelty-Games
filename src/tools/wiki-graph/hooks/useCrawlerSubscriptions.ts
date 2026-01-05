@@ -1,11 +1,13 @@
 import { useEffect, RefObject } from 'react';
 import * as THREE from 'three';
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
 import { WikiCrawler } from '../logic/WikiCrawler';
 import { ForceSimulation } from '../logic/ForceSimulation';
 import { CategoryTracker } from '../logic/CategoryTracker';
 import { SceneManager } from '../scene/SceneManager';
 import { NodeFactory, LoadingIndicator } from '../scene/NodeFactory';
-import { LinkFactory } from '../scene/LinkFactory';
+import { InstancedNodeManager, NodeType } from '../scene/InstancedNodeManager';
+import { InstancedLinkManager } from '../scene/InstancedLinkManager';
 import { WikiArticle, ArticleNode, ArticleLink } from '../data/Article';
 
 interface LinkCount {
@@ -66,7 +68,8 @@ interface CrawlerSubscriptionDeps {
     simulation: ForceSimulation;
     categoryTracker: CategoryTracker;
     nodeFactory: NodeFactory;
-    linkFactory: LinkFactory;
+    nodeManager: InstancedNodeManager;
+    linkManager: InstancedLinkManager;
     articlesRef: RefObject<Map<string, ArticleNode>>;
     linksRef: RefObject<ArticleLink[]>;
     pendingLinksRef: RefObject<Map<string, Set<string>>>;
@@ -78,16 +81,38 @@ interface CrawlerSubscriptionDeps {
     setFetchingCount: (count: number) => void;
     setPendingQueueSize: (size: number) => void;
     updateStatsLabel: (title: string) => void;
+    onError: (error: Error) => void;
     startArticle: string;
+}
+
+function createLabel(title: string, isLeaf: boolean, isMissing: boolean): CSS2DObject {
+    const labelDiv = document.createElement('div');
+    labelDiv.textContent = title;
+    labelDiv.style.color = isMissing ? '#999999' : isLeaf ? '#cccccc' : 'white';
+    labelDiv.style.fontSize = '12px';
+    labelDiv.style.fontFamily = 'sans-serif';
+    labelDiv.style.textShadow = '1px 1px 2px black';
+    labelDiv.style.whiteSpace = 'nowrap';
+
+    const label = new CSS2DObject(labelDiv);
+    label.position.set(0, 0.75, 0);
+    return label;
+}
+
+// Helper to determine node type from article
+function getNodeType(article: WikiArticle): NodeType {
+    if (article.leaf) return 'cone';
+    if (article.missing) return 'box';
+    return 'sphere';
 }
 
 export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
     useEffect(() => {
         const {
-            crawler, sceneManager, simulation, categoryTracker, nodeFactory, linkFactory,
+            crawler, sceneManager, simulation, categoryTracker, nodeFactory, nodeManager, linkManager,
             articlesRef, linksRef, pendingLinksRef, loadingIndicatorsRef, linkCountsRef,
             selectedArticleRef, setArticleCount, setLinkCount, setFetchingCount,
-            setPendingQueueSize, updateStatsLabel, startArticle
+            setPendingQueueSize, updateStatsLabel, onError, startArticle
         } = deps;
 
         const articles = articlesRef.current!;
@@ -113,6 +138,7 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
         }
 
         function createLink(source: string, target: string) {
+            // Check if link already exists
             const existing = links.find(
                 l => l.source === source && l.target === target
             );
@@ -122,20 +148,23 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
             const targetNode = articles.get(target);
             if (!sourceNode || !targetNode) return;
 
+            // Check if reverse link exists (making this bidirectional)
             const reverseLink = links.find(
                 l => l.source === target && l.target === source
             );
 
-            const line = linkFactory.createLink(!!reverseLink);
-            scene.add(line);
+            // Add as directional link
+            const instanceIndex = linkManager.addLink('directional');
+            links.push({ source, target, instanceIndex, linkType: 'directional' });
 
-            links.push({ source, target, line });
-            simulation.addLink(source, target);
-
+            // If reverse exists, add bidirectional overlay on top
             if (reverseLink) {
-                linkFactory.setBidirectional(reverseLink.line);
+                const biIndex = linkManager.addLink('bidirectional');
+                // Store bidirectional link (uses same source/target as original for transform updates)
+                links.push({ source, target, instanceIndex: biIndex, linkType: 'bidirectional' });
             }
 
+            simulation.addLink(source, target);
             setLinkCount(links.length);
 
             if (selectedArticleRef.current && source === selectedArticleRef.current) {
@@ -144,93 +173,104 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
         }
 
         crawler.onArticleFetched((article: WikiArticle) => {
-            const fetchedTitles = [article.title, ...(article.aliases ?? [])];
-            removeFromLoadingIndicators(fetchedTitles);
+            try {
+                const fetchedTitles = [article.title, ...(article.aliases ?? [])];
+                removeFromLoadingIndicators(fetchedTitles);
 
-            const existing = findNodeByTitleOrAlias(articles, article.title, article.aliases);
+                const existing = findNodeByTitleOrAlias(articles, article.title, article.aliases);
 
-            // Skip if already exists (and not a leaf promotion)
-            if (existing && (!existing.node.article.leaf || article.leaf)) return;
+                // Skip if already exists (and not a leaf promotion)
+                if (existing && (!existing.node.article.leaf || article.leaf)) return;
 
-            // Leaf being promoted to full node
-            if (existing) {
-                const { node: existingNode, aliasTitle } = existing;
+                // Leaf being promoted to full node
+                if (existing) {
+                    const { node: existingNode, aliasTitle } = existing;
 
-                // Remove the leaf's label and mesh
-                const oldLabel = existingNode.mesh.userData.label as THREE.Object3D & { element?: HTMLElement };
-                if (oldLabel) {
-                    scene.remove(oldLabel);
-                    oldLabel.element?.remove();
+                    // Remove the old label
+                    scene.remove(existingNode.label);
+                    existingNode.label.element.remove();
+
+                    // Create new instance for the promoted node
+                    // Note: The old cone instance is orphaned but that's OK for now
+                    categoryTracker.registerArticle(article.title, article.categories);
+                    const color = categoryTracker.getArticleColor(article.title);
+                    const nodeType = getNodeType(article);
+                    const instanceIndex = nodeManager.addNode(nodeType, color);
+
+                    const label = createLabel(article.title, false, article.missing === true);
+                    scene.add(label);
+
+                    // Update existing node
+                    existingNode.article = article;
+                    existingNode.instanceIndex = instanceIndex;
+                    existingNode.instanceType = nodeType;
+                    existingNode.label = label;
+
+                    // Clean up old leaf entry if stored under different title (redirect case)
+                    if (aliasTitle && aliasTitle !== article.title) {
+                        articles.delete(aliasTitle);
+                        simulation.removeNode(aliasTitle);
+                    }
+
+                    // Store under canonical title and aliases
+                    articles.set(article.title, existingNode);
+                    simulation.addNode(article.title);
+                    for (const alias of article.aliases ?? []) {
+                        articles.set(alias, existingNode);
+                    }
+
+                    resolvePendingLinks(article, pendingLinks, createLink);
+                    return;
                 }
-                scene.remove(existingNode.mesh);
-                existingNode.mesh.geometry.dispose();
-                (existingNode.mesh.material as THREE.Material).dispose();
 
-                // Create replacement mesh
-                categoryTracker.registerArticle(article.title, article.categories);
-                const color = categoryTracker.getArticleColor(article.title);
-                const newMesh = nodeFactory.createNode(article, color);
-                newMesh.position.copy(existingNode.position);
-                scene.add(newMesh);
+                // Create new node (leaf or full)
+                const nodeType = getNodeType(article);
+                let color = 0xffffff; // Default white for leaves/missing
 
-                existingNode.article = article;
-                existingNode.mesh = newMesh;
-
-                // Clean up old leaf entry if stored under different title (redirect case)
-                if (aliasTitle && aliasTitle !== article.title) {
-                    articles.delete(aliasTitle);
-                    simulation.removeNode(aliasTitle);
+                if (!article.leaf && !article.missing) {
+                    categoryTracker.registerArticle(article.title, article.categories);
+                    color = categoryTracker.getArticleColor(article.title);
                 }
 
-                // Store under canonical title and aliases
-                articles.set(article.title, existingNode);
+                const instanceIndex = nodeManager.addNode(nodeType, color);
+
+                const label = createLabel(article.title, article.leaf === true, article.missing === true);
+                scene.add(label);
+
+                const node: ArticleNode = {
+                    article,
+                    instanceIndex,
+                    instanceType: nodeType,
+                    label,
+                    position: new THREE.Vector3(),
+                    velocity: new THREE.Vector3()
+                };
+
+                articles.set(article.title, node);
                 simulation.addNode(article.title);
                 for (const alias of article.aliases ?? []) {
-                    articles.set(alias, existingNode);
+                    articles.set(alias, node);
                 }
 
                 resolvePendingLinks(article, pendingLinks, createLink);
-                return;
+                setArticleCount(articles.size);
+            } catch (err) {
+                onError(err instanceof Error ? err : new Error(String(err)));
             }
-
-            // Create new node (leaf or full)
-            let mesh: THREE.Mesh;
-            if (article.leaf) {
-                mesh = nodeFactory.createLeafNode(article.title);
-                const label = mesh.userData.label;
-                if (label) scene.add(label);
-            } else {
-                categoryTracker.registerArticle(article.title, article.categories);
-                const color = categoryTracker.getArticleColor(article.title);
-                mesh = nodeFactory.createNode(article, color);
-            }
-            scene.add(mesh);
-
-            const node: ArticleNode = {
-                article,
-                mesh,
-                position: new THREE.Vector3(),
-                velocity: new THREE.Vector3()
-            };
-
-            articles.set(article.title, node);
-            simulation.addNode(article.title);
-            for (const alias of article.aliases ?? []) {
-                articles.set(alias, node);
-            }
-
-            resolvePendingLinks(article, pendingLinks, createLink);
-            setArticleCount(articles.size);
         });
 
         crawler.onLinkDiscovered((source: string, target: string) => {
-            if (articles.has(target)) {
-                createLink(source, target);
-            } else {
-                if (!pendingLinks.has(target)) {
-                    pendingLinks.set(target, new Set());
+            try {
+                if (articles.has(target)) {
+                    createLink(source, target);
+                } else {
+                    if (!pendingLinks.has(target)) {
+                        pendingLinks.set(target, new Set());
+                    }
+                    pendingLinks.get(target)!.add(source);
                 }
-                pendingLinks.get(target)!.add(source);
+            } catch (err) {
+                onError(err instanceof Error ? err : new Error(String(err)));
             }
         });
 

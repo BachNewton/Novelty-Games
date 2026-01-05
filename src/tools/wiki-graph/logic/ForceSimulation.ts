@@ -157,7 +157,10 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
         },
 
         update: (deltaTime) => {
-            if (stable || nodes.size === 0) return;
+            // TODO: O(n²) repulsion is too expensive for large graphs.
+            // Consider: Barnes-Hut algorithm (O(n log n)), spatial partitioning,
+            // or Web Workers for parallel computation.
+            if (stable || nodes.size === 0 || nodes.size > 500) return;
 
             const dt = Math.min(deltaTime, 50) / 1000;
             const force = new Map<string, THREE.Vector3>();

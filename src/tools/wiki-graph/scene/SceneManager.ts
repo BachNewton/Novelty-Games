@@ -3,6 +3,8 @@ import { OrbitControls } from 'three/examples/jsm/Addons';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer';
 import Stats from 'three/examples/jsm/libs/stats.module';
 
+export const DEFAULT_CAMERA_DISTANCE = 30;
+
 export interface SceneComponents {
     scene: THREE.Scene;
     camera: THREE.PerspectiveCamera;
@@ -30,7 +32,7 @@ export function createSceneManager(container: HTMLDivElement): SceneManager {
         0.1,
         10000
     );
-    camera.position.set(0, 0, 30);
+    camera.position.set(0, 0, DEFAULT_CAMERA_DISTANCE);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);

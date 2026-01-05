@@ -1,17 +1,68 @@
-import { useRef, useState, useMemo, useCallback } from 'react';
+import React, { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
 import { ArticleNode, ArticleLink } from '../data/Article';
-import { createWikiCrawler } from '../logic/WikiCrawler';
+import { createWikiCrawler, DEFAULT_LINK_LIMIT, DEFAULT_MAX_DEPTH } from '../logic/WikiCrawler';
 import { createForceSimulation } from '../logic/ForceSimulation';
 import { createCategoryTracker } from '../logic/CategoryTracker';
 import { createCameraAnimator, CameraAnimator } from '../logic/CameraAnimator';
 import { createNodeFactory, LoadingIndicator } from '../scene/NodeFactory';
-import { createLinkFactory } from '../scene/LinkFactory';
+import { createInstancedNodeManager } from '../scene/InstancedNodeManager';
+import { createInstancedLinkManager } from '../scene/InstancedLinkManager';
+import { DEFAULT_CAMERA_DISTANCE } from '../scene/SceneManager';
 import { useThreeScene } from '../hooks/useThreeScene';
 import { useAnimationLoop } from '../hooks/useAnimationLoop';
 import { useMouseInteraction } from '../hooks/useMouseInteraction';
 import { useCrawlerSubscriptions } from '../hooks/useCrawlerSubscriptions';
 import ProgressPanel from './ProgressPanel';
+
+interface ErrorBoundaryState {
+    error: Error | null;
+}
+
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, ErrorBoundaryState> {
+    state: ErrorBoundaryState = { error: null };
+
+    static getDerivedStateFromError(error: Error) {
+        return { error };
+    }
+
+    render() {
+        if (this.state.error) {
+            return (
+                <div style={{
+                    width: '100%',
+                    height: '100vh',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#1a1a2e',
+                    color: 'white',
+                    fontFamily: 'monospace',
+                    padding: '20px',
+                    boxSizing: 'border-box'
+                }}>
+                    <div style={{
+                        maxWidth: '600px',
+                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                        border: '1px solid #ff4444',
+                        borderRadius: '8px',
+                        padding: '20px'
+                    }}>
+                        <h2 style={{ color: '#ff4444', marginTop: 0 }}>Error</h2>
+                        <pre style={{
+                            whiteSpace: 'pre-wrap',
+                            wordBreak: 'break-word',
+                            margin: 0
+                        }}>
+                            {this.state.error.message}
+                        </pre>
+                    </div>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
 
 const START_ARTICLE = 'Finland';
 
@@ -38,36 +89,51 @@ const Home: React.FC = () => {
     const [linkCount, setLinkCount] = useState(0);
     const [fetchingCount, setFetchingCount] = useState(0);
     const [pendingQueueSize, setPendingQueueSize] = useState(0);
-    const [linkLimit, setLinkLimit] = useState(4);
-    const [maxDepth, setMaxDepth] = useState(1);
+    const [linkLimit, setLinkLimit] = useState(DEFAULT_LINK_LIMIT);
+    const [maxDepth, setMaxDepth] = useState(DEFAULT_MAX_DEPTH);
     const [selectedArticle, setSelectedArticle] = useState<string | null>(START_ARTICLE);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [error, setError] = useState<Error | null>(null);
+
 
     // Logic instances
     const crawler = useMemo(() => createWikiCrawler(), []);
     const simulation = useMemo(() => createForceSimulation(), []);
     const categoryTracker = useMemo(() => createCategoryTracker(), []);
     const nodeFactory = useMemo(() => createNodeFactory(), []);
-    const linkFactory = useMemo(() => createLinkFactory(), []);
+    const nodeManager = useMemo(() => createInstancedNodeManager(), []);
+    const linkManager = useMemo(() => createInstancedLinkManager(), []);
 
     // Scene setup
     const { sceneManager, isReady } = useThreeScene(containerRef);
 
-    // Initialize camera animator when scene is ready
-    useMemo(() => {
+    // Initialize camera animator and add instanced meshes when scene is ready
+    useEffect(() => {
         if (isReady && sceneManager) {
-            const { camera, controls } = sceneManager.getComponents();
+            const { scene, camera, controls } = sceneManager.getComponents();
             cameraAnimatorRef.current = createCameraAnimator(camera, controls);
+
+            // Add instanced node meshes to scene
+            for (const mesh of nodeManager.getMeshes()) {
+                scene.add(mesh);
+            }
+
+            // Add instanced link meshes to scene
+            for (const mesh of linkManager.getMeshes()) {
+                scene.add(mesh);
+            }
         }
-    }, [isReady, sceneManager]);
+    }, [isReady, sceneManager, nodeManager, linkManager]);
 
     // Stats label management
     const updateStatsLabel = useCallback((title: string | null) => {
         if (!sceneManager) return;
 
+        const { scene } = sceneManager.getComponents();
+
         // Remove existing stats label
         if (statsLabelRef.current) {
-            statsLabelRef.current.parent?.remove(statsLabelRef.current);
+            scene.remove(statsLabelRef.current);
             statsLabelRef.current.element.remove();
             statsLabelRef.current = null;
         }
@@ -101,10 +167,10 @@ const Home: React.FC = () => {
         statsDiv.style.whiteSpace = 'nowrap';
 
         const statsLabel = new CSS2DObject(statsDiv);
-        statsLabel.position.set(0, 1.1, 0);
-
+        // Position in world space (will be updated in animation loop)
         if (node) {
-            node.mesh.add(statsLabel);
+            statsLabel.position.set(node.position.x, node.position.y + 1.1, node.position.z);
+            scene.add(statsLabel);
         }
         statsLabelRef.current = statsLabel;
     }, [sceneManager]);
@@ -136,7 +202,7 @@ const Home: React.FC = () => {
     // Mouse interaction
     useMouseInteraction({
         sceneManager,
-        nodeFactory,
+        nodeManager,
         articlesRef,
         onArticleClick: handleArticleClick
     });
@@ -148,7 +214,8 @@ const Home: React.FC = () => {
         simulation,
         categoryTracker,
         nodeFactory,
-        linkFactory,
+        nodeManager,
+        linkManager,
         articlesRef,
         linksRef,
         pendingLinksRef,
@@ -160,6 +227,7 @@ const Home: React.FC = () => {
         setFetchingCount,
         setPendingQueueSize,
         updateStatsLabel,
+        onError: setError,
         startArticle: START_ARTICLE
     });
 
@@ -169,10 +237,16 @@ const Home: React.FC = () => {
         simulation,
         cameraAnimator: cameraAnimatorRef.current,
         nodeFactory,
-        linkFactory,
+        nodeManager,
+        linkManager,
         articlesRef,
         linksRef,
-        loadingIndicatorsRef
+        loadingIndicatorsRef,
+        statsLabelRef,
+        selectedArticleRef,
+        fogDensity: 0.1,
+        baseDistance: DEFAULT_CAMERA_DISTANCE,
+        labelScaleFactor: 1
     });
 
     // UI handlers
@@ -201,8 +275,47 @@ const Home: React.FC = () => {
                 onLinkLimitChange={handleLinkLimitChange}
                 onMaxDepthChange={handleMaxDepthChange}
             />
+            {error && (
+                <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        maxWidth: '600px',
+                        backgroundColor: '#1a1a2e',
+                        border: '1px solid #ff4444',
+                        borderRadius: '8px',
+                        padding: '20px',
+                        color: 'white',
+                        fontFamily: 'monospace'
+                    }}>
+                        <h2 style={{ color: '#ff4444', marginTop: 0 }}>Error</h2>
+                        <pre style={{
+                            whiteSpace: 'pre-wrap',
+                            wordBreak: 'break-word',
+                            margin: 0
+                        }}>
+                            {error.message}
+                        </pre>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
-export default Home;
+const HomeWithErrorBoundary: React.FC = () => (
+    <ErrorBoundary>
+        <Home />
+    </ErrorBoundary>
+);
+
+export default HomeWithErrorBoundary;

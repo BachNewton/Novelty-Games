@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
+import { NodeType } from '../scene/InstancedNodeManager';
 
 export interface WikiArticle {
     title: string;       // Exactly as Wikipedia returns it
@@ -10,9 +12,13 @@ export interface WikiArticle {
     leaf?: boolean;      // True if this is a leaf node (not yet fetched, just a placeholder)
 }
 
+export type LinkType = 'directional' | 'bidirectional';
+
 export interface ArticleNode {
     article: WikiArticle;
-    mesh: THREE.Mesh;
+    instanceIndex: number;
+    instanceType: NodeType;
+    label: CSS2DObject;
     position: THREE.Vector3;
     velocity: THREE.Vector3;
 }
@@ -20,7 +26,8 @@ export interface ArticleNode {
 export interface ArticleLink {
     source: string;
     target: string;
-    line: THREE.Mesh;
+    instanceIndex: number;
+    linkType: 'directional' | 'bidirectional';
 }
 
 export interface CrawlState {

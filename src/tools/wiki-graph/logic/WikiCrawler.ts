@@ -62,6 +62,9 @@ function shuffleArray<T>(array: T[]): T[] {
     return shuffled;
 }
 
+export const DEFAULT_LINK_LIMIT = 4;
+export const DEFAULT_MAX_DEPTH = 1;
+
 export function createWikiCrawler(): WikiCrawler {
     // Article state tracking:
     // - articles: Already fetched articles (title -> article)
@@ -81,8 +84,8 @@ export function createWikiCrawler(): WikiCrawler {
     let currentBatchSize = 0;
 
     // Configuration
-    let linkLimit = 4;
-    let maxDepth = 1;
+    let linkLimit = DEFAULT_LINK_LIMIT;
+    let maxDepth = DEFAULT_MAX_DEPTH;
 
     // Event callbacks
     const articleCallbacks: Array<(article: WikiArticle) => void> = [];
