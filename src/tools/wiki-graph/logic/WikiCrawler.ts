@@ -62,26 +62,49 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 export function createWikiCrawler(): WikiCrawler {
+    // Article state tracking:
+    // - articles: Already fetched articles (canonical title -> article)
+    // - inFlight: Currently being fetched (prevents duplicate requests, handles React StrictMode double-mount)
+    // - pendingQueue: Waiting to be fetched
     const articles = new Map<string, WikiArticle>();
-    const links = new Set<string>();
-    const inFlight = new Set<string>(); // Articles currently being fetched
+    const inFlight = new Set<string>();
     let pendingQueue: QueueItem[] = [];
+
+    // Link tracking (prevents duplicate link reports)
+    const links = new Set<string>();
+
+    // Crawler state
     let running = false;
     let activeRequests = 0;
     let lastRequestTime = 0;
+    let currentBatchSize = 0;
+
+    // Configuration
     let linkLimit = 4;
     let maxDepth = 1;
 
+    // Event callbacks
     const articleCallbacks: Array<(article: WikiArticle) => void> = [];
     const linkCallbacks: Array<(source: string, target: string) => void> = [];
     const requestCallbacks: Array<(activeCount: number, batchSize: number) => void> = [];
     const linksQueuedCallbacks: Array<(sourceTitle: string, queuedTitles: string[]) => void> = [];
     const fetchFailedCallbacks: Array<(failedTitles: string[]) => void> = [];
     const fetchProgressCallbacks: Array<(title: string, linkCount: number, isComplete: boolean) => void> = [];
-    let currentBatchSize = 0;
 
     function normalizeTitle(title: string): string {
         return title.replace(/_/g, ' ');
+    }
+
+    function isAlreadyTracked(normalizedTitle: string): boolean {
+        return articles.has(normalizedTitle) || inFlight.has(normalizedTitle);
+    }
+
+    function isInPendingQueue(normalizedTitle: string): boolean {
+        return pendingQueue.some(q => normalizeTitle(q.title) === normalizedTitle);
+    }
+
+    function shouldQueueArticle(normalizedTitle: string): boolean {
+        return !isAlreadyTracked(normalizedTitle) && !isInPendingQueue(normalizedTitle);
     }
 
     async function waitForRateLimit(): Promise<void> {
@@ -222,16 +245,19 @@ export function createWikiCrawler(): WikiCrawler {
 
     async function processQueue(): Promise<void> {
         while (running) {
-            // Build a batch of items to fetch from the queue
+            // Build a batch of items to fetch (skip already-fetched articles)
             const batch: QueueItem[] = [];
-            const seen = new Set<string>();
+            const seenInBatch = new Set<string>();
 
             while (batch.length < BATCH_SIZE && pendingQueue.length > 0) {
                 const item = pendingQueue.shift()!;
                 const normalized = normalizeTitle(item.title);
-                if (!articles.has(normalized) && !seen.has(normalized)) {
+                const alreadyFetched = articles.has(normalized);
+                const duplicateInBatch = seenInBatch.has(normalized);
+
+                if (!alreadyFetched && !duplicateInBatch) {
                     batch.push(item);
-                    seen.add(normalized);
+                    seenInBatch.add(normalized);
                 }
             }
 
@@ -266,13 +292,16 @@ export function createWikiCrawler(): WikiCrawler {
                     fetchedTitles.add(from);
                 }
 
-                // Now that pagination is complete, queue links for each article
+                // Queue child links for BFS continuation
                 for (const article of fetched) {
-                    // Randomly select limited links
                     const selectedLinks = shuffleArray(article.links).slice(0, linkLimit);
 
-                    // Only add links to queue if we haven't reached max depth
-                    if (article.depth < maxDepth) {
+                    // BFS depth check: only queue children if we haven't reached maxDepth
+                    // Children are queued at (parent.depth + 1), so they'll be fetched
+                    // and their children queued at (parent.depth + 2), etc.
+                    const shouldQueueChildren = article.depth < maxDepth;
+
+                    if (shouldQueueChildren) {
                         const queuedLinks: string[] = [];
                         for (const linkTitle of selectedLinks) {
                             const linkKey = `${article.title}|${linkTitle}`;
@@ -281,9 +310,7 @@ export function createWikiCrawler(): WikiCrawler {
                                 linkCallbacks.forEach(cb => cb(article.title, linkTitle));
 
                                 const normalizedLink = normalizeTitle(linkTitle);
-                                const inPending = pendingQueue.some(q => normalizeTitle(q.title) === normalizedLink);
-
-                                if (!articles.has(normalizedLink) && !inPending) {
+                                if (shouldQueueArticle(normalizedLink)) {
                                     pendingQueue.push({ title: linkTitle, depth: article.depth + 1 });
                                     queuedLinks.push(normalizedLink);
                                 }
@@ -293,7 +320,7 @@ export function createWikiCrawler(): WikiCrawler {
                             linksQueuedCallbacks.forEach(cb => cb(article.title, queuedLinks));
                         }
                     } else {
-                        // Still report links for visualization, but don't queue them
+                        // At max depth: report links for visualization only, don't queue
                         for (const linkTitle of selectedLinks) {
                             const linkKey = `${article.title}|${linkTitle}`;
                             if (!links.has(linkKey)) {
@@ -324,8 +351,8 @@ export function createWikiCrawler(): WikiCrawler {
         start: (startTitle) => {
             const normalized = normalizeTitle(startTitle);
 
-            // If already fetched or currently being fetched, just resume if stopped
-            if (articles.has(normalized) || inFlight.has(normalized)) {
+            // Prevent duplicate fetches (handles React StrictMode double-mount)
+            if (isAlreadyTracked(normalized)) {
                 if (!running) {
                     running = true;
                     processQueue();
@@ -333,6 +360,7 @@ export function createWikiCrawler(): WikiCrawler {
                 return;
             }
 
+            // Start fresh BFS from this article at depth 0
             pendingQueue = [{ title: normalized, depth: 0 }];
             running = true;
             processQueue();
@@ -351,46 +379,45 @@ export function createWikiCrawler(): WikiCrawler {
 
         expand: (title) => {
             const article = articles.get(normalizeTitle(title));
-            if (article) {
-                // Find links whose targets haven't been fetched yet
-                const unfetchedLinks = article.links.filter(linkTitle => {
-                    const normalizedLink = normalizeTitle(linkTitle);
-                    return !articles.has(normalizedLink);
-                });
+            if (!article) return;
 
-                // Randomly select limited links from unfetched ones
-                const selectedLinks = shuffleArray(unfetchedLinks).slice(0, linkLimit);
+            // Find unfetched links from this article
+            const unfetchedLinks = article.links.filter(linkTitle => {
+                return !isAlreadyTracked(normalizeTitle(linkTitle));
+            });
 
-                const queuedLinks: string[] = [];
-                for (const linkTitle of selectedLinks) {
-                    const normalizedLink = normalizeTitle(linkTitle);
-                    const inPending = pendingQueue.some(q => normalizeTitle(q.title) === normalizedLink);
+            const selectedLinks = shuffleArray(unfetchedLinks).slice(0, linkLimit);
+            const queuedLinks: string[] = [];
 
-                    // Report the link (creates line when target is fetched)
-                    const linkKey = `${article.title}|${linkTitle}`;
-                    if (!links.has(linkKey)) {
-                        links.add(linkKey);
-                        linkCallbacks.forEach(cb => cb(article.title, linkTitle));
-                    }
+            for (const linkTitle of selectedLinks) {
+                const normalizedLink = normalizeTitle(linkTitle);
 
-                    if (!inPending) {
-                        pendingQueue.push({ title: linkTitle, depth: article.depth + 1 });
-                        queuedLinks.push(normalizedLink);
-                    }
+                // Report link for visualization
+                const linkKey = `${article.title}|${linkTitle}`;
+                if (!links.has(linkKey)) {
+                    links.add(linkKey);
+                    linkCallbacks.forEach(cb => cb(article.title, linkTitle));
                 }
 
-                if (queuedLinks.length > 0) {
-                    linksQueuedCallbacks.forEach(cb => cb(article.title, queuedLinks));
+                // Queue at depth 1: clicking any node starts a fresh BFS from that point
+                // This means maxDepth controls how many levels deep we go from the clicked node
+                if (shouldQueueArticle(normalizedLink)) {
+                    pendingQueue.push({ title: linkTitle, depth: 1 });
+                    queuedLinks.push(normalizedLink);
                 }
+            }
 
-                // Trigger request state change to update UI
-                requestCallbacks.forEach(cb => cb(activeRequests, currentBatchSize));
+            if (queuedLinks.length > 0) {
+                linksQueuedCallbacks.forEach(cb => cb(article.title, queuedLinks));
+            }
 
-                // Ensure crawler is running to process the queue
-                if (!running && pendingQueue.length > 0) {
-                    running = true;
-                    processQueue();
-                }
+            // Trigger request state change to update UI
+            requestCallbacks.forEach(cb => cb(activeRequests, currentBatchSize));
+
+            // Ensure crawler is running to process the queue
+            if (!running && pendingQueue.length > 0) {
+                running = true;
+                processQueue();
             }
         },
 

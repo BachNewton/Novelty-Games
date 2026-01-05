@@ -40,6 +40,24 @@ export function createCategoryTracker(): CategoryTracker {
         return categoryColorIndex.get(category)!;
     }
 
+    function findBestCategory(title: string): string | null {
+        const categories = articleCategories.get(title);
+        if (!categories || categories.length === 0) return null;
+
+        let bestCategory = categories[0];
+        let bestCount = 0;
+
+        for (const category of categories) {
+            const count = categoryArticles.get(category)?.size ?? 0;
+            if (count > bestCount) {
+                bestCount = count;
+                bestCategory = category;
+            }
+        }
+
+        return bestCategory;
+    }
+
     return {
         registerArticle: (title, categories) => {
             if (articleCategories.has(title)) return;
@@ -54,23 +72,7 @@ export function createCategoryTracker(): CategoryTracker {
             }
         },
 
-        getOptimalCategory: (title) => {
-            const categories = articleCategories.get(title);
-            if (!categories || categories.length === 0) return null;
-
-            let bestCategory = categories[0];
-            let bestCount = 0;
-
-            for (const category of categories) {
-                const count = categoryArticles.get(category)?.size ?? 0;
-                if (count > bestCount) {
-                    bestCount = count;
-                    bestCategory = category;
-                }
-            }
-
-            return bestCategory;
-        },
+        getOptimalCategory: (title) => findBestCategory(title),
 
         getCategoryColor: (category) => {
             if (!category) return 0x888888;
@@ -79,20 +81,8 @@ export function createCategoryTracker(): CategoryTracker {
         },
 
         getArticleColor: (title) => {
-            const categories = articleCategories.get(title);
-            if (!categories || categories.length === 0) return 0x888888;
-
-            let bestCategory = categories[0];
-            let bestCount = 0;
-
-            for (const category of categories) {
-                const count = categoryArticles.get(category)?.size ?? 0;
-                if (count > bestCount) {
-                    bestCount = count;
-                    bestCategory = category;
-                }
-            }
-
+            const bestCategory = findBestCategory(title);
+            if (!bestCategory) return 0x888888;
             const colorIndex = assignColorToCategory(bestCategory);
             return COLOR_PALETTE[colorIndex];
         },
