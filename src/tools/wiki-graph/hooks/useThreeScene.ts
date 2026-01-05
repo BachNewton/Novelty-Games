@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState, RefObject } from 'react';
 import { createSceneManager, SceneManager } from '../scene/SceneManager';
-import { ArticleLink } from '../data/Article';
 
 export function useThreeScene(
-    containerRef: RefObject<HTMLDivElement | null>,
-    linksRef: RefObject<ArticleLink[]>
+    containerRef: RefObject<HTMLDivElement | null>
 ): { sceneManager: SceneManager | null; isReady: boolean } {
     const sceneManagerRef = useRef<SceneManager | null>(null);
     const [isReady, setIsReady] = useState(false);
@@ -17,7 +15,7 @@ export function useThreeScene(
         setIsReady(true);
 
         function onWindowResize() {
-            manager.handleResize(linksRef.current!);
+            manager.handleResize();
         }
 
         window.addEventListener('resize', onWindowResize);
@@ -28,7 +26,7 @@ export function useThreeScene(
             sceneManagerRef.current = null;
             setIsReady(false);
         };
-    }, [containerRef, linksRef]);
+    }, [containerRef]);
 
     return { sceneManager: sceneManagerRef.current, isReady };
 }

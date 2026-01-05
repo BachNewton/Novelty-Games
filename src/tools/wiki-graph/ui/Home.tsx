@@ -52,7 +52,7 @@ const Home: React.FC = () => {
     const linkFactory = useMemo(() => createLinkFactory(), []);
 
     // Scene setup
-    const { sceneManager, isReady } = useThreeScene(containerRef, linksRef);
+    const { sceneManager, isReady } = useThreeScene(containerRef);
 
     // Initialize camera animator when scene is ready
     useMemo(() => {

@@ -15,24 +15,30 @@ export interface NodeFactory {
     rotateIndicator: (ring: THREE.Mesh, deltaTime: number) => void;
 }
 
+const MISSING_COLOR = 0x666666;  // Grey for missing articles
+
 export function createNodeFactory(): NodeFactory {
     const baseDistance = 30;
     const fogDensity = 0.003;
 
     return {
         createNode: (article, color) => {
-            const geometry = new THREE.SphereGeometry(0.4, 16, 16);
+            // Missing articles: grey box. Normal articles: colored sphere
+            const isMissing = article.missing === true;
+            const geometry = isMissing
+                ? new THREE.BoxGeometry(0.5, 0.5, 0.5)
+                : new THREE.SphereGeometry(0.4, 16, 16);
             const material = new THREE.MeshStandardMaterial({
-                color,
+                color: isMissing ? MISSING_COLOR : color,
                 roughness: 0.5,
                 metalness: 0.3
             });
             const mesh = new THREE.Mesh(geometry, material);
-            mesh.userData = { title: article.title };
+            mesh.userData = { title: article.title, missing: isMissing };
 
             const labelDiv = document.createElement('div');
             labelDiv.textContent = article.title;
-            labelDiv.style.color = 'white';
+            labelDiv.style.color = isMissing ? '#999999' : 'white';
             labelDiv.style.fontSize = '12px';
             labelDiv.style.fontFamily = 'sans-serif';
             labelDiv.style.textShadow = '1px 1px 2px black';

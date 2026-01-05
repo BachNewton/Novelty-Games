@@ -63,7 +63,7 @@ function shuffleArray<T>(array: T[]): T[] {
 
 export function createWikiCrawler(): WikiCrawler {
     // Article state tracking:
-    // - articles: Already fetched articles (canonical title -> article)
+    // - articles: Already fetched articles (title -> article)
     // - inFlight: Currently being fetched (prevents duplicate requests, handles React StrictMode double-mount)
     // - pendingQueue: Waiting to be fetched
     const articles = new Map<string, WikiArticle>();
@@ -91,20 +91,16 @@ export function createWikiCrawler(): WikiCrawler {
     const fetchFailedCallbacks: Array<(failedTitles: string[]) => void> = [];
     const fetchProgressCallbacks: Array<(title: string, linkCount: number, isComplete: boolean) => void> = [];
 
-    function normalizeTitle(title: string): string {
-        return title.replace(/_/g, ' ');
+    function isAlreadyTracked(title: string): boolean {
+        return articles.has(title) || inFlight.has(title);
     }
 
-    function isAlreadyTracked(normalizedTitle: string): boolean {
-        return articles.has(normalizedTitle) || inFlight.has(normalizedTitle);
+    function isInPendingQueue(title: string): boolean {
+        return pendingQueue.some(q => q.title === title);
     }
 
-    function isInPendingQueue(normalizedTitle: string): boolean {
-        return pendingQueue.some(q => normalizeTitle(q.title) === normalizedTitle);
-    }
-
-    function shouldQueueArticle(normalizedTitle: string): boolean {
-        return !isAlreadyTracked(normalizedTitle) && !isInPendingQueue(normalizedTitle);
+    function shouldQueueArticle(title: string): boolean {
+        return !isAlreadyTracked(title) && !isInPendingQueue(title);
     }
 
     async function waitForRateLimit(): Promise<void> {
@@ -152,7 +148,7 @@ export function createWikiCrawler(): WikiCrawler {
                 // Parse redirects (only on first request)
                 if (isFirstPage && data.query?.redirects) {
                     for (const redirect of data.query.redirects) {
-                        redirectMap.set(normalizeTitle(redirect.from), normalizeTitle(redirect.to));
+                        redirectMap.set(redirect.from, redirect.to);
                     }
                 }
 
@@ -169,12 +165,12 @@ export function createWikiCrawler(): WikiCrawler {
                     for (const page of Object.values(data.query.pages)) {
                         if ('missing' in page) continue;
 
-                        const title = normalizeTitle(page.title);
+                        const title = page.title;
                         const existing = articleMap.get(title);
 
                         if (existing) {
                             // Merge links from continuation
-                            const newLinks = (page.links ?? []).map(l => normalizeTitle(l.title));
+                            const newLinks = (page.links ?? []).map(l => l.title);
                             existing.links.push(...newLinks);
                             // Merge categories
                             const newCategories = (page.categories ?? []).map(c => c.title.replace('Category:', ''));
@@ -199,7 +195,7 @@ export function createWikiCrawler(): WikiCrawler {
                             const article: WikiArticle = {
                                 title,
                                 categories: (page.categories ?? []).map(c => c.title.replace('Category:', '')),
-                                links: (page.links ?? []).map(l => normalizeTitle(l.title)),
+                                links: (page.links ?? []).map(l => l.title),
                                 depth: articleDepth,
                                 aliases: redirectSources.length > 0 ? redirectSources : undefined
                             };
@@ -251,13 +247,12 @@ export function createWikiCrawler(): WikiCrawler {
 
             while (batch.length < BATCH_SIZE && pendingQueue.length > 0) {
                 const item = pendingQueue.shift()!;
-                const normalized = normalizeTitle(item.title);
-                const alreadyFetched = articles.has(normalized);
-                const duplicateInBatch = seenInBatch.has(normalized);
+                const alreadyFetched = articles.has(item.title);
+                const duplicateInBatch = seenInBatch.has(item.title);
 
                 if (!alreadyFetched && !duplicateInBatch) {
                     batch.push(item);
-                    seenInBatch.add(normalized);
+                    seenInBatch.add(item.title);
                 }
             }
 
@@ -268,18 +263,18 @@ export function createWikiCrawler(): WikiCrawler {
 
             try {
                 const titles = batch.map(item => item.title);
-                const depthMap = new Map(batch.map(item => [normalizeTitle(item.title), item.depth]));
+                const depthMap = new Map(batch.map(item => [item.title, item.depth]));
 
                 // Mark as in-flight before fetching
                 for (const title of titles) {
-                    inFlight.add(normalizeTitle(title));
+                    inFlight.add(title);
                 }
 
                 const { articles: fetched, redirects } = await fetchArticles(titles, depthMap);
 
                 // Remove from in-flight after fetching
                 for (const title of titles) {
-                    inFlight.delete(normalizeTitle(title));
+                    inFlight.delete(title);
                 }
 
                 // Track which requested titles were successfully fetched
@@ -297,8 +292,6 @@ export function createWikiCrawler(): WikiCrawler {
                     const selectedLinks = shuffleArray(article.links).slice(0, linkLimit);
 
                     // BFS depth check: only queue children if we haven't reached maxDepth
-                    // Children are queued at (parent.depth + 1), so they'll be fetched
-                    // and their children queued at (parent.depth + 2), etc.
                     const shouldQueueChildren = article.depth < maxDepth;
 
                     if (shouldQueueChildren) {
@@ -309,10 +302,9 @@ export function createWikiCrawler(): WikiCrawler {
                                 links.add(linkKey);
                                 linkCallbacks.forEach(cb => cb(article.title, linkTitle));
 
-                                const normalizedLink = normalizeTitle(linkTitle);
-                                if (shouldQueueArticle(normalizedLink)) {
+                                if (shouldQueueArticle(linkTitle)) {
                                     pendingQueue.push({ title: linkTitle, depth: article.depth + 1 });
-                                    queuedLinks.push(normalizedLink);
+                                    queuedLinks.push(linkTitle);
                                 }
                             }
                         }
@@ -331,16 +323,26 @@ export function createWikiCrawler(): WikiCrawler {
                     }
                 }
 
-                // Report any missing articles (requested but not returned by API)
-                const missingTitles = batch
-                    .map(item => normalizeTitle(item.title))
-                    .filter(title => !fetchedTitles.has(title));
-                if (missingTitles.length > 0) {
+                // Create placeholder nodes for missing articles (requested but not returned by API)
+                const missingItems = batch.filter(item => !fetchedTitles.has(item.title));
+                for (const item of missingItems) {
+                    const placeholderArticle: WikiArticle = {
+                        title: item.title,
+                        categories: [],
+                        links: [],
+                        depth: item.depth,
+                        missing: true
+                    };
+                    articles.set(item.title, placeholderArticle);
+                    articleCallbacks.forEach(cb => cb(placeholderArticle));
+                }
+                if (missingItems.length > 0) {
+                    const missingTitles = missingItems.map(item => item.title);
                     console.warn(`Missing Wikipedia articles: [${missingTitles.join(', ')}]`);
                     fetchFailedCallbacks.forEach(cb => cb(missingTitles));
                 }
             } catch (error) {
-                const failedTitles = batch.map(item => normalizeTitle(item.title));
+                const failedTitles = batch.map(item => item.title);
                 console.error(`Failed to fetch batch [${failedTitles.join(', ')}]:`, error);
                 fetchFailedCallbacks.forEach(cb => cb(failedTitles));
             }
@@ -349,10 +351,8 @@ export function createWikiCrawler(): WikiCrawler {
 
     return {
         start: (startTitle) => {
-            const normalized = normalizeTitle(startTitle);
-
             // Prevent duplicate fetches (handles React StrictMode double-mount)
-            if (isAlreadyTracked(normalized)) {
+            if (isAlreadyTracked(startTitle)) {
                 if (!running) {
                     running = true;
                     processQueue();
@@ -361,7 +361,7 @@ export function createWikiCrawler(): WikiCrawler {
             }
 
             // Start fresh BFS from this article at depth 0
-            pendingQueue = [{ title: normalized, depth: 0 }];
+            pendingQueue = [{ title: startTitle, depth: 0 }];
             running = true;
             processQueue();
         },
@@ -378,21 +378,18 @@ export function createWikiCrawler(): WikiCrawler {
         },
 
         expand: (title) => {
-            const article = articles.get(normalizeTitle(title));
+            const article = articles.get(title);
             if (!article) return;
 
             // Find unfetched links from this article
             const unfetchedLinks = article.links.filter(linkTitle => {
-                return !isAlreadyTracked(normalizeTitle(linkTitle));
+                return !isAlreadyTracked(linkTitle);
             });
 
             const selectedLinks = shuffleArray(unfetchedLinks).slice(0, linkLimit);
             const queuedLinks: string[] = [];
 
             for (const linkTitle of selectedLinks) {
-                const normalizedLink = normalizeTitle(linkTitle);
-
-                // Report link for visualization
                 const linkKey = `${article.title}|${linkTitle}`;
                 if (!links.has(linkKey)) {
                     links.add(linkKey);
@@ -400,10 +397,9 @@ export function createWikiCrawler(): WikiCrawler {
                 }
 
                 // Queue at depth 1: clicking any node starts a fresh BFS from that point
-                // This means maxDepth controls how many levels deep we go from the clicked node
-                if (shouldQueueArticle(normalizedLink)) {
+                if (shouldQueueArticle(linkTitle)) {
                     pendingQueue.push({ title: linkTitle, depth: 1 });
-                    queuedLinks.push(normalizedLink);
+                    queuedLinks.push(linkTitle);
                 }
             }
 

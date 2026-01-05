@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { Line2 } from 'three/examples/jsm/lines/Line2';
 
 export interface WikiArticle {
-    title: string;
+    title: string;       // Exactly as Wikipedia returns it
     categories: string[];
     links: string[];
     depth: number;
     aliases?: string[];  // Redirect source titles that point to this article
+    missing?: boolean;   // True if Wikipedia API didn't return this article
 }
 
 export interface ArticleNode {
@@ -19,7 +19,7 @@ export interface ArticleNode {
 export interface ArticleLink {
     source: string;
     target: string;
-    line: Line2;
+    line: THREE.Mesh;
 }
 
 export interface CrawlState {

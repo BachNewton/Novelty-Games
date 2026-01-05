@@ -1,9 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer';
-import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
 import Stats from 'three/examples/jsm/libs/stats.module';
-import { ArticleLink } from '../data/Article';
 
 export interface SceneComponents {
     scene: THREE.Scene;
@@ -18,7 +16,7 @@ export interface SceneComponents {
 
 export interface SceneManager {
     getComponents: () => SceneComponents;
-    handleResize: (links: ArticleLink[]) => void;
+    handleResize: () => void;
     dispose: () => void;
 }
 
@@ -72,16 +70,11 @@ export function createSceneManager(container: HTMLDivElement): SceneManager {
     return {
         getComponents: () => components,
 
-        handleResize: (links) => {
+        handleResize: () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
             labelRenderer.setSize(window.innerWidth, window.innerHeight);
-
-            for (const link of links) {
-                const material = link.line.material as LineMaterial;
-                material.resolution.set(window.innerWidth, window.innerHeight);
-            }
         },
 
         dispose: () => {
