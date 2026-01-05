@@ -9,6 +9,15 @@ const SOURCE_RADIUS = 0.015;
 const TARGET_RADIUS = 0.03;
 const RADIAL_SEGMENTS = 6;
 
+function applyUniformColor(geometry: THREE.BufferGeometry, color: THREE.Color) {
+    const colors: number[] = [];
+    const positions = geometry.attributes.position;
+    for (let i = 0; i < positions.count; i++) {
+        colors.push(color.r, color.g, color.b);
+    }
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+}
+
 export interface LinkFactory {
     createLink: (isBidirectional: boolean) => THREE.Mesh;
     updateLinkPositions: (link: THREE.Mesh, sourcePos: THREE.Vector3, targetPos: THREE.Vector3) => void;
@@ -70,14 +79,8 @@ export function createLinkFactory(): LinkFactory {
         createLink: (isBidirectional) => {
             const geometry = createTaperedGeometry();
 
-            // Override colors if bidirectional
             if (isBidirectional) {
-                const colors: number[] = [];
-                const positions = geometry.attributes.position;
-                for (let i = 0; i < positions.count; i++) {
-                    colors.push(BIDIRECTIONAL_COLOR.r, BIDIRECTIONAL_COLOR.g, BIDIRECTIONAL_COLOR.b);
-                }
-                geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+                applyUniformColor(geometry, BIDIRECTIONAL_COLOR);
             }
 
             const material = createTaperedMaterial();
@@ -109,16 +112,7 @@ export function createLinkFactory(): LinkFactory {
 
         setBidirectional: (link) => {
             link.userData.isBidirectional = true;
-
-            const geometry = link.geometry as THREE.CylinderGeometry;
-            const colors: number[] = [];
-            const positions = geometry.attributes.position;
-
-            for (let i = 0; i < positions.count; i++) {
-                colors.push(BIDIRECTIONAL_COLOR.r, BIDIRECTIONAL_COLOR.g, BIDIRECTIONAL_COLOR.b);
-            }
-
-            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            applyUniformColor(link.geometry, BIDIRECTIONAL_COLOR);
         }
     };
 }

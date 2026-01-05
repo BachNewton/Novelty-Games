@@ -11,6 +11,11 @@ interface MouseInteractionDeps {
     onArticleClick: (title: string) => void;
 }
 
+function updateMouseFromEvent(event: MouseEvent | PointerEvent, mouse: THREE.Vector2) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+}
+
 export function useMouseInteraction(deps: MouseInteractionDeps): void {
     const hoveredMeshRef = useRef<THREE.Mesh | null>(null);
 
@@ -26,9 +31,7 @@ export function useMouseInteraction(deps: MouseInteractionDeps): void {
         }
 
         function onPointerDown(event: PointerEvent) {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
+            updateMouseFromEvent(event, mouse);
             raycaster.setFromCamera(mouse, camera);
 
             const intersects = raycaster.intersectObjects(getMeshes(), false);
@@ -40,9 +43,7 @@ export function useMouseInteraction(deps: MouseInteractionDeps): void {
         }
 
         function onMouseMove(event: MouseEvent) {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
+            updateMouseFromEvent(event, mouse);
             raycaster.setFromCamera(mouse, camera);
 
             const intersects = raycaster.intersectObjects(getMeshes(), false);

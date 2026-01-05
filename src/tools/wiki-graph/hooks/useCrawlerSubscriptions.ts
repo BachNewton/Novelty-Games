@@ -13,6 +13,53 @@ interface LinkCount {
     isComplete: boolean;
 }
 
+interface ExistingNodeResult {
+    node: ArticleNode;
+    aliasTitle: string | null;
+}
+
+function findNodeByTitleOrAlias(
+    articles: Map<string, ArticleNode>,
+    title: string,
+    aliases?: string[]
+): ExistingNodeResult | null {
+    const direct = articles.get(title);
+    if (direct) return { node: direct, aliasTitle: null };
+
+    if (!aliases) return null;
+
+    for (const alias of aliases) {
+        const node = articles.get(alias);
+        if (node?.article.leaf) {
+            return { node, aliasTitle: alias };
+        }
+    }
+    return null;
+}
+
+function disposeIndicator(scene: THREE.Scene, indicator: LoadingIndicator) {
+    scene.remove(indicator.ring);
+    indicator.ring.geometry.dispose();
+    (indicator.ring.material as THREE.Material).dispose();
+}
+
+function resolvePendingLinks(
+    article: WikiArticle,
+    pendingLinks: Map<string, Set<string>>,
+    createLink: (source: string, target: string) => void
+) {
+    const titlesToCheck = [article.title, ...(article.aliases ?? [])];
+    for (const title of titlesToCheck) {
+        const pending = pendingLinks.get(title);
+        if (pending) {
+            for (const sourceTitle of pending) {
+                createLink(sourceTitle, article.title);
+            }
+            pendingLinks.delete(title);
+        }
+    }
+}
+
 interface CrawlerSubscriptionDeps {
     crawler: WikiCrawler;
     sceneManager: SceneManager | null;
@@ -59,9 +106,7 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
                     indicator.pending.delete(title);
                 }
                 if (indicator.pending.size === 0) {
-                    scene.remove(indicator.ring);
-                    indicator.ring.geometry.dispose();
-                    (indicator.ring.material as THREE.Material).dispose();
+                    disposeIndicator(scene, indicator);
                     loadingIndicators.delete(sourceTitle);
                 }
             }
@@ -102,35 +147,26 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
             const fetchedTitles = [article.title, ...(article.aliases ?? [])];
             removeFromLoadingIndicators(fetchedTitles);
 
-            // Check for existing node by canonical title OR any alias (handles redirects)
-            let existingNode = articles.get(article.title);
-            let existingLeafTitle: string | null = null;
-            if (!existingNode && article.aliases) {
-                for (const alias of article.aliases) {
-                    const node = articles.get(alias);
-                    if (node?.article.leaf) {
-                        existingNode = node;
-                        existingLeafTitle = alias;
-                        break;
-                    }
-                }
-            }
+            const existing = findNodeByTitleOrAlias(articles, article.title, article.aliases);
 
-            // Check if this is a leaf being promoted to a full node
-            if (existingNode && existingNode.article.leaf && !article.leaf) {
-                // Replace the leaf mesh with a full node mesh
-                // Remove the leaf's separate label from scene
+            // Skip if already exists (and not a leaf promotion)
+            if (existing && (!existing.node.article.leaf || article.leaf)) return;
+
+            // Leaf being promoted to full node
+            if (existing) {
+                const { node: existingNode, aliasTitle } = existing;
+
+                // Remove the leaf's label and mesh
                 const oldLabel = existingNode.mesh.userData.label as THREE.Object3D & { element?: HTMLElement };
                 if (oldLabel) {
                     scene.remove(oldLabel);
-                    if (oldLabel.element) {
-                        oldLabel.element.remove();
-                    }
+                    oldLabel.element?.remove();
                 }
                 scene.remove(existingNode.mesh);
                 existingNode.mesh.geometry.dispose();
                 (existingNode.mesh.material as THREE.Material).dispose();
 
+                // Create replacement mesh
                 categoryTracker.registerArticle(article.title, article.categories);
                 const color = categoryTracker.getArticleColor(article.title);
                 const newMesh = nodeFactory.createNode(article, color);
@@ -140,47 +176,29 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
                 existingNode.article = article;
                 existingNode.mesh = newMesh;
 
-                // Clean up old leaf entry if it was stored under a different title (redirect case)
-                if (existingLeafTitle && existingLeafTitle !== article.title) {
-                    articles.delete(existingLeafTitle);
-                    simulation.removeNode(existingLeafTitle);
+                // Clean up old leaf entry if stored under different title (redirect case)
+                if (aliasTitle && aliasTitle !== article.title) {
+                    articles.delete(aliasTitle);
+                    simulation.removeNode(aliasTitle);
                 }
 
                 // Store under canonical title and aliases
                 articles.set(article.title, existingNode);
                 simulation.addNode(article.title);
-                if (article.aliases) {
-                    for (const alias of article.aliases) {
-                        articles.set(alias, existingNode);
-                    }
+                for (const alias of article.aliases ?? []) {
+                    articles.set(alias, existingNode);
                 }
 
-                // Resolve pending links for this newly promoted node
-                const titlesToCheck = [article.title, ...(article.aliases ?? [])];
-                for (const title of titlesToCheck) {
-                    const pending = pendingLinks.get(title);
-                    if (pending) {
-                        for (const sourceTitle of pending) {
-                            createLink(sourceTitle, article.title);
-                        }
-                        pendingLinks.delete(title);
-                    }
-                }
+                resolvePendingLinks(article, pendingLinks, createLink);
                 return;
             }
-
-            // Skip if already exists (and not a leaf promotion)
-            if (existingNode) return;
 
             // Create new node (leaf or full)
             let mesh: THREE.Mesh;
             if (article.leaf) {
                 mesh = nodeFactory.createLeafNode(article.title);
-                // Add leaf label to scene separately (not as child of mesh)
                 const label = mesh.userData.label;
-                if (label) {
-                    scene.add(label);
-                }
+                if (label) scene.add(label);
             } else {
                 categoryTracker.registerArticle(article.title, article.categories);
                 const color = categoryTracker.getArticleColor(article.title);
@@ -188,32 +206,20 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
             }
             scene.add(mesh);
 
-            const position = new THREE.Vector3();
-            const velocity = new THREE.Vector3();
-
-            const node: ArticleNode = { article, mesh, position, velocity };
+            const node: ArticleNode = {
+                article,
+                mesh,
+                position: new THREE.Vector3(),
+                velocity: new THREE.Vector3()
+            };
 
             articles.set(article.title, node);
             simulation.addNode(article.title);
-
-            if (article.aliases) {
-                for (const alias of article.aliases) {
-                    articles.set(alias, node);
-                }
+            for (const alias of article.aliases ?? []) {
+                articles.set(alias, node);
             }
 
-            // Resolve pending links
-            const titlesToCheck = [article.title, ...(article.aliases ?? [])];
-            for (const title of titlesToCheck) {
-                const pending = pendingLinks.get(title);
-                if (pending) {
-                    for (const sourceTitle of pending) {
-                        createLink(sourceTitle, article.title);
-                    }
-                    pendingLinks.delete(title);
-                }
-            }
-
+            resolvePendingLinks(article, pendingLinks, createLink);
             setArticleCount(articles.size);
         });
 
@@ -273,9 +279,7 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
                 const indicator = loadingIndicators.get(title)!;
                 indicator.pending.delete('__pagination__');
                 if (indicator.pending.size === 0) {
-                    scene.remove(indicator.ring);
-                    indicator.ring.geometry.dispose();
-                    (indicator.ring.material as THREE.Material).dispose();
+                    disposeIndicator(scene, indicator);
                     loadingIndicators.delete(title);
                 }
             }
