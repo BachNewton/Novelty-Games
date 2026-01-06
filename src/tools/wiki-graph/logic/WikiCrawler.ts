@@ -253,8 +253,9 @@ export function createWikiCrawler(): WikiCrawler {
                 const item = pendingQueue.shift()!;
                 const alreadyFetched = articles.has(item.title);
                 const duplicateInBatch = seenInBatch.has(item.title);
+                const exceedsCurrentMaxDepth = item.depth > maxDepth;
 
-                if (!alreadyFetched && !duplicateInBatch) {
+                if (!alreadyFetched && !duplicateInBatch && !exceedsCurrentMaxDepth) {
                     batch.push(item);
                     seenInBatch.add(item.title);
                 }
@@ -399,6 +400,8 @@ export function createWikiCrawler(): WikiCrawler {
             const article = articles.get(title);
             if (!article || article.leaf) return;  // Can't expand a leaf
 
+            console.log(`[WikiCrawler] expand(${title}) called | article.depth=${article.depth} | current maxDepth=${maxDepth}`);
+
             // Find unfetched links from this article
             const unfetchedLinks = article.links.filter(linkTitle => {
                 return !isAlreadyTracked(linkTitle);
@@ -407,6 +410,12 @@ export function createWikiCrawler(): WikiCrawler {
             const selectedLinks = shuffleArray(unfetchedLinks).slice(0, linkLimit);
             const queuedLinks: string[] = [];
 
+            // Check if children should be fetched or created as leafs
+            const childDepth = 1;  // expand() always starts fresh BFS at depth 1
+            const shouldFetchChildren = childDepth < maxDepth;
+
+            console.log(`[WikiCrawler] expand(${title}) | childDepth=${childDepth} | maxDepth=${maxDepth} | shouldFetchChildren=${shouldFetchChildren}`);
+
             for (const linkTitle of selectedLinks) {
                 const linkKey = `${article.title}|${linkTitle}`;
                 if (!links.has(linkKey)) {
@@ -414,12 +423,29 @@ export function createWikiCrawler(): WikiCrawler {
                     linkCallbacks.forEach(cb => cb(article.title, linkTitle));
                 }
 
-                // Queue at depth 1: clicking any node starts a fresh BFS from that point
-                if (shouldQueueArticle(linkTitle)) {
-                    pendingQueue.push({ title: linkTitle, depth: 1 });
-                    queuedLinks.push(linkTitle);
+                if (shouldFetchChildren) {
+                    // Queue at depth 1: clicking any node starts a fresh BFS from that point
+                    if (shouldQueueArticle(linkTitle)) {
+                        pendingQueue.push({ title: linkTitle, depth: 1 });
+                        queuedLinks.push(linkTitle);
+                    }
+                } else {
+                    // Create leaf directly without API call
+                    if (!articles.has(linkTitle)) {
+                        const leafArticle: WikiArticle = {
+                            title: linkTitle,
+                            categories: [],
+                            links: [],
+                            depth: childDepth,
+                            leaf: true
+                        };
+                        articles.set(linkTitle, leafArticle);
+                        articleCallbacks.forEach(cb => cb(leafArticle));
+                    }
                 }
             }
+
+            console.log(`[WikiCrawler] expand(${title}) queued ${queuedLinks.length} articles at depth 1`);
 
             if (queuedLinks.length > 0) {
                 linksQueuedCallbacks.forEach(cb => cb(article.title, queuedLinks));
@@ -460,6 +486,7 @@ export function createWikiCrawler(): WikiCrawler {
         },
         getLinkLimit: () => linkLimit,
         setMaxDepth: (depth: number) => {
+            console.log(`[WikiCrawler] setMaxDepth(${depth}) called | old value was ${maxDepth}`);
             maxDepth = depth;
         },
         getMaxDepth: () => maxDepth,

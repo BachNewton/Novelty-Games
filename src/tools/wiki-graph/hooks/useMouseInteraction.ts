@@ -45,15 +45,20 @@ export function useMouseInteraction(deps: MouseInteractionDeps): void {
             }
 
             // Linear search through articles to find matching instance
-            for (const [title, node] of articlesRef.current!) {
+            // Return the canonical title (article.title) not the map key, to handle aliases
+            for (const node of articlesRef.current!.values()) {
                 if (node.instanceType === nodeType && node.instanceIndex === instanceId) {
-                    return title;
+                    return node.article.title;
                 }
             }
             return null;
         }
 
         function onPointerDown(event: PointerEvent) {
+            // Clear highlight immediately at start of touch/click (for touch devices)
+            nodeManager.clearHighlight();
+            hoveredTitleRef.current = null;
+
             updateMouseFromEvent(event, mouse, renderer.domElement);
             raycaster.setFromCamera(mouse, camera);
 
@@ -68,7 +73,10 @@ export function useMouseInteraction(deps: MouseInteractionDeps): void {
             }
         }
 
-        function onMouseMove(event: MouseEvent) {
+        function onPointerMove(event: PointerEvent) {
+            // Skip if this is a touch pointer (only handle mouse/pen for hover)
+            if (event.pointerType === 'touch') return;
+
             updateMouseFromEvent(event, mouse, renderer.domElement);
             raycaster.setFromCamera(mouse, camera);
 
@@ -98,11 +106,11 @@ export function useMouseInteraction(deps: MouseInteractionDeps): void {
         }
 
         renderer.domElement.addEventListener('pointerdown', onPointerDown);
-        renderer.domElement.addEventListener('mousemove', onMouseMove);
+        renderer.domElement.addEventListener('pointermove', onPointerMove);
 
         return () => {
             renderer.domElement.removeEventListener('pointerdown', onPointerDown);
-            renderer.domElement.removeEventListener('mousemove', onMouseMove);
+            renderer.domElement.removeEventListener('pointermove', onPointerMove);
         };
     }, [deps]);
 }

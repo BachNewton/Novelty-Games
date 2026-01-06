@@ -7,6 +7,7 @@ export interface InstancedNodeManager {
     setPosition: (type: NodeType, index: number, position: THREE.Vector3) => void;
     setColor: (type: NodeType, index: number, color: number) => void;
     setRotation: (type: NodeType, index: number, quaternion: THREE.Quaternion) => void;
+    hideInstance: (type: NodeType, index: number) => void;
     setHighlighted: (type: NodeType, index: number, position: THREE.Vector3) => void;
     clearHighlight: () => void;
     getInstanceCount: (type: NodeType) => number;
@@ -159,6 +160,16 @@ export function createInstancedNodeManager(): InstancedNodeManager {
             const scale = new THREE.Vector3();
             tempMatrix.decompose(position, new THREE.Quaternion(), scale);
             tempMatrix.compose(position, quaternion, scale);
+            data.mesh.setMatrixAt(index, tempMatrix);
+            data.needsUpdate = true;
+        },
+
+        hideInstance: (type, index) => {
+            const data = meshes.get(type)!;
+            if (index >= data.count) return;
+
+            // Scale to 0 to hide the instance
+            tempMatrix.makeScale(0, 0, 0);
             data.mesh.setMatrixAt(index, tempMatrix);
             data.needsUpdate = true;
         },

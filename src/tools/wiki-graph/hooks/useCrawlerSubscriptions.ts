@@ -190,8 +190,10 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
                     scene.remove(existingNode.label);
                     existingNode.label.element.remove();
 
+                    // Hide the old cone instance
+                    nodeManager.hideInstance(existingNode.instanceType, existingNode.instanceIndex);
+
                     // Create new instance for the promoted node
-                    // Note: The old cone instance is orphaned but that's OK for now
                     categoryTracker.registerArticle(article.title, article.categories);
                     const color = categoryTracker.getArticleColor(article.title);
                     const nodeType = getNodeType(article);
@@ -207,14 +209,19 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
                     existingNode.label = label;
 
                     // Clean up old leaf entry if stored under different title (redirect case)
+                    // Preserve position when changing titles
                     if (aliasTitle && aliasTitle !== article.title) {
+                        const currentPosition = simulation.getPosition(aliasTitle);
                         articles.delete(aliasTitle);
                         simulation.removeNode(aliasTitle);
+                        simulation.addNode(article.title, currentPosition);
+                    } else {
+                        // Already under correct title, addNode will be a no-op
+                        simulation.addNode(article.title);
                     }
 
                     // Store under canonical title and aliases
                     articles.set(article.title, existingNode);
-                    simulation.addNode(article.title);
                     for (const alias of article.aliases ?? []) {
                         articles.set(alias, existingNode);
                     }
