@@ -9,3 +9,5 @@
 - Left click prefers links within graph and right click prefers links outside graph.
 - Camera follows node as it moves.
 - WASDs for movement controls.
+- Stats label is outdated when selecting a new node.
+- Conform to consitent terminology such as node, leaf, link, labels, graph, etc...
