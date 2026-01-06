@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/Addons';
+import { ANIMATION_CONFIG } from '../config/animationConfig';
 
 function easeInOutCubic(t: number): number {
     return t < 0.5
@@ -23,10 +24,10 @@ export function createCameraAnimator(
     let endTarget = new THREE.Vector3();
     let startCameraPos = new THREE.Vector3();
     let elapsed = 0;
-    let duration = 1000;
+    let duration: number = ANIMATION_CONFIG.camera.durationMs;
 
     return {
-        animateTo: (target, dur = 1000) => {
+        animateTo: (target, dur = ANIMATION_CONFIG.camera.durationMs) => {
             startTarget = controls.target.clone();
             startCameraPos = camera.position.clone();
             endTarget = target.clone();

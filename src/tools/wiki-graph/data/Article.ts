@@ -29,11 +29,3 @@ export interface ArticleLink {
     instanceIndex: number;
     linkType: 'directional' | 'bidirectional';
 }
-
-export interface CrawlState {
-    articles: Map<string, WikiArticle>;
-    pendingQueue: string[];
-    currentDepth: number;
-    isRunning: boolean;
-    activeRequests: number;
-}

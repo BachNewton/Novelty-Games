@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { UI_CONFIG } from '../config/uiConfig';
+import { API_CONFIG } from '../config/apiConfig';
 
 interface ProgressPanelProps {
     articleCount: number;
@@ -33,16 +35,16 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
                 onClick={() => setMinimized(false)}
                 style={{
                     position: 'absolute',
-                    top: 10,
-                    right: 10,
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    top: UI_CONFIG.panel.positionOffset,
+                    right: UI_CONFIG.panel.positionOffset,
+                    backgroundColor: UI_CONFIG.panel.background,
                     color: 'white',
                     border: 'none',
-                    borderRadius: '8px',
-                    padding: '8px 12px',
+                    borderRadius: UI_CONFIG.panel.borderRadius,
+                    padding: UI_CONFIG.panel.minimizedPadding,
                     cursor: 'pointer',
-                    fontSize: '14px',
-                    zIndex: 100
+                    fontSize: UI_CONFIG.panel.fontSize,
+                    zIndex: UI_CONFIG.panel.zIndex
                 }}
             >
                 Wiki Graph [{articleCount}]
@@ -53,16 +55,16 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
     return (
         <div style={{
             position: 'absolute',
-            top: 10,
-            right: 10,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            top: UI_CONFIG.panel.positionOffset,
+            right: UI_CONFIG.panel.positionOffset,
+            backgroundColor: UI_CONFIG.panel.background,
             color: 'white',
-            padding: '16px',
-            borderRadius: '8px',
-            minWidth: '200px',
+            padding: UI_CONFIG.panel.padding,
+            borderRadius: UI_CONFIG.panel.borderRadius,
+            minWidth: UI_CONFIG.panel.minWidth,
             fontFamily: 'monospace',
-            fontSize: '14px',
-            zIndex: 100
+            fontSize: UI_CONFIG.panel.fontSize,
+            zIndex: UI_CONFIG.panel.zIndex
         }}>
             <div style={{
                 display: 'flex',
@@ -87,13 +89,13 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
             </div>
 
             <div style={{ marginBottom: '8px' }}>
-                <span style={{ color: '#88D8B0' }}>Articles:</span> {articleCount}
+                <span style={{ color: UI_CONFIG.panel.accent }}>Articles:</span> {articleCount}
             </div>
             <div style={{ marginBottom: '8px' }}>
-                <span style={{ color: '#88D8B0' }}>Links:</span> {linkCount}
+                <span style={{ color: UI_CONFIG.panel.accent }}>Links:</span> {linkCount}
             </div>
             {fetchingCount > 0 && (
-                <div style={{ marginBottom: '8px', color: '#88D8B0' }}>
+                <div style={{ marginBottom: '8px', color: UI_CONFIG.panel.accent }}>
                     Fetching {fetchingCount} article{fetchingCount !== 1 ? 's' : ''}...
                 </div>
             )}
@@ -107,8 +109,8 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
                 </label>
                 <input
                     type="range"
-                    min="1"
-                    max="50"
+                    min={API_CONFIG.crawling.linkLimit.min}
+                    max={API_CONFIG.crawling.linkLimit.max}
                     value={linkLimit}
                     onChange={(e) => onLinkLimitChange(parseInt(e.target.value))}
                     style={{ width: '100%' }}
@@ -121,8 +123,8 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
                 </label>
                 <input
                     type="range"
-                    min="1"
-                    max="10"
+                    min={API_CONFIG.crawling.maxDepth.min}
+                    max={API_CONFIG.crawling.maxDepth.max}
                     value={maxDepth}
                     onChange={(e) => onMaxDepthChange(parseInt(e.target.value))}
                     style={{ width: '100%' }}
@@ -142,7 +144,7 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
                         {selectedArticle}
                     </div>
                     {selectedCategory && (
-                        <div style={{ fontSize: '12px', color: '#4ECDC4', marginTop: '4px' }}>
+                        <div style={{ fontSize: '12px', color: UI_CONFIG.panel.category, marginTop: '4px' }}>
                             {selectedCategory}
                         </div>
                     )}

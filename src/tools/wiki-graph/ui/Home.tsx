@@ -5,10 +5,14 @@ import { createWikiCrawler, DEFAULT_LINK_LIMIT, DEFAULT_MAX_DEPTH } from '../log
 import { createForceSimulation } from '../logic/ForceSimulation';
 import { createCategoryTracker } from '../logic/CategoryTracker';
 import { createCameraAnimator, CameraAnimator } from '../logic/CameraAnimator';
-import { createNodeFactory, LoadingIndicator } from '../scene/NodeFactory';
+import { LoadingIndicator } from '../scene/LoadingIndicatorFactory';
 import { createInstancedNodeManager } from '../scene/InstancedNodeManager';
 import { createInstancedLinkManager } from '../scene/InstancedLinkManager';
 import { DEFAULT_CAMERA_DISTANCE } from '../scene/SceneManager';
+import { API_CONFIG } from '../config/apiConfig';
+import { UI_CONFIG } from '../config/uiConfig';
+import { LABEL_CONFIG } from '../config/labelConfig';
+import { SCENE_CONFIG } from '../config/sceneConfig';
 import { useThreeScene } from '../hooks/useThreeScene';
 import { useAnimationLoop } from '../hooks/useAnimationLoop';
 import { useMouseInteraction } from '../hooks/useMouseInteraction';
@@ -35,7 +39,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, Error
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: '#1a1a2e',
+                    backgroundColor: UI_CONFIG.error.background,
                     color: 'white',
                     fontFamily: 'monospace',
                     padding: '20px',
@@ -43,12 +47,12 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, Error
                 }}>
                     <div style={{
                         maxWidth: '600px',
-                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                        border: '1px solid #ff4444',
+                        backgroundColor: UI_CONFIG.error.overlay,
+                        border: `1px solid ${UI_CONFIG.error.border}`,
                         borderRadius: '8px',
                         padding: '20px'
                     }}>
-                        <h2 style={{ color: '#ff4444', marginTop: 0 }}>Error</h2>
+                        <h2 style={{ color: UI_CONFIG.error.text, marginTop: 0 }}>Error</h2>
                         <pre style={{
                             whiteSpace: 'pre-wrap',
                             wordBreak: 'break-word',
@@ -64,7 +68,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, Error
     }
 }
 
-const START_ARTICLE = 'Finland';
+const START_ARTICLE = API_CONFIG.crawling.startArticle;
 
 interface LinkCount {
     count: number;
@@ -89,8 +93,8 @@ const Home: React.FC = () => {
     const [linkCount, setLinkCount] = useState(0);
     const [fetchingCount, setFetchingCount] = useState(0);
     const [pendingQueueSize, setPendingQueueSize] = useState(0);
-    const [linkLimit, setLinkLimit] = useState(DEFAULT_LINK_LIMIT);
-    const [maxDepth, setMaxDepth] = useState(DEFAULT_MAX_DEPTH);
+    const [linkLimit, setLinkLimit] = useState<number>(DEFAULT_LINK_LIMIT);
+    const [maxDepth, setMaxDepth] = useState<number>(DEFAULT_MAX_DEPTH);
     const [selectedArticle, setSelectedArticle] = useState<string | null>(START_ARTICLE);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [error, setError] = useState<Error | null>(null);
@@ -100,7 +104,6 @@ const Home: React.FC = () => {
     const crawler = useMemo(() => createWikiCrawler(), []);
     const simulation = useMemo(() => createForceSimulation(), []);
     const categoryTracker = useMemo(() => createCategoryTracker(), []);
-    const nodeFactory = useMemo(() => createNodeFactory(), []);
     const nodeManager = useMemo(() => createInstancedNodeManager(), []);
     const linkManager = useMemo(() => createInstancedLinkManager(), []);
 
@@ -160,7 +163,7 @@ const Home: React.FC = () => {
 
         const statsDiv = document.createElement('div');
         statsDiv.textContent = `(${visualizedLinks}/${totalStr})`;
-        statsDiv.style.color = '#4ECDC4';
+        statsDiv.style.color = LABEL_CONFIG.stats.color;
         statsDiv.style.fontSize = '10px';
         statsDiv.style.fontFamily = 'sans-serif';
         statsDiv.style.textShadow = '1px 1px 2px black';
@@ -169,7 +172,7 @@ const Home: React.FC = () => {
         const statsLabel = new CSS2DObject(statsDiv);
         // Position in world space (will be updated in animation loop)
         if (node) {
-            statsLabel.position.set(node.position.x, node.position.y + 1.1, node.position.z);
+            statsLabel.position.set(node.position.x, node.position.y + LABEL_CONFIG.stats.worldYOffset, node.position.z);
             scene.add(statsLabel);
         }
         statsLabelRef.current = statsLabel;
@@ -213,7 +216,6 @@ const Home: React.FC = () => {
         sceneManager,
         simulation,
         categoryTracker,
-        nodeFactory,
         nodeManager,
         linkManager,
         articlesRef,
@@ -236,7 +238,6 @@ const Home: React.FC = () => {
         sceneManager,
         simulation,
         cameraAnimator: cameraAnimatorRef.current,
-        nodeFactory,
         nodeManager,
         linkManager,
         articlesRef,
@@ -244,9 +245,9 @@ const Home: React.FC = () => {
         loadingIndicatorsRef,
         statsLabelRef,
         selectedArticleRef,
-        fogDensity: 0.1,
+        fogDensity: SCENE_CONFIG.fog.density,
         baseDistance: DEFAULT_CAMERA_DISTANCE,
-        labelScaleFactor: 1
+        labelScaleFactor: LABEL_CONFIG.fog.scaleFactor
     });
 
     // UI handlers
@@ -290,14 +291,14 @@ const Home: React.FC = () => {
                 }}>
                     <div style={{
                         maxWidth: '600px',
-                        backgroundColor: '#1a1a2e',
-                        border: '1px solid #ff4444',
+                        backgroundColor: UI_CONFIG.error.background,
+                        border: `1px solid ${UI_CONFIG.error.border}`,
                         borderRadius: '8px',
                         padding: '20px',
                         color: 'white',
                         fontFamily: 'monospace'
                     }}>
-                        <h2 style={{ color: '#ff4444', marginTop: 0 }}>Error</h2>
+                        <h2 style={{ color: UI_CONFIG.error.text, marginTop: 0 }}>Error</h2>
                         <pre style={{
                             whiteSpace: 'pre-wrap',
                             wordBreak: 'break-word',

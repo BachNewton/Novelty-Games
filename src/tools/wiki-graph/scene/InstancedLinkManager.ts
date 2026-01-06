@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { LINK_CONFIG } from '../config/linkConfig';
 
 export type LinkType = 'directional' | 'bidirectional';
 
@@ -10,17 +11,18 @@ export interface InstancedLinkManager {
     sync: () => void;
 }
 
-const INITIAL_CAPACITY = 5000;
-const DIRECTIONAL_RADIUS_START = 0.015; // Thin at source
-const DIRECTIONAL_RADIUS_END = 0.03;    // Thick at target
-const BIDIRECTIONAL_RADIUS = 0.035;     // Thicker to cover directional underneath
-const SOURCE_COLOR = new THREE.Color(0xFFA500); // Orange
-const TARGET_COLOR = new THREE.Color(0x4ECDC4); // Cyan
-const BIDIRECTIONAL_COLOR = new THREE.Color(0x9B59B6); // Purple
-
 function createDirectionalGeometry(): THREE.CylinderGeometry {
     // Tapered cylinder: thin at bottom (source), thick at top (target)
-    const geometry = new THREE.CylinderGeometry(DIRECTIONAL_RADIUS_END, DIRECTIONAL_RADIUS_START, 1, 6, 1);
+    const geometry = new THREE.CylinderGeometry(
+        LINK_CONFIG.geometry.targetRadius,
+        LINK_CONFIG.geometry.sourceRadius,
+        1,
+        LINK_CONFIG.geometry.radialSegments,
+        1
+    );
+
+    const sourceColor = new THREE.Color(LINK_CONFIG.colors.directional);
+    const targetColor = new THREE.Color(LINK_CONFIG.colors.target);
 
     // Shift geometry so bottom is at origin (easier transform math)
     geometry.translate(0, 0.5, 0);
@@ -31,7 +33,7 @@ function createDirectionalGeometry(): THREE.CylinderGeometry {
 
     for (let i = 0; i < positions.count; i++) {
         const y = positions.getY(i); // 0 at bottom (source), 1 at top (target)
-        const color = SOURCE_COLOR.clone().lerp(TARGET_COLOR, y);
+        const color = sourceColor.clone().lerp(targetColor, y);
         colors[i * 3] = color.r;
         colors[i * 3 + 1] = color.g;
         colors[i * 3 + 2] = color.b;
@@ -44,17 +46,24 @@ function createDirectionalGeometry(): THREE.CylinderGeometry {
 
 function createBidirectionalGeometry(): THREE.CylinderGeometry {
     // Slightly thicker cylinder to cover directional link underneath
-    const geometry = new THREE.CylinderGeometry(BIDIRECTIONAL_RADIUS, BIDIRECTIONAL_RADIUS, 1, 6, 1);
+    const geometry = new THREE.CylinderGeometry(
+        LINK_CONFIG.geometry.bidirectionalRadius,
+        LINK_CONFIG.geometry.bidirectionalRadius,
+        1,
+        LINK_CONFIG.geometry.radialSegments,
+        1
+    );
     geometry.translate(0, 0.5, 0);
 
     // Solid purple color
+    const bidirectionalColor = new THREE.Color(LINK_CONFIG.colors.bidirectional);
     const positions = geometry.attributes.position;
     const colors = new Float32Array(positions.count * 3);
 
     for (let i = 0; i < positions.count; i++) {
-        colors[i * 3] = BIDIRECTIONAL_COLOR.r;
-        colors[i * 3 + 1] = BIDIRECTIONAL_COLOR.g;
-        colors[i * 3 + 2] = BIDIRECTIONAL_COLOR.b;
+        colors[i * 3] = bidirectionalColor.r;
+        colors[i * 3 + 1] = bidirectionalColor.g;
+        colors[i * 3 + 2] = bidirectionalColor.b;
     }
 
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
@@ -72,7 +81,7 @@ export function createInstancedLinkManager(): InstancedLinkManager {
     const material = new THREE.MeshBasicMaterial({
         vertexColors: true,
         transparent: true,
-        opacity: 0.8
+        opacity: LINK_CONFIG.materials.opacity
     });
 
     // Create both mesh types
@@ -81,7 +90,7 @@ export function createInstancedLinkManager(): InstancedLinkManager {
     const directionalMesh = new THREE.InstancedMesh(
         createDirectionalGeometry(),
         material,
-        INITIAL_CAPACITY
+        LINK_CONFIG.capacity.initial
     );
     directionalMesh.count = 0;
     directionalMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -90,7 +99,7 @@ export function createInstancedLinkManager(): InstancedLinkManager {
     const bidirectionalMesh = new THREE.InstancedMesh(
         createBidirectionalGeometry(),
         material.clone(), // Clone so they can have independent settings if needed
-        INITIAL_CAPACITY
+        LINK_CONFIG.capacity.initial
     );
     bidirectionalMesh.count = 0;
     bidirectionalMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -109,10 +118,10 @@ export function createInstancedLinkManager(): InstancedLinkManager {
             const data = meshes.get(type)!;
             const index = data.count;
 
-            if (index >= INITIAL_CAPACITY) {
+            if (index >= LINK_CONFIG.capacity.initial) {
                 throw new Error(
-                    `InstancedLinkManager: Exceeded buffer capacity of ${INITIAL_CAPACITY} for link type "${type}". ` +
-                    `Consider increasing INITIAL_CAPACITY or reducing linkLimit/maxDepth.`
+                    `InstancedLinkManager: Exceeded buffer capacity of ${LINK_CONFIG.capacity.initial} for link type "${type}". ` +
+                    `Consider increasing capacity.initial or reducing linkLimit/maxDepth.`
                 );
             }
 

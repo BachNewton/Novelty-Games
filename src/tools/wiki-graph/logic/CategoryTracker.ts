@@ -1,3 +1,5 @@
+import { NODE_CONFIG } from '../config/nodeConfig';
+
 const COLOR_PALETTE = [
     0x4ECDC4, // Teal
     0xFF6B6B, // Coral
@@ -75,14 +77,14 @@ export function createCategoryTracker(): CategoryTracker {
         getOptimalCategory: (title) => findBestCategory(title),
 
         getCategoryColor: (category) => {
-            if (!category) return 0x888888;
+            if (!category) return NODE_CONFIG.colors.default;
             const colorIndex = assignColorToCategory(category);
             return COLOR_PALETTE[colorIndex];
         },
 
         getArticleColor: (title) => {
             const bestCategory = findBestCategory(title);
-            if (!bestCategory) return 0x888888;
+            if (!bestCategory) return NODE_CONFIG.colors.default;
             const colorIndex = assignColorToCategory(bestCategory);
             return COLOR_PALETTE[colorIndex];
         },

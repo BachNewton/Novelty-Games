@@ -1,14 +1,15 @@
 import { useEffect, RefObject } from 'react';
 import * as THREE from 'three';
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
 import { WikiCrawler } from '../logic/WikiCrawler';
 import { ForceSimulation } from '../logic/ForceSimulation';
 import { CategoryTracker } from '../logic/CategoryTracker';
 import { SceneManager } from '../scene/SceneManager';
-import { NodeFactory, LoadingIndicator } from '../scene/NodeFactory';
+import { LoadingIndicator, createLoadingIndicator } from '../scene/LoadingIndicatorFactory';
 import { InstancedNodeManager, NodeType } from '../scene/InstancedNodeManager';
 import { InstancedLinkManager } from '../scene/InstancedLinkManager';
 import { WikiArticle, ArticleNode, ArticleLink } from '../data/Article';
+import { API_CONFIG } from '../config/apiConfig';
+import { createNodeLabel } from '../util/labelUtils';
 
 interface LinkCount {
     count: number;
@@ -67,7 +68,6 @@ interface CrawlerSubscriptionDeps {
     sceneManager: SceneManager | null;
     simulation: ForceSimulation;
     categoryTracker: CategoryTracker;
-    nodeFactory: NodeFactory;
     nodeManager: InstancedNodeManager;
     linkManager: InstancedLinkManager;
     articlesRef: RefObject<Map<string, ArticleNode>>;
@@ -85,20 +85,6 @@ interface CrawlerSubscriptionDeps {
     startArticle: string;
 }
 
-function createLabel(title: string, isLeaf: boolean, isMissing: boolean): CSS2DObject {
-    const labelDiv = document.createElement('div');
-    labelDiv.textContent = title;
-    labelDiv.style.color = isMissing ? '#999999' : isLeaf ? '#cccccc' : 'white';
-    labelDiv.style.fontSize = '12px';
-    labelDiv.style.fontFamily = 'sans-serif';
-    labelDiv.style.textShadow = '1px 1px 2px black';
-    labelDiv.style.whiteSpace = 'nowrap';
-
-    const label = new CSS2DObject(labelDiv);
-    label.position.set(0, 0.75, 0);
-    return label;
-}
-
 // Helper to determine node type from article
 function getNodeType(article: WikiArticle): NodeType {
     if (article.leaf) return 'cone';
@@ -109,7 +95,7 @@ function getNodeType(article: WikiArticle): NodeType {
 export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
     useEffect(() => {
         const {
-            crawler, sceneManager, simulation, categoryTracker, nodeFactory, nodeManager, linkManager,
+            crawler, sceneManager, simulation, categoryTracker, nodeManager, linkManager,
             articlesRef, linksRef, pendingLinksRef, loadingIndicatorsRef, linkCountsRef,
             selectedArticleRef, setArticleCount, setLinkCount, setFetchingCount,
             setPendingQueueSize, updateStatsLabel, onError, startArticle
@@ -172,6 +158,84 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
             }
         }
 
+        function promoteLeafToFullNode(
+            existingNode: ArticleNode,
+            article: WikiArticle,
+            aliasTitle: string | null
+        ): void {
+            // Remove the old label
+            scene.remove(existingNode.label);
+            existingNode.label.element.remove();
+
+            // Hide the old cone instance
+            nodeManager.hideInstance(existingNode.instanceType, existingNode.instanceIndex);
+
+            // Create new instance for the promoted node
+            categoryTracker.registerArticle(article.title, article.categories);
+            const color = categoryTracker.getArticleColor(article.title);
+            const nodeType = getNodeType(article);
+            const instanceIndex = nodeManager.addNode(nodeType, color);
+
+            const label = createNodeLabel(article.title, false, article.missing === true);
+            scene.add(label);
+
+            // Update existing node
+            existingNode.article = article;
+            existingNode.instanceIndex = instanceIndex;
+            existingNode.instanceType = nodeType;
+            existingNode.label = label;
+
+            // Handle title changes (redirect case) - preserve position
+            if (aliasTitle && aliasTitle !== article.title) {
+                const currentPosition = simulation.getPosition(aliasTitle);
+                articles.delete(aliasTitle);
+                simulation.removeNode(aliasTitle);
+                simulation.addNode(article.title, currentPosition);
+            } else {
+                simulation.addNode(article.title);
+            }
+
+            // Store under canonical title and aliases
+            articles.set(article.title, existingNode);
+            for (const alias of article.aliases ?? []) {
+                articles.set(alias, existingNode);
+            }
+
+            resolvePendingLinks(article, pendingLinks, createLink);
+        }
+
+        function createNewArticleNode(article: WikiArticle): void {
+            const nodeType = getNodeType(article);
+            let color = 0xffffff; // Default white for leaves/missing
+
+            if (!article.leaf && !article.missing) {
+                categoryTracker.registerArticle(article.title, article.categories);
+                color = categoryTracker.getArticleColor(article.title);
+            }
+
+            const instanceIndex = nodeManager.addNode(nodeType, color);
+            const label = createNodeLabel(article.title, article.leaf === true, article.missing === true);
+            scene.add(label);
+
+            const node: ArticleNode = {
+                article,
+                instanceIndex,
+                instanceType: nodeType,
+                label,
+                position: new THREE.Vector3(),
+                velocity: new THREE.Vector3()
+            };
+
+            articles.set(article.title, node);
+            simulation.addNode(article.title);
+            for (const alias of article.aliases ?? []) {
+                articles.set(alias, node);
+            }
+
+            resolvePendingLinks(article, pendingLinks, createLink);
+            setArticleCount(articles.size);
+        }
+
         crawler.onArticleFetched((article: WikiArticle) => {
             try {
                 const fetchedTitles = [article.title, ...(article.aliases ?? [])];
@@ -182,85 +246,11 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
                 // Skip if already exists (and not a leaf promotion)
                 if (existing && (!existing.node.article.leaf || article.leaf)) return;
 
-                // Leaf being promoted to full node
                 if (existing) {
-                    const { node: existingNode, aliasTitle } = existing;
-
-                    // Remove the old label
-                    scene.remove(existingNode.label);
-                    existingNode.label.element.remove();
-
-                    // Hide the old cone instance
-                    nodeManager.hideInstance(existingNode.instanceType, existingNode.instanceIndex);
-
-                    // Create new instance for the promoted node
-                    categoryTracker.registerArticle(article.title, article.categories);
-                    const color = categoryTracker.getArticleColor(article.title);
-                    const nodeType = getNodeType(article);
-                    const instanceIndex = nodeManager.addNode(nodeType, color);
-
-                    const label = createLabel(article.title, false, article.missing === true);
-                    scene.add(label);
-
-                    // Update existing node
-                    existingNode.article = article;
-                    existingNode.instanceIndex = instanceIndex;
-                    existingNode.instanceType = nodeType;
-                    existingNode.label = label;
-
-                    // Clean up old leaf entry if stored under different title (redirect case)
-                    // Preserve position when changing titles
-                    if (aliasTitle && aliasTitle !== article.title) {
-                        const currentPosition = simulation.getPosition(aliasTitle);
-                        articles.delete(aliasTitle);
-                        simulation.removeNode(aliasTitle);
-                        simulation.addNode(article.title, currentPosition);
-                    } else {
-                        // Already under correct title, addNode will be a no-op
-                        simulation.addNode(article.title);
-                    }
-
-                    // Store under canonical title and aliases
-                    articles.set(article.title, existingNode);
-                    for (const alias of article.aliases ?? []) {
-                        articles.set(alias, existingNode);
-                    }
-
-                    resolvePendingLinks(article, pendingLinks, createLink);
-                    return;
+                    promoteLeafToFullNode(existing.node, article, existing.aliasTitle);
+                } else {
+                    createNewArticleNode(article);
                 }
-
-                // Create new node (leaf or full)
-                const nodeType = getNodeType(article);
-                let color = 0xffffff; // Default white for leaves/missing
-
-                if (!article.leaf && !article.missing) {
-                    categoryTracker.registerArticle(article.title, article.categories);
-                    color = categoryTracker.getArticleColor(article.title);
-                }
-
-                const instanceIndex = nodeManager.addNode(nodeType, color);
-
-                const label = createLabel(article.title, article.leaf === true, article.missing === true);
-                scene.add(label);
-
-                const node: ArticleNode = {
-                    article,
-                    instanceIndex,
-                    instanceType: nodeType,
-                    label,
-                    position: new THREE.Vector3(),
-                    velocity: new THREE.Vector3()
-                };
-
-                articles.set(article.title, node);
-                simulation.addNode(article.title);
-                for (const alias of article.aliases ?? []) {
-                    articles.set(alias, node);
-                }
-
-                resolvePendingLinks(article, pendingLinks, createLink);
-                setArticleCount(articles.size);
             } catch (err) {
                 onError(err instanceof Error ? err : new Error(String(err)));
             }
@@ -293,7 +283,7 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
                     existing.pending.add(title);
                 }
             } else {
-                const ring = nodeFactory.createLoadingIndicator();
+                const ring = createLoadingIndicator();
                 scene.add(ring);
                 loadingIndicators.set(sourceTitle, {
                     ring,
@@ -316,15 +306,15 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
             const node = articles.get(title);
 
             if (node && !isComplete && !loadingIndicators.has(title)) {
-                const ring = nodeFactory.createLoadingIndicator();
+                const ring = createLoadingIndicator();
                 scene.add(ring);
                 loadingIndicators.set(title, {
                     ring,
-                    pending: new Set(['__pagination__'])
+                    pending: new Set([API_CONFIG.markers.pagination])
                 });
             } else if (isComplete && loadingIndicators.has(title)) {
                 const indicator = loadingIndicators.get(title)!;
-                indicator.pending.delete('__pagination__');
+                indicator.pending.delete(API_CONFIG.markers.pagination);
                 if (indicator.pending.size === 0) {
                     disposeIndicator(scene, indicator);
                     loadingIndicators.delete(title);

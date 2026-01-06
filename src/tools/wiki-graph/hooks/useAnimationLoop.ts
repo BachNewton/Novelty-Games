@@ -5,17 +5,16 @@ import { SceneManager } from '../scene/SceneManager';
 import { ForceSimulation } from '../logic/ForceSimulation';
 import { CameraAnimator } from '../logic/CameraAnimator';
 import { ArticleNode, ArticleLink } from '../data/Article';
-import { NodeFactory, LoadingIndicator } from '../scene/NodeFactory';
+import { LoadingIndicator, rotateIndicator } from '../scene/LoadingIndicatorFactory';
 import { InstancedNodeManager } from '../scene/InstancedNodeManager';
 import { InstancedLinkManager } from '../scene/InstancedLinkManager';
-
-const MINIMUM_FRAME_RATE = 1000 / 25;
+import { ANIMATION_CONFIG } from '../config/animationConfig';
+import { LABEL_CONFIG } from '../config/labelConfig';
 
 interface AnimationDeps {
     sceneManager: SceneManager | null;
     simulation: ForceSimulation;
     cameraAnimator: CameraAnimator | null;
-    nodeFactory: NodeFactory;
     nodeManager: InstancedNodeManager;
     linkManager: InstancedLinkManager;
     articlesRef: RefObject<Map<string, ArticleNode>>;
@@ -38,7 +37,7 @@ export function useAnimationLoop(deps: AnimationDeps): void {
 
     useEffect(() => {
         const {
-            sceneManager, simulation, cameraAnimator, nodeFactory, nodeManager, linkManager,
+            sceneManager, simulation, cameraAnimator, nodeManager, linkManager,
             articlesRef, linksRef, loadingIndicatorsRef, statsLabelRef, selectedArticleRef,
             fogDensity, baseDistance, labelScaleFactor
         } = deps;
@@ -49,7 +48,7 @@ export function useAnimationLoop(deps: AnimationDeps): void {
 
         // Derive max visible distance from fog formula once (constant for the session)
         // opacity = exp(-d² * fogDensity), solve for d when opacity = minOpacity
-        const minOpacity = 0.01;
+        const minOpacity = LABEL_CONFIG.fog.minOpacity;
         const maxDistanceBeyondBase = Math.sqrt(-Math.log(minOpacity) / fogDensity);
         const maxLabelDistance = baseDistance + maxDistanceBeyondBase;
 
@@ -74,7 +73,7 @@ export function useAnimationLoop(deps: AnimationDeps): void {
         }
 
         function animate(time: DOMHighResTimeStamp) {
-            const deltaTime = Math.min(time - previousTimeRef.current, MINIMUM_FRAME_RATE);
+            const deltaTime = Math.min(time - previousTimeRef.current, ANIMATION_CONFIG.minFrameTimeMs);
             previousTimeRef.current = time;
 
             simulation.update(deltaTime);
@@ -93,7 +92,7 @@ export function useAnimationLoop(deps: AnimationDeps): void {
                     nodeManager.setPosition(node.instanceType, node.instanceIndex, pos);
 
                     // Update title label with fog/scale effects
-                    updateLabel(node.label, pos, 0.75, 11);
+                    updateLabel(node.label, pos, LABEL_CONFIG.title.yOffset, LABEL_CONFIG.title.baseFontSize);
 
                     // Orient cones toward their source node
                     if (node.instanceType === 'cone') {
@@ -131,7 +130,7 @@ export function useAnimationLoop(deps: AnimationDeps): void {
                 const node = articles.get(title);
                 if (node) {
                     indicator.ring.position.copy(node.position);
-                    nodeFactory.rotateIndicator(indicator.ring, deltaTime);
+                    rotateIndicator(indicator.ring, deltaTime);
                 }
             }
 
@@ -141,7 +140,7 @@ export function useAnimationLoop(deps: AnimationDeps): void {
             if (statsLabel && selectedTitle) {
                 const selectedNode = articles.get(selectedTitle);
                 if (selectedNode) {
-                    updateLabel(statsLabel, selectedNode.position, 1.25, 9);
+                    updateLabel(statsLabel, selectedNode.position, LABEL_CONFIG.stats.yOffset, LABEL_CONFIG.stats.baseFontSize);
                 }
             }
 

@@ -15,7 +15,8 @@
       "Bash(curl:*)",
       "WebFetch(domain:www.mediawiki.org)",
       "Bash(ls:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(wc:*)"
     ]
   }
 }

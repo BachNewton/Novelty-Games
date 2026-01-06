@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { NODE_CONFIG } from '../config/nodeConfig';
 
 export type NodeType = 'sphere' | 'box' | 'cone';
 
@@ -15,9 +16,6 @@ export interface InstancedNodeManager {
     sync: () => void;
 }
 
-const INITIAL_CAPACITY = 5000;
-const MISSING_COLOR = 0x666666;
-const LEAF_COLOR = 0xffffff;
 
 interface InstancedMeshData {
     mesh: THREE.InstancedMesh;
@@ -28,11 +26,21 @@ interface InstancedMeshData {
 function createGeometry(type: NodeType): THREE.BufferGeometry {
     switch (type) {
         case 'sphere':
-            return new THREE.SphereGeometry(0.4, 16, 16);
-        case 'box':
-            return new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            return new THREE.SphereGeometry(
+                NODE_CONFIG.geometry.sphere.radius,
+                NODE_CONFIG.geometry.sphere.segments,
+                NODE_CONFIG.geometry.sphere.segments
+            );
+        case 'box': {
+            const size = NODE_CONFIG.geometry.box.size;
+            return new THREE.BoxGeometry(size, size, size);
+        }
         case 'cone': {
-            const geo = new THREE.ConeGeometry(0.3, 0.6, 4);
+            const geo = new THREE.ConeGeometry(
+                NODE_CONFIG.geometry.cone.radius,
+                NODE_CONFIG.geometry.cone.height,
+                NODE_CONFIG.geometry.cone.segments
+            );
             geo.rotateX(Math.PI / 2); // Point in -Z direction
             return geo;
         }
@@ -41,17 +49,21 @@ function createGeometry(type: NodeType): THREE.BufferGeometry {
 
 function createMaterial(): THREE.MeshStandardMaterial {
     return new THREE.MeshStandardMaterial({
-        roughness: 0.5,
-        metalness: 0.3
+        roughness: NODE_CONFIG.materials.roughness,
+        metalness: NODE_CONFIG.materials.metalness
     });
 }
 
 function createHighlightMesh(): THREE.Mesh {
-    const geometry = new THREE.SphereGeometry(0.55, 16, 16);
+    const geometry = new THREE.SphereGeometry(
+        NODE_CONFIG.highlight.sphereRadius,
+        NODE_CONFIG.geometry.sphere.segments,
+        NODE_CONFIG.geometry.sphere.segments
+    );
     const material = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
+        color: NODE_CONFIG.highlight.color,
         transparent: true,
-        opacity: 0.3,
+        opacity: NODE_CONFIG.highlight.opacity,
         side: THREE.BackSide
     });
     const mesh = new THREE.Mesh(geometry, material);
@@ -72,19 +84,19 @@ export function createInstancedNodeManager(): InstancedNodeManager {
 
         // Set default color based on type
         if (type === 'box') {
-            material.color.setHex(MISSING_COLOR);
+            material.color.setHex(NODE_CONFIG.colors.missing);
         } else if (type === 'cone') {
-            material.color.setHex(LEAF_COLOR);
+            material.color.setHex(NODE_CONFIG.colors.leaf);
         }
 
-        const instancedMesh = new THREE.InstancedMesh(geometry, material, INITIAL_CAPACITY);
+        const instancedMesh = new THREE.InstancedMesh(geometry, material, NODE_CONFIG.capacity.initial);
         instancedMesh.count = 0; // Start with 0 visible instances
         instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 
         // Enable per-instance colors for spheres (category colors)
         if (type === 'sphere') {
             instancedMesh.instanceColor = new THREE.InstancedBufferAttribute(
-                new Float32Array(INITIAL_CAPACITY * 3),
+                new Float32Array(NODE_CONFIG.capacity.initial * 3),
                 3
             );
             instancedMesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
@@ -105,10 +117,10 @@ export function createInstancedNodeManager(): InstancedNodeManager {
             const data = meshes.get(type)!;
             const index = data.count;
 
-            if (index >= INITIAL_CAPACITY) {
+            if (index >= NODE_CONFIG.capacity.initial) {
                 throw new Error(
-                    `InstancedNodeManager: Exceeded buffer capacity of ${INITIAL_CAPACITY} for node type "${type}". ` +
-                    `Consider increasing INITIAL_CAPACITY or reducing linkLimit/maxDepth.`
+                    `InstancedNodeManager: Exceeded buffer capacity of ${NODE_CONFIG.capacity.initial} for node type "${type}". ` +
+                    `Consider increasing capacity.initial or reducing linkLimit/maxDepth.`
                 );
             }
 
@@ -179,7 +191,7 @@ export function createInstancedNodeManager(): InstancedNodeManager {
             highlightMesh.position.copy(position);
 
             // Adjust size based on node type
-            const scale = type === 'cone' ? 0.8 : 1;
+            const scale = type === 'cone' ? NODE_CONFIG.highlight.coneScale : 1;
             highlightMesh.scale.setScalar(scale);
         },
 

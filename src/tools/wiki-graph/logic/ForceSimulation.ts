@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { PHYSICS_CONFIG } from '../config/physicsConfig';
 
 export interface ForceConfig {
     springStrength: number;
@@ -28,13 +29,13 @@ export interface ForceSimulation {
 }
 
 const DEFAULT_CONFIG: ForceConfig = {
-    springStrength: 0.02,
-    springLength: 8,
-    repulsionStrength: 200,
-    centeringStrength: 0.001,
-    damping: 0.85,
-    maxVelocity: 2,
-    stabilityThreshold: 0.01
+    springStrength: PHYSICS_CONFIG.springStrength,
+    springLength: PHYSICS_CONFIG.springLength,
+    repulsionStrength: PHYSICS_CONFIG.repulsionStrength,
+    centeringStrength: PHYSICS_CONFIG.centeringStrength,
+    damping: PHYSICS_CONFIG.damping,
+    maxVelocity: PHYSICS_CONFIG.maxVelocity,
+    stabilityThreshold: PHYSICS_CONFIG.stabilityThreshold
 };
 
 export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceSimulation {
@@ -44,10 +45,11 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
     let stable = false;
 
     function randomPosition(): THREE.Vector3 {
+        const range = PHYSICS_CONFIG.initialSpawnRange;
         return new THREE.Vector3(
-            (Math.random() - 0.5) * 20,
-            (Math.random() - 0.5) * 20,
-            (Math.random() - 0.5) * 20
+            (Math.random() - 0.5) * range,
+            (Math.random() - 0.5) * range,
+            (Math.random() - 0.5) * range
         );
     }
 
@@ -160,9 +162,9 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
             // TODO: O(n²) repulsion is too expensive for large graphs.
             // Consider: Barnes-Hut algorithm (O(n log n)), spatial partitioning,
             // or Web Workers for parallel computation.
-            if (stable || nodes.size === 0 || nodes.size > 500) return;
+            if (stable || nodes.size === 0 || nodes.size > PHYSICS_CONFIG.nodeLimit) return;
 
-            const dt = Math.min(deltaTime, 50) / 1000;
+            const dt = Math.min(deltaTime, PHYSICS_CONFIG.maxDeltaTimeMs) / 1000;
             const force = new Map<string, THREE.Vector3>();
 
             for (const id of nodes.keys()) {

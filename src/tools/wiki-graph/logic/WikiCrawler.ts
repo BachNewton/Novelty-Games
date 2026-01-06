@@ -1,8 +1,9 @@
 import { WikiArticle } from '../data/Article';
+import { API_CONFIG } from '../config/apiConfig';
 
-const API_BASE = 'https://en.wikipedia.org/w/api.php';
-const RATE_LIMIT_MS = 1000;
-const BATCH_SIZE = 20;
+const API_BASE = API_CONFIG.wikipedia.baseUrl;
+const RATE_LIMIT_MS = API_CONFIG.wikipedia.rateLimitMs;
+const BATCH_SIZE = API_CONFIG.wikipedia.batchSize;
 
 export interface WikiCrawler {
     start: (startTitle: string) => void;
@@ -62,8 +63,8 @@ function shuffleArray<T>(array: T[]): T[] {
     return shuffled;
 }
 
-export const DEFAULT_LINK_LIMIT = 4;
-export const DEFAULT_MAX_DEPTH = 1;
+export const DEFAULT_LINK_LIMIT = API_CONFIG.crawling.linkLimit.default;
+export const DEFAULT_MAX_DEPTH = API_CONFIG.crawling.maxDepth.default;
 
 export function createWikiCrawler(): WikiCrawler {
     // Article state tracking:
@@ -84,8 +85,8 @@ export function createWikiCrawler(): WikiCrawler {
     let currentBatchSize = 0;
 
     // Configuration
-    let linkLimit = DEFAULT_LINK_LIMIT;
-    let maxDepth = DEFAULT_MAX_DEPTH;
+    let linkLimit: number = DEFAULT_LINK_LIMIT;
+    let maxDepth: number = DEFAULT_MAX_DEPTH;
 
     // Event callbacks
     const articleCallbacks: Array<(article: WikiArticle) => void> = [];
@@ -116,6 +117,94 @@ export function createWikiCrawler(): WikiCrawler {
         lastRequestTime = Date.now();
     }
 
+    function parseRedirects(data: WikiApiResponse): Map<string, string> {
+        const redirectMap = new Map<string, string>();
+        if (data.query?.redirects) {
+            for (const redirect of data.query.redirects) {
+                redirectMap.set(redirect.from, redirect.to);
+            }
+        }
+        return redirectMap;
+    }
+
+    function buildReverseRedirectMap(redirectMap: Map<string, string>): Map<string, string[]> {
+        const reverseRedirects = new Map<string, string[]>();
+        for (const [from, to] of redirectMap) {
+            if (!reverseRedirects.has(to)) {
+                reverseRedirects.set(to, []);
+            }
+            reverseRedirects.get(to)!.push(from);
+        }
+        return reverseRedirects;
+    }
+
+    function normalizeCategory(category: string): string {
+        return category.replace(API_CONFIG.markers.categoryPrefix, '');
+    }
+
+    function mergePageData(
+        existing: WikiArticle,
+        page: { links?: Array<{ title: string }>; categories?: Array<{ title: string }> }
+    ): void {
+        const newLinks = (page.links ?? []).map(l => l.title);
+        existing.links.push(...newLinks);
+        const newCategories = (page.categories ?? []).map(c => normalizeCategory(c.title));
+        existing.categories.push(...newCategories);
+    }
+
+    function determineArticleDepth(
+        title: string,
+        reverseRedirects: Map<string, string[]>,
+        depthMap: Map<string, number>
+    ): number {
+        let articleDepth = depthMap.get(title);
+        if (articleDepth === undefined) {
+            const redirectSources = reverseRedirects.get(title) ?? [];
+            for (const source of redirectSources) {
+                const sourceDepth = depthMap.get(source);
+                if (sourceDepth !== undefined) {
+                    articleDepth = sourceDepth;
+                    break;
+                }
+            }
+        }
+        return articleDepth ?? 0;
+    }
+
+    function createArticleFromPage(
+        page: { title: string; links?: Array<{ title: string }>; categories?: Array<{ title: string }> },
+        reverseRedirects: Map<string, string[]>,
+        depthMap: Map<string, number>
+    ): WikiArticle {
+        const title = page.title;
+        const articleDepth = determineArticleDepth(title, reverseRedirects, depthMap);
+        const redirectSources = reverseRedirects.get(title) ?? [];
+
+        return {
+            title,
+            categories: (page.categories ?? []).map(c => normalizeCategory(c.title)),
+            links: (page.links ?? []).map(l => l.title),
+            depth: articleDepth,
+            aliases: redirectSources.length > 0 ? redirectSources : undefined
+        };
+    }
+
+    function emitArticleIfNew(
+        article: WikiArticle,
+        emittedArticles: Set<string>
+    ): void {
+        if (articles.has(article.title) || emittedArticles.has(article.title)) {
+            return;
+        }
+
+        articles.set(article.title, article);
+        for (const alias of article.aliases ?? []) {
+            articles.set(alias, article);
+        }
+        emittedArticles.add(article.title);
+        articleCallbacks.forEach(cb => cb(article));
+    }
+
     async function fetchArticles(titles: string[], depthMap: Map<string, number>): Promise<FetchResult> {
         const articleMap = new Map<string, WikiArticle>();
         const redirectMap = new Map<string, string>();
@@ -128,7 +217,6 @@ export function createWikiCrawler(): WikiCrawler {
         requestCallbacks.forEach(cb => cb(activeRequests, currentBatchSize));
 
         try {
-            // Keep fetching until all data is retrieved (handle pagination)
             do {
                 await waitForRateLimit();
 
@@ -149,71 +237,30 @@ export function createWikiCrawler(): WikiCrawler {
                 const response = await fetch(`${API_BASE}?${params}`);
                 const data: WikiApiResponse = await response.json();
 
-                // Parse redirects (only on first request)
-                if (isFirstPage && data.query?.redirects) {
-                    for (const redirect of data.query.redirects) {
-                        redirectMap.set(redirect.from, redirect.to);
+                // Parse redirects on first request
+                if (isFirstPage) {
+                    const newRedirects = parseRedirects(data);
+                    for (const [from, to] of newRedirects) {
+                        redirectMap.set(from, to);
                     }
                 }
 
                 // Build reverse redirect map for depth lookup
-                const reverseRedirects = new Map<string, string[]>();
-                for (const [from, to] of redirectMap) {
-                    if (!reverseRedirects.has(to)) {
-                        reverseRedirects.set(to, []);
-                    }
-                    reverseRedirects.get(to)!.push(from);
-                }
+                const reverseRedirects = buildReverseRedirectMap(redirectMap);
 
+                // Process each page in the response
                 if (data.query?.pages) {
                     for (const page of Object.values(data.query.pages)) {
                         if ('missing' in page) continue;
 
-                        const title = page.title;
-                        const existing = articleMap.get(title);
+                        const existing = articleMap.get(page.title);
 
                         if (existing) {
-                            // Merge links from continuation
-                            const newLinks = (page.links ?? []).map(l => l.title);
-                            existing.links.push(...newLinks);
-                            // Merge categories
-                            const newCategories = (page.categories ?? []).map(c => c.title.replace('Category:', ''));
-                            existing.categories.push(...newCategories);
+                            mergePageData(existing, page);
                         } else {
-                            // Determine depth from canonical title or redirect sources
-                            let articleDepth = depthMap.get(title);
-                            if (articleDepth === undefined) {
-                                const redirectSources = reverseRedirects.get(title) ?? [];
-                                for (const source of redirectSources) {
-                                    const sourceDepth = depthMap.get(source);
-                                    if (sourceDepth !== undefined) {
-                                        articleDepth = sourceDepth;
-                                        break;
-                                    }
-                                }
-                            }
-                            articleDepth = articleDepth ?? 0;
-
-                            const redirectSources = reverseRedirects.get(title) ?? [];
-
-                            const article: WikiArticle = {
-                                title,
-                                categories: (page.categories ?? []).map(c => c.title.replace('Category:', '')),
-                                links: (page.links ?? []).map(l => l.title),
-                                depth: articleDepth,
-                                aliases: redirectSources.length > 0 ? redirectSources : undefined
-                            };
-                            articleMap.set(title, article);
-
-                            // Emit article immediately so node appears
-                            if (!articles.has(title) && !emittedArticles.has(title)) {
-                                articles.set(title, article);
-                                for (const source of redirectSources) {
-                                    articles.set(source, article);
-                                }
-                                emittedArticles.add(title);
-                                articleCallbacks.forEach(cb => cb(article));
-                            }
+                            const article = createArticleFromPage(page, reverseRedirects, depthMap);
+                            articleMap.set(article.title, article);
+                            emitArticleIfNew(article, emittedArticles);
                         }
                     }
                 }
@@ -225,7 +272,7 @@ export function createWikiCrawler(): WikiCrawler {
                     ...(data.continue.clcontinue && { clcontinue: data.continue.clcontinue })
                 } : undefined;
 
-                // Report progress for each article after each pagination request
+                // Report progress for each article
                 const hasMoreLinks = !!data.continue?.plcontinue;
                 for (const article of articleMap.values()) {
                     fetchProgressCallbacks.forEach(cb => cb(article.title, article.links.length, !hasMoreLinks));
@@ -243,26 +290,122 @@ export function createWikiCrawler(): WikiCrawler {
         }
     }
 
+    function buildBatch(): QueueItem[] {
+        const batch: QueueItem[] = [];
+        const seenInBatch = new Set<string>();
+
+        while (batch.length < BATCH_SIZE && pendingQueue.length > 0) {
+            const item = pendingQueue.shift()!;
+            const alreadyFetched = articles.has(item.title);
+            const duplicateInBatch = seenInBatch.has(item.title);
+            const exceedsCurrentMaxDepth = item.depth > maxDepth;
+
+            if (!alreadyFetched && !duplicateInBatch && !exceedsCurrentMaxDepth) {
+                batch.push(item);
+                seenInBatch.add(item.title);
+            }
+        }
+
+        return batch;
+    }
+
+    function trackFetchedTitles(
+        fetched: WikiArticle[],
+        redirects: Map<string, string>
+    ): Set<string> {
+        const fetchedTitles = new Set<string>();
+        for (const article of fetched) {
+            fetchedTitles.add(article.title);
+        }
+        for (const [from] of redirects) {
+            fetchedTitles.add(from);
+        }
+        return fetchedTitles;
+    }
+
+    function processLinkDiscovery(article: WikiArticle, linkTitle: string): void {
+        const linkKey = `${article.title}|${linkTitle}`;
+        if (!links.has(linkKey)) {
+            links.add(linkKey);
+            linkCallbacks.forEach(cb => cb(article.title, linkTitle));
+        }
+    }
+
+    function createLeafArticle(linkTitle: string, depth: number): void {
+        if (articles.has(linkTitle)) return;
+
+        const leafArticle: WikiArticle = {
+            title: linkTitle,
+            categories: [],
+            links: [],
+            depth,
+            leaf: true
+        };
+        articles.set(linkTitle, leafArticle);
+        articleCallbacks.forEach(cb => cb(leafArticle));
+    }
+
+    function queueChildLinks(article: WikiArticle, selectedLinks: string[]): void {
+        const queuedLinks: string[] = [];
+        for (const linkTitle of selectedLinks) {
+            processLinkDiscovery(article, linkTitle);
+
+            if (shouldQueueArticle(linkTitle)) {
+                pendingQueue.push({ title: linkTitle, depth: article.depth + 1 });
+                queuedLinks.push(linkTitle);
+            }
+        }
+        if (queuedLinks.length > 0) {
+            linksQueuedCallbacks.forEach(cb => cb(article.title, queuedLinks));
+        }
+    }
+
+    function createLeafLinks(article: WikiArticle, selectedLinks: string[], childDepth: number): void {
+        for (const linkTitle of selectedLinks) {
+            processLinkDiscovery(article, linkTitle);
+            createLeafArticle(linkTitle, childDepth);
+        }
+    }
+
+    function processArticleLinks(article: WikiArticle): void {
+        const selectedLinks = shuffleArray(article.links).slice(0, linkLimit);
+        const childDepth = article.depth + 1;
+        const shouldQueueChildren = childDepth < maxDepth;
+
+        if (shouldQueueChildren) {
+            queueChildLinks(article, selectedLinks);
+        } else {
+            createLeafLinks(article, selectedLinks, childDepth);
+        }
+    }
+
+    function createMissingArticles(batch: QueueItem[], fetchedTitles: Set<string>): void {
+        const missingItems = batch.filter(item => !fetchedTitles.has(item.title));
+        if (missingItems.length === 0) return;
+
+        for (const item of missingItems) {
+            const placeholderArticle: WikiArticle = {
+                title: item.title,
+                categories: [],
+                links: [],
+                depth: item.depth,
+                missing: true
+            };
+            articles.set(item.title, placeholderArticle);
+            articleCallbacks.forEach(cb => cb(placeholderArticle));
+        }
+
+        const missingTitles = missingItems.map(item => item.title);
+        console.warn(`Missing Wikipedia articles: [${missingTitles.join(', ')}]`);
+        fetchFailedCallbacks.forEach(cb => cb(missingTitles));
+    }
+
     async function processQueue(): Promise<void> {
         while (running) {
-            // Build a batch of items to fetch (skip already-fetched articles)
-            const batch: QueueItem[] = [];
-            const seenInBatch = new Set<string>();
-
-            while (batch.length < BATCH_SIZE && pendingQueue.length > 0) {
-                const item = pendingQueue.shift()!;
-                const alreadyFetched = articles.has(item.title);
-                const duplicateInBatch = seenInBatch.has(item.title);
-                const exceedsCurrentMaxDepth = item.depth > maxDepth;
-
-                if (!alreadyFetched && !duplicateInBatch && !exceedsCurrentMaxDepth) {
-                    batch.push(item);
-                    seenInBatch.add(item.title);
-                }
-            }
+            const batch = buildBatch();
 
             if (batch.length === 0) {
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await new Promise(resolve => setTimeout(resolve, API_CONFIG.queuePollIntervalMs));
                 continue;
             }
 
@@ -271,95 +414,22 @@ export function createWikiCrawler(): WikiCrawler {
                 const depthMap = new Map(batch.map(item => [item.title, item.depth]));
 
                 // Mark as in-flight before fetching
-                for (const title of titles) {
-                    inFlight.add(title);
-                }
+                titles.forEach(title => inFlight.add(title));
 
                 const { articles: fetched, redirects } = await fetchArticles(titles, depthMap);
 
                 // Remove from in-flight after fetching
-                for (const title of titles) {
-                    inFlight.delete(title);
-                }
+                titles.forEach(title => inFlight.delete(title));
 
-                // Track which requested titles were successfully fetched
-                const fetchedTitles = new Set<string>();
-                for (const article of fetched) {
-                    fetchedTitles.add(article.title);
-                }
-                // Also count redirects as fetched (the source title resolved to a canonical title)
-                for (const [from] of redirects) {
-                    fetchedTitles.add(from);
-                }
+                // Track which titles were successfully fetched
+                const fetchedTitles = trackFetchedTitles(fetched, redirects);
 
-                // Queue child links for BFS continuation
-                for (const article of fetched) {
-                    const selectedLinks = shuffleArray(article.links).slice(0, linkLimit);
+                // Process links for each fetched article
+                fetched.forEach(processArticleLinks);
 
-                    // BFS depth check: only queue children if they would be below maxDepth
-                    const childDepth = article.depth + 1;
-                    const shouldQueueChildren = childDepth < maxDepth;
+                // Handle missing articles
+                createMissingArticles(batch, fetchedTitles);
 
-                    if (shouldQueueChildren) {
-                        const queuedLinks: string[] = [];
-                        for (const linkTitle of selectedLinks) {
-                            const linkKey = `${article.title}|${linkTitle}`;
-                            if (!links.has(linkKey)) {
-                                links.add(linkKey);
-                                linkCallbacks.forEach(cb => cb(article.title, linkTitle));
-
-                                if (shouldQueueArticle(linkTitle)) {
-                                    pendingQueue.push({ title: linkTitle, depth: article.depth + 1 });
-                                    queuedLinks.push(linkTitle);
-                                }
-                            }
-                        }
-                        if (queuedLinks.length > 0) {
-                            linksQueuedCallbacks.forEach(cb => cb(article.title, queuedLinks));
-                        }
-                    } else {
-                        // At max depth: create leaf nodes (no API call, just placeholders)
-                        for (const linkTitle of selectedLinks) {
-                            const linkKey = `${article.title}|${linkTitle}`;
-                            if (!links.has(linkKey)) {
-                                links.add(linkKey);
-                                linkCallbacks.forEach(cb => cb(article.title, linkTitle));
-
-                                // Create leaf if not already tracked
-                                if (!articles.has(linkTitle)) {
-                                    const leafArticle: WikiArticle = {
-                                        title: linkTitle,
-                                        categories: [],
-                                        links: [],
-                                        depth: childDepth,
-                                        leaf: true
-                                    };
-                                    articles.set(linkTitle, leafArticle);
-                                    articleCallbacks.forEach(cb => cb(leafArticle));
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Create placeholder nodes for missing articles (requested but not returned by API)
-                const missingItems = batch.filter(item => !fetchedTitles.has(item.title));
-                for (const item of missingItems) {
-                    const placeholderArticle: WikiArticle = {
-                        title: item.title,
-                        categories: [],
-                        links: [],
-                        depth: item.depth,
-                        missing: true
-                    };
-                    articles.set(item.title, placeholderArticle);
-                    articleCallbacks.forEach(cb => cb(placeholderArticle));
-                }
-                if (missingItems.length > 0) {
-                    const missingTitles = missingItems.map(item => item.title);
-                    console.warn(`Missing Wikipedia articles: [${missingTitles.join(', ')}]`);
-                    fetchFailedCallbacks.forEach(cb => cb(missingTitles));
-                }
             } catch (error) {
                 const failedTitles = batch.map(item => item.title);
                 console.error(`Failed to fetch batch [${failedTitles.join(', ')}]:`, error);
