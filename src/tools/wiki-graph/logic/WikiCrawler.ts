@@ -400,8 +400,6 @@ export function createWikiCrawler(): WikiCrawler {
             const article = articles.get(title);
             if (!article || article.leaf) return;  // Can't expand a leaf
 
-            console.log(`[WikiCrawler] expand(${title}) called | article.depth=${article.depth} | current maxDepth=${maxDepth}`);
-
             // Find unfetched links from this article
             const unfetchedLinks = article.links.filter(linkTitle => {
                 return !isAlreadyTracked(linkTitle);
@@ -413,8 +411,6 @@ export function createWikiCrawler(): WikiCrawler {
             // Check if children should be fetched or created as leafs
             const childDepth = 1;  // expand() always starts fresh BFS at depth 1
             const shouldFetchChildren = childDepth < maxDepth;
-
-            console.log(`[WikiCrawler] expand(${title}) | childDepth=${childDepth} | maxDepth=${maxDepth} | shouldFetchChildren=${shouldFetchChildren}`);
 
             for (const linkTitle of selectedLinks) {
                 const linkKey = `${article.title}|${linkTitle}`;
@@ -444,8 +440,6 @@ export function createWikiCrawler(): WikiCrawler {
                     }
                 }
             }
-
-            console.log(`[WikiCrawler] expand(${title}) queued ${queuedLinks.length} articles at depth 1`);
 
             if (queuedLinks.length > 0) {
                 linksQueuedCallbacks.forEach(cb => cb(article.title, queuedLinks));
@@ -486,7 +480,6 @@ export function createWikiCrawler(): WikiCrawler {
         },
         getLinkLimit: () => linkLimit,
         setMaxDepth: (depth: number) => {
-            console.log(`[WikiCrawler] setMaxDepth(${depth}) called | old value was ${maxDepth}`);
             maxDepth = depth;
         },
         getMaxDepth: () => maxDepth,
