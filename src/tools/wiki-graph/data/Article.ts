@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
+import { Text } from 'troika-three-text';
 import { NodeType } from '../scene/InstancedNodeManager';
 
 export interface WikiArticle {
@@ -18,7 +18,7 @@ export interface ArticleNode {
     article: WikiArticle;
     instanceIndex: number;
     instanceType: NodeType;
-    label: CSS2DObject;
+    label: Text;
     position: THREE.Vector3;
     velocity: THREE.Vector3;
 }

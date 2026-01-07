@@ -1,5 +1,5 @@
 import React, { useRef, useState, useMemo, useCallback, useEffect } from 'react';
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
+import { Text } from 'troika-three-text';
 import { ArticleNode, ArticleLink } from '../data/Article';
 import { createWikiCrawler, DEFAULT_LINK_LIMIT, DEFAULT_MAX_DEPTH } from '../logic/WikiCrawler';
 import { createForceSimulation } from '../logic/ForceSimulation';
@@ -12,11 +12,9 @@ import { createCameraAnimator, CameraAnimator } from '../logic/CameraAnimator';
 import { LoadingIndicator } from '../scene/LoadingIndicatorFactory';
 import { createInstancedNodeManager } from '../scene/InstancedNodeManager';
 import { createInstancedLinkManager } from '../scene/InstancedLinkManager';
-import { DEFAULT_CAMERA_DISTANCE } from '../scene/SceneManager';
 import { API_CONFIG } from '../config/apiConfig';
 import { UI_CONFIG } from '../config/uiConfig';
 import { LABEL_CONFIG } from '../config/labelConfig';
-import { SCENE_CONFIG } from '../config/sceneConfig';
 import { useThreeScene } from '../hooks/useThreeScene';
 import { useAnimationLoop } from '../hooks/useAnimationLoop';
 import { useMouseInteraction } from '../hooks/useMouseInteraction';
@@ -94,7 +92,7 @@ const Home: React.FC = () => {
     const loadingIndicatorsRef = useRef<Map<string, LoadingIndicator>>(new Map());
     const linkCountsRef = useRef<Map<string, LinkCount>>(new Map());
     const selectedArticleRef = useRef<string | null>(START_ARTICLE);
-    const statsLabelRef = useRef<CSS2DObject | null>(null);
+    const statsLabelRef = useRef<Text | null>(null);
     const cameraAnimatorRef = useRef<CameraAnimator | null>(null);
 
     // UI state
@@ -187,7 +185,7 @@ const Home: React.FC = () => {
         // Remove existing stats label
         if (statsLabelRef.current) {
             scene.remove(statsLabelRef.current);
-            statsLabelRef.current.element.remove();
+            statsLabelRef.current.dispose();
             statsLabelRef.current = null;
         }
 
@@ -211,15 +209,16 @@ const Home: React.FC = () => {
 
         const totalStr = isComplete ? String(totalLinks) : `${totalLinks}+`;
 
-        const statsDiv = document.createElement('div');
-        statsDiv.textContent = `(${visualizedLinks}/${totalStr})`;
-        statsDiv.style.color = LABEL_CONFIG.stats.color;
-        statsDiv.style.fontSize = '10px';
-        statsDiv.style.fontFamily = 'sans-serif';
-        statsDiv.style.textShadow = '1px 1px 2px black';
-        statsDiv.style.whiteSpace = 'nowrap';
+        const statsLabel = new Text();
+        statsLabel.text = `(${visualizedLinks}/${totalStr})`;
+        statsLabel.fontSize = 0.2;
+        statsLabel.color = LABEL_CONFIG.stats.color;
+        statsLabel.anchorX = 'center';
+        statsLabel.anchorY = 'bottom';
+        statsLabel.outlineWidth = 0.015;
+        statsLabel.outlineColor = 0x000000;
+        statsLabel.sync();
 
-        const statsLabel = new CSS2DObject(statsDiv);
         // Position in world space (will be updated in animation loop)
         if (node) {
             statsLabel.position.set(node.position.x, node.position.y + LABEL_CONFIG.stats.worldYOffset, node.position.z);
@@ -357,10 +356,7 @@ const Home: React.FC = () => {
         linksRef,
         loadingIndicatorsRef,
         statsLabelRef,
-        selectedArticleRef,
-        fogDensity: SCENE_CONFIG.fog.density,
-        baseDistance: DEFAULT_CAMERA_DISTANCE,
-        labelScaleFactor: LABEL_CONFIG.fog.scaleFactor
+        selectedArticleRef
     });
 
     // UI handlers

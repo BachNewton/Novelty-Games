@@ -27,8 +27,7 @@ export const LABEL_CONFIG = {
     textShadow: '1px 1px 2px black'
   },
 
-  fog: {
-    minOpacity: 0.01,
-    scaleFactor: 1
+  fade: {
+    minOpacity: 0.01
   }
 };

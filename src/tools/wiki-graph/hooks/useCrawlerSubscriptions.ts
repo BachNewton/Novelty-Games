@@ -9,7 +9,7 @@ import { InstancedNodeManager, NodeType } from '../scene/InstancedNodeManager';
 import { InstancedLinkManager } from '../scene/InstancedLinkManager';
 import { WikiArticle, ArticleNode, ArticleLink } from '../data/Article';
 import { API_CONFIG } from '../config/apiConfig';
-import { createNodeLabel } from '../util/labelUtils';
+import { createTroikaLabel } from '../util/troikaLabelUtils';
 
 interface LinkCount {
     count: number;
@@ -165,7 +165,7 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
         ): void {
             // Remove the old label
             scene.remove(existingNode.label);
-            existingNode.label.element.remove();
+            existingNode.label.dispose();
 
             // Hide the old cone instance
             nodeManager.hideInstance(existingNode.instanceType, existingNode.instanceIndex);
@@ -176,7 +176,7 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
             const nodeType = getNodeType(article);
             const instanceIndex = nodeManager.addNode(nodeType, color);
 
-            const label = createNodeLabel(article.title, false, article.missing === true);
+            const label = createTroikaLabel(article.title, false, article.missing === true);
             scene.add(label);
 
             // Update existing node
@@ -214,7 +214,7 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
             }
 
             const instanceIndex = nodeManager.addNode(nodeType, color);
-            const label = createNodeLabel(article.title, article.leaf === true, article.missing === true);
+            const label = createTroikaLabel(article.title, article.leaf === true, article.missing === true);
             scene.add(label);
 
             const node: ArticleNode = {

@@ -8,14 +8,53 @@ Post-cleanup code review with recommendations for future improvements.
 |------|---------------|
 | Remove unused code/files | Deleted `LinkFactory.ts`, `NodeFactory.ts`, removed `CrawlState` interface |
 | Extract magic numbers to config | Created 9 config files organized by feature (nodeConfig, linkConfig, sceneConfig, etc.) |
-| Reduce code duplication | Created `labelUtils.ts` to consolidate label creation |
+| Reduce code duplication | Created `troikaLabelUtils.ts` to consolidate label creation |
 | Reduce excessive nesting | Extracted `promoteLeafToFullNode()` and `createNewArticleNode()` from 92-line callback |
 | Review/update comments | Verified all comments accurate; found and fixed `CONFIG` -> `NODE_CONFIG` bug |
+| Fix O(n²) cone orientation | Replaced `links.find()` with pre-built Map lookup in animation loop |
+| Replace CSS2D with troika-three-text | Switched from DOM-based labels to GPU-rendered SDF text |
 
-**Files deleted**: 2 (LinkFactory.ts, NodeFactory.ts)
-**Files created**: 10 (9 config files + labelUtils.ts)
-**Files modified**: 13
-**Net lines reduced**: ~100-150
+**Files deleted**: 3 (LinkFactory.ts, NodeFactory.ts, labelUtils.ts)
+**Files created**: 11 (9 config files + troikaLabelUtils.ts + troika type declarations)
+**Files modified**: 15
+
+## Performance Improvements
+
+### Labels: CSS2D to Troika Migration
+
+**Problem**: CSS2DRenderer created a DOM element per label. At 1000 nodes, this caused severe layout thrashing—dropping to 9 FPS with only 15% CPU/GPU usage (browser blocked on DOM operations).
+
+**Solution**: Replaced with troika-three-text (SDF-based GPU text rendering).
+
+**Results at 1000 nodes (physics disabled):**
+| Label System | FPS | Cost vs baseline |
+|--------------|-----|------------------|
+| None | 60 | - |
+| CSS2D | 9 | -51 FPS |
+| Troika | 28 | -32 FPS |
+
+Troika is 3x faster than CSS2D. The remaining 32 FPS cost comes from per-frame updates (position, quaternion for billboarding, opacity for distance fade).
+
+### Cone Orientation: O(n²) to O(n)
+
+**Problem**: Each frame called `links.find()` inside the node loop to orient cone meshes—O(articles × links) complexity.
+
+**Solution**: Build a lookup Map once per frame, then O(1) lookups.
+
+```typescript
+// Before: O(n²)
+const incomingLink = links.find(l => l.target === title && l.linkType === 'directional');
+
+// After: O(n)
+const directionalLinkSources = new Map<string, string>();
+for (const link of links) {
+    if (link.linkType === 'directional') {
+        directionalLinkSources.set(link.target, link.source);
+    }
+}
+// Then O(1) lookup per cone
+const sourceTitle = directionalLinkSources.get(title);
+```
 
 ## Current Strengths
 
@@ -23,6 +62,7 @@ Post-cleanup code review with recommendations for future improvements.
 2. **Clear Directory Structure** - config/, data/, hooks/, logic/, scene/, ui/, util/
 3. **Good TypeScript Usage** - Proper interfaces, no `any` types, union types for variants
 4. **Instanced Mesh Implementation** - Correct batching and GPU updates
+5. **GPU-based Labels** - Troika SDF text scales better than DOM elements
 
 ## Architectural Issues
 
@@ -42,7 +82,7 @@ if (pos) {
 
 ### 2. Ref-Heavy Architecture
 
-`Home.tsx:82-89` creates 7 refs passed through hooks as mutable global state:
+`Home.tsx` creates 7 refs passed through hooks as mutable global state:
 
 ```typescript
 const articlesRef = useRef<Map<string, ArticleNode>>(new Map());
@@ -51,70 +91,12 @@ const pendingLinksRef = useRef<Map<string, Set<string>>>(new Map());
 const loadingIndicatorsRef = useRef<Map<string, LoadingIndicator>>(new Map());
 const linkCountsRef = useRef<Map<string, LinkCount>>(new Map());
 const selectedArticleRef = useRef<string | null>(START_ARTICLE);
-const statsLabelRef = useRef<CSS2DObject | null>(null);
+const statsLabelRef = useRef<Text | null>(null);
 ```
 
 **Impact**: Hard to trace data flow, prevents React re-renders, implicit dependencies, untestable.
 
 **Fix**: Create a dedicated `GraphState` container managed outside React (context + reducer, or Zustand).
-
-#### Solution Options
-
-**React Context** (built-in): Share state without prop drilling. Downside: all consumers re-render when any part of state changes unless you split contexts or memoize carefully.
-
-**Zustand** (recommended): Lightweight state library (~1KB). Creates a store outside React that components subscribe to selectively.
-
-```typescript
-// src/tools/wiki-graph/state/graphStore.ts
-import { create } from 'zustand';
-import { ArticleNode, ArticleLink } from '../data/Article';
-import { LoadingIndicator } from '../scene/LoadingIndicatorFactory';
-
-interface LinkCount {
-    count: number;
-    isComplete: boolean;
-}
-
-interface GraphState {
-    articles: Map<string, ArticleNode>;
-    links: ArticleLink[];
-    pendingLinks: Map<string, Set<string>>;
-    loadingIndicators: Map<string, LoadingIndicator>;
-    linkCounts: Map<string, LinkCount>;
-    selectedArticle: string | null;
-}
-
-export const useGraphStore = create<GraphState>(() => ({
-    articles: new Map(),
-    links: [],
-    pendingLinks: new Map(),
-    loadingIndicators: new Map(),
-    linkCounts: new Map(),
-    selectedArticle: null
-}));
-```
-
-Usage:
-```typescript
-// In hooks/controller (non-reactive)
-const articles = useGraphStore.getState().articles;
-
-// In React components (reactive, selective)
-const selectedArticle = useGraphStore(state => state.selectedArticle);
-```
-
-#### Complexity Comparison
-
-| | Current (refs) | With Zustand |
-|--|----------------|--------------|
-| Dependencies | 0 | +1 small lib (~1KB) |
-| Lines of code | ~same | ~same |
-| Works now | Yes | Yes |
-| Testable | No | Yes |
-| Type-safe | With `!` hacks | Fully |
-| Learning curve | None | ~30 min |
-
-The current ref approach works. This refactor is about future maintainability, not fixing something broken.
 
 ### 3. Business Logic in Hooks
 
@@ -128,94 +110,39 @@ The current ref approach works. This refactor is about future maintainability, n
 
 **Impact**: Untestable, hard to reason about, React lifecycle tangled with business logic.
 
-**Fix**: Extract a plain TypeScript `GraphController` that:
-- Owns all graph mutation logic
-- Has no React dependencies
-- Emits events or updates state that React subscribes to
-
-```typescript
-// Example structure
-export interface GraphController {
-    handleArticleFetched: (article: WikiArticle) => void;
-    handleLinkDiscovered: (source: string, target: string) => void;
-    dispose: () => void;
-}
-
-export function createGraphController(
-    simulation: ForceSimulation,
-    nodeManager: InstancedNodeManager,
-    // ...other dependencies
-): GraphController {
-    // All business logic here
-}
-```
-
-The hook becomes just wiring:
-```typescript
-useEffect(() => {
-    const controller = createGraphController(...);
-    crawler.onArticleFetched(controller.handleArticleFetched);
-    return () => controller.dispose();
-}, []);
-```
+**Fix**: Extract a plain TypeScript `GraphController` that owns all graph mutation logic with no React dependencies.
 
 ### 4. Non-Null Assertions
 
 Patterns throughout the codebase assume refs/maps are always populated:
 
 ```typescript
-const articles = articlesRef.current!;  // useCrawlerSubscriptions.ts:104
-const data = meshes.get(type)!;         // InstancedLinkManager.ts:118
-nodes.get(nodeIds[i])!;                 // ForceSimulation.ts:88
+const articles = articlesRef.current!;  // useCrawlerSubscriptions.ts
+const data = meshes.get(type)!;         // InstancedLinkManager.ts
+nodes.get(nodeIds[i])!;                 // ForceSimulation.ts
 ```
 
 **Impact**: Silent runtime failures if assumptions break.
 
 **Fix**: Use early returns with null checks, or document why assertion is safe.
 
-**Note**: This issue is largely solved by fixing #2 (Ref-Heavy Architecture). The non-null assertions exist because `RefObject<T>.current` is typed as `T | null`. A `GraphState` container with concrete types eliminates most of these—you'd have one ref holding the container instead of seven nullable refs.
+### 5. O(n²) Physics
 
-### 5. O(n^2) Physics
+`ForceSimulation.applyRepulsionForces` compares every node pair. With 1000 nodes, that's ~500,000 comparisons per frame.
 
-`ForceSimulation.applyRepulsionForces` compares every node pair. With `nodeLimit: 500`, that's 124,750 comparisons per frame. There's already a TODO acknowledging this (`ForceSimulation.ts:162-164`):
-
-```typescript
-// TODO: O(n²) repulsion is too expensive for large graphs.
-// Consider: Barnes-Hut algorithm (O(n log n)), spatial partitioning,
-// or Web Workers for parallel computation.
-```
-
-**Impact**: CPU bottleneck before visual density limits.
+**Impact**: At 1000 nodes, physics alone costs ~25 FPS.
 
 **Fix**: Implement Barnes-Hut algorithm (octree-based O(n log n)) or use d3-force-3d.
 
-### 6. DOM Labels Don't Scale
+## Future Label Optimizations
 
-`CSS2DRenderer` creates a DOM element per label. 500+ absolutely-positioned elements restyled every frame will strain the browser.
+The troika migration improved label performance from 9 to 28 FPS, but there's still room for optimization:
 
-**Impact**: Layout thrashing at scale.
-
-**Fix**: Consider SDF text (troika-three-text), sprite-based labels, or more aggressive culling.
-
-## Is This Idiomatic TypeScript?
-
-**Mostly yes.** The code follows TypeScript conventions:
-- Interface-first design
-- Proper generic usage
-- No `any` escape hatches
-- Good use of union types
-
-**But** the React patterns are non-idiomatic. Heavy ref usage, massive hooks, and mutable Maps/Sets passed around aren't how modern React applications are typically structured. The TypeScript is good; the React architecture needs work.
-
-## When These Issues Matter
-
-These architectural issues become blockers when you want to:
-- **Support 1000+ nodes** - O(n^2) physics and DOM labels will struggle
-- **Add features like filtering, search, undo/redo** - Ref-heavy architecture makes state management painful
-- **Write tests** - Business logic buried in hooks is nearly impossible to unit test
-- **Onboard other contributors** - Data flow through closures and refs is hard to trace
-
-For the current scope (interactive Wikipedia graph exploration), the code works fine. These are investments for future growth.
+1. **Frustum culling** - Skip updating labels outside the camera view
+2. **Distance culling before position update** - Currently we set position then check distance; could check distance first
+3. **Reduce per-frame opacity updates** - Only update opacity when distance changes significantly
+4. **Batch quaternion updates** - All labels share the same billboard orientation; could update once
+5. **LOD for labels** - Hide labels entirely beyond a threshold, show only on hover
 
 ## Priority Recommendations
 
@@ -224,40 +151,9 @@ For the current scope (interactive Wikipedia graph exploration), the code works 
 | 1 | Extract `GraphController` from hooks | Medium | High |
 | 2 | Remove duplicate position/velocity from `ArticleNode` | Low | High |
 | 3 | Create centralized `GraphState` type | Low | Medium |
-| 4 | Replace O(n^2) physics with Barnes-Hut | High | Medium |
-
-## Config Design Review
-
-The cleanup created 9 feature-based config files. Here's an honest assessment:
-
-**What Works Well:**
-- Feature-based separation makes sense. Changing node geometry doesn't require touching link config.
-- Values are colocated with their domain. Finding "link opacity" means looking in `linkConfig.ts`, not scrolling through a 200-line monolith.
-
-**What's Awkward:**
-
-1. **Color fragmentation** - Colors are scattered across 4 files:
-   ```
-   nodeConfig.ts    → node colors
-   linkConfig.ts    → link colors
-   labelConfig.ts   → label colors
-   uiConfig.ts      → UI colors
-   ```
-   If you want to change the app's color palette, you're editing 4 files. A single `colors.ts` might be cleaner.
-
-2. **Some files are tiny** - `animationConfig.ts` has ~10 values. `loadingIndicatorConfig.ts` has ~8. These could arguably be folded into their parent domain (scene, node).
-
-**Alternative Structure (4-5 files instead of 9):**
-- `geometry.ts` - all shapes (nodes, links, loading indicators)
-- `colors.ts` - all colors in one place
-- `physics.ts` - simulation parameters
-- `api.ts` - Wikipedia API config
-- `ui.ts` - panel layout, fonts, etc.
-
-**Verdict:** The current design is functional and organized, just more granular than necessary. Not worth refactoring unless color fragmentation becomes painful in practice.
+| 4 | Replace O(n²) physics with Barnes-Hut | High | Medium |
+| 5 | Further label optimizations (frustum culling, etc.) | Medium | Medium |
 
 ## Summary
 
-The codebase is functional and maintainable at current scope. The cleanup (config organization, dead code removal, function extraction) established a solid foundation.
-
-However, the ref-heavy, hook-centric architecture has scaling limits. Before adding features like filtering, search, undo/redo, or supporting 1000+ nodes, the business logic should be extracted from React into testable, standalone modules.
+The codebase is functional and maintainable at current scope. Recent performance work (troika labels, cone orientation fix) improved scalability significantly. The ref-heavy, hook-centric architecture remains the main technical debt for future feature development.

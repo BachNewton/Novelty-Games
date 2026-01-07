@@ -1,6 +1,6 @@
 import { useEffect, useRef, RefObject } from 'react';
 import * as THREE from 'three';
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer';
+import { Text } from 'troika-three-text';
 import { SceneManager } from '../scene/SceneManager';
 import { ForceSimulation } from '../logic/ForceSimulation';
 import { CameraAnimator } from '../logic/CameraAnimator';
@@ -10,6 +10,7 @@ import { InstancedNodeManager } from '../scene/InstancedNodeManager';
 import { InstancedLinkManager } from '../scene/InstancedLinkManager';
 import { ANIMATION_CONFIG } from '../config/animationConfig';
 import { LABEL_CONFIG } from '../config/labelConfig';
+import { SCENE_CONFIG } from '../config/sceneConfig';
 
 interface AnimationDeps {
     sceneManager: SceneManager | null;
@@ -20,11 +21,8 @@ interface AnimationDeps {
     articlesRef: RefObject<Map<string, ArticleNode>>;
     linksRef: RefObject<ArticleLink[]>;
     loadingIndicatorsRef: RefObject<Map<string, LoadingIndicator>>;
-    statsLabelRef: RefObject<CSS2DObject | null>;
+    statsLabelRef: RefObject<Text | null>;
     selectedArticleRef: RefObject<string | null>;
-    fogDensity: number;
-    baseDistance: number;
-    labelScaleFactor: number;
 }
 
 // Reusable quaternion for cone orientation
@@ -32,41 +30,41 @@ const tempQuaternion = new THREE.Quaternion();
 const tempDirection = new THREE.Vector3();
 const upVector = new THREE.Vector3(0, 0, -1); // Cone points in -Z
 
+// Label fade constants derived from config
+const BASE_DISTANCE = SCENE_CONFIG.camera.defaultDistance;
+const FOG_DENSITY = SCENE_CONFIG.fog.density;
+const MIN_OPACITY = LABEL_CONFIG.fade.minOpacity;
+const MAX_DISTANCE_BEYOND_BASE = Math.sqrt(-Math.log(MIN_OPACITY) / FOG_DENSITY);
+const MAX_LABEL_DISTANCE = BASE_DISTANCE + MAX_DISTANCE_BEYOND_BASE;
+
 export function useAnimationLoop(deps: AnimationDeps): void {
     const previousTimeRef = useRef(0);
 
     useEffect(() => {
         const {
             sceneManager, simulation, cameraAnimator, nodeManager, linkManager,
-            articlesRef, linksRef, loadingIndicatorsRef, statsLabelRef, selectedArticleRef,
-            fogDensity, baseDistance, labelScaleFactor
+            articlesRef, linksRef, loadingIndicatorsRef, statsLabelRef, selectedArticleRef
         } = deps;
 
         if (!sceneManager) return;
 
-        const { scene, camera, renderer, labelRenderer, controls, stats } = sceneManager.getComponents();
+        const { scene, camera, renderer, controls, stats } = sceneManager.getComponents();
 
-        // Derive max visible distance from fog formula once (constant for the session)
-        // opacity = exp(-d² * fogDensity), solve for d when opacity = minOpacity
-        const minOpacity = LABEL_CONFIG.fog.minOpacity;
-        const maxDistanceBeyondBase = Math.sqrt(-Math.log(minOpacity) / fogDensity);
-        const maxLabelDistance = baseDistance + maxDistanceBeyondBase;
-
-        function updateLabel(label: CSS2DObject, pos: THREE.Vector3, yOffset: number, baseFontSize: number): void {
+        function updateTroikaLabel(label: Text, pos: THREE.Vector3, yOffset: number): void {
             const distance = camera.position.distanceTo(pos);
 
-            if (distance < maxLabelDistance) {
+            if (distance < MAX_LABEL_DISTANCE) {
                 label.position.set(pos.x, pos.y + yOffset, pos.z);
                 label.visible = true;
 
-                const scale = (baseDistance / distance) * labelScaleFactor;
-                const distanceBeyondBase = Math.max(0, distance - baseDistance);
-                const opacity = Math.exp(-distanceBeyondBase * distanceBeyondBase * fogDensity);
+                // Billboard: face camera
+                label.quaternion.copy(camera.quaternion);
 
-                if (label.element) {
-                    label.element.style.opacity = String(opacity);
-                    label.element.style.fontSize = `${baseFontSize * scale}px`;
-                }
+                // Fade based on distance
+                const distanceBeyondBase = Math.max(0, distance - BASE_DISTANCE);
+                const opacity = Math.exp(-distanceBeyondBase * distanceBeyondBase * FOG_DENSITY);
+                label.fillOpacity = opacity;
+                label.outlineOpacity = opacity;
             } else {
                 label.visible = false;
             }
@@ -99,8 +97,8 @@ export function useAnimationLoop(deps: AnimationDeps): void {
                     // Update instance position
                     nodeManager.setPosition(node.instanceType, node.instanceIndex, pos);
 
-                    // Update title label with fog/scale effects
-                    updateLabel(node.label, pos, LABEL_CONFIG.title.yOffset, LABEL_CONFIG.title.baseFontSize);
+                    // Update label position and fade
+                    updateTroikaLabel(node.label, pos, LABEL_CONFIG.title.yOffset);
 
                     // Orient cones toward their source node
                     if (node.instanceType === 'cone') {
@@ -148,14 +146,13 @@ export function useAnimationLoop(deps: AnimationDeps): void {
             if (statsLabel && selectedTitle) {
                 const selectedNode = articles.get(selectedTitle);
                 if (selectedNode) {
-                    updateLabel(statsLabel, selectedNode.position, LABEL_CONFIG.stats.yOffset, LABEL_CONFIG.stats.baseFontSize);
+                    updateTroikaLabel(statsLabel, selectedNode.position, LABEL_CONFIG.stats.yOffset);
                 }
             }
 
             cameraAnimator?.update(deltaTime);
             controls.update();
             renderer.render(scene, camera);
-            labelRenderer.render(scene, camera);
             stats.update();
         }
 

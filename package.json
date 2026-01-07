@@ -23,6 +23,7 @@
     "suncalc": "^1.9.0",
     "three": "^0.169.0",
     "three-to-cannon": "^5.0.2",
+    "troika-three-text": "^0.52.4",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4",
     "workbox-background-sync": "^6.6.0",
