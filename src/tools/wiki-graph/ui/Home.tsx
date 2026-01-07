@@ -116,7 +116,7 @@ const Home: React.FC = () => {
     const [damping, setDamping] = useState(PHYSICS_CONTROLS.damping.default);
     const [maxVelocity, setMaxVelocity] = useState(PHYSICS_CONTROLS.maxVelocity.default);
     const [nodeLimit, setNodeLimit] = useState(PHYSICS_CONTROLS.nodeLimit.default);
-    const [forceUnstable, setForceUnstable] = useState(false);
+    const [forceUnstable, setForceUnstable] = useState(true);
 
     // Network mode state
     const [useMockData, setUseMockData] = useState(false);

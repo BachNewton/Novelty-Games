@@ -47,7 +47,7 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
     const nodes = new Map<string, SimNode>();
     const links: Array<{ source: string; target: string }> = [];
     let stable = false;
-    let forceUnstable = false;
+    let forceUnstable = true;
 
     function randomPosition(): THREE.Vector3 {
         const range = PHYSICS_CONFIG.initialSpawnRange;
