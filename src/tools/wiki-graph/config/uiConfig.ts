@@ -18,4 +18,4 @@ export const UI_CONFIG = {
     border: '#ff4444',
     text: '#ff4444'
   }
-} as const;
+};

@@ -19,4 +19,4 @@ export const LINK_CONFIG = {
   capacity: {
     initial: 5000
   }
-} as const;
+};

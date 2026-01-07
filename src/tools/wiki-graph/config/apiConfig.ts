@@ -5,6 +5,15 @@ export const API_CONFIG = {
     batchSize: 20
   },
 
+  mock: {
+    delay: {
+      default: 20,
+      min: 0,
+      max: 2000,
+      step: 10
+    }
+  },
+
   queuePollIntervalMs: 100,
 
   crawling: {
@@ -25,4 +34,4 @@ export const API_CONFIG = {
     pagination: '__pagination__',
     categoryPrefix: 'Category:'
   }
-} as const;
+};

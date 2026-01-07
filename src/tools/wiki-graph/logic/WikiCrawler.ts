@@ -1,8 +1,8 @@
 import { WikiArticle } from '../data/Article';
 import { API_CONFIG } from '../config/apiConfig';
+import { WikiFetcher } from './networking/WikiFetcher';
+import { createRealWikiFetcher } from './networking/RealWikiFetcher';
 
-const API_BASE = API_CONFIG.wikipedia.baseUrl;
-const RATE_LIMIT_MS = API_CONFIG.wikipedia.rateLimitMs;
 const BATCH_SIZE = API_CONFIG.wikipedia.batchSize;
 
 export interface WikiCrawler {
@@ -28,26 +28,6 @@ export interface WikiCrawler {
     onFetchProgress: (callback: (title: string, linkCount: number, isComplete: boolean) => void) => void;
 }
 
-interface WikiApiResponse {
-    query?: {
-        redirects?: Array<{ from: string; to: string }>;
-        pages?: Record<string, {
-            title: string;
-            categories?: Array<{ title: string }>;
-            links?: Array<{ title: string }>;
-        }>;
-    };
-    continue?: {
-        continue?: string;
-        plcontinue?: string;
-        clcontinue?: string;
-    };
-}
-
-interface FetchResult {
-    articles: WikiArticle[];
-    redirects: Map<string, string>;  // from → to
-}
 
 interface QueueItem {
     title: string;
@@ -66,7 +46,8 @@ function shuffleArray<T>(array: T[]): T[] {
 export const DEFAULT_LINK_LIMIT = API_CONFIG.crawling.linkLimit.default;
 export const DEFAULT_MAX_DEPTH = API_CONFIG.crawling.maxDepth.default;
 
-export function createWikiCrawler(): WikiCrawler {
+export function createWikiCrawler(fetcher?: WikiFetcher): WikiCrawler {
+    const wikiFetcher = fetcher ?? createRealWikiFetcher();
     // Article state tracking:
     // - articles: Already fetched articles (title -> article)
     // - inFlight: Currently being fetched (prevents duplicate requests, handles React StrictMode double-mount)
@@ -81,12 +62,11 @@ export function createWikiCrawler(): WikiCrawler {
     // Crawler state
     let running = false;
     let activeRequests = 0;
-    let lastRequestTime = 0;
     let currentBatchSize = 0;
 
     // Configuration
-    let linkLimit: number = DEFAULT_LINK_LIMIT;
-    let maxDepth: number = DEFAULT_MAX_DEPTH;
+    let linkLimit = DEFAULT_LINK_LIMIT;
+    let maxDepth = DEFAULT_MAX_DEPTH;
 
     // Event callbacks
     const articleCallbacks: Array<(article: WikiArticle) => void> = [];
@@ -108,92 +88,8 @@ export function createWikiCrawler(): WikiCrawler {
         return !isAlreadyTracked(title) && !isInPendingQueue(title);
     }
 
-    async function waitForRateLimit(): Promise<void> {
-        const now = Date.now();
-        const elapsed = now - lastRequestTime;
-        if (elapsed < RATE_LIMIT_MS) {
-            await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_MS - elapsed));
-        }
-        lastRequestTime = Date.now();
-    }
-
-    function parseRedirects(data: WikiApiResponse): Map<string, string> {
-        const redirectMap = new Map<string, string>();
-        if (data.query?.redirects) {
-            for (const redirect of data.query.redirects) {
-                redirectMap.set(redirect.from, redirect.to);
-            }
-        }
-        return redirectMap;
-    }
-
-    function buildReverseRedirectMap(redirectMap: Map<string, string>): Map<string, string[]> {
-        const reverseRedirects = new Map<string, string[]>();
-        for (const [from, to] of redirectMap) {
-            if (!reverseRedirects.has(to)) {
-                reverseRedirects.set(to, []);
-            }
-            reverseRedirects.get(to)!.push(from);
-        }
-        return reverseRedirects;
-    }
-
-    function normalizeCategory(category: string): string {
-        return category.replace(API_CONFIG.markers.categoryPrefix, '');
-    }
-
-    function mergePageData(
-        existing: WikiArticle,
-        page: { links?: Array<{ title: string }>; categories?: Array<{ title: string }> }
-    ): void {
-        const newLinks = (page.links ?? []).map(l => l.title);
-        existing.links.push(...newLinks);
-        const newCategories = (page.categories ?? []).map(c => normalizeCategory(c.title));
-        existing.categories.push(...newCategories);
-    }
-
-    function determineArticleDepth(
-        title: string,
-        reverseRedirects: Map<string, string[]>,
-        depthMap: Map<string, number>
-    ): number {
-        let articleDepth = depthMap.get(title);
-        if (articleDepth === undefined) {
-            const redirectSources = reverseRedirects.get(title) ?? [];
-            for (const source of redirectSources) {
-                const sourceDepth = depthMap.get(source);
-                if (sourceDepth !== undefined) {
-                    articleDepth = sourceDepth;
-                    break;
-                }
-            }
-        }
-        return articleDepth ?? 0;
-    }
-
-    function createArticleFromPage(
-        page: { title: string; links?: Array<{ title: string }>; categories?: Array<{ title: string }> },
-        reverseRedirects: Map<string, string[]>,
-        depthMap: Map<string, number>
-    ): WikiArticle {
-        const title = page.title;
-        const articleDepth = determineArticleDepth(title, reverseRedirects, depthMap);
-        const redirectSources = reverseRedirects.get(title) ?? [];
-
-        return {
-            title,
-            categories: (page.categories ?? []).map(c => normalizeCategory(c.title)),
-            links: (page.links ?? []).map(l => l.title),
-            depth: articleDepth,
-            aliases: redirectSources.length > 0 ? redirectSources : undefined
-        };
-    }
-
-    function emitArticleIfNew(
-        article: WikiArticle,
-        emittedArticles: Set<string>
-    ): void {
-        if (articles.has(article.title) || emittedArticles.has(article.title)) {
+    function storeArticle(article: WikiArticle): void {
+        if (articles.has(article.title)) {
             return;
         }
 
@@ -201,93 +97,7 @@ export function createWikiCrawler(): WikiCrawler {
         for (const alias of article.aliases ?? []) {
             articles.set(alias, article);
         }
-        emittedArticles.add(article.title);
         articleCallbacks.forEach(cb => cb(article));
-    }
-
-    async function fetchArticles(titles: string[], depthMap: Map<string, number>): Promise<FetchResult> {
-        const articleMap = new Map<string, WikiArticle>();
-        const redirectMap = new Map<string, string>();
-        const emittedArticles = new Set<string>();
-        let continueParams: Record<string, string> | undefined;
-        let isFirstPage = true;
-
-        activeRequests++;
-        currentBatchSize = titles.length;
-        requestCallbacks.forEach(cb => cb(activeRequests, currentBatchSize));
-
-        try {
-            do {
-                await waitForRateLimit();
-
-                const params = new URLSearchParams({
-                    action: 'query',
-                    titles: titles.join('|'),
-                    prop: 'links|categories',
-                    pllimit: 'max',
-                    plnamespace: '0',
-                    clshow: '!hidden',
-                    cllimit: 'max',
-                    redirects: '1',
-                    format: 'json',
-                    origin: '*',
-                    ...continueParams
-                });
-
-                const response = await fetch(`${API_BASE}?${params}`);
-                const data: WikiApiResponse = await response.json();
-
-                // Parse redirects on first request
-                if (isFirstPage) {
-                    const newRedirects = parseRedirects(data);
-                    for (const [from, to] of newRedirects) {
-                        redirectMap.set(from, to);
-                    }
-                }
-
-                // Build reverse redirect map for depth lookup
-                const reverseRedirects = buildReverseRedirectMap(redirectMap);
-
-                // Process each page in the response
-                if (data.query?.pages) {
-                    for (const page of Object.values(data.query.pages)) {
-                        if ('missing' in page) continue;
-
-                        const existing = articleMap.get(page.title);
-
-                        if (existing) {
-                            mergePageData(existing, page);
-                        } else {
-                            const article = createArticleFromPage(page, reverseRedirects, depthMap);
-                            articleMap.set(article.title, article);
-                            emitArticleIfNew(article, emittedArticles);
-                        }
-                    }
-                }
-
-                // Check for continuation
-                continueParams = data.continue ? {
-                    continue: data.continue.continue ?? '',
-                    ...(data.continue.plcontinue && { plcontinue: data.continue.plcontinue }),
-                    ...(data.continue.clcontinue && { clcontinue: data.continue.clcontinue })
-                } : undefined;
-
-                // Report progress for each article
-                const hasMoreLinks = !!data.continue?.plcontinue;
-                for (const article of articleMap.values()) {
-                    fetchProgressCallbacks.forEach(cb => cb(article.title, article.links.length, !hasMoreLinks));
-                }
-
-                isFirstPage = false;
-
-            } while (continueParams);
-
-            return { articles: Array.from(articleMap.values()), redirects: redirectMap };
-        } finally {
-            activeRequests--;
-            currentBatchSize = 0;
-            requestCallbacks.forEach(cb => cb(activeRequests, currentBatchSize));
-        }
     }
 
     function buildBatch(): QueueItem[] {
@@ -416,24 +226,60 @@ export function createWikiCrawler(): WikiCrawler {
                 // Mark as in-flight before fetching
                 titles.forEach(title => inFlight.add(title));
 
-                const { articles: fetched, redirects } = await fetchArticles(titles, depthMap);
+                // Track active requests
+                activeRequests++;
+                currentBatchSize = titles.length;
+                const currentActive = activeRequests;
+                const currentSize = currentBatchSize;
+                requestCallbacks.forEach(cb => cb(currentActive, currentSize));
 
-                // Remove from in-flight after fetching
-                titles.forEach(title => inFlight.delete(title));
+                try {
+                    // Use injected fetcher to fetch articles
+                    const { articles: fetched, redirects } = await wikiFetcher.fetchArticles(
+                        titles,
+                        depthMap,
+                        {
+                            // Emit articles early so nodes appear during pagination
+                            onArticle: (article) => {
+                                storeArticle(article);
+                            },
+                            // Report progress during pagination
+                            onProgress: (title, linkCount, isComplete) => {
+                                fetchProgressCallbacks.forEach(cb => cb(title, linkCount, isComplete));
+                            }
+                        }
+                    );
 
-                // Track which titles were successfully fetched
-                const fetchedTitles = trackFetchedTitles(fetched, redirects);
+                    // Store any remaining articles (e.g., if callbacks weren't used)
+                    fetched.forEach(storeArticle);
 
-                // Process links for each fetched article
-                fetched.forEach(processArticleLinks);
+                    // Track which titles were successfully fetched
+                    const fetchedTitles = trackFetchedTitles(fetched, redirects);
 
-                // Handle missing articles
-                createMissingArticles(batch, fetchedTitles);
+                    // Process links for each fetched article
+                    fetched.forEach(processArticleLinks);
 
+                    // Handle missing articles
+                    createMissingArticles(batch, fetchedTitles);
+
+                } catch (error) {
+                    const failedTitles = batch.map(item => item.title);
+                    console.error(`Failed to fetch batch [${failedTitles.join(', ')}]:`, error);
+                    fetchFailedCallbacks.forEach(cb => cb(failedTitles));
+                } finally {
+                    // Remove from in-flight after fetching
+                    titles.forEach(title => inFlight.delete(title));
+
+                    // Update active requests
+                    activeRequests--;
+                    currentBatchSize = 0;
+                    const finalActive = activeRequests;
+                    const finalSize = currentBatchSize;
+                    requestCallbacks.forEach(cb => cb(finalActive, finalSize));
+                }
             } catch (error) {
-                const failedTitles = batch.map(item => item.title);
-                console.error(`Failed to fetch batch [${failedTitles.join(', ')}]:`, error);
-                fetchFailedCallbacks.forEach(cb => cb(failedTitles));
+                // Outer catch for unexpected errors in batch processing
+                console.error(`Unexpected error processing batch:`, error);
             }
         }
     }

@@ -4,4 +4,4 @@ export const ANIMATION_CONFIG = {
   },
 
   minFrameTimeMs: 1000 / 25  // 25 fps
-} as const;
+};

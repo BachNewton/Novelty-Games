@@ -11,3 +11,4 @@
 - WASDs for movement controls.
 - Stats label is outdated when selecting a new node.
 - Conform to consitent terminology such as node, leaf, link, labels, graph, etc...
+- Red links should be grey or red

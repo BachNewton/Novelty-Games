@@ -197,17 +197,6 @@ nodes.get(nodeIds[i])!;                 // ForceSimulation.ts:88
 
 **Fix**: Consider SDF text (troika-three-text), sprite-based labels, or more aggressive culling.
 
-### 7. `as const` Type Friction
-
-Config files use `as const` for immutability, but this causes literal type inference:
-```typescript
-export const DEFAULT_LINK_LIMIT = API_CONFIG.defaults.linkLimit; // type is `4`, not `number`
-```
-
-**Impact**: Type errors when assigning to mutable variables.
-
-**Fix**: Add explicit types at export: `export const DEFAULT_LINK_LIMIT: number = ...`
-
 ## Is This Idiomatic TypeScript?
 
 **Mostly yes.** The code follows TypeScript conventions:
@@ -236,7 +225,6 @@ For the current scope (interactive Wikipedia graph exploration), the code works 
 | 2 | Remove duplicate position/velocity from `ArticleNode` | Low | High |
 | 3 | Create centralized `GraphState` type | Low | Medium |
 | 4 | Replace O(n^2) physics with Barnes-Hut | High | Medium |
-| 5 | Fix `as const` type widening at exports | Low | Low |
 
 ## Config Design Review
 
@@ -245,13 +233,10 @@ The cleanup created 9 feature-based config files. Here's an honest assessment:
 **What Works Well:**
 - Feature-based separation makes sense. Changing node geometry doesn't require touching link config.
 - Values are colocated with their domain. Finding "link opacity" means looking in `linkConfig.ts`, not scrolling through a 200-line monolith.
-- Immutability via `as const` prevents accidental mutation.
 
 **What's Awkward:**
 
-1. **The `as const` friction** - We hit real bugs from literal type inference. Every time you assign a config value to a mutable variable (`let`, `useState`), you need explicit type annotations. This is a recurring tax.
-
-2. **Color fragmentation** - Colors are scattered across 4 files:
+1. **Color fragmentation** - Colors are scattered across 4 files:
    ```
    nodeConfig.ts    → node colors
    linkConfig.ts    → link colors
@@ -260,7 +245,7 @@ The cleanup created 9 feature-based config files. Here's an honest assessment:
    ```
    If you want to change the app's color palette, you're editing 4 files. A single `colors.ts` might be cleaner.
 
-3. **Some files are tiny** - `animationConfig.ts` has ~10 values. `loadingIndicatorConfig.ts` has ~8. These could arguably be folded into their parent domain (scene, node).
+2. **Some files are tiny** - `animationConfig.ts` has ~10 values. `loadingIndicatorConfig.ts` has ~8. These could arguably be folded into their parent domain (scene, node).
 
 **Alternative Structure (4-5 files instead of 9):**
 - `geometry.ts` - all shapes (nodes, links, loading indicators)
@@ -268,11 +253,6 @@ The cleanup created 9 feature-based config files. Here's an honest assessment:
 - `physics.ts` - simulation parameters
 - `api.ts` - Wikipedia API config
 - `ui.ts` - panel layout, fonts, etc.
-
-Export with explicit types to avoid `as const` friction:
-```typescript
-export const NODE_RADIUS: number = 0.4;  // not inferred as literal `0.4`
-```
 
 **Verdict:** The current design is functional and organized, just more granular than necessary. Not worth refactoring unless color fragmentation becomes painful in practice.
 

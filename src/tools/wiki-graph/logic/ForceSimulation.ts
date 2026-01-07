@@ -9,6 +9,7 @@ export interface ForceConfig {
     damping: number;
     maxVelocity: number;
     stabilityThreshold: number;
+    nodeLimit: number;
 }
 
 interface SimNode {
@@ -26,6 +27,8 @@ export interface ForceSimulation {
     setNodeFixed: (id: string, fixed: boolean) => void;
     isStable: () => boolean;
     getNodeCount: () => number;
+    updateConfig: (config: Partial<ForceConfig>) => void;
+    setForceUnstable: (value: boolean) => void;
 }
 
 const DEFAULT_CONFIG: ForceConfig = {
@@ -35,7 +38,8 @@ const DEFAULT_CONFIG: ForceConfig = {
     centeringStrength: PHYSICS_CONFIG.centeringStrength,
     damping: PHYSICS_CONFIG.damping,
     maxVelocity: PHYSICS_CONFIG.maxVelocity,
-    stabilityThreshold: PHYSICS_CONFIG.stabilityThreshold
+    stabilityThreshold: PHYSICS_CONFIG.stabilityThreshold,
+    nodeLimit: PHYSICS_CONFIG.nodeLimit
 };
 
 export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceSimulation {
@@ -43,6 +47,7 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
     const nodes = new Map<string, SimNode>();
     const links: Array<{ source: string; target: string }> = [];
     let stable = false;
+    let forceUnstable = false;
 
     function randomPosition(): THREE.Vector3 {
         const range = PHYSICS_CONFIG.initialSpawnRange;
@@ -162,7 +167,7 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
             // TODO: O(n²) repulsion is too expensive for large graphs.
             // Consider: Barnes-Hut algorithm (O(n log n)), spatial partitioning,
             // or Web Workers for parallel computation.
-            if (stable || nodes.size === 0 || nodes.size > PHYSICS_CONFIG.nodeLimit) return;
+            if (stable || nodes.size === 0 || nodes.size > cfg.nodeLimit) return;
 
             const dt = Math.min(deltaTime, PHYSICS_CONFIG.maxDeltaTimeMs) / 1000;
             const force = new Map<string, THREE.Vector3>();
@@ -195,7 +200,7 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
                 maxMovement = Math.max(maxMovement, movement.length());
             }
 
-            stable = maxMovement < cfg.stabilityThreshold;
+            stable = maxMovement < cfg.stabilityThreshold && !forceUnstable;
         },
 
         getPosition: (id) => {
@@ -211,6 +216,16 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
 
         isStable: () => stable,
 
-        getNodeCount: () => nodes.size
+        getNodeCount: () => nodes.size,
+
+        updateConfig: (config) => {
+            Object.assign(cfg, config);
+            stable = false;
+        },
+
+        setForceUnstable: (value: boolean) => {
+            forceUnstable = value;
+            if (value) stable = false;
+        }
     };
 }

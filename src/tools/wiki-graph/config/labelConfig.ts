@@ -31,4 +31,4 @@ export const LABEL_CONFIG = {
     minOpacity: 0.01,
     scaleFactor: 1
   }
-} as const;
+};

@@ -4,6 +4,10 @@ import { ArticleNode, ArticleLink } from '../data/Article';
 import { createWikiCrawler, DEFAULT_LINK_LIMIT, DEFAULT_MAX_DEPTH } from '../logic/WikiCrawler';
 import { createForceSimulation } from '../logic/ForceSimulation';
 import { createCategoryTracker } from '../logic/CategoryTracker';
+import { createRealWikiFetcher } from '../logic/networking/RealWikiFetcher';
+import { createMockWikiFetcher, MockWikiFetcher } from '../logic/networking/MockWikiFetcher';
+import { PHYSICS_CONTROLS } from '../config/physicsConfig';
+import { createStorer, StorageKey } from '../../../util/Storage';
 import { createCameraAnimator, CameraAnimator } from '../logic/CameraAnimator';
 import { LoadingIndicator } from '../scene/LoadingIndicatorFactory';
 import { createInstancedNodeManager } from '../scene/InstancedNodeManager';
@@ -75,6 +79,11 @@ interface LinkCount {
     isComplete: boolean;
 }
 
+interface WikiGraphSettings {
+    useMockData: boolean;
+    mockDelay: number;
+}
+
 const Home: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -93,19 +102,60 @@ const Home: React.FC = () => {
     const [linkCount, setLinkCount] = useState(0);
     const [fetchingCount, setFetchingCount] = useState(0);
     const [pendingQueueSize, setPendingQueueSize] = useState(0);
-    const [linkLimit, setLinkLimit] = useState<number>(DEFAULT_LINK_LIMIT);
-    const [maxDepth, setMaxDepth] = useState<number>(DEFAULT_MAX_DEPTH);
+    const [linkLimit, setLinkLimit] = useState(DEFAULT_LINK_LIMIT);
+    const [maxDepth, setMaxDepth] = useState(DEFAULT_MAX_DEPTH);
     const [selectedArticle, setSelectedArticle] = useState<string | null>(START_ARTICLE);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [error, setError] = useState<Error | null>(null);
 
+    // Physics state (session-only, not persisted)
+    const [springStrength, setSpringStrength] = useState(PHYSICS_CONTROLS.springStrength.default);
+    const [springLength, setSpringLength] = useState(PHYSICS_CONTROLS.springLength.default);
+    const [repulsionStrength, setRepulsionStrength] = useState(PHYSICS_CONTROLS.repulsionStrength.default);
+    const [centeringStrength, setCenteringStrength] = useState(PHYSICS_CONTROLS.centeringStrength.default);
+    const [damping, setDamping] = useState(PHYSICS_CONTROLS.damping.default);
+    const [maxVelocity, setMaxVelocity] = useState(PHYSICS_CONTROLS.maxVelocity.default);
+    const [nodeLimit, setNodeLimit] = useState(PHYSICS_CONTROLS.nodeLimit.default);
+    const [forceUnstable, setForceUnstable] = useState(false);
+
+    // Network mode state
+    const [useMockData, setUseMockData] = useState(false);
+    const [mockDelay, setMockDelay] = useState(API_CONFIG.mock.delay.default);
+    const mockFetcherRef = useRef<MockWikiFetcher | null>(null);
+
+    // Storage for settings
+    const settingsStorer = useMemo(() => createStorer<WikiGraphSettings>(StorageKey.WIKI_GRAPH), []);
 
     // Logic instances
-    const crawler = useMemo(() => createWikiCrawler(), []);
+    const crawler = useMemo(() => {
+        if (useMockData) {
+            const mockFetcher = createMockWikiFetcher();
+            mockFetcher.setDelay(mockDelay);
+            mockFetcherRef.current = mockFetcher;
+            return createWikiCrawler(mockFetcher);
+        } else {
+            mockFetcherRef.current = null;
+            return createWikiCrawler(createRealWikiFetcher());
+        }
+    }, [useMockData]);
     const simulation = useMemo(() => createForceSimulation(), []);
     const categoryTracker = useMemo(() => createCategoryTracker(), []);
     const nodeManager = useMemo(() => createInstancedNodeManager(), []);
     const linkManager = useMemo(() => createInstancedLinkManager(), []);
+
+    // Derived counts (recomputed when articleCount changes)
+    const { nodeCount, leafCount } = useMemo(() => {
+        let nodes = 0;
+        let leaves = 0;
+        for (const article of articlesRef.current.values()) {
+            if (article.article.leaf) {
+                leaves++;
+            } else {
+                nodes++;
+            }
+        }
+        return { nodeCount: nodes, leafCount: leaves };
+    }, [articleCount]);
 
     // Scene setup
     const { sceneManager, isReady } = useThreeScene(containerRef);
@@ -202,6 +252,69 @@ const Home: React.FC = () => {
         }
     }, [categoryTracker, crawler, updateStatsLabel]);
 
+    // Physics parameter handlers
+    const handleSpringStrengthChange = useCallback((value: number) => {
+        setSpringStrength(value);
+        simulation.updateConfig({ springStrength: value });
+    }, [simulation]);
+
+    const handleSpringLengthChange = useCallback((value: number) => {
+        setSpringLength(value);
+        simulation.updateConfig({ springLength: value });
+    }, [simulation]);
+
+    const handleRepulsionStrengthChange = useCallback((value: number) => {
+        setRepulsionStrength(value);
+        simulation.updateConfig({ repulsionStrength: value });
+    }, [simulation]);
+
+    const handleCenteringStrengthChange = useCallback((value: number) => {
+        setCenteringStrength(value);
+        simulation.updateConfig({ centeringStrength: value });
+    }, [simulation]);
+
+    const handleDampingChange = useCallback((value: number) => {
+        setDamping(value);
+        simulation.updateConfig({ damping: value });
+    }, [simulation]);
+
+    const handleMaxVelocityChange = useCallback((value: number) => {
+        setMaxVelocity(value);
+        simulation.updateConfig({ maxVelocity: value });
+    }, [simulation]);
+
+    const handleNodeLimitChange = useCallback((value: number) => {
+        setNodeLimit(value);
+        simulation.updateConfig({ nodeLimit: value });
+    }, [simulation]);
+
+    const handleForceUnstableChange = useCallback((value: boolean) => {
+        setForceUnstable(value);
+        simulation.setForceUnstable(value);
+    }, [simulation]);
+
+    // Network mode toggle handler - save and refresh for clean state
+    const handleMockDataToggle = useCallback((enabled: boolean) => {
+        settingsStorer.save({ useMockData: enabled, mockDelay });
+        window.location.reload();
+    }, [settingsStorer, mockDelay]);
+
+    // Mock delay handler - updates fetcher in real-time and saves to storage
+    const handleMockDelayChange = useCallback((value: number) => {
+        setMockDelay(value);
+        mockFetcherRef.current?.setDelay(value);
+        settingsStorer.save({ useMockData, mockDelay: value });
+    }, [settingsStorer, useMockData]);
+
+    // Load settings from localStorage on mount
+    useEffect(() => {
+        const settings = settingsStorer.loadSync();
+        if (settings) {
+            setUseMockData(settings.useMockData ?? false);
+            setMockDelay(settings.mockDelay ?? API_CONFIG.mock.delay.default);
+        }
+    }, [settingsStorer]);
+
     // Mouse interaction
     useMouseInteraction({
         sceneManager,
@@ -266,6 +379,8 @@ const Home: React.FC = () => {
             <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
             <ProgressPanel
                 articleCount={articleCount}
+                nodeCount={nodeCount}
+                leafCount={leafCount}
                 linkCount={linkCount}
                 fetchingCount={fetchingCount}
                 pendingQueueSize={pendingQueueSize}
@@ -275,6 +390,26 @@ const Home: React.FC = () => {
                 selectedCategory={selectedCategory}
                 onLinkLimitChange={handleLinkLimitChange}
                 onMaxDepthChange={handleMaxDepthChange}
+                springStrength={springStrength}
+                springLength={springLength}
+                repulsionStrength={repulsionStrength}
+                centeringStrength={centeringStrength}
+                damping={damping}
+                maxVelocity={maxVelocity}
+                nodeLimit={nodeLimit}
+                forceUnstable={forceUnstable}
+                onForceUnstableChange={handleForceUnstableChange}
+                onSpringStrengthChange={handleSpringStrengthChange}
+                onSpringLengthChange={handleSpringLengthChange}
+                onRepulsionStrengthChange={handleRepulsionStrengthChange}
+                onCenteringStrengthChange={handleCenteringStrengthChange}
+                onDampingChange={handleDampingChange}
+                onMaxVelocityChange={handleMaxVelocityChange}
+                onNodeLimitChange={handleNodeLimitChange}
+                useMockData={useMockData}
+                onMockDataToggle={handleMockDataToggle}
+                mockDelay={mockDelay}
+                onMockDelayChange={handleMockDelayChange}
             />
             {error && (
                 <div style={{

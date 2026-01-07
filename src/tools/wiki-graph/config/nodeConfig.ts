@@ -37,4 +37,4 @@ export const NODE_CONFIG = {
   capacity: {
     initial: 5000
   }
-} as const;
+};

@@ -31,4 +31,4 @@ export const SCENE_CONFIG = {
   fog: {
     density: 0.1
   }
-} as const;
+};

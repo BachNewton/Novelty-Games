@@ -18,4 +18,4 @@ export const LOADING_INDICATOR_CONFIG = {
       y: 0.003
     }
   }
-} as const;
+};
