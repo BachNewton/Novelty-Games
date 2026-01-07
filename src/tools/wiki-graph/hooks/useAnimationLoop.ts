@@ -82,6 +82,14 @@ export function useAnimationLoop(deps: AnimationDeps): void {
             const links = linksRef.current!;
             const loadingIndicators = loadingIndicatorsRef.current!;
 
+            // Build lookup map for directional links: target -> source (O(n) once, not O(n²))
+            const directionalLinkSources = new Map<string, string>();
+            for (const link of links) {
+                if (link.linkType === 'directional') {
+                    directionalLinkSources.set(link.target, link.source);
+                }
+            }
+
             // Update instanced node positions
             for (const [title, node] of articles) {
                 const pos = simulation.getPosition(title);
@@ -96,9 +104,9 @@ export function useAnimationLoop(deps: AnimationDeps): void {
 
                     // Orient cones toward their source node
                     if (node.instanceType === 'cone') {
-                        const incomingLink = links.find(l => l.target === title && l.linkType === 'directional');
-                        if (incomingLink) {
-                            const sourceNode = articles.get(incomingLink.source);
+                        const sourceTitle = directionalLinkSources.get(title);
+                        if (sourceTitle) {
+                            const sourceNode = articles.get(sourceTitle);
                             if (sourceNode) {
                                 // Point from target (this node) toward source
                                 tempDirection.subVectors(pos, sourceNode.position).normalize();
