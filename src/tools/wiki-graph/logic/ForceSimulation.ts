@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PHYSICS_CONFIG } from '../config/physicsConfig';
+import { DEBUG_CONFIG } from '../config/debugConfig';
 
 export interface ForceConfig {
     springStrength: number;
@@ -168,6 +169,8 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
         },
 
         update: (deltaTime) => {
+            if (DEBUG_CONFIG.disablePhysics) return;
+
             // TODO: O(n²) repulsion is too expensive for large graphs.
             // Consider: Barnes-Hut algorithm (O(n log n)), spatial partitioning,
             // or Web Workers for parallel computation.

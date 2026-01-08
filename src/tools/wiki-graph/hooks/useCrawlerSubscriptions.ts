@@ -190,8 +190,7 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
             const nodeType = getNodeType(article);
             const instanceIndex = nodeManager.addNode(nodeType, color);
 
-            const label = createTitleLabel(article.title, false, article.missing === true);
-            scene.add(label);
+            const label = createTitleLabel(article.title, false, article.missing === true, scene);
 
             // Update existing node
             existingNode.article = article;
@@ -228,8 +227,7 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
             }
 
             const instanceIndex = nodeManager.addNode(nodeType, color);
-            const label = createTitleLabel(article.title, article.leaf === true, article.missing === true);
-            scene.add(label);
+            const label = createTitleLabel(article.title, article.leaf === true, article.missing === true, scene);
 
             const node: ArticleNode = {
                 article,

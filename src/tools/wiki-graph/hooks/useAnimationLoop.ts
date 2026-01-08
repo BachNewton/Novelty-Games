@@ -11,6 +11,7 @@ import { InstancedLinkManager } from '../scene/InstancedLinkManager';
 import { ANIMATION_CONFIG } from '../config/animationConfig';
 import { LABEL_CONFIG } from '../config/labelConfig';
 import { SCENE_CONFIG } from '../config/sceneConfig';
+import { DEBUG_CONFIG } from '../config/debugConfig';
 
 interface AnimationDeps {
     sceneManager: SceneManager | null;
@@ -51,6 +52,8 @@ export function useAnimationLoop(deps: AnimationDeps): void {
         const { scene, camera, renderer, controls, stats } = sceneManager.getComponents();
 
         function updateTroikaLabel(label: Text, pos: THREE.Vector3, yOffset: number): void {
+            if (DEBUG_CONFIG.disableLabels) return;
+
             const distance = camera.position.distanceTo(pos);
 
             if (distance < MAX_LABEL_DISTANCE) {

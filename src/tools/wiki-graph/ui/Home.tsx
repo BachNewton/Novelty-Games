@@ -209,12 +209,11 @@ const Home: React.FC = () => {
         }
 
         const totalStr = isComplete ? String(totalLinks) : `${totalLinks}+`;
-        const statsLabel = createStatsLabel(`(${visualizedLinks}/${totalStr})`);
+        const statsLabel = createStatsLabel(`(${visualizedLinks}/${totalStr})`, scene);
 
         // Position in world space (will be updated in animation loop)
         if (node) {
             statsLabel.position.set(node.position.x, node.position.y + LABEL_CONFIG.stats.worldYOffset, node.position.z);
-            scene.add(statsLabel);
         }
         statsLabelRef.current = statsLabel;
     }, [sceneManager]);
