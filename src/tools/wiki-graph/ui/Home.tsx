@@ -109,13 +109,10 @@ const Home: React.FC = () => {
 
     // Physics state (session-only, not persisted)
     const [springStrength, setSpringStrength] = useState(PHYSICS_CONTROLS.springStrength.default);
-    const [springLength, setSpringLength] = useState(PHYSICS_CONTROLS.springLength.default);
     const [repulsionStrength, setRepulsionStrength] = useState(PHYSICS_CONTROLS.repulsionStrength.default);
-    const [centeringStrength, setCenteringStrength] = useState(PHYSICS_CONTROLS.centeringStrength.default);
     const [damping, setDamping] = useState(PHYSICS_CONTROLS.damping.default);
     const [maxVelocity, setMaxVelocity] = useState(PHYSICS_CONTROLS.maxVelocity.default);
-    const [nodeLimit, setNodeLimit] = useState(PHYSICS_CONTROLS.nodeLimit.default);
-    const [forceUnstable, setForceUnstable] = useState(true);
+    const [barnesHutTheta, setBarnesHutTheta] = useState(PHYSICS_CONTROLS.barnesHutTheta.default);
 
     // Network mode state
     const [useMockData, setUseMockData] = useState(false);
@@ -248,19 +245,9 @@ const Home: React.FC = () => {
         simulation.updateConfig({ springStrength: value });
     }, [simulation]);
 
-    const handleSpringLengthChange = useCallback((value: number) => {
-        setSpringLength(value);
-        simulation.updateConfig({ springLength: value });
-    }, [simulation]);
-
     const handleRepulsionStrengthChange = useCallback((value: number) => {
         setRepulsionStrength(value);
         simulation.updateConfig({ repulsionStrength: value });
-    }, [simulation]);
-
-    const handleCenteringStrengthChange = useCallback((value: number) => {
-        setCenteringStrength(value);
-        simulation.updateConfig({ centeringStrength: value });
     }, [simulation]);
 
     const handleDampingChange = useCallback((value: number) => {
@@ -273,14 +260,9 @@ const Home: React.FC = () => {
         simulation.updateConfig({ maxVelocity: value });
     }, [simulation]);
 
-    const handleNodeLimitChange = useCallback((value: number) => {
-        setNodeLimit(value);
-        simulation.updateConfig({ nodeLimit: value });
-    }, [simulation]);
-
-    const handleForceUnstableChange = useCallback((value: boolean) => {
-        setForceUnstable(value);
-        simulation.setForceUnstable(value);
+    const handleBarnesHutThetaChange = useCallback((value: number) => {
+        setBarnesHutTheta(value);
+        simulation.updateConfig({ barnesHutTheta: value });
     }, [simulation]);
 
     // Network mode toggle handler - save and refresh for clean state
@@ -378,21 +360,15 @@ const Home: React.FC = () => {
                 onLinkLimitChange={handleLinkLimitChange}
                 onMaxDepthChange={handleMaxDepthChange}
                 springStrength={springStrength}
-                springLength={springLength}
                 repulsionStrength={repulsionStrength}
-                centeringStrength={centeringStrength}
                 damping={damping}
                 maxVelocity={maxVelocity}
-                nodeLimit={nodeLimit}
-                forceUnstable={forceUnstable}
-                onForceUnstableChange={handleForceUnstableChange}
+                barnesHutTheta={barnesHutTheta}
                 onSpringStrengthChange={handleSpringStrengthChange}
-                onSpringLengthChange={handleSpringLengthChange}
                 onRepulsionStrengthChange={handleRepulsionStrengthChange}
-                onCenteringStrengthChange={handleCenteringStrengthChange}
                 onDampingChange={handleDampingChange}
                 onMaxVelocityChange={handleMaxVelocityChange}
-                onNodeLimitChange={handleNodeLimitChange}
+                onBarnesHutThetaChange={handleBarnesHutThetaChange}
                 useMockData={useMockData}
                 onMockDataToggle={handleMockDataToggle}
                 mockDelay={mockDelay}

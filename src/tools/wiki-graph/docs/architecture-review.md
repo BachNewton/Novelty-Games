@@ -13,10 +13,12 @@ Post-cleanup code review with recommendations for future improvements.
 | Review/update comments | Verified all comments accurate; found and fixed `CONFIG` -> `NODE_CONFIG` bug |
 | Fix O(n²) cone orientation | Replaced `links.find()` with pre-built Map lookup in animation loop |
 | Replace CSS2D with troika-three-text | Switched from DOM-based labels to GPU-rendered SDF text |
+| Replace O(n²) physics with Barnes-Hut | Created `Octree.ts`, O(n log n) repulsion via spatial partitioning |
+| Simplify physics config | Removed unused: springLength, centeringStrength, stabilityThreshold, nodeLimit, forceUnstable |
 
 **Files deleted**: 3 (LinkFactory.ts, NodeFactory.ts, labelUtils.ts)
-**Files created**: 11 (9 config files + troikaLabelUtils.ts + troika type declarations)
-**Files modified**: 15
+**Files created**: 12 (9 config files + troikaLabelUtils.ts + troika type declarations + Octree.ts)
+**Files modified**: 17
 
 ## Performance Improvements
 
@@ -55,6 +57,39 @@ for (const link of links) {
 // Then O(1) lookup per cone
 const sourceTitle = directionalLinkSources.get(title);
 ```
+
+### Physics: O(n²) to O(n log n) via Barnes-Hut
+
+**Problem**: `applyRepulsionForces()` compared every node pair. At 1000 nodes: ~500,000 comparisons per frame, dropping to 35 FPS with only 10% CPU / 20% GPU utilization (algorithmic bottleneck, not compute).
+
+**Solution**: Implemented Barnes-Hut algorithm with octree spatial partitioning.
+
+```typescript
+// Before: O(n²) - compare every pair
+for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+        // calculate repulsion between nodes[i] and nodes[j]
+    }
+}
+
+// After: O(n log n) - octree approximation
+octree.build(nodes);  // O(n log n)
+for (const node of nodes) {
+    const force = octree.calculateForce(node.position, node.id, theta, strength);
+    // Barnes-Hut: if cell_size/distance < theta, treat cluster as single mass
+}
+```
+
+**Key design decisions:**
+- Dynamic bounds: octree computes bounding box from actual node positions each frame
+- Theta parameter (default 0.7): controls accuracy vs speed tradeoff, exposed in UI
+- No object pooling (kept simple—GC not a bottleneck in practice)
+
+**Results:**
+| Nodes | Before | After |
+|-------|--------|-------|
+| 1000 | 35 FPS | 95 FPS |
+| 2000 | ~15 FPS | 77 FPS |
 
 ## Current Strengths
 
@@ -126,14 +161,6 @@ nodes.get(nodeIds[i])!;                 // ForceSimulation.ts
 
 **Fix**: Use early returns with null checks, or document why assertion is safe.
 
-### 5. O(n²) Physics
-
-`ForceSimulation.applyRepulsionForces` compares every node pair. With 1000 nodes, that's ~500,000 comparisons per frame.
-
-**Impact**: At 1000 nodes, physics alone costs ~25 FPS.
-
-**Fix**: Implement Barnes-Hut algorithm (octree-based O(n log n)) or use d3-force-3d.
-
 ## Label Optimization Investigation (January 2026)
 
 ### The Benchmark Artifact
@@ -194,7 +221,6 @@ For current use cases, the existing distance culling is sufficient.
 | 1 | Extract `GraphController` from hooks | Medium | High |
 | 2 | Remove duplicate position/velocity from `ArticleNode` | Low | High |
 | 3 | Create centralized `GraphState` type | Low | Medium |
-| 4 | Replace O(n²) physics with Barnes-Hut | High | Medium |
 
 ## Summary
 
@@ -202,5 +228,6 @@ The codebase is functional and maintainable at current scope. Performance work h
 - **Labels**: CSS2D → Troika (3x faster), distance culling handles scale
 - **Cone orientation**: O(n²) → O(n) build + O(1) lookups
 - **Node spawning**: Near parent for natural graph expansion
+- **Physics**: O(n²) → O(n log n) via Barnes-Hut octree (35 → 95 FPS at 1000 nodes)
 
 The ref-heavy, hook-centric architecture remains the main technical debt for future feature development.

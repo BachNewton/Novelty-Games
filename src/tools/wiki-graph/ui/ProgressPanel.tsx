@@ -17,21 +17,15 @@ interface ProgressPanelProps {
     onLinkLimitChange: (limit: number) => void;
     onMaxDepthChange: (depth: number) => void;
     springStrength: number;
-    springLength: number;
     repulsionStrength: number;
-    centeringStrength: number;
     damping: number;
     maxVelocity: number;
-    nodeLimit: number;
-    forceUnstable: boolean;
-    onForceUnstableChange: (value: boolean) => void;
+    barnesHutTheta: number;
     onSpringStrengthChange: (value: number) => void;
-    onSpringLengthChange: (value: number) => void;
     onRepulsionStrengthChange: (value: number) => void;
-    onCenteringStrengthChange: (value: number) => void;
     onDampingChange: (value: number) => void;
     onMaxVelocityChange: (value: number) => void;
-    onNodeLimitChange: (value: number) => void;
+    onBarnesHutThetaChange: (value: number) => void;
     useMockData: boolean;
     onMockDataToggle: (enabled: boolean) => void;
     mockDelay: number;
@@ -59,21 +53,15 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
     onLinkLimitChange,
     onMaxDepthChange,
     springStrength,
-    springLength,
     repulsionStrength,
-    centeringStrength,
     damping,
     maxVelocity,
-    nodeLimit,
-    forceUnstable,
-    onForceUnstableChange,
+    barnesHutTheta,
     onSpringStrengthChange,
-    onSpringLengthChange,
     onRepulsionStrengthChange,
-    onCenteringStrengthChange,
     onDampingChange,
     onMaxVelocityChange,
-    onNodeLimitChange,
+    onBarnesHutThetaChange,
     useMockData,
     onMockDataToggle,
     mockDelay,
@@ -269,17 +257,20 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
 
                 {physicsExpanded && (
                     <>
-                        <div style={{ marginBottom: '12px' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={forceUnstable}
-                                    onChange={(e) => onForceUnstableChange(e.target.checked)}
-                                    style={{ marginRight: '8px' }}
-                                />
-                                Keep simulating
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '4px' }}>
+                                Barnes-Hut theta: {barnesHutTheta.toFixed(2)}
                             </label>
-                            <div style={descriptionStyle}>Override stability check, never stop simulating</div>
+                            <input
+                                type="range"
+                                min={PHYSICS_CONTROLS.barnesHutTheta.min}
+                                max={PHYSICS_CONTROLS.barnesHutTheta.max}
+                                step={PHYSICS_CONTROLS.barnesHutTheta.step}
+                                value={barnesHutTheta}
+                                onChange={(e) => onBarnesHutThetaChange(parseFloat(e.target.value))}
+                                style={{ width: '100%' }}
+                            />
+                            <div style={descriptionStyle}>{PHYSICS_CONTROLS.barnesHutTheta.description}</div>
                         </div>
 
                         <div>
@@ -300,22 +291,6 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
 
                         <div>
                             <label style={{ display: 'block', marginBottom: '4px' }}>
-                                Spring length: {springLength}
-                            </label>
-                            <input
-                                type="range"
-                                min={PHYSICS_CONTROLS.springLength.min}
-                                max={PHYSICS_CONTROLS.springLength.max}
-                                step={PHYSICS_CONTROLS.springLength.step}
-                                value={springLength}
-                                onChange={(e) => onSpringLengthChange(parseFloat(e.target.value))}
-                                style={{ width: '100%' }}
-                            />
-                            <div style={descriptionStyle}>{PHYSICS_CONTROLS.springLength.description}</div>
-                        </div>
-
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '4px' }}>
                                 Repulsion strength: {repulsionStrength}
                             </label>
                             <input
@@ -328,22 +303,6 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
                                 style={{ width: '100%' }}
                             />
                             <div style={descriptionStyle}>{PHYSICS_CONTROLS.repulsionStrength.description}</div>
-                        </div>
-
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '4px' }}>
-                                Centering strength: {centeringStrength.toFixed(4)}
-                            </label>
-                            <input
-                                type="range"
-                                min={PHYSICS_CONTROLS.centeringStrength.min}
-                                max={PHYSICS_CONTROLS.centeringStrength.max}
-                                step={PHYSICS_CONTROLS.centeringStrength.step}
-                                value={centeringStrength}
-                                onChange={(e) => onCenteringStrengthChange(parseFloat(e.target.value))}
-                                style={{ width: '100%' }}
-                            />
-                            <div style={descriptionStyle}>{PHYSICS_CONTROLS.centeringStrength.description}</div>
                         </div>
 
                         <div>
@@ -376,22 +335,6 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
                                 style={{ width: '100%' }}
                             />
                             <div style={descriptionStyle}>{PHYSICS_CONTROLS.maxVelocity.description}</div>
-                        </div>
-
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '4px' }}>
-                                Node limit: {nodeLimit}
-                            </label>
-                            <input
-                                type="range"
-                                min={PHYSICS_CONTROLS.nodeLimit.min}
-                                max={PHYSICS_CONTROLS.nodeLimit.max}
-                                step={PHYSICS_CONTROLS.nodeLimit.step}
-                                value={nodeLimit}
-                                onChange={(e) => onNodeLimitChange(parseInt(e.target.value))}
-                                style={{ width: '100%' }}
-                            />
-                            <div style={descriptionStyle}>{PHYSICS_CONTROLS.nodeLimit.description}</div>
                         </div>
                     </>
                 )}

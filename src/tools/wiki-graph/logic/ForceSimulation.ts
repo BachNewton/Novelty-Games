@@ -1,16 +1,14 @@
 import * as THREE from 'three';
 import { PHYSICS_CONFIG } from '../config/physicsConfig';
 import { DEBUG_CONFIG } from '../config/debugConfig';
+import { createOctree } from '../util/Octree';
 
 export interface ForceConfig {
     springStrength: number;
-    springLength: number;
     repulsionStrength: number;
-    centeringStrength: number;
     damping: number;
     maxVelocity: number;
-    stabilityThreshold: number;
-    nodeLimit: number;
+    barnesHutTheta: number;
 }
 
 interface SimNode {
@@ -31,29 +29,23 @@ export interface ForceSimulation {
     update: (deltaTime: number) => void;
     getPosition: (id: string) => THREE.Vector3 | undefined;
     setNodeFixed: (id: string, fixed: boolean) => void;
-    isStable: () => boolean;
     getNodeCount: () => number;
     updateConfig: (config: Partial<ForceConfig>) => void;
-    setForceUnstable: (value: boolean) => void;
 }
 
 const DEFAULT_CONFIG: ForceConfig = {
     springStrength: PHYSICS_CONFIG.springStrength,
-    springLength: PHYSICS_CONFIG.springLength,
     repulsionStrength: PHYSICS_CONFIG.repulsionStrength,
-    centeringStrength: PHYSICS_CONFIG.centeringStrength,
     damping: PHYSICS_CONFIG.damping,
     maxVelocity: PHYSICS_CONFIG.maxVelocity,
-    stabilityThreshold: PHYSICS_CONFIG.stabilityThreshold,
-    nodeLimit: PHYSICS_CONFIG.nodeLimit
+    barnesHutTheta: PHYSICS_CONFIG.barnesHutTheta
 };
 
 export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceSimulation {
     const cfg = { ...DEFAULT_CONFIG, ...config };
     const nodes = new Map<string, SimNode>();
     const links: Array<{ source: string; target: string }> = [];
-    let stable = false;
-    let forceUnstable = true;
+    const octree = createOctree();
 
     function positionNearParent(parentId: string | undefined): THREE.Vector3 {
         const parent = parentId ? nodes.get(parentId) : undefined;
@@ -78,8 +70,8 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
             const distance = delta.length();
             if (distance === 0) continue;
 
-            const displacement = distance - cfg.springLength;
-            const springForce = delta.normalize().multiplyScalar(cfg.springStrength * displacement);
+            // Spring length is 0, so displacement equals distance
+            const springForce = delta.normalize().multiplyScalar(cfg.springStrength * distance);
 
             if (!sourceNode.fixed) {
                 const sourceForce = force.get(link.source) ?? new THREE.Vector3();
@@ -96,42 +88,22 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
     }
 
     function applyRepulsionForces(force: Map<string, THREE.Vector3>): void {
-        const nodeIds = Array.from(nodes.keys());
+        // Build octree from current positions
+        octree.build(nodes);
 
-        for (let i = 0; i < nodeIds.length; i++) {
-            for (let j = i + 1; j < nodeIds.length; j++) {
-                const nodeA = nodes.get(nodeIds[i])!;
-                const nodeB = nodes.get(nodeIds[j])!;
-
-                const delta = new THREE.Vector3().subVectors(nodeB.position, nodeA.position);
-                const distanceSq = delta.lengthSq();
-                if (distanceSq === 0) continue;
-
-                const repulsion = cfg.repulsionStrength / distanceSq;
-                const repulsionForce = delta.normalize().multiplyScalar(repulsion);
-
-                if (!nodeA.fixed) {
-                    const forceA = force.get(nodeIds[i]) ?? new THREE.Vector3();
-                    forceA.sub(repulsionForce);
-                    force.set(nodeIds[i], forceA);
-                }
-
-                if (!nodeB.fixed) {
-                    const forceB = force.get(nodeIds[j]) ?? new THREE.Vector3();
-                    forceB.add(repulsionForce);
-                    force.set(nodeIds[j], forceB);
-                }
-            }
-        }
-    }
-
-    function applyCenteringForces(force: Map<string, THREE.Vector3>): void {
+        // Calculate repulsion for each node using Barnes-Hut
         for (const [id, node] of nodes) {
             if (node.fixed) continue;
 
-            const centeringForce = node.position.clone().multiplyScalar(-cfg.centeringStrength);
+            const repulsionForce = octree.calculateForce(
+                node.position,
+                id,
+                cfg.barnesHutTheta,
+                cfg.repulsionStrength
+            );
+
             const nodeForce = force.get(id) ?? new THREE.Vector3();
-            nodeForce.add(centeringForce);
+            nodeForce.add(repulsionForce);
             force.set(id, nodeForce);
         }
     }
@@ -149,7 +121,6 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
                 velocity: new THREE.Vector3(),
                 fixed: false
             });
-            stable = false;
         },
 
         removeNode: (id) => {
@@ -164,17 +135,11 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
         addLink: (source, target) => {
             if (!links.some(l => l.source === source && l.target === target)) {
                 links.push({ source, target });
-                stable = false;
             }
         },
 
         update: (deltaTime) => {
             if (DEBUG_CONFIG.disablePhysics) return;
-
-            // TODO: O(n²) repulsion is too expensive for large graphs.
-            // Consider: Barnes-Hut algorithm (O(n log n)), spatial partitioning,
-            // or Web Workers for parallel computation.
-            if (stable || nodes.size === 0 || nodes.size > cfg.nodeLimit) return;
 
             const dt = Math.min(deltaTime, PHYSICS_CONFIG.maxDeltaTimeMs) / 1000;
             const force = new Map<string, THREE.Vector3>();
@@ -185,9 +150,6 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
 
             applySpringForces(force);
             applyRepulsionForces(force);
-            applyCenteringForces(force);
-
-            let maxMovement = 0;
 
             for (const [id, node] of nodes) {
                 if (node.fixed) continue;
@@ -204,10 +166,7 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
 
                 const movement = node.velocity.clone().multiplyScalar(dt);
                 node.position.add(movement);
-                maxMovement = Math.max(maxMovement, movement.length());
             }
-
-            stable = maxMovement < cfg.stabilityThreshold && !forceUnstable;
         },
 
         getPosition: (id) => {
@@ -221,18 +180,10 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
             }
         },
 
-        isStable: () => stable,
-
         getNodeCount: () => nodes.size,
 
         updateConfig: (config) => {
             Object.assign(cfg, config);
-            stable = false;
-        },
-
-        setForceUnstable: (value: boolean) => {
-            forceUnstable = value;
-            if (value) stable = false;
         }
     };
 }
