@@ -18,8 +18,13 @@ interface SimNode {
     fixed: boolean;
 }
 
+interface AddNodeOptions {
+    parentId?: string;
+    position?: THREE.Vector3;
+}
+
 export interface ForceSimulation {
-    addNode: (id: string, initialPosition?: THREE.Vector3) => void;
+    addNode: (id: string, options?: AddNodeOptions) => void;
     removeNode: (id: string) => void;
     addLink: (source: string, target: string) => void;
     update: (deltaTime: number) => void;
@@ -49,12 +54,16 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
     let stable = false;
     let forceUnstable = true;
 
-    function randomPosition(): THREE.Vector3 {
-        const range = PHYSICS_CONFIG.initialSpawnRange;
+    function positionNearParent(parentId: string | undefined): THREE.Vector3 {
+        const parent = parentId ? nodes.get(parentId) : undefined;
+        if (!parent) {
+            return new THREE.Vector3(0, 0, 0);
+        }
+        const range = PHYSICS_CONFIG.spawnOffsetRange;
         return new THREE.Vector3(
-            (Math.random() - 0.5) * range,
-            (Math.random() - 0.5) * range,
-            (Math.random() - 0.5) * range
+            parent.position.x + (Math.random() - 0.5) * range,
+            parent.position.y + (Math.random() - 0.5) * range,
+            parent.position.z + (Math.random() - 0.5) * range
         );
     }
 
@@ -127,17 +136,12 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
     }
 
     return {
-        addNode: (id, initialPosition) => {
+        addNode: (id, options) => {
             if (nodes.has(id)) return;
 
-            let position: THREE.Vector3;
-            if (initialPosition) {
-                position = initialPosition.clone();
-            } else if (nodes.size === 0) {
-                position = new THREE.Vector3(0, 0, 0);
-            } else {
-                position = randomPosition();
-            }
+            const position = options?.position
+                ? options.position.clone()
+                : positionNearParent(options?.parentId);
 
             nodes.set(id, {
                 position,

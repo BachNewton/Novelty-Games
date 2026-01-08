@@ -134,15 +134,58 @@ nodes.get(nodeIds[i])!;                 // ForceSimulation.ts
 
 **Fix**: Implement Barnes-Hut algorithm (octree-based O(n log n)) or use d3-force-3d.
 
-## Future Label Optimizations
+## Label Optimization Investigation (January 2026)
 
-The troika migration improved label performance from 9 to 28 FPS, but there's still room for optimization:
+### The Benchmark Artifact
 
-1. **Frustum culling** - Skip updating labels outside the camera view
-2. **Distance culling before position update** - Currently we set position then check distance; could check distance first
-3. **Reduce per-frame opacity updates** - Only update opacity when distance changes significantly
-4. **Batch quaternion updates** - All labels share the same billboard orientation; could update once
-5. **LOD for labels** - Hide labels entirely beyond a threshold, show only on hover
+Initial testing showed 27 FPS at 1000 nodes with physics disabled, suggesting label rendering was expensive. However, this was a **benchmark artifact**—all nodes were clustered in a small area due to `initialSpawnRange: 20`.
+
+When nodes spawn spread out (as they do in real usage), FPS jumped to 100.
+
+### Why Distance Culling Already Works
+
+Labels beyond `MAX_LABEL_DISTANCE` (~52 units) are set to `visible = false`, which skips the draw call entirely:
+
+```typescript
+if (distance < MAX_LABEL_DISTANCE) {
+    label.visible = true;
+    // ... update position, quaternion, opacity
+} else {
+    label.visible = false;  // No draw call
+}
+```
+
+The "fix" was ensuring nodes naturally spread out:
+- New nodes now spawn near their parent (not at origin)
+- Graph expands organically as it grows
+- Distant labels automatically hidden by existing culling
+
+### Optimizations Tested (No Significant Impact)
+
+| Optimization | Result | Why |
+|--------------|--------|-----|
+| Quaternion batching | No change | `quaternion.copy()` is cheap (4 floats) |
+| Frustum culling | Only helps when zoomed in | Most labels on-screen in typical view |
+
+### The Real Bottleneck: Draw Calls
+
+At 1000 clustered labels: 12% CPU, 35% GPU, 27 FPS. Low utilization with poor FPS indicates **draw call overhead**, not compute.
+
+- Nodes: 3 instanced meshes = 3 draw calls ✓
+- Links: 2 instanced meshes = 2 draw calls ✓
+- Labels: 1000 Text meshes = **1000 draw calls** ✗
+
+Each Troika Text is a separate mesh. This is architectural—text content varies per label, preventing traditional instancing.
+
+### Future: If More Simultaneous Labels Needed
+
+If requirements change and we need 1000+ visible labels at once:
+
+1. **@pmndrs/uikit** - "Everything is instanced, every glyph" - single draw call
+2. **Custom instanced characters** - SDF texture atlas + instanced planes per character (~60 draw calls for A-Z, a-z, 0-9)
+3. **LOD approach** - Full labels nearby, colored dots for distant nodes
+
+For current use cases, the existing distance culling is sufficient.
 
 ## Priority Recommendations
 
@@ -152,8 +195,12 @@ The troika migration improved label performance from 9 to 28 FPS, but there's st
 | 2 | Remove duplicate position/velocity from `ArticleNode` | Low | High |
 | 3 | Create centralized `GraphState` type | Low | Medium |
 | 4 | Replace O(n²) physics with Barnes-Hut | High | Medium |
-| 5 | Further label optimizations (frustum culling, etc.) | Medium | Medium |
 
 ## Summary
 
-The codebase is functional and maintainable at current scope. Recent performance work (troika labels, cone orientation fix) improved scalability significantly. The ref-heavy, hook-centric architecture remains the main technical debt for future feature development.
+The codebase is functional and maintainable at current scope. Performance work has addressed the main bottlenecks:
+- **Labels**: CSS2D → Troika (3x faster), distance culling handles scale
+- **Cone orientation**: O(n²) → O(n) build + O(1) lookups
+- **Node spawning**: Near parent for natural graph expansion
+
+The ref-heavy, hook-centric architecture remains the main technical debt for future feature development.

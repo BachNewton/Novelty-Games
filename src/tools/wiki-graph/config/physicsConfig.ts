@@ -8,7 +8,7 @@ export const PHYSICS_CONFIG = {
   stabilityThreshold: 0.01,
   nodeLimit: 5000,
   maxDeltaTimeMs: 50,
-  initialSpawnRange: 20
+  spawnOffsetRange: 5
 };
 
 export const PHYSICS_CONTROLS = {

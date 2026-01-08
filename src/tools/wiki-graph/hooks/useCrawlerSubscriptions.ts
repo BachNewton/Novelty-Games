@@ -63,6 +63,20 @@ function resolvePendingLinks(
     }
 }
 
+function findParentId(
+    article: WikiArticle,
+    pendingLinks: Map<string, Set<string>>
+): string | undefined {
+    const titlesToCheck = [article.title, ...(article.aliases ?? [])];
+    for (const title of titlesToCheck) {
+        const pending = pendingLinks.get(title);
+        if (pending && pending.size > 0) {
+            return pending.values().next().value;
+        }
+    }
+    return undefined;
+}
+
 interface CrawlerSubscriptionDeps {
     crawler: WikiCrawler;
     sceneManager: SceneManager | null;
@@ -190,7 +204,7 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
                 const currentPosition = simulation.getPosition(aliasTitle);
                 articles.delete(aliasTitle);
                 simulation.removeNode(aliasTitle);
-                simulation.addNode(article.title, currentPosition);
+                simulation.addNode(article.title, { position: currentPosition });
             } else {
                 simulation.addNode(article.title);
             }
@@ -227,7 +241,8 @@ export function useCrawlerSubscriptions(deps: CrawlerSubscriptionDeps): void {
             };
 
             articles.set(article.title, node);
-            simulation.addNode(article.title);
+            const parentId = findParentId(article, pendingLinks);
+            simulation.addNode(article.title, { parentId });
             for (const alias of article.aliases ?? []) {
                 articles.set(alias, node);
             }
