@@ -15,6 +15,7 @@ import { createInstancedLinkManager } from '../scene/InstancedLinkManager';
 import { API_CONFIG } from '../config/apiConfig';
 import { UI_CONFIG } from '../config/uiConfig';
 import { LABEL_CONFIG } from '../config/labelConfig';
+import { createStatsLabel } from '../util/troikaLabelUtils';
 import { useThreeScene } from '../hooks/useThreeScene';
 import { useAnimationLoop } from '../hooks/useAnimationLoop';
 import { useMouseInteraction } from '../hooks/useMouseInteraction';
@@ -208,16 +209,7 @@ const Home: React.FC = () => {
         }
 
         const totalStr = isComplete ? String(totalLinks) : `${totalLinks}+`;
-
-        const statsLabel = new Text();
-        statsLabel.text = `(${visualizedLinks}/${totalStr})`;
-        statsLabel.fontSize = 0.2;
-        statsLabel.color = LABEL_CONFIG.stats.color;
-        statsLabel.anchorX = 'center';
-        statsLabel.anchorY = 'bottom';
-        statsLabel.outlineWidth = 0.015;
-        statsLabel.outlineColor = 0x000000;
-        statsLabel.sync();
+        const statsLabel = createStatsLabel(`(${visualizedLinks}/${totalStr})`);
 
         // Position in world space (will be updated in animation loop)
         if (node) {

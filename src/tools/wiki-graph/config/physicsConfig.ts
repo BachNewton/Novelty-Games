@@ -55,7 +55,7 @@ export const PHYSICS_CONTROLS = {
     description: 'Maximum speed nodes can move per frame'
   },
   nodeLimit: {
-    default: 500,
+    default: 5000,
     min: 10,
     max: 5000,
     step: 10,

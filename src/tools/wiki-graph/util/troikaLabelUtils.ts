@@ -1,26 +1,37 @@
 import { Text } from 'troika-three-text';
 import { LABEL_CONFIG } from '../config/labelConfig';
 
-export function createTroikaLabel(
+function applyCommonStyle(label: Text): void {
+    label.anchorX = 'center';
+    label.anchorY = 'bottom';
+    label.outlineColor = LABEL_CONFIG.outline.color;
+    label.sync();
+}
+
+export function createTitleLabel(
     title: string,
     isLeaf: boolean,
     isMissing: boolean
 ): Text {
-    const text = new Text();
-    text.text = title;
-    text.fontSize = 0.3;
-    text.color = isMissing
+    const label = new Text();
+    label.text = title;
+    label.fontSize = LABEL_CONFIG.title.fontSize;
+    label.outlineWidth = LABEL_CONFIG.title.outlineWidth;
+    label.color = isMissing
         ? LABEL_CONFIG.colors.missing
         : isLeaf
         ? LABEL_CONFIG.colors.leaf
         : LABEL_CONFIG.colors.normal;
-    text.anchorX = 'center';
-    text.anchorY = 'bottom';
-    text.outlineWidth = 0.02;
-    text.outlineColor = 0x000000;
+    applyCommonStyle(label);
+    return label;
+}
 
-    // Sync to generate geometry
-    text.sync();
-
-    return text;
+export function createStatsLabel(text: string): Text {
+    const label = new Text();
+    label.text = text;
+    label.fontSize = LABEL_CONFIG.stats.fontSize;
+    label.outlineWidth = LABEL_CONFIG.stats.outlineWidth;
+    label.color = LABEL_CONFIG.stats.color;
+    applyCommonStyle(label);
+    return label;
 }

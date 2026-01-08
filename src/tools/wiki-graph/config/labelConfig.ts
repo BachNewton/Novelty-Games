@@ -1,18 +1,15 @@
 export const LABEL_CONFIG = {
-  node: {
-    yOffset: 0.75,
-    fontSize: 12
-  },
-
   title: {
     yOffset: 0.75,
-    baseFontSize: 11
+    fontSize: 0.55,
+    outlineWidth: 0.02
   },
 
   stats: {
-    yOffset: 1.25,
+    yOffset: 1.35,
     worldYOffset: 1.1,
-    baseFontSize: 9,
+    fontSize: 0.45,
+    outlineWidth: 0.015,
     color: '#4ECDC4'
   },
 
@@ -22,9 +19,8 @@ export const LABEL_CONFIG = {
     normal: 'white'
   },
 
-  style: {
-    fontFamily: 'sans-serif',
-    textShadow: '1px 1px 2px black'
+  outline: {
+    color: 0x000000
   },
 
   fade: {
