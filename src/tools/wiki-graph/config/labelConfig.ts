@@ -1,4 +1,7 @@
 export const LABEL_CONFIG = {
+  // Nunito - friendly rounded sans-serif
+  font: 'https://fonts.cdnfonts.com/s/15604/Nunito-Regular.woff',
+
   title: {
     yOffset: 0.75,
     fontSize: 0.55,

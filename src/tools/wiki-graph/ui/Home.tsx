@@ -1,15 +1,14 @@
 import React, { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import { Text } from 'troika-three-text';
-import { ArticleNode, ArticleLink } from '../data/Article';
 import { createWikiCrawler, DEFAULT_LINK_LIMIT, DEFAULT_MAX_DEPTH } from '../logic/WikiCrawler';
 import { createForceSimulation } from '../logic/ForceSimulation';
 import { createCategoryTracker } from '../logic/CategoryTracker';
 import { createRealWikiFetcher } from '../logic/networking/RealWikiFetcher';
 import { createMockWikiFetcher, MockWikiFetcher } from '../logic/networking/MockWikiFetcher';
+import { createGraphController, GraphController } from '../logic/GraphController';
 import { PHYSICS_CONTROLS } from '../config/physicsConfig';
 import { createStorer, StorageKey } from '../../../util/Storage';
 import { createCameraAnimator, CameraAnimator } from '../logic/CameraAnimator';
-import { LoadingIndicator } from '../scene/LoadingIndicatorFactory';
 import { createInstancedNodeManager } from '../scene/InstancedNodeManager';
 import { createInstancedLinkManager } from '../scene/InstancedLinkManager';
 import { API_CONFIG } from '../config/apiConfig';
@@ -73,11 +72,6 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, Error
 
 const START_ARTICLE = API_CONFIG.crawling.startArticle;
 
-interface LinkCount {
-    count: number;
-    isComplete: boolean;
-}
-
 interface WikiGraphSettings {
     useMockData: boolean;
     mockDelay: number;
@@ -86,15 +80,12 @@ interface WikiGraphSettings {
 const Home: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Graph data refs
-    const articlesRef = useRef<Map<string, ArticleNode>>(new Map());
-    const linksRef = useRef<ArticleLink[]>([]);
-    const pendingLinksRef = useRef<Map<string, Set<string>>>(new Map());
-    const loadingIndicatorsRef = useRef<Map<string, LoadingIndicator>>(new Map());
-    const linkCountsRef = useRef<Map<string, LinkCount>>(new Map());
+    // Controller state (not a ref - needs to trigger re-render when set)
+    const [controller, setController] = useState<GraphController | null>(null);
     const selectedArticleRef = useRef<string | null>(START_ARTICLE);
     const statsLabelRef = useRef<Text | null>(null);
     const cameraAnimatorRef = useRef<CameraAnimator | null>(null);
+    const updateStatsLabelRef = useRef<(title: string) => void>(() => {});
 
     // UI state
     const [articleCount, setArticleCount] = useState(0);
@@ -141,9 +132,11 @@ const Home: React.FC = () => {
 
     // Derived counts (recomputed when articleCount changes)
     const { nodeCount, leafCount } = useMemo(() => {
+        if (!controller) return { nodeCount: 0, leafCount: 0 };
+
         let nodes = 0;
         let leaves = 0;
-        for (const article of articlesRef.current.values()) {
+        for (const article of controller.getArticles().values()) {
             if (article.article.leaf) {
                 leaves++;
             } else {
@@ -151,32 +144,14 @@ const Home: React.FC = () => {
             }
         }
         return { nodeCount: nodes, leafCount: leaves };
-    }, [articleCount]);
+    }, [articleCount, controller]);
 
     // Scene setup
     const { sceneManager, isReady } = useThreeScene(containerRef);
 
-    // Initialize camera animator and add instanced meshes when scene is ready
-    useEffect(() => {
-        if (isReady && sceneManager) {
-            const { scene, camera, controls } = sceneManager.getComponents();
-            cameraAnimatorRef.current = createCameraAnimator(camera, controls);
-
-            // Add instanced node meshes to scene
-            for (const mesh of nodeManager.getMeshes()) {
-                scene.add(mesh);
-            }
-
-            // Add instanced link meshes to scene
-            for (const mesh of linkManager.getMeshes()) {
-                scene.add(mesh);
-            }
-        }
-    }, [isReady, sceneManager, nodeManager, linkManager]);
-
-    // Stats label management
+    // Stats label management - updates ref so controller can call it
     const updateStatsLabel = useCallback((title: string | null) => {
-        if (!sceneManager) return;
+        if (!sceneManager || !controller) return;
 
         const { scene } = sceneManager.getComponents();
 
@@ -189,12 +164,12 @@ const Home: React.FC = () => {
 
         if (!title) return;
 
-        const node = articlesRef.current.get(title);
-        const visualizedLinks = linksRef.current.filter(link => link.source === title).length;
+        const node = controller.getArticles().get(title);
+        const visualizedLinks = controller.getLinks().filter(link => link.source === title).length;
 
         let totalLinks: number;
         let isComplete: boolean;
-        const progress = linkCountsRef.current.get(title);
+        const progress = controller.getLinkProgress(title);
         if (progress) {
             totalLinks = progress.count;
             isComplete = progress.isComplete;
@@ -207,23 +182,67 @@ const Home: React.FC = () => {
 
         const totalStr = isComplete ? String(totalLinks) : `${totalLinks}+`;
         const statsLabel = createStatsLabel(`(${visualizedLinks}/${totalStr})`, scene);
+        if (!statsLabel) return;  // Labels disabled
 
         // Position in world space (will be updated in animation loop)
         if (node) {
             statsLabel.position.set(node.position.x, node.position.y + LABEL_CONFIG.stats.worldYOffset, node.position.z);
         }
         statsLabelRef.current = statsLabel;
-    }, [sceneManager]);
+    }, [sceneManager, controller]);
+
+    // Keep ref in sync - needed because controller is created before updateStatsLabel
+    // has controller in its closure, so we use this indirection to avoid stale closures
+    useEffect(() => {
+        updateStatsLabelRef.current = (title: string) => updateStatsLabel(title);
+    }, [updateStatsLabel]);
+
+    // Initialize controller, camera animator, and add instanced meshes when scene is ready
+    useEffect(() => {
+        if (isReady && sceneManager) {
+            const { scene, camera, controls } = sceneManager.getComponents();
+            cameraAnimatorRef.current = createCameraAnimator(camera, controls);
+
+            // Create controller (owns all graph state)
+            const newController = createGraphController({
+                scene,
+                simulation,
+                categoryTracker,
+                nodeManager,
+                linkManager,
+                callbacks: {
+                    onArticleCountChange: setArticleCount,
+                    onLinkCountChange: setLinkCount,
+                    onError: setError
+                },
+                selectedArticleRef,
+                updateStatsLabel: (title: string) => updateStatsLabelRef.current(title)
+            });
+            setController(newController);
+
+            // Add instanced node meshes to scene
+            for (const mesh of nodeManager.getMeshes()) {
+                scene.add(mesh);
+            }
+
+            // Add instanced link meshes to scene
+            for (const mesh of linkManager.getMeshes()) {
+                scene.add(mesh);
+            }
+        }
+    }, [isReady, sceneManager, nodeManager, linkManager, simulation, categoryTracker]);
 
     // Article click handler
     const handleArticleClick = useCallback((title: string) => {
         setSelectedArticle(title);
         selectedArticleRef.current = title;
 
-        const node = articlesRef.current.get(title);
+        const node = controller?.getArticles().get(title);
 
         // Check if this is a leaf node
         if (node?.article.leaf) {
+            // Add loading indicator immediately for visual feedback
+            controller?.addQueuedIndicator(title, [title]);
             // Promote the leaf to a full node - stats will show after promotion via onFetchProgress
             crawler.promoteLeaf(title);
         } else {
@@ -237,7 +256,7 @@ const Home: React.FC = () => {
         if (node && cameraAnimatorRef.current) {
             cameraAnimatorRef.current.animateTo(node.position.clone());
         }
-    }, [categoryTracker, crawler, updateStatsLabel]);
+    }, [categoryTracker, crawler, updateStatsLabel, controller]);
 
     // Physics parameter handlers
     const handleSpringStrengthChange = useCallback((value: number) => {
@@ -291,26 +310,15 @@ const Home: React.FC = () => {
     useMouseInteraction({
         sceneManager,
         nodeManager,
-        articlesRef,
+        controller,
         onArticleClick: handleArticleClick
     });
 
     // Crawler subscriptions
     useCrawlerSubscriptions({
         crawler,
-        sceneManager,
-        simulation,
-        categoryTracker,
-        nodeManager,
-        linkManager,
-        articlesRef,
-        linksRef,
-        pendingLinksRef,
-        loadingIndicatorsRef,
-        linkCountsRef,
+        controller,
         selectedArticleRef,
-        setArticleCount,
-        setLinkCount,
         setFetchingCount,
         setPendingQueueSize,
         updateStatsLabel,
@@ -325,9 +333,7 @@ const Home: React.FC = () => {
         cameraAnimator: cameraAnimatorRef.current,
         nodeManager,
         linkManager,
-        articlesRef,
-        linksRef,
-        loadingIndicatorsRef,
+        controller,
         statsLabelRef,
         selectedArticleRef
     });

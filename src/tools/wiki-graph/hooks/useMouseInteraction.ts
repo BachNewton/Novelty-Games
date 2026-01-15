@@ -1,13 +1,13 @@
-import { useEffect, useRef, RefObject } from 'react';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { SceneManager } from '../scene/SceneManager';
 import { InstancedNodeManager, NodeType } from '../scene/InstancedNodeManager';
-import { ArticleNode } from '../data/Article';
+import { GraphController } from '../logic/GraphController';
 
 interface MouseInteractionDeps {
     sceneManager: SceneManager | null;
     nodeManager: InstancedNodeManager;
-    articlesRef: RefObject<Map<string, ArticleNode>>;
+    controller: GraphController | null;
     onArticleClick: (title: string) => void;
 }
 
@@ -21,10 +21,12 @@ export function useMouseInteraction(deps: MouseInteractionDeps): void {
     const hoveredTitleRef = useRef<string | null>(null);
 
     useEffect(() => {
-        const { sceneManager, nodeManager, articlesRef, onArticleClick } = deps;
+        const { sceneManager, nodeManager, controller, onArticleClick } = deps;
 
-        if (!sceneManager) return;
+        if (!sceneManager || !controller) return;
 
+        // Capture non-null controller for use in nested functions
+        const graphController = controller;
         const { camera, renderer, raycaster, mouse } = sceneManager.getComponents();
 
         // Get instanced meshes for raycasting
@@ -46,7 +48,8 @@ export function useMouseInteraction(deps: MouseInteractionDeps): void {
 
             // Linear search through articles to find matching instance
             // Return the canonical title (article.title) not the map key, to handle aliases
-            for (const node of articlesRef.current!.values()) {
+            const articles = graphController.getArticles();
+            for (const node of articles.values()) {
                 if (node.instanceType === nodeType && node.instanceIndex === instanceId) {
                     return node.article.title;
                 }
@@ -93,7 +96,7 @@ export function useMouseInteraction(deps: MouseInteractionDeps): void {
                 const mesh = intersects[0].object as THREE.InstancedMesh;
                 const title = findArticleByInstance(mesh, intersects[0].instanceId);
                 if (title) {
-                    const node = articlesRef.current!.get(title);
+                    const node = graphController.getArticles().get(title);
                     if (node) {
                         nodeManager.setHighlighted(node.instanceType, node.instanceIndex, node.position);
                         hoveredTitleRef.current = title;

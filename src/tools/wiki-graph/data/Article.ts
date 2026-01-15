@@ -18,7 +18,7 @@ export interface ArticleNode {
     article: WikiArticle;
     instanceIndex: number;
     instanceType: NodeType;
-    label: Text;
+    label: Text | null;  // null when DEBUG_CONFIG.disableLabels is true
     position: THREE.Vector3;
     velocity: THREE.Vector3;
 }

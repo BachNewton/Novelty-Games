@@ -378,17 +378,50 @@ export function createWikiCrawler(fetcher?: WikiFetcher): WikiCrawler {
             // Remove from articles so it can be re-fetched
             articles.delete(title);
 
-            // Queue for fetching at depth 0 (fresh BFS from this point)
-            pendingQueue.push({ title, depth: 0 });
+            // Mark as in-flight to prevent duplicate fetches
+            inFlight.add(title);
 
             // Trigger request state change to update UI
+            activeRequests++;
             requestCallbacks.forEach(cb => cb(activeRequests, currentBatchSize));
 
-            // Ensure crawler is running to process the queue
-            if (!running) {
-                running = true;
-                processQueue();
-            }
+            // Fetch immediately in parallel (don't wait for queue)
+            const depthMap = new Map([[title, 0]]);
+            wikiFetcher.fetchArticles(
+                [title],
+                depthMap,
+                {
+                    onArticle: (fetchedArticle) => {
+                        storeArticle(fetchedArticle);
+                    },
+                    onProgress: (progressTitle, linkCount, isComplete) => {
+                        fetchProgressCallbacks.forEach(cb => cb(progressTitle, linkCount, isComplete));
+                    }
+                }
+            ).then(({ articles: fetched, redirects }) => {
+                // Store any remaining articles
+                fetched.forEach(storeArticle);
+
+                // Track fetched titles
+                const fetchedTitles = new Set<string>();
+                for (const a of fetched) fetchedTitles.add(a.title);
+                for (const [from] of redirects) fetchedTitles.add(from);
+
+                // Process links for the promoted article
+                fetched.forEach(processArticleLinks);
+
+                // Handle if article was missing
+                if (!fetchedTitles.has(title)) {
+                    createMissingArticles([{ title, depth: 0 }], fetchedTitles);
+                }
+            }).catch((error) => {
+                console.error(`Failed to fetch promoted leaf [${title}]:`, error);
+                fetchFailedCallbacks.forEach(cb => cb([title]));
+            }).finally(() => {
+                inFlight.delete(title);
+                activeRequests--;
+                requestCallbacks.forEach(cb => cb(activeRequests, currentBatchSize));
+            });
         },
 
         setLinkLimit: (limit: number) => {

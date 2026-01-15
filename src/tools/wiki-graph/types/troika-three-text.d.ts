@@ -1,8 +1,16 @@
 declare module 'troika-three-text' {
     import { Mesh, Color } from 'three';
 
+    export interface TextBuilderConfig {
+        useWorker?: boolean;
+        unicodeFontsURL?: string;
+    }
+
+    export function configureTextBuilder(config: TextBuilderConfig): void;
+
     export class Text extends Mesh {
         text: string;
+        font: string | null;
         fontSize: number;
         color: string | number | Color;
         anchorX: 'left' | 'center' | 'right' | number;

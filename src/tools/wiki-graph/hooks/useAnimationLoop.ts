@@ -4,8 +4,8 @@ import { Text } from 'troika-three-text';
 import { SceneManager } from '../scene/SceneManager';
 import { ForceSimulation } from '../logic/ForceSimulation';
 import { CameraAnimator } from '../logic/CameraAnimator';
-import { ArticleNode, ArticleLink } from '../data/Article';
-import { LoadingIndicator, rotateIndicator } from '../scene/LoadingIndicatorFactory';
+import { GraphController } from '../logic/GraphController';
+import { rotateIndicator } from '../scene/LoadingIndicatorFactory';
 import { InstancedNodeManager } from '../scene/InstancedNodeManager';
 import { InstancedLinkManager } from '../scene/InstancedLinkManager';
 import { ANIMATION_CONFIG } from '../config/animationConfig';
@@ -19,11 +19,9 @@ interface AnimationDeps {
     cameraAnimator: CameraAnimator | null;
     nodeManager: InstancedNodeManager;
     linkManager: InstancedLinkManager;
-    articlesRef: RefObject<Map<string, ArticleNode>>;
-    linksRef: RefObject<ArticleLink[]>;
-    loadingIndicatorsRef: RefObject<Map<string, LoadingIndicator>>;
+    controller: GraphController | null;
     statsLabelRef: RefObject<Text | null>;
-    selectedArticleRef: RefObject<string | null>;
+    selectedArticleRef: { current: string | null };
 }
 
 // Reusable quaternion for cone orientation
@@ -44,11 +42,13 @@ export function useAnimationLoop(deps: AnimationDeps): void {
     useEffect(() => {
         const {
             sceneManager, simulation, cameraAnimator, nodeManager, linkManager,
-            articlesRef, linksRef, loadingIndicatorsRef, statsLabelRef, selectedArticleRef
+            controller, statsLabelRef, selectedArticleRef
         } = deps;
 
-        if (!sceneManager) return;
+        if (!sceneManager || !controller) return;
 
+        // Capture non-null controller for use in nested functions
+        const graphController = controller;
         const { scene, camera, renderer, controls, stats } = sceneManager.getComponents();
 
         function updateTroikaLabel(label: Text, pos: THREE.Vector3, yOffset: number): void {
@@ -79,9 +79,9 @@ export function useAnimationLoop(deps: AnimationDeps): void {
 
             simulation.update(deltaTime);
 
-            const articles = articlesRef.current!;
-            const links = linksRef.current!;
-            const loadingIndicators = loadingIndicatorsRef.current!;
+            const articles = graphController.getArticles();
+            const links = graphController.getLinks();
+            const loadingIndicators = graphController.getLoadingIndicators();
 
             // Build lookup map for directional links: target -> source (O(n) once, not O(n²))
             const directionalLinkSources = new Map<string, string>();
@@ -101,7 +101,9 @@ export function useAnimationLoop(deps: AnimationDeps): void {
                     nodeManager.setPosition(node.instanceType, node.instanceIndex, pos);
 
                     // Update label position and fade
-                    updateTroikaLabel(node.label, pos, LABEL_CONFIG.title.yOffset);
+                    if (node.label) {
+                        updateTroikaLabel(node.label, pos, LABEL_CONFIG.title.yOffset);
+                    }
 
                     // Orient cones toward their source node
                     if (node.instanceType === 'cone') {
