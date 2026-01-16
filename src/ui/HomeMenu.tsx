@@ -23,7 +23,8 @@ enum VersionState {
     UNKNOWN,
     OUTDATED,
     CHECKING,
-    INSTALLING
+    INSTALLING,
+    DEV
 }
 
 interface HomeMenuProps {
@@ -37,7 +38,7 @@ interface HomeMenuProps {
 
 const HomeMenu: React.FC<HomeMenuProps> = ({ updateCallbacks }) => {
     const navigate = useNavigate();
-    const [versionState, setVersionState] = useState(VersionState.CHECKING);
+    const [versionState, setVersionState] = useState(import.meta.env.DEV ? VersionState.DEV : VersionState.CHECKING);
 
     useEffect(() => {
         updateCallbacks.setOnUpdateAvailable(() => {
@@ -127,6 +128,8 @@ function versionStateUi(versionState: VersionState) {
             </Button>;
         case VersionState.UNKNOWN:
             return <>✖️ Offline</>;
+        case VersionState.DEV:
+            return <>🤖 Dev</>;
     }
 }
 

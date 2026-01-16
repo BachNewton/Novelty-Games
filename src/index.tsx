@@ -57,7 +57,7 @@ serviceWorkerRegistration.register({
       onOfflineCallback();
     },
     onCheckFailed: () => {
-      // If version check fails (network error, etc.), 
+      // If version check fails (network error, etc.),
       // we can't determine update status, so leave UI in checking state
     },
   },
