@@ -1,2 +1,2 @@
 # Novelty Games
-An all-in-one app for all of the novelty game ideas Kyle has
+An all-in-one app for all of Kyle's novelty ideas
