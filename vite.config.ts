@@ -19,7 +19,7 @@ export default defineConfig(({ command }) => ({
       buildBase: '/Novelty-Games/',
     }),
   ],
-  base: command === 'build' ? '/Novelty-Games/' : '/',
+  base: '/Novelty-Games/',
   build: {
     outDir: 'build',
     sourcemap: true,
