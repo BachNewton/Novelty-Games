@@ -64,7 +64,9 @@ export function createTestingGame(): Game {
 
 export function doubleClickImage(imageSrc: string) {
     const imageElements = screen.getAllByRole<HTMLImageElement>('img');
-    const imageElement = imageElements.find(element => element.src === imageSrc)!;
+    // Extract just the filename from the expected src
+    const expectedFilename = imageSrc.split('/').pop()!;
+    const imageElement = imageElements.find(element => element.src.includes(expectedFilename))!;
     fireEvent.click(imageElement);
     fireEvent.click(imageElement);
 }

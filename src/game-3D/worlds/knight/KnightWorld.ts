@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { GameWorld, GameWorldCreator } from "../GameWorld";
 import { FBXLoader, OrbitControls } from 'three/examples/jsm/Addons';
-import KnightRunAnimationFbx from './models/Lite Sword and Shield Pack/sword and shield run.fbx';
+import KnightRunAnimationFbx from './models/sword-shield-pack/sword-and-shield-run.fbx';
 
 const KNIGHT_MODEL_URL = 'https://raw.githubusercontent.com/BachNewton/Novelty-Games/refs/heads/main/models/knight/Paladin%20WProp%20J%20Nordstrom.fbx';
 

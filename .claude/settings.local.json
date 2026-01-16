@@ -17,7 +17,9 @@
       "Bash(ls:*)",
       "Bash(git log:*)",
       "Bash(wc:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(grep:*)",
+      "Bash(npm run test-all:*)"
     ]
   }
 }
