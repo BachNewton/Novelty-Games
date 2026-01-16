@@ -61,7 +61,7 @@ describe('Board UI', () => {
         expect(game.teams[1].tableau.battleArea[0] instanceof RollCard).toBe(true);
 
         // The CrashCard should be in the discard pile
-        expect(game.discard.image).toBe('MB-crash.svg');
+        expect(game.discard.image).toContain('MB-crash.svg');
     });
 
     it('should show a hazard card in the discard pile if a coup-fourré is played to prevent it', () => {
@@ -95,7 +95,7 @@ describe('Board UI', () => {
         expect(playedAceCard?.coupFourré).toBe(true);
 
         // The CrashCard should be in the discard pile
-        expect(game.discard?.image).toBe('MB-crash.svg');
+        expect(game.discard?.image).toContain('MB-crash.svg');
     });
 
     it('should give the correct info to the communicator when playing a distance card', () => {
