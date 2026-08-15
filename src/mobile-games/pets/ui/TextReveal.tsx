@@ -25,13 +25,9 @@ const TextReveal: React.FC<TextRevealProps> = ({ children }) => {
         return () => clearInterval(intervalId);
     }, [children]);
 
-    // The full text invisibly reserves the final size from the first frame, so the bubble doesn't
-    // grow in height while the reveal types over it.
-    return <div style={{ position: 'relative' }}>
-        <div style={{ visibility: 'hidden' }}>{children}</div>
-
-        <div style={{ position: 'absolute', top: '0px', left: '0px' }}>{revealedText}</div>
-    </div>;
+    // A zero-width space keeps one line of height before any text has revealed, so the first
+    // character doesn't bump the height.
+    return <div>{revealedText === '' ? '200B' : revealedText}</div>;
 };
 
 export default TextReveal;
