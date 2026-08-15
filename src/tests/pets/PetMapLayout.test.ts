@@ -1,5 +1,7 @@
 import { createMapProjection } from "../../mobile-games/pets/logic/MapProjection";
-import { clampZoom, getFitZoom, getMinZoom, MAX_ZOOM, MIN_ZOOM } from "../../mobile-games/pets/logic/PetMapLayout";
+import { clampZoom, getFitZoom, getHiddenCenter, getMinZoom, HIDDEN_RADIUS_METERS, MAX_ZOOM, MIN_ZOOM } from "../../mobile-games/pets/logic/PetMapLayout";
+import { PET_DATA } from "../../mobile-games/pets/data/PetData";
+import { createNavigator } from "../../util/geolocation/Navigator";
 
 // A tall, narrow phone, which is the only way this game is played.
 const PHONE_WIDTH = 390;
@@ -47,6 +49,26 @@ describe('getMinZoom function from PetMapLayout', () => {
 
             expect(minZoom).toBeGreaterThanOrEqual(MIN_ZOOM);
             expect(minZoom).toBeLessThanOrEqual(MAX_ZOOM);
+        }
+    });
+});
+
+describe('getHiddenCenter function from PetMapLayout', () => {
+    it('should place every real pet meaningfully off-center but still inside its circle', () => {
+        const projection = createMapProjection();
+        const navigator = createNavigator();
+
+        // A little slack for the flat-earth approximation in offsetLocation.
+        const toleranceMeters = 2;
+
+        for (const petData of PET_DATA) {
+            const center = getHiddenCenter(projection, petData.id, petData.location);
+            const meters = navigator.calculateDistanceAndBearing(petData.location, center).distance * 1000;
+
+            // The bug this guards: a small offset leaves the "?" pointing almost straight at the
+            // pet's real spot, making the hunt trivial.
+            expect(meters).toBeGreaterThanOrEqual(0.4 * HIDDEN_RADIUS_METERS - toleranceMeters);
+            expect(meters).toBeLessThanOrEqual(0.85 * HIDDEN_RADIUS_METERS + toleranceMeters);
         }
     });
 });

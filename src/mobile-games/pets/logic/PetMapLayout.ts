@@ -23,7 +23,8 @@ export const MAP_ATTRIBUTION = 'Map tiles by Stamen Design, under CC BY 3.0. Dat
 const TILE_DIRECTORY = 'pets-map-tiles';
 const TILE_EXTENSION = 'jpg';
 const TILE_MARGIN = 1;
-const HIDDEN_OFFSET_MAX_RATIO = 0.35;
+const HIDDEN_OFFSET_MIN_RATIO = 0.4;
+const HIDDEN_OFFSET_MAX_RATIO = 0.85;
 const OVERLAP_OFFSET_PIXELS = 38;
 const FIT_TOLERANCE = 1.2;
 const LOCATION_KEY_PRECISION = 5;
@@ -169,8 +170,10 @@ export function getTiles(range: TileRange, zoom: number): Tile[] {
  * Where the fuzzy circle for an undiscovered pet is drawn.
  *
  * The circle is deliberately NOT centered on the pet: a hash of the pet's id picks a stable
- * bearing and a distance of up to 35% of the radius, so the center gives nothing away while
- * the pet is still comfortably inside the circle.
+ * bearing and a distance of 40% to 85% of the radius, so the center is always meaningfully
+ * wrong while the pet still sits comfortably inside the circle. The lower bound matters as
+ * much as the upper - a small offset would leave the center pointing almost straight at the
+ * pet's real spot.
  */
 export function getHiddenCenter(projection: MapProjection, petId: string, location: Location): Location {
     const cached = hiddenCenters.get(petId);
@@ -178,8 +181,9 @@ export function getHiddenCenter(projection: MapProjection, petId: string, locati
 
     const hash = hashString(petId);
     const bearing = (hash % 3600) / 10;
-    const distance = (((hash >>> 12) % 1000) / 1000) * HIDDEN_OFFSET_MAX_RATIO * HIDDEN_RADIUS_METERS;
-    const center = projection.offsetLocation(location, distance, bearing);
+    const fraction = ((hash >>> 12) % 1000) / 1000;
+    const ratio = HIDDEN_OFFSET_MIN_RATIO + fraction * (HIDDEN_OFFSET_MAX_RATIO - HIDDEN_OFFSET_MIN_RATIO);
+    const center = projection.offsetLocation(location, ratio * HIDDEN_RADIUS_METERS, bearing);
 
     hiddenCenters.set(petId, center);
 
