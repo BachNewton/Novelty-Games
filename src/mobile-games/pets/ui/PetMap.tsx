@@ -501,7 +501,7 @@ const PetMap: React.FC<PetMapProps> = ({ pets, onGoToPet }) => {
             </div>
         </div>}
 
-        {locateButtonUi(playerLocation, () => {
+        {selected !== null ? null : locateButtonUi(playerLocation, () => {
             if (playerLocation !== null) commitCenter(playerLocation);
         })}
 
@@ -769,7 +769,7 @@ function bubbleUi(petData: PetData, pet: Pet | undefined, onGoToPet: (petId: str
 
         <div style={{ display: 'flex', marginTop: '6px' }}>
             <Button fontScale={0.9} onClick={() => onGoToPet(petData.id)}>
-                {isDiscovered ? `Visit ${petData.name}` : 'Track them down'}
+                {isDiscovered ? `Visit ${petData.name}` : 'Find them'}
             </Button>
         </div>
     </div>;
@@ -811,10 +811,10 @@ function locateButtonUi(playerLocation: Location | null, onLocate: () => void): 
         }}
         style={{
             position: 'absolute',
-            top: '10px',
-            right: '10px',
-            width: '38px',
-            height: '38px',
+            bottom: '20px',
+            right: '15px',
+            width: '48px',
+            height: '48px',
             borderRadius: '50%',
             border: '2px solid white',
             boxSizing: 'border-box',
@@ -823,7 +823,9 @@ function locateButtonUi(playerLocation: Location | null, onLocate: () => void): 
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            fontSize: '1.1em',
+            // Sized in pixels, unlike em text the Scaffold's font scaling would inflate.
+            fontSize: '22px',
+            lineHeight: '1',
             cursor: isEnabled ? 'pointer' : 'default',
             opacity: isEnabled ? 1 : 0.4
         }}
