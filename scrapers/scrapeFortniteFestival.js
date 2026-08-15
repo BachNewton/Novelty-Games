@@ -1,69 +1,70 @@
 import fs from 'fs';
 
-const BASE_URL = 'https://fnzone.es/en/festival';
-const SCRIPT_CONTENT_REGEX = /<script id=\"__NEXT_DATA__\".+>(.+)<\/script>/g;
-const BUILD_ID_REGEX = /(?<=static\/)[^/]+(?=\/_buildManifest\.js)/;
+// Epic's own content API for Festival jam tracks. This is the upstream source the
+// community sites repackage, so it needs no HTML scraping and exposes fields those
+// sites drop - notably `_activeDate`, the date a track first hit the in-game store.
+const SPARK_TRACKS_URL = 'https://fortnitecontent-website-prod07.ol.epicgames.com/content/api/pages/fortnite-game/spark-tracks';
+const OUTPUT_PATH = 'db/fortniteFestivalSongs.json';
+
+// Epic writes 99 into an intensity when the part has no rating rather than omitting it.
+const UNRATED_INTENSITY = 99;
 
 (async () => {
-    console.log('Opening:', BASE_URL);
-    const response = await fetch(BASE_URL);
-    const text = await response.text();
-    console.log('Fetched festival page');
+    console.log('Fetching:', SPARK_TRACKS_URL);
+    const response = await fetch(SPARK_TRACKS_URL);
 
-    const buildId = text.match(BUILD_ID_REGEX)[0];
+    if (!response.ok) {
+        throw new Error(`Failed to fetch spark tracks: ${response.status} ${response.statusText}`);
+    }
 
-    const matches = text.matchAll(SCRIPT_CONTENT_REGEX);
-    const json = matches.next().value[1];
-    const object = JSON.parse(json);
+    const content = await response.json();
 
-    const ids = object.props.pageProps.pageData.map(song => song.sn);
-    console.log('Song IDs:', ids);
+    // The response mixes CMS metadata (_title, _locale, lastModified, ...) in alongside
+    // the track entries, so keep only the entries that actually carry a track.
+    const trackEntries = Object.values(content).filter(entry => entry?.track);
+    console.log('Found tracks:', trackEntries.length);
 
-    const songDataNetworkCalls = ids.map(id => {
-        return async () => {
-            const response = await fetch(`https://fnzone.es/_next/data/${buildId}/en/festival/${id}.json`);
-            const text = await response.text();
-            const object = JSON.parse(text);
-            const songData = object.pageProps.songData;
-            return songData;
-        };
-    });
+    if (trackEntries.length === 0) {
+        throw new Error('No tracks found - the spark tracks response shape has likely changed');
+    }
 
-    const songData = await Promise.all(songDataNetworkCalls.map(call => call()));
-    console.log('Song Data:', songData);
+    const songs = trackEntries.map(entry => {
+        const track = entry.track;
+        const intensities = track.in ?? {};
 
-    const songs = songData.map(song => {
-        console.log('Processing song:', song.tt, 'by', song.an);
-
-        const guitarDifficulty = song.in.gr;
-        const proGuitarDifficulty = song.in.pg;
-        const bassDifficulty = song.in.ba;
-        const drumsDifficulty = song.in.ds;
-        const proBassDifficulty = song.in.pb;
-        const proDrumsDifficulty = song.in.pd;
-        const vocalsDifficulty = song.in.vl;
+        console.log('Processing song:', track.tt, 'by', track.an);
 
         return {
-            name: song.tt,
-            artist: song.an,
-            albumArt: song.au,
-            year: song.ry,
-            length: song.dn,
+            name: track.tt,
+            artist: track.an,
+            albumArt: track.au,
+            year: track.ry,
+            length: track.dn,
+            storeReleaseDate: entry._activeDate ?? null,
             sampleMp3: null,
             difficulties: {
-                bass: bassDifficulty,
-                drums: drumsDifficulty,
-                guitar: guitarDifficulty,
-                proBass: proBassDifficulty,
-                proDrums: proDrumsDifficulty,
-                proGuitar: proGuitarDifficulty,
-                vocals: vocalsDifficulty
+                bass: toDifficulty(intensities.ba),
+                drums: toDifficulty(intensities.ds),
+                guitar: toDifficulty(intensities.gr),
+                proBass: toDifficulty(intensities.pb),
+                proDrums: toDifficulty(intensities.pd),
+                proGuitar: toDifficulty(intensities.pg),
+                vocals: toDifficulty(intensities.vl)
             }
         };
     });
 
-    console.log('Songs:', songs);
+    // Sorted by name so the weekly commit only diffs tracks that actually changed.
+    songs.sort((a, b) => a.name.localeCompare(b.name));
+
+    console.log('Songs:', songs.length);
 
     console.log('Writing songs to JSON file');
-    await fs.promises.writeFile('db/fortniteFestivalSongs.json', JSON.stringify(songs));
+    await fs.promises.writeFile(OUTPUT_PATH, JSON.stringify(songs));
 })();
+
+// A part with no chart is absent from the intensities entirely, so normalize both that
+// and the 99 placeholder to null.
+function toDifficulty(intensity) {
+    return intensity === undefined || intensity === UNRATED_INTENSITY ? null : intensity;
+}
