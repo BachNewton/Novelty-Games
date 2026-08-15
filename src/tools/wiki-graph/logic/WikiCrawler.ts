@@ -88,9 +88,32 @@ export function createWikiCrawler(fetcher?: WikiFetcher): WikiCrawler {
         return !isAlreadyTracked(title) && !isInPendingQueue(title);
     }
 
+    function createLinksFromExistingArticles(newArticle: WikiArticle): void {
+        const titlesToCheck = [newArticle.title, ...(newArticle.aliases ?? [])];
+
+        for (const [, existingArticle] of articles) {
+            // Skip leaf/missing articles (they don't have real link data)
+            if (existingArticle.leaf || existingArticle.missing) continue;
+
+            // Check if existing article's links contain the new article
+            for (const titleToCheck of titlesToCheck) {
+                if (existingArticle.links.includes(titleToCheck)) {
+                    processLinkDiscovery(existingArticle, newArticle.title);
+                    break;  // Only create one link per existing article
+                }
+            }
+        }
+    }
+
     function storeArticle(article: WikiArticle): void {
         if (articles.has(article.title)) {
             return;
+        }
+
+        // Check if existing articles link to this new article (before storing)
+        // Only do this for non-leaf articles since leafs will be promoted later
+        if (!article.leaf) {
+            createLinksFromExistingArticles(article);
         }
 
         articles.set(article.title, article);
@@ -178,14 +201,32 @@ export function createWikiCrawler(fetcher?: WikiFetcher): WikiCrawler {
     }
 
     function processArticleLinks(article: WikiArticle): void {
-        const selectedLinks = shuffleArray(article.links).slice(0, linkLimit);
+        // Separate links into existing articles vs new articles
+        const linksToExisting: string[] = [];
+        const linksToNew: string[] = [];
+
+        for (const linkTitle of article.links) {
+            if (articles.has(linkTitle)) {
+                linksToExisting.push(linkTitle);
+            } else {
+                linksToNew.push(linkTitle);
+            }
+        }
+
+        // Create links to ALL existing articles
+        for (const linkTitle of linksToExisting) {
+            processLinkDiscovery(article, linkTitle);
+        }
+
+        // Select linkLimit NEW articles to add to the graph
+        const selectedNewLinks = shuffleArray(linksToNew).slice(0, linkLimit);
         const childDepth = article.depth + 1;
         const shouldQueueChildren = childDepth < maxDepth;
 
         if (shouldQueueChildren) {
-            queueChildLinks(article, selectedLinks);
+            queueChildLinks(article, selectedNewLinks);
         } else {
-            createLeafLinks(article, selectedLinks, childDepth);
+            createLeafLinks(article, selectedNewLinks, childDepth);
         }
     }
 
@@ -316,24 +357,33 @@ export function createWikiCrawler(fetcher?: WikiFetcher): WikiCrawler {
             const article = articles.get(title);
             if (!article || article.leaf) return;  // Can't expand a leaf
 
-            // Find unfetched links from this article
-            const unfetchedLinks = article.links.filter(linkTitle => {
-                return !isAlreadyTracked(linkTitle);
-            });
+            // Separate links into existing articles vs unfetched links
+            const linksToExisting: string[] = [];
+            const unfetchedLinks: string[] = [];
 
-            const selectedLinks = shuffleArray(unfetchedLinks).slice(0, linkLimit);
+            for (const linkTitle of article.links) {
+                if (articles.has(linkTitle)) {
+                    linksToExisting.push(linkTitle);
+                } else if (!isAlreadyTracked(linkTitle)) {
+                    unfetchedLinks.push(linkTitle);
+                }
+            }
+
+            // Create links to ALL existing articles
+            for (const linkTitle of linksToExisting) {
+                processLinkDiscovery(article, linkTitle);
+            }
+
+            // Select linkLimit NEW articles to add to the graph
+            const selectedNewLinks = shuffleArray(unfetchedLinks).slice(0, linkLimit);
             const queuedLinks: string[] = [];
 
             // Check if children should be fetched or created as leafs
             const childDepth = 1;  // expand() always starts fresh BFS at depth 1
             const shouldFetchChildren = childDepth < maxDepth;
 
-            for (const linkTitle of selectedLinks) {
-                const linkKey = `${article.title}|${linkTitle}`;
-                if (!links.has(linkKey)) {
-                    links.add(linkKey);
-                    linkCallbacks.forEach(cb => cb(article.title, linkTitle));
-                }
+            for (const linkTitle of selectedNewLinks) {
+                processLinkDiscovery(article, linkTitle);
 
                 if (shouldFetchChildren) {
                     // Queue at depth 1: clicking any node starts a fresh BFS from that point
