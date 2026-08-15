@@ -14,7 +14,7 @@ export const MIN_ZOOM = 11;
 export const MAX_ZOOM = 15;
 
 /** Radius of the fuzzy "somewhere around here" circle drawn for pets that haven't been found yet. */
-export const HIDDEN_RADIUS_METERS = 300;
+export const HIDDEN_RADIUS_METERS = 500;
 
 // Required by the tiles' licenses — see public/pets-map-tiles/ATTRIBUTION.md
 export const MAP_ATTRIBUTION = 'Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.';
@@ -23,7 +23,7 @@ export const MAP_ATTRIBUTION = 'Map tiles by Stamen Design, under CC BY 3.0. Dat
 const TILE_DIRECTORY = 'pets-map-tiles';
 const TILE_EXTENSION = 'jpg';
 const TILE_MARGIN = 1;
-const HIDDEN_OFFSET_MIN_RATIO = 0.4;
+const HIDDEN_OFFSET_MIN_RATIO = 0.15;
 const HIDDEN_OFFSET_MAX_RATIO = 0.85;
 const OVERLAP_OFFSET_PIXELS = 38;
 const FIT_TOLERANCE = 1.2;
@@ -170,7 +170,7 @@ export function getTiles(range: TileRange, zoom: number): Tile[] {
  * Where the fuzzy circle for an undiscovered pet is drawn.
  *
  * The circle is deliberately NOT centered on the pet: a hash of the pet's id picks a stable
- * bearing and a distance of 40% to 85% of the radius, so the center is always meaningfully
+ * bearing and a distance of 15% to 85% of the radius, so the center is always meaningfully
  * wrong while the pet still sits comfortably inside the circle. The lower bound matters as
  * much as the upper - a small offset would leave the center pointing almost straight at the
  * pet's real spot.

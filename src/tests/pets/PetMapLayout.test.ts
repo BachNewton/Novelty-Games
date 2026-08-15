@@ -67,7 +67,7 @@ describe('getHiddenCenter function from PetMapLayout', () => {
 
             // The bug this guards: a small offset leaves the "?" pointing almost straight at the
             // pet's real spot, making the hunt trivial.
-            expect(meters).toBeGreaterThanOrEqual(0.4 * HIDDEN_RADIUS_METERS - toleranceMeters);
+            expect(meters).toBeGreaterThanOrEqual(0.15 * HIDDEN_RADIUS_METERS - toleranceMeters);
             expect(meters).toBeLessThanOrEqual(0.85 * HIDDEN_RADIUS_METERS + toleranceMeters);
         }
     });
