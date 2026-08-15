@@ -12,10 +12,12 @@ const WIDTH = '80%';
 interface FriendshipBarProps {
     isDiscovered: boolean;
     level: number;
-    animationKey: number;
+    animationKey: string | number;
+    /** Positioning and styling overrides, merged over the bar's defaults. */
+    style?: React.CSSProperties;
 }
 
-const FriendshipBar: React.FC<FriendshipBarProps> = ({ isDiscovered, level, animationKey }) => {
+const FriendshipBar: React.FC<FriendshipBarProps> = ({ isDiscovered, level, animationKey, style }) => {
     const [barWidth, setBarWidth] = useState('0%');
     const [shouldAnimate, setShouldAnimate] = useState(false);
     const previousLevel = useRef(level);
@@ -68,7 +70,8 @@ const FriendshipBar: React.FC<FriendshipBarProps> = ({ isDiscovered, level, anim
         borderRadius: BORDER_RADIUS,
         backgroundColor: COLORS.surface,
         overflow: 'hidden',
-        boxShadow: level < MAX_HEARTS ? undefined : glowEffect()
+        boxShadow: level < MAX_HEARTS ? undefined : glowEffect(),
+        ...style
     }}>
         {backgroundColor(shouldAnimate, barWidth, level)}
 

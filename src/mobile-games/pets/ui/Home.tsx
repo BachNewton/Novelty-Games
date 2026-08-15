@@ -63,7 +63,16 @@ const Home: React.FC<HomeProps> = ({ database }) => {
     };
 
     const content = selectedTab === null
-        ? <Menu selection={menuOptionSelection} pets={pets} seenInteractions={seenInteractions} />
+        ? <Menu
+            selection={menuOptionSelection}
+            pets={pets}
+            seenInteractions={seenInteractions}
+            onGoToPet={petId => {
+                const index = pets.findIndex(pet => pet.id === petId);
+
+                if (index >= 0) setSelectedTab(index);
+            }}
+        />
         : <PetContent
             pets={pets}
             selectedPet={selectedPet}

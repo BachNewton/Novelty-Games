@@ -2,8 +2,8 @@ import { COLORS } from "./Home";
 import TextReveal from "./TextReveal";
 
 interface SpeechBubbleProps {
-    /** Typed out one character at a time. */
-    text: string;
+    /** Typed out one character at a time. A bubble can also hold only custom content instead. */
+    text?: string;
     /** Changing this restarts the typewriter reveal, even if the text is the same. */
     revealKey?: string | number;
     /** Positioning and styling overrides, merged over the bubble's defaults. */
@@ -28,7 +28,7 @@ const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text, revealKey, style, chi
     }}>
         {children}
 
-        <TextReveal key={revealKey}>{text}</TextReveal>
+        {text === undefined ? null : <TextReveal key={revealKey}>{text}</TextReveal>}
     </div>;
 };
 

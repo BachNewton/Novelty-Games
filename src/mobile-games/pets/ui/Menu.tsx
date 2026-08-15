@@ -8,29 +8,35 @@ interface MenuProps {
     selection: MenuOption;
     pets: Pet[];
     seenInteractions: Set<string>;
+    onGoToPet: (petId: string) => void;
 }
 
 export enum MenuOption {
     WELCOME, OVERVIEW, MAP
 }
 
-const Menu: React.FC<MenuProps> = ({ selection, pets, seenInteractions }) => {
+const Menu: React.FC<MenuProps> = ({ selection, pets, seenInteractions, onGoToPet }) => {
     // The map is the one option that wants the whole area, edge to edge.
     const isFullBleed = selection === MenuOption.MAP;
 
     return <div style={{ padding: isFullBleed ? '0px' : '15px', height: isFullBleed ? '100%' : undefined }}>
-        {contentUi(selection, pets, seenInteractions)}
+        {contentUi(selection, pets, seenInteractions, onGoToPet)}
     </div>;
 };
 
-function contentUi(selection: MenuOption, pets: Pet[], seenInteractions: Set<string>): JSX.Element {
+function contentUi(
+    selection: MenuOption,
+    pets: Pet[],
+    seenInteractions: Set<string>,
+    onGoToPet: (petId: string) => void
+): JSX.Element {
     switch (selection) {
         case MenuOption.WELCOME:
             return <Welcome />;
         case MenuOption.OVERVIEW:
             return <Overview pets={pets} seenInteractions={seenInteractions} />;
         case MenuOption.MAP:
-            return <PetMap pets={pets} />;
+            return <PetMap pets={pets} onGoToPet={onGoToPet} />;
     }
 }
 

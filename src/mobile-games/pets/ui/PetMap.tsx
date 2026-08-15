@@ -18,7 +18,9 @@ import {
     MIN_ZOOM,
     TileRange
 } from "../logic/PetMapLayout";
-import { MAX_HEARTS } from "./FriendshipBar";
+import { State } from "../data/PetSave";
+import Button from "../../../util/ui/Button";
+import FriendshipBar from "./FriendshipBar";
 import { COLORS } from "./Home";
 import MapTile from "./MapTile";
 import SpeechBubble from "./SpeechBubble";
@@ -34,6 +36,7 @@ const WHEEL_PAGE_PIXELS = 100;
 
 interface PetMapProps {
     pets: Pet[];
+    onGoToPet: (petId: string) => void;
 }
 
 interface ViewState {
@@ -66,7 +69,7 @@ interface Point {
     y: number;
 }
 
-const PetMap: React.FC<PetMapProps> = ({ pets }) => {
+const PetMap: React.FC<PetMapProps> = ({ pets, onGoToPet }) => {
     const projection = useRef(createMapProjection()).current;
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -502,7 +505,7 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
             if (playerLocation !== null) commitCenter(playerLocation);
         })}
 
-        {selected === null ? null : bubbleUi(selected, pets.find(pet => pet.id === selected.id))}
+        {selected === null ? null : bubbleUi(selected, pets.find(pet => pet.id === selected.id), onGoToPet)}
     </div>;
 };
 
@@ -668,6 +671,16 @@ function discoveredMarkerUi(
             }}
         />
 
+        {isNapping(pet) ? <div style={{
+            position: 'absolute',
+            top: '-6px',
+            right: '-8px',
+            padding: '0px 3px',
+            borderRadius: '8px',
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            fontSize: '0.8em'
+        }}>💤</div> : null}
+
         <div style={{
             marginTop: '2px',
             padding: '0px 5px',
@@ -728,13 +741,13 @@ function playerUiOf(
     </div>;
 }
 
-function bubbleUi(petData: PetData, pet: Pet | undefined): JSX.Element {
+function bubbleUi(petData: PetData, pet: Pet | undefined, onGoToPet: (petId: string) => void): JSX.Element {
     const isDiscovered = pet?.discovered === true;
-    const text = isDiscovered ? getFriendshipLine(pet!) : petData.dialogue.hidden;
 
     return <div
         className='pets-map-pop-in'
         onClick={event => event.stopPropagation()}
+        onPointerDown={event => event.stopPropagation()}
         style={{
             position: 'absolute',
             left: '10px',
@@ -747,34 +760,42 @@ function bubbleUi(petData: PetData, pet: Pet | undefined): JSX.Element {
         {/* Keying the reveal on the pet restarts the typing for a different marker, while tapping
             the same one again simply leaves the finished text alone. */}
         <SpeechBubble
-            text={text}
+            text={isDiscovered ? undefined : petData.dialogue.hidden}
             revealKey={petData.id}
             style={{ width: '100%', margin: 0, backgroundColor: 'rgba(0,0,0,0.78)' }}
         >
-            {isDiscovered ? headerUi(pet!) : null}
+            {isDiscovered ? discoveredBubbleContentUi(petData, pet!) : null}
         </SpeechBubble>
+
+        <div style={{ display: 'flex', marginTop: '6px' }}>
+            <Button fontScale={0.9} onClick={() => onGoToPet(petData.id)}>
+                {isDiscovered ? `Visit ${petData.name}` : 'Track them down'}
+            </Button>
+        </div>
     </div>;
 }
 
-function headerUi(pet: Pet): JSX.Element {
-    return <div style={{ color: COLORS.primary, marginBottom: '4px' }}>
-        {pet.name}
+/** Just the name and the same friendship bar the pet's own page shows, glow and all. */
+function discoveredBubbleContentUi(petData: PetData, pet: Pet): JSX.Element {
+    return <>
+        <div style={{ color: COLORS.primary, textAlign: 'center' }}>{pet.name}</div>
 
-        <span style={{ marginLeft: '8px' }}>{getHearts(pet)}</span>
-    </div>;
+        <FriendshipBar
+            isDiscovered={true}
+            level={pet.friendship}
+            animationKey={petData.id}
+            style={{ position: 'relative', top: '0px', width: 'auto', margin: '8px 4px 2px' }}
+        />
+    </>;
 }
 
-function getHearts(pet: Pet): string {
-    const filled = Math.min(pet.friendship, MAX_HEARTS);
+/** Mirrors what the pet's own page will show: a pet whose cycle has passed flips state on the next visit. */
+function isNapping(pet: Pet): boolean {
+    const isAsleep = pet.state === State.ASLEEP;
 
-    return '🩷'.repeat(filled) + '🤍'.repeat(MAX_HEARTS - filled);
-}
+    if (pet.nextCycle !== null && pet.nextCycle < Date.now()) return !isAsleep;
 
-function getFriendshipLine(pet: Pet): string {
-    if (pet.friendship >= MAX_HEARTS) return `Best friends! ${pet.name} lights up whenever you visit.`;
-    if (pet.friendship === 0) return `You've met ${pet.name}! Visit again to start growing your friendship.`;
-
-    return `You and ${pet.name} are ${pet.friendship} of ${MAX_HEARTS} hearts along the way to being best friends.`;
+    return isAsleep;
 }
 
 /** Zooming is left to pinching and the wheel, so recentring on the player is the only button. */
@@ -792,12 +813,13 @@ function locateButtonUi(playerLocation: Location | null, onLocate: () => void): 
             position: 'absolute',
             top: '10px',
             right: '10px',
-            width: '36px',
-            height: '36px',
+            width: '38px',
+            height: '38px',
             borderRadius: '50%',
-            border: `2px solid ${COLORS.secondary}`,
-            backgroundColor: 'rgba(0,0,0,0.6)',
-            color: 'white',
+            border: '2px solid white',
+            boxSizing: 'border-box',
+            backgroundColor: COLORS.secondary,
+            boxShadow: '0 2px 6px rgba(0,0,0,0.4)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
