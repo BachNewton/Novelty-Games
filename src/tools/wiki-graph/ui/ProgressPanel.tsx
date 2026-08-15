@@ -21,11 +21,15 @@ interface ProgressPanelProps {
     damping: number;
     maxVelocity: number;
     barnesHutTheta: number;
+    densityRadius: number;
+    densityRepulsionScale: number;
     onSpringStrengthChange: (value: number) => void;
     onRepulsionStrengthChange: (value: number) => void;
     onDampingChange: (value: number) => void;
     onMaxVelocityChange: (value: number) => void;
     onBarnesHutThetaChange: (value: number) => void;
+    onDensityRadiusChange: (value: number) => void;
+    onDensityRepulsionScaleChange: (value: number) => void;
     useMockData: boolean;
     onMockDataToggle: (enabled: boolean) => void;
     mockDelay: number;
@@ -57,11 +61,15 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
     damping,
     maxVelocity,
     barnesHutTheta,
+    densityRadius,
+    densityRepulsionScale,
     onSpringStrengthChange,
     onRepulsionStrengthChange,
     onDampingChange,
     onMaxVelocityChange,
     onBarnesHutThetaChange,
+    onDensityRadiusChange,
+    onDensityRepulsionScaleChange,
     useMockData,
     onMockDataToggle,
     mockDelay,
@@ -335,6 +343,38 @@ const ProgressPanel: React.FC<ProgressPanelProps> = ({
                                 style={{ width: '100%' }}
                             />
                             <div style={descriptionStyle}>{PHYSICS_CONTROLS.maxVelocity.description}</div>
+                        </div>
+
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '4px' }}>
+                                Density radius: {densityRadius}
+                            </label>
+                            <input
+                                type="range"
+                                min={PHYSICS_CONTROLS.densityRadius.min}
+                                max={PHYSICS_CONTROLS.densityRadius.max}
+                                step={PHYSICS_CONTROLS.densityRadius.step}
+                                value={densityRadius}
+                                onChange={(e) => onDensityRadiusChange(parseFloat(e.target.value))}
+                                style={{ width: '100%' }}
+                            />
+                            <div style={descriptionStyle}>{PHYSICS_CONTROLS.densityRadius.description}</div>
+                        </div>
+
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '4px' }}>
+                                Density repulsion: {densityRepulsionScale.toFixed(1)}
+                            </label>
+                            <input
+                                type="range"
+                                min={PHYSICS_CONTROLS.densityRepulsionScale.min}
+                                max={PHYSICS_CONTROLS.densityRepulsionScale.max}
+                                step={PHYSICS_CONTROLS.densityRepulsionScale.step}
+                                value={densityRepulsionScale}
+                                onChange={(e) => onDensityRepulsionScaleChange(parseFloat(e.target.value))}
+                                style={{ width: '100%' }}
+                            />
+                            <div style={descriptionStyle}>{PHYSICS_CONTROLS.densityRepulsionScale.description}</div>
                         </div>
                     </>
                 )}

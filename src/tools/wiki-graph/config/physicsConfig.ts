@@ -5,7 +5,9 @@ export const PHYSICS_CONFIG = {
   maxVelocity: 10,
   maxDeltaTimeMs: 50,
   spawnOffsetRange: 5,
-  barnesHutTheta: 0.7
+  barnesHutTheta: 0.7,
+  densityRadius: 15,
+  densityRepulsionScale: 0.5
 };
 
 export const PHYSICS_CONTROLS = {
@@ -43,5 +45,19 @@ export const PHYSICS_CONTROLS = {
     max: 1.5,
     step: 0.05,
     description: 'Barnes-Hut approximation threshold (lower=accurate, higher=fast)'
+  },
+  densityRadius: {
+    default: 15,
+    min: 5,
+    max: 50,
+    step: 1,
+    description: 'Radius to check for nearby nodes when calculating density'
+  },
+  densityRepulsionScale: {
+    default: 0.5,
+    min: 0,
+    max: 2,
+    step: 0.1,
+    description: 'How much extra repulsion to apply in dense clusters (0=none, 1=double at high density)'
   }
 };

@@ -104,6 +104,8 @@ const Home: React.FC = () => {
     const [damping, setDamping] = useState(PHYSICS_CONTROLS.damping.default);
     const [maxVelocity, setMaxVelocity] = useState(PHYSICS_CONTROLS.maxVelocity.default);
     const [barnesHutTheta, setBarnesHutTheta] = useState(PHYSICS_CONTROLS.barnesHutTheta.default);
+    const [densityRadius, setDensityRadius] = useState(PHYSICS_CONTROLS.densityRadius.default);
+    const [densityRepulsionScale, setDensityRepulsionScale] = useState(PHYSICS_CONTROLS.densityRepulsionScale.default);
 
     // Network mode state
     const [useMockData, setUseMockData] = useState(false);
@@ -284,6 +286,16 @@ const Home: React.FC = () => {
         simulation.updateConfig({ barnesHutTheta: value });
     }, [simulation]);
 
+    const handleDensityRadiusChange = useCallback((value: number) => {
+        setDensityRadius(value);
+        simulation.updateConfig({ densityRadius: value });
+    }, [simulation]);
+
+    const handleDensityRepulsionScaleChange = useCallback((value: number) => {
+        setDensityRepulsionScale(value);
+        simulation.updateConfig({ densityRepulsionScale: value });
+    }, [simulation]);
+
     // Network mode toggle handler - save and refresh for clean state
     const handleMockDataToggle = useCallback((enabled: boolean) => {
         settingsStorer.save({ useMockData: enabled, mockDelay });
@@ -375,6 +387,10 @@ const Home: React.FC = () => {
                 onDampingChange={handleDampingChange}
                 onMaxVelocityChange={handleMaxVelocityChange}
                 onBarnesHutThetaChange={handleBarnesHutThetaChange}
+                densityRadius={densityRadius}
+                densityRepulsionScale={densityRepulsionScale}
+                onDensityRadiusChange={handleDensityRadiusChange}
+                onDensityRepulsionScaleChange={handleDensityRepulsionScaleChange}
                 useMockData={useMockData}
                 onMockDataToggle={handleMockDataToggle}
                 mockDelay={mockDelay}

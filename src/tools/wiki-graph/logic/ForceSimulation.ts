@@ -9,6 +9,8 @@ export interface ForceConfig {
     damping: number;
     maxVelocity: number;
     barnesHutTheta: number;
+    densityRadius: number;
+    densityRepulsionScale: number;
 }
 
 interface SimNode {
@@ -38,7 +40,9 @@ const DEFAULT_CONFIG: ForceConfig = {
     repulsionStrength: PHYSICS_CONFIG.repulsionStrength,
     damping: PHYSICS_CONFIG.damping,
     maxVelocity: PHYSICS_CONFIG.maxVelocity,
-    barnesHutTheta: PHYSICS_CONFIG.barnesHutTheta
+    barnesHutTheta: PHYSICS_CONFIG.barnesHutTheta,
+    densityRadius: PHYSICS_CONFIG.densityRadius,
+    densityRepulsionScale: PHYSICS_CONFIG.densityRepulsionScale
 };
 
 export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceSimulation {
@@ -95,11 +99,21 @@ export function createForceSimulation(config: Partial<ForceConfig> = {}): ForceS
         for (const [id, node] of nodes) {
             if (node.fixed) continue;
 
+            // Calculate local density to scale repulsion in clusters
+            let effectiveStrength = cfg.repulsionStrength;
+            if (cfg.densityRepulsionScale > 0) {
+                const localMass = octree.getLocalMass(node.position, cfg.densityRadius, id);
+                // Scale repulsion: more neighbors = stronger repulsion
+                // Using sqrt to make the scaling less aggressive
+                const densityMultiplier = 1 + cfg.densityRepulsionScale * Math.sqrt(localMass);
+                effectiveStrength *= densityMultiplier;
+            }
+
             const repulsionForce = octree.calculateForce(
                 node.position,
                 id,
                 cfg.barnesHutTheta,
-                cfg.repulsionStrength
+                effectiveStrength
             );
 
             const nodeForce = force.get(id) ?? new THREE.Vector3();

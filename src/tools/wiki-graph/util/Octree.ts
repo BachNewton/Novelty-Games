@@ -23,6 +23,7 @@ interface OctreeNode {
 export interface Octree {
     build: (nodes: Map<string, { position: THREE.Vector3 }>) => void;
     calculateForce: (position: THREE.Vector3, excludeId: string, theta: number, strength: number) => THREE.Vector3;
+    getLocalMass: (position: THREE.Vector3, radius: number, excludeId: string) => number;
 }
 
 export function createOctree(): Octree {
@@ -111,6 +112,71 @@ export function createOctree(): Octree {
         }
 
         insert(parent.children![octant]!, id, x, y, z);
+    }
+
+    function countMassInRadius(
+        node: OctreeNode,
+        px: number,
+        py: number,
+        pz: number,
+        radiusSq: number,
+        excludeId: string
+    ): number {
+        if (node.mass === 0) return 0;
+
+        // Calculate distance from position to the center of mass
+        const dx = node.comX - px;
+        const dy = node.comY - py;
+        const dz = node.comZ - pz;
+        const distSq = dx * dx + dy * dy + dz * dz;
+
+        // If this is a leaf node
+        if (node.children === null && node.nodeId !== null) {
+            if (node.nodeId === excludeId) return 0;
+            return distSq <= radiusSq ? 1 : 0;
+        }
+
+        // If the entire cell is within the radius, count all its mass
+        // Check if the farthest corner of the cell is within radius
+        const halfSize = node.size / 2;
+        const maxDistSq = distSq + 3 * halfSize * halfSize; // Approximate max distance to corner
+        if (maxDistSq <= radiusSq) {
+            // Entire cell is within radius - but we need to exclude the query node
+            // For simplicity, just recurse if it's not a leaf
+            if (node.children !== null) {
+                let mass = 0;
+                for (const child of node.children) {
+                    if (child !== null) {
+                        mass += countMassInRadius(child, px, py, pz, radiusSq, excludeId);
+                    }
+                }
+                return mass;
+            }
+            return node.mass;
+        }
+
+        // If the cell is completely outside the radius, skip it
+        // Check if the nearest point of the cell is outside radius
+        const nearestX = Math.max(node.centerX - halfSize, Math.min(px, node.centerX + halfSize));
+        const nearestY = Math.max(node.centerY - halfSize, Math.min(py, node.centerY + halfSize));
+        const nearestZ = Math.max(node.centerZ - halfSize, Math.min(pz, node.centerZ + halfSize));
+        const nearestDistSq = (nearestX - px) ** 2 + (nearestY - py) ** 2 + (nearestZ - pz) ** 2;
+        if (nearestDistSq > radiusSq) {
+            return 0;
+        }
+
+        // Cell partially overlaps - recurse into children
+        if (node.children !== null) {
+            let mass = 0;
+            for (const child of node.children) {
+                if (child !== null) {
+                    mass += countMassInRadius(child, px, py, pz, radiusSq, excludeId);
+                }
+            }
+            return mass;
+        }
+
+        return 0;
     }
 
     function calculateForceFromNode(
@@ -204,6 +270,12 @@ export function createOctree(): Octree {
             calculateForceFromNode(root, position.x, position.y, position.z, excludeId, theta, strength, force);
 
             return force;
+        },
+
+        getLocalMass: (position, radius, excludeId) => {
+            if (root === null) return 0;
+
+            return countMassInRadius(root, position.x, position.y, position.z, radius * radius, excludeId);
         }
     };
 }
