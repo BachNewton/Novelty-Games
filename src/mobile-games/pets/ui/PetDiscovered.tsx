@@ -1,7 +1,6 @@
 import { Pet } from "../data/Pet";
 import FriendshipBar from "./FriendshipBar";
-import { COLORS } from "./Home";
-import TextReveal from "./TextReveal";
+import SpeechBubble from "./SpeechBubble";
 
 interface PetDiscoveredProps {
     selectedPet: Pet;
@@ -39,23 +38,8 @@ function petImageUi(image: string): JSX.Element {
 }
 
 function textBubbleUi(text: string): JSX.Element {
-    return <div style={{
-        position: 'absolute',
-        bottom: '0',
-        width: 'calc(100% - 15px)',
-        minHeight: '2.5em',
-        margin: '7.5px',
-        border: `2px solid ${COLORS.primary}`,
-        borderRadius: '25px',
-        padding: '10px',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        boxSizing: 'border-box',
-        fontFamily: 'Pet',
-        fontSize: '1.2em'
-    }}>
-        <TextReveal>
-            {text}
-        </TextReveal>
+    return <div style={{ position: 'absolute', bottom: '0', left: '0', width: '100%' }}>
+        <SpeechBubble text={text} />
     </div>;
 }
 
