@@ -7,7 +7,6 @@ import { createCompass } from "../../../util/geolocation/Compass";
 import { DataManager } from "../logic/DataManager";
 import { DistanceAndBearing } from "../../../util/geolocation/Navigator";
 import { Pet } from "../data/Pet";
-import { PET_DATA_MAP } from "../data/PetData";
 import SpeechBubble from "./SpeechBubble";
 
 interface DiscoverProps {
@@ -65,8 +64,6 @@ const Discover: React.FC<DiscoverProps> = ({ dataManager, selectedPet, selectedT
         flexDirection: 'column',
         boxSizing: 'border-box'
     }}>
-        {silhouetteUi(selectedPet)}
-
         <div style={{
             flex: '1 1 auto',
             minHeight: '0',
@@ -97,28 +94,5 @@ const Discover: React.FC<DiscoverProps> = ({ dataManager, selectedPet, selectedT
         </div>
     </div>;
 };
-
-function silhouetteUi(selectedPet: Pet): JSX.Element {
-    const image = PET_DATA_MAP.get(selectedPet.id)?.images.greetLowFriendship;
-
-    if (image === undefined) return <></>;
-
-    return <div style={{
-        flex: '0 1 30%',
-        minHeight: '0',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: `radial-gradient(ellipse 35% 90% at center, ${COLORS.surface}, transparent)`
-    }}>
-        <img src={image} alt='' style={{
-            maxWidth: '50%',
-            maxHeight: '100%',
-            opacity: 0.85,
-            filter: 'brightness(0)',
-            maskImage: 'radial-gradient(circle, black 60%, transparent 75%)'
-        }} />
-    </div>;
-}
 
 export default Discover;
