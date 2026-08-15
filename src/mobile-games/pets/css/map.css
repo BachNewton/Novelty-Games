@@ -1,0 +1,54 @@
+@keyframes pets-map-pulse {
+    0% {
+        transform: scale(0.6);
+        opacity: 0.7;
+    }
+
+    80% {
+        transform: scale(2.6);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(2.6);
+        opacity: 0;
+    }
+}
+
+@keyframes pets-map-bob {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+@keyframes pets-map-pop-in {
+    0% {
+        transform: translateY(8px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0px);
+        opacity: 1;
+    }
+}
+
+.pets-map-pulse {
+    animation: pets-map-pulse 2.2s ease-out infinite;
+}
+
+.pets-map-bob {
+    animation: pets-map-bob 2.4s ease-in-out infinite;
+}
+
+.pets-map-pop-in {
+    animation: pets-map-pop-in 0.25s ease-out;
+}

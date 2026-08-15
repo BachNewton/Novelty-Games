@@ -38,9 +38,10 @@ function petImageUi(image: string): JSX.Element {
 }
 
 function textBubbleUi(text: string): JSX.Element {
-    return <div style={{ position: 'absolute', bottom: '0', left: '0', width: '100%' }}>
-        <SpeechBubble text={text} />
-    </div>;
+    return <SpeechBubble text={text} style={{
+        position: 'absolute',
+        bottom: '0'
+    }} />;
 }
 
 export default PetDiscovered;

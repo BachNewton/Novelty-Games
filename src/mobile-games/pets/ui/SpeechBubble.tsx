@@ -7,11 +7,17 @@ interface SpeechBubbleProps {
     label?: string;
     /** Renders the text in italics, for voices that aren't quite here yet. */
     isItalic?: boolean;
+    /** Types the text out one character at a time. Best kept off for long text the player taps to read. */
+    reveal?: boolean;
     /** Changing this restarts the typewriter reveal, even if the text is the same. */
     revealKey?: string | number;
+    /** Positioning and styling overrides, merged over the bubble's defaults. */
+    style?: React.CSSProperties;
+    /** Custom content rendered above the text, for headers the label caption can't express. */
+    children?: React.ReactNode;
 }
 
-const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text, label, isItalic = false, revealKey }) => {
+const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text, label, isItalic = false, reveal = true, revealKey, style, children }) => {
     return <div style={{
         width: 'calc(100% - 15px)',
         minHeight: '2.5em',
@@ -23,13 +29,14 @@ const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text, label, isItalic = fal
         boxSizing: 'border-box',
         fontFamily: 'Pet',
         fontSize: '1.2em',
-        fontStyle: isItalic ? 'italic' : 'normal'
+        fontStyle: isItalic ? 'italic' : 'normal',
+        ...style
     }}>
         {labelUi(label)}
 
-        <TextReveal key={revealKey}>
-            {text}
-        </TextReveal>
+        {children}
+
+        {reveal ? <TextReveal key={revealKey}>{text}</TextReveal> : <div>{text}</div>}
     </div>;
 };
 
