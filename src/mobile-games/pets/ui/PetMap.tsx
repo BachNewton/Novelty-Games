@@ -785,7 +785,7 @@ function goToPetButtonUi(label: string, onGoToPet: () => void): JSX.Element {
                 boxShadow: '0 2px 5px rgba(0,0,0,0.4)',
                 cursor: 'pointer'
             }}
-        >{label} 🐾</button>
+        >{label}</button>
     </div>;
 }
 
@@ -827,8 +827,8 @@ function locateButtonUi(playerLocation: Location | null, onLocate: () => void): 
             position: 'absolute',
             top: '10px',
             right: '10px',
-            width: '38px',
-            height: '38px',
+            width: '48px',
+            height: '48px',
             borderRadius: '50%',
             border: '2px solid white',
             boxSizing: 'border-box',
@@ -837,8 +837,7 @@ function locateButtonUi(playerLocation: Location | null, onLocate: () => void): 
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            // Sized in pixels so the Scaffold's font scaling can't grow the paw past the circle.
-            fontSize: '16px',
+            fontSize: '1.1em',
             lineHeight: '1',
             cursor: isEnabled ? 'pointer' : 'default',
             opacity: isEnabled ? 1 : 0.4
