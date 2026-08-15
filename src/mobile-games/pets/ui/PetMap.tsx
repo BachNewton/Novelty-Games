@@ -19,7 +19,6 @@ import {
     TileRange
 } from "../logic/PetMapLayout";
 import { State } from "../data/PetSave";
-import Button from "../../../util/ui/Button";
 import FriendshipBar from "./FriendshipBar";
 import { COLORS } from "./Home";
 import MapTile from "./MapTile";
@@ -501,7 +500,7 @@ const PetMap: React.FC<PetMapProps> = ({ pets, onGoToPet }) => {
             </div>
         </div>}
 
-        {selected !== null ? null : locateButtonUi(playerLocation, () => {
+        {locateButtonUi(playerLocation, () => {
             if (playerLocation !== null) commitCenter(playerLocation);
         })}
 
@@ -763,15 +762,30 @@ function bubbleUi(petData: PetData, pet: Pet | undefined, onGoToPet: (petId: str
             text={isDiscovered ? undefined : petData.dialogue.hidden}
             revealKey={petData.id}
             style={{ width: '100%', margin: 0, backgroundColor: 'rgba(0,0,0,0.78)' }}
+            footer={goToPetButtonUi(isDiscovered ? `Visit ${petData.name}` : 'Find them', () => onGoToPet(petData.id))}
         >
             {isDiscovered ? discoveredBubbleContentUi(petData, pet!) : null}
         </SpeechBubble>
+    </div>;
+}
 
-        <div style={{ display: 'flex', marginTop: '6px' }}>
-            <Button fontScale={0.9} onClick={() => onGoToPet(petData.id)}>
-                {isDiscovered ? `Visit ${petData.name}` : 'Find them'}
-            </Button>
-        </div>
+/** Lives inside the bubble and dresses like it, rather than as a bare browser button. */
+function goToPetButtonUi(label: string, onGoToPet: () => void): JSX.Element {
+    return <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+        <button
+            onClick={onGoToPet}
+            style={{
+                fontFamily: 'Pet',
+                fontSize: '0.9em',
+                color: 'white',
+                backgroundColor: COLORS.primary,
+                border: 'none',
+                borderRadius: '18px',
+                padding: '6px 24px',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.4)',
+                cursor: 'pointer'
+            }}
+        >{label} 🐾</button>
     </div>;
 }
 
@@ -811,10 +825,10 @@ function locateButtonUi(playerLocation: Location | null, onLocate: () => void): 
         }}
         style={{
             position: 'absolute',
-            bottom: '20px',
-            right: '15px',
-            width: '48px',
-            height: '48px',
+            top: '10px',
+            right: '10px',
+            width: '38px',
+            height: '38px',
             borderRadius: '50%',
             border: '2px solid white',
             boxSizing: 'border-box',
@@ -823,9 +837,7 @@ function locateButtonUi(playerLocation: Location | null, onLocate: () => void): 
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            // Sized in pixels, unlike em text the Scaffold's font scaling would inflate.
-            fontSize: '22px',
-            lineHeight: '1',
+            fontSize: '1.1em',
             cursor: isEnabled ? 'pointer' : 'default',
             opacity: isEnabled ? 1 : 0.4
         }}

@@ -10,9 +10,11 @@ interface SpeechBubbleProps {
     style?: React.CSSProperties;
     /** Custom content rendered above the text, for headers such as a name and friendship hearts. */
     children?: React.ReactNode;
+    /** Custom content rendered below the text, for actions such as a button. */
+    footer?: React.ReactNode;
 }
 
-const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text, revealKey, style, children }) => {
+const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text, revealKey, style, children, footer }) => {
     return <div style={{
         width: 'calc(100% - 15px)',
         minHeight: '2.5em',
@@ -29,6 +31,8 @@ const SpeechBubble: React.FC<SpeechBubbleProps> = ({ text, revealKey, style, chi
         {children}
 
         {text === undefined ? null : <TextReveal key={revealKey}>{text}</TextReveal>}
+
+        {footer}
     </div>;
 };
 
