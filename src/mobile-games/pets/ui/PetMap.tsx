@@ -751,7 +751,7 @@ function bubbleUi(petData: PetData, pet: Pet | undefined, onGoToPet: (petId: str
             position: 'absolute',
             left: '10px',
             right: '10px',
-            bottom: '30px',
+            bottom: '10px',
             maxHeight: '45%',
             overflow: 'auto'
         }}
@@ -778,8 +778,8 @@ function goToPetButtonUi(label: string, onGoToPet: () => void): JSX.Element {
                 fontFamily: 'Pet',
                 fontSize: '0.9em',
                 color: 'white',
-                backgroundColor: COLORS.primary,
-                border: 'none',
+                backgroundColor: 'rgba(255,255,255,0.12)',
+                border: `2px solid ${COLORS.secondary}`,
                 borderRadius: '18px',
                 padding: '6px 24px',
                 boxShadow: '0 2px 5px rgba(0,0,0,0.4)',
@@ -837,7 +837,9 @@ function locateButtonUi(playerLocation: Location | null, onLocate: () => void): 
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            fontSize: '1.1em',
+            // Sized in pixels so the Scaffold's font scaling can't grow the paw past the circle.
+            fontSize: '16px',
+            lineHeight: '1',
             cursor: isEnabled ? 'pointer' : 'default',
             opacity: isEnabled ? 1 : 0.4
         }}
