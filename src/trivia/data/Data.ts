@@ -43,16 +43,20 @@ export interface FestivalSong extends Data {
     length: number;
     sampleMp3: string | null;
     albumArt: string;
+    /** ISO date the track first became available in the in-game store. Null for songs cached before this field was scraped. */
+    storeReleaseDate: string | null;
     difficulties: FestivalSongDifficulty;
 }
 
 interface FestivalSongDifficulty {
     bass: number;
     drums: number;
-    guitar: number;
+    /** Null when the track has no lead chart at all. */
+    guitar: number | null;
     proBass: number;
     proDrums: number;
-    proGuitar: number;
+    /** Null when the track has no lead chart at all. */
+    proGuitar: number | null;
     vocals: number;
 }
 

@@ -14,6 +14,7 @@ import { createFortniteFestivalDatabase, getSuperKey } from "../logic/FortniteFe
 import SortIcon from "../icons/sort.svg";
 import { calculateOverallDifficulty } from "../logic/OverallDifficulty";
 import { RankedSong } from "../data/RankedSong";
+import { getStoreReleaseTime } from "../logic/StoreReleaseDate";
 
 const INITIAL_VISIBLE_COUNT = 25; // Initial number of songs to show
 const SONGS_PER_PAGE = 25; // Number of songs to load on scroll
@@ -38,6 +39,15 @@ enum SortOrder {
     ASCENDING, DESCENDING
 }
 
+enum SortField {
+    DIFFICULTY, RELEASE_DATE
+}
+
+const SORT_FIELD_LABELS: Record<SortField, string> = {
+    [SortField.DIFFICULTY]: 'Difficulty',
+    [SortField.RELEASE_DATE]: 'Release Date'
+};
+
 const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const database = useRef(createFortniteFestivalDatabase()).current;
     const [songs, setSongs] = useState<Array<FestivalSong> | null>(null);
@@ -47,6 +57,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const [difficultyWeight, setDifficultyWeight] = useState(DIFFICULTY_WEIGHT_DEFAULT);
     const [ownedSongs, setOwnedSongs] = useState(new Set<string>());
     const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.DESCENDING);
+    const [sortField, setSortField] = useState<SortField>(SortField.DIFFICULTY);
 
     const [selectedInstruments, setSelectedInstruments] = useState<SelectedInstruments>({
         guitar: true,
@@ -159,7 +170,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
                     {difficultyWeightUi(difficultyWeight, setDifficultyWeight)}
                 </Widget>
 
-                {searchUi(searchText, setSearchText, sortOrder, changeSortOrder)}
+                {searchUi(searchText, setSearchText, sortOrder, changeSortOrder, sortField, setSortField)}
             </div>
         </div>
 
@@ -174,6 +185,7 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
             selectedProInstruments,
             visibleCount,
             sortOrder,
+            sortField,
             ownedSongs,
             updateOwnedSong
         )}
@@ -184,7 +196,9 @@ function searchUi(
     searchText: string,
     setSearchText: (text: string) => void,
     sortOrder: SortOrder,
-    changeSortOrder: () => void
+    changeSortOrder: () => void,
+    sortField: SortField,
+    setSortField: (field: SortField) => void
 ): JSX.Element {
     const sortIconTransformation = sortOrder === SortOrder.ASCENDING ? 'rotate(180deg) scaleX(-1)' : 'none';
 
@@ -195,6 +209,22 @@ function searchUi(
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
         />
+
+        <select
+            style={{
+                fontSize: '1em',
+                borderRadius: '15px',
+                padding: '7.5px',
+                marginLeft: '5px',
+                cursor: 'pointer'
+            }}
+            value={sortField}
+            onChange={e => setSortField(Number(e.target.value) as SortField)}
+        >
+            {Object.entries(SORT_FIELD_LABELS).map(([field, label]) =>
+                <option key={field} value={field}>{label}</option>
+            )}
+        </select>
 
         <img src={SortIcon} alt='Sort' style={{
             height: '50px',
@@ -322,6 +352,7 @@ function songsUi(
     selectedProInstruments: SelectedInstruments,
     visibleCount: number,
     sortOrder: SortOrder,
+    sortField: SortField,
     ownedSongs: Set<string>,
     updateOwnedSong: (isOwned: boolean, song: FestivalSong) => void
 ): JSX.Element {
@@ -334,13 +365,17 @@ function songsUi(
         selectedProInstruments
     );
 
+    const getSortValue = (song: FestivalSong) => sortField === SortField.RELEASE_DATE
+        ? getStoreReleaseTime(song)
+        : getOverallDifficulty(song);
+
     const sortedSongs = songs.sort((a, b) => {
-        const aDifficulty = getOverallDifficulty(a);
-        const bDifficulty = getOverallDifficulty(b);
+        const aValue = getSortValue(a);
+        const bValue = getSortValue(b);
 
         const compare = sortOrder === SortOrder.DESCENDING
-            ? aDifficulty - bDifficulty
-            : bDifficulty - aDifficulty;
+            ? aValue - bValue
+            : bValue - aValue;
 
         if (compare === 0) {
             const aSeconds = a.length;

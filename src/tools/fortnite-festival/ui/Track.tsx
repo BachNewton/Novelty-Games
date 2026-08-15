@@ -6,10 +6,12 @@ import BassIcon from "../icons/bass.png";
 import VocalsIcon from "../icons/vocals.png";
 import VerticalSpacer from "../../../util/ui/Spacer";
 import { SelectedInstruments } from "./Home";
+import { formatStoreReleaseDate } from "../logic/StoreReleaseDate";
 
 const TRACK_WIDTH = '325px';
 const ICON_SIZE = '40px';
 const ALBUM_ART_SIZE = '100px';
+const RELEASE_DATE_FONT_SIZE = '0.75em';
 
 interface TrackProps {
     song: FestivalSong;
@@ -45,6 +47,9 @@ const Track: React.FC<TrackProps> = ({ song, rank, selectedInstruments, selected
             <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <div>{song.name}</div>
                 <div>{song.artist}</div>
+                <div style={{ fontSize: RELEASE_DATE_FONT_SIZE, color: 'grey' }}>
+                    Added {formatStoreReleaseDate(song)}
+                </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
