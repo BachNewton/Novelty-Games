@@ -87,6 +87,7 @@ const PetContent: React.FC<PetContentProps> = ({
             dataManager={dataManager}
             selectedPet={selectedPet}
             selectedTab={selectedTab}
+            hiddenText={dataManager.getTextAndImage(selectedPet).text}
             discoverPet={discoverPet}
             onDistanceUpdate={distance => setDistanceToPet(distance)}
         />;
