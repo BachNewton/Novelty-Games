@@ -35,6 +35,9 @@ export interface SelectedInstruments {
 
 type Instrument = keyof SelectedInstruments;
 
+// Note these read backwards from the comparison they drive: ASCENDING puts the highest
+// value at the top as #1, DESCENDING puts the lowest there. They name the rank sequence
+// running down the page, not the values.
 enum SortOrder {
     ASCENDING, DESCENDING
 }
@@ -45,8 +48,14 @@ enum SortField {
 
 const SORT_FIELD_LABELS: Record<SortField, string> = {
     [SortField.DIFFICULTY]: 'Difficulty',
-    [SortField.RELEASE_DATE]: 'Release Date'
+    [SortField.RELEASE_DATE]: 'Released'
 };
+
+// Scale the search row with the viewport so search, sort field and sort direction all fit
+// one row on a phone without wrapping. The upper bounds preserve the desktop sizes.
+const CONTROL_FONT_SIZE = 'clamp(0.75rem, 3.2vw, 1.2rem)';
+const CONTROL_PADDING = 'clamp(4px, 1.6vw, 7.5px)';
+const SORT_ICON_SIZE = 'clamp(32px, 11vw, 50px)';
 
 const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const database = useRef(createFortniteFestivalDatabase()).current;
@@ -56,8 +65,9 @@ const Home: React.FC<HomeProps> = ({ loadingSongs }) => {
     const [searchText, setSearchText] = useState('');
     const [difficultyWeight, setDifficultyWeight] = useState(DIFFICULTY_WEIGHT_DEFAULT);
     const [ownedSongs, setOwnedSongs] = useState(new Set<string>());
-    const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.DESCENDING);
-    const [sortField, setSortField] = useState<SortField>(SortField.DIFFICULTY);
+    // Default to the newest songs at the top, which is what most visits are looking for.
+    const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.ASCENDING);
+    const [sortField, setSortField] = useState<SortField>(SortField.RELEASE_DATE);
 
     const [selectedInstruments, setSelectedInstruments] = useState<SelectedInstruments>({
         guitar: true,
@@ -202,9 +212,20 @@ function searchUi(
 ): JSX.Element {
     const sortIconTransformation = sortOrder === SortOrder.ASCENDING ? 'rotate(180deg) scaleX(-1)' : 'none';
 
-    return <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0px' }}>
+    // All three controls stay on one row at every width by scaling with the viewport
+    // instead of wrapping. minWidth: 0 is what lets the input shrink at all - flex items
+    // default to min-width:auto, which is what forced the overflow on phones.
+    // The rem bounds are deliberate: an ancestor sets font-size 1.2em, so em here would
+    // compound and the controls would never reach their intended small size.
+    return <div style={{ display: 'flex', alignItems: 'center', gap: '5px', margin: '10px 0px' }}>
         <input
-            style={{ fontSize: '1em', borderRadius: '15px', padding: '7.5px', flexGrow: 1 }}
+            style={{
+                fontSize: CONTROL_FONT_SIZE,
+                borderRadius: '15px',
+                padding: CONTROL_PADDING,
+                flexGrow: 1,
+                minWidth: 0
+            }}
             placeholder='Search'
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
@@ -212,11 +233,11 @@ function searchUi(
 
         <select
             style={{
-                fontSize: '1em',
+                fontSize: CONTROL_FONT_SIZE,
                 borderRadius: '15px',
-                padding: '7.5px',
-                marginLeft: '5px',
-                cursor: 'pointer'
+                padding: CONTROL_PADDING,
+                cursor: 'pointer',
+                flexShrink: 0
             }}
             value={sortField}
             onChange={e => setSortField(Number(e.target.value) as SortField)}
@@ -227,14 +248,14 @@ function searchUi(
         </select>
 
         <img src={SortIcon} alt='Sort' style={{
-            height: '50px',
+            height: SORT_ICON_SIZE,
             border: '1px solid var(--novelty-blue)',
             borderRadius: '15px',
             cursor: 'pointer',
             padding: '1px',
-            marginLeft: '5px',
             boxShadow: 'black 0px 0px 10px',
-            transform: sortIconTransformation
+            transform: sortIconTransformation,
+            flexShrink: 0
         }} onClick={changeSortOrder} />
     </div>;
 }
@@ -290,7 +311,6 @@ function instrumentSelectorUi(selectedInstruments: SelectedInstruments, instrume
     const guitarLabel = isPro ? 'Pro Guitar' : 'Guitar';
     const bassLabel = isPro ? 'Pro Bass' : 'Bass';
     const drumsLabel = isPro ? 'Pro Drums' : 'Drums';
-    const vocalsLabel = isPro ? <span style={{ textDecoration: 'line-through', color: 'grey' }}>Pro Vocals</span> : 'Vocals';
 
     return <div style={{
         display: 'grid',
@@ -311,8 +331,13 @@ function instrumentSelectorUi(selectedInstruments: SelectedInstruments, instrume
         <ToggleSwitch enabled={selectedInstruments.bass} onChange={() => instrumentToggled('bass')} />
         <div>{drumsLabel}</div>
         <ToggleSwitch enabled={selectedInstruments.drums} onChange={() => instrumentToggled('drums')} />
-        <div>{vocalsLabel}</div>
-        <ToggleSwitch enabled={selectedInstruments.vocals} onChange={() => { if (!isPro) instrumentToggled('vocals') }} />
+
+        {/* Epic charts one vocal part, played either by ear or with a mic, so there is no
+            pro vocal difficulty to select. */}
+        {isPro ? null : <>
+            <div>Vocals</div>
+            <ToggleSwitch enabled={selectedInstruments.vocals} onChange={() => instrumentToggled('vocals')} />
+        </>}
     </div>;
 }
 
