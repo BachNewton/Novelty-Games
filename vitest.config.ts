@@ -8,4 +8,6 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
   },
+  // Vite only recognises lower case image extensions, and some pet photos are named .JPG.
+  assetsInclude: ['**/*.JPG'],
 });

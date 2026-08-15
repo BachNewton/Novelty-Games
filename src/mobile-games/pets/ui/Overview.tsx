@@ -1,6 +1,7 @@
 import VerticalSpacer from "../../../util/ui/Spacer";
 import { Pet } from "../data/Pet";
 import { createOverviewData, PetBreakdown } from "../logic/OverviewData";
+import { MAP_ATTRIBUTION } from "../logic/PetMapLayout";
 import { COLORS } from "./Home";
 import { menuBannerUi } from "./Menu";
 
@@ -56,8 +57,26 @@ const Overview: React.FC<OverviewProps> = ({ pets, seenInteractions }) => {
         <div style={headerStyle}>Breakdown</div>
 
         {breakdownUi}
+
+        {attributionUi()}
     </>;
 };
+
+/**
+ * The map tiles' licenses have to be credited somewhere in the game. This screen is the quiet
+ * corner for it, so the map itself stays clear.
+ */
+function attributionUi(): JSX.Element {
+    return <>
+        <VerticalSpacer height={20} />
+
+        <div style={{
+            fontSize: '0.6em',
+            textAlign: 'center',
+            opacity: 0.55
+        }}>{MAP_ATTRIBUTION}</div>
+    </>;
+}
 
 function rowUi(label: string, acquired: number, total: number): JSX.Element {
     return <>

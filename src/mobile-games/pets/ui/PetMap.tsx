@@ -6,16 +6,15 @@ import { PET_DATA, PetData } from "../data/PetData";
 import { createMapProjection, MapProjection, TILE_SIZE, WorldPoint } from "../logic/MapProjection";
 import {
     clampCenter,
+    clampZoom,
     getBoundsCenter,
-    getFitZoom,
     getHiddenCenter,
     getLayerOrigin,
+    getMinZoom,
     getOverlapOffset,
     getTiles,
     getVisibleTileRange,
     HIDDEN_RADIUS_METERS,
-    MAP_ATTRIBUTION,
-    MAX_ZOOM,
     MIN_ZOOM,
     TileRange
 } from "../logic/PetMapLayout";
@@ -27,17 +26,33 @@ import SpeechBubble from "./SpeechBubble";
 const MARKER_SIZE = 44;
 const HIDDEN_MARKER_SIZE = 32;
 const DRAG_THRESHOLD = 6;
-/** How far apart two fingers have to travel before the map steps a whole zoom level. */
-const PINCH_STEP = 1.6;
 const MAP_BACKGROUND = '#f3e7dc';
+/** How much wheel delta adds up to one whole zoom level. One notch of a mouse wheel is usually 100. */
+const WHEEL_STEP_DELTA = 100;
+const WHEEL_LINE_PIXELS = 16;
+const WHEEL_PAGE_PIXELS = 100;
 
 interface PetMapProps {
     pets: Pet[];
 }
 
 interface ViewState {
+    /** Always a whole level, because tiles only exist at integer zooms. */
     zoom: number;
     center: Location;
+}
+
+/**
+ * A pinch in progress. The map keeps rendering at the view's zoom and is stretched to follow the
+ * fingers with a CSS transform, so the gesture stays glued to them; a real zoom is only committed
+ * once the fingers lift.
+ */
+interface PinchState {
+    /** Container point the fingers started around. The map is scaled about it, so it never moves. */
+    anchor: Point;
+    /** How far the fingers have carried the map since, which pans it. */
+    offset: Point;
+    scale: number;
 }
 
 interface Size {
@@ -57,20 +72,32 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
 
     const [size, setSize] = useState<Size | null>(null);
     const [view, setView] = useState<ViewState | null>(null);
+    const [pinch, setPinch] = useState<PinchState | null>(null);
     const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
     const [playerLocation, setPlayerLocation] = useState<Location | null>(null);
 
-    // Gestures read the latest view/size without re-binding handlers.
+    // How far out the map is worth showing depends on how much room there is for it.
+    const minZoom = size === null || size.width === 0 || size.height === 0
+        ? MIN_ZOOM
+        : getMinZoom(projection, size.width, size.height);
+
+    // Gestures read the latest state without re-binding handlers.
     const viewRef = useRef(view);
     const sizeRef = useRef(size);
+    const pinchRef = useRef(pinch);
+    const minZoomRef = useRef(minZoom);
     viewRef.current = view;
     sizeRef.current = size;
+    pinchRef.current = pinch;
+    minZoomRef.current = minZoom;
 
     const pointers = useRef(new Map<number, Point>());
     const dragStart = useRef<{ x: number; y: number; center: Location } | null>(null);
-    const pinchDistance = useRef<number | null>(null);
+    const pinchStart = useRef<{ distance: number; midpoint: Point } | null>(null);
     const hasDragged = useRef(false);
+    const wheelDelta = useRef(0);
     const pendingCenter = useRef<Location | null>(null);
+    const pendingPinch = useRef<PinchState | null>(null);
     const frame = useRef<number | null>(null);
 
     useEffect(() => {
@@ -87,17 +114,20 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
         return () => observer.disconnect();
     }, []);
 
-    // The whole play area is framed as soon as we know how much room we have.
+    // The whole play area is framed as soon as we know how much room we have. A later resize can
+    // raise the minimum zoom, so an already zoomed out view gets pulled back into range too.
     useEffect(() => {
-        if (size === null || view !== null || size.width === 0 || size.height === 0) return;
+        if (size === null || size.width === 0 || size.height === 0) return;
 
-        const zoom = getFitZoom(projection, size.width, size.height);
+        const current = viewRef.current;
+        const zoom = current === null ? minZoom : clampZoom(current.zoom, minZoom);
+        const center = current === null ? getBoundsCenter() : current.center;
 
         setView({
             zoom: zoom,
-            center: clampCenter(projection, getBoundsCenter(), zoom, size.width, size.height)
+            center: clampCenter(projection, center, zoom, size.width, size.height)
         });
-    }, [size]);
+    }, [size, minZoom]);
 
     useEffect(() => {
         const locationService = createLocationService();
@@ -119,6 +149,31 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
         };
     }, []);
 
+    // Bound natively rather than through React so the wheel can be claimed before the page scrolls
+    // with it. The handlers below only ever read refs, so binding once is enough.
+    useEffect(() => {
+        const element = containerRef.current;
+        if (element === null) return;
+
+        const onWheel = (event: WheelEvent) => {
+            event.preventDefault();
+
+            wheelDelta.current += toWheelPixels(event);
+
+            const steps = Math.trunc(wheelDelta.current / WHEEL_STEP_DELTA);
+            if (steps === 0) return;
+
+            wheelDelta.current -= steps * WHEEL_STEP_DELTA;
+
+            // Scrolling down zooms out.
+            zoomBy(-steps, toContainerPoint(element, { x: event.clientX, y: event.clientY }));
+        };
+
+        element.addEventListener('wheel', onWheel, { passive: false });
+
+        return () => element.removeEventListener('wheel', onWheel);
+    }, []);
+
     const commitCenter = (center: Location) => {
         const currentView = viewRef.current;
         const currentSize = sizeRef.current;
@@ -133,35 +188,38 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
         setView(next);
     };
 
-    // Panning is coalesced to one update per frame so a fast drag doesn't queue up renders.
-    const scheduleCenter = (center: Location) => {
-        pendingCenter.current = center;
-
+    // Gesture updates are coalesced to one per frame so a fast drag doesn't queue up renders.
+    const scheduleFrame = () => {
         if (frame.current !== null) return;
 
         frame.current = requestAnimationFrame(() => {
             frame.current = null;
 
-            const next = pendingCenter.current;
-            if (next !== null) commitCenter(next);
+            const center = pendingCenter.current;
+            pendingCenter.current = null;
+            if (center !== null) commitCenter(center);
+
+            const nextPinch = pendingPinch.current;
+            pendingPinch.current = null;
+            if (nextPinch !== null) setPinch(nextPinch);
         });
     };
 
-    const zoomBy = (steps: number, anchor?: Point) => {
-        const currentView = viewRef.current;
+    const scheduleCenter = (center: Location) => {
+        pendingCenter.current = center;
+        scheduleFrame();
+    };
+
+    /** Settles on a whole zoom level while keeping `anchorLocation` under `anchor` on screen. */
+    const zoomTo = (zoom: number, anchor: Point, anchorLocation: Location) => {
         const currentSize = sizeRef.current;
-        if (currentView === null || currentSize === null) return;
+        if (currentSize === null) return;
 
-        const zoom = Math.min(Math.max(currentView.zoom + steps, MIN_ZOOM), MAX_ZOOM);
-        if (zoom === currentView.zoom) return;
-
-        const point = anchor ?? { x: currentSize.width / 2, y: currentSize.height / 2 };
-        const anchorLocation = screenToLocation(projection, point, currentView, currentSize);
         const anchorWorld = projection.locationToWorld(anchorLocation, zoom);
 
         const centerWorld: WorldPoint = {
-            x: anchorWorld.x - (point.x - currentSize.width / 2),
-            y: anchorWorld.y - (point.y - currentSize.height / 2)
+            x: anchorWorld.x - (anchor.x - currentSize.width / 2),
+            y: anchorWorld.y - (anchor.y - currentSize.height / 2)
         };
 
         const next: ViewState = {
@@ -179,6 +237,17 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
         setView(next);
     };
 
+    const zoomBy = (steps: number, anchor: Point) => {
+        const currentView = viewRef.current;
+        const currentSize = sizeRef.current;
+        if (currentView === null || currentSize === null) return;
+
+        const zoom = clampZoom(currentView.zoom + steps, minZoomRef.current);
+        if (zoom === currentView.zoom) return;
+
+        zoomTo(zoom, anchor, screenToLocation(projection, anchor, currentView, currentSize));
+    };
+
     const startDrag = (x: number, y: number) => {
         const currentView = viewRef.current;
         if (currentView === null) return;
@@ -189,14 +258,24 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
     const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
         containerRef.current?.setPointerCapture(event.pointerId);
         pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-        hasDragged.current = false;
 
         if (pointers.current.size === 1) {
+            hasDragged.current = false;
             startDrag(event.clientX, event.clientY);
-        } else {
-            dragStart.current = null;
-            pinchDistance.current = getPointerDistance(pointers.current);
+
+            return;
         }
+
+        dragStart.current = null;
+        startPinch();
+    };
+
+    const startPinch = () => {
+        const midpoint = toContainerPoint(containerRef.current, getPointerMidpoint(pointers.current));
+
+        pinchStart.current = { distance: getPointerDistance(pointers.current), midpoint: midpoint };
+
+        setPinch({ anchor: midpoint, offset: { x: 0, y: 0 }, scale: 1 });
     };
 
     const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -227,23 +306,68 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
     };
 
     const handlePinch = () => {
-        const start = pinchDistance.current;
-        const distance = getPointerDistance(pointers.current);
-        if (start === null || start === 0 || distance === 0) return;
+        const start = pinchStart.current;
+        if (start === null || start.distance === 0) {
+            startPinch();
+            return;
+        }
 
-        const scale = distance / start;
-        const steps = scale > PINCH_STEP ? 1 : scale < 1 / PINCH_STEP ? -1 : 0;
-        if (steps === 0) return;
+        const currentView = viewRef.current;
+        const distance = getPointerDistance(pointers.current);
+        if (currentView === null || distance === 0) return;
 
         hasDragged.current = true;
-        pinchDistance.current = distance;
-        zoomBy(steps, toContainerPoint(containerRef.current, getPointerMidpoint(pointers.current)));
+
+        const midpoint = toContainerPoint(containerRef.current, getPointerMidpoint(pointers.current));
+
+        // Limiting the stretch in zoom space rather than in raw scale means the map simply stops at
+        // the ends of the range instead of stretching past them and snapping back on release.
+        const zoom = clampZoom(currentView.zoom + Math.log2(distance / start.distance), minZoomRef.current);
+
+        pendingPinch.current = {
+            anchor: start.midpoint,
+            offset: { x: midpoint.x - start.midpoint.x, y: midpoint.y - start.midpoint.y },
+            scale: Math.pow(2, zoom - currentView.zoom)
+        };
+
+        scheduleFrame();
+    };
+
+    const endPinch = () => {
+        const stretched = pendingPinch.current ?? pinchRef.current;
+
+        pinchStart.current = null;
+        pendingPinch.current = null;
+        setPinch(null);
+
+        const currentView = viewRef.current;
+        const currentSize = sizeRef.current;
+        if (stretched === null || currentView === null || currentSize === null) return;
+
+        // Scaling about the anchor leaves whatever sits under it untouched, so that location is what
+        // the committed zoom has to keep in place - moved by however far the fingers carried the map.
+        const anchorLocation = screenToLocation(projection, stretched.anchor, currentView, currentSize);
+        const zoom = Math.round(clampZoom(currentView.zoom + Math.log2(stretched.scale), minZoomRef.current));
+
+        zoomTo(zoom, {
+            x: stretched.anchor.x + stretched.offset.x,
+            y: stretched.anchor.y + stretched.offset.y
+        }, anchorLocation);
     };
 
     const onPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+        const wasPinching = pointers.current.size >= 2;
+
         pointers.current.delete(event.pointerId);
         dragStart.current = null;
-        pinchDistance.current = null;
+
+        if (wasPinching) endPinch();
+
+        // A third finger lifting can leave two still down, which is simply a fresh pinch.
+        if (pointers.current.size >= 2) {
+            startPinch();
+            return;
+        }
 
         const remaining = Array.from(pointers.current.values())[0];
         if (remaining !== undefined) startDrag(remaining.x, remaining.y);
@@ -291,10 +415,6 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        onWheel={event => zoomBy(
-            event.deltaY < 0 ? 1 : -1,
-            toContainerPoint(containerRef.current, { x: event.clientX, y: event.clientY })
-        )}
         onClick={() => {
             if (!hasDragged.current) setSelectedPetId(null);
         }}
@@ -314,21 +434,31 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
             position: 'absolute',
             left: '0px',
             top: '0px',
-            willChange: 'transform',
-            transform: `translate3d(${origin.x - topLeft.x}px, ${origin.y - topLeft.y}px, 0)`
+            width: '100%',
+            height: '100%',
+            transformOrigin: pinch === null ? undefined : `${pinch.anchor.x}px ${pinch.anchor.y}px`,
+            transform: pinch === null
+                ? undefined
+                : `translate3d(${pinch.offset.x}px, ${pinch.offset.y}px, 0) scale(${pinch.scale})`
         }}>
-            {tilesUi}
-            {markersUi}
-            {playerUi}
+            <div style={{
+                position: 'absolute',
+                left: '0px',
+                top: '0px',
+                willChange: 'transform',
+                transform: `translate3d(${origin.x - topLeft.x}px, ${origin.y - topLeft.y}px, 0)`
+            }}>
+                {tilesUi}
+                {markersUi}
+                {playerUi}
+            </div>
         </div>}
 
-        {controlsUi(() => zoomBy(1), () => zoomBy(-1), playerLocation, () => {
+        {locateButtonUi(playerLocation, () => {
             if (playerLocation !== null) commitCenter(playerLocation);
         })}
 
         {selected === null ? null : bubbleUi(selected, pets.find(pet => pet.id === selected.id))}
-
-        {attributionUi()}
     </div>;
 };
 
@@ -556,8 +686,6 @@ function playerUiOf(
 
 function bubbleUi(petData: PetData, pet: Pet | undefined): JSX.Element {
     const isDiscovered = pet?.discovered === true;
-
-    const heading = isDiscovered ? pet!.name : 'You hear a faint voice...';
     const text = isDiscovered ? getFriendshipLine(pet!) : petData.dialogue.hidden;
 
     return <div
@@ -572,22 +700,23 @@ function bubbleUi(petData: PetData, pet: Pet | undefined): JSX.Element {
             overflow: 'auto'
         }}
     >
+        {/* Keying the reveal on the pet restarts the typing for a different marker, while tapping
+            the same one again simply leaves the finished text alone. */}
         <SpeechBubble
             text={text}
-            reveal={false}
-            isItalic={!isDiscovered}
+            revealKey={petData.id}
             style={{ width: '100%', margin: 0, backgroundColor: 'rgba(0,0,0,0.78)' }}
         >
-            <div style={{
-                color: isDiscovered ? COLORS.primary : COLORS.secondary,
-                fontStyle: 'normal',
-                marginBottom: '4px'
-            }}>
-                {heading}
-
-                {isDiscovered ? <span style={{ marginLeft: '8px' }}>{getHearts(pet!)}</span> : null}
-            </div>
+            {isDiscovered ? headerUi(pet!) : null}
         </SpeechBubble>
+    </div>;
+}
+
+function headerUi(pet: Pet): JSX.Element {
+    return <div style={{ color: COLORS.primary, marginBottom: '4px' }}>
+        {pet.name}
+
+        <span style={{ marginLeft: '8px' }}>{getHearts(pet)}</span>
     </div>;
 }
 
@@ -604,36 +733,21 @@ function getFriendshipLine(pet: Pet): string {
     return `You and ${pet.name} are ${pet.friendship} of ${MAX_HEARTS} hearts along the way to being best friends.`;
 }
 
-function controlsUi(
-    onZoomIn: () => void,
-    onZoomOut: () => void,
-    playerLocation: Location | null,
-    onLocate: () => void
-): JSX.Element {
+/** Zooming is left to pinching and the wheel, so recentring on the player is the only button. */
+function locateButtonUi(playerLocation: Location | null, onLocate: () => void): JSX.Element {
+    const isEnabled = playerLocation !== null;
+
     return <div
         onPointerDown={event => event.stopPropagation()}
-        onClick={event => event.stopPropagation()}
+        onClick={event => {
+            event.stopPropagation();
+
+            if (isEnabled) onLocate();
+        }}
         style={{
             position: 'absolute',
             top: '10px',
             right: '10px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px'
-        }}
-    >
-        {controlButtonUi('+', onZoomIn, true)}
-        {controlButtonUi('−', onZoomOut, true)}
-        {controlButtonUi('🐾', onLocate, playerLocation !== null)}
-    </div>;
-}
-
-function controlButtonUi(label: string, onClick: () => void, isEnabled: boolean): JSX.Element {
-    return <div
-        onClick={() => {
-            if (isEnabled) onClick();
-        }}
-        style={{
             width: '36px',
             height: '36px',
             borderRadius: '50%',
@@ -647,21 +761,15 @@ function controlButtonUi(label: string, onClick: () => void, isEnabled: boolean)
             cursor: isEnabled ? 'pointer' : 'default',
             opacity: isEnabled ? 1 : 0.4
         }}
-    >{label}</div>;
+    >🐾</div>;
 }
 
-function attributionUi(): JSX.Element {
-    return <div style={{
-        position: 'absolute',
-        right: '4px',
-        bottom: '4px',
-        padding: '2px 6px',
-        borderRadius: '6px',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        color: 'rgba(255,255,255,0.85)',
-        fontSize: '0.55em',
-        pointerEvents: 'none'
-    }}>{MAP_ATTRIBUTION}</div>;
+/** Wheel deltas arrive in pixels, lines or pages depending on the device, so they're evened out. */
+function toWheelPixels(event: WheelEvent): number {
+    if (event.deltaMode === event.DOM_DELTA_LINE) return event.deltaY * WHEEL_LINE_PIXELS;
+    if (event.deltaMode === event.DOM_DELTA_PAGE) return event.deltaY * WHEEL_PAGE_PIXELS;
+
+    return event.deltaY;
 }
 
 function toLayerPoint(projection: MapProjection, location: Location, zoom: number, origin: WorldPoint): WorldPoint {

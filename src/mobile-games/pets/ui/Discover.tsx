@@ -85,12 +85,7 @@ const Discover: React.FC<DiscoverProps> = ({ dataManager, selectedPet, selectedT
         </div>
 
         <div style={{ flexShrink: 0 }}>
-            <SpeechBubble
-                text={hiddenText}
-                label={`🤫 ${selectedPet.name} is whispering from a hiding spot...`}
-                isItalic={true}
-                revealKey={selectedTab}
-            />
+            <SpeechBubble text={hiddenText} revealKey={selectedTab} />
         </div>
     </div>;
 };

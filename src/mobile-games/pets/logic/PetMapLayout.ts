@@ -82,7 +82,7 @@ export function getBoundsCenter(): Location {
  * whole city as a tiny blob, so a small pan is preferred over a much emptier map.
  */
 export function getFitZoom(projection: MapProjection, width: number, height: number): number {
-    for (let zoom = MAX_ZOOM; zoom > MIN_ZOOM; zoom--) {
+    for (let zoom = MAX_ZOOM; zoom >= MIN_ZOOM; zoom--) {
         const rect = getBoundsWorldRect(projection, zoom);
         const fitsWidth = rect.max.x - rect.min.x <= width * FIT_TOLERANCE;
         const fitsHeight = rect.max.y - rect.min.y <= height * FIT_TOLERANCE;
@@ -91,6 +91,22 @@ export function getFitZoom(projection: MapProjection, width: number, height: num
     }
 
     return MIN_ZOOM;
+}
+
+/**
+ * The furthest out the player is allowed to zoom.
+ *
+ * Once the whole play area is on screen there is nothing left to reveal, so zooming out again
+ * only shrinks the city into an island floating in empty background. MIN_ZOOM is the hard floor
+ * underneath that, since no tiles exist below it.
+ */
+export function getMinZoom(projection: MapProjection, width: number, height: number): number {
+    return Math.max(getFitZoom(projection, width, height), MIN_ZOOM);
+}
+
+/** Holds a zoom inside the levels that are both tiled and worth showing. */
+export function clampZoom(zoom: number, minZoom: number = MIN_ZOOM): number {
+    return Math.min(Math.max(zoom, Math.max(minZoom, MIN_ZOOM)), MAX_ZOOM);
 }
 
 /** Keeps the viewport inside the tiled area, centering the area on any axis that's smaller than the viewport. */
