@@ -100,6 +100,13 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
     const pendingPinch = useRef<PinchState | null>(null);
     const frame = useRef<number | null>(null);
 
+    // A pan moves the layer directly on the DOM while the finger is down. Panning through React
+    // state re-renders the whole map every frame, which lags a beat behind the finger.
+    const layerRef = useRef<HTMLDivElement>(null);
+    const pendingTransform = useRef<string | null>(null);
+    const dragCenter = useRef<Location | null>(null);
+    const lastCommitWorld = useRef<WorldPoint | null>(null);
+
     useEffect(() => {
         const element = containerRef.current;
         if (element === null) return;
@@ -184,6 +191,7 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
             center: clampCenter(projection, center, currentView.zoom, currentSize.width, currentSize.height)
         };
 
+        lastCommitWorld.current = projection.locationToWorld(next.center, next.zoom);
         viewRef.current = next;
         setView(next);
     };
@@ -195,6 +203,10 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
         frame.current = requestAnimationFrame(() => {
             frame.current = null;
 
+            const transform = pendingTransform.current;
+            pendingTransform.current = null;
+            if (transform !== null && layerRef.current !== null) layerRef.current.style.transform = transform;
+
             const center = pendingCenter.current;
             pendingCenter.current = null;
             if (center !== null) commitCenter(center);
@@ -205,9 +217,14 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
         });
     };
 
-    const scheduleCenter = (center: Location) => {
-        pendingCenter.current = center;
-        scheduleFrame();
+    /** Commits wherever the drag has carried the map as the real view, in one state update. */
+    const endDrag = () => {
+        const center = dragCenter.current;
+
+        dragCenter.current = null;
+        pendingTransform.current = null;
+
+        if (center !== null) commitCenter(center);
     };
 
     /** Settles on a whole zoom level while keeping `anchorLocation` under `anchor` on screen. */
@@ -253,6 +270,7 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
         if (currentView === null) return;
 
         dragStart.current = { x: x, y: y, center: currentView.center };
+        lastCommitWorld.current = projection.locationToWorld(currentView.center, currentView.zoom);
     };
 
     const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -266,6 +284,8 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
             return;
         }
 
+        // Whatever a drag in progress has already moved becomes real before the pinch anchors itself.
+        endDrag();
         dragStart.current = null;
         startPinch();
     };
@@ -297,12 +317,35 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
 
         if (Math.abs(deltaX) > DRAG_THRESHOLD || Math.abs(deltaY) > DRAG_THRESHOLD) hasDragged.current = true;
 
-        const startWorld = projection.locationToWorld(start.center, currentView.zoom);
+        const currentSize = sizeRef.current;
+        if (currentSize === null) return;
 
-        scheduleCenter(projection.worldToLocation({
+        const zoom = currentView.zoom;
+        const startWorld = projection.locationToWorld(start.center, zoom);
+
+        const center = clampCenter(projection, projection.worldToLocation({
             x: startWorld.x - deltaX,
             y: startWorld.y - deltaY
-        }, currentView.zoom));
+        }, zoom), zoom, currentSize.width, currentSize.height);
+
+        dragCenter.current = center;
+
+        const origin = getLayerOrigin(projection, zoom);
+        const topLeft = getTopLeftWorld(projection, { zoom: zoom, center: center }, currentSize);
+
+        pendingTransform.current = `translate3d(${origin.x - topLeft.x}px, ${origin.y - topLeft.y}px, 0)`;
+
+        // A long pan can outrun the prefetched tile margin, so the view is still committed - and
+        // fresh tiles brought in - once a tile's worth of map has gone by. The committed transform
+        // matches the imperative one, so nothing jumps.
+        const world = projection.locationToWorld(center, zoom);
+        const lastCommit = lastCommitWorld.current;
+
+        if (lastCommit !== null && (Math.abs(world.x - lastCommit.x) > TILE_SIZE || Math.abs(world.y - lastCommit.y) > TILE_SIZE)) {
+            pendingCenter.current = center;
+        }
+
+        scheduleFrame();
     };
 
     const handlePinch = () => {
@@ -362,6 +405,7 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
         dragStart.current = null;
 
         if (wasPinching) endPinch();
+        else endDrag();
 
         // A third finger lifting can leave two still down, which is simply a fresh pinch.
         if (pointers.current.size >= 2) {
@@ -441,7 +485,7 @@ const PetMap: React.FC<PetMapProps> = ({ pets }) => {
                 ? undefined
                 : `translate3d(${pinch.offset.x}px, ${pinch.offset.y}px, 0) scale(${pinch.scale})`
         }}>
-            <div style={{
+            <div ref={layerRef} style={{
                 position: 'absolute',
                 left: '0px',
                 top: '0px',
