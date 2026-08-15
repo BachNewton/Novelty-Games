@@ -74,7 +74,7 @@ const Footer: React.FC<FooterProps> = ({
                 )
             : distanceUi(distance);
 
-    const rows = selectedTab === null ? 2 : 3;
+    const rows = 3;
 
     return <div style={{
         display: 'grid',
@@ -130,6 +130,13 @@ function getMenuOptions(menuOptionSelected: (selection: MenuOption) => void): JS
             isEnabled={true}
             text='Overview'
             onClick={() => menuOptionSelected(MenuOption.OVERVIEW)}
+            columns={2}
+        />
+        <PetsButton
+            interactionSeen={false}
+            isEnabled={true}
+            text='Map'
+            onClick={() => menuOptionSelected(MenuOption.MAP)}
             columns={2}
         />
     </>;

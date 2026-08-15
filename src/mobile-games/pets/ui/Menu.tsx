@@ -1,6 +1,7 @@
 import { Pet } from "../data/Pet";
 import { COLORS } from "./Home";
 import Overview from "./Overview";
+import PetMap from "./PetMap";
 import Welcome from "./Welcome";
 
 interface MenuProps {
@@ -10,11 +11,14 @@ interface MenuProps {
 }
 
 export enum MenuOption {
-    WELCOME, OVERVIEW
+    WELCOME, OVERVIEW, MAP
 }
 
 const Menu: React.FC<MenuProps> = ({ selection, pets, seenInteractions }) => {
-    return <div style={{ padding: '15px' }}>
+    // The map is the one option that wants the whole area, edge to edge.
+    const isFullBleed = selection === MenuOption.MAP;
+
+    return <div style={{ padding: isFullBleed ? '0px' : '15px', height: isFullBleed ? '100%' : undefined }}>
         {contentUi(selection, pets, seenInteractions)}
     </div>;
 };
@@ -25,6 +29,8 @@ function contentUi(selection: MenuOption, pets: Pet[], seenInteractions: Set<str
             return <Welcome />;
         case MenuOption.OVERVIEW:
             return <Overview pets={pets} seenInteractions={seenInteractions} />;
+        case MenuOption.MAP:
+            return <PetMap pets={pets} />;
     }
 }
 
