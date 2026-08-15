@@ -25,9 +25,9 @@ const TextReveal: React.FC<TextRevealProps> = ({ children }) => {
         return () => clearInterval(intervalId);
     }, [children]);
 
-    // A zero-width space keeps one line of height before any text has revealed, so the first
-    // character doesn't bump the height.
-    return <div>{revealedText === '' ? '200B' : revealedText}</div>;
+    // An invisible zero-width space character sits in the quotes below. It keeps one line of
+    // height before any text has revealed, so the first character doesn't bump the height.
+    return <div>{revealedText === '' ? '​' : revealedText}</div>;
 };
 
 export default TextReveal;
