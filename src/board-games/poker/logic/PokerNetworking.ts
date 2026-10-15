@@ -1,12 +1,12 @@
-import io from 'socket.io-client';
-import { wait } from '../../../util/Async';
+
 import { GameData } from '../data/GameData';
 import { Card, toCard } from '../data/Card';
 import { Player, toPlayer } from '../data/Player';
 import { isLocalhost } from '../../../util/Localhost';
 
-const PROD_SERVER = 'https://novelty-games.mooo.com:8080';
-const DEV_SERVER = 'localhost:8080';
+// Cloudflare Workers poker server (Durable Objects backend)
+const PROD_SERVER = 'wss://novelty-poker.jane-sturdyhippo.workers.dev';
+const DEV_SERVER = 'ws://localhost:8787';
 
 const LOBBY_NAME = 'Novelty Games';
 const STARTING_CHIPS = 100;
@@ -47,7 +47,10 @@ export function createPokerNetworking(): PokerNetworking {
     if (instance !== null) return instance;
 
     const url = isLocalhost() ? DEV_SERVER : PROD_SERVER;
-    const socket = io(url);
+
+    // Connect WebSocket with room name as query param
+    const wsUrl = `${url}/?room=${encodeURIComponent(LOBBY_NAME)}`;
+    const socket = new WebSocket(wsUrl);
 
     let username = 'username';
 
@@ -61,98 +64,134 @@ export function createPokerNetworking(): PokerNetworking {
         message: () => { }
     };
 
-    socket.onAny((eventName, args) => {
-        if (eventName === 'badJoin') return;
-        if (eventName === 'goodJoin') return;
-        if (eventName === 'gameBegun') return;
-        if (eventName === 'roomUsers') return;
-        if (eventName === 'roomPlayers') return;
-        if (eventName === 'yourTurn') return;
-        if (eventName === 'potSize') return;
-        if (eventName === 'dealBoard') return;
-        if (eventName === 'message') return;
-        if (eventName === 'allIn') return;
-        if (eventName === 'consoleLog') return;
-        if (eventName === 'hands') return;
-        if (eventName === 'validOption') return;
+    // Send a JSON message to the server
+    const send = (type: string, data?: any) => {
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type, data }));
+        }
+    };
 
-        console.log(`Unhandled event: ${eventName}`, args);
+    // Wait for connection to be open, then send
+    const sendWhenReady = (type: string, data?: any) => {
+        if (socket.readyState === WebSocket.OPEN) {
+            send(type, data);
+        } else {
+            socket.addEventListener('open', () => send(type, data), { once: true });
+        }
+    };
+
+    // Handle incoming messages (dispatch by type)
+    socket.addEventListener('message', (event: MessageEvent) => {
+        let parsed: any;
+        try {
+            parsed = JSON.parse(event.data);
+        } catch {
+            console.warn('Received non-JSON message:', event.data);
+            return;
+        }
+
+        const { type, data } = parsed;
+
+        switch (type) {
+            case 'badJoin': {
+                // Room doesn't exist or name taken — try to create it then join
+                send('createRoom', {
+                    username: null,
+                    stacksize: 0,
+                    lobbyname: LOBBY_NAME,
+                    smallBlind: 1,
+                    bigBlind: 2,
+                    password: ''
+                });
+                setTimeout(() => {
+                    send('joinRoom', [LOBBY_NAME, username, STARTING_CHIPS]);
+                }, 1000);
+                break;
+            }
+
+            case 'goodJoin': {
+                send('joinRoom', [LOBBY_NAME, username, STARTING_CHIPS]);
+                break;
+            }
+
+            case 'gameBegun':
+                callbacks.gameBegun();
+                break;
+
+            case 'roomUsers': {
+                const users = data.users as string[];
+                callbacks.roomUsers(users);
+                break;
+            }
+
+            case 'roomPlayers': {
+                // data is an array: [dealerIndex, ...playerObjects]
+                const arr = Array.isArray(data) ? data : [];
+                const players = arr.slice(1).map((p: any) => toPlayer(p)) as Player[];
+                const player = players.find(p => p.name === username);
+
+                if (player) {
+                    const maxInPot = Math.max(...players.filter(p => p.lastAction !== 'Folded').map(p => p.inPot));
+                    const toCall = maxInPot - player.inPot;
+
+                    const gameData: GameData = {
+                        player: player,
+                        players: players,
+                        toCall: toCall
+                    };
+
+                    callbacks.gameUpdate(gameData);
+                }
+                break;
+            }
+
+            case 'yourTurn':
+                callbacks.yourTurn();
+                break;
+
+            case 'potSize':
+                callbacks.potUpdate(data);
+                break;
+
+            case 'dealBoard':
+                callbacks.dealBoard(data.map((c: any) => toCard(c)));
+                break;
+
+            case 'message':
+                callbacks.message(data);
+                break;
+
+            case 'allIn':
+                send('playerTurn', 'playerIsAllIn');
+                break;
+
+            case 'consoleLog':
+                callbacks.message(data);
+                break;
+
+            case 'hands':
+            case 'validOption':
+                // Ignored - same as original
+                break;
+
+            default:
+                console.log(`Unhandled event: ${type}`, data);
+                break;
+        }
     });
 
-    socket.on('badJoin', async _ => {
-        socket.emit('createRoom', {
-            username: null,
-            stacksize: 0,
-            lobbyname: LOBBY_NAME,
-            smallBlind: 1,
-            bigBlind: 2,
-            password: ''
-        });
-
-        await wait(1000);
-
-        socket.emit('joinRoom', [
-            LOBBY_NAME,
-            username,
-            STARTING_CHIPS
-        ]);
+    socket.addEventListener('error', (event: Event) => {
+        console.error('WebSocket error:', event);
     });
 
-    socket.on('goodJoin', _ => {
-        socket.emit('joinRoom', [
-            LOBBY_NAME,
-            username,
-            STARTING_CHIPS
-        ]);
+    socket.addEventListener('close', () => {
+        console.log('WebSocket disconnected');
     });
-
-    socket.on('gameBegun', () => {
-        callbacks.gameBegun();
-    });
-
-    socket.on('roomUsers', data => {
-        const users = data.users as string[];
-        callbacks.roomUsers(users);
-    });
-
-    socket.on('roomPlayers', data => {
-        // const dealerIndex = data[0] as number;
-
-        const players = data.splice(1).map((p: any) => toPlayer(p)) as Player[];
-        const player = players.find(p => p.name === username)!;
-
-        const maxInPot = Math.max(...players.filter(p => p.lastAction !== 'Folded').map(p => p.inPot));
-        const toCall = maxInPot - player.inPot;
-
-        const gameData: GameData = {
-            player: player,
-            players: players,
-            toCall: toCall
-        };
-
-        callbacks.gameUpdate(gameData);
-    });
-
-    socket.on('yourTurn', () => callbacks.yourTurn());
-
-    socket.on('potSize', pot => callbacks.potUpdate(pot));
-
-    socket.on('dealBoard', cards => callbacks.dealBoard(cards.map((c: any) => toCard(c))));
-
-    socket.on('message', message => callbacks.message(message));
-
-    socket.on('allIn', () => socket.emit('playerTurn', 'playerIsAllIn'));
-
-    socket.on('consoleLog', text => callbacks.message(text));
-
-    socket.on('hands', () => { /* Ignore */ });
-    socket.on('validOption', () => { /* Ignore */ });
 
     instance = {
         connect: (name) => {
             username = name;
-
-            socket.emit('joinAttempt', {
+            sendWhenReady('joinAttempt', {
                 username: username,
                 stackSize: STARTING_CHIPS,
                 lobbyname: LOBBY_NAME,
@@ -161,11 +200,11 @@ export function createPokerNetworking(): PokerNetworking {
         },
 
         startGame: () => {
-            socket.emit('startGame');
+            send('startGame');
         },
 
         takeAction: (action) => {
-            socket.emit('playerTurn', getActionValue(action));
+            send('playerTurn', getActionValue(action));
         },
 
         onGameBegun: callback => callbacks.gameBegun = callback,
